@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AtlasVA：面向无教师 VLM 智能体的自进化视觉技能记忆 · 论文解读</title>
+
+<!-- 数学公式渲染（在线查看时生效；无网络时正文仍可读） -->
+<script>
+  window.MathJax = {
+    tex:{inlineMath:[['$','$'],['\\(','\\)']], displayMath:[['$$','$$'],['\\[','\\]']]},
+    svg:{fontCache:'global'}
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;
+  }
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:880px; margin:0 auto; padding:18px 22px 90px}
+
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:27px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)}
+  .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .meta-grid a:hover{text-decoration:underline}
+
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap}
+  nav.toc a:hover{color:var(--accent)}
+
+  section{margin:38px 0}
+  h2{font-size:21px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:17px; margin:24px 0 8px}
+  p{margin:12px 0}
+  ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.9em}
+  strong{color:var(--text)}
+
+  /* 开源贡献表 */
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:14px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:10px 12px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  .yes{color:var(--ok); font-weight:600}
+  .no{color:var(--muted)}
+
+  /* 图 */
+  figure{margin:24px 0; text-align:center}
+  figure img{max-width:100%; height:auto; border:1px solid var(--line); border-radius:10px; background:#fff}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+
+  /* 提示框 */
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+
+  blockquote{border-left:3px solid var(--line); margin:14px 0; padding:2px 16px; color:var(--muted)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+  .mjx-container{overflow-x:auto; overflow-y:hidden}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <!-- ============================ 抬头 / 元信息 ============================ -->
+  <header class="head">
+    <div class="chips">
+      <span class="chip">VLM Agent</span>
+      <span class="chip">Visual Memory</span>
+      <span class="chip">Teacher-Free</span>
+      <span class="chip">Self-Evolving</span>
+      <span class="chip">Reward Shaping</span>
+      <span class="chip">PPO / RL</span>
+    </div>
+    <h1>AtlasVA：面向无教师 VLM 智能体的自进化视觉技能记忆</h1>
+    <p class="orig-title">AtlasVA: Self-Evolving Visual Skill Memory for Teacher-Free VLM Agents</p>
+    <dl class="meta-grid">
+      <dt>作者</dt><dd>Pan Wang*, Yihao Hu*, Xiujin Liu, Jingchu Yang, Hang Wang, Zhihao Wen（*共同一作；通讯 z.wen@antgroup.com）</dd>
+      <dt>团队 / 机构</dt><dd>蚂蚁集团 Ant Group · 中国科学技术大学 USTC · 西湖大学 Westlake · 密歇根大学 UMich · 中山大学 SYSU</dd>
+      <dt>原文链接</dt><dd><a href="https://arxiv.org/abs/2605.17933" target="_blank" rel="noopener">arXiv:2605.17933</a></dd>
+      <dt>项目主页</dt><dd><a href="https://wangpan-ustc.github.io/AtlasvaWeb/" target="_blank" rel="noopener">wangpan-ustc.github.io/AtlasvaWeb</a></dd>
+      <dt>发表 / 年份</dt><dd>arXiv 预印本 2026（cs.CV）</dd>
+      <dt>解读日期</dt><dd>2026-05-30</dd>
+    </dl>
+  </header>
+
+  <div class="tldr">
+    <b>TL;DR</b> — 现有 VLM 智能体的记忆几乎都以<strong>文本</strong>形式存储，并依赖<strong>专有教师模型（如 GPT-4）</strong>来总结/精炼，这把二维几何结构压缩成有损的一维语言，且反馈稀疏、抽象、滞后。AtlasVA 把智能体记忆从“纯文本仓库”升级为<strong>三层视觉技能记忆 VSM</strong>（空间热力图 + 视觉范例 + 符号文本），并提出一套<strong>无教师的图谱自进化机制</strong>：直接从轨迹统计 + 轻量网格启发式中演化出 danger / affinity 热力图，再把这些视觉先验当作<strong>势函数（potential function）</strong>转成稠密、坐标对齐的塑形奖励。在 Sokoban、FrozenLake、3D 具身导航和 3D 机械臂操作四类基准上，仅用 <strong>3B</strong> 的 Qwen2.5-VL，平均成功率达 <strong>0.93</strong>，反超 GPT-5（0.69）、o3（0.71）与最强开源基线 VAGEN（0.78）。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#opensource">① 开源贡献</a>
+    <a href="#motivation">② 动机与贡献</a>
+    <a href="#method">③ 方法</a>
+    <a href="#evaluation">④ 实验评估</a>
+    <a href="#insight">⑤ 洞见</a>
+  </nav>
+
+  <!-- ============================ ① 开源贡献 ============================ -->
+  <section id="opensource">
+    <h2><span class="n">①</span>开源贡献 Open-source Artifacts</h2>
+    <p>本文开源程度较高：<strong>代码、训练好的 3B 模型权重、项目主页</strong>均已公开核实可访问（许可证 MIT）。评测环境（Sokoban / FrozenLake / AI2-THOR / ManiSkill）均为公开第三方仿真器，论文在其上做封装与扩展；未见单独打包发布的“数据集”。下表链接均为解读日实际确认存在。</p>
+    <table>
+      <thead><tr><th>类型</th><th>是否开源</th><th>内容 / 链接</th></tr></thead>
+      <tbody>
+        <tr><td>代码 Code</td><td class="yes">✔</td><td><a href="https://github.com/wangpan-ustc/AtlasVA" target="_blank" rel="noopener">github.com/wangpan-ustc/AtlasVA</a><br>含 <code>atlasva/</code> 包（环境、agent 多轮交互、视觉记忆与奖励塑形模块）、内置 <code>verl/</code> RL 后端、PPO/GRPO 训练入口（<code>main_ppo.py</code>）、四类环境训练脚本及 API 评测脚本。许可证 <strong>MIT</strong>（以 HF 卡片标注为准）。</td></tr>
+        <tr><td>模型权重 Weights</td><td class="yes">✔</td><td><a href="https://huggingface.co/wangpan-ustc/AtlasVA" target="_blank" rel="noopener">huggingface.co/wangpan-ustc/AtlasVA</a><br>基于 <code>Qwen2.5-VL-3B-Instruct</code> 的训练权重，任务类型 image-text-to-text，许可证 <strong>MIT</strong>。</td></tr>
+        <tr><td>数据集 Dataset</td><td class="no">✘</td><td>未单独发布。记忆（热力图/范例/文本技能）在训练时由<strong>训练环境轨迹</strong>在线演化生成，验证集严格隔离；无静态训练数据包。</td></tr>
+        <tr><td>环境 / Benchmark</td><td class="no">— 复用第三方</td><td>Sokoban、FrozenLake（Gymnasium）、3D 导航（AI2-THOR / EmbodiedBench）、PrimitiveSkill（ManiSkill3，VAGEN 引入）。其中 <strong>Swap</strong> 任务为本文新增；封装与脚本随代码仓库一并提供。</td></tr>
+        <tr><td>项目主页 / Demo</td><td class="yes">✔</td><td><a href="https://wangpan-ustc.github.io/AtlasvaWeb/" target="_blank" rel="noopener">wangpan-ustc.github.io/AtlasvaWeb</a>（含架构图、定性 rollout，无交互式 demo）</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============================ ② 动机与贡献 ============================ -->
+  <section id="motivation">
+    <h2><span class="n">②</span>研究动机与贡献 Motivation &amp; Contribution</h2>
+    <h3>背景与问题</h3>
+    <p>VLM 正成为交互式智能体的通用接口：读指令、解析画面、在序列环境里执行有空间约束的动作（web 导航、GUI 控制、具身规划）。在<strong>长程空间任务</strong>里，智能体必须跨 episode 积累可复用经验，而不是每步从零推理。为此，近期一批“记忆增强 RL”系统（Reflexion、ExpeL、Mem0、A-Mem，以及技能库式的 SkillRL、XSkill）会把成功/失败轨迹<strong>总结成文本</strong>，检索相关条目，再靠一个强大的<strong>教师模型</strong>来不断精炼记忆。</p>
+    <p>这套配方对“纯语言智能体”合理，但对靠<strong>空间感知</strong>解题的 VLM 智能体严重水土不服。论文把痛点精确拆成三条（对应原文 Figure 1 上半部）：</p>
+    <ul>
+      <li><strong>① 模态失配 / 信息有损（Modality Mismatch）：</strong>把二维布局压成一维文本规则会丢弃几何结构——死胡同、局部陷阱、有希望的子目标区域这类<strong>空间拓扑</strong>很难用文字表达，等于把“视觉决策”退化成一道有损翻译题。</li>
+      <li><strong>② 教师依赖（Teacher Dependency）：</strong>要维护这些文本记录，框架往往需要一个专有 LLM 去总结失败、合并技能、改写记忆。这既抬高算力 / API 成本，也破坏了“完全自主自我改进”的前提。</li>
+      <li><strong>③ 稀疏文本奖励的反馈失配（Sparse Text Reward）：</strong>用“文本批评”（如“你不该把箱子推进角落”）来评估空间交互，本质抽象、滞后、缺乏精确坐标定位，无法提供稠密、坐标感知的指导，从而加剧 RL 的<strong>信用分配（credit assignment）</strong>难题。</li>
+    </ul>
+
+    <h3>本文的切入点</h3>
+    <p>核心主张一句话：<strong>VLM 智能体可复用的经验，应当保持在「视觉模态」里。</strong>顺着这个 insight，三条痛点被一一对位破解：</p>
+    <ul>
+      <li>对 ①：用三层视觉技能记忆（VSM）把经验存成<strong>空间热力图 + 视觉范例 + 符号文本</strong>，热力图作为视觉提示把复杂 3D 环境投影成 2.5D 空间图，让敏感的空间知识留在 VLM 的原生模态里。</li>
+      <li>对 ②：直接从原始交互历史<strong>自举（bootstrap）</strong>记忆——聚合轨迹统计来构造自进化热力图，不调用任何外部模型做文本总结。</li>
+      <li>对 ③：把同一批热力图在数学上<strong>形式化为势函数</strong>，奖励朝历史成功区域移动、惩罚已识别的死锁，从而提供稠密、坐标对齐的指导。</li>
+    </ul>
+
+    <h3>核心贡献</h3>
+    <ol>
+      <li><strong>三层视觉技能记忆（VSM）：</strong>用「空间热力图 + 视觉范例 + 符号文本」的层级取代有损的纯文本存储，让可复用经验原生对齐智能体的视觉感知。</li>
+      <li><strong>无教师图谱演化机制：</strong>直接从原始轨迹统计（终止失败位置→danger；成功路径访问频率→affinity）+ 静态网格启发式（角落陷阱、BFS 距离场）精炼 danger / affinity 热力图，<strong>彻底去掉对专有 LLM 的依赖</strong>。</li>
+      <li><strong>稠密视觉奖励塑形：</strong>把演化中的视觉先验复用为势函数，提供稠密、坐标对齐的梯度，缓解 2D / 3D 任务里严重的稀疏奖励瓶颈，在学习效率与最终性能上都有显著提升（3B 模型平均成功率 0.93，反超 GPT-5 / o3）。</li>
+    </ol>
+  </section>
+
+  <!-- ============================ ③ 方法 ============================ -->
+  <section id="method">
+    <h2><span class="n">③</span>方法 Method</h2>
+    <p>AtlasVA 把问题建模成部分可观测马尔可夫决策过程 $\mathcal{M}=\langle\mathcal{S},\mathcal{O},\mathcal{A},\mathcal{T},\mathcal{R},\gamma\rangle$。每个时刻 $t$，智能体收到多模态观测 $o_t$（一张渲染的 RGB 帧 + 自然语言任务描述），从由 VLM 参数化的多模态策略 $\pi_\theta(a_t\mid o_{\le t})$ 中采样离散动作 $a_t$；环境只在任务成功时给出<strong>稀疏二值奖励</strong> $R(s_t,a_t)\in\{0,1\}$。难点在于：最优策略需要深刻的空间推理和长程规划，反馈却极其稀疏滞后。</p>
+    <p>关键设计是一个 <strong>GridState 抽象</strong> $g_t$：训练时直接从仿真器内部状态读取“特权信息”（障碍、可交互物体的语义层；主操作实体的二维坐标 $p_t\in\mathbb{Z}^2$），<strong>仅用于构造和演化空间先验</strong>。注意：部署 / 评测时 VLM 策略<strong>只</strong>吃原始视觉输入 + 渲染好的视觉记忆提示，绝不接收这些底层坐标，从而保证零样本比较的公平性。整体如下图：一个闭合的“感知—优化”回路（a 三层记忆 → b 无教师演化 → c 稠密视觉奖励 → d 策略优化 → 回到 a 刷新记忆）。</p>
+
+    <figure>
+      <img src="figures/arch.png" alt="AtlasVA 架构总览">
+      <figcaption>图 1：AtlasVA 架构总览。(a) 三层视觉技能记忆 VSM 以「空间热力图 / 视觉范例 / 符号文本」提示策略；(b) 无教师 rollout 用轨迹日志 + episode 截图驱动 VSM 自进化（EMA 融合 + 范例挖掘）；(c) 演化出的空间先验形式化为 affinity 增益与 danger 惩罚，提供稠密奖励塑形；(d) 优化阶段用增广奖励更新策略，更好的轨迹再回头刷新 VSM，形成闭环。（出处：原文 Figure 2）</figcaption>
+    </figure>
+
+    <h3>3.1　三层视觉技能记忆 VSM（Fig.2a）</h3>
+    <p>给 VLM 的增广多模态提示构造为
+    $$\tilde o_t = [\,M_{\text{danger}},\; M_{\text{affinity}},\; E_{\text{vis}},\; S_{\text{text}},\; o_t\,].$$
+    三层从“感知 → 实例 → 符号”构成完整的知识梯度：</p>
+    <ul>
+      <li><strong>L1 空间热力图（Spatial Heatmaps）：</strong>在环境上铺连续空间场——<em>danger map</em> 标示死锁风险、<em>affinity map</em> 标示离任务完成的接近度。不写成文本数组，而是渲染成 RGB 热力图 $M\in\mathbb{R}^{H\times W\times3}$，天然对齐 VLM 的视觉编码器。注入方式是<strong>独立的视觉 token</strong>（实验发现直接 alpha 叠加到原图上会干扰 VLM 对小前景物体的识别）。</li>
+      <li><strong>L2 视觉范例（Visual Exemplars，$E_{\text{vis}}$）：</strong>从历史 rollout 中挖一小撮代表性截图，显式打上 success / failure 标签，给抽象空间先验配上具体视觉参照。</li>
+      <li><strong>L3 符号文本技能（$S_{\text{text}}$）：</strong>保留一组紧凑的文本启发式（通用原则 / 推箱策略 / 应避免的错误）。关键点：这些文本<strong>直接来自环境规则书与任务描述</strong>，不需要任何教师 LLM 生成或总结，从而保持“完全无教师”。</li>
+    </ul>
+
+    <h3>3.2　无教师视觉图谱演化（Fig.2b）</h3>
+    <p>L1 的热力图由两支融合而成：静态网格启发式 $M_{\text{heuristic}}$ + 累积轨迹统计 $M_{\text{stat}}$。</p>
+    <p><strong>轨迹累积。</strong>设 $\mathcal{T}_{\text{fail}}$、$\mathcal{T}_{\text{succ}}$ 为失败 / 成功轨迹集合。批次级 danger map 通过累积<strong>终止失败位置</strong> $p_T$ 得到：
+    $$M_{\text{batch}}^{\text{danger}}(p)=\frac{1}{|\mathcal{T}_{\text{fail}}|}\sum_{\tau\in\mathcal{T}_{\text{fail}}}\mathbb{I}(p_T=p).$$
+    其中 $\mathbb{I}(\cdot)$ 是指示函数；该式统计“失败收场坐标”的归一化频次。affinity map 则记录成功路径上坐标的<strong>归一化访问频率</strong>。</p>
+    <p><strong>EMA 融合。</strong>历史统计用指数滑动平均（衰减率 $\alpha=0.85$）更新：$M_{\text{stat}}\leftarrow\alpha M_{\text{stat}}+(1-\alpha)M_{\text{batch}}$。最终呈现给 VLM 的热力图是静态启发式与 EMA 统计的动态混合：
+    $$M_{\text{final}}=(1-\beta_k)\,M_{\text{heuristic}}+\beta_k\,M_{\text{stat}},$$
+    调度系数 $\beta_k\in[0,1]$ 随训练 epoch $k$ 从 0 退火到 1：早期靠<strong>静态几何</strong>提供安全的冷启动探索，后期平滑过渡到<strong>经验驱动</strong>的精炼，避免灾难性遗忘。$M_{\text{heuristic}}$ 由当前布局现算的拓扑特征构成（affinity 用到目标的 BFS 距离场；danger 用角落 / 贴墙 / 洞口邻域的衰减），所以即便面对训练中没见过的新布局，也能即时给出稠密空间梯度——这正是<strong>零样本泛化</strong>到新拓扑的来源。</p>
+
+    <h3>3.3　图谱接地的稠密视觉奖励塑形（Fig.2c）</h3>
+    <p>从 $p_t$ 到 $p_{t+1}$ 的转移，计算有界辅助视觉奖励 $r_{\text{visual}}=\lambda_{\text{danger}}\!\cdot\! r_{\text{danger}}+\lambda_{\text{affinity}}\!\cdot\! r_{\text{affinity}}$。</p>
+    <p><strong>Danger 惩罚：</strong>对进入历史高危坐标施加正比于其 danger 值的负惩罚
+    $$r_{\text{danger}}=-\,M_{\text{final}}^{\text{danger}}(p_{t+1}).$$
+    <strong>Affinity 增益：</strong>取 affinity 势的<strong>逐步差分</strong>
+    $$r_{\text{affinity}}=M_{\text{final}}^{\text{affinity}}(p_{t+1})-M_{\text{final}}^{\text{affinity}}(p_{t}).$$
+    由于 $M_{\text{final}}^{\text{affinity}}$ 继承了 BFS 距离梯度，只要智能体朝目标走近一步就得到<strong>严格正</strong>信号，走远则<strong>严格负</strong>——把单一的终端稀疏奖励，变成每一步都有的稠密优化地形。</p>
+
+    <h3>3.4　优化与闭环（Fig.2d）</h3>
+    <p>用于 RL 的最终奖励为 $r_{\text{visual}}+r_{\text{env}}$。更形式化地（附录 A），塑形项为
+    $$F(o_t,a_t,o_{t+1})=\big[\Phi_{\text{affinity}}(o_{t+1})-\Phi_{\text{affinity}}(o_t)\big]-\beta\cdot\mathbb{I}(\text{enters\_danger}(o_{t+1})),$$
+    其中 affinity 支按<strong>势函数差分</strong>（potential-based reward shaping，Ng et al. 1999），理论上保证不改变最优策略；而 danger 支被<strong>有意</strong>设计成「非势函数」的启发式安全约束——它<strong>刻意</strong>重塑最优策略，让智能体宁可绕远也要避开危险捷径。EMA 演化把整个系统变成一个自举循环：策略变强 → 轨迹质量更高 → 经 EMA 更精确地更新 $M$ → 提供更准的势函数 $\Phi$ 和增广观测 $\tilde o_t$ → 进一步优化策略。视觉范例的更新用<strong>冻结的 DINOv2</strong> 余弦相似度匹配关键拐点帧 + FIFO 淘汰（选 DINOv2 而非 CLIP，因其自监督目标给出更好的 patch 级空间对应，利于 Sokoban 这类二维拓扑匹配）。</p>
+
+    <figure>
+      <img src="figures/heatmap.png" alt="空间热力图随训练演化">
+      <figcaption>图 2：L1 空间热力图的演化（Step 0→400）。纯靠环境交互，danger（红）逐渐高亮结构性死角，affinity（绿）逐渐勾出可通行的子目标路径——无需任何外部语言模型监督。（出处：原文 Figure 6）</figcaption>
+    </figure>
+
+    <div class="callout note">
+      <span class="label">实现要点（复现关键）</span>
+      <ul style="margin:6px 0">
+        <li><strong>基座 / 优化：</strong>Qwen2.5-VL-3B-Instruct，PPO + GAE，actor lr $1\times10^{-6}$、critic lr $1\times10^{-5}$，rollout batch 128、mini-batch 32，KL 系数 0.0；8× RTX 6000 Ada，vLLM 异步 rollout，prompt 长 5000–8000、response 4000。</li>
+        <li><strong>记忆超参（全环境统一）：</strong>EMA $\alpha=0.85$；渲染 cell 40px；范例池正/负各 3、最多注入 4 个、DINOv2 余弦检索；文本技能 Top-K 注入 3（grid）/4（Swap），每 10 次更新剪枝一次。</li>
+        <li><strong>热力图渲染：</strong>严格线性 colormap——danger 映射到纯红 (R=255,G=0,B=0)、affinity 映射到纯绿 (R=0,G=255,B=0)，用 alpha 通道编码强度；作为独立 <code>&lt;image&gt;</code> token 注入而非叠图。</li>
+        <li><strong>奖励系数随任务调：</strong>纯网格任务（Sokoban/FrozenLake）$\lambda_{\text{danger}}=\lambda_{\text{affinity}}=0.05$；导航 0.1；高精度长程操作 PrimitiveSkill 用更强引导 0.3。成功 +1.0，失败/超时 −0.1，格式错误 −0.5。</li>
+        <li><strong>3D→2.5D 投影：</strong>导航把可达面投到 X-Z 平面、按 0.25m/格离散成 2D 平面图；机械臂把操作台映成局部 2.5D 网格、Z 轴高度作为任务元数据隐式保留。3D 连续坐标实时反查 2.5D 热力图取势。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============================ ④ 实验评估 ============================ -->
+  <section id="evaluation">
+    <h2><span class="n">④</span>实验评估 Evaluation</h2>
+    <h3>评测设置</h3>
+    <ul>
+      <li><strong>Benchmark（4 类、覆盖 2D→3D）：</strong>
+        <strong>Sokoban</strong>（推箱子，考验不可逆死锁规避与几何规划）、<strong>FrozenLake</strong>（冰湖避洞导航，Gymnasium）、<strong>3D Navigation</strong>（AI2-THOR 具身导航，含 Base / Common 子集）、<strong>PrimitiveSkill</strong>（ManiSkill3 多轮机械臂操作，含 Place / Stack / Drawer / Align 及本文<strong>新增的 Swap</strong>——要求交换两个方块位置）。</li>
+      <li><strong>对比基线：</strong>专有模型 GPT-5、o3、o4-mini、GPT-4o、Gemini 2.5 Flash/Pro、Gemini 2.0、Claude Sonnet 4.5/3.7；开源模型 Qwen2.5-VL-72B/7B/3B、VLM-R1-3B；以及最强 RL 基线 <strong>VAGEN</strong>。AtlasVA 自身基座只有 3B。</li>
+      <li><strong>指标：</strong>成功率 Success Rate（0–1，越高越好），及 Overall 平均。零样本评测：记忆只在训练环境演化，验证集严格隔离。</li>
+    </ul>
+
+    <h3>主要结果</h3>
+    <p>下表节选原文 Table 2 的核心列（Navigation 取 Average，PrimitiveSkill 取五项均值）。AtlasVA 在<strong>每个</strong>基准上都拿到当列最佳：</p>
+    <table>
+      <thead><tr><th>方法</th><th>Sokoban</th><th>FrozenLake</th><th>Navigation(Avg)</th><th>PrimitiveSkill(均)</th><th>Overall</th></tr></thead>
+      <tbody>
+        <tr><td>GPT-5</td><td>0.70</td><td>0.77</td><td>0.78</td><td>0.64</td><td>0.69</td></tr>
+        <tr><td>o3</td><td>0.60</td><td>0.78</td><td>0.78</td><td>0.69</td><td>0.71</td></tr>
+        <tr><td>Claude Sonnet 4.5</td><td>0.31</td><td>0.80</td><td>0.67</td><td>0.63</td><td>0.62</td></tr>
+        <tr><td>Qwen2.5-VL-72B</td><td>0.18</td><td>0.44</td><td>0.73</td><td>0.57</td><td>0.55</td></tr>
+        <tr><td>Qwen2.5-VL-3B（基座，0-shot）</td><td>0.14</td><td>0.14</td><td>0.24</td><td>0.00</td><td>0.09</td></tr>
+        <tr><td>VAGEN（最强开源 RL 基线）</td><td>0.61</td><td>0.71</td><td>0.79</td><td>0.83</td><td>0.78</td></tr>
+        <tr><td><strong>AtlasVA（本文，3B）</strong></td><td><strong>0.79</strong></td><td><strong>0.83</strong></td><td><strong>0.86</strong></td><td><strong>1.00</strong></td><td><strong>0.93</strong></td></tr>
+      </tbody>
+    </table>
+    <p>几点解读：</p>
+    <ul>
+      <li><strong>小模型反超大模型（RQ1）：</strong>3B 的 AtlasVA Overall 0.93，显著高于 GPT-5（0.69）、o3（0.71）和 VAGEN（0.78）。在 Sokoban 上从基座的 0.14 拉到 <strong>0.79</strong>，超过 GPT-5 的 0.70——空间任务上参数量不是决定因素，<strong>是否有原生空间记忆</strong>才是。</li>
+      <li><strong>3D 操作几乎打满：</strong>PrimitiveSkill 五个子任务（Place/Stack/Drawer/Align/Swap）全部 <strong>1.00</strong>。对比之下，新增的 Swap 任务上 Qwen2.5-VL-72B 仅 0.33、GPT-5 仅 0.55——长程精确操作正是大模型“空间盲”的重灾区，而对比性视觉范例有效正则化了策略、阻止重蹈历史失败。</li>
+      <li><strong>收敛更快（RQ2）：</strong>纯文本（仅 L3）的基线在 Sokoban 上很难超过 0.25 成功率；AtlasVA 约 140 步就爬到 ~0.80。PrimitiveSkill 上 AtlasVA 快速收敛到满分，文本基线只在 ~0.60 处停滞（原文 Figure 4）。</li>
+    </ul>
+
+    <figure>
+      <img src="figures/waterfall.png" alt="奖励瀑布分析">
+      <figcaption>图 3：奖励瀑布分析。Danger 惩罚（橙）与 Affinity 增益（绿）在每一步持续提供信号，有效补足稀疏的环境奖励（Spars Env）；四个环境里稀疏项常为 0，稠密塑形项把奖励地形填满。（出处：原文 Figure 9）</figcaption>
+    </figure>
+
+    <h3>消融 / 分析</h3>
+    <p>原文 Figure 5 做了五项诊断式消融，逐一回应 RQ：</p>
+    <ul>
+      <li><strong>w/o VSM：</strong>移除整套视觉层级，在 Sokoban / FrozenLake 上性能急剧下降——证明把几何约束压成文本会造成致命信息损失，原生视觉接地确有必要（RQ4）。</li>
+      <li><strong>w/o Heatmap (L1) / w/o Exemplar (L2)：</strong>去掉拓扑图或情节检索任一层都掉点，说明两层缺一不可。</li>
+      <li><strong>w/o Atlas Evolution：</strong>关掉离线 off-policy 更新（退化为静态规则）导致全任务大幅退化——反证“热力图能纯靠原始统计自举、无需教师 LLM”（RQ3）。</li>
+      <li><strong>w/o Dense Reward：</strong>只用稀疏反馈会困在长程任务的局部最优，确认稠密塑形对缓解稀疏奖励瓶颈、加速收敛是必需的（RQ2）。</li>
+    </ul>
+    <p>其它分析：热力图从 Step 0 的空白到 Step 200 已能显式标出结构性死角与可达子目标路径（Figure 6，即上图 2）；视觉范例池上限 6，在前 40 步即填满，并与验证成功率从近 0 跃升到 70%+ <strong>同步</strong>发生（Figure 7），随后持续以新观测淘汰旧帧（Figure 8）；逐步奖励曲线（Figure 11）显示 danger 惩罚在临近死角时立即给出纠偏信号、affinity 增益沿有效路径持续给正反馈。</p>
+  </section>
+
+  <!-- ============================ ⑤ 洞见 ============================ -->
+  <section id="insight">
+    <h2><span class="n">⑤</span>洞见 Insights</h2>
+    <div class="callout insight">
+      <span class="label">Insight</span>
+      <ul style="margin:6px 0">
+        <li><strong>「记忆应保持在感知的原生模态里」是核心方法论。</strong>把空间经验存成 RGB 热力图，而不是文字规则，等于让 VLM 用预训练好的视觉编码器去做“零样本空间模式匹配”，绕开了“2D→文本→2D”的有损翻译。这一思路可迁移到任何<strong>感知主导</strong>的智能体记忆设计。</li>
+        <li><strong>同一份视觉先验可以「一物三用」。</strong>热力图既是 (a) 注入策略的视觉提示、又是 (b) 自进化的记忆载体、还是 (c) 奖励塑形的势函数——感知、记忆、优化被统一在一个可微的空间场上，省去了三套独立机制和外部教师。</li>
+        <li><strong>统计 + 启发式的「无教师」自举，足以替代专有 LLM 的总结/精炼。</strong>“失败终点→danger、成功路径→affinity、BFS/角落→静态先验”这套极简非参数提取，配 EMA 退火调度，就能演化出有意义的拓扑图——把自我改进的成本从“反复调用 GPT-4”降到几乎为零。</li>
+      </ul>
+    </div>
+    <h3>局限与未来</h3>
+    <ul>
+      <li><strong>2.5D 投影是主要边界：</strong>作者自陈，把桌面 3D 操作投影成 2.5D 视觉先验是核心限制；推广到<strong>高度遮挡、第一人称的 3D 机器人</strong>场景仍是关键未解问题（X-Z 投影 + Z 轴当元数据的简化在强遮挡下会失效）。</li>
+      <li><strong>依赖仿真器特权状态：</strong>danger/affinity 的演化依赖训练时从仿真器读取的精确坐标（GridState）。虽然评测时策略不接触这些信息，但在<strong>真实机器人</strong>上缺乏这种 ground-truth 坐标，迁移需要可靠的位姿估计。</li>
+      <li><strong>danger 支非势函数：</strong>它刻意改变最优策略以偏好安全——好处是避险，潜在代价是可能放弃某些最优但“危险”的捷径，需按任务权衡 $\lambda$。</li>
+      <li><strong>规模与任务多样性：</strong>实验集中在网格 / 桌面 / 室内导航；更开放、动态、像素级输入更复杂的环境（如真实 web / 户外）尚未验证。</li>
+    </ul>
+    <h3>与相关工作的关系</h3>
+    <p>相对 Reflexion / ExpeL / Mem0 / A-Mem 这类把轨迹蒸馏成<strong>语言记录</strong>的记忆框架，以及 SkillRL / XSkill 这类构建<strong>自然语言 / Markdown 技能库</strong>的方法，AtlasVA 的根本区别是把在线适应<strong>整体搬到视觉图谱</strong>，并去掉教师依赖（即便号称视觉接地的 XSkill 仍以 Markdown/JSON 存经验，难以刻画细粒度空间陷阱）。在奖励侧，相对“用外部 LLM 生成文本奖励”（Text2Reward、RL-VLM-F 等）和需要大量手工设计势函数的经典 PBRS（Ng et al. 1999），AtlasVA 让<strong>自进化视觉图谱充当自动学习的势函数</strong>，把网格线索与轨迹统计转成稠密坐标对齐奖励，既自动化了奖励工程，又保留逐步空间梯度；也避免了 count-based 探索奖励难以直接扩展到像素级输入的问题。基座与环境上，本文延续 VAGEN 的多轮 VLM RL 设定（PrimitiveSkill 即由 VAGEN 引入），并在其上以更小的 3B 模型显著超越之。</p>
+  </section>
+
+  <footer class="foot">
+    本页为 <code>paper-reading</code> skill 生成的阅读笔记，仅作辅助，细节以
+    <a href="https://arxiv.org/abs/2605.17933" target="_blank" rel="noopener">原文</a> 为准 · 解读日期 2026-05-30
+  </footer>
+
+</article>
+</body>
+</html>

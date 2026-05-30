@@ -1,1 +1,21 @@
-[]
+[
+  {
+    "slug": "2605.17933-atlasva-visual-skill-memory",
+    "title": "AtlasVA: Self-Evolving Visual Skill Memory for Teacher-Free VLM Agents",
+    "authors": "Pan Wang, Yihao Hu, Xiujin Liu, Jingchu Yang, Hang Wang, Zhihao Wen",
+    "team": "Ant Group · USTC · Westlake · UMich · SYSU",
+    "arxiv": "https://arxiv.org/abs/2605.17933",
+    "code": "https://github.com/wangpan-ustc/AtlasVA",
+    "date": "2026-05-30",
+    "published": "arXiv 2026",
+    "tldr": "把 VLM 智能体的文本记忆升级为三层视觉技能记忆（热力图+视觉范例+符号文本），并用无教师的轨迹统计自进化出 danger/affinity 图谱、复用为稠密势函数奖励；3B 模型在 Sokoban/FrozenLake/3D 导航/机械臂上平均成功率 0.93，反超 GPT-5、o3 与 VAGEN。",
+    "tags": [
+      "VLM",
+      "Agent",
+      "Memory",
+      "Self-Evolving",
+      "Visual-Skill"
+    ],
+    "path": "papers/2605.17933-atlasva-visual-skill-memory/index.html"
+  }
+]
