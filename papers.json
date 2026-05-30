@@ -170,5 +170,24 @@
       "Continual-Learning"
     ],
     "path": "papers/2026-05-30-learning-beyond-gradients/index.html"
+  },
+  {
+    "slug": "2603.19312-leworldmodel",
+    "title": "LeWorldModel: Stable End-to-End Joint-Embedding Predictive Architecture from Pixels",
+    "authors": "Lucas Maes, Quentin Le Lidec, Damien Scieur, Yann LeCun, Randall Balestriero",
+    "team": "Mila & Université de Montréal · NYU · Samsung SAIL · Brown University",
+    "arxiv": "https://arxiv.org/abs/2603.19312",
+    "code": "https://github.com/lucas-maes/le-wm",
+    "date": "2026-05-30",
+    "published": "arXiv 2026",
+    "tldr": "首个从原始像素端到端稳定训练的 JEPA world model：只用 next-embedding prediction + 高斯正则 SIGReg 两项 loss，超参从 6 降到 1 且 anti-collapse 可证明；~15M 参数单卡可训，latent-space MPC 规划比 DINO-WM 快至多 48×。",
+    "tags": [
+      "World-Model",
+      "JEPA",
+      "Self-Supervised",
+      "Planning",
+      "Control"
+    ],
+    "path": "papers/2603.19312-leworldmodel/index.html"
   }
 ]

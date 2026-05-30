@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LeWorldModel：从像素端到端稳定训练的 JEPA world model · 论文解读</title>
+
+<script>
+  window.MathJax = {
+    tex:{inlineMath:[['$','$'],['\\(','\\)']], displayMath:[['$$','$$'],['\\[','\\]']]},
+    svg:{fontCache:'global'}
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;
+  }
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:880px; margin:0 auto; padding:18px 22px 90px}
+
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:27px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)}
+  .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .meta-grid a:hover{text-decoration:underline}
+
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap; line-height:2}
+  nav.toc a:hover{color:var(--accent)}
+
+  section{margin:38px 0}
+  h2{font-size:21px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:17px; margin:24px 0 8px}
+  h4{font-size:15px; margin:18px 0 6px; color:var(--accent2)}
+  p{margin:12px 0}
+  ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.9em}
+  strong{color:var(--text)}
+
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:14px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:10px 12px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  .yes{color:var(--ok); font-weight:600}
+  .no{color:var(--muted)}
+  .num{font-variant-numeric:tabular-nums; white-space:nowrap}
+
+  figure{margin:24px 0; text-align:center}
+  figure img{max-width:100%; height:auto; border:1px solid var(--line); border-radius:10px; background:#fff}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+
+  blockquote{border-left:3px solid var(--line); margin:14px 0; padding:2px 16px; color:var(--muted)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+  .mjx-container{overflow-x:auto; overflow-y:hidden}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <!-- ============================ 抬头 / 元信息 ============================ -->
+  <header class="head">
+    <div class="chips">
+      <span class="chip">World-Model</span>
+      <span class="chip">JEPA</span>
+      <span class="chip">Self-Supervised</span>
+      <span class="chip">Planning</span>
+      <span class="chip">Control</span>
+      <span class="chip">MPC</span>
+    </div>
+    <h1>LeWorldModel：从像素端到端稳定训练的 JEPA world model</h1>
+    <p class="orig-title">LeWorldModel: Stable End-to-End Joint-Embedding Predictive Architecture from Pixels</p>
+    <dl class="meta-grid">
+      <dt>作者</dt><dd>Lucas Maes*, Quentin Le Lidec*, Damien Scieur, Yann LeCun, Randall Balestriero（* 同等贡献）</dd>
+      <dt>团队 / 机构</dt><dd>Mila &amp; Université de Montréal · New York University · Samsung SAIL · Brown University</dd>
+      <dt>原文链接</dt><dd><a href="https://arxiv.org/abs/2603.19312" target="_blank" rel="noopener">https://arxiv.org/abs/2603.19312</a>（preprint，v2，2026-03-24）</dd>
+      <dt>代码 / 主页</dt><dd><a href="https://github.com/lucas-maes/le-wm" target="_blank" rel="noopener">github.com/lucas-maes/le-wm</a> · <a href="https://le-wm.github.io/" target="_blank" rel="noopener">le-wm.github.io</a></dd>
+      <dt>发表 / 年份</dt><dd>arXiv 2026（preprint）</dd>
+      <dt>解读日期</dt><dd>2026-05-30</dd>
+    </dl>
+  </header>
+
+  <div class="tldr">
+    <b>TL;DR</b> — LeWorldModel（LeWM）是<strong>第一个能从原始像素端到端、稳定训练的 JEPA world model</strong>。它只用<strong>两个 loss 项</strong>——latent 空间里的下一帧 next-embedding prediction loss，加上一个把 embedding 分布拉成各向同性高斯的正则项 SIGReg——就把可调的 loss 超参从 6 个（PLDM）压到了 1 个，并给出可证明的 anti-collapse 保证。模型仅约 <strong>15M 参数</strong>、单卡几小时即可训练；在 2D/3D 连续控制任务上以 latent-space MPC 规划，<strong>planning 比 foundation-model 类 world model（DINO-WM）快至多 48×</strong>，效果仍有竞争力；其 latent 还自发编码了物体位置/角度等物理量，并能在「违反物理」事件上给出更高的 surprise。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#opensource">① 开源贡献</a>
+    <a href="#motivation">② 动机与贡献</a>
+    <a href="#primer">③ 前置知识 / 背景</a>
+    <a href="#method">④ 方法</a>
+    <a href="#evaluation">⑤ 实验评估</a>
+    <a href="#insight">⑥ 洞见</a>
+  </nav>
+
+  <!-- ============================ ① 开源贡献 ============================ -->
+  <section id="opensource">
+    <h2><span class="n">①</span>开源贡献 Open-source Artifacts</h2>
+    <p>开源程度<strong>很高且经核实可用</strong>：官方仓库 <code>lucas-maes/le-wm</code>（MIT 许可、~3.6k stars）提供了完整的训练 / 规划 / 评测脚本；四个环境的<strong>预训练权重</strong>与<strong>离线数据集</strong>均已上传 Hugging Face（<code>quentinll/lewm-*</code>）；并配有带视频 demo 的项目主页。训练 / 评测基础设施被单独抽成两个开源框架 <code>stable-pretraining</code> 与 <code>stable-worldmodel</code>。下表均为解读当日（2026-05-30）实际核实存在的链接。</p>
+    <table>
+      <thead><tr><th>类型</th><th>是否开源</th><th>内容 / 链接</th></tr></thead>
+      <tbody>
+        <tr><td>代码 Code</td><td class="yes">✔</td><td><a href="https://github.com/lucas-maes/le-wm" target="_blank" rel="noopener">github.com/lucas-maes/le-wm</a> — MIT 许可。含模型与训练目标 <code>jepa.py</code>、训练 <code>train.py</code>、规划/评测 <code>eval.py</code>，以及各环境的 Hydra config。LeWM 本体代码，依赖下面两个框架。</td></tr>
+        <tr><td>模型权重 Weights</td><td class="yes">✔</td><td>4 个环境的 checkpoint（约 15M 参数）：<a href="https://huggingface.co/quentinll/lewm-pusht" target="_blank" rel="noopener">lewm-pusht</a> · <a href="https://huggingface.co/quentinll/lewm-cube" target="_blank" rel="noopener">lewm-cube</a> · <a href="https://huggingface.co/quentinll/lewm-tworooms" target="_blank" rel="noopener">lewm-tworooms</a> · <a href="https://huggingface.co/quentinll/lewm-reacher" target="_blank" rel="noopener">lewm-reacher</a>（HF Hub，部分另提供 Google Drive 备份；baseline 权重亦在 Drive）。</td></tr>
+        <tr><td>数据集 Dataset</td><td class="yes">✔</td><td>4 个离线轨迹数据集（HDF5）：<a href="https://huggingface.co/datasets/quentinll/lewm-pusht" target="_blank" rel="noopener">lewm-pusht</a> · <a href="https://huggingface.co/datasets/quentinll/lewm-cube" target="_blank" rel="noopener">lewm-cube</a> · <a href="https://huggingface.co/datasets/quentinll/lewm-tworooms" target="_blank" rel="noopener">lewm-tworooms</a> · <a href="https://huggingface.co/datasets/quentinll/lewm-reacher" target="_blank" rel="noopener">lewm-reacher</a>（无 reward、无标注，纯 observation+action 轨迹）。</td></tr>
+        <tr><td>环境 / 框架</td><td class="yes">✔</td><td>评测与规划环境管理：<a href="https://github.com/galilai-group/stable-worldmodel" target="_blank" rel="noopener">stable-worldmodel</a>（ref [50]，arXiv 2602.08968）；训练库：<a href="https://arxiv.org/abs/2511.19484" target="_blank" rel="noopener">stable-pretraining</a>（ref [49]）。环境基于 Gymnasium，覆盖 TwoRoom / PushT / OGBench-Cube / Reacher。</td></tr>
+        <tr><td>项目主页 / Demo</td><td class="yes">✔</td><td><a href="https://le-wm.github.io/" target="_blank" rel="noopener">le-wm.github.io</a> — 含四个环境的规划 rollout 视频、latent 解码可视化与 t-SNE 视频。</td></tr>
+      </tbody>
+    </table>
+    <div class="callout note">
+      <span class="label">一句话</span>
+      代码 + 权重 + 数据 + 环境框架 + 主页 demo 五件套齐全且可下载，复现门槛低（论文强调单张 GPU 即可），是这篇工作「lowering the barrier to entry for research」主张的实打实兑现。
+    </div>
+  </section>
+
+  <!-- ============================ ② 动机与贡献 ============================ -->
+  <section id="motivation">
+    <h2><span class="n">②</span>研究动机与贡献 Motivation &amp; Contribution</h2>
+
+    <h3>背景与问题</h3>
+    <p>人们想让 agent 直接从摄像头像素学会预测「我做这个动作之后世界会变成什么样」，也就是学一个 <strong>world model</strong>，然后在它的「想象」里做规划（planning），尤其是在 <strong>offline、reward-free</strong>（只有观测和动作、没有奖励标注）的设定下。<strong>JEPA</strong>（Joint-Embedding Predictive Architecture）是近年很受关注的一条路线：它不去重建像素，而是把观测编码进一个紧凑的 <strong>latent</strong> 空间，在 latent 里预测未来。但现有 JEPA 路线有两类各自的「痛」：</p>
+    <ul>
+      <li><strong>端到端但脆弱（以 PLDM 为代表）。</strong>从像素端到端学 encoder + predictor，靠 VICReg 风格的正则避免 collapse，但目标函数有<strong>多达 6 个 loss 项</strong>（prediction、variance、covariance、time-sim、time-var、time-cov，外加 IDM），系数 $(\alpha,\beta,\gamma,\zeta,\nu,\mu)$ 极难调；网格搜索的复杂度高达 $\mathcal{O}(n^6)$，训练曲线（图 Fig.19）多项噪声大、非单调，稳定性差，且其 anti-collapse 正则在理论上是 under-specified（缺乏保证）。</li>
+      <li><strong>稳但「外挂」（以 DINO-WM 为代表）。</strong>直接冻结一个预训练大视觉模型（DINOv2）当 encoder，只学 predictor。这样确实不会 collapse，但<strong>不是端到端</strong>——表达能力被 pretraining 的先验框死；而且 DINOv2 把每帧编码成大量 patch token，导致 planning 时 rollout 极慢。</li>
+      <li><strong>另一些 world model 需要额外信号</strong>：Dreamer 依赖任务/图像重建、TD-MPC 依赖 reward 与底层状态——都不满足「task-agnostic、reward-free、纯像素」这一目标。</li>
+    </ul>
+
+    <h3>本文的切入点</h3>
+    <p>作者的核心观察是：JEPA 训练的全部「玄学」其实都在围绕一件事——<strong>怎么防止 representation collapse</strong>（见下文前置知识）。与其堆叠一大串启发式正则（再加 stop-gradient / EMA 这些缺乏明确目标函数的技巧），不如<strong>直接、显式地约束 latent embedding 的分布</strong>：只要逼迫 embedding 服从一个各向同性高斯（isotropic Gaussian），就既保证了特征不退化（方差不塌、维度不冗余），又有可证明的 anti-collapse 保证。这个约束由作者团队的 <strong>SIGReg</strong>（Sketched-Isotropic-Gaussian Regularizer，来自 LeJEPA）一项就能实现。于是整个 world model 的目标只剩两项：<em>预测</em> + <em>分布正则</em>。</p>
+
+    <figure>
+      <img src="figures/fig2_comparison.png" alt="LeWM 与四类 world model 的对比">
+      <figcaption>图 1：LeWM 与四类 latent world model 范式的对比。<strong>PLDM</strong>（端到端但 6 个超参、anti-collapse under-specified）、<strong>DINO-WM</strong>（靠冻结预训练 encoder、非端到端、受 pretraining 知识限制）、<strong>Dreamer</strong>（task-specific、需图像重建）、<strong>TD-MPC</strong>（task-specific、需底层状态与 reward）。LeWM 同时做到：端到端、task-agnostic、纯像素、reward-free、免重建、仅 1 个超参且 anti-collapse 可证明。（出处：原文 Figure 2）</figcaption>
+    </figure>
+
+    <h3>核心贡献</h3>
+    <ol>
+      <li><strong>第一个从原始像素端到端稳定训练的 JEPA world model。</strong>目标函数只有两项（next-embedding prediction + SIGReg），把可调 loss 超参从 6 降到 <strong>1</strong>（即正则权重 $\lambda$），且该超参可用 $\mathcal{O}(\log n)$ 的二分搜索高效调；不用 stop-gradient、不用 EMA、不用预训练 encoder。训练对架构与超参都鲁棒。</li>
+      <li><strong>紧凑、高效的规划。</strong>约 15M 参数、单卡几小时可训。由于把每帧编码成比 DINO-WM 少约 200× 的 token，latent-space MPC 规划<strong>快至多 48×</strong>（PushT 上 full planning 0.98s vs DINO-WM 47s），并在多样的 2D/3D 操控、导航、运动任务上超越同为端到端的 PLDM、与 foundation-model 类方法竞争。</li>
+      <li><strong>latent 编码了物理结构。</strong>通过对 latent 做 probing（线性/非线性探针回归物理量）证明物体位置、角度、末端执行器位置等物理量可从 embedding 中恢复；并用 violation-of-expectation（VoE）测试证明模型对「物体瞬移」等违反物理连续性的事件会给出显著更高的 surprise。此外还观察到 temporal straightening（latent 轨迹自发变直）等涌现现象。</li>
+    </ol>
+  </section>
+
+  <!-- ============================ ③ 前置知识 / 背景（应读者要求新增） ============================ -->
+  <section id="primer">
+    <h2><span class="n">③</span>前置知识 / 背景 Primer（从零开始）</h2>
+    <p>这一节面向不熟悉该领域的读者，从头讲清楚理解 LeWM 所需的几个概念：world model、model-based planning、JEPA（在 latent 而非像素里预测）、representation collapse，以及 self-supervised learning、encoder/predictor、latent-space planning / MPC。已经熟悉的读者可直接跳到第 ④ 节。</p>
+
+    <h3>3.1 什么是 world model？为什么 model-based planning 需要它</h3>
+    <p>想象你在玩一个推箱子的游戏。你的大脑里有一个「如果我往左推，箱子会移到哪儿」的<strong>心理模型</strong>——你能在脑子里预演几步，挑出能把箱子推到目标的动作，而不必每个动作都真的去试一遍。这个「能预测『当前状态 + 一个动作 → 下一个状态』的模型」，在 AI 里就叫 <strong>world model</strong>（世界模型）。</p>
+    <p>形式上，给定当前观测 $o_t$（比如一帧画面）和一个动作 $a_t$，world model 要预测下一时刻的情况。有了它，agent 就能做 <strong>model-based planning</strong>（基于模型的规划）：在模型的「想象」里把若干候选动作序列 rollout（推演）出来，看哪条序列最能达成目标，再真正执行最优的那条。相比「直接试错」的 model-free 方法，这样做的好处是：</p>
+    <ul>
+      <li><strong>样本效率高</strong>——大量试错发生在「想象」里，不消耗真实交互；</li>
+      <li><strong>适合 offline 设定</strong>——只要有一批固定的历史轨迹数据，就能学出模型，再用它生成合成经验、评估「反事实」的动作序列（「如果当初这么做会怎样」），无需在线与环境交互；</li>
+      <li><strong>可复用</strong>——同一个 world model 可以服务很多不同的任务目标，因为它学的是「世界怎么运转」，而不是「怎么完成某个特定任务」。</li>
+    </ul>
+    <p>本文关心的正是最纯粹的设定：<strong>只给原始像素 + 动作，没有 reward、没有任务标签、没有底层物理状态</strong>，要 offline 地学一个通用 world model。</p>
+
+    <h3>3.2 什么是 JEPA？为什么在 latent 里预测，而不是重建像素</h3>
+    <p>学 world model 最直白的做法是<strong>在像素空间直接预测下一帧图像</strong>（generative world model，如 DreamerV4、DIAMOND）。但这条路有个根本矛盾：<strong>像素里塞满了与决策无关的细节</strong>——光影、纹理、背景噪点、远处飘动的草……要把这些全部精确重建出来，模型会把大量容量浪费在「画得逼真」上，而这些细节对「把箱子推到哪」毫无帮助。</p>
+    <p><strong>JEPA = Joint-Embedding Predictive Architecture</strong>（由 LeCun 提出），换了个思路：<strong>不在像素里预测，而在一个抽象的 latent（embedding）空间里预测。</strong>它有两个部件：</p>
+    <ul>
+      <li><strong>encoder</strong> $\mathrm{enc}_\theta$：把一帧观测 $o_t$ 压成一个低维向量 $z_t = \mathrm{enc}_\theta(o_t)$，即 latent / embedding。这一步相当于「只保留画面里重要的、与动力学相关的信息，丢掉无关细节」。</li>
+      <li><strong>predictor</strong> $\mathrm{pred}_\phi$：在 latent 空间里，根据当前 latent $z_t$ 和动作 $a_t$，预测下一时刻的 latent $\hat z_{t+1} = \mathrm{pred}_\phi(z_t, a_t)$。</li>
+    </ul>
+    <p>训练时，把真实的下一帧也用 encoder 编成 $z_{t+1}$ 作为「目标」，让 predictor 的预测 $\hat z_{t+1}$ 去逼近它。<strong>关键点：预测的对象是「向量」，损失算在 embedding 上，而不是逐像素。</strong>打个比方——要预测「明天天气」，你只需要预测「晴/雨、气温、风力」这几个<em>概念</em>，而不需要把明天天空中每一朵云的形状都画出来。JEPA 就是只在「概念层」（latent）上对齐未来，因此能把建模能力集中在真正重要的结构上，更高效、更鲁棒、更易于下游规划。</p>
+    <div class="callout note">
+      <span class="label">为什么这对 planning 特别友好</span>
+      latent 维度低（本文 encoder 输出仅一个 192 维向量），rollout 一步只是「向量 → 向量」的轻量前向；相比之下，把每帧编码成几百个 patch token 的方案，rollout 成本高得多。这正是 LeWM 规划能快几十倍的根源（见第 ⑤ 节）。
+    </div>
+
+    <h3>3.3 representation collapse：JEPA 最大的坑，以及怎么避开</h3>
+    <p>JEPA 的预测目标有一个致命的「作弊捷径」。仔细想：如果 encoder 把<strong>所有不同的画面都映射成同一个常数向量</strong>（比如永远输出全 0），那么「预测下一帧 latent」这件事就变得毫无难度——因为不管输入什么，目标都是同一个常数，predictor 随便输出那个常数就能把 prediction loss 压到 0。</p>
+    <p>这种「所有输入塌缩成几乎相同表示」的退化现象，就叫 <strong>representation collapse</strong>。它会把 prediction loss 降到很低（看似训练得很好），但学出来的 latent 毫无信息、完全不可用。<strong>防止 collapse 是训练 JEPA 的核心挑战。</strong>常见的几类对策各有代价：</p>
+    <ul>
+      <li><strong>EMA + stop-gradient</strong>（I-JEPA、V-JEPA 等）：用一个缓慢滑动平均的「目标 encoder」，并切断目标侧的梯度，制造不对称来防塌缩。问题：EMA / SG 缺乏明确的优化目标，理论理解有限，且引入额外的不稳定与调参负担。</li>
+      <li><strong>冻结预训练 encoder</strong>（DINO-WM）：encoder 不训练，自然不会塌缩。代价是非端到端、受限于 pretraining 的先验。</li>
+      <li><strong>方差/协方差正则</strong>（VICReg 系，PLDM 采用）：显式要求每个特征维度有足够方差（不塌）、维度间去相关（不冗余）。代价是项数多、系数难调。</li>
+    </ul>
+    <p><strong>LeWM 的做法属于第三类，但更彻底、更省。</strong>它不去逐项约束方差/协方差，而是<strong>直接把整批 embedding 的分布逼成一个各向同性高斯</strong> $N(0, I)$——高斯本身就「每个方向都有单位方差、各方向不相关」，因此一旦匹配成功，方差不塌、维度不退化、collapse 被根除，而且这是有理论保证的（见第 ④ 节 Cramér–Wold 定理）。一个分布约束，顶替了一堆启发式正则。</p>
+
+    <h3>3.4 三个支撑概念：self-supervised、encoder/predictor、latent-space planning / MPC</h3>
+    <h4>Self-supervised representation learning（自监督表示学习）</h4>
+    <p>「自监督」指<strong>不依赖人工标注</strong>，而是从数据自身构造监督信号来学表示。JEPA 就是典型：监督信号是「下一帧的 embedding」，它来自数据本身（把真实的下一帧编码一下就有了），不需要任何人去标注。LeWM 进一步是 reward-free 的——连「奖励」这种弱标注都不需要，纯粹从「观测序列怎么演化」里学。</p>
+    <h4>encoder 与 predictor 的分工</h4>
+    <p>再强调一次这对搭档：<strong>encoder</strong> 负责「感知」——把高维像素压成紧凑 latent（本文用一个 ~5M 参数的 ViT-Tiny）；<strong>predictor</strong> 负责「动力学」——在 latent 里根据动作推演未来（本文用一个 ~10M 参数的 Transformer，带因果掩码以利用历史帧）。两者在 LeWM 里是<strong>联合、端到端</strong>训练的（这正是它区别于 DINO-WM 的地方）。</p>
+    <h4>latent-space planning 与 MPC（Model Predictive Control）</h4>
+    <p>训练好 world model 后，怎么用它做事？答案是<strong>在 latent 空间里规划</strong>。给定起始观测 $o_1$ 和目标观测 $o_g$，把两者都编码成 latent；然后搜索一段动作序列，让 predictor 从起始 latent 一路 rollout 到的末态，尽量接近目标 latent。这是一个有限步的最优控制问题，用采样式优化器（本文用 <strong>CEM</strong>，Cross-Entropy Method）反复「采样动作→在模型里推演→挑成本最低的精英→收紧采样分布」来解。</p>
+    <p>但 autoregressive rollout 越长、累积的预测误差越大。<strong>MPC（Model Predictive Control，模型预测控制）</strong>是工程上的标准对策：每次只规划一小段、只执行其中头 $K$ 个动作，然后从新的真实观测重新规划（receding horizon，滚动时域）。这样能不断用真实反馈纠偏，是 LeWM 测试时的控制范式。</p>
+    <div class="callout note">
+      <span class="label">读到这里你需要记住的</span>
+      world model = 学「状态+动作→下一状态」；JEPA = 在 latent 里预测、不重建像素；collapse = 全塌成常数的作弊解，必须防；LeWM = 用「预测 + 高斯分布正则」两项端到端学一个 JEPA world model，再用 CEM+MPC 在 latent 里规划。
+    </div>
+  </section>
+
+  <!-- ============================ ④ 方法 ============================ -->
+  <section id="method">
+    <h2><span class="n">④</span>方法 Method</h2>
+    <p>LeWM 分两个阶段：<strong>训练阶段</strong>从 offline、reward-free 的轨迹里端到端学出 encoder + predictor（目标只有两项 loss）；<strong>推理阶段</strong>冻结模型，在其 latent 空间里用 CEM + MPC 做 goal-conditioned 规划。下图是训练流程总览。</p>
+
+    <figure>
+      <img src="figures/fig1_pipeline.png" alt="LeWM 训练流程总览">
+      <figcaption>图 2：LeWM 训练流程。<strong>左</strong>：encoder 把相邻两帧观测 $o_t, o_{t+1}$ 编成 latent $z_t, z_{t+1}$；predictor 根据 $z_t$ 与动作 $a_t$ autoregressively 预测下一步 latent $\hat z_{t+1}$，用 MSE 与真实 $z_{t+1}$ 对齐（prediction loss）。<strong>右（SIGReg）</strong>：把 latent embedding 投影到多个随机一维方向上，对每个一维投影做正态性检验，逼迫整体 embedding 分布匹配各向同性高斯，从而防 collapse。整个网络<strong>不用 stop-gradient / EMA / 预训练表示</strong>，全部联合优化。（出处：原文 Figure 1）</figcaption>
+    </figure>
+
+    <h3>4.1 学习 latent world model</h3>
+    <h4>数据与设定</h4>
+    <p>完全 offline、reward-free：训练数据是长度 $T$ 的轨迹，每条由原始像素观测 $o_{1:T}$ 和对应动作 $a_{1:T}$ 组成。轨迹来自任意 behavior policy（可以是伪专家或探索性的），只要能<strong>充分覆盖环境动力学</strong>即可，不要求最优。目标不是优化某个任务的行为，而是学到能刻画环境动力学、之后可被控制 / 适配到多种任务的通用表示。</p>
+
+    <h4>模型架构</h4>
+    <p>两个部件，定义即：</p>
+    $$z_t = \mathrm{enc}_\theta(o_t), \qquad \hat z_{t+1} = \mathrm{pred}_\phi(z_t, a_t).$$
+    <ul>
+      <li><strong>encoder</strong>：默认是 <strong>ViT-Tiny</strong>（patch size 14、12 层、3 头、hidden 192，约 5M 参数）。观测 embedding $z_t$ 取最后一层的 <code>[CLS]</code> token，再经一个 1 层带 BatchNorm 的 MLP 做投影。<strong>这一步投影是必要的</strong>：ViT 最后一层的 LayerNorm 会破坏 anti-collapse 目标的有效优化，所以要把表示映射到一个新空间再施加 SIGReg。</li>
+      <li><strong>predictor</strong>：一个 6 层、16 头、10% dropout 的 Transformer（约 10M 参数）。动作通过 <strong>AdaLN</strong>（Adaptive Layer Normalization，参数初始化为 0）逐层注入，使动作对 predictor 的影响「渐进式」地起作用、稳定训练。predictor 以 $N$ 帧历史表示为输入，带<strong>因果掩码</strong>地 autoregressively 预测下一帧表示，其后也接一个与 encoder 同款的 projector。</li>
+    </ul>
+    <p>合计约 <strong>15M 参数</strong>，单张 NVIDIA L40S GPU 即可训练。</p>
+
+    <h4>训练目标：两项 loss</h4>
+    <p><strong>① 预测项（teacher-forcing 的 next-embedding prediction）：</strong></p>
+    $$\mathcal{L}_{\text{pred}} \triangleq \lVert \hat z_{t+1} - z_{t+1}\rVert_2^2, \qquad \hat z_{t+1} = \mathrm{pred}_\phi(z_t, a_t).$$
+    <p>这一项逼迫 encoder 学出「对 predictor 而言可预测」的表示。其中 $z_{t+1}=\mathrm{enc}_\theta(o_{t+1})$ 是真实下一帧编码出的目标，$\hat z_{t+1}$ 是 predictor 的预测，两者算 MSE。<strong>但仅有这一项必然导致 collapse</strong>（所有输入塌成常数即可把它压到 0），所以需要第二项。</p>
+
+    <p><strong>② 反塌缩正则项 SIGReg（Sketched-Isotropic-Gaussian Regularizer）：</strong>逼迫 latent embedding 分布匹配各向同性高斯。设 $Z\in\mathbb{R}^{N\times B\times d}$ 为在历史长度 $N$、batch $B$、维度 $d$ 上收集到的 embedding。高维空间直接检验正态性很难（经典正态性检验都是为一维设计的），SIGReg 的巧思是<strong>「sketch」——把 embedding 投影到 $M$ 个随机单位方向 $u^{(m)}\in\mathbb{S}^{d-1}$ 上得到一维投影 $h^{(m)}=Zu^{(m)}$，对每个一维投影施加 Epps–Pulley 正态性检验统计量 $T(\cdot)$ 并求平均</strong>：</p>
+    $$\mathrm{SIGReg}(Z) \triangleq \frac{1}{M}\sum_{m=1}^{M} T\big(h^{(m)}\big).$$
+    <p>其中 Epps–Pulley 统计量比较一维投影的经验特征函数 $\phi_N(t;h)=\frac1N\sum_n e^{ith_n}$ 与标准高斯 $N(0,1)$ 的特征函数 $\phi_0$ 的差：</p>
+    $$T^{(m)} = \int_{-\infty}^{\infty} w(t)\,\big|\phi_N(t;h^{(m)}) - \phi_0(t)\big|^2\,dt,\qquad w(t)=e^{-t^2/2\kappa^2}.$$
+    <p>实际计算时这个积分用梯形数值积分（trapezoid，节点 $T$ 均匀分布在 $[0.2,4]$）近似。<strong>为什么「匹配所有一维投影」就等价于「匹配整个高维分布」？</strong>——这正是 <strong>Cramér–Wold 定理</strong>保证的：</p>
+    $$\mathrm{SIGReg}(Z)\to 0 \iff \mathbb{P}_Z \to N(0, I).$$
+    <p>直觉上：一个高维分布的「所有方向上的投影」唯一决定了它本身；只要每个方向看起来都是标准高斯，整体就是各向同性高斯。这给了 LeWM <strong>可证明的 anti-collapse 保证</strong>——高斯各方向方差为 1，特征不可能塌成常数，也不可能维度冗余。</p>
+
+    <p><strong>完整目标</strong>把两项加权相加（注意 SIGReg 是<strong>逐时间步</strong>施加的）：</p>
+    $$\mathcal{L}_{\text{LeWM}} \triangleq \mathcal{L}_{\text{pred}} + \lambda\,\mathrm{SIGReg}(Z).$$
+    <p>训练逻辑可用一段伪代码概括（原文 Algorithm 1）：</p>
+    <blockquote>
+      <code>emb = encoder(obs)</code> &nbsp;# (B,T,D)<br>
+      <code>next_emb = predictor(emb, actions)</code><br>
+      <code>pred_loss = MSE(emb[:,1:], next_emb[:,:-1])</code> &nbsp;# next-embedding prediction<br>
+      <code>sigreg_loss = mean(SIGReg(emb.transpose(0,1)))</code> &nbsp;# 逐步施加，anti-collapse<br>
+      <code>return pred_loss + lambd * sigreg_loss</code>
+    </blockquote>
+    <div class="callout note">
+      <span class="label">只剩一个超参</span>
+      SIGReg 引入两个内部参数：随机投影数 $M$（默认 1024）和数值积分节点数。消融显示<strong>下游性能对这两者几乎不敏感</strong>（图 Fig.15 中、右），因此真正需要调的只有正则权重 $\lambda$（默认 0.1）。而 $\lambda$ 可用 $\mathcal{O}(\log n)$ 的二分搜索高效确定——相比 PLDM 的 $\mathcal{O}(n^6)$ 网格搜索是质的简化。LeWM 不用 stop-gradient、不用 EMA、不用任何额外稳定化技巧，梯度贯穿所有部件、端到端联合优化。
+    </div>
+
+    <h3>4.2 latent planning（CEM + MPC）</h3>
+    <figure>
+      <img src="figures/fig4_planning.png" alt="LeWM latent 规划">
+      <figcaption>图 3：LeWM 的 latent 规划。给定起始观测 $o_1$ 与目标 $o_g$，encoder 编出起始 latent $z_1$ 与目标 latent $z_g$；predictor 在 latent 空间里把候选动作序列 rollout 到 horizon $H$，用末态 latent 与目标 latent 的距离（cost）引导 solver（CEM）优化动作序列；预测—优化循环反复迭代直到收敛出好的规划。world model 参数在规划中保持冻结。（出处：原文 Figure 4）</figcaption>
+    </figure>
+    <p>测试时是 goal-conditioned 的轨迹优化。latent 转移为 $\hat z_{t+1}=\mathrm{pred}_\phi(\hat z_t, a_t)$、$\hat z_1=\mathrm{enc}_\theta(o_1)$。优化动作序列以最小化末端 latent 与目标 latent 的匹配代价：</p>
+    $$\mathcal{C}(\hat z_H) = \lVert \hat z_H - z_g\rVert_2^2,\qquad z_g=\mathrm{enc}_\theta(o_g);\qquad a_{1:H}^* = \arg\min_{a_{1:H}} \mathcal{C}(\hat z_H).$$
+    <p>用 <strong>CEM</strong>（Cross-Entropy Method）求解：每步从高斯采样分布里采若干候选动作序列、在 world model 里 rollout 算 cost、选出 cost 最低的「精英」更新采样分布的均值与方差，迭代收紧。由于 autoregressive rollout 会随 horizon 增长累积误差，作者采用 <strong>receding-horizon MPC</strong>：只执行优化出的前 $K$ 个动作，再从新观测重规划。</p>
+    <div class="callout note">
+      <span class="label">规划实现细节</span>
+      frame-skip = 5（把相邻 5 个动作打包成一个 action block，等价于更长视野但计算更省）；history 长度 PushT / OGBench-Cube 为 3、TwoRoom 为 1；CEM 每步采样 300 条候选、迭代 30 步（PushT）/ 10 步（其他），每步保留 top-30 精英、初始采样方差 1；planning horizon = 5 步（对应 25 个环境步，因 frame-skip 5）；MPC horizon = 5。训练用 batch 128、子轨迹 4 帧 / 4 个 block、图像 224×224。全部实验在单张 L40S 上完成。
+    </div>
+  </section>
+
+  <!-- ============================ ⑤ 实验评估 ============================ -->
+  <section id="evaluation">
+    <h2><span class="n">⑤</span>实验评估 Evaluation</h2>
+
+    <h3>评测设置</h3>
+    <ul>
+      <li><strong>环境 / 数据集（4 个，2D &amp; 3D，连续动作空间）：</strong>
+        <ul>
+          <li><strong>TwoRoom</strong>：2D 导航，两个房间被一道带门的墙隔开，agent（红点）须穿门走到目标位置。10k 轨迹（均长 92 步）。</li>
+          <li><strong>PushT</strong>：2D 操控，agent（蓝点）须把 T 形块推到目标姿态，机器人基准常用。20k 专家轨迹（均长 196 步）。</li>
+          <li><strong>OGBench-Cube</strong>：3D 机械臂操控，末端执行器抓起立方体放到目标位（单 cube 变体）。10k 轨迹（各 200 步），视觉复杂度更高。</li>
+          <li><strong>Reacher</strong>（DeepMind Control Suite）：2D 平面内两关节臂到达目标构型。10k 轨迹（各 200 步），数据由 SAC policy 采集。</li>
+        </ul>
+      </li>
+      <li><strong>对比基线：</strong>DINO-WM（冻结 DINOv2 的 foundation-model 类 world model）、PLDM（最接近本文、同为端到端 JEPA，7 项 loss）、GCBC（goal-conditioned behavioral cloning）、GCIQL 与 GCIVL（两种 goal-conditioned offline RL）。为公平，DINO-WM 去掉了它原本可用的 proprioceptive 输入。每个方法的超参在所有环境间固定。</li>
+      <li><strong>指标：</strong>控制看 <strong>Success Rate（SR，↑ 越高越好）</strong>；规划效率看 <strong>planning time（s，↓）</strong>；latent 物理结构看 probing 的 <strong>MSE（↓）与 Pearson r（↑）</strong>；物理理解看 VoE 的 <strong>surprise（预测 MSE）</strong>是否在扰动处显著升高。</li>
+    </ul>
+
+    <h3>主要结果（一）：规划效率 + 固定算力下的性能</h3>
+    <figure>
+      <img src="figures/fig3_planning_time.png" alt="规划时间与固定算力性能">
+      <figcaption>图 4：规划时间与固定算力下的性能。<strong>左</strong>：PushT 上 full planning 时间（50 次平均）——LeWM 仅 <strong>0.98s</strong>，DINO-WM 需 <strong>47s</strong>（约 48× 加速；因 LeWM 把观测编码成比 DINO-WM 少约 200× 的 token，速度可与 PLDM 媲美而比 DINO-WM 快约 50×）。<strong>中 / 右</strong>：固定 FLOPs 预算下，LeWM 在 PushT（90 vs 13）与 OGBench-Cube（74 vs 48）上显著优于 DINO-WM。（出处：原文 Figure 3）</figcaption>
+    </figure>
+
+    <h3>主要结果（二）：四个环境的控制成功率</h3>
+    <figure>
+      <img src="figures/fig6_performance.png" alt="四个环境的规划性能">
+      <figcaption>图 5：四个环境上的规划成功率对比（LeWM vs DINO-WM / PLDM / GCBC / GCIQL / GCIVL / Random）。LeWM 在 PushT、Reacher 上稳定优于 PLDM 与 DINO-WM；在视觉更复杂、3D 的 OGBench-Cube 上略逊于 DINO-WM；在最简单的 TwoRoom 上反而被 PLDM / DINO-WM 超过。（出处：原文 Figure 6）</figcaption>
+    </figure>
+    <table>
+      <thead><tr><th>方法</th><th class="num">TwoRoom</th><th class="num">Reacher</th><th class="num">PushT</th><th class="num">OGBench-Cube</th></tr></thead>
+      <tbody>
+        <tr><td><strong>LeWM（本文）</strong></td><td class="num">87</td><td class="num"><strong>86</strong></td><td class="num"><strong>90</strong>（固定算力）</td><td class="num"><strong>74</strong>（固定算力）</td></tr>
+        <tr><td>DINO-WM</td><td class="num">100</td><td class="num">79</td><td class="num">13（固定算力）</td><td class="num"><strong>~80</strong>（略高于 LeWM）</td></tr>
+        <tr><td>PLDM</td><td class="num">100</td><td class="num">78</td><td class="num">72（比 LeWM 低约 18 个点）</td><td class="num">—</td></tr>
+      </tbody>
+    </table>
+    <p class="orig-title" style="font-style:normal;font-size:13px">注：上表数字读自原文 Figure 3 / 6 的柱状标注，部分为近似值；PushT / OGBench-Cube 的对比在「固定算力」设定下尤为悬殊。</p>
+    <p><strong>怎么读这些数字？</strong>LeWM 的卖点不是「在每个任务上都最强」，而是<strong>在极低算力 / 极快规划下保持有竞争力的成功率</strong>：在更有挑战的 PushT 上比同为端到端的 PLDM 高约 18 个点；即便 DINO-WM 享有 proprioceptive 信息，LeWM（纯像素）在 PushT 上仍反超它，说明它确实捕捉到了任务相关量。<strong>不利的两处也很诚实</strong>：(1) OGBench-Cube 这种 3D、视觉复杂场景，DINO-WM 因 pretraining 先验略占优——端到端学一个好 encoder 在这里更难；(2) <strong>最简单的 TwoRoom 反而吃亏</strong>，作者解释这是 SIGReg 的潜在局限——该环境内在维度很低、数据多样性低，硬要在高维 latent 里匹配各向同性高斯反而让表示「不够结构化」。</p>
+
+    <h3>主要结果（三）：latent 里的物理结构</h3>
+    <p><strong>Probing（探针回归物理量）。</strong>在 PushT 上训练线性 / 非线性探针从 latent 预测物理量，LeWM 始终优于 PLDM，并与 DINOv2 这种在约 124M 图像上预训练的大模型有竞争力（下表节选原文 Table 1，MSE↓ / r↑）：</p>
+    <table>
+      <thead><tr><th>物理量</th><th>模型</th><th class="num">Linear MSE↓</th><th class="num">Linear r↑</th><th class="num">MLP MSE↓</th><th class="num">MLP r↑</th></tr></thead>
+      <tbody>
+        <tr><td rowspan="3">Agent Location</td><td>DINO-WM</td><td class="num">1.888</td><td class="num">0.977</td><td class="num">0.003</td><td class="num">0.999</td></tr>
+        <tr><td>PLDM</td><td class="num">0.090</td><td class="num">0.955</td><td class="num">0.014</td><td class="num">0.993</td></tr>
+        <tr><td><strong>LeWM</strong></td><td class="num"><strong>0.052</strong></td><td class="num">0.974</td><td class="num"><strong>0.004</strong></td><td class="num"><strong>0.998</strong></td></tr>
+        <tr><td rowspan="3">Block Location</td><td>DINO-WM</td><td class="num"><strong>0.006</strong></td><td class="num">0.997</td><td class="num">0.002</td><td class="num">0.999</td></tr>
+        <tr><td>PLDM</td><td class="num">0.122</td><td class="num">0.938</td><td class="num">0.011</td><td class="num">0.994</td></tr>
+        <tr><td><strong>LeWM</strong></td><td class="num">0.029</td><td class="num">0.986</td><td class="num"><strong>0.001</strong></td><td class="num"><strong>0.999</strong></td></tr>
+        <tr><td rowspan="3">Block Angle</td><td>DINO-WM</td><td class="num"><strong>0.050</strong></td><td class="num">0.979</td><td class="num">0.009</td><td class="num">0.995</td></tr>
+        <tr><td>PLDM</td><td class="num">0.446</td><td class="num">0.745</td><td class="num">0.056</td><td class="num">0.972</td></tr>
+        <tr><td><strong>LeWM</strong></td><td class="num">0.187</td><td class="num">0.902</td><td class="num"><strong>0.021</strong></td><td class="num">0.990</td></tr>
+      </tbody>
+    </table>
+    <p>OGBench-Cube 上的更全面 probing（原文 Table 4）显示：LeWM 在位置类量（block position、end-effector position）上最好；但<strong>所有方法</strong>在 block 旋转（quaternion / yaw）这类细粒度旋转量上都很差——细粒度旋转信息很难压进紧凑 latent，这与定性 rollout 中「末端执行器朝向细节会丢失」一致。</p>
+    <p><strong>解码可视化 + t-SNE + temporal straightening。</strong>尽管训练<strong>从不</strong>用重建 loss，事后训练一个 decoder 仍能从 192 维 latent 重建出场景（原文 Figure 8），说明紧凑 latent 保留了足够的物理状态信息；t-SNE 显示 latent 保留了空间邻接与相对位置结构（Figure 9）；更有趣的是，<strong>latent 轨迹随训练自发变「直」</strong>（temporal straightening，相邻 latent 速度向量的 cosine 相似度升高，Figure 17）——LeWM 甚至比专门加了时间平滑正则的 PLDM 还要直，是一种 emergent（涌现）现象。</p>
+
+    <h3>主要结果（四）：物理理解的 VoE 测试</h3>
+    <p>沿用 violation-of-expectation 范式：构造三类轨迹——正常的、视觉扰动的（物体颜色突变）、物理扰动的（物体瞬移到随机位置，违反物理连续性），看模型的 surprise（预测 MSE）是否在扰动处升高。结论（Figure 10）：在所有三个环境里，<strong>「瞬移」这类物理违例都会触发显著更高的 surprise（配对 t 检验 $p<0.01$）</strong>；而单纯的颜色变化引发的 surprise 较弱、不显著——说明 <strong>LeWM 对物理扰动比对视觉扰动更敏感</strong>，符合一个「懂物理」的 world model 应有的样子。</p>
+
+    <h3>消融 / 分析</h3>
+    <ul>
+      <li><strong>SIGReg 内部参数（投影数 / 积分节点）——不敏感</strong>（Figure 15 中、右）：变动它们对 PushT 成功率几乎无影响，因此真正要调的只有 $\lambda$。</li>
+      <li><strong>正则权重 $\lambda$——很鲁棒</strong>（Figure 16）：$\lambda\in[0.01,0.2]$ 时 SR 都 &gt; 80%，在 $\lambda\approx0.09$ 达峰；只有到 $\lambda=0.5$（正则压过预测项）才骤降。$\lambda$ 是唯一有效超参，可二分搜索。</li>
+      <li><strong>embedding 维度——需够大但很快饱和</strong>（Figure 15 左）：维度太小（约 &lt;184）性能掉得厉害；超过阈值后收益递减。</li>
+      <li><strong>predictor 大小</strong>（Table 6）：ViT-S 最佳（96.0），ViT-T 偏小（80.67）、ViT-B 反而略降（86.7）。</li>
+      <li><strong>predictor dropout</strong>（Table 9）：适度 dropout=0.1 最好（96.0），无 dropout（78.0）或过大（0.5→66.67）都更差——适度 dropout 起到正则、提升泛化的作用。</li>
+      <li><strong>encoder 架构——与具体骨干无关</strong>（Table 8）：把 ViT 换成 ResNet-18 仍有竞争力（94.0 vs 96.0），ViT 仅略占优，说明方法对视觉骨干不挑。</li>
+      <li><strong>要不要加 decoder/重建 loss——不要</strong>（Table 7）：加重建 loss 反而略降（86.0 vs 96.0），印证 JEPA 目标已抓到规划所需信息，重建只会鼓励编码无关视觉细节。</li>
+      <li><strong>训练方差——稳</strong>（Table 5）：三个随机种子下 LeWM 96.0±2.83，方差低；PLDM 78.0±5.0 方差更大。训练曲线（Figure 18 vs 19）也显示 LeWM 两项 loss 平滑单调下降，而 PLDM 的七项里多项噪声大、非单调。</li>
+    </ul>
+  </section>
+
+  <!-- ============================ ⑥ 洞见 ============================ -->
+  <section id="insight">
+    <h2><span class="n">⑥</span>洞见 Insights</h2>
+    <div class="callout insight">
+      <span class="label">Insight 1 · 用「一个分布约束」替掉「一堆启发式正则」</span>
+      JEPA 训练的所有 trick（EMA、stop-gradient、方差/协方差/时间正则……）本质都在迂回地防 collapse。LeWM 的关键转变是<strong>把问题正面化</strong>：直接显式要求 latent 分布是各向同性高斯，借 Cramér–Wold 定理把「高维分布匹配」化简为「所有一维随机投影上的正态性检验」（SIGReg），从而获得<strong>可证明</strong>的 anti-collapse，并把 6 个超参砍到 1 个、把 $\mathcal{O}(n^6)$ 调参降到 $\mathcal{O}(\log n)$。这是一种「与其堆补丁，不如换一个有理论保证的目标」的方法论。
+    </div>
+    <div class="callout insight">
+      <span class="label">Insight 2 · 紧凑 latent 是规划提速的关键</span>
+      LeWM 把每帧压成<strong>单个 192 维向量</strong>（少于 DINO-WM 约 200× 的 token），使 latent-space rollout 极轻量，带来约 48× 的规划加速。这提示：在 model-based planning 里，<strong>encoder 输出的「token 预算」直接决定了在线规划的实时性</strong>——foundation-model 编码虽强，但 patch token 太多会拖垮 MPC。「够用即可」的紧凑表示反而更适合放进控制回路。
+    </div>
+    <div class="callout insight">
+      <span class="label">Insight 3 · 物理理解可以「免费」涌现</span>
+      不用重建 loss，latent 却能被解码回场景、能线性读出物理量、对物理违例报警，甚至自发出现 temporal straightening。这说明<strong>「在 latent 里准确预测未来」这一目标本身就足以逼出物理结构</strong>——理解世界未必需要逐像素重建，预测才是更本质的监督信号。
+    </div>
+
+    <h3>局限与未来</h3>
+    <p>作者自陈了几点边界：<strong>(1) 规划仍受限于短 horizon</strong>，autoregressive rollout 误差累积，长视野推理需要 hierarchical world modeling。<strong>(2) 依赖覆盖充分的 offline 数据</strong>，采集成本不低；尤其在<strong>内在维度极低、多样性差的简单环境（如 TwoRoom）</strong>，SIGReg 强行匹配高维高斯反而有害——这是该正则的明确短板，未来或可在大规模自然视频上 pretrain 以提供更强先验。<strong>(3) 当前需要 action 标注</strong>来预测未来状态，作者提出可用 inverse dynamics modeling 学习未来动作表示、减少对显式动作标注的依赖。此外细粒度旋转量难以编码也是普遍未解问题。</p>
+
+    <h3>与相关工作的关系</h3>
+    <p>基于本文自身的论述：相对 <strong>generative world model</strong>（IRIS、DIAMOND、DreamerV4、Genie 等在像素空间建模、且常需 reward），LeWM 走 reward-free、在 latent 里建模的 JEPA 路线。相对 <strong>masked-prediction 类 JEPA</strong>（I-JEPA、V-JEPA、Brain-JEPA，靠 EMA+SG 防塌缩），LeWM 不用这些缺乏明确目标的技巧。相对 <strong>DINO-WM</strong>（冻结预训练 encoder、非端到端），LeWM 端到端、表达力不被 pretraining 框死、且规划快得多。最接近的是 <strong>PLDM</strong>（同为端到端 JEPA、用 VICReg 系正则），LeWM 把它的 7 项 loss 简化为 2 项、超参从 6 降到 1、训练更稳更快、控制更好。其反塌缩正则 SIGReg 来自同团队的 <strong>LeJEPA</strong>（ref [25]），本文是把这套「provable, heuristic-free」的自监督理念首次成功落到<strong>从像素端到端学 world model</strong> 上。</p>
+  </section>
+
+  <footer class="foot">
+    本页为 <code>paper-reading</code> skill 生成的阅读笔记，仅作辅助，细节以
+    <a href="https://arxiv.org/abs/2603.19312" target="_blank" rel="noopener">原文</a> 为准 · 解读日期 2026-05-30
+  </footer>
+
+</article>
+</body>
+</html>
