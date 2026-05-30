@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ArenaRL：用锦标赛式相对排名为 open-ended agent 扩展 RL · 论文解读</title>
+
+<script>
+  window.MathJax = {
+    tex:{inlineMath:[['$','$'],['\\(','\\)']], displayMath:[['$$','$$'],['\\[','\\]']]},
+    svg:{fontCache:'global'}
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;
+  }
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:880px; margin:0 auto; padding:18px 22px 90px}
+
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:27px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)}
+  .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .meta-grid a:hover{text-decoration:underline}
+
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap}
+  nav.toc a:hover{color:var(--accent)}
+
+  section{margin:38px 0}
+  h2{font-size:21px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:17px; margin:24px 0 8px}
+  p{margin:12px 0}
+  ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.9em}
+  strong{color:var(--text)}
+
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:14px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:10px 12px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  .yes{color:var(--ok); font-weight:600}
+  .no{color:var(--muted)}
+  .num{font-variant-numeric:tabular-nums; text-align:right}
+
+  figure{margin:24px 0; text-align:center}
+  figure img{max-width:100%; height:auto; border:1px solid var(--line); border-radius:10px; background:#fff}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+
+  blockquote{border-left:3px solid var(--line); margin:14px 0; padding:2px 16px; color:var(--muted)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+  .mjx-container{overflow-x:auto; overflow-y:hidden}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <!-- ============================ 抬头 / 元信息 ============================ -->
+  <header class="head">
+    <div class="chips">
+      <span class="chip">LLM</span>
+      <span class="chip">Agent</span>
+      <span class="chip">RL</span>
+      <span class="chip">Ranking</span>
+      <span class="chip">Open-Ended</span>
+      <span class="chip">Tournament</span>
+      <span class="chip">Reward Model</span>
+    </div>
+    <h1>ArenaRL：用锦标赛式（tournament）组内相对排名为 open-ended agent 扩展 RL</h1>
+    <p class="orig-title">ArenaRL: Scaling RL for Open-Ended Agents via Tournament-based Relative Ranking</p>
+    <dl class="meta-grid">
+      <dt>作者</dt><dd>Qiang Zhang, Boli Chen, Fanrui Zhang, Ruixue Ding<sup>*</sup>, Shihang Wang, Qiuchen Wang, Yinfeng Huang, Haonan Zhang, Rongxiang Zhu, Pengyong Wang, Ailin Ren, Xin Li, Pengjun Xie, Jiawei Liu<sup>†</sup>, Ning Guo, Jingren Zhou, Zheng-Jun Zha（<sup>*</sup> Project leader，<sup>†</sup> Corresponding author）</dd>
+      <dt>团队 / 机构</dt><dd>Tongyi Lab, Alibaba Group；Amap (高德地图), Alibaba Group（页眉署名 Tongyi DeepResearch）</dd>
+      <dt>原文链接</dt><dd><a href="https://arxiv.org/abs/2601.06487" target="_blank" rel="noopener">https://arxiv.org/abs/2601.06487</a></dd>
+      <dt>发表 / 年份</dt><dd>arXiv 2026（Technical Report，v2，2026-01-22）</dd>
+      <dt>解读日期</dt><dd>2026-05-30</dd>
+    </dl>
+  </header>
+
+  <div class="tldr">
+    <b>TL;DR</b> — 在 open-ended（无客观 ground-truth）的 agent 任务上，主流 RL 依赖 LLM-as-Judge 给单条 trajectory 打 pointwise scalar reward；当 policy 变强、组内 trajectory 越来越像时，reward 被压缩进极窄区间（如 0.8–0.9），加上 judge 自身噪声，<b>信噪比低到无法优化</b>（作者称之为 <b>discriminative collapse</b>）。ArenaRL 把范式从「给绝对分」改为「<b>组内相对排名</b>」：用一个 process-aware 的 pairwise judge 在同一组 rollout 之间两两比较，再用<b>锦标赛（tournament）</b>把胜负结构化成稳定的 rank → advantage。核心工程贡献是一个 <b>seeded single-elimination（带种子的单败淘汰）</b>拓扑：先用 greedy decoding 的 trajectory 作「quality anchor」做预排序，再按种子建二叉树对阵，把复杂度从 round-robin 的 $\mathcal{O}(N^2)$ 降到 $\mathcal{O}(N)$，排名保真度却几乎等同 round-robin 上界。作者还构建了 Open-Travel 与 Open-DeepResearch 两个带完整 SFT→RL→评测流水线的 benchmark。结果：在 Open-Travel 平均 win rate 达 41.8%（GRPO 16.4%、GSPO 17.2%），在三个公开写作 benchmark、以及真实高德业务数据上也都显著领先。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#opensource">① 开源贡献</a>
+    <a href="#motivation">② 动机与贡献</a>
+    <a href="#method">③ 方法</a>
+    <a href="#evaluation">④ 实验评估</a>
+    <a href="#insight">⑤ 洞见</a>
+  </nav>
+
+  <!-- ============================ ① 开源贡献 ============================ -->
+  <section id="opensource">
+    <h2><span class="n">①</span>开源贡献 Open-source Artifacts</h2>
+    <p>本文开源了<strong>训练框架代码</strong>（GitHub <code>Alibaba-NLP/qqr</code>，Apache-2.0）与<strong>两个 benchmark 数据集</strong>（Open-Travel、Open-DeepResearch，发布在 Hugging Face 的 <code>Alibaba-NLP/arenarl</code> collection；Open-Travel 另有 ModelScope 镜像）。代码内置了论文里全部五种 tournament 拓扑，作为 <code>slime</code> RL 框架的轻量、非侵入式扩展，并接入了 MCP（Model Context Protocol）工具标准。<strong>模型权重未发布</strong>（collection 中只有数据集与论文，没有 checkpoint）。下表均为解读日实际核实的结果。</p>
+    <table>
+      <thead><tr><th>类型</th><th>是否开源</th><th>内容 / 链接</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>代码 Code</td>
+          <td class="yes">✔</td>
+          <td><a href="https://github.com/Alibaba-NLP/qqr" target="_blank" rel="noopener">github.com/Alibaba-NLP/qqr</a>（亦名 "hilichurl"，Apache-2.0）。"An RL training framework for open-ended agents"，核心算法全实现，含 Anchor-Based / Round-Robin / Swiss-System / Double-Elimination / Seeded Single-Elimination 五种拓扑；作为 slime 的扩展，集成 MCP；提供 <code>scripts/travel/run-qwen3-8B.sh</code> 等快速启动脚本。Python 88% / Shell 12%。</td>
+        </tr>
+        <tr>
+          <td>模型权重 Weights</td>
+          <td class="no">✘</td>
+          <td>未发布。论文主干模型为 Qwen3-8B-Base，经 SFT→RL 得到 ArenaRL 模型，但 HF collection 中未提供 checkpoint。</td>
+        </tr>
+        <tr>
+          <td>数据集 Dataset</td>
+          <td class="yes">✔</td>
+          <td>HF collection <a href="https://huggingface.co/collections/Alibaba-NLP/arenarl" target="_blank" rel="noopener">Alibaba-NLP/arenarl</a> 内含 <strong>Open-Travel</strong>（SFT 2,600 / RL 1,626 / 测试 250，中文，旅行规划）与 <strong>Open-DeepResearch</strong>（SFT 2,662 / RL 2,216 / 测试 100，中/英，通用 deep research）；Open-Travel 另见 ModelScope <a href="https://modelscope.cn/datasets/iic/Open-Travel" target="_blank" rel="noopener">iic/Open-Travel</a>。两者均为「SFT→RL→多维自动评测」的完整流水线 benchmark。</td>
+        </tr>
+        <tr>
+          <td>环境 / Benchmark</td>
+          <td class="yes">✔</td>
+          <td>Open-Travel 工具基于高德开放平台 Web service API（search poi / around search / get navigation）+ 百炼 WebSearch；Open-DeepResearch 用 Google Search API + 自动摘要。评测 harness 随代码与数据一起给出。另外在 WritingBench / HelloBench / LongBench-write 三个公开写作 benchmark 上扩展评测（这三个为他人工作）。</td>
+        </tr>
+        <tr>
+          <td>项目主页 / Demo</td>
+          <td class="no">—</td>
+          <td>无独立项目主页；信息集中在 GitHub README 与 HF collection。</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="callout warn"><span class="label">注</span>注意 arXiv 编号为 <code>2601.06487</code>（2026 年 1 月）。论文为 Technical Report 体例，无标准会议/期刊 venue。模型权重「未见发布」属事实陈述，后续 Alibaba-NLP 是否补放 checkpoint 需以官方仓库为准。</p>
+  </section>
+
+  <!-- ============================ ② 动机与贡献 ============================ -->
+  <section id="motivation">
+    <h2><span class="n">②</span>研究动机与贡献 Motivation &amp; Contribution</h2>
+
+    <h3>背景与问题：pointwise scalar reward 的 discriminative collapse</h3>
+    <p>RL 已经在<strong>有可验证结果</strong>的任务（数学、代码）上大幅提升了 LLM agent 的能力——这类任务有 ground-truth，rule-based reward 能给出明确信号，GRPO、DAPO 等算法因此成功。但很多真正重要的现实任务是 <strong>open-ended</strong> 的：个性化旅行规划、深度行业分析、开放写作……它们的解空间巨大、非结构化，「对不对」本身是<strong>主观、多维</strong>的（推理是否严谨、是否满足个性化约束、方案是否实用），传统基于 ground-truth 的 RL 根本用不上。</p>
+    <p>为了拿到 reward，目前主流做法是 <strong>LLM-as-Judge</strong>：让一个强模型给每条 trajectory 的最终答案打一个 <strong>pointwise scalar score</strong>。作者指出这套机制有一个内在的致命缺陷，他们命名为 <strong>discriminative collapse（判别坍缩）</strong>：</p>
+    <ul>
+      <li><strong>组内方差消失。</strong>随着 policy 被不断优化，同一个 query 采样出的一组 trajectory $\{\tau_i\}$ 在分布上越来越接近、质量都很高，judge 给出的分数被压缩到很窄的区间（例如满分 1 的尺度上挤在 0.8–0.9），彼此几乎不可区分（$\sigma_{\text{group}}\to 0$）。</li>
+      <li><strong>judge 自身有噪声。</strong>LLM judge 的打分受 decoding 随机性、length preference 等 spurious correlation 影响，存在不可忽略的评测噪声 $\sigma_{\text{noise}}$。作者在 Figure 1(a) 中实测：单轮组内信号 $\sigma_{\text{group}}\approx 0.03$，而 N 轮重复评测的打分噪声带 $\sigma_{\text{noise}}\approx 0.02$，两者<strong>量级相当</strong>。</li>
+      <li><strong>信噪比太低无法优化。</strong>于是有效信噪比 $\text{SNR}=\sigma_{\text{group}}/\sigma_{\text{noise}}\approx 0.03/0.02$，低到优化几乎被 reward model 的噪声主导。更糟的是 GRPO 这类算法的 advantage 是 $A_i=(\hat R_i-\mu)/\sigma$，当 $\sigma_{\text{group}}$ 趋零时，分母上的归一化反而会<strong>把这股漂移噪声放大成主导梯度</strong>，导致优化停滞甚至退化。</li>
+    </ul>
+
+    <figure>
+      <img src="figures/fig1_pointwise.png" alt="discriminative collapse 示意与 ArenaRL 性能雷达图">
+      <figcaption>图 1（原文 Figure 1）：(a) <strong>discriminative collapse</strong> 示意——单轮评测里组内 reward 被压在 0.8–0.9 的窄带（$\sigma_{\text{group}}\approx0.03$），N 轮重复评测显示打分噪声带 $\sigma_{\text{noise}}\approx0.02$，二者量级相当，导致 $\text{SNR}$ 过低无法优化；(b) 雷达图：ArenaRL 在 Travel/Writing/DeepResearch 多个维度上全面超过 SFT、GRPO、GSPO。</figcaption>
+    </figure>
+
+    <h3>本文的切入点</h3>
+    <p>作者从 <strong>decision theory（决策理论）</strong>借来一个早有共识的观察：<strong>pairwise preference（两两偏好）判断，比 pointwise 的定量打分更稳定</strong>（Fürnkranz &amp; Hüllermeier 2010；DPO 的 Rafailov et al. 2023 也是同源思想）。既然「绝对打分」在高质量、相似 trajectory 之间会坍缩，那就不要绝对分，改为<strong>在组内构造相对排名（relative ranking）</strong>——只要能稳定地判断"A 比 B 好"，就能恢复出可优化的 advantage 信号。这就是 ArenaRL（Arena = 竞技场）名字的由来：为每一组 rollout 现场搭一个对抗"竞技场"。</p>
+    <p>但要把 pairwise 偏好优化扩展到 long-horizon 的 agent 任务，最大瓶颈是<strong>算力</strong>：穷举两两比较（round-robin）虽然给出最准的排名，但复杂度 $\mathcal{O}(N^2)$ 对在线训练不可承受。本文的另一半工作就是系统地研究 <strong>tournament topology（锦标赛拓扑）</strong>，在排名保真度与采样效率之间找最优点。</p>
+
+    <h3>核心贡献</h3>
+    <ol>
+      <li><strong>形式化 discriminative collapse，并提出 ArenaRL 范式。</strong>识别并量化了 open-ended 任务中 pointwise scalar reward 的判别坍缩问题，提出用<strong>锦标赛式的组内相对排名</strong>替代不稳定的标量 reward，从而恢复可优化的 advantage 信号；并设计了一个 <strong>process-aware pairwise evaluation</strong>——judge 不只比最终答案，还审查 chain-of-thought 的逻辑一致性与 tool 调用的精确性。</li>
+      <li><strong>提出 seeded single-elimination 拓扑，把 $\mathcal{O}(N^2)$ 降到 $\mathcal{O}(N)$。</strong>针对标准单/双败淘汰对初始配对极度敏感（随机配对会让高质量 trajectory 提前相遇被淘汰）的痛点，创新性地用 greedy decoding 的 trajectory 作 "quality anchor" 先做低偏差预排序（种子），再建二叉树对阵；线性复杂度下，advantage 估计精度几乎等于 round-robin 上界。</li>
+      <li><strong>构建 Open-Travel 与 Open-DeepResearch 两个带完整训练流水线的 benchmark。</strong>不同于只给测试集的静态 benchmark，这两个套件提供 SFT→RL→多维自动评测的完整闭环，填补了 open-ended agent「全生命周期」评测基础设施的空白；并在真实高德（Amap）业务数据上验证了落地价值。</li>
+    </ol>
+  </section>
+
+  <!-- ============================ ③ 方法 ============================ -->
+  <section id="method">
+    <h2><span class="n">③</span>方法 Method</h2>
+    <p>整体看，ArenaRL 是一个落在「对抗竞技场」框架里的在线 policy optimization 方法，分两阶段（Figure 2 左）：<strong>Stage 1 Cold Start</strong>——用 SFT 让 base 模型先学会基本的 tool-call 格式与多步推理；<strong>Stage 2 在线相对排名优化</strong>——对当前 policy $\pi_\theta$ 采样出的一组 trajectory $\mathcal{G}=\{\tau_1,\dots,\tau_N\}$，<strong>不</strong>走 reward model 打标量分那条（那条会 discriminative collapse），而是经「pairwise judge → tournament → relative ranks/advantages → policy update」这条相对排名通路。Figure 2 右半部分系统对比了五种 tournament 拓扑及其复杂度。</p>
+
+    <figure>
+      <img src="figures/fig2_method.png" alt="ArenaRL 整体流程与五种 tournament 拓扑">
+      <figcaption>图 2（原文 Figure 2）：<strong>左</strong>——ArenaRL 两阶段流程；Stage 2 里上半的 pointwise scalar reward 通路会发生 discriminative collapse（虚线，弃用），下半改用「Pairwise Judge → Tournament Comparison → Relative Ranks / Advantages」。<strong>右</strong>——五种拓扑对比：Round-Robin（$\mathcal{O}(N^2)$，gold standard 但不可行）、Anchor-Based（$\mathcal{O}(N)$ 但分辨率低）、<strong>Seeded Single-Elimination（$\mathcal{O}(N)$，效率与精度最佳平衡）</strong>、Double-Elimination（$\mathcal{O}(N)$ 但缺先验）、Swiss-System（$\mathcal{O}(N\log N)$）。</figcaption>
+    </figure>
+
+    <h3>3.1 任务与 RL 目标</h3>
+    <p>把 open-ended agent 任务形式化为<strong>条件 trajectory 生成</strong>问题。给定工具集 $T$ 和从任务分布 $\mathcal{D}$ 采样的 query $x$，agent policy $\pi_\theta$ 生成一条多步交互 trajectory $\tau$，它是 chain-of-thought $z_k$、tool 调用 $a_k\in T$、环境反馈 $o_k$ 与最终答案 $y$ 交错的序列：</p>
+    <p>$$\tau = [\,z_1,a_1,o_1,\dots,z_k,a_k,o_k,\dots,z_K,a_K,o_K,\,y\,]$$</p>
+    <p>RL 的优化目标是在对齐 reward 信号的同时，用 KL 约束防止 policy 偏离参考模型太远：</p>
+    <p>$$\mathcal{L}(\theta)=\mathbb{E}_{x\sim\mathcal{D},\,\tau\sim\pi_\theta(\cdot\,|\,x;T)}\Big[\,r_\phi(x,\tau)-\beta\,\mathbb{D}_{\mathrm{KL}}\big(\pi_\theta(\cdot|x)\,\|\,\pi_{\text{ref}}(\cdot|x)\big)\,\Big]$$</p>
+    <p>其中 $r_\phi(x,\tau)$ 是 trajectory 质量的 reward，$\pi_{\text{ref}}$ 是 reference policy，$\beta$ 控制 KL 正则强度。<strong>问题就出在 $r_\phi$ 怎么来</strong>：open-ended 任务没有可验证的 $R^*$，只能让 LLM judge 把观测分 $\hat R(\tau)$ 当作真效用 $R^*(\tau)$ 加噪声 $\epsilon$——这正是 discriminative collapse 的来源（见 §②）。</p>
+
+    <h3>3.2 process-aware pairwise evaluation（Arena Judge）</h3>
+    <p>ArenaRL 用一个 <strong>Arena Judge</strong> $\mathcal{J}$ 取代标量 reward model。给 query $x$ 和两条候选 $\tau_a,\tau_b$，$\mathcal{J}$ <strong>联合</strong>评估并对每条<strong>分别</strong>输出一个质量分。输入有三部分：(1) query $x$；(2) 两条 trajectory 的核心 context $\tau_i,\tau_j$（含每步的 CoT $z_k$、tool 调用 $a_k$ 与最终答案 $y$）；(3) 一份 <strong>process-aware rubric</strong> $u$——它强制细粒度审查 CoT 的逻辑一致性、tool call 的精确性、以及最终答案的可靠性。这保证优化信号奖励的是 agent 真正的<strong>推理能力</strong>，而不是过拟合到答案的表层特征。</p>
+    <p>为了消除 LLM judge 的<strong>位置偏置（positional bias）</strong>，采用双向打分：交换两条 trajectory 的呈现顺序各评一次再相加：</p>
+    <p>$$(s_i,s_j)=\mathcal{J}(x,\tau_i,\tau_j,u)+\mathcal{J}(x,\tau_j,\tau_i,u)$$</p>
+    <p>$s_i,s_j$ 即双向 pairwise 评测下给 $\tau_i,\tau_j$ 的质量分，消掉偏向第一/第二位的 bias。</p>
+
+    <h3>3.3 五种 tournament 拓扑：从 gold standard 到线性近似</h3>
+    <p>有了「能稳定比 A 和 B」的 $\mathcal{J}$，剩下的问题是怎么用尽量少的 pairwise 比较，把一组 $N$ 条 trajectory 排出可靠的名次。作者实现并对比了五种拓扑：</p>
+    <ul>
+      <li><strong>Round-Robin（循环赛，gold standard）。</strong>每条 $\tau_i$ 与其余 $N-1$ 条都比一遍，得分为归一化胜率
+        $$\text{Score}(\tau_i)=\frac{1}{N-1}\sum_{j\neq i}\mathbb{I}(s_i>s_j)$$
+        无偏但 $\mathcal{O}(N^2)$，仅用作衡量其它拓扑保真度的"上界基准"。</li>
+      <li><strong>Anchor-Based Ranking（锚点排名）。</strong>先用 greedy decoding（Temperature=0）生成一条确定性参考 trajectory 作 <strong>quality anchor</strong> $\tau_{anc}$；其余 $N-1$ 条用高熵采样（Temperature≈0.8）保证探索多样性，再各自只和 anchor 比一次。复杂度 $\mathcal{O}(N)$，但<strong>分辨率低</strong>：只衡量了"比 anchor 好多少"，捕捉不到两条探索 trajectory 之间的细微差别。</li>
+      <li><strong>Seeded Single-Elimination（带种子的单败淘汰，本文主推）。</strong>两阶段混合：(1) <strong>Seeding</strong>——先用 anchor-based 机制给每条算一个初步分，据此排出低偏差的种子序 $s^i_{\text{seed}}$；(2) <strong>Elimination</strong>——按种子建二叉对阵树（最高种子 vs 最低种子，seed 1 vs seed N），每场胜者 $\tau_{\text{win}}=\arg\max_{\tau\in\tau_i,\tau_j}(s_i,s_j)$ 晋级、败者淘汰。最终名次主要由<strong>在淘汰树中存活的深度</strong>决定；同一轮被淘汰的（如都止步四分之一决赛）再用历史累计平均分在同层内细排。复杂度线性：seeding 需 $N-1$ 次、tournament 需 $N-1$ 次比较。关键在于<strong>用 seeding 阶段的高质量先验来引导对阵结构，避免强者内耗</strong>。</li>
+      <li><strong>Double-Elimination（双败淘汰）。</strong>引入败者组，一条 trajectory 输两次才淘汰，原则上对偶然爆冷更鲁棒；为把预算控制在 ≈$2N$ 次比较，它用<strong>随机种子</strong>而非 anchor 初始化——结果正因缺了高质量初始种子，保真度反而不如 seeded single-elimination。</li>
+      <li><strong>Swiss-System（瑞士制）。</strong>非淘汰、动态配对：每轮让胜负记录相同的 trajectory 互相对阵（如 "1–0" 打 "1–0"），固定打 $K\approx\log_2 N$ 轮、每轮 $N/2$ 场，最终用总胜场 + Buchholz 分（对手过往胜场之和）排名。复杂度 $\mathcal{O}(N\log N)$。</li>
+    </ul>
+
+    <h3>3.4 ranking → advantage：把离散名次变成稳定优化信号</h3>
+    <p>不管用哪种拓扑，最终都为组内每条 trajectory 产出一个相对名次 $\text{Rank}(\tau_i)\in\{0,\dots,N-1\}$（0 为最高）。先把离散名次映射成<strong>分位数式 reward</strong>：</p>
+    <p>$$r_i = 1-\frac{\text{Rank}(\tau_i)}{N-1}$$</p>
+    <p>再在组内做标准化得到 advantage：</p>
+    <p>$$A_i=\frac{r_i-\mu_r}{\sigma_r+\epsilon}$$</p>
+    <p>其中 $\mu_r,\sigma_r$ 是组内 rank-based reward $\{r_1,\dots,r_N\}$ 的均值与标准差。<strong>直觉</strong>：因为 $r_i$ 来自名次而非 judge 的绝对分，组内一定是均匀铺开的 $\{1,\frac{N-2}{N-1},\dots,0\}$，$\sigma_r$ 是个稳定的常数级量，<strong>从根本上规避了 $\sigma_{\text{group}}\to0$ 把噪声放大的陷阱</strong>。最后用一个带 clip 与 KL 惩罚的 PPO 式目标优化 policy：</p>
+    <p>$$\mathcal{L}_{\text{ArenaRL}}(\theta)=\mathbb{E}_{x\sim\mathcal{D},\,\mathcal{G}\sim\pi_\theta}\!\left[\frac{1}{N}\sum_{i=1}^{N}\!\left(\min\!\Big(\tfrac{\pi_\theta(\tau_i|x)}{\pi_{\text{old}}(\tau_i|x)}A_i,\ \text{clip}\big(\tfrac{\pi_\theta(\tau_i|x)}{\pi_{\text{old}}(\tau_i|x)},1-\epsilon,1+\epsilon\big)A_i\Big)-\beta\,\mathbb{D}_{\mathrm{KL}}\big(\pi_\theta(\cdot|x)\,\|\,\pi_{\text{ref}}(\cdot|x)\big)\right)\right]$$</p>
+    <p>形式上与 GRPO/PPO 同构——<strong>唯一但关键的差别是 $A_i$ 的来源</strong>：ArenaRL 的 $A_i$ 来自锦标赛相对排名，而非 reward model 的标量分。</p>
+
+    <div class="callout note">
+      <span class="label">实现要点</span>
+      <ul>
+        <li><strong>主干 &amp; 框架</strong>：base 模型 Qwen3-8B-Base；Cold-start 用 TRL + DeepSpeed ZeRO-3，3 epoch，32×H20，lr $2\times10^{-5}$；RL 阶段基于 <strong>slime</strong> 框架实现，8×H20，Adam lr $1\times10^{-6}$，<strong>把环境反馈对应的 token 从 loss 里 mask 掉</strong>，让优化聚焦推理质量。</li>
+        <li><strong>超参</strong>：Open-Travel 与开放写作用 group size $N=16$、组数 $K=8$；Open-DeepResearch 为提效率改成 $N=8,K=4$。（Table 2 的拓扑对比则统一用 $N=8,K=8$。）</li>
+        <li><strong>训练用 judge</strong>：训练时用 <strong>Qwen3-Max</strong> 作 Arena Judge；评测时换成 <strong>Qwen3-Max + Claude-4-Sonnet</strong> 双 judge（与训练 judge 不同家族，降低过拟合 judge 偏好的风险）。</li>
+        <li><strong>seeding 的工程细节</strong>：anchor 用 greedy（T=0）求确定性；探索分支用 T≈0.8 求多样性——这一冷一热的搭配是 seeding 低偏差的来源。完整算法见原文 Algorithm 1（含 anchor 评分→种子排序→蛇形填充对阵表→逐轮淘汰归档→分层排序→advantage 计算四个 phase）。</li>
+        <li><strong>范式</strong>：严格遵循 "Cold-start → RL"，以缓解 RL 初期的 reward collapse；但作者也专门验证了<strong>跳过 cold-start 直接 RL</strong> 仍可行（见 §④）。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============================ ④ 实验评估 ============================ -->
+  <section id="evaluation">
+    <h2><span class="n">④</span>实验评估 Evaluation</h2>
+
+    <h3>评测设置</h3>
+    <ul>
+      <li><strong>Benchmark / 数据集：</strong>(1) <strong>Open-Travel</strong>——五个子任务，考察多约束（预算、时间窗、出行人数、偏好）下的 long-horizon 规划与多工具协同：Direction（多途经点路线规划）、1-Day（单城一日游）、Compare（出行方式比较）、Search（POI 搜索）、M-Day（多日游，作为泛化任务、不进 SFT）。(2) <strong>Open-DeepResearch</strong>——多轮搜索/阅读/综合并产出开放答案，沿 7 个维度评：Framework / Tool Usage / Coverage / Relevance / Accuracy / Depth / Clarity。(3) 三个公开<strong>开放写作</strong> benchmark：WritingBench（六个专业领域 A–F）、HelloBench（QA/Summ/Heur 三子集）、LongBench-write（万字长文连贯性）。(4) 真实 <strong>高德（Amap/Gaode）业务数据</strong>。</li>
+      <li><strong>对比基线：</strong>两类——(a) 强闭源模型 <strong>GPT-4o、Grok-4、Gemini-2.5-pro、Claude-3.7-Sonnet</strong>；(b) RL 算法 <strong>GRPO、GSPO</strong>（pointwise scalar 打分，用完全相同的 judge 与 rubric、只评答案部分），以及 <strong>SFT</strong> 起点。</li>
+      <li><strong>评价指标 Metric：</strong>open-ended agent 任务用 <strong>win rate（胜率，越高越好）</strong>——候选输出 vs benchmark baseline trajectory 做 pairwise 评测，取非平局中候选胜出的比例，并对两个 judge 取平均。Open-DeepResearch 还报 <strong>Val.%（valid generation rate）</strong>，因 long-context 易 context overflow 而无法产出有效答案，故先统计有效产出比例、再在有效子集上算 win rate。</li>
+    </ul>
+
+    <figure>
+      <img src="figures/fig3_dataset.png" alt="Open-Travel 与 Open-DeepResearch 的三阶段构建流程">
+      <figcaption>图 3（原文 Figure 3）：两个 benchmark 的三阶段构建——Stage I 专家设计种子 query + 用强闭源 baseline 模型生成参考 trajectory；Stage II 用 Qwen3 / Qwen3-Max 等多模型做 LLM-based query 扩展，得到 SFT 数据与无标注 RL query；Stage III 用 rule-augmented LLM 沿 effectiveness / correctness / consistency 三维做质量管控、不合格则迭代重写。最终规模：Open-Travel SFT 2,600 / RL 1,626，Open-DeepResearch SFT 2,662 / RL 2,216；下方列出两域的工具集与任务类型。</figcaption>
+    </figure>
+
+    <h3>主要结果一：tournament 拓扑对比（Table 2，Open-Travel，$N=8,K=8$）</h3>
+    <table>
+      <thead><tr><th>拓扑（Comparison Cost）</th><th class="num">Direction</th><th class="num">Search</th><th class="num">Compare</th><th class="num">1-Day</th><th class="num">M-Day</th><th class="num">Mean</th></tr></thead>
+      <tbody>
+        <tr><td>SFT（–）</td><td class="num">10.6</td><td class="num">29.7</td><td class="num">14.1</td><td class="num">20.4</td><td class="num">7.1</td><td class="num">16.4</td></tr>
+        <tr><td>Anchor-Based（$N{-}1$）</td><td class="num">18.0</td><td class="num">41.3</td><td class="num">30.9</td><td class="num">31.1</td><td class="num">17.6</td><td class="num">27.8</td></tr>
+        <tr><td>Swiss-System（$N\log N$）</td><td class="num">20.9</td><td class="num">43.0</td><td class="num">27.9</td><td class="num">38.6</td><td class="num">11.1</td><td class="num">28.3</td></tr>
+        <tr><td>Double-Elimination（$2N{-}2$）</td><td class="num">12.6</td><td class="num">52.4</td><td class="num">33.7</td><td class="num">39.9</td><td class="num">12.3</td><td class="num">30.2</td></tr>
+        <tr><td><strong>Seeded Single-Elim.（$2N{-}2$）</strong></td><td class="num">16.9</td><td class="num"><strong>69.9</strong></td><td class="num">22.9</td><td class="num">34.9</td><td class="num">18.1</td><td class="num"><strong>32.5</strong></td></tr>
+        <tr><td><em>Round-Robin（上界，$N(N{-}1)/2$）</em></td><td class="num">23.3</td><td class="num">66.3</td><td class="num">23.6</td><td class="num">32.1</td><td class="num">19.0</td><td class="num"><em>32.9</em></td></tr>
+      </tbody>
+    </table>
+    <p>结论非常干净：<strong>Seeded Single-Elimination 平均 win rate 32.5%，几乎追平 round-robin "gold standard" 的 32.9%</strong>，却只要线性次比较；它甚至在 Search、1-Day 子任务上<strong>反超</strong> round-robin（作者解释：anchor seeding 滤掉了早期随机配对的爆冷噪声，避免强者被误淘汰）。相比之下，Swiss 与 Double-Elim 因缺有效先验或比较深度不足，落在 28–30%。因此后续主实验均采用 seeded single-elimination。</p>
+
+    <h3>主要结果二：与 baseline 全面对比（Table 3）</h3>
+    <table>
+      <thead><tr><th>方法</th><th class="num">Open-Travel Mean</th><th class="num">Open-DeepResearch Mean</th><th class="num">DeepResearch Val.%</th></tr></thead>
+      <tbody>
+        <tr><td>GPT-4o</td><td class="num">5.1</td><td class="num">12.2</td><td class="num">88.0</td></tr>
+        <tr><td>Grok-4</td><td class="num">16.8</td><td class="num">34.8</td><td class="num">83.0</td></tr>
+        <tr><td>Gemini-2.5-pro</td><td class="num">15.8</td><td class="num">28.3</td><td class="num">92.0</td></tr>
+        <tr><td>Claude-3.7-Sonnet</td><td class="num">31.6</td><td class="num">19.1</td><td class="num">89.0</td></tr>
+        <tr><td>SFT</td><td class="num">16.4</td><td class="num">16.7</td><td class="num">32.0</td></tr>
+        <tr><td>GRPO</td><td class="num">16.4</td><td class="num">25.2</td><td class="num">17.0</td></tr>
+        <tr><td>GSPO</td><td class="num">17.2</td><td class="num">25.2</td><td class="num">21.0</td></tr>
+        <tr><td><strong>ArenaRL</strong></td><td class="num"><strong>41.8</strong></td><td class="num"><strong>64.3</strong></td><td class="num"><strong>99.0</strong></td></tr>
+      </tbody>
+    </table>
+    <p>读数：在 Open-Travel 上 ArenaRL 平均 win rate <strong>41.8%</strong>，是 GRPO（16.4%）/GSPO（17.2%）的 2.4 倍以上，也明显高于最强闭源 Claude-3.7-Sonnet（31.6%）。在 Open-DeepResearch 上 win rate <strong>64.3%</strong> 且 <strong>Val.% 高达 99%</strong>——而 GRPO/GSPO 的 Val.% 只有 17%/21%，<strong>甚至低于 SFT 起点（32%）</strong>。作者由此点出 pointwise reward 的硬伤：对涉及复杂 tool use 的 long-horizon 任务，给整条 trajectory 一个标量分既抓不到细粒度改进、又容易被 length bias 等 spurious advantage 带偏，反而<strong>训坏了模型</strong>（频繁 context overflow 无法产出有效答案）；ArenaRL 基于比较的信号提供了更具判别力的梯度方向。</p>
+
+    <h3>主要结果三：开放写作泛化（Table 4，平均分）</h3>
+    <table>
+      <thead><tr><th>方法</th><th class="num">WritingBench (mean A–F)</th><th class="num">HelloBench (QA/Summ/Heur)</th><th class="num">LongBench-write</th><th class="num">总平均</th></tr></thead>
+      <tbody>
+        <tr><td>GPT-4o</td><td class="num">~69.4</td><td class="num">81.0/84.3/89.1</td><td class="num">90.4</td><td class="num">76.05</td></tr>
+        <tr><td>Claude-3.7-Sonnet</td><td class="num">~67.5</td><td class="num">80.8/74.7/95.8</td><td class="num">98.3</td><td class="num">76.65</td></tr>
+        <tr><td>SFT</td><td class="num">~68.5</td><td class="num">78.4/63.4/82.4</td><td class="num">85.5</td><td class="num">72.17</td></tr>
+        <tr><td>GRPO</td><td class="num">~68.0</td><td class="num">79.1/64.9/83.8</td><td class="num">86.96</td><td class="num">73.60</td></tr>
+        <tr><td>GSPO</td><td class="num">~68.7</td><td class="num"><strong>80.1</strong>/64.0/81.8</td><td class="num">85.21</td><td class="num">73.03</td></tr>
+        <tr><td><strong>ArenaRL</strong></td><td class="num"><strong>~77.3</strong></td><td class="num">79.1/73.8/<strong>91.3</strong></td><td class="num">93.78</td><td class="num"><strong>80.30</strong></td></tr>
+      </tbody>
+    </table>
+    <p>在与 agent 工具无关的纯开放写作上，ArenaRL 总平均 80.30，超 GRPO 6.70、GSPO 7.27，并反超 GPT-4o、Claude-3.7-Sonnet。唯一小幅落后是 HelloBench-QA（79.11 vs GSPO 80.06），作者归因于该子任务高度受限于模型固有知识。这说明 ArenaRL <strong>不止适用于 tool-augmented agent，而是能系统性提升模型的推理与表达能力</strong>，适用面更广。</p>
+
+    <h3>消融 / 分析（Figure 4）</h3>
+    <figure>
+      <img src="figures/fig4_experiments.png" alt="group size 影响、LLM-人类一致性、无 cold-start 训练曲线">
+      <figcaption>图 4（原文 Figure 4）：(a) <strong>group size $N$</strong> 的影响——Open-Travel 平均 win rate 随 $N$ 单调上升，$N=2$ 已达 20.8%（>SFT 16.4%），$N=16$ 升到 41.8%，1-Day 子任务在 $N=8$ 从 34.9%→58.0%；(b) <strong>LLM judge 与人类</strong>评测的混淆矩阵，对角线占绝大多数、整体一致率 73.9%；(c) <strong>无 cold-start</strong> 直接 RL 训 Qwen3-8B 的 Search 子任务曲线，第 0 步为 0、第 160 步爬到峰值 71%。</figcaption>
+    </figure>
+    <ul>
+      <li><strong>group size $N$ 越大越好（关键消融）。</strong>$N\in\{2,4,8,16\}$ 上 win rate 单调上升；即便最小的 $N=2$（最朴素的两两比较）也已 20.8% 超过 SFT，证明<strong>「比较」本身就提供有效优化梯度</strong>；$N$ 越大候选池越宽、越可能采到强 trajectory 供模型学习。</li>
+      <li><strong>评测可信（一致性分析）。</strong>LLM judge 与人类评测一致率 73.9%，说明 ArenaRL 的提升不是过拟合到特定 judge 偏好，而是与人类判断广泛对齐。</li>
+      <li><strong>能跳过 cold-start 自演化。</strong>不做 SFT、直接对通用 Qwen3-8B 跑 ArenaRL：起点能力为 0，但随 RL step 稳定上升、第 160 步达 71%——表明即便初始输出质量极低，相对排名机制仍能可靠提供梯度，<strong>缓解了 RL 的冷启动问题</strong>，在缺乏昂贵 SFT 标注的场景能从零自演化。</li>
+      <li><strong>真实业务落地（高德）。</strong>在可量化的 POI 搜索任务上，ArenaRL 把 search accuracy 从 baseline 提升到 <strong>75%→83%</strong>；在带模糊意图/多目标权衡的开放规划任务上，核心业务指标从 <strong>69%→80%</strong>，且全程稳定增长。</li>
+      <li><strong>case study（Appendix F）。</strong>baseline SFT 模型在 CoT 里有「复述题面」倾向、常给泛泛建议、对不齐用户意图；ArenaRL 模型则会主动检索多个目标景点、做逻辑连贯的路线规划、产出有说服力的个性化行程。</li>
+    </ul>
+  </section>
+
+  <!-- ============================ ⑤ 洞见 ============================ -->
+  <section id="insight">
+    <h2><span class="n">⑤</span>洞见 Insights</h2>
+    <div class="callout insight">
+      <span class="label">Insight</span>
+      <ul>
+        <li><strong>「打分坍缩」是 open-ended RL 的隐性杀手，而排名是天然解药。</strong>当 policy 变强、组内 trajectory 趋同，pointwise reward 的有效信号 $\sigma_{\text{group}}$ 会被 judge 噪声 $\sigma_{\text{noise}}$ 淹没；更阴险的是 GRPO 式 $A=(\hat R-\mu)/\sigma$ 的归一化会<strong>主动放大</strong>这股噪声。改成组内相对排名后，advantage 来自稳定的名次分位数，分母不再趋零——这是个可迁移到任何「reward 难以校准但偏好易判断」场景的方法论。</li>
+        <li><strong>把「比较」工程化的核心是先验，而非比较次数。</strong>同样线性复杂度，朴素单/双败淘汰因随机配对让强者内耗而失真；ArenaRL 的关键不是多比几场，而是<strong>用 greedy decoding 的 anchor 做低偏差 seeding</strong> 来引导对阵结构。一个好的初始先验，让 $\mathcal{O}(N)$ 的近似几乎追平 $\mathcal{O}(N^2)$ 的 gold standard，甚至在部分子任务上反超（滤掉了爆冷噪声）。</li>
+        <li><strong>process-aware 比 outcome-only 更能逼出真推理。</strong>judge 不只看最终答案、还审 CoT 逻辑与 tool 调用精度，避免模型过拟合答案表层、被 length bias 牵着走；这也解释了为何 ArenaRL 的 Val.% 高达 99% 而 GRPO/GSPO 反而把模型训得频繁 context overflow。</li>
+      </ul>
+    </div>
+
+    <h3>局限与未来</h3>
+    <ul>
+      <li><strong>仍重度依赖一个强 LLM judge。</strong>训练用 Qwen3-Max 作 Arena Judge——相对排名缓解了"打分坍缩"，但若 judge 本身在某领域系统性偏置，pairwise 偏好同样会被带偏（一致率 73.9% 也意味着约 1/4 与人类不一致）。judge 的算力与成本（每组要做多次双向 pairwise）也是规模化的现实负担。</li>
+      <li><strong>权重未开源。</strong>截至解读日只放出框架代码与两个数据集，未见 ArenaRL checkpoint，复现需自行 SFT→RL。</li>
+      <li><strong>评测仍是 LLM-as-Judge 的 win rate。</strong>训练与评测都建立在 LLM 偏好上，虽用了跨家族双 judge + 人类一致性来佐证，但 open-ended 任务缺绝对真值这一根本困难并未被消除。</li>
+      <li><strong>未来方向：</strong>作者明确提出要把 ArenaRL 高效扩展到 <strong>multimodal agent</strong> 场景，进一步提升框架的通用性。</li>
+    </ul>
+
+    <h3>与相关工作的关系（基于本文自身论述）</h3>
+    <p>沿用 LLM-as-Judge 的 reward 获取范式，但 ArenaRL 站在最近兴起的<strong>comparison-based</strong> 评测一边：相比 <strong>Writing-Zero</strong>（与随机参考比、只给二元正/负的粗粒度信号）它给出细粒度的多级 rubric 相对分；相比 <strong>Pref-GRPO</strong>（基于穷举 pairwise 胜率、$\mathcal{O}(N^2)$，且主要验证在 text-to-image）它用稀疏 tournament 拓扑把复杂度压到 $\mathcal{O}(N)$ 并首次把 contrastive 机制做到了 long-horizon agent 任务上。RL 算法层面它是 GRPO（Shao et al.）/GSPO（Zheng et al.）的"相对排名替身"——目标函数同构，只换掉 advantage 来源。benchmark 方面，相比只给静态测试集的 VitaBench、DeepResearchBench，本文的 Open-Travel/Open-DeepResearch 提供了 SFT→RL→多维评测的完整训练-评测闭环。</p>
+  </section>
+
+  <footer class="foot">
+    本页为 <code>paper-reading</code> skill 生成的阅读笔记，仅作辅助，细节以
+    <a href="https://arxiv.org/abs/2601.06487" target="_blank" rel="noopener">原文</a> 为准 · 解读日期 2026-05-30
+  </footer>
+
+</article>
+</body>
+</html>

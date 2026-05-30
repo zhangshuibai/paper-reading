@@ -75,5 +75,24 @@
       "Online-Feedback"
     ],
     "path": "papers/2026-05-30-kaonai-online-autoresearch/index.html"
+  },
+  {
+    "slug": "2601.06487-arenarl",
+    "title": "ArenaRL: Scaling RL for Open-Ended Agents via Tournament-based Relative Ranking",
+    "authors": "Qiang Zhang, Boli Chen, Fanrui Zhang, Ruixue Ding, Shihang Wang, Qiuchen Wang, Yinfeng Huang, Haonan Zhang, Rongxiang Zhu, Pengyong Wang, Ailin Ren, Xin Li, Pengjun Xie, Jiawei Liu, Ning Guo, Jingren Zhou, Zheng-Jun Zha",
+    "team": "Tongyi Lab, Alibaba Group; Amap, Alibaba Group",
+    "arxiv": "https://arxiv.org/abs/2601.06487",
+    "code": "https://github.com/Alibaba-NLP/qqr",
+    "date": "2026-05-30",
+    "published": "arXiv 2026",
+    "tldr": "用锦标赛式组内相对排名替代会发生 discriminative collapse 的 pointwise scalar reward，并以 seeded single-elimination 把复杂度降到 O(N)，显著提升 open-ended agent 的 RL 效果。",
+    "tags": [
+      "LLM",
+      "Agent",
+      "RL",
+      "Ranking",
+      "Open-Ended"
+    ],
+    "path": "papers/2601.06487-arenarl/index.html"
   }
 ]
