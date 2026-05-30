@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>TOUCAN：从真实 MCP 环境合成 150 万条 tool-agentic 数据 — 解读</title>
+<script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']]}};</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+  :root{--maxw:880px;--fg:#1a1a1a;--muted:#667;--line:#e5e7eb;--bg:#fff;--card:#fafafa;--accent:#2563eb;--code-bg:#f5f5f7;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.75 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:40px 22px 80px;}
+  h1{font-size:25px;line-height:1.35;margin:.2em 0 .5em}
+  h2{font-size:20px;margin:1.9em 0 .6em;padding-bottom:.3em;border-bottom:2px solid var(--line)}
+  h3{font-size:17px;margin:1.4em 0 .5em;color:#222}
+  h4{font-size:15.5px;margin:1.1em 0 .3em;color:#444}
+  p{margin:.7em 0}
+  a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+  code{background:var(--code-bg);padding:.12em .4em;border-radius:4px;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:.9em}
+  blockquote{margin:1em 0;padding:.6em 1em;border-left:4px solid var(--accent);background:var(--card);color:#444}
+  table{border-collapse:collapse;width:100%;margin:1.1em 0;font-size:13.5px}
+  th,td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}
+  th{background:#f3f4f6;font-weight:600}
+  tbody tr:nth-child(even) td{background:#fafafa}
+  .lead{font-size:16.5px;color:#333}
+  .muted{color:var(--muted)}
+  .pill{display:inline-block;padding:.15em .6em;border-radius:999px;background:#eef2ff;color:#3730a3;font-size:12.5px;margin:.15em .3em .15em 0}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:1em 0}
+  figure{margin:1.4em 0;text-align:center}
+  figure img{max-width:100%;border:1px solid var(--line);border-radius:8px}
+  figcaption{font-size:13px;color:var(--muted);margin-top:.5em;text-align:left}
+  .footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+  .ok{color:#15803d;font-weight:600}.no{color:#b91c1c;font-weight:600}
+  .small{font-size:13px}.num{font-variant-numeric:tabular-nums;text-align:right}
+  .toc{font-size:14.5px}.toc a{color:#444}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:640px){.grid2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="muted" style="font-size:13px">论文解读 · Paper Reading · <span class="pill">MCP</span></div>
+  <h1>TOUCAN：从近 500 个真实 MCP 环境合成 150 万条 tool-agentic 训练数据</h1>
+  <div class="muted">
+    <span>TOUCAN: Synthesizing 1.5M Tool-Agentic Data from Real-World MCP Environments</span><br/>
+    <span>Zhangchen Xu, Adriana Meza Soria, Shawn Tan, Anurag Roy, Ashish Sunil Agrawal, Radha Poovendran, Rameswar Panda</span><br/>
+    <span>University of Washington · MIT-IBM Watson AI Lab</span><br/>
+    <span>arXiv preprint, 2025-10（cs.LG）· <a href="https://arxiv.org/abs/2510.01179">arXiv:2510.01179</a></span>
+  </div>
+</header>
+
+<div class="card lead">
+  一句话：TOUCAN 把网上爬到的近 500 个<strong>真实 MCP server</strong> 当作可执行环境，用一条「合成任务 → 真实执行轨迹 → 严格过滤」的 pipeline 造出 <strong>1,527,259 条 tool-agentic trajectory</strong>（目前最大的开源同类数据集），并证明只用其高质量子集做 SFT，就能让 7–32B 的 Qwen2.5 模型在 BFCL V3 上反超 GPT-4.5-Preview 等更大的闭源模型，在 MCP-Universe 上把同参数量级的 Pareto frontier 往前推。
+</div>
+
+<nav class="toc">
+  <strong>目录</strong>
+  <ol>
+    <li><a href="#oss">① 开源贡献</a></li>
+    <li><a href="#motiv">② 动机与贡献</a></li>
+    <li><a href="#method">③ 方法</a></li>
+    <li><a href="#eval">④ 实验评估</a></li>
+    <li><a href="#insight">⑤ 洞见</a></li>
+  </ol>
+</nav>
+
+<!-- ① 开源贡献 -->
+<section id="oss">
+  <h2>① 开源贡献</h2>
+  <p class="lead">这是一篇<strong>以数据集为核心贡献</strong>的工作，而且开源得相当彻底：数据集、完整数据合成 pipeline 代码、以及三个训练好的 checkpoint <strong>都已公开</strong>，许可证宽松。</p>
+  <table>
+    <thead><tr><th>类型</th><th>内容</th><th>链接 / 说明（已核实）</th></tr></thead>
+    <tbody>
+      <tr><td>数据集 <span class="ok">✔</span></td>
+        <td>Toucan-1.5M，parquet 格式，按 trajectory generator 分 4 个 config：<code>Kimi-K2</code>（518,516 条）、<code>OSS</code>（457,130）、<code>Qwen3</code>（551,613），外加一个已筛好的 <code>SFT</code> 子集（119,287）</td>
+        <td><a href="https://huggingface.co/datasets/Agent-Ark/Toucan-1.5M">hf.co/datasets/Agent-Ark/Toucan-1.5M</a>；许可证 <code>apache-2.0</code>；核实时 213 likes、5.4k 下载</td></tr>
+      <tr><td>代码 <span class="ok">✔</span></td>
+        <td>完整数据生成 pipeline（仓库 <code>./datagen</code> 目录），并内置 <code>Qwen-Agent</code> 源码用于跑 trajectory</td>
+        <td><a href="https://github.com/TheAgentArk/Toucan">github.com/TheAgentArk/Toucan</a>；许可证 <strong>MIT</strong>（已核 LICENSE 文件，Copyright 2025 Agent Ark）；核实时约 245 stars</td></tr>
+      <tr><td>权重 <span class="ok">✔</span></td>
+        <td>三个 SFT checkpoint：Toucan-Qwen2.5-<strong>7B</strong>/<strong>14B</strong>/<strong>32B</strong>-Instruct-v0.1</td>
+        <td><a href="https://huggingface.co/Agent-Ark">huggingface.co/Agent-Ark</a> 下三个模型均可下载（v0.1）</td></tr>
+      <tr><td>Benchmark</td>
+        <td>本文不提出新 benchmark，沿用现成的 BFCL V3、τ-Bench / τ²-Bench、MCP-Universe</td>
+        <td>评测按各自官方 setup 运行（MCP-Universe 用其本地评测环境）</td></tr>
+      <tr><td>Demo / 主页 <span class="no">✘</span></td><td>未见独立 project page / demo</td><td>—</td></tr>
+    </tbody>
+  </table>
+  <p class="small muted">说明：数据由若干开源 LLM（GPT-OSS、Kimi-K2、Qwen3、Mistral / DevStral 系列等）合成、并经真实 MCP server 执行，下游使用仍需留意各 teacher 模型与各 MCP server 自身的条款；论文也在 Ethics 部分给出了基于 GitHub 的 take-down 流程。</p>
+</section>
+
+<!-- ② 动机与贡献 -->
+<section id="motiv">
+  <h2>② 动机与贡献</h2>
+
+  <h3>2.1 背景：LLM agent 缺的不是模型，是「真实、可执行、规模够大」的训练数据</h3>
+  <p>LLM agent 要做的事是：在<strong>可能很大的工具集</strong>里找对 tool、用正确参数调用、在 tool 失败时优雅处理、再把结果综合成符合上下文的回答。<strong>Model Context Protocol（MCP）</strong>（Anthropic 2025）给出了一套标准化接口，让 LLM 可以统一地「发现 / 调用 / 执行」外部工具，第一次让「把真实世界环境批量接进 agent」在工程上变得可行。</p>
+  <p>但作者指出，开源社区真正的瓶颈在<strong>数据</strong>：训练 agentic LLM 需要大量「task–trajectory pair」，trajectory 要完整记录 planning、tool call、tool response、最终回复这条链。现有开源数据集普遍有四类硬伤——</p>
+  <ul>
+    <li><strong>工具多样性低</strong>：工具种类与领域覆盖窄；</li>
+    <li><strong>tool response 是假的</strong>：很多数据集（如 ToolACE）用 LLM <em>模拟</em>工具返回，而非真正执行，导致 response 与真实 API 行为脱节；</li>
+    <li><strong>只有单轮</strong>：多数停留在 user↔model 的 single-turn function call，缺少真实多轮交互；</li>
+    <li><strong>规模不够</strong>：SFT 体量偏小。</li>
+  </ul>
+  <p>论文用对比表（原文 Table 1）把这点讲透：现有最大的开源 tool 数据 Nemotron(Tools) 约 31 万条，且工具规格 / 响应来源「不公开」；APIGen-MT-5K、ToolACE、Hermes-FC-V1 都只有 1 万量级。TOUCAN 直接做到 <strong>1,527,259 条</strong>、含 <strong>567,262 条多轮对话</strong>，工具规格是 <strong>Real（真实 MCP）</strong>、tool response 是 <strong>Executed（真执行）</strong>，并覆盖 single / parallel / multi-step 以及「无关 / 不可解」（irrelevance）这一关键 edge case。</p>
+
+  <div class="card">
+    <strong>核心观察（也是方法的支点）：</strong>既然 MCP 已经把成百上千个真实工具标准化地暴露出来，就不必再「凭空想象」工具及其返回——直接把真实 MCP server 当成可执行环境，让 teacher 模型在里面<strong>真的把工具调起来</strong>，产生的 trajectory 自带真实性、复杂度与多样性。
+  </div>
+
+  <h3>2.2 贡献清单</h3>
+  <ol>
+    <li><strong>TOUCAN 数据集</strong>：迄今最大的开源 tool-agent 训练集，覆盖 parallel / multi-step tool call、multi-turn 对话、以及 edge-case（不可解 / 无关）工具使用。作者强调 Kimi-K2、GLM-4.5 这类前沿模型的报告都点名「大规模、广领域 trajectory」很关键，而 TOUCAN 提供了开源替代品来补缺口。</li>
+    <li><strong>TOUCAN Pipeline</strong>：一条能吃<strong>任意 MCP specification</strong> 的数据生成流水线，支持通过 MCP server 真实执行工具，并因走 MCP 标准而可无缝扩展到新工具。</li>
+    <li><strong>TOUCAN Checkpoints（实证）</strong>：在 TOUCAN 高质量子集上 SFT 出的 Qwen2.5-7B/14B/32B，在 BFCL V3、τ-Bench/τ²-Bench、MCP-Universe 上一致超过各自 base，部分指标超过更大的闭源 / 开源对手。</li>
+  </ol>
+</section>
+
+<!-- ③ 方法 -->
+<section id="method">
+  <h2>③ 方法</h2>
+
+  <h3>3.1 总览：五阶段 pipeline + 三个 extension</h3>
+  <p>每条样本包含：task description、完整 agent trajectory（及其用到的 tools）、quality / classification 标注、以及丰富 metadata。数据构造是一条系统化的<strong>五阶段流水线</strong>：① MCP server onboarding → ② task synthesis → ③ task filtering（LLM pre-filtering）→ ④ trajectory generation → ⑤ rule &amp; LLM post-filtering；之后再叠加<strong>三个 extension</strong>（Irrelevance / Persona 多样化 / Multi-turn）补足真实性与难度。</p>
+
+  <figure>
+    <img src="figures/fig2_pipeline.png" alt="TOUCAN 五阶段构造 pipeline"/>
+    <figcaption>原文 Figure 2：TOUCAN 的五阶段构造流程（Server Onboarding → Task Synthesis → LLM-Based Pre-Filtering → Trajectory Generation → Rule&amp;LLM-based Post-Filtering），右侧 Ext.1 Irrelevance / Ext.2 Persona-based Diversification / Ext.3 Multi-Turn 是三种数据扩展机制，最终汇成 1.5M+ instances。</figcaption>
+  </figure>
+
+  <h3>3.2 Stage 1 — MCP Server Onboarding（把真实环境清洗出来）</h3>
+  <p>「环境」来自 <a href="https://smithery.ai/">Smithery</a>（MCP server 的平台 / 注册表）与 GitHub 上的 MCP specification。每个 server 带一份结构化 JSON，内含机器可读的工具定义。作者从约 <strong>2,800</strong> 个 server 的初始爬取出发，做两步关键过滤：(1) 只保留能通过 <strong>streamable HTTP</strong> 远程访问的 server（保证能真正跑 trajectory）；(2) 剔除需要<strong>第三方凭证（API key 等）</strong>才能调用的 server（保证可达性与可复现性）。这一步把数据砍到 <strong>30.6%（871 个 server）</strong>。最后对每个 server 生成一小批测试问题去<strong>实测每个工具</strong>，把会报错 / 失灵工具所在的 server 也筛掉，最终得到 <strong>495 个高质量 MCP server</strong>（其上含 2,000+ 工具），覆盖广泛领域。</p>
+
+  <div class="grid2">
+    <figure>
+      <img src="figures/fig1_server_filtering.png" alt="MCP server 逐级过滤"/>
+      <figcaption>原文 Figure 1：MCP server 逐级过滤——Total Crawl 2,851 → Remote MCP Server 2,120（74.4%）→ Onboarded Server 871（30.6%）→ High-quality Server 495（17.4%）。</figcaption>
+    </figure>
+    <figure>
+      <img src="figures/fig3_domain_ring.png" alt="最终 MCP server 的领域分布"/>
+      <figcaption>原文 Figure 3：最终 server 集合的领域分布（LLM 自动标注），头部类别为 Web Search &amp; Research (70)、Development Tools (48)、Data Analysis &amp; Processing (36)、Crypto &amp; Blockchain (33)…括号内为该类 server 数量。</figcaption>
+    </figure>
+  </div>
+
+  <h3>3.3 Stage 2 — Task Synthesis（造任务：要难、要真实、要覆盖 edge case）</h3>
+  <p>一个 task = 一个 question + 期望用到的若干工具名。为避免单一模型偏置，作者用<strong>五个开源 LLM</strong>（<code>Mistral-Small</code>、<code>DevStral-Small</code>、<code>GPT-OSS</code>、<code>Kimi-K2</code>、<code>Qwen3-32B</code>）作为 task generator，并设最大工具数 $N=3$。三种采样策略：</p>
+  <ul>
+    <li><strong>Single Server</strong>：给定一个 server，造需要其 1 到 $N$ 个工具的任务，并按 server 在 Smithery 的真实使用量来平衡分布，贴近现实使用频率；</li>
+    <li><strong>Multi-Server</strong>：基于 MCP metadata 的领域标注，先采样 $N$ 个（同域或跨域）server，让 LLM 做一次「server 分析」勾勒跨 server 工作流，锁定 2 到 $N$ 个具体工具，再造能跨多 server 协作的任务；</li>
+    <li><strong>Featured Server</strong>：人工精选 25 个代表性 server，把它们全部 metadata 喂进上下文，指定期望工具数，让 LLM 自由组合、构造更综合的真实场景任务。</li>
+  </ul>
+
+  <h3>3.4 Stage 3 — Task Filtering（六维打分，砍掉次品任务）</h3>
+  <p>用 <code>Kimi-K2</code> 作为 annotator（在「与人类标注相关性」和「成本」间最平衡），对每个任务沿<strong>六个维度</strong>用 1–5 Likert 量表打分并过滤：<strong>Tool Selection Difficulty</strong>（选对工具的难度）、<strong>Tool Selection Uniqueness</strong>（工具组合是否唯一、有无别的可行解）、<strong>Question Quality</strong>（清晰度 / 具体性 / 有效性）、<strong>Scenario Realism</strong>（场景真实性）、<strong>Verifiable</strong>（答案是否易验证）、<strong>Stability</strong>（工具输出是否随时间 / 地理 / 随机性保持一致）。</p>
+
+  <h3>3.5 Stage 4 — Trajectory Generation（真执行，跑出轨迹）</h3>
+  <p>对通过过滤的任务，用<strong>三个不同家族的 teacher LLM</strong>（<code>GPT-OSS-120B</code>、<code>Kimi-K2</code>、<code>Qwen3-32B</code>）× <strong>两个 agent framework</strong>（<code>Qwen-agent</code>、<code>OpenAI-agent</code>）去真实环境里跑，收集含 tool call、tool response、reasoning 的完整 trajectory。模型与 server 都远程部署、经 streamable HTTP 访问——即 tool response 是真从 MCP server 执行回来的。</p>
+
+  <h3>3.6 Stage 5 — Rule &amp; LLM-Based Post-Filtering（双重过滤保质量）</h3>
+  <p><strong>规则启发式</strong>先排掉：起不来 agent / 连不上远程 MCP server、不含任何 tool call、tool response 报错、或 trajectory 里出现<strong>本地文件系统路径</strong>（泄漏 / 不可复现）的样本；还会校验是否<strong>按正确顺序</strong>用了任务要求的工具，并报告 <strong>desired tool use percentage</strong>（要求工具的覆盖率）与 <strong>order correctness</strong>（调用顺序是否正确）。之后用 <code>GPT-OSS-120B</code> 作 judge，标两维：<strong>Completeness</strong>（是否端到端满足用户请求）与 <strong>Conciseness</strong>（是否用最少必要步骤解决）。双阶段过滤保证只留下「高质量、简洁、可执行」的轨迹。</p>
+
+  <h3>3.7 三个 Extension（补足真实性与难度）</h3>
+  <p>核心 pipeline 产出的多是「单轮、且因为可见工具都相关、选工具太容易」的轨迹。为此在 Stage 1–5 之外加三种扩展：</p>
+  <ul>
+    <li><strong>Ext.1 Irrelevance（抗幻觉）</strong>：<strong>跨样本打乱 MCP server metadata</strong> 再重跑任务生成，制造「当前工具集根本解不了」的 query，训练模型学会拒答 / 另寻他法。对这类任务，过滤时<strong>反过来只保留 tool call 数为 0</strong> 的轨迹。</li>
+    <li><strong>Ext.2 Persona-based Diversification</strong>：在<strong>保持同一组目标工具</strong>前提下做两件事——引入新语境 / persona 增加多样性，叠加额外约束增加复杂度，产出「相似但不同」的任务变体。</li>
+    <li><strong>Ext.3 Multi-Turn</strong>：用 trajectory generation 模型做<strong>自模拟</strong>生成多轮对话，两条路子：(1) 把需多工具协作的复杂任务拆成顺序子问题；(2) 给 LLM 已有对话上下文让它生成 follow-up。之后再走一遍 Stage 2–5 把多轮任务补成完整 trajectory。</li>
+  </ul>
+
+  <h3>3.8 数据画像</h3>
+  <figure>
+    <img src="figures/fig4_data_analysis.png" alt="TOUCAN 数据集统计分析"/>
+    <figcaption>原文 Figure 4：数据集统计。(a)(b) server 数 / required tool 数 → 覆盖多 server、多工具任务；(c)(d) 上下文里的「总工具数」普遍多于「目标工具数」→ 选工具并不平凡；(e) user message 的 token 长度；(f)(g)(h) 用户消息数 / tool call 数（含 parallel call）/ 总消息数 → 体现多轮、含并行调用的丰富交互。</figcaption>
+  </figure>
+  <div class="grid2">
+    <figure>
+      <img src="figures/fig5_subset_stats.png" alt="TOUCAN 子集构成"/>
+      <figcaption>原文 Figure 5：TOUCAN 1.53M 的子集构成。外环按 trajectory generator 区分（Kimi-K2 33.0% / Qwen3 37.9% / OSS 29.1%），内环按数据分区区分 Original 与三类 extension（Ext.1 Irrelevance、Ext.2 Diversify、Ext.3 Multi-Turn）。</figcaption>
+    </figure>
+    <figure>
+      <img src="figures/fig6_quality.png" alt="TOUCAN 质量统计"/>
+      <figcaption>原文 Figure 6：质量统计（Likert 1–5 分布）。Scenario Realism（94.4% 高分）、Question Quality（79.0% 高分）等维度评分很高；而 Tool Selection Difficulty 有 63.0% 落在「低」——说明「可见工具都相关」时选工具确实偏易，这正是 Ext.1/Ext.2 想补的难度缺口。</figcaption>
+    </figure>
+  </div>
+
+  <h3>3.9 复现要点</h3>
+  <p>每条样本的 schema 字段（见 HF 数据卡）：<code>uuid</code>、<code>subset_name</code>（single-turn-original / irrelevant / single-turn-diversify / multi-turn）、<code>messages</code>（带 chat template 的完整 trajectory）、<code>question</code>、<code>available_tools</code>（上下文里可见的工具）、<code>target_tools</code>（种子工具，格式 <code>Server_Name::Tool_Name</code>）、<code>question_quality_assessment</code>、<code>response_quality_assessment</code>、<code>metadata</code>（原始 MCP server 数据 + LLM 标注）。数据集以 parquet 提供，<code>Kimi-K2 / OSS / Qwen3</code> 三个全量 config 与一个 <code>SFT</code> 子集分开，便于按需取用。</p>
+</section>
+
+<!-- ④ 实验评估 -->
+<section id="eval">
+  <h2>④ 实验评估</h2>
+
+  <h3>4.1 训练与评测设置</h3>
+  <p><strong>训练</strong>：在 TOUCAN 上对三个开源模型做 SFT——<code>Qwen2.5-7B-Instruct</code>、<code>Qwen2.5-14B-Instruct</code>、<code>Qwen2.5-32B-Instruct</code>。由于全量数据很大，作者只从一个<strong>高质量子集</strong>采样训练：筛选标准为 question quality &amp; scenario realism 均为 5、response completeness &amp; conciseness ≥ 4、desired tool use percentage = 1.0（轨迹完整覆盖任务要求的全部工具）。再做类别再平衡，最终 SFT 集合共 <strong>119.3K</strong> 条 = 28.3K（原始 pipeline）+ 40K（Ext.1 Irrelevance）+ 15.8K（Ext.2 Diversify）+ 35.2K（Ext.3 Multi-Turn）。评测在 8×H100 上进行。</p>
+  <p><strong>三个 benchmark</strong>（考点 / 指标，方向均为越高越好）：</p>
+  <ul>
+    <li><strong>BFCL V3</strong>（overall accuracy 等）：function calling，涵盖 single-turn（Non-live/Live AST）、multi-turn、hallucination（relevance / irrelevance）；</li>
+    <li><strong>τ-Bench / τ²-Bench</strong>（Pass@1 / 平均分）：动态用户交互下的 agentic tool use，覆盖 airline / retail / telecom 域，用 GPT-4o 作 user simulator；</li>
+    <li><strong>MCP-Universe</strong>（task success rate / score）：<strong>用 11 个真实 MCP server、231 个真实任务</strong>，跨 location navigation、repository management、financial analysis、3D design、browser automation、web search 六域——最贴近本文「真实 MCP」设定的执行式评测。</li>
+  </ul>
+
+  <h3>4.2 BFCL V3：32B 反超 GPT-4.5-Preview，multi-turn 提升最猛</h3>
+  <p>TOUCAN-tuned 模型相对各自 base 一致提升，且<strong>超过更大的闭源对手</strong>。Toucan-Qwen2.5-32B 拿到 <strong>70.45% overall</strong>，压过 GPT-4.5-Preview（70.32）、GPT-4.1（68.69）、DeepSeek-V3（64.71），并在 <strong>Multi-Turn 子集拿到全表最高的 46.50%</strong>。提升幅度随模型增大而增大（7B +3.16、14B +7.40、32B +8.72），multi-turn 一项尤其显著（如 32B 从 26.38 → 46.50）。</p>
+  <table>
+    <thead><tr><th>Model</th><th class="num">Overall</th><th class="num">Non-Live AST</th><th class="num">Live AST</th><th class="num">Multi-Turn</th><th class="num">Relevance</th><th class="num">Irrelevance</th></tr></thead>
+    <tbody>
+      <tr><td colspan="7" class="muted small"><em>大模型 / 闭源对照</em></td></tr>
+      <tr><td>DeepSeek-V3</td><td class="num">64.71</td><td class="num">88.54</td><td class="num">77.34</td><td class="num">29.87</td><td class="num">83.33</td><td class="num">76.49</td></tr>
+      <tr><td>Qwen2.5-72B-Instruct</td><td class="num">64.37</td><td class="num">87.56</td><td class="num">78.68</td><td class="num">29.38</td><td class="num">72.22</td><td class="num">77.41</td></tr>
+      <tr><td>Qwen3-235B-A22B</td><td class="num">67.94</td><td class="num">87.90</td><td class="num">77.03</td><td class="num">40.12</td><td class="num">83.33</td><td class="num">76.32</td></tr>
+      <tr><td>Qwen3-32B</td><td class="num">69.25</td><td class="num">88.90</td><td class="num">77.83</td><td class="num">43.12</td><td class="num">72.22</td><td class="num">75.79</td></tr>
+      <tr><td>o3-Mini</td><td class="num">64.61</td><td class="num">86.15</td><td class="num">79.08</td><td class="num">28.75</td><td class="num">72.22</td><td class="num">82.96</td></tr>
+      <tr><td>GPT-4.1</td><td class="num">68.69</td><td class="num">85.42</td><td class="num">79.92</td><td class="num">40.50</td><td class="num">77.78</td><td class="num">85.95</td></tr>
+      <tr><td>GPT-4.5-Preview</td><td class="num">70.32</td><td class="num">86.12</td><td class="num">79.34</td><td class="num">45.38</td><td class="num">66.67</td><td class="num">83.64</td></tr>
+      <tr><td colspan="7" class="muted small"><em>base → +TOUCAN</em></td></tr>
+      <tr><td>Qwen2.5-7B-Instruct</td><td class="num">55.10</td><td class="num">84.19</td><td class="num">72.32</td><td class="num">12.88</td><td class="num">72.22</td><td class="num">67.93</td></tr>
+      <tr><td><strong>　+ TOUCAN</strong></td><td class="num"><strong>58.26</strong> <span class="ok small">(+3.16)</span></td><td class="num">78.52</td><td class="num">74.50</td><td class="num">22.62</td><td class="num">66.67</td><td class="num">75.18</td></tr>
+      <tr><td>Qwen2.5-14B-Instruct</td><td class="num">57.69</td><td class="num">83.38</td><td class="num">73.70</td><td class="num">19.75</td><td class="num">83.33</td><td class="num">68.46</td></tr>
+      <tr><td><strong>　+ TOUCAN</strong></td><td class="num"><strong>65.09</strong> <span class="ok small">(+7.40)</span></td><td class="num">85.42</td><td class="num">76.01</td><td class="num">35.25</td><td class="num">72.22</td><td class="num">75.96</td></tr>
+      <tr><td>Qwen2.5-32B-Instruct</td><td class="num">61.73</td><td class="num">85.58</td><td class="num">76.01</td><td class="num">26.38</td><td class="num">72.22</td><td class="num">72.68</td></tr>
+      <tr><td><strong>　+ TOUCAN</strong></td><td class="num"><strong>70.45</strong> <span class="ok small">(+8.72)</span></td><td class="num"><strong>87.12</strong></td><td class="num">78.90</td><td class="num"><strong>46.50</strong></td><td class="num">77.78</td><td class="num">78.10</td></tr>
+    </tbody>
+  </table>
+  <p class="small muted">原文 Table 2（%）。括号内为相对各自 base 的 overall 提升。注：Qwen3-32B（69.25）作为更强的 base 仍领先，作者的主张是「超过更大的 production / 闭源 LLM（如 DeepSeek-V3、GPT-4.5-Preview）并在 multi-turn 取得最优」，并非压过所有模型。</p>
+
+  <h3>4.3 τ-Bench / τ²-Bench：多轮动态交互也一致涨</h3>
+  <p>在 airline / retail / telecom 三域，TOUCAN-tuned 一致提升。三个规模在 τ-bench 平均分上分别 +7.45 / +4.39 / +3.57，在 τ²-bench 上 +1.69 / +5.97 / +2.20，说明多轮扩展确实增强了「动态用户交互下的多轮推理」（telecom 子项偶有回落，见下表 7B 行）。</p>
+  <table>
+    <thead><tr><th>Model</th><th class="num">τ Avg</th><th class="num">τ Airline</th><th class="num">τ Retail</th><th class="num">τ² Avg</th><th class="num">τ² Airline</th><th class="num">τ² Retail</th><th class="num">τ² Telecom</th></tr></thead>
+    <tbody>
+      <tr><td>Qwen2.5-7B-Instruct</td><td class="num">15.03</td><td class="num">8.75</td><td class="num">21.30</td><td class="num">16.08</td><td class="num">14.00</td><td class="num">17.54</td><td class="num">16.70</td></tr>
+      <tr><td><strong>　+ TOUCAN</strong></td><td class="num"><strong>22.48</strong> <span class="ok small">(+7.45)</span></td><td class="num">15.50</td><td class="num">29.46</td><td class="num"><strong>17.77</strong></td><td class="num">20.00</td><td class="num">22.80</td><td class="num">10.50</td></tr>
+      <tr><td>Qwen2.5-14B-Instruct</td><td class="num">30.85</td><td class="num">17.25</td><td class="num">44.46</td><td class="num">24.46</td><td class="num">12.00</td><td class="num">41.20</td><td class="num">20.18</td></tr>
+      <tr><td><strong>　+ TOUCAN</strong></td><td class="num"><strong>35.24</strong> <span class="ok small">(+4.39)</span></td><td class="num">22.00</td><td class="num">48.48</td><td class="num"><strong>30.43</strong> <span class="ok small">(+5.97)</span></td><td class="num">22.00</td><td class="num">49.10</td><td class="num">20.18</td></tr>
+      <tr><td>Qwen2.5-32B-Instruct</td><td class="num">38.76</td><td class="num">26.00</td><td class="num">51.52</td><td class="num">29.40</td><td class="num">18.00</td><td class="num">49.10</td><td class="num">21.11</td></tr>
+      <tr><td><strong>　+ TOUCAN</strong></td><td class="num"><strong>42.33</strong> <span class="ok small">(+3.57)</span></td><td class="num">29.00</td><td class="num">55.65</td><td class="num"><strong>31.60</strong></td><td class="num">22.00</td><td class="num">52.60</td><td class="num">20.20</td></tr>
+    </tbody>
+  </table>
+  <p class="small muted">原文 Table 3（%）。</p>
+
+  <h3>4.4 MCP-Universe：把同参数量级的 Pareto frontier 往前推</h3>
+  <p>这是最能体现「真实 MCP 训练」价值的一项。论文以柱状图（Figure 7）和「性能 vs 规模」散点（Figure 8）呈现，<strong>未给出逐模型数值表</strong>，因此这里只复述其定性结论：TOUCAN-tuned 模型在六域大多<strong>显著超过同规模乃至更大的开源模型</strong>；其 <strong>32B 模型在 3D Design 上拿到最高分</strong>、在 Financial Analysis 上表现强，甚至超过 Llama-3.3-70B-Instruct、Qwen2.5-72B-Instruct、GLM-4.5-Air（106B）、DeepSeek-V3（671B）等大得多的前沿开源模型。值得注意的是，benchmark 里多数 server 需要复杂配置、因而<strong>并未进入 TOUCAN 的数据合成</strong>，模型仍能迁移涨分，说明「见过多样工具」本身就能增强 agentic 能力。</p>
+  <figure>
+    <img src="figures/fig8_pareto.png" alt="MCP-Universe 上性能 vs 模型规模"/>
+    <figcaption>原文 Figure 8：MCP-Universe 上 overall task success rate（OSR）vs 模型规模——TOUCAN-tuned 模型（箭头所指）在更小的参数量上取得更高 OSR，把 Pareto frontier 往前推。</figcaption>
+  </figure>
+
+  <h3>4.5 关键消融（Ext. 逐项叠加，Qwen2.5-14B）</h3>
+  <p>在 Qwen2.5-14B-Instruct 上对 TOUCAN 逐步叠加扩展，隔离每个 extension 的贡献（原文 Figure 9）。结论是<strong>每个组件都有正贡献</strong>：单 single-turn 子集已把 BFCLv3 从 57.69 抬到 60.16；Irrelevance 把 BFCLv3 进一步推到 64.74（抗幻觉 / irrelevance 场景受益最直接）；Multi-Turn 则把 τ-bench 两项明显拉高（Airline 17.25→22.00、Retail 44.46→48.48），并把 BFCLv3 推到 65.09。</p>
+  <table>
+    <thead><tr><th>训练数据（累加）</th><th class="num">BFCLv3</th><th class="num">τ-bench Airline@1</th><th class="num">τ-bench Retail@1</th></tr></thead>
+    <tbody>
+      <tr><td>Qwen2.5-14B-Instruct（base）</td><td class="num">57.69</td><td class="num">17.25</td><td class="num">44.46</td></tr>
+      <tr><td>+ Single Turn</td><td class="num">60.16</td><td class="num">15.50</td><td class="num">36.95</td></tr>
+      <tr><td>+ Irrelevance</td><td class="num">64.74</td><td class="num">16.75</td><td class="num">41.63</td></tr>
+      <tr><td>+ Diversify</td><td class="num">64.56</td><td class="num">17.25</td><td class="num">43.70</td></tr>
+      <tr><td><strong>+ Multi-Turn（= 完整 TOUCAN）</strong></td><td class="num"><strong>65.09</strong></td><td class="num"><strong>22.00</strong></td><td class="num"><strong>48.48</strong></td></tr>
+    </tbody>
+  </table>
+  <p class="small muted">原文 Figure 9（%）。可见 single-turn 单独使用时反而压低了 τ-bench（多轮能力没被覆盖），必须靠 Multi-Turn 扩展补回——印证了三个 extension 的设计动机。</p>
+
+  <p><strong>老实说在哪：</strong>(1) MCP-Universe 论文只给柱状 / 散点图、无逐模型数值表，且其绝对成功率整体偏低（benchmark 本身很难，多数 server 未进训练）；(2) BFCL 上更强的 base（Qwen3-32B 69.25）仍领先 Toucan-Qwen2.5-32B（70.45 仅略高，且二者 base 不同）；(3) τ²-bench 的 telecom 子项在 7B 上反而下降，提升并非处处单调。</p>
+</section>
+
+<!-- ⑤ 洞见 -->
+<section id="insight">
+  <h2>⑤ 洞见</h2>
+
+  <h3>5.1 可迁移的 takeaway</h3>
+  <ol>
+    <li><strong>「真实可执行环境」本身就是数据质量的护城河。</strong> 把 MCP server 当环境、让 teacher 真把工具调起来，省掉了「凭空想象工具返回」这一最易失真的环节——tool response 是 Executed 而非 Simulated，这是 TOUCAN 区别于 ToolACE 等数据集的根本点，也是小模型能在执行式 benchmark（MCP-Universe）上迁移涨分的原因。</li>
+    <li><strong>数据「难度」要靠工程刻意制造，不会自然出现。</strong> 质量统计显示，当上下文里的工具都与任务相关时，选工具其实很容易（63% 落在低难度）。作者用 Ext.1（打乱 metadata 造不可解 query）和 Ext.2（加约束 / 换 persona）<strong>人为注入难度与抗幻觉信号</strong>；消融也证明 single-turn 单用会压低多轮性能，必须靠 Multi-Turn 补回。这提醒我们：合成 agentic 数据时，「无关工具 / 不可解 / 多轮」必须被显式设计进去。</li>
+    <li><strong>SFT 在 multi-turn 上的边际收益最大。</strong> BFCL 上提升最猛的恰恰是 multi-turn 子集（32B：26.38→46.50），且提升随模型增大而增大——说明高质量多轮轨迹是当前开源 agent 训练里最稀缺、也最值钱的部分。</li>
+  </ol>
+
+  <h3>5.2 局限与未来工作（作者自述）</h3>
+  <ul>
+    <li><strong>onboarding 的硬性取舍</strong>：为可复现，<strong>排除了所有需要 API key / 账号配置的 server</strong>（如 Notion、GitHub），覆盖面因此有偏；作者计划手动 onboard 更多 server，或开发自动 onboarding agent。</li>
+    <li><strong>真实执行成本高</strong>：真执行虽质量高但慢且贵；作者计划训练一个<strong>专门模拟 tool response 的 expert LLM</strong> 作为低成本替代。</li>
+    <li><strong>数据有时效</strong>：语料 2025 年 6 月采集，search 类 MCP 的返回只反映彼时信息；提供模块化 pipeline 便于后续更新。</li>
+    <li><strong>只做了 SFT</strong>：全文是监督微调，未引入 RL / 偏好优化；在执行式任务上与闭源推理模型仍有差距，留了 RL on real MCP 的空间。作者还计划做一个面向 web search 的 MCP benchmark。</li>
+  </ul>
+
+  <h3>5.3 与已有工作的关系（依本文 framing）</h3>
+  <p>作者把领域分成「过去 / 现在 / 未来」三段：<strong>过去</strong>是 Gorilla/BFCL、ToolAlpaca、ToolLLM、API Pack/Blend、APIGen 等围绕 REST API 与函数调用的工具数据；<strong>现在</strong>是 Kimi-K2、GLM-4.5 这类强调 tool use 的前沿模型，以及 BFCL、τ-Bench、ACEBench 等 benchmark，但开源训练数据仍「不透明 / 太小 / 用 LLM 模拟工具」；<strong>未来</strong>是一批并行涌现的 MCP benchmark（MCP-Radar、MCP-Bench、MCP-Universe、MCP-AgentBench、MCPMark 等）。TOUCAN 的定位很清楚——它不造新 benchmark，而是补上「面向 MCP 时代的、大规模、真实执行的开源训练数据」这块缺失的拼图，把评测端的进步对接到训练端。</p>
+</section>
+
+<div class="footer">
+  本解读由自动流程生成，仅供学习参考；如有出入请以原论文为准。<br/>
+  原文：<a href="https://arxiv.org/abs/2510.01179">arXiv:2510.01179</a> · 数据集：<a href="https://huggingface.co/datasets/Agent-Ark/Toucan-1.5M">Agent-Ark/Toucan-1.5M</a> · 代码：<a href="https://github.com/TheAgentArk/Toucan">TheAgentArk/Toucan</a>（MIT）· 模型：<a href="https://huggingface.co/Agent-Ark">Agent-Ark</a>
+</div>
+
+</div>
+</body>
+</html>

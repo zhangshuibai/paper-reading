@@ -522,5 +522,28 @@
       "mcp",
       "agent"
     ]
+  },
+  {
+    "slug": "2510.01179-toucan-mcp-tool-agentic-data",
+    "title": "TOUCAN: Synthesizing 1.5M Tool-Agentic Data from Real-World MCP Environments",
+    "authors": "Zhangchen Xu, Adriana Meza Soria, Shawn Tan, Anurag Roy, Ashish Sunil Agrawal, Radha Poovendran, Rameswar Panda",
+    "team": "University of Washington; MIT-IBM Watson AI Lab",
+    "arxiv": "https://arxiv.org/abs/2510.01179",
+    "code": "https://github.com/TheAgentArk/Toucan",
+    "date": "2026-05-30",
+    "published": "arXiv 2025",
+    "tldr": "把近 500 个真实 MCP server 当可执行环境，合成 152.7 万条真实执行的 tool-agentic 轨迹（最大开源同类数据集）；仅用 11.9 万高质量子集 SFT，就让 Qwen2.5-7B/14B/32B 在 BFCL V3 上反超 GPT-4.5-Preview 并推进 MCP-Universe 的 Pareto frontier。",
+    "tags": [
+      "MCP",
+      "Tool-Agentic",
+      "Synthetic-Data",
+      "Function-Calling",
+      "SFT"
+    ],
+    "path": "papers/2510.01179-toucan-mcp-tool-agentic-data/index.html",
+    "categories": [
+      "mcp",
+      "agent"
+    ]
   }
 ]
