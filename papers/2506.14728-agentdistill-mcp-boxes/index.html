@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AgentDistill：用可复用 MCP Box 实现免训练 agent 蒸馏 · 论文解读</title>
+
+<script>
+  window.MathJax = {
+    tex:{inlineMath:[['$','$'],['\\(','\\)']], displayMath:[['$$','$$'],['\\[','\\]']]},
+    svg:{fontCache:'global'}
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;
+  }
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:880px; margin:0 auto; padding:18px 22px 90px}
+
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:27px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)}
+  .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .meta-grid a:hover{text-decoration:underline}
+
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap}
+  nav.toc a:hover{color:var(--accent)}
+
+  section{margin:38px 0}
+  h2{font-size:21px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:17px; margin:24px 0 8px}
+  p{margin:12px 0}
+  ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.9em}
+  strong{color:var(--text)}
+
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:14px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:10px 12px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  .yes{color:var(--ok); font-weight:600}
+  .no{color:var(--muted)}
+  .num{font-variant-numeric:tabular-nums; text-align:right}
+
+  figure{margin:24px 0; text-align:center}
+  figure img{max-width:100%; height:auto; border:1px solid var(--line); border-radius:10px; background:#fff}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+
+  blockquote{border-left:3px solid var(--line); margin:14px 0; padding:2px 16px; color:var(--muted)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+  .mjx-container{overflow-x:auto; overflow-y:hidden}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">MCP</span>
+      <span class="chip">agent</span>
+      <span class="chip">distillation</span>
+      <span class="chip">training-free</span>
+      <span class="chip">tool use</span>
+    </div>
+    <h1>AgentDistill：用可复用 MCP Box 实现「免训练」的 agent 蒸馏</h1>
+    <p class="orig-title">AgentDistill: Training-Free Agent Distillation with Generalizable MCP Boxes</p>
+    <dl class="meta-grid">
+      <dt>作者</dt><dd>Jiahao Qiu*, Xinzhe Juan*, Yimin Wang*, Ling Yang*, Xuan Qi, Tongcheng Zhang, Jiacheng Guo, Yifu Lu, Zixin Yao, Hongru Wang, Shilong Liu, Xun Jiang, Liu Leqi†, Mengdi Wang†（*共同一作，†通讯作者）</dd>
+      <dt>团队 / 机构</dt><dd>Princeton University (AI Lab)、University of Michigan、Tsinghua University (IIIS)、Shanghai Jiao Tong University、Columbia University、The Chinese University of Hong Kong、Tianqiao and Chrissy Chen Institute、University of Texas at Austin</dd>
+      <dt>原文链接</dt><dd><a href="https://arxiv.org/abs/2506.14728" target="_blank" rel="noopener">https://arxiv.org/abs/2506.14728</a>（另见 OpenReview: <a href="https://openreview.net/forum?id=UfSbS4N1ob" target="_blank" rel="noopener">UfSbS4N1ob</a>）</dd>
+      <dt>发表 / 年份</dt><dd>arXiv preprint, 2025-06-17（v1）；已投 ICLR 2026（OpenReview 提交于 2025-09-19，截至解读日页面未显示明确录用结论）</dd>
+      <dt>解读日期</dt><dd>2026-05-30</dd>
+    </dl>
+  </header>
+
+  <div class="tldr">
+    <b>TL;DR</b> — 传统的 agent 蒸馏要么 replay teacher 的完整 trajectory、要么让 student 模仿逐步的 tool 调用，既贵又难泛化。AgentDistill 提出一条<strong>完全免训练（training-free）</strong>的路线：让强大的 teacher agent（Claude-Sonnet-4 + GPT-4o）在解题时自主生成一批<strong>自包含、可参数化的 MCP（Model–Context–Protocol）工具脚本</strong>，再经 abstraction / clustering / consolidation 整理成一个可复用的 <strong>MCP-Box</strong>，在推理时直接挂载到小模型 student agent（GPT-3.5-turbo、Qwen3-8B、LLaMA3.1-8B）上。无需任何 fine-tune 或 gradient update，student 在 PathVQA、SLAKE、Game of 24 三个 benchmark 上一致显著提升（Game of 24 最高 +48.4 分），平均表现可逼近 teacher 并超过 OctoTools (GPT-4o) 这类检索式工具系统。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#opensource">① 开源贡献</a>
+    <a href="#motivation">② 动机与贡献</a>
+    <a href="#method">③ 方法</a>
+    <a href="#evaluation">④ 实验评估</a>
+    <a href="#insight">⑤ 洞见</a>
+  </nav>
+
+  <section id="opensource">
+    <h2><span class="n">①</span>开源贡献 Open-source Artifacts</h2>
+    <p>本文的核心产出是<strong>方法 / pipeline 本身</strong>，而非一套打包发布的模型或数据集。论文正文与首页脚注<strong>没有给出 AgentDistill 自己的 GitHub 仓库或项目主页链接</strong>；截至解读日（2026-05-30），通过 WebSearch、GitHub 仓库检索均<strong>未能定位到官方代码仓库</strong>，故标注为「未见」。论文真正依赖、且可独立核实的，是它所<strong>站立其上的第三方框架与公开数据集</strong>（SmolAgents、OctoTools、24-game、PathVQA、SLAKE），这些并非 AgentDistill 团队的发布物。下表如实区分二者。</p>
+    <table>
+      <thead><tr><th>类型</th><th>是否开源</th><th>内容 / 链接</th></tr></thead>
+      <tbody>
+        <tr><td>AgentDistill 代码 Code</td><td class="no">✘ 未见</td><td>论文未提供官方仓库；解读日检索未找到。若后续放出应以作者官方为准。</td></tr>
+        <tr><td>模型权重 Weights</td><td class="no">✘ 不适用</td><td>方法为 training-free，不产生新权重；student 直接用现成的 GPT-3.5-turbo / Qwen3-8B / LLaMA3.1-8B。</td></tr>
+        <tr><td>产物 MCP-Box</td><td class="no">✘ 未单独发布</td><td>MCP-Box 是 teacher 在各数据集上自动生成的 FastMCP 风格 Python 工具集合（PathVQA 9 个、SLAKE 13 个、Game of 24 1 个），论文未附下载。</td></tr>
+        <tr><td>所依赖框架（第三方）</td><td class="yes">✔</td><td>agent 搭建在 SmolAgents 之上：<a href="https://github.com/huggingface/smolagents" target="_blank" rel="noopener">github.com/huggingface/smolagents</a>（ref [48]）；baseline 工具系统为 OctoTools（ref [52]，arXiv:2502.11271）。</td></tr>
+        <tr><td>评测数据集（第三方）</td><td class="yes">✔</td><td>Game of 24：<a href="https://huggingface.co/datasets/nlile/24-game" target="_blank" rel="noopener">huggingface.co/datasets/nlile/24-game</a>（ref [49]）；PathVQA（ref [50]）、SLAKE（ref [51]）为公开医学 VQA 数据集。</td></tr>
+      </tbody>
+    </table>
+    <div class="callout warn">
+      <span class="label">核实说明</span>
+      只把<strong>确实存在</strong>的链接列入「✔」。AgentDistill 官方代码标 ✘ 是因为本次检索未能确认其存在，<strong>并非断言永不开源</strong>；这也与论文「训练-free、即插即用」的定位一致——它真正的「可复用资产」是 MCP-Box 这一<em>产物形态</em>，而非传统意义上的代码权重发布。
+    </div>
+  </section>
+
+  <section id="motivation">
+    <h2><span class="n">②</span>研究动机与贡献 Motivation &amp; Contribution</h2>
+
+    <h3>背景与问题</h3>
+    <p>把大模型的能力蒸馏到小模型，对纯 LLM 已经很成熟：从 logits 对齐（Hinton 等）、hidden feature 对齐（DistilBERT、PKD、TinyBERT）、attention 对齐（MiniLM），到 chain-of-thought distillation（CoTD）让 student 复现 teacher 的 step-by-step rationale。但当对象变成 <strong>LLM-based agent</strong>——会 planning、用 memory、调 tool、与环境交互的系统——蒸馏就棘手得多，因为要迁移的不再只是「答案/中间推理」，还包括 tool 使用方式和任务分解策略。</p>
+    <p>论文把已有 agent 蒸馏归为两类，并指出各自的<strong>具体失败模式</strong>：</p>
+    <ul>
+      <li><strong>Trajectory（轨迹）蒸馏</strong>：如 Structured Agent Distillation (SAD)、把 LLM agent 蒸进小模型的检索/代码工具方法。它们把 teacher 的「思考 + tool 调用」交织轨迹当作监督信号，让 student 一步步模仿。问题是：(1) <strong>计算成本高</strong>——teacher 要产出并处理很长很复杂的序列；(2) <strong>泛化差</strong>——student 被动复制固定轨迹，到了新环境不会自适应。</li>
+      <li><strong>Structure（结构）蒸馏</strong>：如 MAGDi（把多 agent 对话编码成 interaction graph）、Sub-goal Distillation（抽取高层子目标序列）。它们比轨迹蒸馏高效，用抽象的 teacher 策略引导 student，但<strong>忽视了 teacher 与 student 在模型能力、知识边界、可用 tool 上的差异</strong>——把强模型的策略硬塞给弱模型，未必接得住。</li>
+    </ul>
+    <p>共同痛点：要么贵、要么不灵活，而且都假定「student 能执行 teacher 定义的计划」。</p>
+
+    <h3>本文的切入点</h3>
+    <p>作者的关键观察是：teacher agent 真正值钱、可迁移的产物，<strong>不是它走过的那条具体轨迹，而是它在解题过程中「随手造出来的工具」</strong>。如果把这些工具抽象成<strong>标准化、自包含、可参数化的 MCP</strong>（Model–Context–Protocol，Anthropic 提出的把上下文/工具以统一协议提供给 LLM 的开放规范），那么这些 MCP 就成了「凝固下来的解题能力」——student 不需要学会怎么写这段代码，只要在合适的时候<strong>调用</strong>它即可。于是蒸馏的载体从「行为序列」变成「工具库」：把繁重的 low-level 代码生成挪到 teacher 离线完成，student 只保留它本来就该做的 high-level planning（决定<em>是否</em>调、调<em>哪个</em>、<em>怎么</em>填参数）。这也天然 training-free——没有 gradient，只是换了工具接口。</p>
+
+    <h3>核心贡献</h3>
+    <ol>
+      <li>提出 <strong>AgentDistill</strong>：一种让 student agent 直接继承 teacher 生成的<strong>模块化、可迁移、可解释</strong>组件（MCP）的新 agent 蒸馏框架；区别于「replay 长动作序列」的前作，student 是<em>直接继承解题能力</em>而非模仿轨迹。</li>
+      <li><strong>完全 training-free</strong>：teacher 与 student 都不微调，MCP 自动抽取 → 抽象 → 复用，无 gradient update、无手工造工具，得到一条高性价比、可部署、对未见任务泛化的蒸馏 pipeline。</li>
+      <li>在 biomedical（PathVQA、SLAKE）与 mathematical（Game of 24）benchmark 上验证：对 GPT-3.5-turbo、Qwen3-8B、LLaMA3.1-8B 三种 student 一致显著提升（见 Table 2），并把 student 平均表现拉近到 teacher、超过 OctoTools (GPT-4o)。</li>
+    </ol>
+
+    <figure>
+      <img src="figures/fig1_comparison.png" alt="LLM 蒸馏 vs Agent 蒸馏 对比">
+      <figcaption>图 1：传统 LLM 蒸馏（上）依赖 CoT prompting + 昂贵的 fine-tuning；AgentDistill（下）完全去掉训练——teacher agent 自主生成模块化、可复用的 MCP，直接集成进 student agent（出处：原文 Figure 1）。</figcaption>
+    </figure>
+  </section>
+
+  <section id="method">
+    <h2><span class="n">③</span>方法 Method</h2>
+    <p>整体流程分三段（见图 2）：<strong>(A) MCP Creation</strong>——teacher agent 解题时由 Manager Agent 分解任务、对需要工具的子任务调用 MCP Creation Module，经「open-source 检索 → 脚本生成 → 虚拟环境执行」产出一批自包含 MCP；<strong>(B) MCP-Box Construction</strong>——把这些原始 MCP 经 abstraction / clustering / consolidation 整理成紧凑、可复用的 MCP-Box；<strong>(C) Student Inference</strong>——推理时把整个 MCP-Box 挂进小模型 student 的 tool 接口，student 像平常一样推理并按需调用工具，全程不更新参数。</p>
+
+    <figure>
+      <img src="figures/fig3_overview.png" alt="AgentDistill 总览">
+      <figcaption>图 2：AgentDistill 总览。左：teacher agent（大模型）通过 Manager Agent 分解任务并生成任务专用 MCP；中：有效 MCP 被 abstraction / clustering / consolidation 整理成可复用 MCP-Box；右：student agent（小模型）挂载该 MCP-Box，免训练即可进行 tool-based reasoning（出处：原文 Figure 3）。</figcaption>
+    </figure>
+
+    <h3>问题形式化</h3>
+    <p>给定监督样本 $\mathcal{D}=\{(x_i,y_i)\}_{i=1}^{N}$ 和 teacher agent $\pi_T$，目标是把 teacher 生成的 MCP 蒸馏成一个自包含的 MCP-Box，用它来提升小模型 student agent $\pi_S$。关键约束是 student <strong>不做任何梯度更新</strong>：</p>
+    $$\nabla_\theta \pi_S = 0.$$
+    <p>形式上把它写成一个「在 MCP 空间里选盒子」的优化问题：</p>
+    $$\max_{\mathcal{B}\subset\mathcal{L}}\ \mathbb{E}_{(x,y)\sim\mathcal{D}}\big[\mathbb{I}\{\pi_S(x;\mathcal{B})=y\}\big],$$
+    <p>其中 $\mathcal{L}$ 是所有 teacher 生成 MCP 的集合，$\mathcal{B}$ 是从 $\mathcal{L}$ 蒸馏出的 MCP-Box，$\pi_S(x;\mathcal{B})$ 表示 student 在输入 $x$、并被 MCP-Box $\mathcal{B}$ 增强后的输出；指示函数 $\mathbb{I}\{\cdot\}$ 在 student 答对时取 1。直觉：<strong>不动 student 的权重，只通过「给它配一套什么样的工具」来最大化答对率</strong>。</p>
+
+    <h3>(A) MCP Creation —— teacher 边解题边造工具</h3>
+    <p>teacher $\pi_T$ 与环境 $\mathcal{E}$ 交互，对样本 $x_i$ 产生一条完整轨迹</p>
+    $$\tau_i=(r_1,a_1,o_1,\dots,r_{L_i},a_{L_i},o_{L_i}),$$
+    <p>其中 $r_t$ 是 reasoning token，$a_t$ 是 action token（如 tool 调用、MCP 生成），$o_t$ 是来自环境的 observation。论文特意 prompt teacher 在推理过程中<strong>把结构化、自包含的 MCP 与普通 reasoning 分离开</strong>地生成；一条轨迹可对应多个子任务、产出多个 MCP。若 teacher 在第 $j$ 步生成一个 MCP，记为 $\mathrm{MCP}_{i,j}\in\mathcal{L}$。</p>
+    <p><strong>只保留成功轨迹</strong>：仅当 $\pi_T(x_i)=y_i$（teacher 答对）时其 MCP 才进入候选池；且要求该 MCP 片段<strong>语法正确且可执行</strong>，才收进临时池 $\mathcal{L}=\{\mathrm{MCP}_{i,j}\}$。这个池子「丰富但 noisy」，下一步再清洗。teacher 结构上很精简——只有三个模块：<strong>Manager Agent</strong>（中枢：分解任务、判断要不要外部工具、把子任务结果汇总成最终答案）、<strong>Basic Image Captioner</strong>（把图像转成文字摘要，让纯文本模型也能处理多模态输入，是医学 VQA 的关键）、<strong>MCP Creation Module</strong>（内含 MCP Brainstorming → Open-Source Searching → Script Generation → Virtual Env Execution 四段，把概念计划落地成经过验证的可执行脚本）。</p>
+
+    <h3>(B) MCP-Box Construction —— 抽象 / 聚类 / 合并</h3>
+    <p>把成功轨迹里收集的所有 MCP 交给一个高容量 instruction-tuned LLM（如 Claude-Sonnet-4）整理成紧凑仓库 MCP-Box，三步走：</p>
+    <p><strong>(1) Abstraction（抽象）</strong>：对每个工具相关的 MCP 片段，抽出相关 Python 代码，prompt LLM 改写成「可复用、参数化、与具体样例无关」的形式：</p>
+    $$\hat{\mathrm{MCP}}_{i,j}=\mathrm{LLM}_{\text{abstract}}(\mathrm{MCP}_{i,j}).$$
+    <p>目标是去掉样例特定的措辞、保留可泛化的 tool-use 策略；过程中最多暴露 <strong>三个</strong>关键参数为可配置，同时保留工具核心逻辑。</p>
+    <p><strong>(2) Clustering（聚类）</strong>：把所有抽象后的 $\hat{\mathrm{MCP}}_{i,j}$ 按功能用一个 code-level 聚类 prompt 分组，LLM 依据「共享的应用语义」给出簇划分：</p>
+    $$\mathcal{C}=\mathrm{LLM}_{\text{cluster}}\big(\{\hat{\mathrm{MCP}}_{i,j}\}\big),$$
+    <p>每个簇 $\mathcal{C}_k$ 对应一个功能组，例如 "image utils" 或 "numeric analysis"。</p>
+    <p><strong>(3) Consolidation（合并）</strong>：在每个簇内，让 LLM 把多个工具实现<strong>合并成单一通用版本</strong>——做参数统一、加输入校验、补文档：</p>
+    $$\mathrm{MCP}^{\text{final}}_k=\mathrm{LLM}_{\text{consolidate}}\big(\{\hat{\mathrm{MCP}}_{i,j}\mid \hat{\mathrm{MCP}}_{i,j}\in\mathcal{C}_k\}\big).$$
+    <p>每个输出是一份 production-ready、兼容 FastMCP 的 Python 文件。最终 MCP-Box 定义为</p>
+    $$\mathcal{B}=\big\{(\mathrm{MCP}^{\text{final}}_k,\ \text{cluster\_name}_k)\big\}_{k=1}^{K},$$
+    <p>每项含一个合并后的 tool protocol 及其功能标签。</p>
+
+    <figure>
+      <img src="figures/fig4_mcpbox.png" alt="MCP-Box 构建过程示例">
+      <figcaption>图 3：MCP-Box 构建的图解示例。从两个针对不同子任务的原始 MCP 草稿（绿/蓝）出发：(1) abstraction 改写成参数化可复用形式，(2) clustering 把功能相近的归并，(3) consolidation 合并成一个带可配置参数（如 <code>region</code>、<code>analysis_mode</code>、<code>bright_threshold_multiplier</code>）的通用 MCP（黄），并兼容 FastMCP 执行（出处：原文 Figure 4）。</figcaption>
+    </figure>
+
+    <h3>(C) Student Inference —— 直接挂载，不学习</h3>
+    <p>基于 SmolAgents 框架，把整个 MCP-Box $\mathcal{B}$ 在推理时挂进 student 的 tool 接口——<strong>不做 retrieval、reranking 或参数预选</strong>。每个 $\mathrm{MCP}^{\text{final}}_k$ 被实现成一个带标准输入/输出接口的可调用工具（FastMCP runtime 里用 <code>@mcp.tool()</code> 装饰）。student $\pi_S$ 是 frozen policy，$\nabla_\theta\pi_S=0$。面对新问题 $x$ 时，student 照常生成中间推理与 tool 调用：每一步 runtime 把 $\mathcal{B}$ 里所有工具暴露为可调用模块，agent 决定调不调、调哪个、怎么填参（文本生成或 function-call 模板），拿到返回值 $o_t$ 再更新上下文。<strong>所有 tool-use 能力都被预先编译进 MCP-Box，student 零额外训练即可受益</strong>——这让 student 保持轻量、推理高效，同时把工具相关的解题能力整体转移进「工具库」本身。</p>
+
+    <div class="callout note">
+      <span class="label">实现要点</span>
+      <ul>
+        <li><strong>teacher = Claude-Sonnet-4（Manager）+ GPT-4o（MCP Creation Module）</strong>；student = GPT-3.5-turbo / Qwen3-8B / LLaMA3.1-8B，均 frozen、无任务微调。</li>
+        <li><strong>三步全靠 prompt 驱动一个高容量 LLM 完成</strong>（abstraction/clustering/consolidation 各一个 prompt），没有训练环节；抽象阶段「最多暴露 3 个参数」是控制工具复杂度、保泛化的刻意设计。</li>
+        <li><strong>只用成功轨迹</strong>（teacher 答对）且 MCP 必须可执行，才进候选池——保证盒子里是「functional、verified」的工具。</li>
+        <li>每个数据集单独构建一个 MCP-Box：构建集与 OctoTools 一致，从各数据集 validation set 采样 <strong>100 条</strong>样本喂给 teacher 生成 MCP；产出的盒子大小差异很大（Game of 24 仅 1 个工具，SLAKE 13 个）。</li>
+        <li>多模态输入靠 Basic Image Captioner 先转文字，使纯文本小模型也能处理 PathVQA / SLAKE 的图像。</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="evaluation">
+    <h2><span class="n">④</span>实验评估 Evaluation</h2>
+    <h3>评测设置</h3>
+    <ul>
+      <li><strong>Benchmark / 数据集：</strong>
+        <ul>
+          <li><strong>Game of 24</strong>（数学）：1,362 道题，每题给 4 个数，用四则运算凑出 24，按人类难度分级，至少有一个合法解——考察严格约束下的符号算术。</li>
+          <li><strong>PathVQA</strong>（医学 VQA）：4,998 张病理图像、32,000 个问题，强调组织病理上的细粒度视觉推理（识别细胞类型、诊断标记等）。</li>
+          <li><strong>SLAKE</strong>（医学 VQA）：642 张放射影像、14,000+ 专家标注 QA 对，双语，考察视觉理解 + 医学知识检索。</li>
+        </ul>
+      </li>
+      <li><strong>对比基线（5 种设定）：</strong>(1) 蒸馏前的 student（无 MCP-Box）；(2) 配预定义工具的 agent（OctoTools 框架 + 各任务对应工具）；(3) 蒸馏后的 student（挂 MCP-Box）；(4) teacher agent（Claude-4 + GPT-4o，上界参照）；(5) 用 GPT-4o 驱动的 OctoTools。</li>
+      <li><strong>评价指标 Metric：</strong>task accuracy（答对题目的百分比，越高越好）；并报告相对蒸馏前的<strong>绝对提升</strong>。所有模型均 frozen、无微调。</li>
+    </ul>
+
+    <h3>主要结果：MCP-Box 一致提升 student（Table 2）</h3>
+    <table>
+      <thead><tr><th>数据集</th><th>Student（base model）</th><th class="num">蒸馏前 (%)</th><th class="num">蒸馏后 (%)</th><th class="num">提升</th></tr></thead>
+      <tbody>
+        <tr><td rowspan="3">PathVQA</td><td>GPT-3.5-turbo</td><td class="num">45.7</td><td class="num"><strong>52.7</strong></td><td class="num">+7.0</td></tr>
+        <tr><td>Qwen3-8B</td><td class="num">53.0</td><td class="num"><strong>55.3</strong></td><td class="num">+2.3</td></tr>
+        <tr><td>LLaMA3.1-8B</td><td class="num">46.7</td><td class="num"><strong>50.0</strong></td><td class="num">+3.3</td></tr>
+        <tr><td rowspan="3">SLAKE</td><td>GPT-3.5-turbo</td><td class="num">61.0</td><td class="num"><strong>68.3</strong></td><td class="num">+7.3</td></tr>
+        <tr><td>Qwen3-8B</td><td class="num">61.0</td><td class="num"><strong>67.7</strong></td><td class="num">+6.7</td></tr>
+        <tr><td>LLaMA3.1-8B</td><td class="num">49.3</td><td class="num"><strong>59.3</strong></td><td class="num">+10.0</td></tr>
+        <tr><td rowspan="3">Game of 24</td><td>GPT-3.5-turbo</td><td class="num">34.3</td><td class="num"><strong>82.7</strong></td><td class="num">+48.4</td></tr>
+        <tr><td>Qwen3-8B</td><td class="num">72.7</td><td class="num"><strong>79.7</strong></td><td class="num">+7.0</td></tr>
+        <tr><td>LLaMA3.1-8B</td><td class="num">21.7</td><td class="num"><strong>64.0</strong></td><td class="num">+42.3</td></tr>
+      </tbody>
+    </table>
+    <p>解读：提升在<strong>所有模型 × 所有数据集上一致为正</strong>。增益大小有明显规律——<strong>越弱、越吃工具的设定，提升越夸张</strong>：Game of 24 这类纯符号算术对小模型最难，GPT-3.5-turbo +48.4、LLaMA3.1-8B +42.3；而本就强的 Qwen3-8B 在 Game of 24 只 +7.0（接近天花板）。SLAKE 提升最稳（LLaMA3.1-8B 高达 +10.0），说明语义丰富的视觉问答能受益于 MCP 的组合式结构；PathVQA 提升温和但稳定（+2.3~+7.0），体现 MCP 的广泛适用性。</p>
+
+    <h3>逼近 teacher、并超过检索式工具系统（Table 3）</h3>
+    <table>
+      <thead><tr><th>数据集</th><th class="num">OctoTools (GPT-4o)</th><th class="num">配预定义工具 agent（sLM 均值）</th><th class="num">Teacher (Claude-4+GPT-4o)</th><th class="num">蒸馏后 student（均值）</th></tr></thead>
+      <tbody>
+        <tr><td>PathVQA</td><td class="num">49</td><td class="num">51.3</td><td class="num">52</td><td class="num"><strong>52.7</strong></td></tr>
+        <tr><td>SLAKE</td><td class="num">64</td><td class="num">57.7</td><td class="num">66</td><td class="num"><strong>65.1</strong></td></tr>
+        <tr><td>Game of 24</td><td class="num">45</td><td class="num">48</td><td class="num">99</td><td class="num"><strong>75.5</strong></td></tr>
+      </tbody>
+    </table>
+    <p>解读：<strong>PathVQA 上蒸馏后的 student 均值 52.7 已追平甚至略超 teacher（52）</strong>，并高于两个 OctoTools 变体；SLAKE 上 65.1 略低于 teacher（66）但超过两个 OctoTools baseline。Game of 24 上 teacher（99）遥遥领先，student 均值 75.5 仍大幅超过 OctoTools (GPT-4o) 的 45 与 sLM-OctoTools 的 48——这里 student 没追平 teacher，因为算术对小模型本就吃力，且 sLM-OctoTools 的均值被 Qwen3-8B 在算术上的强基础拉高。核心结论：<strong>一个精心整理、自包含的 MCP-Box 能让小模型逼近强得多的 agent，并跑赢检索 + 工具编排式 pipeline——既有任务可迁移性，又有「省去动态检索/编排」的效率优势</strong>。</p>
+
+    <h3>泛化性与调用频率（Table 1）</h3>
+    <p>论文用「MCP-Box Calling Rate」（测试样本中 student 至少调用过一次 MCP 的比例）衡量盒子是否真被广泛复用。结果：Game of 24 仅 1 个工具但<strong>三种 student 调用率均 100%</strong>（几乎每题都用）；SLAKE（13 个工具）Qwen3-8B 调用率 94.7%、GPT-3.5-turbo 57.3%、LLaMA3.1-8B 57.0%；PathVQA（9 个工具）调用率 24.0%~58.3%。高调用率说明蒸馏出的 MCP <strong>广泛适用、被 student 反复复用</strong>，印证「无需额外训练即能泛化」的 MCP 产物质量。</p>
+
+    <figure>
+      <img src="figures/fig2_benchmarks.png" alt="三 benchmark 性能对比柱状图">
+      <figcaption>图 4：三个 benchmark 上的性能对比。蒸馏后（After Distillation）的 student 普遍接近「配预定义工具的 agent」乃至 teacher，验证了框架有效性（出处：原文 Figure 2）。</figcaption>
+    </figure>
+
+    <h3>消融 / 分析：为什么 MCP 蒸馏有效</h3>
+    <p>论文没有做传统意义上「逐组件开关」的消融表，而是给出机理性分析与案例研究：</p>
+    <ul>
+      <li><strong>能力解耦</strong>：MCP-Box 是一个「可执行 protocol 的外部库」，把 tool-level 逻辑以参数化形式封装，让 student <strong>绕过 low-level 代码生成</strong>；但 student 仍负责 high-level planning（决定调不调、调哪个、怎么填参）。没有迁移任何 policy gradient 或 planning heuristic——增益来自<strong>把 tool-calling 空间约束到一组 functional、verified 的选项</strong>，降低生成复杂度，又不干扰 agent 自身推理过程。</li>
+      <li><strong>Case Study（Brain MRI，原文 Figure 5）</strong>：teacher 产出两个针对具体子任务的 MCP（检测亮区、分析左半球），AgentDistill 把它们 consolidate 成一个参数化模板，通过暴露 <code>region</code>、<code>analysis_mode</code>、阈值乘数等参数，使同一个工具能跨脑区、跨诊断模式、跨图像特征复用（甚至从 MRI 切到 CT、从「左侧检测」到「全脑详诊」都<strong>无需改代码</strong>）。这正是把「ad-hoc 的自然语言轨迹」转成「结构化、模块化、可组合工具」的价值所在，也是 training-free 泛化的来源。</li>
+    </ul>
+  </section>
+
+  <section id="insight">
+    <h2><span class="n">⑤</span>洞见 Insights</h2>
+    <div class="callout insight">
+      <span class="label">Insight</span>
+      <ul>
+        <li><strong>蒸馏的载体可以从「行为」换成「工具」。</strong>过去 agent 蒸馏盯着 teacher 的 trajectory 或 sub-goal，AgentDistill 指出真正可迁移、可复用、可解释的是 teacher 顺手造的 MCP。把能力「固化进工具库」而非「灌进权重」，于是蒸馏天然 training-free——这是一个很可迁移的方法论转向。</li>
+        <li><strong>「约束工具空间」本身就是一种能力注入。</strong>不传 gradient、不传 planning 启发式，仅仅给 student 一组经过验证的可执行 protocol，就能让弱模型大幅提升（Game of 24 +48 分）。这说明小模型很多时候<strong>不是不会规划，而是 low-level 执行（写对代码/算对算术）拖了后腿</strong>；把这部分外包给 verified tool，规划能力立刻释放出来。</li>
+        <li><strong>abstraction/clustering/consolidation 是把「噪声工具堆」炼成「通用工具」的关键三步。</strong>「最多暴露 3 个参数」这种克制设计，恰好平衡「足够通用」与「不至于复杂到 student 不会用」——参数化是泛化的钥匙，但参数太多反而成负担。</li>
+      </ul>
+    </div>
+    <h3>局限与未来</h3>
+    <p>几点边界（部分为本文坦承、部分为解读判断）：</p>
+    <ul>
+      <li><strong>能力上限仍受 student 的 planning 牵制</strong>：MCP 解决「执行」，但「调不调、怎么用」仍靠 student。Game of 24 上 student（75.5 均值）远不及 teacher（99），说明当任务对高层规划要求高时，光给工具不够。</li>
+      <li><strong>依赖很强的 teacher 与一个高容量整理 LLM</strong>：MCP 由 Claude-4 + GPT-4o 生成、由 Claude-Sonnet-4 整理，pipeline 的「免训练」省的是 student 侧成本，teacher 侧 API 调用成本并未消失。</li>
+      <li><strong>每个数据集单独建 MCP-Box、且只用 100 条样本构建</strong>：跨数据集/跨域共享一个盒子、盒子规模与样本量的 scaling 行为，论文未展开；也未给跨 domain 直接迁移（不重建盒子）的实验。</li>
+      <li><strong>缺少传统消融</strong>：abstraction / clustering / consolidation 三步各自贡献多少、去掉某一步会怎样，没有量化拆解；可执行性过滤、「3 参数」上限等设计选择也未做敏感性分析。</li>
+      <li><strong>开源状态未明</strong>：MCP-Box 与构建代码截至解读日未见发布，复现需自行搭建 teacher pipeline。</li>
+    </ul>
+    <p>顺着它的方向，自然的后续是：跨域统一的 MCP-Box、MCP 的在线增量更新（边用边长工具库）、把工具选择本身也做轻量优化，以及与 self-evolving agent（论文 related work 中的 Alita、long-term memory 等）结合，让工具库随交互持续进化。</p>
+
+    <h3>与相关工作的关系</h3>
+    <p>（基于本文自身论述）相对 <strong>SAD / 检索式 agent 蒸馏（Trajectory 类）</strong>：AgentDistill 不 replay 长轨迹，故计算更省、对新环境更能自适应。相对 <strong>MAGDi / Sub-goal Distillation（Structure 类）</strong>：后者用 interaction graph 或子目标序列做抽象，但忽视 teacher–student 的能力/工具差异；AgentDistill 把可迁移单元下沉到「可执行的参数化工具」，student 用不用、怎么用都由自己决定，从而绕开「弱 student 接不住强 teacher 计划」的问题。在更大图景里，它把 <strong>MCP 这一标准化工具协议</strong>（related work 中 MCP Landscape、MCIP、Alita 等奠基）用作蒸馏的载体，与 OctoTools 这类「检索 + 工具编排」系统形成对比：AgentDistill 主张<strong>预先 consolidate 好一个静态、自包含的工具盒子</strong>，比推理时动态检索/重排更高效，实验中也确实跑赢了 OctoTools (GPT-4o)。</p>
+  </section>
+
+  <footer class="foot">
+    本页为 <code>paper-reading</code> skill 生成的阅读笔记，仅作辅助，细节以
+    <a href="https://arxiv.org/abs/2506.14728" target="_blank" rel="noopener">原文</a> 为准 · 解读日期 2026-05-30
+  </footer>
+
+</article>
+</body>
+</html>

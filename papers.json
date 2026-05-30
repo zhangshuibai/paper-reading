@@ -476,5 +476,28 @@
       "mcp",
       "agent"
     ]
+  },
+  {
+    "slug": "2506.14728-agentdistill-mcp-boxes",
+    "title": "AgentDistill: Training-Free Agent Distillation with Generalizable MCP Boxes",
+    "authors": "Jiahao Qiu, Xinzhe Juan, Yimin Wang, Ling Yang, Xuan Qi, Tongcheng Zhang, Jiacheng Guo, Yifu Lu, Zixin Yao, Hongru Wang, Shilong Liu, Xun Jiang, Liu Leqi, Mengdi Wang",
+    "team": "Princeton; UMich; Tsinghua (IIIS); SJTU; Columbia; CUHK; UT Austin",
+    "arxiv": "https://arxiv.org/abs/2506.14728",
+    "code": "",
+    "date": "2026-05-30",
+    "published": "arXiv 2025",
+    "tldr": "完全 training-free 的 agent 蒸馏：把蒸馏载体从 teacher 行为轨迹换成 teacher 自动生成的可参数化 MCP 工具，整理成可复用 MCP-Box 直接挂到小模型 student 的 tool 接口（零梯度更新）；PathVQA/SLAKE/Game-of-24 全面提升，student 追平 teacher。",
+    "tags": [
+      "MCP",
+      "Agent",
+      "Distillation",
+      "Training-Free",
+      "Tool-Use"
+    ],
+    "path": "papers/2506.14728-agentdistill-mcp-boxes/index.html",
+    "categories": [
+      "mcp",
+      "agent"
+    ]
   }
 ]
