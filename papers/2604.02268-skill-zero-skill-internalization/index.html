@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SKILL0：把 Agent Skill 内化进参数 · 论文解读</title>
+
+<script>
+  window.MathJax = {
+    tex:{inlineMath:[['$','$'],['\\(','\\)']], displayMath:[['$$','$$'],['\\[','\\]']]},
+    svg:{fontCache:'global'}
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;
+  }
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:880px; margin:0 auto; padding:18px 22px 90px}
+
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:27px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)}
+  .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .meta-grid a:hover{text-decoration:underline}
+
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap}
+  nav.toc a:hover{color:var(--accent)}
+
+  section{margin:38px 0}
+  h2{font-size:21px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:17px; margin:24px 0 8px}
+  p{margin:12px 0}
+  ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.9em}
+  strong{color:var(--text)}
+
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:14px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:10px 12px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  .yes{color:var(--ok); font-weight:600}
+  .no{color:var(--muted)}
+  .num{font-variant-numeric:tabular-nums; text-align:right}
+
+  figure{margin:24px 0; text-align:center}
+  figure img{max-width:100%; height:auto; border:1px solid var(--line); border-radius:10px; background:#fff}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+
+  blockquote{border-left:3px solid var(--line); margin:14px 0; padding:2px 16px; color:var(--muted)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+  .mjx-container{overflow-x:auto; overflow-y:hidden}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <!-- ============================ 抬头 / 元信息 ============================ -->
+  <header class="head">
+    <div class="chips">
+      <span class="chip">Agentic RL</span>
+      <span class="chip">Skill Internalization</span>
+      <span class="chip">In-Context RL</span>
+      <span class="chip">Curriculum Learning</span>
+      <span class="chip">Token Efficiency</span>
+    </div>
+    <h1>SKILL0：用 In-Context RL + 动态课程，把 Agent Skill 从 prompt「内化」进模型参数</h1>
+    <p class="orig-title">SKILL0: In-Context Agentic Reinforcement Learning for Skill Internalization</p>
+    <dl class="meta-grid">
+      <dt>作者</dt><dd>Zhengxi Lu, Zhiyuan Yao, Jinyang Wu, Chengcheng Han, Qi Gu, Xunliang Cai, Weiming Lu, Jun Xiao, Yueting Zhuang, Yongliang Shen</dd>
+      <dt>团队 / 机构</dt><dd>Zhejiang University（REAL Lab）· Meituan（美团 LongCat）· Tsinghua University</dd>
+      <dt>原文链接</dt><dd><a href="https://arxiv.org/abs/2604.02268" target="_blank" rel="noopener">https://arxiv.org/abs/2604.02268</a></dd>
+      <dt>代码</dt><dd><a href="https://github.com/ZJU-REAL/SkillZero" target="_blank" rel="noopener">https://github.com/ZJU-REAL/SkillZero</a>（Apache-2.0）</dd>
+      <dt>发表 / 年份</dt><dd>arXiv 2026（v1: 2026-04-02，v2: 2026-05-15；cs.LG）</dd>
+      <dt>解读日期</dt><dd>2026-05-30</dd>
+    </dl>
+  </header>
+
+  <div class="tldr">
+    <b>TL;DR</b> — 当下的 LLM agent 主流靠「inference-time skill augmentation」：在推理时从 skill bank 检索若干技能文档，拼进 prompt 当作指导。这套范式有三个硬伤——检索噪声污染 context、注入的技能文本带来巨大 token 开销、且模型只是「照着 skill 做」而从未真正「学会」skill。本文提出 <b>SKILL0</b>，第一个把「skill internalization（技能内化）」当成显式训练目标的 RL 框架：训练时把 skill 作为 in-context 指导提供（In-Context RL），并用一个 <b>Dynamic Curriculum（动态课程）</b>按「on-policy helpfulness（在线有用性）」对每个 skill 文件打分、在线性递减的预算下逐步撤掉技能，直到 agent 在推理时完全 <b>zero-shot</b>、不需要任何 skill 检索。结果：相比标准 RL baseline，ALFWorld +9.7%、Search-QA +6.6%、WebShop +10.1%，同时把每步 context 压到 <b>不足 0.5k token</b>（比文本类 skill 方法省 3–5×）。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#opensource">① 开源贡献</a>
+    <a href="#motivation">② 动机与贡献</a>
+    <a href="#method">③ 方法</a>
+    <a href="#evaluation">④ 实验评估</a>
+    <a href="#insight">⑤ 洞见</a>
+  </nav>
+
+  <!-- ============================ ① 开源贡献 ============================ -->
+  <section id="opensource">
+    <h2><span class="n">①</span>开源贡献 Open-source Artifacts</h2>
+    <p>论文首页脚注与 GitHub 均确认代码已开源：仓库 <a href="https://github.com/ZJU-REAL/SkillZero" target="_blank" rel="noopener">ZJU-REAL/SkillZero</a>（隶属浙大 REAL Lab）以 <b>Apache-2.0</b> 许可发布，包含 ALFWorld 与 Search 两套环境的<b>完整训练脚本</b>、评测代码、数据预处理与 checkpoint merge 工具。截至解读日（2026-05-30），README 中<b>未提供</b>预训练权重的 Hugging Face 下载链接，WebShop 的脚本在 README 中也未被显式列出（论文正文有用到）。下表区分「论文声称」与「实际可获取」。</p>
+    <table>
+      <thead><tr><th>类型</th><th>是否开源</th><th>内容 / 链接</th></tr></thead>
+      <tbody>
+        <tr><td>代码 Code</td><td class="yes">✔</td><td><a href="https://github.com/ZJU-REAL/SkillZero" target="_blank" rel="noopener">github.com/ZJU-REAL/SkillZero</a> · Apache-2.0。含训练脚本（如 <code>scripts/train_alfworld_skillzero_3b.sh</code>）、ICRL + 动态课程实现、ALFWorld / Search 环境安装与数据预处理（Search-R1 / ALFWorld 数据下载）、model merger。</td></tr>
+        <tr><td>模型权重 Weights</td><td class="no">✘</td><td>README 未给出 Hugging Face 权重链接（仅有指向本论文的 HF Daily Paper 徽章）；需自行按脚本基于 Qwen2.5-VL-3B/7B 训练复现。</td></tr>
+        <tr><td>数据集 Dataset</td><td class="no">部分</td><td>不发布新数据集；提供脚本对接已有公开数据：ALFWorld（训练 split 来自 GiGPO）、Search-QA（NQ / HotpotQA 等，检索器用 E5、对接 Search-R1 setup）、WebShop（选 1000 任务训练 / 128 任务验证）。</td></tr>
+        <tr><td>环境 / Benchmark</td><td class="no">复用公开</td><td>评测环境均为公开 benchmark：<a href="https://github.com/alfworld/alfworld" target="_blank" rel="noopener">ALFWorld</a>、Search-based QA（NQ/TriviaQA/PopQA/HotpotQA/2Wiki/MuSiQue/Bamboogle）、<a href="https://github.com/princeton-nlp/WebShop" target="_blank" rel="noopener">WebShop</a>。仓库提供 ALFWorld / Search 的接入与 harness。</td></tr>
+        <tr><td>项目主页 / Demo</td><td class="no">✘</td><td>无独立项目主页 / 在线 demo；仅 arXiv + GitHub。</td></tr>
+      </tbody>
+    </table>
+    <p class="num" style="text-align:left;color:var(--muted);font-size:13px">注：SkillBank 的初始技能库「initialize from SkillRL」，即技能文件来源于 SkillRL（Xia et al., 2026）的体系；论文附录给出了 ALFWorld / Search / WebShop 三类的 skill 文件示例（Table 8–9）与完整 prompt 模板（Figure 11–13）。</p>
+  </section>
+
+  <!-- ============================ ② 动机与贡献 ============================ -->
+  <section id="motivation">
+    <h2><span class="n">②</span>研究动机与贡献 Motivation &amp; Contribution</h2>
+
+    <h3>背景与问题：inference-time skill augmentation 的三宗罪</h3>
+    <p>「Agent skill」是近一两年随 Claude Code、OpenClaw 等 agent scaffold 兴起的概念——把从历史轨迹里蒸馏出的、可复用的策略 / 原则 / 可执行资源打包成结构化的 skill 文档（通常是 Markdown）。主流用法是 <b>inference-time skill augmentation</b>：推理时从一个 skill bank 里检索相关技能，作为自然语言 guidance 注入到模型每一步的 context 里。这套做法已经形成了「skill 库 + 检索 pipeline + 技能进化」的成熟生态（如 SkillRL、EvolveR）。但论文指出，这种工程上的成功掩盖了三个更根本的缺陷：</p>
+    <ul>
+      <li><strong>检索噪声（retrieval noise）：</strong>检索回来的技能未必相关，错误 / 无关的 guidance 会污染 agent 的 context，把模型带偏。</li>
+      <li><strong>token 开销（token overhead）：</strong>注入的技能文本在多轮交互中不断累积，严重挤占 context、限制可扩展性（尤其当任务域变多时）。</li>
+      <li><strong>「执行」≠「学会」：</strong>这是最关键的一点——一个照着 prompt 里 skill 描述行动的模型，是在<b>执行</b>技能，而不是<b>掌握</b>技能；能力始终留在 context 里，从未沉淀进模型参数。一旦把 skill 文档拿走，能力归零。</li>
+    </ul>
+    <p>作者用一个类比点题（也是论文卷首语「<i>Skills at training, zero at inference.</i>」）：人类学技能也遵循「先有明确的 instruction 阶段 → 再过渡到可以脱离指令、从记忆中自主执行的内化阶段」。RL 天然适合驱动第二步——让 agent 把有效策略固化为 intrinsic policy，而不是每次都去读 context。</p>
+
+    <h3>本文的切入点：把检索「训没」，而不是把检索「做好」</h3>
+    <p>已有研究几乎都在问「<i>怎么更好地检索 / 组织 / 注入 skill</i>」；本文反过来问：<b>能不能把 skill 内化进模型参数，让推理时根本不需要检索？</b>但作者也指出朴素的 RL 在两个方向都会失败：(1) 训练时<b>完全不给</b> skill context，agent 缺乏学习复杂多步行为所需的结构化指导，学不起来；(2) 训练时<b>全程都给满</b> skill context，模型则永远依赖这份它从未被要求内化的外部知识。因此真正需要的是一种「<b>始于有技能、终于无技能</b>」的训练机制，系统性地把能力从 context 迁移到 parameters。这正是 SKILL0 要做的事。</p>
+
+    <h3>核心贡献</h3>
+    <ol>
+      <li><strong>提出 skill internalization 这一显式训练目标。</strong>SKILL0 是第一个把「技能内化」形式化为 RL 训练目标的框架，把 agent 从「推理时依赖 skill」推进到「完全自主的 zero-shot 行为」。</li>
+      <li><strong>提出 In-Context Reinforcement Learning（ICRL）。</strong>在训练 rollout 中提供结构化 skill guidance，但在推理时<b>完全移除</b>，从而让 RL 优化直接对准「从 context-dependent 执行 → 转为 intrinsic competence」这个过渡过程。</li>
+      <li><strong>提出 Dynamic Curriculum（动态课程）。</strong>一种由 <i>helpfulness</i> 驱动的退火（annealing）机制：只有当当前 policy 不再从某个 skill 文件受益时，才把它撤掉；以这种自适应方式替代「按固定时间表撤技能」的死板做法。</li>
+      <li><strong>实证收益显著且高效。</strong>在 ALFWorld / Search-QA / WebShop 三个差异很大的 benchmark 上，相比标准 RL baseline 分别 +9.7% / +6.6% / +10.1%，并与「保留 skill」的 SkillRL 等方法竞争甚至更优；同时把每步 context 压到 <b>&lt; 0.5k token</b>，大幅降低推理开销而不牺牲性能。</li>
+    </ol>
+
+    <figure>
+      <img src="figures/fig1_motivation.png" alt="Skill Augmentation vs Skill Internalization">
+      <figcaption>图 1：两种范式对比（出处：原文 Figure 1）。(a) <b>Skill Augmentation</b>（如 SkillRL）：agent 与环境交互，靠相似度检索把 skill 注入 context，并不断让 skill 进化、SkillBank 越积越大。(b) 本文的 <b>Skill Internalization (SKILL0)</b>：以 on-policy helpfulness 为信号把 skill 逐步内化，最终在推理时 zero-shot、SkillBank 用量随训练步数<b>下降到 0</b>。</figcaption>
+    </figure>
+  </section>
+
+  <!-- ============================ ③ 方法 ============================ -->
+  <section id="method">
+    <h2><span class="n">③</span>方法 Method</h2>
+    <p>SKILL0 的整体流程由三块拼成（见图 2）：<b>(a) Relevance-Driven Skill Grouping</b>——离线把 skill 库按任务类别分组，并为每个 skill 文件配一个专属的验证子任务；<b>(b) In-Context Reinforcement Learning (ICRL)</b>——把交互历史与（被选中的）skill 一起渲染成一张<b>紧凑的视觉图像</b>（visual context）喂给 policy，在 agent loop 里做 RL；<b>(c) Dynamic Curriculum</b>——在线评估每个 skill 文件对当前 policy 的有用性，在一个线性递减的「skill 预算」下逐步撤掉技能，直到推理时完全无技能。下面逐块拆开。</p>
+
+    <figure>
+      <img src="figures/fig2_method.png" alt="SKILL0 方法总览">
+      <figcaption>图 2：SKILL0 总览（出处：原文 Figure 2）。(a) 按相关性把 SKILL.md 分组成 $\mathcal{S}_1,\dots,\mathcal{S}_N$；(b) 把 history + 选中的 skill「渲染→压缩」成 visual token，rollout N 轮后用 reward 更新 policy（Agent Loop）；(c) 课程学习：随训练推进，<b>Dynamic Filter + Self-Compress</b> 让 skill markdown（蓝）逐步减少、observation（绿三角）始终保留，policy 在「更好对齐 → 技能内化」中过渡到推理时无技能（雪花=冻结/zero-shot）。</figcaption>
+    </figure>
+
+    <h3>3.1 Agent Loop：把 agent 自动化建成序贯决策问题</h3>
+    <p>给定任务指令 $I$，agent 要生成动作序列 $\{a_1,\dots,a_T\}$ 完成任务。第 $t$ 步，环境 $\mathcal{E}$（在线模拟器或检索引擎）给出文本 observation $o_t$，agent 按 policy 采样动作：</p>
+    $$ a_t \sim \pi_\theta(a_t \mid I, h_t), \qquad h_t = \{o_1, o_2, \dots, o_t\} $$
+    <p>其中 $\theta$ 是模型参数，$h_t$ 是到 $t$ 步为止的历史。环境随后转移并返回下一 observation $o_{t+1} = \mathcal{E}(o_t, a_t)$，直到任务成功或达到最大步数。</p>
+    <p><b>技能库 SkillBank 的结构。</b>沿用 SkillRL（Xia et al.），把可复用的行为知识组织成两层的 <code>SkillBank</code>：<b>(1) General skills</b> 是适用于所有任务类型的通用策略（如探索策略、目标追踪 heuristic）；<b>(2) Task-specific skills</b> 存特定任务类别 $k$ 的专门知识（领域专属的动作序列、前置条件）。技能以目录形式存放：<code>skills/{task_name}/{skill_category}.md</code>，每个 Markdown 文件 $\mathcal{S}_k$ 装一组同任务、同类别的相关技能。整个库 $\texttt{SkillBank}=\{\mathcal{S}_k\}_{k=1}^{N}$ 共 $N$ 个文件。训练时<b>不是</b>按语义相似度检索，而是按 <i>on-policy helpfulness</i> 选出一个子集 $\mathcal{S}\subseteq\texttt{SkillBank}$（含 $m$ 个文件），这个 helpfulness 衡量每个 $\mathcal{S}_k$ 对当前 policy $\pi_\theta$ 在当前训练阶段的<b>学习价值</b>。</p>
+
+    <h3>3.2 Context Rendering：把历史 + skill 渲染成图像，省 token</h3>
+    <p>当任务域变多时，「累计的技能 + 交互历史」会让 token 成本爆炸。受 Feng et al.（AgentOCR）与 Shi et al.（MemOCR）启发，SKILL0 用一个 <b>context rendering</b> 机制：把文本化的交互历史 $h_t$ 和选中的技能 $\mathcal{S}$ 映射成一张紧凑 RGB 图像，再由 vision encoder <code>Enc</code> 编码、压缩成视觉表征：</p>
+    $$ \mathcal{V}_t = \texttt{Enc}(h_t, \mathcal{S}; c_t) $$
+    <p>其中 $\mathcal{V}_t \in \mathbb{R}^d$ 是喂给 policy 的压缩视觉 context embedding，$c_t \in (0,1]$ 是第 $t$ 步的<b>压缩比（compression ratio）</b>。关键巧思：作者<b>不</b>把 $c_t$ 设为固定超参，而是让 policy 在输出动作 $a_t$ 的同时<b>自己生成</b> $c_t$：</p>
+    $$ (a_t, c_t) \sim \pi_\theta(a_t, c_t \mid I, \mathcal{V}_t) $$
+    <p>直觉上，这让模型学会「在信息够用时多压一点、在关键步保留更多细节」，把 token 预算花在刀刃上。（附录 E：文本用等宽字体渲染，并用<b>颜色语义编码</b>区分不同 context 成分——ALFWorld 里 observation 标蓝、action 标红；Search-QA 里 <code>&lt;search&gt;</code> 与 <code>&lt;information&gt;</code> 分色，让 vision encoder 一眼能分清「感知到的状态 / 执行的动作 / 检索到的内容」。）</p>
+
+    <h3>3.3 In-Context RL：复合 reward 同时优化「任务成功」与「压缩」</h3>
+    <p>为了在 agent loop 里同时激励高效压缩和技能内化，SKILL0 用一个复合 reward（follow Feng et al.）。设 $\mathcal{I}_{\text{succ}}(\tau)\in\{0,1\}$ 是轨迹 $\tau$ 的二值成功指示，复合 reward 定义为：</p>
+    $$ r_t^{\text{comp}} = \begin{cases} \ln(c_t), & \text{if } \mathcal{I}_{\text{succ}}(\tau)=1,\\ 0, & \text{otherwise,} \end{cases} \qquad \tilde{r}_t = r_t + \lambda \cdot r_t^{\text{comp}} $$
+    <p>解释：只有任务<b>成功</b>时才奖励压缩，避免「为压而压」牺牲任务；$\ln(\cdot)$ 形式反映「压缩比越高、边际收益越小」（递减回报）；$r_t$ 是带技能增强下的任务正确性奖励，$\lambda\ge 0$ 调节「任务性能 vs 压缩效率」的权衡。训练目标是 GRPO 风格的 group-normalized 目标——对每个 query $q\sim\mathcal{D}$，旧 policy $\pi_{\theta_{\text{old}}}$ 采一组 $G$ 条轨迹 $\{\tau_i\}_{i=1}^{G}$：</p>
+    $$ \mathcal{L}_{\textsc{Skill0}}(\theta) = \mathbb{E}_{\tau_i\sim\pi_{\theta_{\text{old}}}(q),\,q\sim\mathcal{D}} \;\frac{1}{\sum_{i=1}^{G}|\tau_i|}\sum_{i=1}^{G}\sum_{t=1}^{|\tau_i|} \texttt{clip}\big(r_{i,t}(\theta), A_i, \epsilon\big) - \beta\cdot \mathbb{D}_{\text{KL}}[\pi_\theta \| \pi_{\text{ref}}] $$
+    <p>其中 advantage $A_i$ 由组内总 reward $\{\tilde r(\tau_i)\}$ 归一化得到，$r_{i,t}(\theta)=\pi_\theta(\tau_{i,t}\mid q,\tau_{i,<t})/\pi_{\theta_{\text{old}}}(\tau_{i,t}\mid q,\tau_{i,<t})$ 是 importance sampling 比值，$\beta$ 是 KL 正则系数。</p>
+
+    <h3>3.4 Adaptive Curriculum：线性退火地撤掉技能</h3>
+    <p>核心思想：随训练推进，对外部技能的依赖要被「<b>受控地退火</b>」，避免 context 空间发生突变（distribution shift）。把课程切成 $N_S$ 个阶段，第 $s$ 阶段的 skill 预算 $M^{(s)}$ 做线性衰减：</p>
+    $$ |\mathcal{S}^{(s)}| \le M^{(s)} = \left\lceil N\cdot \frac{N_S - s}{N_S - 1} \right\rceil $$
+    <p>这把每阶段的技能上下文减少量界定在 $M^{(s)} - M^{(s+1)} \approx \tfrac{N}{N_S-1}$。约束 active skill 集合 $\mathcal{S}^{(s)}$ 的变化，就限制了渲染视觉 context $\mathcal{V}_t^{(s)}=\texttt{Enc}(h_t,\mathcal{S}^{(s)};c_t)$ 的偏移，从而保证 policy 分布平滑过渡，安全地走到完全自立的状态 $\mathcal{S}^{(N_S)}=\emptyset$（最后一阶段无技能）。</p>
+    <p>课程分两相协作（见 Algorithm 1）：</p>
+    <ul>
+      <li><strong>(a) Relevance-Driven Skill Grouping（离线）：</strong>训练前，把验证集划成 $N$ 个子任务 $\{\mathcal{T}_k\}$，让每个 $\mathcal{T}_k$ 的技能需求对应到某个 $\mathcal{S}_k$。「相关性」定义为「验证子任务的领域 / 目标是否与 $\mathcal{S}_k$ 里编码的技能类别对齐」。这保证每个 $\mathcal{S}_k$ 都有一个专属子任务来评估其效用，为后续动态课程提供结构基础。</li>
+      <li><strong>(b) Helpfulness-Driven Dynamic Curriculum（在线）：</strong>对每个 skill 文件 $\mathcal{S}_k$，每隔 $d$ 个训练步，在<b>给</b>该技能（w/ skill）与<b>不给</b>（w/o skill）两种条件下评估当前 policy 在 $\mathcal{T}_k$ 上的表现，算出有用性增量 $\Delta_k$：</li>
+    </ul>
+    $$ \Delta_k(\mathcal{S}) := \texttt{Acc}(\pi_\theta, \mathcal{T}_k, \mathcal{S}) - \texttt{Acc}(\pi_\theta, \mathcal{T}_k, \mathcal{S}\setminus\{\mathcal{S}_k\}) $$
+    <p>然后做三步：<b>Filter</b>（只保留 $\Delta_k > 0$、即仍有正向帮助的技能）→ <b>Rank</b>（按 $\Delta_k$ 降序排）→ <b>Select</b>（取 top-$M^{(s)}$）。这就形成一个<b>自配速（self-paced）</b>的课程：一个技能一旦被 policy 内化，它的 $\Delta_k$ 自然趋于 0，就会被正向过滤自动淘汰——预算 $M^{(s)}$ 只是上界，真正的撤除速度由模型「学会了没」决定。</p>
+
+    <div class="callout note">
+      <span class="label">实现要点（复现关注）</span>
+      <ul style="margin:6px 0">
+        <li><b>骨干模型：</b>Qwen2.5-VL-3B / 7B-Instruct（用到 vision encoder，因为 context 是渲染成图像的）。训练最多 180 步，4× H800 GPU。</li>
+        <li><b>课程超参：</b>验证子集 size = 1000；课程阶段数 $N_S = 3$；validation interval $d = 10$（论文称 $d=10$ 是性能 / 算力的最佳折中，见 Table 4）。</li>
+        <li><b>SkillBank 初始化：</b>ALFWorld 与 WebShop 的初始 SkillBank 都「initialize from SkillRL」。</li>
+        <li><b>skill 预算实例：</b>$N_S=3$ 时，ALFWorld 的预算序列是 $[6,3,0]$、Search-QA 是 $[5,3,0]$——最后一阶段强制为 0，硬约束「推理时无技能」。</li>
+        <li><b>数据 / 批：</b>ALFWorld 训练 split 来自 GiGPO，每 batch 采 16 任务 × 8 rollout，max prompt 长度 3072；Search-QA 用 Search-R1 的 setup（检索器 E5，训练数据来自 NQ + HotpotQA，其余数据集留作 out-of-domain 评测），max prompt 4096；WebShop 选 1000 任务训练（16 任务 × 8 rollout，max 4096）。</li>
+        <li><b>理论补充（附录 A）：</b>论文给出了线性预算下「每阶段技能移除数有界 → advantage 估计偏差有界」的稳定性分析，并由 GRPO 单调改进条件推出「阶段数 $N_S > 1 + \tfrac{N\cdot \delta_r}{\epsilon_{\text{clip}}\cdot \sigma_G}$」的充分条件；技能选择部分则证明在 $\alpha$-近似 submodular 假设下，贪心选 top-$M$ 有 $(1-e^{-\alpha})$ 近似比（$\alpha=1$ 时退化为经典 $1-1/e$）。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============================ ④ 实验评估 ============================ -->
+  <section id="evaluation">
+    <h2><span class="n">④</span>实验评估 Evaluation</h2>
+    <h3>评测设置</h3>
+    <ul>
+      <li><strong>Benchmark：</strong>
+        <b>ALFWorld</b>（文本版 embodied 家务游戏，3827 任务实例，6 类活动：Pick / Look / Clean / Heat / Cool / Pick2）考察具身式多步规划；
+        <b>Search-based QA</b>（single-hop：NQ / TriviaQA / PopQA；multi-hop：HotpotQA / 2Wiki / MuSiQue / Bamboogle）考察检索增强的多跳推理，其中 NQ、HotpotQA 为 in-domain，其余为 out-of-domain；
+        <b>WebShop</b>（真实网购式交互环境，128 个固定验证任务）考察长程网页导航与按需购买。</li>
+      <li><strong>对比基线：</strong>in-context skill prompting 方法（文本 / OCR 历史的 Few-Shot、AgentOCR、EvolveR、SkillRL）；RL 方法（GRPO）；ALFWorld 还额外比 prompt 类与 memory 类（ReAct、Reflexion、Mem0、ExpeL、MemP、MemRL、SimpleMem、RLOO）；Search-QA 还比 Search-o1 / Search-R1 / ZeroSearch / O²-Searcher / ParallelSearch / StepSearch，以及闭源 GPT-4o、Gemini-2.5-Pro。</li>
+      <li><strong>指标：</strong>success rate（成功率，%，越高越好）、Score / Accuracy（WebShop，越高越好）、以及每步平均 context <b>token 成本（k/step，越低越好）</b>。</li>
+    </ul>
+
+    <h3>主要结果</h3>
+    <p>下表摘自原文 Table 1（ALFWorld + Search-QA 的平均列与每步 token 成本）。标记说明：† 表示「带 skill augmentation 验证」的方法；* 表示「编码视觉 context、token 开销降低」的方法。<b>SKILL0 在推理时不给任何 skill</b>，但仍取得最高或并列最高的成功率，且 token 成本最低。</p>
+    <table>
+      <thead><tr><th>方法（Qwen2.5-VL-3B）</th><th class="num">ALFWorld Avg↑</th><th class="num">ALFWorld Cost↓ (k)</th><th class="num">Search-QA Avg↑</th><th class="num">Search-QA Cost↓ (k)</th></tr></thead>
+      <tbody>
+        <tr><td>Zero-Shot</td><td class="num">15.2</td><td class="num">1.21</td><td class="num">15.9</td><td class="num">0.48</td></tr>
+        <tr><td>Few-Shot †</td><td class="num">44.1</td><td class="num">2.30</td><td class="num">14.6</td><td class="num">0.36</td></tr>
+        <tr><td>GRPO</td><td class="num">79.9</td><td class="num">1.02</td><td class="num">36.4</td><td class="num">0.61</td></tr>
+        <tr><td>AgentOCR *</td><td class="num">78.2</td><td class="num">0.38</td><td class="num">34.2</td><td class="num">0.36</td></tr>
+        <tr><td>EvolveR</td><td class="num">44.1</td><td class="num">1.89</td><td class="num">38.2</td><td class="num">—</td></tr>
+        <tr><td>SkillRL †</td><td class="num">82.4</td><td class="num">2.21</td><td class="num">38.9</td><td class="num">0.87</td></tr>
+        <tr><td><strong>SKILL0 *</strong></td><td class="num"><strong>87.9</strong></td><td class="num"><strong>0.38</strong></td><td class="num"><strong>40.8</strong></td><td class="num"><strong>0.18</strong></td></tr>
+      </tbody>
+    </table>
+    <table>
+      <thead><tr><th>方法（Qwen2.5-VL-7B）</th><th class="num">ALFWorld Avg↑</th><th class="num">ALFWorld Cost↓ (k)</th><th class="num">Search-QA Avg↑</th><th class="num">Search-QA Cost↓ (k)</th></tr></thead>
+      <tbody>
+        <tr><td>GRPO</td><td class="num">81.8</td><td class="num">0.95</td><td class="num">41.9</td><td class="num">0.73</td></tr>
+        <tr><td>AgentOCR *</td><td class="num">81.2</td><td class="num">0.43</td><td class="num">40.1</td><td class="num">0.36</td></tr>
+        <tr><td>SkillRL †</td><td class="num">89.9</td><td class="num">—</td><td class="num">47.1</td><td class="num">—</td></tr>
+        <tr><td><strong>SKILL0 *</strong></td><td class="num"><strong>89.8</strong></td><td class="num"><strong>0.41</strong></td><td class="num"><strong>44.4</strong></td><td class="num"><strong>0.34</strong></td></tr>
+      </tbody>
+    </table>
+    <p><b>WebShop（128 任务，全部用视觉 context）。</b>3B 上 SKILL0（无技能推理）得 Score 78.6 / Acc 66.4%，比 AgentOCR（75.2 / 56.3）<b>高 +10.1 acc</b>，token 仅 0.49k；7B 上 Score 85.1 / Acc 74.2%（AgentOCR 78.6 / 59.3，<b>+14.9 acc</b>），token 0.46k。而带技能的 Few-Shot 推理要花 0.78–0.91k token，SKILL0 用近一半的 token、却拿到 3× 于 Few-Shot 的准确率。</p>
+    <p><b>怎么读这些数字：</b></p>
+    <ul>
+      <li><b>提升幅度。</b>对标准 RL baseline（GRPO / AgentOCR），SKILL0 在三个 benchmark 上分别 +9.7（ALFWorld）/ +6.6（Search-QA）/ +10.1（WebShop，acc）。注意这是在<b>推理时不给任何 skill</b> 的前提下取得的——说明能力确实被「内化」进了参数。</li>
+      <li><b>对 skill-augmented 方法的追平 / 反超。</b>3B 上 SKILL0（87.9 / 40.8）已超过全程带技能的 SkillRL（82.4 / 38.9）；7B 上 ALFWorld 与 SkillRL（89.9）基本打平（89.8），Search-QA 略低于 SkillRL（44.4 vs 47.1）但仍优于其余所有 RL / search 方法。WebShop 上 SKILL0 全面占优。</li>
+      <li><b>Few-Shot 的天花板。</b>显式给 skill prompt（Few-Shot）相比 Zero-Shot 只有有限提升，印证了「LLM 在缺乏充分探索时，并不能真正用好 skill 描述」——这正是 SKILL0 用 RL 探索去补的短板。</li>
+      <li><b>token 效率是另一条主线。</b>SKILL0 每步仅 0.38k（ALFWorld）/ 0.18k（Search-QA）/ 0.49k（WebShop）token；相比文本 / skill 类的 SkillRL（ALFWorld 2.21k、Search-QA 0.87k）便宜 3–5×。在 WebShop 上更是「省近 2× token、却给到 3× 于 Few-Shot 的准确率」。</li>
+      <li><b>更广的对比（Table 6/7）。</b>ALFWorld 上 SKILL0（89.8，7B）大幅超过 memory 类的 ExpeL(46.3)/Mem0(54.7)/MemRL(21.4)，也超过闭源 GPT-4o(48.0)、Gemini-2.5-Pro(60.3)。Search-QA 上（44.4，7B）超过 Search-R1(38.5)/ZeroSearch(39.1)/EvolveR(43.1)，在 out-of-domain 的 Bamboogle 上尤其强（63.7 / 66.9），显示出对未见推理任务的泛化力。</li>
+    </ul>
+
+    <figure>
+      <img src="figures/fig3_reward_3b.png" alt="3B 训练 reward 曲线">
+      <figcaption>图 3：3B 上的训练 reward 曲线（出处：原文 Figure 3）。SKILL0（红）在整个 RL 过程中持续高于 AgentOCR baseline（蓝），7B 上同样（原文 Figure 4）。</figcaption>
+    </figure>
+
+    <figure>
+      <img src="figures/fig5_skill_comparison.png" alt="训练动态对比">
+      <figcaption>图 4：训练动态对比（出处：原文 Figure 5）。(a) SKILL0 在「带技能验证」时早期涨得更快，「不带技能验证」时初期低、但随训练逐步追平——这正是<b>技能内化</b>的清晰信号；(b) 在「双方都不给技能」的<b>公平推理</b>下，SKILL0 仍胜 AgentOCR，说明优势来自内化的知识而非 prompt 里的技能描述；(c) 在同样 skill-free 推理下，GRPO / SkillRL 早早 plateau，SKILL0 持续上升、上限最高。</figcaption>
+    </figure>
+
+    <h3>消融 / 分析</h3>
+    <p><b>(1) Skill Budget $M$ 的形状最关键。</b>$N_S=3$ 时 ALFWorld 的预算被算成 $[6,3,0]$（线性递减到 0）。把它换成不同形状对比（图 5）：</p>
+    <figure>
+      <img src="figures/fig7_ablations.png" alt="Skill Budget 消融">
+      <figcaption>图 5：Skill Budget $M$ 的消融（出处：原文 Figure 7）。灰=推理时仍给技能（w/ skill），绿=推理时撤掉技能（w/o skill）。只有线性递减的 $[6,3,0]$ 在撤掉技能后还<b>涨 +1.6</b>（真正内化了）；$[6,6,6]$（全程满）撤技能后掉 −13.3，<code>Fixed Full</code>（不过滤）掉 −12.3，$[3,3,3]$ 掉 −9.7；$[0,0,0]$（从头不给技能）则两者持平但绝对值低（≈76.8，学不充分）。</figcaption>
+    </figure>
+    <p>读法：这张图是全文最有说服力的证据——「w/ vs w/o skill 的差」直接量化了模型对外部技能的<b>依赖度</b>。只有「始于有技能、线性退火到无技能」的课程，才能把这个差做到<b>负向消失甚至反转为正</b>（+1.6），即模型脱离技能后反而更好；其余设置要么没学到内化（差很大）、要么学不充分（绝对值低）。Figure 8 进一步显示：静态低预算 $[3,3,3]$ 限制了早期探索→训练不稳、峰值低；而本文的课程在「skill-free 推理」设定下持续优于 Fixed Full。</p>
+    <p><b>(2) Dynamic Curriculum 的三步缺一不可（Table 3）。</b>完整的 <code>Filter &amp; Rank &amp; Select</code> 是唯一在撤技能后还<b>正迁移（Δ=+1.6%）</b>的设置（w/o skill 87.9 vs w/ skill 86.3）；去掉 <b>Filter</b>（把预算内技能全用上）引入噪声、掉 2.7%；去掉 <b>Rank</b>（随机选技能）则<b>灾难性崩塌 −13.7%</b>（跌到 62.9%）。这证明「只保留真正有用的技能」对稳定学习、避免对 prompt 的肤浅依赖至关重要。</p>
+    <p><b>(3) Helpfulness 的「先升后降」轨迹（Figure 6）。</b>所有子任务的 $\Delta_k$ 都呈现一致的 rise-then-fall：早期 policy 还不会用技能 prompt，$\Delta_k$ 低；中期学会「把技能落到动作上」，$\Delta_k$ 升；后期动态课程逼着 policy 把技能内化进参数，对外部 prompt 的依赖下降，$\Delta_k$ 收敛回 0。这条曲线从经验上验证了 ICRL 与课程学习的协同机制——<b>skill 是有效但短暂的脚手架</b>。</p>
+    <p><b>(4) Validation interval $d$（Table 4）。</b>$d=5$ 在 Search-QA 上略有增益但算力开销大得多；$d=20$ 明显变差（ALFWorld 78.1 / Search-QA 42.3）；$d=10$ 是性能 / 效率的最佳折中。</p>
+  </section>
+
+  <!-- ============================ ⑤ 洞见 ============================ -->
+  <section id="insight">
+    <h2><span class="n">⑤</span>洞见 Insights</h2>
+    <div class="callout insight">
+      <span class="label">Insight</span>
+      <ol style="margin:6px 0">
+        <li><b>「技能」应该是训练时的脚手架，而不是推理时的拐杖。</b>SKILL0 把整个领域的默认假设（推理时检索 + 注入 skill）反过来了——技能的正确归宿是被 RL「用掉、然后撤掉」，最终沉淀进参数。helpfulness 的 rise-then-fall 曲线，几乎就是「脚手架」这个比喻的实证。</li>
+        <li><b>用「w/ skill 减 w/o skill 的差」当退火信号，是一个很通用的方法论。</b>它把抽象的「模型学会了没」变成一个可测量、可排序、可过滤的标量 $\Delta_k$，从而实现 self-paced 课程：撤除速度由模型实际掌握程度决定，而非死板的时间表。这个「以边际有用性驱动退火」的思路，可迁移到任何「训练时有辅助信息、希望推理时去掉」的场景（如 hint、CoT 示范、外部 memory）。</li>
+        <li><b>把 context 渲染成图像 + 让 policy 自生成压缩比，是一条被低估的省 token 路线。</b>SKILL0 借 AgentOCR 的视觉压缩把每步 context 压到 &lt;0.5k token，且压缩比由模型自适应决定。「内化」与「视觉压缩」两件事叠加，才使得「推理时既省 token 又不掉点」成为可能——这对长程、多域 agent 的部署成本是实打实的利好。</li>
+      </ol>
+    </div>
+
+    <h3>局限与未来</h3>
+    <p>论文自陈两点局限：<b>(1)</b> SKILL0 的效果<b>依赖初始 SkillBank 的质量</b>——技能库本身要够好（本文直接 initialize from SkillRL），否则没东西可内化；<b>(2)</b> 离线的 relevance-driven skill grouping 在迁移到<b>新任务域</b>时需要<b>重新分组（re-partition）</b>，不是即插即用。我个人补充几点判断：方法重度绑定「视觉 context 渲染」这条技术路线，因此需要带 vision encoder 的多模态骨干（Qwen2.5-VL），纯文本 LLM 想直接套用 ICRL 还需要另想 context 压缩方案；此外实验主要在 3B/7B 与 ≤180 训练步、3 个 benchmark 上，更大模型 / 更长训练 / 更开放任务下「内化」能否同样干净地发生，仍待验证；helpfulness 评估需要在 w/ 与 w/o 两种条件下各跑一遍验证子任务，本身有额外算力开销（$d$ 的取舍即源于此）。</p>
+
+    <h3>与相关工作的关系</h3>
+    <p>（以下基于本文自身的论述。）<b>vs. Agent Skill / skill-augmentation（SkillRL、EvolveR、SkillNet、SkillBench 等）：</b>这些工作聚焦技能的<b>抽取、组织、检索、进化</b>，技能始终活在推理 context 里；SKILL0 则把「技能能否被内化进参数」这条几乎无人探索的路线作为主线，推理时彻底不用技能。<b>vs. memory-based 方法（Mem0 / ExpeL / MemP / MemRL / SimpleMem）：</b>它们把（压缩后的）历史轨迹存进外部数据库供决策时查阅，仍是「外部记忆 + 运行时检索」；SKILL0 内化后无需外部存储。<b>vs. 朴素 agentic RL（GRPO / Search-R1 等）：</b>本文指出朴素 RL 在「全程无技能」与「全程满技能」两端都会失败，其贡献正是中间那条「始于技能、退火到无技能」的训练机制。<b>技术血缘：</b>视觉 context 压缩与复合 reward 来自 AgentOCR（Feng et al.）/ MemOCR（Shi et al.），优化用 GRPO（Shao et al.），初始技能库来自 SkillRL（Xia et al.）——SKILL0 把这些组件重新组织成一个「skill internalization」的新目标。作者把它定位为「从 tool-augmented 走向真正自给自足的自主 LLM agent」的一种新范式。</p>
+  </section>
+
+  <footer class="foot">
+    本页为 <code>paper-reading</code> skill 生成的阅读笔记，仅作辅助，细节以
+    <a href="https://arxiv.org/abs/2604.02268" target="_blank" rel="noopener">原文</a> 为准 · 解读日期 2026-05-30
+  </footer>
+
+</article>
+</body>
+</html>

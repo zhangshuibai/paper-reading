@@ -303,5 +303,24 @@
       "SFT-RL"
     ],
     "path": "papers/2605.15040-orchard-agentic-modeling/index.html"
+  },
+  {
+    "slug": "2604.02268-skill-zero-skill-internalization",
+    "title": "SKILL0: In-Context Agentic Reinforcement Learning for Skill Internalization",
+    "authors": "Zhengxi Lu, Zhiyuan Yao, Jinyang Wu, Chengcheng Han, Qi Gu, Xunliang Cai, Weiming Lu, Jun Xiao, Yueting Zhuang, Yongliang Shen",
+    "team": "Zhejiang University (REAL Lab); Meituan; Tsinghua University",
+    "arxiv": "https://arxiv.org/abs/2604.02268",
+    "code": "https://github.com/ZJU-REAL/SkillZero",
+    "date": "2026-05-30",
+    "published": "arXiv 2026",
+    "tldr": "把 agent skill 从推理时的 prompt 注入「内化」进模型参数：In-Context RL 在训练 rollout 给 skill 指导、推理时完全移除，配 helpfulness 驱动的动态课程线性退火技能预算到 0；ALFWorld/Search-QA/WebShop +6.6~10.1% 且每步 context <0.5k token。",
+    "tags": [
+      "Agentic-RL",
+      "Skill-Internalization",
+      "In-Context-RL",
+      "Curriculum",
+      "Token-Efficiency"
+    ],
+    "path": "papers/2604.02268-skill-zero-skill-internalization/index.html"
   }
 ]
