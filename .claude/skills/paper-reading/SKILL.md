@@ -17,9 +17,15 @@ description: >-
 Turn a single paper into a polished, self-contained HTML reading note, publish it to this
 repo, and hand the user a viewable link.
 
-This skill lives in `zhangshuibai/paper-reading`. Output language for the note is **中文**
-(keep technical terms / proper nouns in English where that's clearer). Be thorough — the
-user explicitly wants *detailed* readings, not a one-paragraph abstract.
+This skill lives in `zhangshuibai/paper-reading`. Be thorough — the user explicitly wants
+*detailed* readings, not a one-paragraph abstract.
+
+**Output language — 中文 散文，术语保留英文。** 解读的叙述/解释全部用中文，但**不要把已经约定俗成的
+技术名词和专有名词翻译成中文** —— 保留研究者口头实际会说的英文形式。例如：`agent`（不要写「智能体」）、
+`token`（不要「词元」）、`prompt`、`policy`、`reward shaping`、`embedding`、`benchmark`、`baseline`、
+`attention`、`fine-tune`、`RL/RLHF`，以及所有模型 / 方法 / 数据集 / 机构的专名，一律保持英文；只翻译那些
+本来就常用中文表达的普通词。判断准则：如果同行平时直接讲那个英文词，就保留英文，不要硬翻。标题和正文是中文，
+但其中内嵌的术语名词维持英文原文。
 
 ---
 
@@ -106,7 +112,8 @@ result/analysis figures). Save into `$REPO/papers/<slug>/figures/`.
 
 ### 6. Write the note
 - Copy the template: `cp "$SKILL/templates/paper.html" "$REPO/papers/<slug>/index.html"`.
-- Fill **every** section in 中文 to the quality bar below. Replace all `{{PLACEHOLDERS}}`,
+- Fill **every** section in 中文 (散文用中文，技术术语如 `agent` 保留英文——见上文「Output language」)
+  to the quality bar below. Replace all `{{PLACEHOLDERS}}`,
   act on every `<!-- 填写 -->` comment, then delete leftover guidance comments and unused
   template rows. Reference figures as `figures/xxx.png`. Use `$...$` / `$$...$$` for math.
 
