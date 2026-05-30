@@ -8,13 +8,13 @@
   :root{
     --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2;
     --muted:#9aa3bd; --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff;
-    --chip:#232842; --chipText:#c7cdec; --shadow:0 8px 30px rgba(0,0,0,.35);
+    --ok:#43c59e; --chip:#232842; --chipText:#c7cdec; --shadow:0 8px 30px rgba(0,0,0,.35);
   }
   @media (prefers-color-scheme: light){
     :root{
       --bg:#f6f7fb; --panel:#ffffff; --panel2:#f0f2f9; --text:#1a1f33;
       --muted:#5a627a; --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff;
-      --chip:#eef1fb; --chipText:#36406b; --shadow:0 8px 24px rgba(20,30,80,.08);
+      --ok:#138a6e; --chip:#eef1fb; --chipText:#36406b; --shadow:0 8px 24px rgba(20,30,80,.08);
     }
   }
   *{box-sizing:border-box}
@@ -24,16 +24,22 @@
     line-height:1.6;
   }
   .wrap{max-width:1080px; margin:0 auto; padding:40px 20px 80px}
-  header.hero{margin-bottom:28px}
+  header.hero{margin-bottom:24px}
   .hero h1{font-size:30px; margin:0 0 6px; letter-spacing:.3px}
   .hero p{color:var(--muted); margin:0; font-size:15px}
-  .bar{display:flex; gap:12px; align-items:center; margin:22px 0 18px; flex-wrap:wrap}
+  .bar{display:flex; gap:12px; align-items:center; margin:22px 0 14px; flex-wrap:wrap}
   .search{
     flex:1; min-width:220px; background:var(--panel); border:1px solid var(--line);
     color:var(--text); padding:11px 14px; border-radius:12px; font-size:14px; outline:none;
   }
   .search:focus{border-color:var(--accent)}
   .count{color:var(--muted); font-size:13px; white-space:nowrap}
+  .catbar{display:flex; gap:8px; flex-wrap:wrap; margin:0 0 22px}
+  .catbtn{cursor:pointer; border:1px solid var(--line); background:var(--panel); color:var(--text);
+          padding:7px 15px; border-radius:999px; font-size:13.5px; transition:all .12s ease}
+  .catbtn:hover{border-color:var(--accent)}
+  .catbtn.active{background:var(--accent); color:#fff; border-color:var(--accent)}
+  .catbtn .n{opacity:.65; margin-left:6px; font-size:12px}
   .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(330px,1fr)); gap:16px}
   .card{
     display:block; text-decoration:none; color:inherit; background:var(--panel);
@@ -41,6 +47,11 @@
     box-shadow:var(--shadow); transition:transform .12s ease, border-color .12s ease;
   }
   .card:hover{transform:translateY(-3px); border-color:var(--accent)}
+  .cats{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px}
+  .cat{font-size:11px; font-weight:700; padding:2px 9px; border-radius:6px; letter-spacing:.2px}
+  .cat.c-agent{background:rgba(122,162,255,.18); color:var(--accent)}
+  .cat.c-se{background:rgba(155,140,255,.20); color:var(--accent2)}
+  .cat.c-wm{background:rgba(67,197,158,.20); color:var(--ok)}
   .card h3{margin:0 0 8px; font-size:17px; line-height:1.35}
   .meta{color:var(--muted); font-size:12.5px; margin-bottom:10px}
   .tldr{font-size:13.5px; color:var(--text); opacity:.92; margin:0 0 12px}
@@ -71,6 +82,8 @@
     <span class="count" id="count"></span>
   </div>
 
+  <div id="catbar" class="catbar"></div>
+
   <div id="grid" class="grid"></div>
 
   <footer>
@@ -83,17 +96,34 @@
 const grid = document.getElementById('grid');
 const countEl = document.getElementById('count');
 const searchEl = document.getElementById('search');
+const catbar = document.getElementById('catbar');
 let PAPERS = [];
+let activeCat = 'all';
+
+// category display config; order defines the filter-bar order
+const CATS = {
+  'agent':        {label:'Agent',        cls:'c-agent'},
+  'self-evolving':{label:'Self-Evolving', cls:'c-se'},
+  'world-model':  {label:'World Model',  cls:'c-wm'},
+};
+const CAT_ORDER = ['agent','self-evolving','world-model'];
 
 function esc(s){return (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+function catBadges(p){
+  return (p.categories||[]).filter(c=>CATS[c])
+    .map(c=>`<span class="cat ${CATS[c].cls}">${CATS[c].label}</span>`).join('');
+}
 
 function card(p){
   const tags = (p.tags||[]).map(t=>`<span class="chip">${esc(t)}</span>`).join('');
   const links = [];
-  if(p.arxiv) links.push(`<a href="${esc(p.arxiv)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">arXiv / 原文 ↗</a>`);
+  if(p.arxiv) links.push(`<a href="${esc(p.arxiv)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">原文 ↗</a>`);
   if(p.code)  links.push(`<a href="${esc(p.code)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">代码 ↗</a>`);
   const sub = [p.authors, p.team].filter(Boolean).map(esc).join(' · ');
+  const badges = catBadges(p);
   return `<a class="card" href="${esc(p.path)}">
+    ${badges?`<div class="cats">${badges}</div>`:''}
     <h3>${esc(p.title)}<span class="date-badge">${esc(p.date||'')}</span></h3>
     ${sub?`<div class="meta">${sub}</div>`:''}
     ${p.tldr?`<p class="tldr">${esc(p.tldr)}</p>`:''}
@@ -102,11 +132,22 @@ function card(p){
   </a>`;
 }
 
+function renderCatbar(){
+  const counts = {all: PAPERS.length};
+  CAT_ORDER.forEach(c => counts[c] = PAPERS.filter(p=>(p.categories||[]).includes(c)).length);
+  const items = ['all', ...CAT_ORDER];
+  catbar.innerHTML = items.map(c=>{
+    const label = c==='all' ? '全部' : CATS[c].label;
+    return `<button class="catbtn ${c===activeCat?'active':''}" data-cat="${c}">${label}<span class="n">${counts[c]||0}</span></button>`;
+  }).join('');
+  catbar.querySelectorAll('.catbtn').forEach(b=>{
+    b.onclick = ()=>{ activeCat = b.dataset.cat; renderCatbar(); applyFilter(); };
+  });
+}
+
 function render(list){
   if(!list.length){
-    grid.innerHTML = `<div class="empty" style="grid-column:1/-1">
-      还没有解读。<br><br>对我说一篇论文的<b>标题</b>或<b>链接</b>（如 arXiv），并让我运行 <code>paper-reading</code> skill 即可在这里生成一篇解读。
-    </div>`;
+    grid.innerHTML = `<div class="empty" style="grid-column:1/-1">没有匹配的解读。</div>`;
     return;
   }
   grid.innerHTML = list.map(card).join('');
@@ -114,8 +155,10 @@ function render(list){
 
 function applyFilter(){
   const q = searchEl.value.trim().toLowerCase();
-  const list = !q ? PAPERS : PAPERS.filter(p=>{
-    const hay = [p.title,p.authors,p.team,p.tldr,(p.tags||[]).join(' ')].join(' ').toLowerCase();
+  let list = PAPERS;
+  if(activeCat !== 'all') list = list.filter(p=>(p.categories||[]).includes(activeCat));
+  if(q) list = list.filter(p=>{
+    const hay = [p.title,p.authors,p.team,p.tldr,(p.tags||[]).join(' '),(p.categories||[]).join(' ')].join(' ').toLowerCase();
     return hay.includes(q);
   });
   countEl.textContent = `${list.length} / ${PAPERS.length} 篇`;
@@ -126,11 +169,11 @@ searchEl.addEventListener('input', applyFilter);
 
 fetch('./papers.json', {cache:'no-store'})
   .then(r=>{ if(!r.ok) throw new Error(r.status); return r.json(); })
-  .then(data=>{ PAPERS = Array.isArray(data)?data:[]; applyFilter(); })
+  .then(data=>{ PAPERS = Array.isArray(data)?data:[]; renderCatbar(); applyFilter(); })
   .catch(()=>{
     countEl.textContent='';
     grid.innerHTML = `<div class="empty" style="grid-column:1/-1">
-      无法读取 <code>papers.json</code>。<br>如果你是在本地用 <code>file://</code> 打开，请改用发布后的在线链接（GitHub Pages 或 raw.githack.com）查看。
+      无法读取 <code>papers.json</code>。<br>如果在本地用 <code>file://</code> 打开，请改用发布后的在线链接（GitHub Pages）查看。
     </div>`;
   });
 </script>

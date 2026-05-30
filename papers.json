@@ -16,7 +16,11 @@
       "Self-Evolving",
       "Visual-Skill"
     ],
-    "path": "papers/2605.17933-atlasva-visual-skill-memory/index.html"
+    "path": "papers/2605.17933-atlasva-visual-skill-memory/index.html",
+    "categories": [
+      "agent",
+      "self-evolving"
+    ]
   },
   {
     "slug": "2605.27366-muse-autoskill",
@@ -35,7 +39,11 @@
       "Self-Evolving",
       "Memory"
     ],
-    "path": "papers/2605.27366-muse-autoskill/index.html"
+    "path": "papers/2605.27366-muse-autoskill/index.html",
+    "categories": [
+      "agent",
+      "self-evolving"
+    ]
   },
   {
     "slug": "2605.24426-seal-coevolution-agents-environments",
@@ -55,7 +63,11 @@
       "Tool-Use",
       "RL"
     ],
-    "path": "papers/2605.24426-seal-coevolution-agents-environments/index.html"
+    "path": "papers/2605.24426-seal-coevolution-agents-environments/index.html",
+    "categories": [
+      "agent",
+      "self-evolving"
+    ]
   },
   {
     "slug": "2026-05-30-kaonai-online-autoresearch",
@@ -74,7 +86,11 @@
       "RL",
       "Online-Feedback"
     ],
-    "path": "papers/2026-05-30-kaonai-online-autoresearch/index.html"
+    "path": "papers/2026-05-30-kaonai-online-autoresearch/index.html",
+    "categories": [
+      "agent",
+      "self-evolving"
+    ]
   },
   {
     "slug": "2601.06487-arenarl",
@@ -93,7 +109,10 @@
       "Ranking",
       "Open-Ended"
     ],
-    "path": "papers/2601.06487-arenarl/index.html"
+    "path": "papers/2601.06487-arenarl/index.html",
+    "categories": [
+      "agent"
+    ]
   },
   {
     "slug": "2605.26494-minimax-m2",
@@ -112,7 +131,11 @@
       "RL",
       "Self-Evolving"
     ],
-    "path": "papers/2605.26494-minimax-m2/index.html"
+    "path": "papers/2605.26494-minimax-m2/index.html",
+    "categories": [
+      "agent",
+      "self-evolving"
+    ]
   },
   {
     "slug": "2605.23904-skillopt",
@@ -131,7 +154,11 @@
       "Self-Evolving",
       "Optimization"
     ],
-    "path": "papers/2605.23904-skillopt/index.html"
+    "path": "papers/2605.23904-skillopt/index.html",
+    "categories": [
+      "agent",
+      "self-evolving"
+    ]
   },
   {
     "slug": "2605.24539-demoevolve",
@@ -150,7 +177,11 @@
       "Demonstrations",
       "Self-Evolving"
     ],
-    "path": "papers/2605.24539-demoevolve/index.html"
+    "path": "papers/2605.24539-demoevolve/index.html",
+    "categories": [
+      "agent",
+      "self-evolving"
+    ]
   },
   {
     "slug": "2026-05-30-learning-beyond-gradients",
@@ -169,7 +200,11 @@
       "RL",
       "Continual-Learning"
     ],
-    "path": "papers/2026-05-30-learning-beyond-gradients/index.html"
+    "path": "papers/2026-05-30-learning-beyond-gradients/index.html",
+    "categories": [
+      "agent",
+      "self-evolving"
+    ]
   },
   {
     "slug": "2603.19312-leworldmodel",
@@ -188,7 +223,10 @@
       "Planning",
       "Control"
     ],
-    "path": "papers/2603.19312-leworldmodel/index.html"
+    "path": "papers/2603.19312-leworldmodel/index.html",
+    "categories": [
+      "world-model"
+    ]
   },
   {
     "slug": "2605.15155-sdar",
@@ -207,7 +245,11 @@
       "Distillation",
       "Self-Distillation"
     ],
-    "path": "papers/2605.15155-sdar/index.html"
+    "path": "papers/2605.15155-sdar/index.html",
+    "categories": [
+      "agent",
+      "self-evolving"
+    ]
   },
   {
     "slug": "2604.15840-coevolve-agent-data-mutual-evolution",
@@ -226,7 +268,11 @@
       "Synthetic-Data",
       "Self-Evolving"
     ],
-    "path": "papers/2604.15840-coevolve-agent-data-mutual-evolution/index.html"
+    "path": "papers/2604.15840-coevolve-agent-data-mutual-evolution/index.html",
+    "categories": [
+      "agent",
+      "self-evolving"
+    ]
   },
   {
     "slug": "2604.20779-swe-chat-coding-agent-in-the-wild",
@@ -245,7 +291,10 @@
       "Vibe-Coding",
       "Code-Security"
     ],
-    "path": "papers/2604.20779-swe-chat-coding-agent-in-the-wild/index.html"
+    "path": "papers/2604.20779-swe-chat-coding-agent-in-the-wild/index.html",
+    "categories": [
+      "agent"
+    ]
   },
   {
     "slug": "2604.08377-skillclaw-collective-skill-evolution",
@@ -264,7 +313,11 @@
       "Self-Improving",
       "WildClawBench"
     ],
-    "path": "papers/2604.08377-skillclaw-collective-skill-evolution/index.html"
+    "path": "papers/2604.08377-skillclaw-collective-skill-evolution/index.html",
+    "categories": [
+      "agent",
+      "self-evolving"
+    ]
   },
   {
     "slug": "2605.07725-sod",
@@ -283,7 +336,10 @@
       "On-Policy",
       "Small-Models"
     ],
-    "path": "papers/2605.07725-sod/index.html"
+    "path": "papers/2605.07725-sod/index.html",
+    "categories": [
+      "agent"
+    ]
   },
   {
     "slug": "2605.15040-orchard-agentic-modeling",
@@ -302,7 +358,10 @@
       "GUI-Agent",
       "SFT-RL"
     ],
-    "path": "papers/2605.15040-orchard-agentic-modeling/index.html"
+    "path": "papers/2605.15040-orchard-agentic-modeling/index.html",
+    "categories": [
+      "agent"
+    ]
   },
   {
     "slug": "2604.02268-skill-zero-skill-internalization",
@@ -321,7 +380,11 @@
       "Curriculum",
       "Token-Efficiency"
     ],
-    "path": "papers/2604.02268-skill-zero-skill-internalization/index.html"
+    "path": "papers/2604.02268-skill-zero-skill-internalization/index.html",
+    "categories": [
+      "agent",
+      "self-evolving"
+    ]
   },
   {
     "slug": "2605.10906-datamaster-data-centric-autonomous-ai",
@@ -340,7 +403,10 @@
       "AutoML",
       "Post-Training"
     ],
-    "path": "papers/2605.10906-datamaster-data-centric-autonomous-ai/index.html"
+    "path": "papers/2605.10906-datamaster-data-centric-autonomous-ai/index.html",
+    "categories": [
+      "agent"
+    ]
   },
   {
     "slug": "2605.09998-continual-harness-self-improving-agents",
@@ -359,6 +425,33 @@
       "In-Context-Learning",
       "LLM-Agent"
     ],
-    "path": "papers/2605.09998-continual-harness-self-improving-agents/index.html"
+    "path": "papers/2605.09998-continual-harness-self-improving-agents/index.html",
+    "categories": [
+      "agent",
+      "self-evolving"
+    ]
+  },
+  {
+    "slug": "2605.12090-world-action-models-survey",
+    "title": "World Action Models: The Next Frontier in Embodied AI",
+    "authors": "Siyin Wang, Junhao Shi, Zhaoyang Fu, Xinzhe He, Feihong Liu, Chenchen Yang, Yikang Zhou, Zhaoye Fei, Jingjing Gong, Jinlan Fu, Mike Zheng Shou, Xuanjing Huang, Xipeng Qiu, Yu-Gang Jiang",
+    "team": "Fudan University (OpenMOSS); Shanghai Innovation Institute; NUS",
+    "arxiv": "https://arxiv.org/abs/2605.12090",
+    "code": "https://github.com/OpenMOSS/Awesome-WAM",
+    "date": "2026-05-30",
+    "published": "arXiv 2026",
+    "tldr": "首篇系统综述 World Action Models（WAMs）：把环境未来预测与动作生成统一进一个具身 foundation model、建模 p(o',a|o,l)；提出 Cascaded/Joint 分类法，梳理数据与评测协议，并指出'视觉逼真≠动作可行'的评测割裂缺陷。",
+    "tags": [
+      "Survey",
+      "World-Action-Model",
+      "Embodied-AI",
+      "VLA",
+      "World-Model"
+    ],
+    "path": "papers/2605.12090-world-action-models-survey/index.html",
+    "categories": [
+      "agent",
+      "world-model"
+    ]
   }
 ]

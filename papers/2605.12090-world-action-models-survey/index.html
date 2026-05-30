@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>World Action Models：具身 AI 的下一个前沿（综述） · 论文解读</title>
+
+<script>
+  window.MathJax = {
+    tex:{inlineMath:[['$','$'],['\\(','\\)']], displayMath:[['$$','$$'],['\\[','\\]']]},
+    svg:{fontCache:'global'}
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;
+  }
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:880px; margin:0 auto; padding:18px 22px 90px}
+
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:27px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)}
+  .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .meta-grid a:hover{text-decoration:underline}
+
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap}
+  nav.toc a:hover{color:var(--accent)}
+
+  section{margin:38px 0}
+  h2{font-size:21px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:17px; margin:24px 0 8px}
+  h4{font-size:15px; margin:18px 0 6px; color:var(--accent2)}
+  p{margin:12px 0}
+  ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.9em}
+  strong{color:var(--text)}
+
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:13.5px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:9px 11px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  .yes{color:var(--ok); font-weight:600}
+  .no{color:var(--muted)}
+
+  figure{margin:24px 0; text-align:center}
+  figure img{max-width:100%; height:auto; border:1px solid var(--line); border-radius:10px; background:#fff}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+
+  blockquote{border-left:3px solid var(--line); margin:14px 0; padding:2px 16px; color:var(--muted)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+  .mjx-container{overflow-x:auto; overflow-y:hidden}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <!-- ============================ 抬头 / 元信息 ============================ -->
+  <header class="head">
+    <div class="chips">
+      <span class="chip">Survey</span>
+      <span class="chip">World Action Model</span>
+      <span class="chip">Embodied AI</span>
+      <span class="chip">VLA</span>
+      <span class="chip">World Model</span>
+    </div>
+    <h1>World Action Models：具身 AI 的下一个前沿（综述）</h1>
+    <p class="orig-title">World Action Models: The Next Frontier in Embodied AI</p>
+    <dl class="meta-grid">
+      <dt>作者</dt><dd>Siyin Wang, Junhao Shi, Zhaoyang Fu, Xinzhe He, Feihong Liu, Chenchen Yang, Yikang Zhou, Zhaoye Fei, Jingjing Gong, Jinlan Fu, Mike Zheng Shou, Xuanjing Huang, Xipeng Qiu, Yu-Gang Jiang</dd>
+      <dt>团队 / 机构</dt><dd>Fudan University（Institute of Trustworthy Embodied AI / OpenMOSS）、Shanghai Innovation Institute、National University of Singapore</dd>
+      <dt>原文链接</dt><dd><a href="https://arxiv.org/abs/2605.12090" target="_blank" rel="noopener">https://arxiv.org/abs/2605.12090</a></dd>
+      <dt>发表 / 年份</dt><dd>arXiv 2026（2605.12090v1, 12 May 2026）</dd>
+      <dt>解读日期</dt><dd>2026-05-30</dd>
+    </dl>
+  </header>
+
+  <div class="tldr">
+    <b>TL;DR</b> — 这是<strong>第一篇系统综述 World Action Models（WAMs）</strong>的工作：WAM 指那种把「预测环境如何演化」和「生成动作」统一在一个具身 foundation model 里、建模联合分布 $p(o',a\mid o,l)$ 而非只建模 $p(a\mid o)$ 的范式，被定位为 VLA 之后的下一代具身策略形态。论文做了三件事：(1) 给 WAM 一个形式化定义，并把它与 VLA、World Model、Video Policy、Action World Model 等近义概念严格区分开；(2) 把现有方法组织成 <strong>Cascaded WAM</strong>（先预测未来状态再解出动作，世界模型与动作解码解耦）和 <strong>Joint WAM</strong>（在一个模型里联合预测未来状态与动作）两大类，并按生成模态（autoregressive / diffusion）、条件机制、动作解码方式进一步细分；(3) 梳理喂养 WAM 的四类数据生态（遥操作、UMI 式人手演示、仿真、互联网级 egocentric 视频）与围绕<strong>视觉保真度、物理常识、动作可行性</strong>三轴的评测协议。最关键的批判性发现：很多视觉上很逼真的世界模型，在「动作可行性」测试下成功率几乎归零——好看 ≠ 能用，这暴露了当前评测把「世界建模」和「动作生成」割裂开来打分的根本缺陷。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#opensource">① 开源贡献</a>
+    <a href="#motivation">② 动机与贡献</a>
+    <a href="#method">③ 方法（分类体系）</a>
+    <a href="#evaluation">④ 评测与数据</a>
+    <a href="#insight">⑤ 洞见</a>
+  </nav>
+
+  <!-- ============================ ① 开源贡献 ============================ -->
+  <section id="opensource">
+    <h2><span class="n">①</span>开源贡献 Open-source Artifacts</h2>
+    <p>作为一篇综述，本文的「开源」主要是一个配套的 <strong>awesome-list / 论文索引仓库</strong>与一个可交互的项目主页（含 leaderboard 与可筛选的 paper library），而非可下载的模型权重或新数据集。仓库以 MIT 许可证发布，本身<strong>不托管</strong>权重 / 数据，而是把所有被综述的论文、代码、模型、数据集以外链（GitHub / Hugging Face / 项目页）方式索引出来，并按本文的 Cascaded / Joint 分类法组织，方便按架构家族检索。以下链接均已核实可访问。</p>
+    <table>
+      <thead><tr><th>类型</th><th>是否开源</th><th>内容 / 链接</th></tr></thead>
+      <tbody>
+        <tr><td>论文索引仓库 Code/List</td><td class="yes">✔</td><td><a href="https://github.com/OpenMOSS/Awesome-WAM" target="_blank" rel="noopener">github.com/OpenMOSS/Awesome-WAM</a><br>综述配套的 awesome-list；顶层章节对应正文结构（World Action Model / World Model for VLA / Training Data / Evaluation）。<strong>MIT License</strong>（Copyright © 2026 OpenMOSS (SII)）。仅做外链索引，不含训练 / 推理脚本。</td></tr>
+        <tr><td>项目主页 / Leaderboard</td><td class="yes">✔</td><td><a href="https://openmoss.github.io/Awesome-WAM" target="_blank" rel="noopener">openmoss.github.io/Awesome-WAM</a><br>八大板块的网页版综述 + 可筛选论文库（按 Cascaded / Joint 过滤、按时间 / 字母排序）+ 一个 WAM 方法 leaderboard 页面。已上线。</td></tr>
+        <tr><td>模型权重 Weights</td><td class="no">✘</td><td>本文不发布新模型权重（综述性质）。所综述的各模型权重需到各自原仓库 / Hugging Face 获取。</td></tr>
+        <tr><td>数据集 Dataset</td><td class="no">✘</td><td>本文不发布新数据集；正文 Table 4–7 系统整理了既有遥操作 / UMI / 仿真 / egocentric 数据集并给出来源，但数据由各原作者托管。</td></tr>
+        <tr><td>Benchmark / 环境</td><td class="no">✘</td><td>本文不提供新 benchmark；Table 8–9 汇总了 40+ 既有评测协议（如 LIBERO、RoboTwin、WorldModelBench、Physics-IQ、WorldSimBench 等），均为外部资源。</td></tr>
+      </tbody>
+    </table>
+    <div class="callout note">
+      <span class="label">核实说明</span>
+      GitHub 仓库与项目主页均已通过网络抓取确认存在且内容与本文一致；许可证文件确认为 MIT（持有人 OpenMOSS (SII)，2026）。本文未声称发布任何新的模型 / 数据 / benchmark，其贡献是<strong>概念框架 + 分类体系 + 资源索引</strong>。
+    </div>
+  </section>
+
+  <!-- ============================ ② 动机与贡献 ============================ -->
+  <section id="motivation">
+    <h2><span class="n">②</span>研究动机与贡献 Motivation &amp; Contribution</h2>
+
+    <h3>背景与问题</h3>
+    <p>近年具身 AI 收敛到一个强范式：<strong>Vision-Language-Action（VLA）</strong>模型——复用预训练的 vision-language backbone 作为通用机器人策略，把动作生成建模为在大规模视觉 / 语言表征之上的条件 token 预测。RT-2、OpenVLA、$\pi_0$ 等展示了惊人的语义泛化：能跟随新语言指令、操纵没见过的物体、在不同 embodiment 间迁移。VLA 的目标可以写成一个纯粹的「观测→动作」映射：</p>
+    $$\mathcal{L}_{\text{VLA}} = \mathbb{E}_{(o,l,a)\sim\mathcal{D}}\big[-\log p(a\mid o,l)\big]$$
+    <p>但 VLA 有一个结构性缺陷：它<strong>只学反应式映射，不显式建模世界在干预下如何演化</strong>。换句话说，策略并不「预想」自己动作的后果。这种缺乏预测式物理推理的特性限制了泛化——尤其在需要预判未来状态的场景里。与此同时，纯 World Model（WM）走的是另一条路，只建模前向动力学：</p>
+    $$\mathcal{L}_{\text{WM}} = \mathbb{E}_{(o,a,o')\sim\mathcal{D}}\big[-\log p(o'\mid o,a)\big]$$
+    <p>它能模拟环境演化，却不直接产生可执行控制。一个自然的方向就此浮现：<strong>把 world modeling 的能力装进具身策略里</strong>——既要预测未来，又要根据预测产生动作。这条线最近迅速升温，但文献高度碎片化：架构五花八门、训练目标各异、应用场景分散，缺一个统一的概念框架。</p>
+
+    <h3>本文的切入点</h3>
+    <p>作者把这一新兴范式正式命名并定义为 <strong>World Action Models（WAMs）</strong>：一类把<em>预测式状态建模</em>与<em>动作生成</em>统一起来的具身 foundation model，其目标是建模未来状态与动作的<strong>联合 / 条件分布</strong>，而非仅仅是动作：</p>
+    $$\mathcal{L}_{\text{WAM}} = \mathbb{E}_{(o,l,o',a)\sim\mathcal{D}}\big[-\log p(o',a\mid o,l)\big]$$
+    <p>其中 $o$ 是当前观测（视觉 / 本体感知 / 其他模态），$l$ 是语言指令，$a$ 是动作，$o'$ 是下一时刻观测。作者进一步给出 WAM 的两条核心判据：<strong>(1) Forward Predictive Modeling</strong>——模型必须以某种可量化的形式预测环境未来演化 $o'$（可以是 pixel 级视频 / 光流的显式预测，也可以是物理 grounded 的 latent 表征）；<strong>(2) Coupled Action Generation</strong>——动作 $a$ 必须与预想的未来 $o'$ 严格对齐推出（既可以是联合概率输出，也可以是 cascaded / unified latent 架构里的 policy conditioning）。基于联合分布是否被显式因子化，WAM 自然分成两类：</p>
+    <ul>
+      <li><strong>Cascaded WAM</strong>：显式因子化目标，$p(o',a\mid o,l)=p(a\mid o',o,l)\,p(o'\mid o,l)$——先合成对未来状态的预测，动作再从中导出。世界模型与动作解码是<em>分开训练</em>的两个模块。</li>
+      <li><strong>Joint WAM</strong>：直接建模联合分布 $p(o',a\mid o,l)$——状态预测与动作生成在共享表征里<em>联合训练、协同优化</em>，迫使模型把环境动力学与控制信号之间的因果依赖内化进去。</li>
+    </ul>
+    <p>论文还专门做了概念澄清，把 WAM 与几个易混概念区分开（见图 2）：<strong>Video Action Models（VAMs）</strong>是把动作和视频帧合成对齐的子集，而 WAM 是模态无关的更广超集（video 只是众多预测代理之一，也可以是单图状态转移、点云、触觉 / 力反馈）；<strong>Video Policies</strong>是由生成式视频架构这一「出身」定义的，只是借用视频骨干的时空表征做 $p(a\mid o)$，未必带显式世界建模目标；<strong>Action World Model（AWM）</strong>功能上等价，但措辞把名词落在「World Model」、强调系统是一个增强版模拟器，而「World Action Model」把名词落在「Model」、把 World 和 Action 摆成并列的两个等权组件，强调它是 VLA 的直接概念继承者、一个完整的机器人 foundation model。</p>
+
+    <h3>核心贡献</h3>
+    <ol>
+      <li><strong>提出并形式化 WAM 范式</strong>，给出 $\mathcal{L}_{\text{WAM}}$ 的统一目标与两条判据，并把它与 VLA / WM / VAM / Video Policy / AWM 逐一辨析，澄清了当前碎片化的术语边界。</li>
+      <li><strong>建立结构化分类体系</strong>：Cascaded vs Joint 两大架构家族，再按生成模态（显式 pixel / 隐式 latent；autoregressive / diffusion）、条件机制、动作解码策略细分；并配套一张时间演化 + taxonomy 的方法谱系图（图 1）和一张覆盖背景 / 架构 / 数据 / 评测四大维度的全景 roadmap（图 2）。</li>
+      <li><strong>系统分析数据生态</strong>：梳理喂养 WAM 的四类数据源（高保真 robot-centric 遥操作、敏捷的 UMI 式便携人手演示、可大规模生成的仿真、互联网级 human / egocentric 视频），讨论各自在「迁移难度 vs 扩展难度」坐标上的取舍（图 7），并整理成 Table 4–7。</li>
+      <li><strong>综合新兴评测协议</strong>：把 WAM 评测组织成<em>世界建模能力</em>（视觉保真度 / 物理常识 / 动作可行性）与<em>动作策略能力</em>两条轴，整理 40+ benchmark（Table 8–9），并指出当前评测把两者割裂打分、缺乏「联合评测」的关键空白。</li>
+      <li><strong>提炼开放挑战</strong>：架构耦合是否真需要显式 pixel 预测、多模态物理状态表示、数据混合配方、长程规划与时间抽象、推理延迟（real-time 控制的「latency tax」）、评测方法学、安全部署等七大方向。</li>
+    </ol>
+    <figure>
+      <img src="figures/fig3_wam_vs_concepts.png" alt="WAM 与 VLA / WM 的输入输出对比，以及 WAM 与 VAM / Video Policy 的概念范围">
+      <figcaption>图 1：WAM 的概念定义与辨析。左：VLA（$o,l\!\to\!a$）、WAM（$o,l\!\to\!o',a$，同时预测动作与未来观测）、WM（$o,a\!\to\!o'$）三者输入输出对照；右：WAM（=AWM）作为最广的超集，包含 VAM、再到 Video Policy 的概念范围嵌套关系。（出处：原文 Figure 3）</figcaption>
+    </figure>
+  </section>
+
+  <!-- ============================ ③ 方法（分类体系） ============================ -->
+  <section id="method">
+    <h2><span class="n">③</span>方法：WAM 的分类体系 Taxonomy</h2>
+    <p>综述的「方法」核心是它的分类法。整体框架如图 2 的方法谱系图所示：所有 WAM 从一个共同根分叉成左侧 <strong>Joint WAM</strong>（紧耦合世界预测与动作生成，再分 Autoregressive / Diffusion-based，连续路线又细分 Unified Stream / Multi-Stream）与右侧 <strong>Cascaded WAM</strong>（世界建模与动作执行主要解耦，沿 Explicit / Implicit 两条对齐轨迹演化）。作者强调这些结构是<em>探索性方向</em>而非严格的相互替代。下面分两大家族展开。</p>
+
+    <figure>
+      <img src="figures/fig1_taxonomy_tree.png" alt="WAM 代表性工作的时间演化与分类树">
+      <figcaption>图 2：WAM 代表性工作的时间演化与 taxonomy。左枝 Joint WAM（Autoregressive / Diffusion-based，后者再分 Unified / Multi-Stream），右枝 Cascaded WAM（Explicit / Implicit），自 2024 → 2026 的演进谱系。（出处：原文 Figure 1）</figcaption>
+    </figure>
+
+    <h3>3.1 在 VLA 之前：World Model 怎样服务 VLA</h3>
+    <p>在把世界模型「装进」策略之前，世界模型先是作为<strong>外部工具</strong>服务 VLA 的训练与评测（图 3）。作者归纳出四种用法：<strong>(a) Imitation Learning</strong>——用世界模型生成 / 过滤训练轨迹来增广模仿学习数据（如 DREMA 用 object-centric Gaussian Splatting + 物理仿真做单样本策略学习；Ctrl-World 合成成功轨迹做 SFT，把 $\pi_{0.5}$-DROID 在下游任务成功率提升 44.7%）；<strong>(b) Reinforcement Learning</strong>——把学到的世界模型当 surrogate environment，在 imagination 里 rollout 做 model-based RL（Dreamer 系列）；<strong>(c) Reward Modeling</strong>——从生成式世界模型导出奖励信号（VIPER 用视频预测兼容性做 action-free reward；Diffusion Reward 用条件视频扩散的熵；GenReward / SRPO 用 latent 对齐 / V-JEPA 2 latent 做 progress-wise 奖励）；<strong>(d) Policy Evaluation</strong>——把世界模型当 data-driven 模拟器做闭环 rollout 测试（Ctrl-World 逐帧注入动作；Veo Robotics 用动作条件视频生成做红队测试）。</p>
+    <figure>
+      <img src="figures/fig4_wm_for_vla.png" alt="世界模型服务 VLA 学习与评测的四种用法示意">
+      <figcaption>图 3：世界模型支撑 VLA 的四种角色——(a) 生成/过滤轨迹做 imitation learning；(b) 在 imagination 里做 reinforcement learning 并 reward modeling；(c) 从学到的动力学产生奖励信号；(d) 作 data-driven 模拟器做 policy evaluation。$\mathcal{T}$ 表示 rollout 轨迹。（出处：原文 Figure 4）</figcaption>
+    </figure>
+
+    <h3>3.2 Cascaded WAM：先预测未来，再解出动作</h3>
+    <p>Cascaded WAM 用一个<strong>两阶段串行管线</strong>：阶段一的世界模型先合成一个代表预想未来的「视觉计划」，阶段二的动作模型再从这个计划里解出可执行控制命令。这种解耦带来天然的归纳偏置——世界模型不必懂机器人运动学，动作模型不必解长程场景预测——但也引入了贯穿所有设计决策的两阶段耦合问题。按中间「规划载体」的类型分两类（见图 4）。</p>
+    <figure>
+      <img src="figures/fig5_cascaded.png" alt="Cascaded WAM 三种结构示意">
+      <figcaption>图 4：Cascaded WAM 结构对比。1(a) Learned Action：世界模型生成显式 pixel 级未来计划，再由学到的 inverse-dynamics / 动作模型映射到动作；1(b) Geometric Extraction：从显式视觉计划用几何抽取（光流 / 位姿）得到动作；2(a) Latent Representation：中间载体是 latent 未来表征而非 RGB 帧，动作模型从中解码命令。（出处：原文 Figure 5）</figcaption>
+    </figure>
+
+    <h4>4.1.1 Explicit Planning：pixel-space 中间表征</h4>
+    <p>最直接的做法用原始 pixel 帧作中间表征——可解释、且能充分利用互联网级视频生成模型的表征能力。按动作如何从合成视频里抽取，又分两支：</p>
+    <ul>
+      <li><strong>Learned Action Extraction（学到的逆动力学）</strong>：<code>UniPi</code> 奠定了「文本条件时空 U-Net 扩散合成任务执行视频 + 卷积 IDM 在相邻帧间回归动作」的两阶段蓝本，但单次长程生成会语义漂移、误差累积。后续工作针对性改进：<code>VLP</code> 引入 VLM 做层次化子动作生成 + tree-search 价值打分以约束误差；<code>RoboEnvision</code> 用非自回归策略，先生成关键帧再插值；<code>ThisThat</code> 用指代表达（"this"/"that"）+ 手势坐标解决同类多物体的语言歧义；<code>Say, Dream, and Act</code> 用对抗蒸馏减少去噪步、并解耦轨迹规划与执行频率；<code>TesserAct</code> 把预测目标扩展到 RGB-D + surface normal，引入显式几何约束；<code>MVISTA-4D</code> 用轨迹级 latent 优化 + 残差 IDM 替代逐步 IDM。还有 <code>Vidar</code>（统一双臂建模）、<code>Gen2Act</code>（零样本调 VideoPoet）、<code>Veo-Act</code>（接触阶段用门控把控制权交给反应式 VLA）、<code>VAG</code> / $\pi_{0.7}$（把第二阶段 IDM 换成 1D U-Net / 预训练 VLA）。</li>
+      <li><strong>Geometric Action Extraction（几何抽取）</strong>：把动作抽取从「逆动力学学习问题」变成「解析可算的几何问题」。以<em>光流</em>为中间表征：<code>AVDC</code> 从生成视频算稠密光流、解析推 SE(3)，全程无需动作标注；<code>Im2Flow2Act</code> 把光流估计搬到 latent；<code>3DFlowAction</code> 升到 3D 光流；<code>NovaFlow</code> / <code>Dream2Flow</code> 推向零训练。以<em>位姿跟踪</em>为代理：<code>Dreamitate</code>（工具 6-DoF 位姿 + 立体几何）、<code>4DGen</code>（多视角 RGB + 3D point map）、<code>RIGVid</code>（FoundationPose 跟踪物体 + 轨迹重定向）、<code>LVP</code>（重建 3D 手姿映射到末端轨迹 + Diffusion Forcing）。</li>
+    </ul>
+    <p>这一类方法对应正文 <strong>Table 1</strong> 的系统对比，关键维度包括：中间表征（Pixel RGB / 光流 / latent）、阶段一骨干（U-Net / DiT / Cosmos / WAN / Veo-3 等）、阶段二模型、是否需要<em>动作标注</em>（Act. Label）、是否<em>零样本</em>（无需任务特定训练），以及在 Sim / Real 上的评测平台。</p>
+
+    <h4>4.1.2 Implicit Planning：latent 中间表征</h4>
+    <p>pixel 级视频合成的计算开销是 real-time 部署的主要瓶颈。隐式路线观察到：扩散过程中形成的中间 latent 已编码了规划所需的动力学信息，<strong>解码回 pixel 空间是多余的</strong>，于是把规划载体换成始终停留在压缩表征里的 latent 序列。代表：<code>VPP</code>（VAE 编码观测 + 扩散单步预测未来 latent + 轻量 policy，首次在该框架达到 real-time）；<code>VILP</code>（多视角 latent 规划）；<code>S-VAM</code>（self-distillation 把多步 SVD teacher 压成单次前向）；<code>Video Policy</code>（冻结视频 U-Net、单独训 action U-Net 从中间特征解码动作）；<code>ARDuP</code>（Co-Tracker + SAM 做伪监督聚焦交互区）；<code>mimic-video</code>（flow matching + 部分去噪在中间检查点抽特征）；<code>MWM</code>（用未来语义 mask latent 替代 RGB 预测，过滤光度噪声）；<code>OmniVTA</code>（视觉 + 触觉 latent 联合）。此外 <code>LAPA</code> 用 VQ-VAE 从无标注视频学「state-latent action」先验、只需少量真实动作微调；<code>villa-X</code> 引入 proprio-FDM 把 latent action 物理 grounding。</p>
+
+    <h3>3.3 Joint WAM：在一个模型里联合预测状态与动作</h3>
+    <p>Joint WAM 把未来世界状态与动作放进<strong>单一统一模型</strong>联合监督训练。中心设计问题是：世界状态与动作如何在共享预测系统里耦合。按底层「基质」分两支：autoregressive（序列化进 token 空间做因果预测）与 diffusion-based（在连续 latent 里通过扩散 / flow 并行生成）。</p>
+
+    <h4>4.2.1 Autoregressive Generation</h4>
+    <p>依赖因果、从左到右的序列解码同时参数化未来状态与控制信号。共享「因果序列建模」统一了这些架构，但把控制和视频生成强行做成严格 left-to-right 预测，带来两个张力：早期视觉幻觉会<strong>灾难性误差传播</strong>级联成动作失败；序列解码的计算瓶颈与 real-time 低延迟需求冲突。按目标表征又分三种范式（对应 <strong>Table 2</strong>）：</p>
+    <ul>
+      <li><strong>Explicit Decoupled Representation（显式解耦）</strong>：模态在表征层保持分离，靠显式注入的控制 token（如 [ACT]、[OBS]）路由到结构上独立的输出头——通常连续动作解码器配上离散视觉 patch 回归分支。代表 <code>GR-1</code>（GPT 式因果 Transformer，双分支同时解码未来 patch + 连续动作，195M）、<code>GR-MG</code>（[PROG] token 把世界 rollout 分成宏 / 微步）、<code>GR-2</code>（VQGAN 离散视觉 + CVAE 动作 chunk，30–719M）。</li>
+      <li><strong>Unified Discrete Representations（统一离散）</strong>：异构模态被完全量化进单一共享 LLM 词表，物理动力学和视觉状态用同一 next-token 头生成。挑战在于设计 attention / routing 缓解长串离散 token 自回归的复合误差。<code>CoT-VLA</code>（先因果生成离散视觉 chain-of-thought、再切全注意力同步预测动作，7B）、<code>WorldVLA</code>（modality-specific causal masking，禁止当前动作 token 关注同 chunk 内已生成动作）、<code>RynnVLA-002</code>（离散 MLLM + 轻量连续 Action Transformer 头）、$\mathcal{F}_1$（Mixture-of-Transformer：Generation expert 预测离散 VQ token、Action expert 从幻觉视觉 foresight 推控制，4.2B）。</li>
+      <li><strong>Predictive Latent Representations（预测式 latent）</strong>：放弃显式 token 生成，在抽象连续 latent 上自回归。<code>VLA-JEPA</code>（基于 JEPA，把未来帧只当孤立监督目标、保持结构无泄漏，靠 embodied action token 条件一个 flow-matching 头执行物理动作，2B）。</li>
+    </ul>
+
+    <h4>4.2.2 Diffusion-based Generation</h4>
+    <p>用多步生成过程捕捉未来状态的复杂分布，跨多步 horizon 并行生成未来世界状态与动作序列，克服自回归的序列瓶颈，支撑高频闭环控制。按预测流的结构耦合分两大类（见图 5）：</p>
+    <figure>
+      <img src="figures/fig6_joint_diffusion.png" alt="Diffusion-based Joint WAM 的主要架构模式">
+      <figcaption>图 5：Diffusion-based Joint WAM 的架构 taxonomy。1(a) Unified Stream：世界与动作在单个 DiT backbone 里整合，世界建模可显式或隐式；2(a) Multi-Stream Cross-Attention Coupled：独立 Video DiT 与 Action DiT 通过显式 cross-attention 耦合；2(b) Hidden-State Coupled：从 video DiT 取中间 hidden state 条件 action DiT；2(c) Shared Representation：视频与动作先过统一 encoder 再各自解码。（出处：原文 Figure 6）</figcaption>
+    </figure>
+    <ul>
+      <li><strong>Unified Stream（单流）</strong>：世界与动作变量被吸进一个统一 backbone（通常单个 DiT），方法特异性体现在预测目标 / 辅助 token / 条件注入方式。又分 <em>Explicit Future Prediction</em>（未来观测或其 latent 代理是直接预测目标）与 <em>Implicit Future Prediction</em>。代表：<code>PAD</code>（联合去噪拼接的未来 image latent + 动作 token，消融证明去掉未来图像预测会损害控制）、<code>VideoVLA</code>（复用 CogVideoX-5B）、<code>UWM</code>（给世界 / 动作变量分配独立可控噪声等级，测试时切换 policy / forward / inverse / 纯视频四种模式）、<code>Cosmos Policy</code>（latent frame injection，一个 checkpoint 同时当 policy / world model / value function）、<code>DreamZero</code>（基于 Wan2.1，KV-cache 观测替换防漂移，系统级优化把推理推到 7Hz，14B）、<code>GigaWorld-Policy</code>、<code>X-WAM</code>（复制末层 DiT 块做 RGB-D 深度分支 + Asynchronous Noise Sampling）；离散扩散有 <code>UD-VLA</code>。Implicit 一类有 <code>FLARE</code>（可学习 future token 的激活对齐冻结 teacher 编码的真实未来视觉 embedding）、<code>FRAPPE</code>（冻结 RDT backbone + 多对齐 expert，Mixture-of-Prefix-and-LoRA）。</li>
+      <li><strong>Multi-Stream（多流）</strong>：世界与动作分配到多个协调分支，交互方式必须被架构显式指定。三种耦合接口：<br>
+      <strong>① Cross-Attention Coupling</strong>——独立 Video DiT 与 Action DiT 通过显式 cross-attention 交互：<code>CoVAR</code>（Bridge Attention）、<code>LDA-1B</code>（MM-DiT 共享自注意力、在 DINO latent 而非 VAE latent 里预测未来）、<code>DUST</code>（两模态用独立噪声时间步 + 独立 flow-matching 损失，异步采样）、<code>LingBot-VA</code> / <code>DexWorldModel</code> / <code>AIM</code>（收敛到 Mixture-of-Transformers 作统一耦合基质 + KV-cache）、<code>Motus</code>（加 semantic understanding expert 做 Tri-modal Joint Attention）、<code>MotuBrain</code>、<code>AdaWorldPolicy</code>（加 force predictor 第三专家）。<br>
+      <strong>② Hidden-State Coupling</strong>——世界分支把内部表征（imagined latent 轨迹 / 多尺度转移特征 / 去噪 hidden state）单向传给动作分支：<code>DiT4DiT</code>（hook 算子截取 hidden 激活经 cross-attention 传给 Action DiT）、<code>Fast-WAM</code>（推理时整支去掉未来视频分支、只用单次前向编码当前视觉）、<code>WAV</code>（显式 trajectory-value 分支）、<code>Act2Goal</code>（Multi-Scale Temporal Hashing 组织 proximal/distal 时间结构 + HER 式 goal relabeling）。<br>
+      <strong>③ Shared Representation</strong>——视觉与动作先融进共同 latent / 统一 encoder 再各自解码：<code>UVA</code>（共享 Transformer + 两个轻量扩散头，masked 训练让同一 backbone 当 policy / video / forward-inverse dynamics / planner，0.5B）、<code>PhysGen</code>（NOVA backbone，Lookahead Multi-Token Prediction）。</li>
+    </ul>
+    <p>这一支对应正文 <strong>Table 3</strong>，按 Unified/Multi-Stream × Explicit/Implicit × 三种耦合接口组织，列出各模型参数规模（如 DreamZero 14B、Motus 8B、UD-VLA 8B、UVA 0.5B）、骨干（Cosmos / Wan / CogVideoX / Genie Envisioner 等）、I/O 模态与 Sim/Real 评测。</p>
+
+    <div class="callout note">
+      <span class="label">分类法要点（便于复现 / 选型）</span>
+      理解一个 WAM 只需问四个问题：<strong>(1) 世界模型与动作解码是分开训（Cascaded）还是联合训（Joint）？(2) 中间 / 预测目标是显式 pixel 还是隐式 latent？(3) 生成机制是 autoregressive 还是 diffusion？(4) 两个模态怎么耦合——单流共享 backbone、cross-attention、hidden-state 单向传递，还是共享 encoder？</strong>这四个轴几乎能定位文中所有方法，也对应到关键工程取舍：pixel 显式可解释但慢、latent 隐式快但 grounding 质量待验证；单流同步最紧但灵活性低、多流灵活但要显式设计交互。
+    </div>
+  </section>
+
+  <!-- ============================ ④ 评测与数据 ============================ -->
+  <section id="evaluation">
+    <h2><span class="n">④</span>评测协议与数据生态 Evaluation &amp; Data</h2>
+    <p>综述没有自己的实验数字，但系统综合了 WAM 的<strong>评测协议</strong>与<strong>训练数据生态</strong>，这相当于本文的「实验评估」部分——它评估的是整个领域的方法论现状。</p>
+
+    <h3>评测设置：两条轴</h3>
+    <p>由于尚无统一协议同时评估「预测未来的保真度」和「生成动作的有效性」这两个相互依赖的成分，现有工作采用<strong>解耦范式</strong>，沿两条轴分别打分：</p>
+    <ul>
+      <li><strong>World Modeling Capability（世界建模能力）</strong>，再分三个并行维度——
+        <em>视觉保真度</em>（像素级 PSNR / SSIM，感知级 LPIPS / DreamSim / DINO 相似度，分布级 FVD）；
+        <em>物理常识</em>（object dynamics + trajectory plausibility：VideoPhy、PhyGenBench、VBench-2.0、WorldModelBench、Physics-IQ 等，查物体连续性、接触 / 碰撞 / 状态变化是否符合因果与物理约束，以及运动 / 轨迹是否平滑可控——WorldScore、EWMBench）；
+        <em>动作可行性</em>（生成视频是否保留了足够的动作相关信息以支持控制推断与下游执行：WorldSimBench 的 Implicit Manipulative Evaluation、以及 "Wow, wo, val!" 的 IDM Turing Test）。对应 <strong>Table 8</strong>。</li>
+      <li><strong>Action Policy Capability（动作策略能力）</strong>：直接测策略产生精确、鲁棒、可泛化控制信号的能力，系统综述了 2019–2026 的 40+ benchmark，分五组——通用操作（MetaWorld、RLBench、LIBERO、ManiSkill 系列、RoboCasa、RoboVerse、COLOSSEUM、AGNOSTOS、GemBench、SimplerEnv 等）、双臂 / 人形（RoboTwin、BiGym、HumanoidBench、HumanoidGen）、移动操作（ManipulaTHOR、HomeRobot、BEHAVIOR-1K）、接触 / 形变操作（SoftGym、PlasticineLab、DaXBench、TacSL、ManiFeel）、真机评测（RoboArena、RoboChallenge、Maniparena）。对应 <strong>Table 9</strong>，按 Generalization / Multi-task / Long-horizon / Language / Data-Scaling / Sim2Real / Dexterity / Memory / Lifelong 等评测焦点标注。</li>
+    </ul>
+
+    <h4>关键评测指标定义</h4>
+    <p>视觉保真度的几个核心指标（越靠近真实越好 / FVD 越低越好）：</p>
+    $$\text{PSNR}(x,y)=10\log\!\Big(\tfrac{\text{MAX}^2}{\text{MSE}(x,y)}\Big),\qquad
+      \text{SSIM}(x,y)=\frac{(2\mu_x\mu_y+C_1)(2\sigma_{xy}+C_2)}{(\mu_x^2+\mu_y^2+C_1)(\sigma_x^2+\sigma_y^2+C_2)}$$
+    <p>PSNR 用最大信号与 MSE 的对数比衡量重建保真；SSIM 比较亮度 / 对比度 / 结构。感知 / 语义级用 LPIPS（深特征空间加权距离）、DreamSim（人类三元组判断训练的融合 embedding 相似度 $1-\lVert E(x)-E(y)\rVert_2$）、DINO 余弦相似度。分布级用 FVD（在预训练视频特征空间算 Fréchet 距离，反映整体真实感与时序动力学）：</p>
+    $$\text{FVD}=\lVert\mu_r-\mu_g\rVert_2^2+\text{Tr}\!\Big(\Sigma_r+\Sigma_g-2(\Sigma_r\Sigma_g)^{1/2}\Big)$$
+
+    <h3>主要「结果」：评测维度全景</h3>
+    <p>用一张表概括本文整理的世界建模评测三轴（搬自 Table 8 的结构）：</p>
+    <table>
+      <thead><tr><th>评测轴</th><th>问的问题</th><th>代表 benchmark / 指标</th></tr></thead>
+      <tbody>
+        <tr><td>视觉保真度</td><td>生成视频<strong>看起来</strong>是否逼真、时序一致？</td><td>PSNR / SSIM（像素）、LPIPS / DreamSim / DINO（感知 / 语义）、FVD（分布）</td></tr>
+        <tr><td>物理常识 · object dynamics</td><td>物体是否守恒、接触 / 碰撞 / 状态变化是否合物理？</td><td>VideoPhy、PhyGenBench（PhyGenEval）、VBench-2.0、WorldModelBench（五条物理律检查）、Physics-IQ</td></tr>
+        <tr><td>物理常识 · 轨迹合理性</td><td>运动是否平滑、可控、时序稳定？</td><td>WorldScore（motion accuracy/magnitude/smoothness）、EWMBench（EEF 轨迹 HSD / nDTW / DYN）</td></tr>
+        <tr><td><strong>动作可行性</strong></td><td>生成视频能否被<strong>翻译回可执行动作</strong>？</td><td>WorldSimBench（Implicit Manipulative Eval）、<strong>"Wow, wo, val!"（IDM Turing Test + 真机执行成功率）</strong></td></tr>
+      </tbody>
+    </table>
+    <p>本文给出的最有冲击力的「结果解读」来自动作可行性轴："Wow, wo, val!" 把一个 IDM 套在生成视频上推动作序列、再用真机执行成功率评判，结果<strong>很多视觉上很有说服力的模型成功率几近归零</strong>。这把「动作可行性」确立为独立于外观与物理真实感的第三评测轴，也直接说明：在视觉保真度榜上分高，完全不代表这个世界模型「能用」于控制。</p>
+
+    <h3>数据生态：四类数据源的取舍</h3>
+    <p>WAM 的独特之处在于<strong>统一的数据消化能力</strong>：既能吃高质量 $(o_t,a_t,o_{t+1})$ 三元组紧耦合表征，又能靠联合训练策略吃海量<em>无配对</em>数据（如无动作标注的视频）。因此数据建设不只是堆 robot-centric 数据，而要战略性混合「严格耦合的演示」与「无约束观测」。原文 Figure 7 把四类数据源画在「迁移难度（Y 轴）vs 扩展难度（X 轴）」坐标上：robot-centric 遥操作在「易迁移、难扩展」一角，human/ego 视频在「海量易扩展、难迁移」一角。</p>
+    <ul>
+      <li><strong>Robot-Centric 遥操作</strong>（高质量、复杂 setup）：严格对齐的高频动作-状态对，几乎零 sim-to-real gap。沿「扩规模」（QT-Opt、MT-Opt、RoboNet、BridgeData、RT-1、Open-X Embodiment 跨 22 机器人聚合超百万轨迹、DROID、UnifoLM-WBT 高 DoF 人形）与「深化感知」（多视角 3D：RH20T / Robo360 / RoboData；触觉 / 灵巧：RoboSet / DexCap / FuSe / AgiBot World）两条线演进。对应 <strong>Table 4</strong>。</li>
+      <li><strong>UMI 式便携人手演示</strong>（好保真、低 setup 成本）：手持 3D 打印夹爪 + 可穿戴相机，非专家也能在真实环境采集，经视觉跟踪 / 重定向对齐到机器人可执行动作。FastUMI、FastUMI-100K（>100K 轨迹）、RealOmin（>3000 家庭、百万级）、Hoi!、RDT2（约 10000 小时）。兼具 egocentric 视频的环境多样性与厘米级动作约束。对应 <strong>Table 5</strong>。</li>
+      <li><strong>仿真数据</strong>（易扩展、有 domain gap）：物理引擎本质上是个精确的计算式世界模型，提供 privileged information（完美深度、精确 6D 位姿、无遮挡多视角）。ManiSkill2、MimicGen / DexMimicGen、InternData-A1（>630k 轨迹）、SynGrasp-1B（千万级抓取）、RoboCasa、RoboCerebra、TesserAct（285k 对齐 RGB-D-normal 做 4D 世界建模）、TLA Dataset（触觉-语言-动作对）。对应 <strong>Table 6</strong>。</li>
+      <li><strong>Human / Egocentric 视频</strong>（海量、迁移难度最大）：互联网级 human / ego 视频是被动世界动力学的近乎无界先验。被动建模（SSv2、EPIC-KITCHENS、Ego4D 超 3600 小时、HowTo100M 1.36 亿 clip、Kinetics-700、DreamDojo 44000 小时）+ 用位姿估计弥合「动作 gap」（把人手当通用末端执行器：Assembly101、H2O、Ego-Exo4D、ARCTIC、HOT3D、EgoDex 829 小时 / 194 任务、Humanoid Everyday / PH²D 对齐人形运动学）。对应 <strong>Table 7</strong>。</li>
+    </ul>
+
+    <h3>关键「消融」：显式世界建模到底有没有用？</h3>
+    <p>综述里最接近「决定性消融」的证据来自 <code>PAD</code>：消融实验确认，<strong>去掉未来图像预测或视频 co-training 会明显损害控制性能</strong>——说明显式世界建模监督对动作训练质量和推理时性能都有实质贡献。但另一组证据（如 Fast-WAM、Being-H0.7 在推理时直接丢掉世界分支仍保持竞争力）指向相反方向：世界建模的好处可能主要来自<strong>训练期的辅助梯度</strong>，而非推理时真去生成未来帧。这一矛盾正是本文反复强调的开放问题。</p>
+  </section>
+
+  <!-- ============================ ⑤ 洞见 ============================ -->
+  <section id="insight">
+    <h2><span class="n">⑤</span>洞见 Insights</h2>
+    <div class="callout insight">
+      <span class="label">Insight</span>
+      <strong>1）「好看 ≠ 能用」是 WAM 评测的核心裂缝。</strong>视觉保真度（PSNR/FVD）只回答视频逼不逼真，物理常识回答世界行为合不合物理，但<em>动作可行性</em>——生成视频能否被翻译回可执行控制——是第三条、也是最被忽视的轴。"Wow, wo, val!" 显示很多高保真模型在 IDM Turing Test 下真机成功率几近归零。把世界建模和动作生成<strong>割裂打分</strong>恰恰违背了 WAM 的核心前提，未来需要 Counterfactual Consistency、Foresight-Conditioned Success 这类<em>联合评测</em>指标，去量化「想象的未来」和「执行的动作」之间的因果一致性。<br><br>
+      <strong>2）显式 pixel 预测可能不是必需品。</strong>越来越多证据表明，世界建模的主要效用或许来自<em>训练期的辅助梯度</em>，而非推理时真去重建高维未来帧；多个框架在测试时移除未来预测头并不显著掉点。这指向一个更高效的范式：用 latent-predictive（如 JEPA 式）方法在联合 latent 里预测抽象未来状态、聚焦环境的因果不变量、绕开 pixel 重建瓶颈——把目标从「像素级重建」改成「动作条件的 latent 状态转移」。<br><br>
+      <strong>3）WAM 的数据优势在于「无配对数据」的可消化性。</strong>VLA 严格需要 $(o_t,a_t)$ 配对、受限于昂贵稀缺的遥操作；WAM 靠联合训练能额外吃海量 action-free 互联网视频，把人手当通用末端执行器。但「人类视频到底贡献了什么」尚不清楚——本文提出把它拆成 low-level 物理先验 / mid-level 因果动力学 / high-level 任务逻辑三层可迁移知识，呼吁用信息论视角设计数据混合配方与 embodiment-aware 过滤机制。
+    </div>
+
+    <h3>局限与未来（本文自陈的开放挑战）</h3>
+    <ul>
+      <li><strong>架构耦合缺乏受控对比</strong>：cascaded / joint-diffusion / 离散 token / 隐式对齐百花齐放，却没有在匹配的规模 / 数据 / 评测下做过系统消融——「显式视觉预测是否真为物理 grounding 所必需」仍是经验上不清楚的问题，亟需严谨消融把领域从「架构时尚」推向「有原则的设计选择」。</li>
+      <li><strong>多模态物理状态表示</strong>：现有 WAM 几乎都只在 RGB 模态预测未来，而接触操作最关键的物理信息（触觉分布、接触力、声学、材料 compliance）恰恰在 pixel 空间不可见——世界模型的盲区正好在它最该建模的物理交互处。需要 modality-adaptive prediction：有富传感流时产物理 grounded 预测、没有时优雅退化到纯视觉。</li>
+      <li><strong>长程规划与时间抽象</strong>：当前多在短程单交互上评测；长程会有分布漂移累积、动作误差复合、连续生成长轨迹算力不可承受。三条路径：modular hierarchy（WAM 当低层执行器 + VLM 高层规划）、intrinsic hierarchical WAM（多分辨率未来预测）、scaling of temporal context（扩 WAM 的「记忆」、避开注意力的二次开销）。</li>
+      <li><strong>推理延迟（latency tax）</strong>：世界预测带来严重延迟，威胁闭环控制可行性。DreamZero 经系统级优化推到 7Hz，仍远落后非生成式 VLA 的 50Hz。引出一个少被直接研究的理论问题：下游控制到底需要多少预测保真度？指向 task-adaptive predictive fidelity——按任务的精度需求与误差容忍度动态调整预测深度 / 分辨率。</li>
+      <li><strong>安全部署</strong>：自信地想象一个错误未来、再据此 commit 一长串难以中断的动作，后果可能比反应式策略更严重。但预测能力也带来机会——prediction-integrated safety：把对想象未来的不确定性估计当作安全监控的一等输入，在执行前用物理约束 / 保守不确定性核验预测动作。</li>
+    </ul>
+
+    <h3>与相关工作的关系（基于本文自身论述）</h3>
+    <p>本文把 WAM 明确定位为 <strong>VLA 的直接概念继承者</strong>：VLA 解决了「把大规模视觉-语言预训练的语义理解 grounding 到电机行为」，但停在反应式映射；WAM 在此之上加入<em>预测式物理推理</em>。相对于经典 model-based RL（Dreamer 系列的 RSSM / TSSM、PlaNet 的 latent 动力学）与表征预测（JEPA / I-JEPA / V-JEPA 2），本文把它们都纳入「VLA 之前的世界模型」脉络（图 3 的四种 WM-for-VLA 用法），强调 WAM 的新意在于把世界模型从「离线监督 / 外部模拟器」转成「内部实时预测核心」。相对于 VAM / Video Policy / AWM 等近义词，本文用「预测承诺 + 模态无关」两个维度把 WAM 划成最广的、不绑定视频骨干的超集，并主张其名称把「World」和「Action」摆成等权组件、强调它是一个完整的机器人 foundation model 而非增强版模拟器。作者反复申明：这些结构是该领域当前的<em>探索方向</em>，而非已尘埃落定的相互替代。</p>
+    <div class="callout warn">
+      <span class="label">阅读提示</span>
+      这是一篇<strong>分类 / 综述</strong>而非提出单一新方法的工作，因此本解读把模板的「方法 / 实验」两节改写成「分类体系 / 评测与数据生态」。文中所有模型名（UniPi、GR-1、DreamZero、UVA…）、benchmark 名、数据集名均为<em>被综述的他人工作</em>，本文不发布新模型 / 数据 / benchmark，其贡献是概念框架、taxonomy 与资源索引。具体数字与引用以原文及各原始论文为准。
+    </div>
+  </section>
+
+  <footer class="foot">
+    本页为 <code>paper-reading</code> skill 生成的阅读笔记，仅作辅助，细节以
+    <a href="https://arxiv.org/abs/2605.12090" target="_blank" rel="noopener">原文</a> 为准 · 解读日期 2026-05-30
+  </footer>
+
+</article>
+</body>
+</html>
