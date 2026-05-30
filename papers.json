@@ -208,5 +208,24 @@
       "Self-Distillation"
     ],
     "path": "papers/2605.15155-sdar/index.html"
+  },
+  {
+    "slug": "2604.15840-coevolve-agent-data-mutual-evolution",
+    "title": "CoEvolve: Training LLM Agents via Agent-Data Mutual Evolution",
+    "authors": "Shidong Yang, Ziyu Ma, Tongwen Huang, Yiming Hu, Yong Wang, Xiangxiang Chu",
+    "team": "AMAP, Alibaba Group",
+    "arxiv": "https://arxiv.org/abs/2604.15840",
+    "code": "https://github.com/AMAP-ML/CoEvolve",
+    "date": "2026-05-30",
+    "published": "arXiv 2026",
+    "tldr": "在 GRPO 训练中从 rollout 抽取 forgetting/boundary/rare 三类弱点信号，引导 LLM 定向再探索并合成、验证新任务回训练集，让 agent 与训练数据相互进化；AppWorld/BFCL 上对 Qwen 系列取得 +15~19 分提升，仅约 10% 额外算力。",
+    "tags": [
+      "LLM-Agent",
+      "RL",
+      "GRPO",
+      "Synthetic-Data",
+      "Self-Evolving"
+    ],
+    "path": "papers/2604.15840-coevolve-agent-data-mutual-evolution/index.html"
   }
 ]

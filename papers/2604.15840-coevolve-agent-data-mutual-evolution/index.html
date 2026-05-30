@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CoEvolve：让 agent 与训练数据相互进化 · 论文解读</title>
+
+<script>
+  window.MathJax = {
+    tex:{inlineMath:[['$','$'],['\\(','\\)']], displayMath:[['$$','$$'],['\\[','\\]']]},
+    svg:{fontCache:'global'}
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;
+  }
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:880px; margin:0 auto; padding:18px 22px 90px}
+
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:27px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)}
+  .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .meta-grid a:hover{text-decoration:underline}
+
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap}
+  nav.toc a:hover{color:var(--accent)}
+
+  section{margin:38px 0}
+  h2{font-size:21px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:17px; margin:24px 0 8px}
+  p{margin:12px 0}
+  ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.9em}
+  strong{color:var(--text)}
+
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:14px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:10px 12px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  .yes{color:var(--ok); font-weight:600}
+  .no{color:var(--muted)}
+  .num{text-align:right; font-variant-numeric:tabular-nums}
+
+  figure{margin:24px 0; text-align:center}
+  figure img{max-width:100%; height:auto; border:1px solid var(--line); border-radius:10px; background:#fff}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+
+  blockquote{border-left:3px solid var(--line); margin:14px 0; padding:2px 16px; color:var(--muted)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+  .mjx-container{overflow-x:auto; overflow-y:hidden}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <!-- ============================ 抬头 / 元信息 ============================ -->
+  <header class="head">
+    <div class="chips">
+      <span class="chip">LLM Agent</span>
+      <span class="chip">RL / GRPO</span>
+      <span class="chip">Synthetic Data</span>
+      <span class="chip">Self-Evolving</span>
+      <span class="chip">Tool Use</span>
+    </div>
+    <h1>CoEvolve：让 agent 与训练数据在闭环反馈中相互进化</h1>
+    <p class="orig-title">CoEvolve: Training LLM Agents via Agent-Data Mutual Evolution</p>
+    <dl class="meta-grid">
+      <dt>作者</dt><dd>Shidong Yang*, Ziyu Ma*, Tongwen Huang*, Yiming Hu, Yong Wang†, Xiangxiang Chu（*Equal contribution，†Project lead &amp; corresponding author）</dd>
+      <dt>团队 / 机构</dt><dd>AMAP, Alibaba Group（高德地图，阿里巴巴集团）</dd>
+      <dt>原文链接</dt><dd><a href="https://arxiv.org/abs/2604.15840" target="_blank" rel="noopener">https://arxiv.org/abs/2604.15840</a></dd>
+      <dt>发表 / 年份</dt><dd>ACL 2026（arXiv 2604.15840，2026-04-17）</dd>
+      <dt>解读日期</dt><dd>2026-05-30</dd>
+    </dl>
+  </header>
+
+  <div class="tldr">
+    <b>TL;DR</b> — agent 的 RL 训练通常跑在一份<strong>静态</strong>数据分布上，既无法跟上 agent 自身不断变化的能力，又覆盖不到真实环境里的长尾交互。CoEvolve 把训练数据本身也变成一个会进化的对象：在 GRPO 训练过程中，从 rollout trajectory 里抽取 <strong>forgetting / boundary / rare</strong> 三类「弱点信号」，用它们引导一个外部 LLM 去环境里「定向再探索」，再把发现的交互抽象成新任务、经环境执行验证后并回训练集——形成 <em>agent 进化 ↔ 数据进化</em> 的闭环。在 AppWorld、BFCL-V3 上，对 Qwen2.5-7B / Qwen3-4B / Qwen3-30B-A3B 分别取得 <strong>+19.43 / +15.58 / +18.14</strong> 的绝对提升，且全程无需任何人工标注。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#opensource">① 开源贡献</a>
+    <a href="#motivation">② 动机与贡献</a>
+    <a href="#method">③ 方法</a>
+    <a href="#evaluation">④ 实验评估</a>
+    <a href="#insight">⑤ 洞见</a>
+  </nav>
+
+  <!-- ============================ ① 开源贡献 ============================ -->
+  <section id="opensource">
+    <h2><span class="n">①</span>开源贡献 Open-source Artifacts</h2>
+    <p>本文在首页明确给出官方仓库 <a href="https://github.com/AMAP-ML/CoEvolve" target="_blank" rel="noopener">github.com/AMAP-ML/CoEvolve</a>（Apache-2.0）。截至解读日（2026-05-30），该仓库已建立但内容仍接近<strong>占位（placeholder）</strong>状态：含 README（项目介绍 + 引用 + 致谢）与 LICENSE，<strong>尚未见到可运行的训练/推理/评测脚本与配置</strong>；README 自述方法建立在 <code>AgentEvolver</code>（ModelScope）与 <code>veRL</code>（VolcEngine）之上，并受 <code>CuES</code> 启发。所用的两个 benchmark（AppWorld、BFCL）本身是第三方开源资产，可独立获取。下面区分「论文声称 / 实际可下载」。</p>
+    <table>
+      <thead><tr><th>类型</th><th>是否开源</th><th>内容 / 链接</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>代码 Code</td>
+          <td class="yes">✔（仓库已建）</td>
+          <td><a href="https://github.com/AMAP-ML/CoEvolve" target="_blank" rel="noopener">github.com/AMAP-ML/CoEvolve</a> · Apache-2.0。当前仅 README + LICENSE，核心训练/反馈/合成代码<strong>尚未释出</strong>（声称基于 AgentEvolver + veRL 实现）。</td>
+        </tr>
+        <tr>
+          <td>模型权重 Weights</td>
+          <td class="no">✘</td>
+          <td>未发布。所用 backbone 为公开模型 Qwen2.5-7B-Instruct / Qwen3-4B-Instruct / Qwen3-30B-A3B-Instruct，但 CoEvolve 训练后的 checkpoint 未提供。</td>
+        </tr>
+        <tr>
+          <td>数据集 Dataset</td>
+          <td class="no">✘</td>
+          <td>未发布。训练数据由方法在线合成（初始 100 条 + 训练中持续生成并验证），论文未释出合成任务集。</td>
+        </tr>
+        <tr>
+          <td>环境 / Benchmark</td>
+          <td class="no">✘（非本文产出，可第三方获取）</td>
+          <td>AppWorld（Trivedi et al., 2024）、BFCL-V3（Patil et al., 2025）；附录另测 ALFWorld、WebShop。均为现有开源 benchmark，本文未新发布环境。</td>
+        </tr>
+        <tr>
+          <td>项目主页 / Demo</td>
+          <td class="no">✘</td>
+          <td>无独立项目主页 / 在线 demo；信息集中在 arXiv 与 GitHub 仓库。</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="callout warn">
+      <span class="label">核实说明</span>
+      仓库链接与 Apache-2.0 许可证经 WebFetch / WebSearch 核实存在；但「可复现的完整 pipeline 代码」截至解读日<strong>未见公开</strong>，README 无安装/使用说明。若要复现，目前需自行基于 veRL + AgentEvolver 搭建，并参照论文附录 Table 9 的超参与 Table 16 的 prompt-to-module 映射。
+    </div>
+  </section>
+
+  <!-- ============================ ② 动机与贡献 ============================ -->
+  <section id="motivation">
+    <h2><span class="n">②</span>研究动机与贡献 Motivation &amp; Contribution</h2>
+
+    <h3>背景与问题</h3>
+    <p>训练能在开放环境里多步推理、调用工具、做 web/软件操作的 LLM agent，目前主流有两条数据路线，论文用 Figure 1 把它们和自己的方案并排画了出来：</p>
+
+    <figure>
+      <img src="figures/fig1.png" alt="三种 agent 训练范式对比">
+      <figcaption>原文 Figure 1：(a) Expert-Supervised——靠人工采集专家 trajectory，数据成本高、泛化有限；(b) Static Synthetic——LLM 离线、open-loop 地生成合成数据，得到一份静态且不自适应的训练集；(c) 本文 Agent-Data Co-Evolution——任务通过反馈驱动的交互持续进化，无需人工监督即可自适应训练。</figcaption>
+    </figure>
+
+    <ul>
+      <li><strong>(a) 专家监督 / imitation learning：</strong>让人类专家手动与环境交互，构造 trajectory 数据集再训练 policy。痛点是——① 真实环境采一条 trajectory 往往要专家花数分钟乃至更久，<strong>成本高、专家时间稀缺</strong>，难以广覆盖地探索环境；② 更本质地，专家演示是交互模式的<strong>静态快照</strong>，覆盖不到真实场景的长尾变体。论文举例：一个 web 导航 agent，如果按钮文案从 "Book Now" 改成 "Reserve Now"，靠静态演示训练的 agent 可能就直接失败。</li>
+      <li><strong>(b) 合成数据 / open-loop synthesis：</strong>用 LLM 的世界知识去探索环境、生成合成 trajectory，确实减轻了对人工标注的依赖。但这种生成<strong>只由 LLM 的先验引导、随机探索</strong>，拿不到 agent 真实表现/交互信号的反馈，导致探索浅、覆盖不全；而且生成出来的数据仍是一份<strong>静态语料</strong>，无法随 agent 能力变化而调整——既不针对 agent 当前的弱点，也不支持持续改进，训练效率低。</li>
+    </ul>
+    <p>一句话概括两者的共同病根：<strong>数据分布是静态的、与 agent 的演化脱钩的</strong>。Related Work 里作者进一步指出，即便是近期的 self-improving / curriculum 类方法，多数也只是在<strong>固定的 query 池</strong>上改写 trajectory 或围绕 seed task 生成变体，本质仍是 open-loop，没有把「探索→发现新的可执行 query/状态」这条回路接进训练。</p>
+
+    <h3>本文的切入点</h3>
+    <p>核心 insight：<strong>把训练数据当成一个会与 agent 一起进化的对象</strong>。既然 RL 训练过程中天然会产生大量 rollout trajectory，这些 trajectory 里其实编码了 agent「在哪里、以什么方式失败/不稳定」的信息——那就用 feedback signal 把这些<strong>失败易发（failure-prone）的交互模式</strong>识别出来，反过来驱动 LLM 回到环境里<strong>有针对性地再探索</strong>，把新发现的交互合成成新任务、验证后并回训练集。这样数据分布就能持续地<strong>瞄准 agent 当前的短板</strong>并随之漂移（data evolving），而 agent 又在不断被补强的数据上持续克服自身局限（agent evolving），二者形成闭环（Figure 1c）。整个过程不需要人工监督。</p>
+
+    <h3>核心贡献</h3>
+    <ol>
+      <li>提出 <strong>CoEvolve</strong>——一个 agent-data 相互进化框架，在 RL 训练中<strong>交替进行 agent 优化与数据分布更新</strong>，全程<strong>无任何人工监督</strong>。</li>
+      <li>与以往「无引导随机探索」的合成数据生成不同，CoEvolve 把<strong>反馈信号（forgetting / boundary / rare）显式注入</strong> LLM 的环境探索，让合成精准对准 agent 的弱点而非盲目铺量。</li>
+      <li>在多个交互式 benchmark 上相对强 baseline 取得<strong>大幅、且跨模型规模一致</strong>的增益（如 Qwen3-4B 在 AppWorld 上的提升），并通过丰富的消融/分析验证「反馈引导」「环境验证」等设计各自的贡献，以及方法的可扩展性与跨域泛化。</li>
+    </ol>
+  </section>
+
+  <!-- ============================ ③ 方法 ============================ -->
+  <section id="method">
+    <h2><span class="n">③</span>方法 Method</h2>
+    <p>CoEvolve 是一个为「无人工监督训练 LLM agent」设计的 co-evolution 框架，一个完整的 CoEvolve Cycle 由三个串联阶段构成（见 Figure 2）：</p>
+    <ul>
+      <li><strong>Stage 1 — Training &amp; Signal Extraction：</strong>用 GRPO 在当前合成任务集上训练 agent，同时从 rollout trajectory 抽取弱点信号，得到 signal-annotated trajectories。</li>
+      <li><strong>Stage 2 — Signal-Guided Environment Re-exploration：</strong>把带信号的 trajectory 喂给一个外部 LLM，让它反思、构造「探索上下文」，并据此回到真实环境做定向再探索，产出 step-level interaction triplets。</li>
+      <li><strong>Stage 3 — Task Abstraction &amp; Validation：</strong>把 triplet 聚合、抽象成新的可执行任务（task-solution pair），经环境执行验证后并入任务集 $\mathcal{D}_t$，供下一轮训练。</li>
+    </ul>
+
+    <figure>
+      <img src="figures/fig2.png" alt="CoEvolve 框架总览">
+      <figcaption>原文 Figure 2：CoEvolve 框架总览。agent 用 GRPO 训练，反馈信号从 rollout trajectory 抽取（Stage 1）；信号引导基于 LLM 的 signal-conditioned 再探索（Stage 2）；再探索结果被转化为经验证的任务以进化训练集（Stage 3）。这一闭环让 CoEvolve 无需人工监督。</figcaption>
+    </figure>
+
+    <h3>3.1 训练与信号抽取（Training &amp; Signal Extraction）</h3>
+    <p><strong>在合成任务上训练。</strong>在训练第 $t$ 步，维护一个由「可执行合成任务」组成的任务集 $\mathcal{D}_t$。初始集 $\mathcal{D}_0$ 由一个大 LLM 与环境交互、无引导探索得到；随训练推进，后续阶段新合成并验证过的任务会不断追加进 $\mathcal{D}_t$，使数据分布与 agent 一起演化。对任意任务 $x\in\mathcal{D}_t$，采样一组 $K$ 条 trajectory $\{\tau_k\}_{k=1}^{K}\sim\pi_\theta(\cdot\mid x)$，每条赋一个标量 reward $R(\tau_k)$，用 <strong>GRPO</strong>（Group Relative Policy Optimization）优化：</p>
+    $$\mathcal{J}(\theta)=\frac{1}{\sum_{k=1}^{K}|\tau_k|}\sum_{k=1}^{K}\sum_{t=1}^{|\tau_k|}\mathrm{CLIP}\big(r_{k,t}(\theta),\hat{A}_k,\epsilon\big)\;-\;\beta\cdot\mathbb{D}_{\mathrm{KL}}\!\left[\pi_\theta\,\|\,\pi_{\mathrm{ref}}\right],$$
+    <p>其中 $r_{k,t}(\theta)=\dfrac{\pi_\theta(a_t^k\mid s_t^k)}{\pi_{\theta_{\mathrm{old}}}(a_t^k\mid s_t^k)}$ 是 importance ratio，$\mathrm{CLIP}(r,A,\epsilon)=\min\!\big[r\cdot A,\ \mathrm{clip}(r,1-\epsilon,1+\epsilon)\cdot A\big]$ 是 PPO 式的裁剪项。$\hat{A}_k$ 是<strong>组内相对 advantage</strong>（GRPO 不学 value 网络，用一组 $K$ 条 trajectory 的 reward 归一化后当 advantage，故称 group-relative），$\pi_{\mathrm{ref}}$ 是固定参考 policy，$\beta$ 控制 KL 正则强度。直觉：在一组同任务的 rollout 里，把比组内平均更好的动作概率往上推、更差的往下压，同时用 KL 拴住、别离参考策略太远。</p>
+
+    <p><strong>信号抽取——三类弱点信号。</strong>训练中产生的 rollout 本身就包含 agent 表现不佳的实例。CoEvolve 据此定义三类行为信号，把触发信号的 trajectory 标注出来，作为后续再探索的种子。三类信号<strong>独立判定、可同时触发</strong>，因为它们刻画的是互补的弱点：</p>
+    <ul>
+      <li><strong>(1) Forgetting Signal（遗忘信号，借鉴 Toneva et al., 2018）：</strong>检测「曾经做对、现在却做错」的回退。设 $s_{\mathrm{now}}\in[0,1]$ 为当前 trajectory $\tau_{\mathrm{now}}$ 的任务级得分（由环境终态 reward 或任务特定评估给出）；对每个任务（或任务类型）维护一个近期得分的滑窗 $\mathcal{H}_{\mathrm{recent}}=\{s_{t-W+1},\dots,s_t\}$（$W$ 为窗口大小）。当
+      $$\exists\, s_i\in\mathcal{H}_{\mathrm{recent}}\ \text{使}\ s_i\ge 0.5\quad\text{且}\quad s_{\mathrm{now}}<0.5$$
+      即历史上成功过、当前 policy 却失败，则标记为 forgetting signal。直觉：抓住训练中的「能力倒退」。</li>
+      <li><strong>(2) Boundary Signal（边界信号）：</strong>识别「在固定 policy、单次训练迭代内结果高度不稳定」的任务。对任务 $x$ 采一组 $\{\tau_k\}_{k=1}^{K}\sim\pi_\theta(\cdot\mid x)$，取归一化得分 $\bar{R}(\tau_k)\in[0,1]$。若这组里<strong>同时</strong>出现成功与失败：
+      $$\exists\,\tau_i,\tau_j\ \text{使}\ \bar{R}(\tau_i)>0.5\quad\text{且}\quad \bar{R}(\tau_j)<0.5,$$
+      则整组都标为 boundary signal。直觉：行为正卡在「决策边界」附近、摇摆不定，最值得补练。</li>
+      <li><strong>(3) Rare Signal（稀有信号，借鉴 Shyalika et al., 2024 的 rare event 视角）：</strong>识别「整个训练过程经验频率很低、却在多条 trajectory 中反复出现」的动作模式——意味着是系统性的探索不足，而非一次性随机事件。对每条 trajectory 抽取动作模式 $p$ 并维护累计出现次数 $c_p$；设 $N$ 为已观测模式总数，当 $N\ge N_{\min}$ 时，若
+      $$\frac{c_p}{N}<\frac{\theta}{100}\quad\text{且}\quad c_p>0,$$
+      （$\theta\in(0,100)$ 是预设频率阈值，例如 $\theta=5$，控制「稀有」的判据），则所有含该模式的 trajectory 标为 rare signal。</li>
+    </ul>
+
+    <h3>3.2 信号引导的环境再探索（Signal-Guided Re-exploration）</h3>
+    <p>拿到 Stage 1 标注出的 trajectory 后，做<strong>定向</strong>再探索，专门去采集瞄准这些弱点的交互数据：</p>
+    <ul>
+      <li><strong>Signal-Conditioned Context Construction（信号条件化上下文构造）：</strong>对每条 signal-annotated trajectory，把完整交互历史（任务描述、agent 执行的动作序列、对应环境反馈）喂给一个 LLM，让它<strong>反思</strong>触发该信号的根本失败原因 / 行为不稳定点，并产出一个结构化的「探索上下文」，刻画 agent <em>在哪里、以什么方式</em>失败或不稳。</li>
+      <li><strong>LLM-Guided Re-exploration（LLM 引导再探索）：</strong>以该上下文为条件，让 LLM 回到环境探索其它可能的行为，沿两个正交维度展开：<strong>(i) multi-round exploration</strong>——从同一上下文发起多次独立探索，鼓励行为多样性；<strong>(ii) multi-step exploration</strong>——每次探索连续走多步，LLM 可根据中间观测修正动作。每一步 LLM 产出动作 $a_t$、环境返回观测 $o_t$，记录为 step-level triplet $(a_t,o_t,\mathrm{id})$，其中 $\mathrm{id}$ 标识该步属于哪次探索 rollout。这些 triplet 按任务分组，作为 Stage 3 的输入。</li>
+    </ul>
+
+    <h3>3.3 任务抽象与验证（Task Abstraction &amp; Validation）</h3>
+    <ul>
+      <li><strong>Triplet Aggregation &amp; Task Abstraction：</strong>先按所属任务把 triplet 分组（每组聚合了多次探索 rollout 在同一任务上下文下的 action-observation 对，刻画了「这个任务可以怎么被完成」的多样证据）。再让一个大 LLM 把每组<strong>抽象成一个任务级规格</strong>——不是照抄 step-level 交互，而是识别用户意图、给出一个简洁的 task query，并推导出一个合理的动作序列作为 solution，从而把 triplet 变成 <strong>task-solution pair</strong>。</li>
+      <li><strong>Environment Validation（环境验证）：</strong>每个合成的 task-solution pair 都要在环境里<strong>实际执行</strong>来验证——实例化对应环境，把生成的 query 与动作序列交给一个 LLM agent 执行。<strong>接受规则：</strong>若成功完成任务目标 → 接受；若执行失败但环境返回了正 reward → 也保留；两个判据都不满足 → 丢弃。通过验证的任务追加进 $\mathcal{D}_t$，构成下一轮的新训练分布。如此迭代抽象-验证-并入，使训练数据持续自适应到 agent 的弱点上，闭合 co-evolution 回路。</li>
+    </ul>
+    <p>附录给出一个直观对照（Figure 6 / Figure 8）：BFCL 的原始样本往往是「copy → cd → rename」这类 3 步、由终态决定成败的短程工具调用；而合成样本是「创建非空文件→复制→分别读取两文件确认内容一致」这类<strong>5 步、显式带状态构造与正确性校验</strong>的长程任务，交互轮数更多、step 依赖更强、还引入显式约束与验证——也就是说，反馈驱动的合成倾向于造出<strong>组合复杂度更高、horizon 更长</strong>的任务。</p>
+
+    <div class="callout note">
+      <span class="label">实现要点（复现关键）</span>
+      <ul style="margin:6px 0">
+        <li><strong>训练框架：</strong>全部用 <code>veRL</code> 实现，算法为 GRPO；探索/合成/抽象用的外部 LLM 是 <strong>Qwen3-Max</strong>。</li>
+        <li><strong>规模与硬件：</strong>Qwen2.5-7B-Instruct、Qwen3-4B-Instruct 在单机 8×NVIDIA H20（Tensor Parallel=1）上训练；Qwen3-30B-A3B-Instruct 用 16×H20（两机各 8 卡，TP=2）。</li>
+        <li><strong>关键超参（Table 9）：</strong>learning rate $1e\!-\!6$；group size $n=8$；training batch size 32；optimizer AdamW；clip ratio low/high = 0.20 / 0.28；KL coefficient $1e\!-\!3$；rollout temperature 0.9；evaluation temperature 0；max response length 4096；reward 为<strong>稀疏二值</strong>（success=1, failure=0）；max interaction step：AppWorld/BFCL 为 30、WebShop/ALFWorld 为 15，超限即判失败。</li>
+        <li><strong>训练流程默认值：</strong>初始合成任务集 100 条，共训练 120 步，每隔 10 步重新生成一次反馈数据。</li>
+        <li><strong>prompt 模块化（Table 16）：</strong>探索 system/user prompt、信号特定探索引导、信号条件化摘要、任务抽象、任务验证各自对应附录中独立的 prompt 图（Fig. 9–13）。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============================ ④ 实验评估 ============================ -->
+  <section id="evaluation">
+    <h2><span class="n">④</span>实验评估 Evaluation</h2>
+
+    <h3>评测设置</h3>
+    <ul>
+      <li><strong>Benchmark：</strong>
+        <ul>
+          <li><strong>AppWorld</strong>——模拟真实数字服务（日历、邮件、音乐、社交等）的环境，agent 通过 Python API 调用解任务（如「找出我 Spotify 歌单里最多人喜欢的歌」），常需多步推理与跨 app 信息聚合。报 Test-Normal (TestN) 与更难的 Test-Challenge (TestC) 两个 split，指标为 <strong>TGC</strong>（Task Goal Completion，单任务成功率）与 <strong>SGC</strong>（Scenario Goal Completion，一个 scenario 下所有任务全完成才算成功，更严格的一致性指标）。</li>
+          <li><strong>BFCL-V3</strong>（Berkeley Function Calling Leaderboard）——评 function/tool calling 能力，用其 <strong>Multi-turn Base</strong> 子集，指标为 multi-turn function calling accuracy：必须在每一轮都选对函数且生成语义/语法都有效的参数，<strong>任一中间步出错即整例失败</strong>，是对长程工具调用一致性的严格度量。</li>
+          <li><strong>附录补充：</strong>ALFWorld（文本化的家居 embodied 任务，长程、部分可观测）与 WebShop（电商交互，<code>search[query]</code> / <code>click[element]</code> 两类动作），用于检验 API/函数调用之外的迁移性。</li>
+        </ul>
+      </li>
+      <li><strong>对比基线：</strong>① 闭源 LLM——Claude-Sonnet-4.5、GPT-4、Gemini-2.5-Flash；② 开源模型——DeepSeek-V3.2、GPT-OSS-20B、LLaMA-3.3-70B、Gemma-3-27B；③ backbone 本身的 zero-shot 与 <strong>GRPO</strong>；附录另比 Reflexion、ReST、Curriculum Learning 等自适应数据生成方法。</li>
+      <li><strong>评价指标：</strong>TGC / SGC / multi-turn accuracy / 各环境 success rate，<strong>均越高越好</strong>。</li>
+    </ul>
+
+    <h3>主要结果</h3>
+    <p>下表搬运原文 Table 1 的核心数字（CoEvolve 行加粗，括号内为相对自身 backbone 的绝对增益）：</p>
+    <table>
+      <thead>
+        <tr><th>Model</th><th class="num">AppWorld-TestN<br>TGC / SGC</th><th class="num">AppWorld-TestC<br>TGC / SGC</th><th class="num">BFCL-V3<br>Multi-turn</th><th class="num">Avg.</th></tr>
+      </thead>
+      <tbody>
+        <tr><td colspan="5" style="color:var(--muted);font-size:12.5px">— Closed-source LLMs —</td></tr>
+        <tr><td>Claude-Sonnet-4.5</td><td class="num">73.81 / 55.36</td><td class="num">49.88 / 32.37</td><td class="num">69.00</td><td class="num">56.08</td></tr>
+        <tr><td>GPT-4</td><td class="num">30.40 / 21.40</td><td class="num">14.60 / 9.30</td><td class="num">54.00</td><td class="num">25.94</td></tr>
+        <tr><td>Gemini-2.5-Flash</td><td class="num">53.57 / 32.14</td><td class="num">40.05 / 20.14</td><td class="num">41.50</td><td class="num">37.48</td></tr>
+        <tr><td colspan="5" style="color:var(--muted);font-size:12.5px">— Open-source Models —</td></tr>
+        <tr><td>DeepSeek-V3.2</td><td class="num">47.02 / 30.36</td><td class="num">22.78 / 9.35</td><td class="num">41.50</td><td class="num">30.20</td></tr>
+        <tr><td>GPT-OSS-20B</td><td class="num">17.86 / 3.57</td><td class="num">5.52 / 0.00</td><td class="num">14.00</td><td class="num">8.19</td></tr>
+        <tr><td>LLaMA-3.3-70B</td><td class="num">31.54 / 8.92</td><td class="num">16.31 / 4.32</td><td class="num">26.00</td><td class="num">17.42</td></tr>
+        <tr><td>Gemma-3-27B</td><td class="num">23.81 / 7.14</td><td class="num">9.83 / 0.72</td><td class="num">16.50</td><td class="num">11.60</td></tr>
+        <tr><td colspan="5" style="color:var(--muted);font-size:12.5px">— Baseline &amp; CoEvolve —</td></tr>
+        <tr><td>Qwen2.5-7B-Instruct</td><td class="num">1.19 / 0.00</td><td class="num">0.72 / 0.00</td><td class="num">13.50</td><td class="num">3.08</td></tr>
+        <tr><td><strong>&nbsp;&nbsp;w/ CoEvolve</strong></td><td class="num"><strong>27.98 / 12.50</strong></td><td class="num"><strong>8.39 / 2.16</strong></td><td class="num"><strong>61.50</strong></td><td class="num"><strong>22.51 (↑19.43)</strong></td></tr>
+        <tr><td>Qwen3-4B-Instruct</td><td class="num">16.67 / 5.36</td><td class="num">7.91 / 2.16</td><td class="num">26.50</td><td class="num">11.72</td></tr>
+        <tr><td><strong>&nbsp;&nbsp;w/ CoEvolve</strong></td><td class="num"><strong>35.71 / 14.28</strong></td><td class="num"><strong>17.03 / 6.47</strong></td><td class="num"><strong>63.00</strong></td><td class="num"><strong>27.30 (↑15.58)</strong></td></tr>
+        <tr><td>Qwen3-30B-A3B</td><td class="num">31.55 / 12.50</td><td class="num">19.90 / 5.76</td><td class="num">43.50</td><td class="num">22.64</td></tr>
+        <tr><td><strong>&nbsp;&nbsp;w/ CoEvolve</strong></td><td class="num"><strong>54.76 / 33.93</strong></td><td class="num"><strong>31.65 / 16.55</strong></td><td class="num"><strong>67.00</strong></td><td class="num"><strong>40.78 (↑18.14)</strong></td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>怎么读这些数字：</strong></p>
+    <ul>
+      <li><strong>提升大且跨规模一致：</strong>三个 backbone 平均分分别 +19.43 / +15.58 / +18.14。最戏剧性的是 Qwen2.5-7B：AppWorld-TestN TGC 从近乎 0（1.19）拉到 27.98，BFCL 从 13.50 跳到 61.50（+48.0）——说明很多失败并非「能力天花板」，而是<strong>训练数据没覆盖到对的交互模式</strong>，补上之后能力被「解锁」。</li>
+      <li><strong>让中等开源模型反超闭源：</strong>Qwen3-4B + CoEvolve 在 BFCL 上拿到 63.00，<strong>超过 GPT-4 (54.00) 与 Gemini-2.5-Flash (41.50)</strong>；30B 版整体 Avg 40.78，也大幅超过 DeepSeek-V3.2 (30.20) 等更大的开源模型。作者据此论证：增益来自「对复杂交互的泛化」而非对测试环境的过拟合。</li>
+      <li><strong>越小的模型受益越多：</strong>7B (+48.0 on BFCL) 比 4B (+36.5) 提升更大，说明 feedback-driven 训练对弱 backbone 的「补课」效果尤其明显。</li>
+      <li><strong>难 split 同样有效：</strong>更难的 AppWorld-TestC 上 30B 版 TGC/SGC 提升 +11.75 / +10.79，TestN 上 +23.21 / +21.43，表明信号确实击中了 failure-prone / 不稳定 / 探索不足的交互。</li>
+    </ul>
+
+    <p><strong>建立在 GRPO 之上的互补增益（Table 2）。</strong>CoEvolve 不是替代 GRPO，而是在其上叠加「反馈引导的数据进化」：</p>
+    <table>
+      <thead><tr><th>Backbone</th><th class="num">AppWorld TestN (TGC)<br>Zero-shot / GRPO / CoEvolve</th><th class="num">BFCL-V3<br>Zero-shot / GRPO / CoEvolve</th></tr></thead>
+      <tbody>
+        <tr><td>Qwen2.5-7B-Instruct</td><td class="num">1.19 / 26.78 / <strong>27.98</strong></td><td class="num">13.50 / 56.00 / <strong>61.50</strong></td></tr>
+        <tr><td>Qwen3-4B-Instruct</td><td class="num">16.67 / 28.57 / <strong>35.71</strong></td><td class="num">26.50 / 58.00 / <strong>63.00</strong></td></tr>
+        <tr><td>Qwen3-30B-A3B-Instruct</td><td class="num">31.55 / 48.81 / <strong>54.76</strong></td><td class="num">43.50 / 64.00 / <strong>67.00</strong></td></tr>
+      </tbody>
+    </table>
+    <p>可见 GRPO 已带来很大一跳，而 CoEvolve 在 GRPO 顶上仍能稳定再加几个点（如 4B 在 AppWorld 28.57→35.71、BFCL 58.00→63.00），且增益跨规模成立——证明「闭环数据进化」提供的是与纯 RL <strong>互补</strong>的收益。</p>
+
+    <h3>训练动态：信号如何重塑数据分布</h3>
+    <figure>
+      <img src="figures/fig3.png" alt="CoEvolve 训练动态">
+      <figcaption>原文 Figure 3：CoEvolve 训练动态（Qwen3-4B）。(a) CoEvolve vs. baseline 在 AppWorld 的性能曲线；(b) 各训练步检测到的信号数；(c) 训练中数据分布的演化（原始 vs. 合成任务的 t-SNE 式分布）；(d) 弱点信号 → 新训练任务的转化（pass rate）。</figcaption>
+    </figure>
+    <ul>
+      <li><strong>(a) 更稳的上升：</strong>CoEvolve 单调爬升 0.21→0.35，而 baseline 先升后<strong>掉头下滑</strong>（0.17→0.29→0.23）——闭环训练带来更稳定的优化。</li>
+      <li><strong>(b) 信号数递减：</strong>检测到的信号从 269 路降到 204，说明 failure-prone 的情形被逐步解决。</li>
+      <li><strong>(c) 分布外扩：</strong>合成任务扩张到原本欠表达的区域，产出多样而非冗余的数据。</li>
+      <li><strong>(d) 转化率走高：</strong>信号驱动生成任务的 pass rate 从 0.71 升到 0.85 并稳定在 0.80，印证反馈引导生成的有效性。</li>
+    </ul>
+
+    <h3>消融 / 分析</h3>
+    <p><strong>① 各训练阶段的增量贡献（Table 3，Qwen3-4B，Avg=AppWorld 与 BFCL 均值）。</strong>这是最关键的一个消融，逐层加料看每一步值多少：</p>
+    <table>
+      <thead><tr><th>Training Phase</th><th class="num">AppWorld</th><th class="num">BFCL</th><th class="num">Avg.</th></tr></thead>
+      <tbody>
+        <tr><td>Zero-shot (Qwen3-4B)</td><td class="num">16.67</td><td class="num">26.50</td><td class="num">21.59</td></tr>
+        <tr><td>+ Synthetic Data（静态合成）</td><td class="num">28.57</td><td class="num">58.00</td><td class="num">43.29</td></tr>
+        <tr><td>+ Random Exploration（随机在线探索）</td><td class="num">30.36</td><td class="num">60.50</td><td class="num">45.43</td></tr>
+        <tr><td><strong>+ Feedback（反馈引导，=CoEvolve）</strong></td><td class="num"><strong>35.71</strong></td><td class="num"><strong>63.00</strong></td><td class="num"><strong>49.36</strong></td></tr>
+      </tbody>
+    </table>
+    <p>读法：静态合成已是大头（21.59→43.29）；加随机在线探索再小升（→45.43）；<strong>真正把分提上去的是「反馈信号」这一步</strong>（45.43→49.36，AppWorld 30.36→35.71、BFCL 60.50→63.00）。这直接坐实了本文论点——<strong>用模型自身反馈来塑造数据，比无引导随机探索更有价值</strong>。</p>
+
+    <p><strong>② 三类信号缺一不可（Table 5，Qwen3-4B）。</strong>去掉任一类都掉分：去 Forgetting 掉得最狠（Avg 49.36→45.18，约 -4 点，说明它在「纠正训练中的能力回退」上最关键）；去 Rare、去 Boundary 各掉 1.6~1.9 点（曝露边界与长尾的价值）。结论：CoEvolve 受益于<strong>多样化的信号集合</strong>，而非单一启发式。</p>
+
+    <figure>
+      <img src="figures/fig4.png" alt="三类信号的分布">
+      <figcaption>原文 Figure 4：AppWorld / BFCL 上三类信号的占比。Boundary Signal 占比最高（51.4% / 45.5%），其次是 Forgetting（29.8% / 29.9%）与 Rare（18.8% / 24.6%）。说明 agent 最常卡在<strong>决策边界</strong>与<strong>已学过却回退</strong>的情形上。</figcaption>
+    </figure>
+
+    <p><strong>③ 环境验证是必需的（Table 11）。</strong>去掉「抽象任务经环境执行验证」这一步：BFCL 63.00→58.50、AppWorld 35.71→<strong>27.38</strong>（掉得更猛）。说明没有验证时，相当一部分合成任务是<strong>噪声或与环境动态不符</strong>的，会反噬训练——验证是 grounding，保证并入的数据是「真能执行且有信息量」的交互。</p>
+
+    <p><strong>④ 超参敏感性（Table 4）。</strong>初始数据量 $N$：$N{=}100$ 给出最好的 BFCL（63.00），$N{=}200$ 让 AppWorld 更高（38.10）但 BFCL 略降；生成频率 $F$：$F{=}5$ 时 AppWorld 最高（35.71），$F{=}10$ 时 BFCL 最好（63.00），$F{=}20$（更新太稀疏）则两边都掉。结论：<strong>适中的初始规模 + 足够频繁的更新</strong>对反馈驱动训练很重要。</p>
+
+    <p><strong>⑤ 跨域泛化（Table 6）。</strong>只在 AppWorld 上训练，能把 BFCL 的 zero-shot 从 26.50 提到 45.00；反向（只训 BFCL）把 AppWorld 从 16.67 提到 19.04。虽然 in-domain 仍最高，但 off-domain 的增益说明 CoEvolve 学到的是<strong>可迁移的策略</strong>，而非环境特异的 trick。附录 Table 10 进一步在 ALFWorld / WebShop 上全面超过 Reflexion / ReST / Curriculum Learning。</p>
+
+    <p><strong>⑥ 行为对照（Table 8）。</strong>对比 GRPO baseline，CoEvolve 在 BFCL 上<strong>保住 53% 原本做对的、并挽回 10% 原本做错的</strong>（AppWorld 对应 19.04% / 16.67%）——即反馈训练不仅保留既有强项，还有效纠正失败例，行为更可靠、自适应。</p>
+
+    <figure>
+      <img src="figures/fig5.png" alt="合成任务与验证任务的余弦相似度分布">
+      <figcaption>原文 Figure 5：合成任务与验证任务的最大余弦相似度分布。两个 benchmark 上多数样本落在<strong>中等相似区间（约 0.4~0.7）</strong>，仅少量逼近 1.0——说明合成产出的是<strong>新任务而非近重复</strong>，反馈驱动的探索在保持多样性的同时维持了与目标分布的关联。</figcaption>
+    </figure>
+
+    <p><strong>⑦ 代价很低（Table 7）。</strong>相比不做闭环的 GRPO，CoEvolve 仅引入约 <strong>10% 的额外计算</strong>（AppWorld 反馈耗时占比 9.67%、BFCL 12.76%），却换来 AppWorld +6.53、BFCL +5.00 的绝对增益（相对 +22.92% / +8.62%）——性价比favorable，是一个「便宜且通用」的训练策略，而非吃算力的 trick。</p>
+  </section>
+
+  <!-- ============================ ⑤ 洞见 ============================ -->
+  <section id="insight">
+    <h2><span class="n">⑤</span>洞见 Insights</h2>
+    <div class="callout insight">
+      <span class="label">Insight 1 · 把「数据分布」纳入优化回路</span>
+      传统 agent RL 优化的是 policy、却把数据分布当常量。CoEvolve 最值得记住的方法论是：<strong>让数据分布成为一个随 agent 共同进化的变量</strong>——rollout 不只是用来算 gradient，还是「agent 在哪失败」的诊断信号源；把诊断结果反馈回环境去定向采集新数据，就把 open-loop 的合成变成了 closed-loop 的 co-evolution。这套「用 model feedback 塑造 data，而非无引导铺量」的思路，可迁移到任何有可执行环境 + 可打分 reward 的 agent 训练场景。
+    </div>
+    <div class="callout insight">
+      <span class="label">Insight 2 · 失败往往是「数据覆盖」问题，不是「能力上限」问题</span>
+      Qwen2.5-7B 在 AppWorld 从 ~0 被拉到 27.98、BFCL +48，以及「越小模型受益越多」的现象，强烈暗示：很多 agent 失败的根因是<strong>训练分布没覆盖到对的交互模式</strong>。一旦用 boundary/forgetting/rare 信号把这些盲区补上，被「锁住」的能力就被解锁。这对实践者是个乐观信号——不一定要换更大模型，先把数据对准弱点。
+    </div>
+    <div class="callout insight">
+      <span class="label">Insight 3 · 「边界」与「遗忘」是最富信息的弱点</span>
+      Boundary signal 占比最高（~50%）、而去掉 Forgetting signal 掉分最多。这两个反直觉的事实合起来说明：最该补练的不是「一直做不对」的任务，而是<strong>「时好时坏（卡在决策边界）」与「学过又退步（遗忘）」</strong>的任务——它们恰好标记了 policy 最不稳定、最容易被一点点数据扳过去的地方。
+    </div>
+
+    <h3>局限与未来</h3>
+    <ul>
+      <li><strong>信号集合有限：</strong>作者坦言 forgetting/boundary/rare 只覆盖了潜在「有信息量的反馈」的一个子集，未来可进一步丰富信号种类。</li>
+      <li><strong>信号依赖当前 policy、早期可能有噪声：</strong>信号是从 agent 自身 trajectory 导出的，训练早期 agent 行为尚不成熟时，抽出的信号可能 noisy / incomplete，需要更鲁棒的信号抽取（这也呼应 Figure 3 早期信号多的现象）。</li>
+      <li><strong>安全 / 可控性：</strong>由于 CoEvolve 会<strong>自主重塑训练分布</strong>，在对抗性或安全攸关的场景下，可能需要人工监督、policy 约束与持续审计，再决定哪些合成任务可进入训练。作者建议未来引入显式 safety filter 与 risk-triggered review，让反馈驱动的自适应保持可控。</li>
+      <li>（笔者补充）核心代码截至解读日仍未释出，复现需自行基于 veRL + AgentEvolver 搭建；reward 为稀疏二值，对 reward 信号更稠密/更模糊的任务能否同样有效，论文未充分覆盖。</li>
+    </ul>
+
+    <h3>与相关工作的关系（基于本文自身论述）</h3>
+    <ul>
+      <li><strong>vs. imitation / 静态专家数据（ReAct、Reflexion、WebGPT 等）：</strong>这类把 agent 训在固定专家 trajectory 上，从根本上把学习限制在预采集数据的覆盖范围内；CoEvolve 脱离这种静态范式，让 agent 在动态、自进化的过程中学习，不依赖固定专家演示。</li>
+      <li><strong>vs. trajectory synthesis（多为 offline / weakly-adaptive、open-loop）：</strong>以往的合成 trajectory 方法（带反思/纠错的 open-loop synthesis、基于教程/脚本/self-training 的大规模 pipeline，乃至更自主的探索/课程）大多<strong>松散耦合于 agent 的失败模式</strong>；CoEvolve 用环境反馈<strong>按需</strong>合成，闭合了这条回路。</li>
+      <li><strong>vs. self-improving / curriculum：</strong>那些方法多在<strong>固定 query 池</strong>上改写 trajectory 或围绕 seed task 生成变体；CoEvolve 用反馈驱动 agent 回到交互环境去<strong>发现新的可执行 query 与状态</strong>，因此数据进化不局限于「改写/过滤一个离线 query 集」。</li>
+      <li><strong>vs. GRPO：</strong>CoEvolve 把 GRPO 当作内层 RL optimizer，外面再套一层反馈引导的数据进化；Table 2 证明二者是<strong>互补</strong>关系而非替代。</li>
+    </ul>
+  </section>
+
+  <footer class="foot">
+    本页为 <code>paper-reading</code> skill 生成的阅读笔记，仅作辅助，细节以
+    <a href="https://arxiv.org/abs/2604.15840" target="_blank" rel="noopener">原文</a> 为准 · 解读日期 2026-05-30
+  </footer>
+
+</article>
+</body>
+</html>
