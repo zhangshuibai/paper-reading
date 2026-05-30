@@ -341,5 +341,24 @@
       "Post-Training"
     ],
     "path": "papers/2605.10906-datamaster-data-centric-autonomous-ai/index.html"
+  },
+  {
+    "slug": "2605.09998-continual-harness-self-improving-agents",
+    "title": "Continual Harness: Online Adaptation for Self-Improving Foundation Agents",
+    "authors": "Seth Karten, Joel Zhang, Tersoo Upaa Jr, Ruirong Feng, Wenzhe Li, Chengshuai Shi, Chi Jin, Kiran Vodrahalli",
+    "team": "Princeton University; ARISE Foundation; Google DeepMind",
+    "arxiv": "https://arxiv.org/abs/2605.09998",
+    "code": "https://github.com/sethkarten/continual-harness",
+    "date": "2026-05-30",
+    "published": "arXiv 2026",
+    "tldr": "reset-free 自改进框架：agent 一边玩一边由 Refiner 在同一局内对 prompt/sub-agents/skills/memory 做 CRUD 编辑，从极简接口追回到人工专家 harness 的大半差距；并用 process-reward + frontier teacher 重标注让开源模型在不重置环境下持续推进游戏里程碑（即 Gemini Plays Pokémon 的自动化版）。",
+    "tags": [
+      "Agentic-Harness",
+      "Self-Improving",
+      "Reset-Free",
+      "In-Context-Learning",
+      "LLM-Agent"
+    ],
+    "path": "papers/2605.09998-continual-harness-self-improving-agents/index.html"
   }
 ]

@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Continual Harness：面向自我改进 foundation agent 的在线适应 · 论文解读</title>
+
+<script>
+  window.MathJax = {
+    tex:{inlineMath:[['$','$'],['\\(','\\)']], displayMath:[['$$','$$'],['\\[','\\]']]},
+    svg:{fontCache:'global'}
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;
+  }
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:880px; margin:0 auto; padding:18px 22px 90px}
+
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:27px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)}
+  .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .meta-grid a:hover{text-decoration:underline}
+
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap}
+  nav.toc a:hover{color:var(--accent)}
+
+  section{margin:38px 0}
+  h2{font-size:21px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:17px; margin:24px 0 8px}
+  p{margin:12px 0}
+  ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.9em}
+  strong{color:var(--text)}
+
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:14px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:10px 12px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  .yes{color:var(--ok); font-weight:600}
+  .no{color:var(--muted)}
+
+  figure{margin:24px 0; text-align:center}
+  figure img{max-width:100%; height:auto; border:1px solid var(--line); border-radius:10px; background:#fff}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+
+  blockquote{border-left:3px solid var(--line); margin:14px 0; padding:2px 16px; color:var(--muted)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+  .mjx-container{overflow-x:auto; overflow-y:hidden}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <!-- ============================ 抬头 / 元信息 ============================ -->
+  <header class="head">
+    <div class="chips">
+      <span class="chip">agentic harness</span>
+      <span class="chip">self-improving agent</span>
+      <span class="chip">reset-free</span>
+      <span class="chip">in-context learning</span>
+      <span class="chip">LLM agent</span>
+    </div>
+    <h1>Continual Harness：为自我改进的 foundation agent 做在线 (reset-free) 适应</h1>
+    <p class="orig-title">Continual Harness: Online Adaptation for Self-Improving Foundation Agents</p>
+    <dl class="meta-grid">
+      <dt>作者</dt><dd>Seth Karten*, Joel Zhang*, Tersoo Upaa Jr, Ruirong Feng, Wenzhe Li, Chengshuai Shi, Chi Jin, Kiran Vodrahalli（*共同一作）</dd>
+      <dt>团队 / 机构</dt><dd>Princeton University · ARISE Foundation · Google DeepMind</dd>
+      <dt>原文链接</dt><dd><a href="https://arxiv.org/abs/2605.09998" target="_blank" rel="noopener">https://arxiv.org/abs/2605.09998</a></dd>
+      <dt>项目主页</dt><dd><a href="https://sethkarten.ai/continual-harness" target="_blank" rel="noopener">https://sethkarten.ai/continual-harness</a></dd>
+      <dt>发表 / 年份</dt><dd>arXiv 2026（v1, 2026-05-11；cs.LG）</dd>
+      <dt>解读日期</dt><dd>2026-05-30</dd>
+    </dl>
+  </header>
+
+  <div class="tldr">
+    <b>TL;DR</b> — 像 Claude Code、OpenHands 这样的 coding harness（用 tools / memory / planning 把 foundation model 包成一个 agent）在编程任务上已经很成熟，但 embodied agent（玩游戏、操作环境）一直缺少同等的自动化 scaffolding。本文先报告 <b>Gemini Plays Pokémon (GPP)</b> 项目：靠 human-in-the-loop 反复改 harness，让 Gemini 成为<b>首个通关多款宝可梦 RPG</b>（Blue、Yellow Legacy 硬核模式、Crystal 全程无败北）的 AI，并在最难的关卡里观察到模型<b>自发开始改自己的策略</b>。在此基础上，作者提出 <b>Continual Harness</b>：一个 <b>reset-free</b>（不重置环境）的自改进框架，把 GPP 里人类手动做的事完全自动化——agent 一边行动、一边由一个 Refiner 每隔 $F$ 步在<b>同一局游戏内</b>对 system prompt / sub-agents / skills / memory 做 CRUD 编辑。在 Pokémon Red、Emerald 上，从零开始的 Continual Harness 大幅降低通关所需的按键数，并把「极简接口」到「人工专家 harness」之间的差距追回大半；提升幅度随模型能力而变。最后还把这套 harness 接到开源模型上，用 process-reward + frontier teacher 重标注的在线 co-learning loop，让 Gemma-4 在不重置环境的情况下持续推进游戏里程碑。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#opensource">① 开源贡献</a>
+    <a href="#motivation">② 动机与贡献</a>
+    <a href="#method">③ 方法</a>
+    <a href="#evaluation">④ 实验评估</a>
+    <a href="#insight">⑤ 洞见</a>
+  </nav>
+
+  <!-- ============================ ① 开源贡献 ============================ -->
+  <section id="opensource">
+    <h2><span class="n">①</span>开源贡献 Open-source Artifacts</h2>
+    <p>本文<strong>开源了 harness / agent 的参考实现</strong>（含 GPP benchmark harness 与三种游戏的 emulator 接入），采用 <strong>MIT 许可证</strong>；但<strong>不</strong>附带模型权重、训练代码与数据集——模型一律走外部 VLM API（Gemini / OpenAI / Anthropic 等），开源模型部分用的 Gemma-4 / Qwen3.5 也是依赖官方权重，本文不二次分发。游戏 ROM 需用户自备（合法获取）。下表链接均已实际核实。</p>
+    <table>
+      <thead><tr><th>类型</th><th>是否开源</th><th>内容 / 链接</th></tr></thead>
+      <tbody>
+        <tr><td>代码 Code</td><td class="yes">✔</td><td><a href="https://github.com/sethkarten/continual-harness" target="_blank" rel="noopener">github.com/sethkarten/continual-harness</a>（MIT）——Continual Harness 的 reset-free refining scaffold、PokeAgent / vision-only / sub-agent 等 agent 实现、meta-tool API、Web UI、metrics、checkpoint 持久化，及多家 VLM 后端。仓库自述同时包含 <b>GPP benchmark harness</b>（用于通关 Blue / Yellow Legacy / Crystal）以及 PokeAgent Speedrun Track 2 的代码。</td></tr>
+        <tr><td>模型权重 Weights</td><td class="no">✘</td><td>未发布。frontier 端用 Gemini 3 系列 API（Pro / Flash / Flash-Lite）；开源 student 用 <b>Gemma-4</b>（E2B / E4B / 26B MoE / 31B dense）的官方权重做 LoRA 微调，本文不分发自己训练出的 adapter。</td></tr>
+        <tr><td>数据集 Dataset</td><td class="no">✘</td><td>未单独发布。训练用的 teacher 轨迹（Gemini-3.1-pro 的 Continual Harness gameplay）未打包公开。</td></tr>
+        <tr><td>环境 / Benchmark</td><td class="yes">✔（间接）</td><td>评测沿用 <b>PokeAgent Challenge</b> 的 milestone 评测与专家 harness（Karten et al. 2026）。本仓库提供 Pokémon Red（PyBoy）、Emerald（mGBA）的 emulator 接入与 milestone / 按键计数基础设施；ROM 需自备。</td></tr>
+        <tr><td>项目主页 / Demo</td><td class="yes">✔</td><td><a href="https://sethkarten.ai/continual-harness" target="_blank" rel="noopener">sethkarten.ai/continual-harness</a>；GPP 当年为公开直播项目。</td></tr>
+      </tbody>
+    </table>
+    <div class="callout note">
+      <span class="label">核实说明</span>
+      GitHub 仓库（含 README、MIT LICENSE）经 WebFetch / WebSearch 确认存在且与论文对应；项目主页确认指向该仓库。模型权重 / 训练代码 / 数据集在仓库自述中明确「不包含」，与论文「依赖外部 API + 官方开源权重」一致，因此标 ✘。
+    </div>
+  </section>
+
+  <!-- ============================ ② 动机与贡献 ============================ -->
+  <section id="motivation">
+    <h2><span class="n">②</span>研究动机与贡献 Motivation &amp; Contribution</h2>
+
+    <h3>背景与问题</h3>
+    <p>在 coding / assistant 领域，<strong>agentic harness</strong>（把 foundation model 包上 tools、memory、planning 的 scaffolding 层）已经是标配基础设施：Claude Code、OpenHands、OpenClaw 让模型能浏览代码库、跑命令、在长交互里维持状态。<strong>但 embodied agent 没有同等物</strong>——面对长程、部分可观测（partial-observability）的决策任务（典型如玩一整款 RPG），缺少能自动搭建 scaffolding 的方法。</p>
+    <p>问题有多硬，PokeAgent Challenge 给了一个干脆的答案：<strong>没有 domain-specific scaffolding 时，frontier 的 vision-language model 在 RPG 上几乎寸步难行</strong>。原因是：模型对像素网格的细粒度空间推理很弱，游戏里大量信息（NPC 意图、战斗机制）不可直接观测，而且任务横跨上万步——overworld 导航、NPC 对话、回合制战斗、物品管理、被 badge / 剧情 gate 卡住的目标，环环相扣。</p>
+    <p>现有的「自改进」思路也都有结构性短板。<strong>Prompt-optimization</strong>（如 GEPA、DSPy 系的 optimizer）和 <strong>reflective self-improvement</strong>（Reflexion、Self-Refine）通常只优化 system prompt 这一个组件，且要<strong>跑完整局再重置（reset）环境</strong>才更新一次。这带来两个致命问题：(1) 每次 reset 都把之前积累的失败诊断清零，改进无法在一局内复利；(2) 那些<strong>只在深度局面才暴露</strong>的失败（后期 Elite Four 战斗、多步谜题、长对话链）reset-based 方法<strong>按定义就够不到</strong>——因为每轮都从初始状态开始。而对真正长跑的 coding agent / embodied agent / ops 任务来说，免费 reset 本就稀缺甚至不存在，<strong>reset-free 才是实际占主导的场景</strong>。</p>
+
+    <h3>本文的切入点</h3>
+    <p>作者的关键观察来自 GPP 项目自身：在 Yellow Legacy 和 Crystal 最难的阶段，他们把人写的专家 agent 撤掉、改为给模型一组 <strong>meta-tools</strong>（<code>define_agent</code>、<code>run_code</code>、notepad 编辑、自建工具）之后，<strong>模型自发开始迭代自己的策略</strong>——不请自来地把一个 sandbox 漏洞封装成通用 <code>press_sequence</code> 原语、给最终 Boss 战起名「Operation Zombie Phoenix」并发展出命名的多阶段战斗策略、在 notepad 里为地下道开关谜题写出显式真值表。这是一种早期、涌现的 continual-harness 行为。本文的论点是：<strong>既然人类在 loop 里手动改 harness 能通关，而模型自己也能改一部分，那就把整个 refiner 角色自动化、并去掉 reset</strong>，让 harness 在一局之内持续演化。</p>
+
+    <h3>核心贡献</h3>
+    <ol>
+      <li><strong>GPP 项目结果</strong>：通过 harness refinement，让 Gemini 成为<strong>首个通关多款宝可梦 RPG</strong> 的 AI 系统——Blue（2025-05）、Yellow Legacy 硬核模式（2025-08，击败 Elite Four）、Crystal（2025-11，终盘无败北）。并定量刻画了 harness 在数千小时游玩里如何被「集中、反复」地改写。</li>
+      <li><strong>提出 Continual Harness</strong>：一个 <strong>reset-free</strong> 框架，从极简环境接口出发，通过<strong>对 harness state 的在线 in-context learning</strong>，自动为 embodied agent 装配出 system prompt / sub-agents / skills / memory 四件套——把 prompt-optimization 从「只改 prompt、靠 reset」推广到「改全状态、不 reset、局内 mid-episode 更新」。</li>
+      <li><strong>追回专家 harness 的大半差距</strong>：在 Pokémon Red、Emerald 上跨 Gemini 3 三档模型，Continual Harness 把「极简接口 → 人工专家 harness」的效率差距追回大部分；在 Emerald 的「成本 vs 完成度」Pareto 平面上，<strong>增益随模型能力而变</strong>（Pro 上严格 Pareto 占优，Flash 上高方差，Flash-Lite 在能力地板以下）。</li>
+      <li><strong>在线 co-learning pipeline</strong>：把 refined harness 迁移到开源模型，用 process reward model 打分 + frontier teacher 重标注低分窗口 + soft SFT 更新，<strong>不重置环境</strong>地让 Gemma-4 在 Pokémon Red 上持续推进里程碑，从而实现 <strong>continual model-harness co-learning</strong>（模型权重与 harness 状态共同演化）。</li>
+    </ol>
+  </section>
+
+  <!-- ============================ ③ 方法 ============================ -->
+  <section id="method">
+    <h2><span class="n">③</span>方法 Method</h2>
+    <p>整篇方法的统一视角是 <strong>Figure 1</strong> 的「三连图」：环境 (environment)、agent、harness、refiner 这四个节点的拓扑始终不变，<strong>变的只是 refiner 的身份</strong>。(1) <strong>Human-in-the-loop</strong>：GPP 里由人读直播轨迹、重写 harness；(2) <strong>Self-improving harness</strong>：Continual Harness 把人换成一个自动 Refiner，在<strong>一局连续 episode 内</strong>对轨迹数据做改写；(3) <strong>Model + harness co-learning</strong>：在 warm-up 之后，开源模型的<strong>权重</strong>和 harness 状态在在线游玩中<strong>联合更新</strong>。</p>
+
+    <figure>
+      <img src="figures/fig1_hero.png" alt="Continual Harness 的三种 refiner 形态">
+      <figcaption>图 1：同一拓扑（environment / agent / harness / refiner）下 refiner 身份的三种实例——人类 → 自动 Refiner → 模型权重 + harness 联合训练（出处：原文 Figure 1）。</figcaption>
+    </figure>
+
+    <h3>问题设定：极简接口与 harness 四件套</h3>
+    <p>每个时刻 $t$，agent 收到一帧画面观测 $o_t$（当前画面的渲染图）和一张 <strong>ASCII text map</strong> $m_t$（用 <code>.</code>=可走、<code>#</code>=墙、<code>?</code>=可交互、<code>N</code>=NPC 等字符描述可见 tile 与玩家朝向），从固定按键集合 $\mathcal{A}$（八键：上下左右 / A / B / START / SELECT）里选动作 $a_t$。记 $s_t=(o_t,m_t)$。这张 text map 只是<strong>补偿 VLM 弱空间推理</strong>，它<strong>不含攻略、不含目标清单、不含寻路</strong>——人类玩家本来也能从屏幕读出这些 tile 信息。环境部分可观测，因为 NPC 意图、战斗机制等内部状态无法直接看到。</p>
+    <p>沿用 PokeAgent 的分解，一个 <strong>agentic harness</strong> $\mathcal{H}$ 由四个组件构成：</p>
+    <ul>
+      <li><strong>System prompt $p$</strong>：每步推理给模型的指令与策略指导。</li>
+      <li><strong>Sub-agents $\mathcal{G}$</strong>：可被 orchestrator 调用的专用模块（战斗策略、解谜、自省等）。</li>
+      <li><strong>Skills $\mathcal{K}$</strong>：可复用例程，既含文本层启发式，也含可执行程序（pathfinder、工具封装）；自带原语如 <code>press_buttons</code>、<code>get_game_state</code> 也算 skill，新 skill 可在游玩中现写。</li>
+      <li><strong>Memory $\mathcal{M}$</strong>：跨轨迹累积事实、策略、观察的持久知识库。</li>
+    </ul>
+    <p>此外 harness 暴露一组固定的 <strong>meta-tools</strong>（<code>define_agent</code>、<code>run_code</code>、<code>process_memory</code> 等），agent 和 Refiner 都通过<strong>同一套 meta-tool API</strong> 原地编辑 $p,\mathcal{G},\mathcal{K},\mathcal{M}$——二者只在「何时被调用、看哪段轨迹」上不同。三种基准 harness：$\mathcal{H}_{\min}$ 只给环境接口 + 通用 prompt，无 sub-agent / memory / skill；$\mathcal{H}_\mathrm{expert}$ 是人工搭好的专家 harness（含 A* 寻路、type chart、伤害计算器、整理好的目标）；$\mathcal{H}_\mathrm{CH}$ 从 $\mathcal{H}_{\min}$ 起步、由自动 Refiner 不断改写，随每个 refinement cycle 演化。</p>
+
+    <figure>
+      <img src="figures/fig2_methodology.png" alt="Continual Harness 两层 loop 架构">
+      <figcaption>图 2：(a) 一局之内的 harness refinement——Agent 读 $(s_t,\mathcal{H},\tau)$ 出动作，每 $F$ 步 Refiner 读窗口 $\tau_{t-F:t}$ 发出四组件编辑 $\Delta$，$\mathcal{H}\!\gets\!\mathcal{H}\oplus\Delta$；(b) 跨 DAgger+PRM 迭代的 co-learning——每轮在 live-refining 的 $\mathcal{H}_t$ 内跑 $K{=}256$ 步，PRM 打分、低分窗口由 Gemini-3.1-pro 重标注、soft SFT 得到 $\theta_{k+1}$，且 reset-free（出处：原文 Figure 2）。</figcaption>
+    </figure>
+
+    <h3>第一层 loop：一局之内的 harness refinement</h3>
+    <p>方法的核心是<strong>对 harness state $\mathcal{H}$ 做在线 in-context learning</strong>，由两层 loop 嵌套：</p>
+    <ul>
+      <li><strong>内层 loop（agent step）</strong>：被当前 harness $\mathcal{H}_t$ 包裹的模型 $M$，从 $s_t$ 和到目前为止的轨迹产出动作 $a_t$。这是标准的 agent 一步。</li>
+      <li><strong>外层 loop（harness refinement）</strong>：在 warm-up $W$ 步之后，<strong>每隔 $F$ 步</strong>，一个 Refiner 读最近的轨迹窗口、找<strong>失败签名</strong>（failure signatures），发出按组件分的编辑 $\Delta=(\Delta p,\Delta\mathcal{G},\Delta\mathcal{K},\Delta\mathcal{M})$。<strong>agent 不 reset</strong>，更新后的 harness 直接进入下一步的 context：$$\mathcal{H}_{t+1}=\mathcal{H}_t\oplus\Delta,$$ 其中 $p$ 被 $\Delta p$ 替换，$\mathcal{G},\mathcal{K},\mathcal{M}$ 接受 CRUD（create / read / update / delete）式操作。</li>
+    </ul>
+    <p>Refiner 读窗口 $\tau_{t-F:t}$，识别四类失败签名——<strong>导航打转、工具调用失败、目标停滞、错过的探索机会</strong>——然后跑<strong>四趟（每组件一趟）</strong>：(i) 基于已识别失败重写 prompt $p$；(ii) 为反复出现的多步模式新建 sub-agent，改写已有项以修失败，删掉没产出地被调用过的项；(iii) 把成功序列固化成 skill，并修复抛过异常的可执行代码；(iv) 补 memory 填空白、更新陈旧项、给已经走过的区域降权。</p>
+    <div class="callout note">
+      <span class="label">为什么 reset-free 是关键</span>
+      <strong>改进信息在一局内单调累积</strong>：早期观察到的失败签名对之后所有 refinement pass 都可见，所以 <strong>refinement 质量随 episode 变长而复利</strong>；reset-based 方法每次更新后这种累积都从头来过。更重要的是，Continual Harness 能瞄准<strong>只在深度局面才出现</strong>的失败（后期战斗、多步谜题、对话链），而 reset-based 按构造够不到。
+    </div>
+
+    <h3>第二层 loop：model–harness co-learning（训练开源模型）</h3>
+    <p>Figure 2(b) 把同一框架实例化成<strong>训练 loop</strong>。每个在线迭代让策略 $\pi_{\theta_k}$ 在一个<strong>持续被 Refiner 改写</strong>的 harness $\mathcal{H}_t$ 内跑 $K{=}256$ 步（DAgger 式 rollout，memory / skills / sub-agents / prompt 全在演化）。一个 <strong>pairwise process reward model (PRM)</strong> $R(s_t,a_t,\tau)\in[0,1]$ 在最近 transition 的滑动窗口上给每步打分；<strong>低奖励窗口由 frontier teacher（Gemini-3.1-pro）重标注</strong>，对重标注后的 shard 做一次 <strong>soft SFT</strong> 得到 $\theta_{k+1}$。该 loop 同样 <strong>reset-free</strong>：第 $k$ 轮结束时保存的 emulator state 直接作为第 $k{+}1$ 轮的起点，<strong>模型在游戏里的位置跨训练累积、而非每轮重启</strong>。</p>
+    <p>这里的精妙之处是<strong>轨迹分布 $\mathcal{D}_\theta$ 通过 harness 依赖于 $\theta$</strong>：模型动作诱导出 $\tau$ → Refiner 读 $\tau$ 更新 $\mathcal{H}_t$ → $\mathcal{H}_t$ 又塑造下一步的观测分布。于是 <strong>$\theta$ 跨迭代更新（在重标注轨迹上 SFT）、$\mathcal{H}_t$ 迭代内更新（靠 Refiner）</strong>，二者在同一份轨迹数据上联动，构成 continual co-learning。</p>
+
+    <div class="callout note">
+      <span class="label">复现要点（来自附录）</span>
+      <ul style="margin:6px 0 0">
+        <li><strong>接口</strong>：原生分辨率（Red/Crystal 160×144，Emerald 240×160）上采样 2×；每个观测步推进固定 <strong>120 帧</strong>，让菜单 / 战斗文本 / 行走动画在两次决策间结算完。</li>
+        <li><strong>成本指标</strong>：主指标是<strong>累计按键数（button presses）到里程碑</strong>，不是工具调用次数——一次 <code>press_buttons([A,A,DOWN])</code> 记 3 次。这让 $\mathcal{H}_{\min}$（每步一键）与会把多步压进一次 tool call 的 harness 可直接比较，并奖励动作通道上的压缩。</li>
+        <li><strong>SFT warm-up</strong>：Gemma-4（E2B/E4B/26B MoE/31B dense）用 Unsloth 在 H200 上做 LoRA（$r{=}256,\alpha{=}256$，bf16，8K context），lr $2\!\times\!10^{-5}$，对 teacher 轨迹过一遍。</li>
+        <li><strong>Offline GRPO</strong>：每个状态采 $G{=}4$ 个 completion，由 Gemini-3-flash-preview 按 action correctness（权重 0.6）+ format（0.4）打分，组内归一化优势，lr $1\!\times\!10^{-6}$，KL $\beta{=}0.04$，共 590 步。</li>
+        <li><strong>在线 PRM 奖励</strong>= 轨迹进展(0.4) + action correctness(0.3) + reasoning quality(0.2) + format(0.1)；relabel 后 soft SFT（3 epoch，lr $5\!\times\!10^{-6}$），PRM stride 8。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============================ ④ 实验评估 ============================ -->
+  <section id="evaluation">
+    <h2><span class="n">④</span>实验评估 Evaluation</h2>
+
+    <h3>评测设置</h3>
+    <ul>
+      <li><strong>Benchmark / 环境：</strong>Pokémon <strong>Red</strong> 与 <strong>Emerald</strong>（同类型、但地图 / 机制 / 难度不同）；GPP 部分还覆盖 Blue、Yellow Legacy、Crystal。用 PokeAgent Challenge 的标准化 milestone 评测——Emerald 到第 3 道馆共 31 个里程碑，Red 18 个。</li>
+      <li><strong>对比基线：</strong>$\mathcal{H}_{\min}$（极简接口 + 通用 prompt）作下界；$\mathcal{H}_\mathrm{expert}$（人工专家 harness，含 A* 寻路 / type chart / 伤害计算 / 整理好的目标）作上界。$\mathcal{H}_\mathrm{CH}$ 三个变体：<strong>from scratch</strong>（从 $\mathcal{H}_{\min}$ 起、全程 refine）、<strong>bootstrap frozen</strong>（载入一次成功 from-scratch 的 harness、关闭 refine）、<strong>bootstrap updating</strong>（同样 bootstrap、但继续 refine）。</li>
+      <li><strong>模型与种子：</strong>frontier 用 Gemini 3 三档（Pro / Flash / Flash-Lite）；开源迁移用 Gemma-4（E2B / E4B / 26B MoE / 31B dense），跨族负对照用 Qwen3.5（27B/35B）。每个实验至少 3 个 seed，报 seed 中位数 + 半透明单 seed 轨迹。</li>
+      <li><strong>指标方向：</strong>主指标<strong>累计按键数到里程碑（越低越好）</strong>；Pareto 平面用「到达里程碑比例（越高越好）」对「美元成本（越低越好，log 轴，cached input 按 25% 计）」。</li>
+    </ul>
+
+    <h3>主要结果 1：GPP 通关多款 RPG，且 harness 改写「集中而反复」</h3>
+    <p>GPP 让 Gemini 通关 Blue / Yellow Legacy 硬核 / Crystal（终盘无败北），成为首个通关多款宝可梦 RPG 的 AI。定量上：Yellow Legacy 全程对 skill / sub-agent 定义的 CRUD 操作<strong>贯穿始终、不收敛到固定 scaffold</strong>，且<strong>集中在少数导航 / 战斗组件</strong>；其中 <code>battle_strategist_agent</code> 这个 prompt 在 Elite Four 阶段经历「生长—简化」循环，最后被一次<strong>结构性重写</strong>吸收进会派发到命名子检查的 <code>master_battle_agent</code>。Elite Four 的 lifetime 重试次数也很能说明长程难度：Lorelei 18 次、Bruno 20 次、Agatha 18 次、Lance 19 次、Champion Pixel 第 4 次才胜——伴随的是越来越结构化的战斗 prompt 与持久书面 memory。</p>
+
+    <h3>主要结果 2：Continual Harness 追回到专家 harness 的大半差距</h3>
+    <figure>
+      <img src="figures/fig3_progression.png" alt="里程碑 vs 累计按键数">
+      <figcaption>图 3：到达的里程碑数 vs 累计按键数。左 Red（到 Thunder Badge 的 11 个里程碑子集），右 Emerald（到 Knuckle Badge / 第 2 馆的 9 个，x 轴截到 8.5k）。粗线为 seed 中位数，细线为单 seed（出处：原文 Figure 5）。</figcaption>
+    </figure>
+    <p>在两款游戏上，Continual Harness 相对 $\mathcal{H}_{\min}$ <strong>显著降低每个里程碑的按键成本</strong>，并把 $\mathcal{H}_{\min}\!\to\!\mathcal{H}_\mathrm{expert}$ 的效率差距<strong>追回大半</strong>——而且它<strong>看不到</strong>游戏 decompilation、里程碑日程、或专家 harness 里任何人工 sub-agent。残差差距集中在<strong>对话密集的馆内</strong>和<strong>多回合战斗策略</strong>（Continual Harness 尚不能可靠合成的组件）。在 Red 上，<strong>bootstrap-updating 在每个里程碑都比 from-scratch 更高效</strong>，说明 refinement 信号在一局内复利、且一局炼好的 harness 能加速下一局——即便游戏状态本身被 reset。</p>
+
+    <h3>主要结果 3：增益依赖模型能力（Emerald Pareto）</h3>
+    <figure>
+      <img src="figures/fig4_pareto.png" alt="Emerald 成本-完成度 Pareto 平面">
+      <figcaption>图 4：Emerald 成本–完成度 Pareto 平面。实心点=单个 24 小时 seed，带环点=每格中位数，虚线阶梯=成本单调 Pareto 前沿；y 轴=31 里程碑的到达比例，x 轴=Gemini API 花费（log，cached input 25%）（出处：原文 Figure 6）。</figcaption>
+    </figure>
+    <table>
+      <thead><tr><th>模型 × harness</th><th>到达里程碑</th><th>成本（中位）</th><th>读法</th></tr></thead>
+      <tbody>
+        <tr><td>Pro · $\mathcal{H}_{\min}$</td><td>98%</td><td>$215</td><td>基线</td></tr>
+        <tr><td><strong>Pro · CH from-scratch</strong></td><td><strong>100%</strong></td><td><strong>$130</strong></td><td>严格 Pareto 占优：满完成 + 约 −40% 成本</td></tr>
+        <tr><td>Pro · CH bootstrap(×2)</td><td>96–100%</td><td>$110–140</td><td>同档高效区</td></tr>
+        <tr><td>Flash · $\mathcal{H}_{\min}$</td><td>77%</td><td>$30</td><td>基线</td></tr>
+        <tr><td>Flash · CH bootstrap-upd.</td><td>80%</td><td>$42</td><td>仅略高，整体<strong>高方差</strong></td></tr>
+        <tr><td>Flash-Lite · $\mathcal{H}_{\min}$</td><td>20%</td><td>$11</td><td>基线</td></tr>
+        <tr><td>Flash-Lite · CH（任一变体）</td><td class="no">3–13%</td><td>同等或更高</td><td><strong>在能力地板之下，反而更差</strong></td></tr>
+      </tbody>
+    </table>
+    <p>结论很干脆：<strong>harness 增益需要一个「足够会正确使用 harness 组件」的模型</strong>。Pro 上 Continual Harness 严格 Pareto 占优；Flash 上收益高方差；Flash-Lite 则被 harness 拖累——存在一个<strong>能力地板（capability floor）</strong>，其下 refinement loop 无法 bootstrap。</p>
+
+    <h3>主要结果 4：开源 student 与 refining harness 协同学习</h3>
+    <figure>
+      <img src="figures/fig5_colearn.png" alt="reset-free DAgger+PRM 训练曲线">
+      <figcaption>图 5：reset-free DAgger+PRM 训练在 Pokémon Red 上持续推进里程碑。x=训练迭代 $k$，y=到达的里程碑 index；实心点=从游戏开头起，空心环=中盘 checkpoint 起，星=judge 确认的推进，虚线=未训练 Gemma-4 基线（零推进）。Teacher=Gemini-3.1-pro（出处：原文 Figure，h6_colearn_pipeline）。</figcaption>
+    </figure>
+    <p>开源模型先经 SFT（在 frontier Continual Harness 轨迹上）+ offline GRPO 两段 warm-up，但<strong>两段 warm-up 单独都不带来有意义的里程碑推进</strong>；真正的 live 增益只在 co-learning 阶段出现。每个迭代 = 256 步 DAgger rollout（穿过全套 refining harness）→ PRM 打分 → Gemini-3.1-pro 重标注低分窗口 → soft SFT。loop reset-free，所以图里每条曲线是<strong>同一个 agent 在自己训练里走出的一条连续游戏轨迹</strong>，不是多次独立 rollout 的聚合。结果：<strong>无论从游戏开头还是中盘 checkpoint，模型的实时游戏位置都在跨迭代推进</strong>，两类阶梯形状一致，说明训练信号不挑早期分布。跨族负对照 Qwen3.5（无 SFT warm-up）能产出可解析的 tool call，<strong>但在 live rollout 里走不出起始区</strong>，排除了「rollout 协议假象」。warm-up 阶段的 eval（Red）也显示 SFT 把 <code>tool_format</code> 从近 0 抬到 0.50、<code>action_relevance</code> 抬到 0.75，是后续能上 loop 的前提。</p>
+
+    <h3>消融 / 机制归因</h3>
+    <figure>
+      <img src="figures/fig6_pathfinding.png" alt="导航 skill 向 oracle 自我改进">
+      <figcaption>图 6：寻路 skill 机制。左=演化出的 top-10% 导航 skill 集相对 Dijkstra oracle 的路径成本缺口（越低越好，虚线 0% 为 oracle）；右=导航 skill 累计调用次数 vs 按键数（出处：原文 Figure，h2_pathfinding）。</figcaption>
+    </figure>
+    <ul>
+      <li><strong>Skill 是主力</strong>：用 Dijkstra/BFS oracle 直接度量 skill 自身质量（独立于端到端效率）。$\mathcal{H}_{\min}$ 从不调用导航 skill；每个 CH 条件在 24 小时里累计上百次调用。from-scratch 的路径成本缺口从开局近「半成本惩罚」迅速降到个位数并稳住——<strong>这是 in-loop、reset-free 的修复</strong>：早期调用的失败被 Refiner 诊断，受影响的 skill 在<strong>同一局内</strong>被修好。附录指出 $\mathcal{H}_{\min}\!\to\!\mathcal{H}_\mathrm{CH}$ 的差距<strong>大部分由 skill library 单独吸收</strong>。</li>
+      <li><strong>Skill 调试是「分诊」</strong>：大多数现写的 skill 从没被调用（create-and-forget 长尾），少数工作集吃掉绝大多数调用；refinement loop 专修 agent 真正依赖的 skill、容忍无用 skill 的回归。这正是 reset-free 优于 reset-based 的论据——<strong>失败记录与修复落在同一条轨迹里，loop 在一局内闭合</strong>。</li>
+      <li><strong>Sub-agent 省 token</strong>：sub-agent 的 per-step token 比 orchestrator 低约一个数量级；导航 / 对话 / 菜单任务的「干净返回 + 回到原目标」成功率都接近上限。结论：<strong>是 harness 而非裸模型扛起了大部分长程性能</strong>——一旦 orchestrator 能委派给便宜的专用 context 并信任其返回，长任务就用远少的 token 变得可解。</li>
+      <li><strong>Memory 复用 + bootstrap 边界</strong>：memory 只有在 library 既成熟又被<strong>继承</strong>时才被真正「拉取」——bootstrap 跑会在馆 / 洞窟段主动查继承来的 memory，from-scratch 则写得多、回看少（引用率绝对值偏低，作者如实报告）。继承表（c5）显示：Emerald 上 frozen / continued 各 store 的继承率几乎 100%；Red 上 skills / memories 也 ~100%，<strong>唯独 sub-agents 在 continued 跌到 6.4%</strong>——Red 的 bootstrap-updating agent 把 sub-agent 预算缩到寥寥几次、且引用了 bootstrap 里不存在的 ID，随之里程碑阶梯回退（约第 213 步起）。结论：<strong>可迁移单元是「跨局的 harness」而非单局</strong>，当 agent 继续用继承组件时成立，抛弃时即破——提示需要 reuse prior 或 sub-agent 弃用策略。</li>
+    </ul>
+  </section>
+
+  <!-- ============================ ⑤ 洞见 ============================ -->
+  <section id="insight">
+    <h2><span class="n">⑤</span>洞见 Insights</h2>
+    <div class="callout insight">
+      <span class="label">Insight 1 · reset-free 让改进在一局内复利</span>
+      把「优化只改 prompt + 跑完整局再 reset」换成「改全 harness 状态 + mid-episode、不 reset」，是本文最可迁移的方法论。reset-free 的两个红利——(1) 失败诊断与修复落在同一条轨迹、loop 在一局内闭合；(2) 能瞄准只在深度局面才暴露的失败——恰好是 coding agent / embodied agent / ops 这类「reset 昂贵或不存在」任务的刚需。
+    </div>
+    <div class="callout insight">
+      <span class="label">Insight 2 · harness 增益是模型能力的「放大器」，不是「替代品」</span>
+      Emerald Pareto 上 Pro 严格占优、Flash 高方差、Flash-Lite 反被拖累，揭示了一个<strong>能力地板</strong>：harness 不能凭空把弱模型抬起来，它放大的是模型「会用工具 / 会委派 / 会自省」的既有能力。换言之，自改进 scaffolding 的收益与底座能力强相关——这对「靠 harness 救小模型」的直觉是一个反向校正。
+    </div>
+    <div class="callout insight">
+      <span class="label">Insight 3 · 可迁移单元是 harness，不是单局；模型自欺会击穿 reset-free</span>
+      机制分析显示，真正跨局带走价值的是<strong>继承下来的 harness 组件</strong>；一旦 agent 抛弃它们（Red 的 sub-agent 崩塌），性能立刻回退。附录的「Power Plant 路线 loop」案例更触目：agent 因 schema mismatch 把同一个无效 payload 重复了 842 次、3.5 小时，内部 reasoning 却一直「自评进展良好」——暴露了 <strong>feedback blindness</strong> 与 context horizon 限制（工具创建多发生在遇到瓶颈的前 50–200 步，超过 500 步停滞后就退化为重复执行）。这说明 reset-free 自改进的真正软肋不在「改不改 harness」，而在 agent 能否<strong>对环境反馈保持诚实</strong>。
+    </div>
+
+    <h3>局限与未来</h3>
+    <ul>
+      <li><strong>能力地板</strong>：Flash-Lite 在 Emerald 卡在 20% 以下，且所有 CH 变体都不如 $\mathcal{H}_{\min}$；当前评测的开源 Gemma-4（至 31B）<strong>还不足以同时当 teacher 和 trainee</strong>，co-learning 因此耦合了一个 frontier teacher。</li>
+      <li><strong>co-learning 未饱和</strong>：只报告了训练 horizon 内的持续推进，<strong>未确立收敛点</strong>；per-iteration PRM 奖励非单调、推进呈「爆发式」（多个 ≥0.40 的连续窗口才换来一次大跨步），resume checkpoint 后还有 2–3 迭代的回归。</li>
+      <li><strong>残差差距</strong>：对话密集的馆内、多回合战斗策略仍是 CH 难以可靠合成的部分；sub-agent 缺乏 reuse prior / 弃用规则会导致回退。</li>
+      <li><strong>未做的对照</strong>：本文只研究 reset-free 训练，与「传统带 reset 的 batch 累积」在同一任务上的正面对比仍是 open question。</li>
+    </ul>
+
+    <h3>与相关工作的关系</h3>
+    <p>（基于本文自身论述）与 coding harness（Claude Code / OpenHands / OpenClaw）相比，本文把 harness 思想搬到 embodied RPG，并自动化其构建。与 prompt-optimization（GEPA、DSPy 系）和 reflective self-improvement（Reflexion、Self-Refine）相比，关键区别是 <strong>Continual Harness 原地编辑<em>全部</em> harness 状态 $(p,\mathcal{G},\mathcal{K},\mathcal{M})$、且 mid-episode、从部分轨迹窗口、不 reset</strong>，而它们多是「episode 之间、只改局部、要 reset」。与游戏 agent 两条路线相比——Voyager / Claude Plays 自建工具、或把 LLM 配一个手工 planner——本文把「自建」推进到全自动 refiner，并由 GPP 的真实通关记录背书。在 RL 侧，它把 reset-free RL、in-context RL、process reward model、STaR 式自训练组合进 co-learning：warm-up 用 SFT + offline GRPO，在线阶段让 frontier teacher 重标注模型自身 rollout 的低分窗口、做 soft SFT，从而把 harness refinement 与模型训练闭成一个环。</p>
+  </section>
+
+  <footer class="foot">
+    本页为 <code>paper-reading</code> skill 生成的阅读笔记，仅作辅助，细节以
+    <a href="https://arxiv.org/abs/2605.09998" target="_blank" rel="noopener">原文</a> 为准 · 解读日期 2026-05-30
+  </footer>
+
+</article>
+</body>
+</html>
