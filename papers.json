@@ -227,5 +227,43 @@
       "Self-Evolving"
     ],
     "path": "papers/2604.15840-coevolve-agent-data-mutual-evolution/index.html"
+  },
+  {
+    "slug": "2604.20779-swe-chat-coding-agent-in-the-wild",
+    "title": "SWE-chat: Coding Agent Interactions From Real Users in the Wild",
+    "authors": "Joachim Baumann, Vishakh Padmakumar, Xiang Li, John Yang, Diyi Yang, Sanmi Koyejo",
+    "team": "Stanford University (SALT-NLP)",
+    "arxiv": "https://arxiv.org/abs/2604.20779",
+    "code": "https://github.com/SALT-NLP/SWE-chat",
+    "date": "2026-05-30",
+    "published": "arXiv 2026",
+    "tldr": "首个大规模真实'野外'coding agent 会话数据集（~6K 会话、63K+ prompt、355K+ tool call、逐行 human/agent 代码归属）：真实使用高度双峰、agent 自主性超过其寻求监督的能力、vibe coding 又贵又不安全。",
+    "tags": [
+      "Coding-Agent",
+      "Dataset",
+      "Human-AI-Interaction",
+      "Vibe-Coding",
+      "Code-Security"
+    ],
+    "path": "papers/2604.20779-swe-chat-coding-agent-in-the-wild/index.html"
+  },
+  {
+    "slug": "2604.08377-skillclaw-collective-skill-evolution",
+    "title": "SkillClaw: Let Skills Evolve Collectively with Agentic Evolver",
+    "authors": "Ziyu Ma, Shidong Yang, Yuxiang Ji, Xucong Wang, Yong Wang, Yiming Hu, Tongwen Huang, Xiangxiang Chu",
+    "team": "DreamX Team (AMAP, Alibaba)",
+    "arxiv": "https://arxiv.org/abs/2604.08377",
+    "code": "https://github.com/AMAP-ML/SkillClaw",
+    "date": "2026-05-30",
+    "published": "arXiv 2026",
+    "tldr": "把跨用户、跨时间的真实交互轨迹当作改进 agent skills 的第一信号：agentic evolver 对按 skill 分组的共享证据做 refine/create/skip，夜间真实环境验证后才合并同步，让 skills 在多用户生态中集体进化、单调不退化。",
+    "tags": [
+      "LLM-Agent",
+      "Agent-Skills",
+      "Skill-Evolution",
+      "Self-Improving",
+      "WildClawBench"
+    ],
+    "path": "papers/2604.08377-skillclaw-collective-skill-evolution/index.html"
   }
 ]

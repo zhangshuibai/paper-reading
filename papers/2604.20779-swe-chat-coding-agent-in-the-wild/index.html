@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SWE-chat：真实用户与 coding agent 的「野外」交互数据集 · 论文解读</title>
+
+<script>
+  window.MathJax = {
+    tex:{inlineMath:[['$','$'],['\\(','\\)']], displayMath:[['$$','$$'],['\\[','\\]']]},
+    svg:{fontCache:'global'}
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;
+  }
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:880px; margin:0 auto; padding:18px 22px 90px}
+
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:27px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)}
+  .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .meta-grid a:hover{text-decoration:underline}
+
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap}
+  nav.toc a:hover{color:var(--accent)}
+
+  section{margin:38px 0}
+  h2{font-size:21px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:17px; margin:24px 0 8px}
+  p{margin:12px 0}
+  ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.9em}
+  strong{color:var(--text)}
+
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:14px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:10px 12px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  .yes{color:var(--ok); font-weight:600}
+  .no{color:var(--muted)}
+  .num{font-variant-numeric:tabular-nums; white-space:nowrap}
+
+  figure{margin:24px 0; text-align:center}
+  figure img{max-width:100%; height:auto; border:1px solid var(--line); border-radius:10px; background:#fff}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+
+  blockquote{border-left:3px solid var(--line); margin:14px 0; padding:2px 16px; color:var(--muted)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+  .mjx-container{overflow-x:auto; overflow-y:hidden}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <!-- ============================ 抬头 / 元信息 ============================ -->
+  <header class="head">
+    <div class="chips">
+      <span class="chip">coding agent</span>
+      <span class="chip">dataset</span>
+      <span class="chip">human-AI interaction</span>
+      <span class="chip">vibe coding</span>
+      <span class="chip">code security</span>
+    </div>
+    <h1>SWE-chat：真实用户与 coding agent 的「野外」交互数据集</h1>
+    <p class="orig-title">SWE-chat: Coding Agent Interactions From Real Users in the Wild</p>
+    <dl class="meta-grid">
+      <dt>作者</dt><dd>Joachim Baumann, Vishakh Padmakumar, Xiang Li, John Yang, Diyi Yang, Sanmi Koyejo</dd>
+      <dt>团队 / 机构</dt><dd>Stanford University（SALT-NLP 实验室）</dd>
+      <dt>原文链接</dt><dd><a href="https://arxiv.org/abs/2604.20779" target="_blank" rel="noopener">https://arxiv.org/abs/2604.20779</a></dd>
+      <dt>发表 / 年份</dt><dd>arXiv 2026（v1, 2026-04-22）</dd>
+      <dt>解读日期</dt><dd>2026-05-30</dd>
+    </dl>
+  </header>
+
+  <div class="tldr">
+    <b>TL;DR</b> — SWE-chat 是<strong>第一个大规模、真实「野外」的 coding agent 会话数据集</strong>：通过开源工具 Entire.io 的 CLI checkpoint logging，从 200+ 个公开 GitHub 仓库收集了约 6,000 个会话、63,000+ 条 user prompt、355,000+ 次 tool call，并带有<strong>逐行的 human vs. agent 代码归属</strong>。基于它，作者给出真实使用的实证画像：coding mode 高度<strong>双峰</strong>（41% 的会话是 agent 写 &gt;99% 代码的 "vibe coding"，23% 由人全写）；agent 越来越自主但<strong>效率不高</strong>——只有 44.3% 的 agent 产出代码最终进入 commit；vibe coding 既贵又慢，还会引入约 <strong>9×</strong> 于纯人工的安全漏洞；用户在 44% 的 turn 里通过中断/纠正/报错主动 push back。结论：agent 的<strong>自主性正在超过其寻求监督的能力</strong>，把审查负担转嫁给了用户，curated benchmark 严重低估了真实工作流的复杂度。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#opensource">① 开源贡献</a>
+    <a href="#motivation">② 动机与贡献</a>
+    <a href="#method">③ 方法</a>
+    <a href="#evaluation">④ 实验评估</a>
+    <a href="#insight">⑤ 洞见</a>
+  </nav>
+
+  <!-- ============================ ① 开源贡献 ============================ -->
+  <section id="opensource">
+    <h2><span class="n">①</span>开源贡献 Open-source Artifacts</h2>
+    <p>这是一篇<strong>数据集论文</strong>，核心交付物是数据本身——<strong>数据集已经在 Hugging Face 上以 <code>odc-by</code> 许可证公开发布且可下载</strong>（解读日已核实），并配有一个实时更新的项目主页；代码仓库已建好但截至解读日仍是占位状态（README 写「data and code coming soon」）。数据采集依赖的底层工具 Entire CLI 本身也是开源的。</p>
+    <table>
+      <thead><tr><th>类型</th><th>是否开源</th><th>内容 / 链接</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>数据集 Dataset</td>
+          <td class="yes">✔</td>
+          <td><a href="https://huggingface.co/datasets/SALT-NLP/SWE-chat" target="_blank" rel="noopener">huggingface.co/datasets/SALT-NLP/SWE-chat</a><br>
+          parquet 格式，许可证 <code>odc-by</code>。已核实包含：<span class="num">repositories 205</span>、<span class="num">checkpoints 13,406</span>、<span class="num">sessions 5,851</span>、<span class="num">commits 14,459</span>、<span class="num">conversations 2,692,480</span>，外加 5,851 个 <code>transcripts/*.jsonl</code> 完整对话转录。含 tool call、thinking trace、code diff 与逐行 human/agent 归属。<strong>「活数据集」</strong>，持续更新。</td>
+        </tr>
+        <tr>
+          <td>代码 Code</td>
+          <td class="no">⚠ 占位</td>
+          <td><a href="https://github.com/SALT-NLP/SWE-chat" target="_blank" rel="noopener">github.com/SALT-NLP/SWE-chat</a>（MIT）。仓库已建立，但当前仅有 LICENSE 与 README，内容为「Stay tuned — data and code coming soon」，<strong>采集/分析/标注/指标脚本尚未释出</strong>。</td>
+        </tr>
+        <tr>
+          <td>采集工具 Tooling</td>
+          <td class="yes">✔（第三方）</td>
+          <td>数据采集依赖 Entire.io 的 CLI checkpoint logging：<a href="https://github.com/entireio/cli" target="_blank" rel="noopener">github.com/entireio/cli</a>。开发者通过安装该工具并 opt-in 才会被记录。</td>
+        </tr>
+        <tr>
+          <td>项目主页 / Demo</td>
+          <td class="yes">✔</td>
+          <td><a href="https://swe-chat.com" target="_blank" rel="noopener">swe-chat.com</a>：实时统计面板（解读日显示 6K+ 会话、63K+ prompt、355K+ tool call、2.7M 事件，并标注近 7 天增量），含 10 个示例会话与数据/代码/论文入口。</td>
+        </tr>
+        <tr>
+          <td>模型权重 Weights</td>
+          <td class="no">—</td>
+          <td>本文不训练模型，无权重发布（标注用的是现成的开源/闭源 LLM 作 judge）。</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="num" style="color:var(--muted);font-size:13px">注：论文统计与 HF 表行数略有出入（如正文常写「约 6,000 sessions」，HF 表为 5,851；正文称 13,000+ checkpoints，HF 表为 13,406）——因数据集持续增长，不同时间点的快照数字会变动。</p>
+  </section>
+
+  <!-- ============================ ② 动机与贡献 ============================ -->
+  <section id="motivation">
+    <h2><span class="n">②</span>研究动机与贡献 Motivation &amp; Contribution</h2>
+
+    <h3>背景与问题</h3>
+    <p>AI coding agent（在 LLM 上加一套 tool call——编辑文件、跑 shell、调 subagent）已经被大规模采用，甚至被报道能解决人类要花 12 小时的编码任务（METR 在 50% 成功率下的估计）。开发者正在以前所未有的规模把编码工作「外包」给 agent。但本文指出一个尖锐的空白：<strong>我们对人和 agent 究竟如何交互、agent 的产出到底有多少被真正采用、它们多久失败一次、用户怎么应对，几乎全是道听途说（anecdotal）。</strong></p>
+    <p>已有评测的具体痛点在于：</p>
+    <ul>
+      <li><strong>Benchmark 只盯着 patch generation。</strong>SWE-bench、SWE-bench Multimodal、Multi-SWE-bench、SWE-bench Pro 等绝大多数 SE benchmark 都是「一组有明确可验证答案的 curated 问题」，最近的工作只是在加大难度（Terminal-bench、APEX-SWE 等），却<strong>忽略了 human-agent 交互这一维度</strong>。</li>
+      <li><strong>curated 表现不等于真实可用。</strong>在打磨好的 GitHub issue 上拿高分，并不能迁移到真实的、迭代式的使用——真实场景里用户看到输出后会反复改口、纠正、打断。</li>
+      <li><strong>没有公开数据捕获完整 agentic 会话。</strong>已有数据集要么只有 agent 轨迹没有真实用户 prompt（如 SWE-smith-trajectories、CoderForge、SERA、nex-agi-agent-sft、Agent Trajectories、Multi-SWE-bench_trajs、Agent Data Protocol、AIDev），要么有代码归属但缺 tool-use 轨迹（AgentPack）。<strong>没有一个同时具备「真实用户 prompt + agent tool-use 轨迹 + code diff + 逐行代码归属」四要素</strong>（见论文 Table 1）。</li>
+    </ul>
+    <p>作者认为，要造出真正有用的 agent，前提是<strong>搞清开发者在实践中如何使用它们</strong>，而唯一办法就是在野外收集真实使用数据。两个研究问题：</p>
+    <ul>
+      <li><strong>RQ1：</strong>真实编码任务中，用户如何与 coding agent 交互？</li>
+      <li><strong>RQ2：</strong>coding agent 在实践中如何失败，用户又如何应对？</li>
+    </ul>
+
+    <h3>本文的切入点</h3>
+    <p>关键的「使能」观察是：Entire.io 这个开源 CLI 工具，会把每一次 coding agent 会话的 checkpoint 记录到仓库的一个专用分支，<strong>并把每个 checkpoint 关联到一个带逐行 human/agent 归属的 commit</strong>。这给了作者一个前所未有的抓手——只要扫描所有 opt-in 的公开仓库，就能拿到「完整交互轨迹 + 代码归属」这种以前拿不到的数据。在此之上，作者再用 LLM-as-a-judge 对会话做语义标注（成功度、用户画像、prompt 意图、用户 push back），从而能问「<em>怎么</em>交互」和「<em>为什么</em>成功/失败」这类聚合统计回答不了的问题。</p>
+
+    <h3>核心贡献</h3>
+    <ol>
+      <li><strong>提出 SWE-chat 数据集</strong>——第一个来自真实用户、真实仓库的大规模 coding agent 会话数据集（约 6K 会话、63K+ prompt、355K+ tool call、2.7M 日志事件，覆盖 200+ 仓库、五种主流 agent），含完整交互轨迹与逐行 human/agent 代码归属，且为持续增长的「活数据集」。</li>
+      <li><strong>给出真实使用的交互画像（回答 RQ1）：</strong>用户用 agent 做的事远不止写补丁——「理解已有代码」是最常见意图（19.0%），agent 有 1/3 的 tool call 在跑 bash 而非编辑文件；coding mode 极度双峰，且 vibe coding 三个月内份额从 ~20% 翻倍到 &gt;40%；用户多为「expert nitpicker」（39.7%），交互是多轮、挑剔、迭代的。</li>
+      <li><strong>给出失败模式与用户响应的实证（回答 RQ2）：</strong>定义了一套可从原始日志直接算出的效率/安全指标，量化发现 agent <strong>powerful but brittle</strong>——只有 44.3% 产出代码存活进 commit；vibe coding 比协作模式贵约 3×、引漏洞约 9× 于纯人工；agent 极少主动停下来提问（Claude Code 仅 1.4% 的 turn），而用户在 44% 的 turn 主动 push back。据此提出用 SWE-chat 构建真实工作流 benchmark、改进交互设计、训练 user simulator 的研究路线图。</li>
+    </ol>
+  </section>
+
+  <!-- ============================ ③ 方法 ============================ -->
+  <section id="method">
+    <h2><span class="n">③</span>方法 Method</h2>
+    <p>本文的「方法」是一条<strong>数据采集 + 富标注 + 指标计算</strong>的流水线，而非模型训练。整体上分三层：(a) 从 opt-in 的公开仓库自动发现并解析 Entire CLI 记录的原始会话日志；(b) 用 LLM-as-a-judge 给会话/prompt 打语义标签（成功度、用户画像、意图、push back）；(c) 直接从原始日志和代码归属数据算出一套效率与安全指标。下图是采集流程与数据规模的总览。</p>
+
+    <figure>
+      <img src="figures/fig1-overview.png" alt="SWE-chat 采集流程与数据规模总览">
+      <figcaption>图 1：SWE-chat 把「agent 会话日志」与「git 代码版本」结合起来——开发者安装开源工具 Entire.io 后，CLI 自动记录会话并把它链接到带逐行 human/agent 归属的 commit。右栏为数据规模。（出处：原文 Figure 1）</figcaption>
+    </figure>
+
+    <h3>1. 数据采集流水线（Appendix C.1）</h3>
+    <p>原始日志存放在每个仓库的 <code>entire/checkpoints/v1</code> 分支里，含 checkpoint/session 元信息、user prompt 和完整对话转录。流水线通过查询 <strong>GitHub Code Search API</strong> 发现所有启用了 Entire 的公开仓库，逐仓库下载 checkpoint 目录，并把原始转录解析成结构化的表（user prompt、agent response、thinking trace、tool call、tool result、逐 turn token 用量、tool-call 元信息含文件路径与 shell 命令）。数据来自五种主流 agent——Claude Code、OpenCode、Gemini CLI、Cursor、Factory AI Droid——其中实践中 ~85% 来自 Claude Code（它是 Entire CLI 最早支持、也最常用的 agent）。Entire.io 自 2026-02-10 公开发布后开源开发者迅速涌入，因此数据呈陡峭增长（图 1 左）；Entire 自家仓库（<code>entireio/cli</code>）的占比已随采纳增长降到 &lt;20%。</p>
+    <div class="callout warn">
+      <span class="label">选择偏差（很重要）</span>
+      SWE-chat 只覆盖<strong>主动 opt-in、使用公开仓库</strong>的 Entire CLI 用户，因此反映的是「早期采用者」群体，不一定能推广到所有 coding agent 用户，也不覆盖私有企业代码库。此外，<strong>被用户整个放弃的失败会话往往没有 commit，因而不会被记录</strong>——这会系统性地高估成功率与 agent 效率。
+    </div>
+
+    <h3>2. LLM-as-a-judge 富标注（Table 2 / Appendix E）</h3>
+    <p>作者在四个维度上给数据打标签，全部用 LLM judge 标注全量数据：</p>
+    <ul>
+      <li><strong>Session success（0–100）：</strong>会话级，输入完整对话 + tool call 摘要，按五个维度（目标完成度、终态、agent 效率、代码/commit 质量、用户体验）给一个整数分。用 <code>claude-sonnet-4-6</code> 标注。</li>
+      <li><strong>User persona：</strong>会话级，把用户分为 <em>expert nitpicker</em>（保持目标不变、不断做精确纠正）、<em>vague requester</em>（指令宽泛、把决策交给 agent）、<em>mind changer</em>（中途改目标）或 <em>other</em>。用 <code>gpt-5.4-2026-03-05</code>（reasoning_effort=low）。</li>
+      <li><strong>Prompt intent：</strong>prompt 级，分为 create / refactor / debug / understand / connect / git / test / other 八类。用 <code>Qwen/Qwen3.5-27B</code>。</li>
+      <li><strong>User pushback：</strong>prompt 级（非中断），分为 correction（纠正/补信息/改方向）、rejection（明确撤销/拒绝）、failure_report（报告产出坏了）、non_pushback。用 <code>Qwen/Qwen3.5-9B</code>，输入含到该 prompt 为止的完整上下文。</li>
+    </ul>
+    <p>标注方法学很严谨：先两位标注者迭代到对 10 条全一致以得到 codebook，再各自独立标 90 条算 inter-annotator agreement，最后讨论出 100 条 gold label；然后用这 100 条 gold 在 9–11 个候选 LLM × 2–4 个 prompt 改写下做选型，挑最优模型 + prompt。作者明确警告 <strong>LLM judge 会犯错、不是可靠的标注者</strong>，选这条路只是为了「随数据增长持续标注」的可扩展性，并建议下游使用前再验证。</p>
+
+    <h3>3. 效率与安全指标（Appendix C.2 / D.5）</h3>
+    <p>这套指标全部<strong>无需标注、直接从原始日志算</strong>，是本文量化结论的基石。代码归属由 Entire CLI 在 commit 时用 shadow branch 上的临时 checkpoint 计算，得到逐行的 human/agent 归属：</p>
+    <p>$$\text{Agent-authored \%} = \frac{\text{agent lines survived}}{\text{total committed lines}}\times 100$$</p>
+    <p>其中 <em>agent lines survived</em> 是最终 commit 里仍归属于 agent 的行数，分母是 commit 的总行数——这个比例就是用来切分 coding mode 的依据。</p>
+    <p>为衡量「agent 白干了多少」，作者把每个改动文件还原成三态——<em>base</em>（父 commit）、<em>agent actions</em>（按时序回放每次改文件的 tool call）、<em>committed</em>（最终态）：用 Python 的 <code>difflib.SequenceMatcher</code> 在每次 tool call 后做逐行 diff，给每行打 provenance 标签（base / agent），追踪所有 agent 的增删改，再看 commit 时哪些存活。由此得两个率：</p>
+    <p>$$\text{Coding efficiency} = \frac{\text{agent lines survived}}{\text{agent cumulative lines produced}}\times 100$$</p>
+    <p>$$\text{Code survival rate} = \frac{\text{agent lines survived}}{\text{agent lines in final state}}\times 100$$</p>
+    <p><strong>Coding efficiency</strong>（编码效率）= agent 全部产出里最终进 commit 的比例（包含 agent 自己后来又重写掉的行，所以会「惩罚」agent 的自我返工）；<strong>Code survival rate</strong>（存活率）= 在 agent 自我覆盖之后、人类保留下来的比例（不惩罚 agent 自我覆盖）。直觉上，efficiency 衡量「整体白干程度」，survival 衡量「人类对 agent 净产出的接受程度」。</p>
+    <p>此外还有一组「每 100 行 committed 代码消耗」的资源指标（lower is better）：</p>
+    <p>$$\text{Token eff.}=\tfrac{\sum \text{tokens (in+out+cache)}}{\text{committed lines}}\times100,\quad
+    \text{Cost eff.}=\tfrac{\sum_{\text{API call}}\text{tokens}\times\text{price}_{\text{model}}}{\text{committed lines}}\times100$$</p>
+    <p>$$\text{Cognitive eff.}=\tfrac{\sum \text{user prompt chars}}{\text{committed lines}}\times100,\quad
+    \text{Time eff.}=\tfrac{\sum \text{session runtimes}}{\text{committed lines}}\times100$$</p>
+    <p>其中 cognitive efficiency 用「用户敲的 prompt 字符数」近似用户的认知投入；time efficiency 统计完整会话时长但剔除 &gt;2 分钟的纯空闲段。由于一个会话可能跨多个 commit、多个会话也可能贡献到同一 commit，涉及 commit 级归属的分析（Table 3、图 7）只保留<strong>能无歧义归属</strong>的会话（占 48.6%）。</p>
+    <p>安全维度则用开源静态分析器 <strong>Semgrep</strong>（<code>--config=auto</code> 规则集）：对每个 commit 取改动前后的仓库快照各扫一遍，只保留「commit 修改过的文件」里的发现，把「post 有、pre 没有」记为 <em>introduced</em>（引入漏洞）、「pre 有、post 没有」记为 <em>fixed</em>（修复漏洞），按每 1,000 行换算成率，并对照 CWE 分类。</p>
+  </section>
+
+  <!-- ============================ ④ 实验评估 ============================ -->
+  <section id="evaluation">
+    <h2><span class="n">④</span>实验评估 Evaluation</h2>
+    <p>本文没有「打榜」意义上的实验，而是用 SWE-chat 对真实使用做<strong>描述性实证分析</strong>，分别回答 RQ1（怎么用）与 RQ2（怎么失败、怎么应对）。下图把所有核心发现浓缩在一张图里。</p>
+
+    <figure>
+      <img src="figures/fig2-insights.png" alt="SWE-chat 使用模式与失败模式总览">
+      <figcaption>图 2：SWE-chat 的使用模式（左，RQ1）与失败模式（右，RQ2）总览。文字颜色对应各子图组件。结论反映的是「opt-in 公开仓库的开源开发者」这一群体。（出处：原文 Figure 2）</figcaption>
+    </figure>
+
+    <h3>评测设置</h3>
+    <ul>
+      <li><strong>数据 / 群体：</strong>SWE-chat 全量会话（~6K，~85% 为 Claude Code），分析对象是真实开发者在公开仓库的多轮交互。</li>
+      <li><strong>没有传统 baseline：</strong>这是描述性研究，「对比」体现在三种 coding mode 之间，以及与同期野外测量工作（McCain et al. 2026、METR）的趋势对照。</li>
+      <li><strong>关键指标方向：</strong>coding efficiency / code survival rate 越高越好；token/cost/cognitive/time efficiency（每 100 行消耗）越低越好；vulnerabilities introduced per 1K lines 越低越好；session success（0–100）越高越好。</li>
+    </ul>
+
+    <h3>RQ1 主要结果：真实使用画像</h3>
+    <ul>
+      <li><strong>任务远超「写代码」：</strong>user prompt 的意图分布里，最常见的具体意图是「理解已有代码/行为」19.0%，其次创建新代码 13.4%、git 操作 13.4%、debug 13.0%，refactor/test/connect 更少（还有 26.6% 落入宽泛的 other）。这些「代码理解 + 例行开发」能力在现有 benchmark 里被严重低估。</li>
+      <li><strong>agent 一个 turn 内狂调工具：</strong>所有 tool call 里 bash 占约 1/3（以 git 操作为主），其余主要是 read/edit/grep；轨迹典型是先 read/search 再改文件、跑 build（图 21）。Table 5 给出细分：read 19.8%、edit 19.6%、git/gh 11.9%、grep 10.1%、bash:build 8.0% 等。</li>
+      <li><strong>coding mode 极度双峰（核心发现，图 5）：</strong>虽然所有 committed 行里 55.8% 由 agent 所写，但分布是双峰的——
+        <ul>
+          <li><strong>Human-only（22.7% 会话）：</strong>commit 代码全由人写，agent 只当理解/调试/git 助手。</li>
+          <li><strong>Collaborative（36.5% 会话）：</strong>人和 agent 共同贡献（agent 写 &gt;0% 但 &lt;99%）。</li>
+          <li><strong>Vibe coding（40.8% 会话）：</strong>agent 写了 &gt;99% 的 commit 代码。</li>
+        </ul>
+        三个月观察窗内，vibe coding 份额从 ~20% 翻倍到 &gt;40%（图 25）；但「完全自主一次性解决问题」仍远非现实——交互通常跨多轮。</li>
+      <li><strong>用户多为「挑剔的专家」：</strong>persona 分布为 expert nitpicker 39.7%、vague requester 33.5%、other 19.9%、mind changer 7.0%（图 24）。即使在 vibe coding 会话里也有 47% 是 expert nitpicker；mind changing 在 vibe coding 里更少（5% vs. 其它模式 10%）。这与「benchmark 一次性给全指令」的假设截然相反——真实用户是看到输出后<strong>迭代细化</strong>。</li>
+    </ul>
+
+    <figure>
+      <img src="figures/fig5-vibe-histogram.png" alt="按 agent 撰写代码占比划分的三种 coding mode 直方图">
+      <figcaption>图 3：野外的 vibe coding。横轴为 agent 撰写代码占比，明显双峰——human-only（0%）与 vibe coding（≥99%）两端高耸，中间 collaborative 稀薄。均值 55.8%、中位数 73.3%。（出处：原文 Figure 5）</figcaption>
+    </figure>
+
+    <h3>RQ2 主要结果：失败模式与用户响应</h3>
+    <p><strong>(1) 大部分会话成功，但长尾失败有信息量。</strong>session success 分布左偏，90% 的会话拿到 50+ 分，均值 75.7、中位数 82.0（图 6）。human-only 会话的平均成功分略低于协作/vibe。作者手动检查了成功分最低（2–15）的 50 个会话，最常见的失败是：用户在 agent 产出有意义结果前就中断、以及 agent 产出/commit 的东西与用户真实诉求完全无关。</p>
+    <p><strong>(2) agent 效率不高——近一半产出被丢弃（Table 3）。</strong>只有 44.3% 的 agent 产出代码存活进 commit。vibe coding 会话用户更「照单全收」（平均 commit 59% 的 agent 行），但这难以因果归因——可能是产出更对路，也可能是用户审查更松。</p>
+    <table>
+      <thead><tr><th>Coding mode</th><th class="num">Coding efficiency</th><th class="num">Code survival rate</th><th class="num">存活 / agent自覆盖 / human覆盖 / human删除</th></tr></thead>
+      <tbody>
+        <tr><td>All modes</td><td class="num">44.3%</td><td class="num">50.3%</td><td class="num">44.3 / 9.3 / 42.2 / —*</td></tr>
+        <tr><td>Collaborative</td><td class="num">38.2%</td><td class="num">44.1%</td><td class="num">38.2 / 10.1 / 46.9 / —</td></tr>
+        <tr><td>Vibe coding</td><td class="num">59.0%</td><td class="num">64.6%</td><td class="num">59.0 / 7.1 / 30.9 / —</td></tr>
+      </tbody>
+    </table>
+    <p class="num" style="color:var(--muted);font-size:13px">*归属细分为「存活 / agent 自我覆盖 / human 覆盖 / human 删除」四段（原文为堆叠条形）；human 直接改写归到 human overwrite，agent 自我覆盖多发生在用户 push back 让 agent 重写时。Table 3 排除了 human-only 模式。</p>
+    <p><strong>(3) vibe coding 又贵又慢（图 7、图 29）。</strong>vibe coding 每 100 行 committed 代码中位消耗 204K token，约为协作模式的 3×、人工的 2×；折合美元中位成本 \$0.13/100 行，而 human-only \$0.07、collaborative \$0.05。时间上，collaborative 最高效（中位 4.8 分钟/100 行），vibe coding（12.6）和 human-only（8.6）都更慢。作者强调 time/cognitive 都是不完美的代理指标（没算用户读代码、规划指令的时间）。</p>
+
+    <figure>
+      <img src="figures/fig7-cost.png" alt="每 100 行 committed 代码的美元成本，按 coding mode 分箱线图">
+      <figcaption>图 4：每 100 行 committed 代码的成本效率（lower is better），μ 为均值。注意箱体中位数（vibe coding 反而较低）与均值 μ 的差异——分布长尾使均值排序与中位数排序不一致，作者正文以中位数为准。（出处：原文 Figure 7）</figcaption>
+    </figure>
+    <p><strong>(4) vibe coding 更不安全（Table 4）。</strong>用 Semgrep 比较 pre/post commit：vibe-coded commit 每 1K 行引入 0.76 个漏洞，约为 human-only（0.08）的 <strong>9×</strong>、collaborative（0.14）的 <strong>5×</strong>。虽然 vibe coding 修漏洞的率也更高（0.52 vs. 0.04 / 0.08），但<strong>每种模式都是引入多于修复，且 vibe coding 差距最大</strong>。漏洞类型涵盖 path traversal、command injection、unsafe format string、SQL injection 等（CWE-22/134/353/78/89…）。</p>
+    <table>
+      <thead><tr><th>Coding mode</th><th class="num">Vulnerabilities fixed (/1K lines)</th><th class="num">Vulnerabilities introduced (/1K lines)</th></tr></thead>
+      <tbody>
+        <tr><td>Human-only</td><td class="num">0.04</td><td class="num">0.08</td></tr>
+        <tr><td>Collaborative</td><td class="num">0.08</td><td class="num">0.14</td></tr>
+        <tr><td><strong>Vibe coding</strong></td><td class="num"><strong>0.52</strong></td><td class="num"><strong>0.76</strong></td></tr>
+        <tr><td>Overall</td><td class="num">0.06</td><td class="num">0.11</td></tr>
+      </tbody>
+    </table>
+    <p><strong>(5) agent 越来越自主，但用户频繁 push back（图 8）。</strong>多数 Claude Code turn 很短（中位 &lt;1 分钟，p90 &lt;7 分钟），但 turn 时长的 99.9 分位已超 <strong>100 分钟</strong>且呈上升趋势（图 30）——agent 自主运行越来越久。可另一边，<strong>agent 极少主动停下来提问</strong>（仅 1.1%–2.6% 的 turn 触发 AskUserQuestion）；用户则在 3.3%–6.0% 的 turn 硬中断 agent（多发生在 agent 退出 plan mode、做 git 操作或编辑文件时），更普遍的是「软」push back——在 agent 完成一个 turn 后用纠正 prompt 顶回去，<strong>合计 39% 的 turn 有 push back</strong>，且不分 coding mode（vibe coding 也一样）。这说明即使完全依赖 agent 写代码，用户也并非被动。</p>
+
+    <h3>标注质量验证（消融性证据，Appendix E）</h3>
+    <p>由于结论高度依赖 LLM judge，作者专门验证了标注可靠性。Inter-annotator agreement（Table 6/7）：prompt intent Cohen's κ=0.709（一致率 75.6%）、prompt pushback κ=0.832（二分类版 κ=0.888）、user persona κ=0.662（78.9%）、session success Spearman ρ=0.757 / ICC(2,1)=0.503——「moderate-high」。LLM 对 100 条 gold 的表现（Table 8）：所选模型在 prompt intent 0.76（qwen-3.5-27b）、user persona 0.69（gpt-5.4）、repository domain 0.81 / audience 0.84（claude-opus-4-6）、pushback binary 0.79（qwen-3.5-9b）、session success ICC(2,1)=0.60（claude-sonnet-4-6）。作者据此<strong>主动声明这些标签不应被当作 ground truth</strong>，仅用于「在海量数据里方便地筛例子」。</p>
+  </section>
+
+  <!-- ============================ ⑤ 洞见 ============================ -->
+  <section id="insight">
+    <h2><span class="n">⑤</span>洞见 Insights</h2>
+    <div class="callout insight">
+      <span class="label">Insight 1 · 自主性正在超过监督能力</span>
+      最反直觉也最值得记住的一点：agent 的<strong>自主性增长速度，快于它「学会何时寻求指导」的速度</strong>。一边是 &gt;40% 的会话已是 vibe coding、turn 时长长尾突破 100 分钟；另一边 agent 只在 1.4% 的 turn 主动提问，而用户却要在 44% 的 turn 里手动顶回去。换句话说，<strong>「catch 不安全/跑偏」的负担几乎完全转嫁给了人类</strong>——而人类的审查恰恰是错误唯一被发现的途径。
+    </div>
+    <div class="callout insight">
+      <span class="label">Insight 2 · powerful but brittle，且「协作」才是甜点区</span>
+      agent 写了一半以上的 commit 代码，但只有不到一半的产出存活——更多自主<strong>没有</strong>换来更高效的交付。而 human-agent <strong>协作（collaborative）模式在几乎所有效率指标上都是最划算的</strong>（成本 \$0.05/100 行最低、时间最快），这暗示「全自主」的方向可能适得其反。这不是反对用 coding agent，而是说<strong>它们远没有发挥出应有的效率</strong>。
+    </div>
+    <div class="callout insight">
+      <span class="label">Insight 3 · curated benchmark 系统性低估了真实复杂度</span>
+      真实使用里最常见的意图是「理解代码」而非「写代码」，交互是多轮、挑剔、不断改口的；而主流 benchmark 是「一次性给全指令、只评 patch」。这种错配意味着<strong>排行榜上的强表现不能简单等同于真实可用</strong>——下一个前沿在「协作工作流」的评测，而非更难的单点任务。
+    </div>
+
+    <h3>局限与未来</h3>
+    <p>作者自陈的局限相当坦诚：</p>
+    <ul>
+      <li><strong>选择偏差：</strong>只覆盖 opt-in、用公开仓库的 Entire CLI 用户（早期采用者），不含私有企业代码；此刻结论未必能推广。随采纳增长会更多样化。</li>
+      <li><strong>失败被低估、贡献也被低估：</strong>被整段放弃的会话因无 commit 而未被记录 → 高估成功率与效率；同时把「人换个文件重写 agid 建议」算作 human 删除 → 又可能低估 agent 的真实有用性（逐行归属抓不住语义层面的复用）。</li>
+      <li><strong>指标是代理：</strong>committed lines、prompt 字符数等都只是用户满意度的代理，不应直接当优化目标。</li>
+      <li><strong>LLM judge 不可靠：</strong>明确建议下游再验证，不要照单全收标签（并引用作者自己关于「LLM annotation hacking」的工作）。</li>
+    </ul>
+    <p>未来方向（Section 5.1 路线图）：① 用真实会话轨迹构建<strong>扎根真实工作流的 benchmark</strong>（如评 agent 在真实对话上下文里是否提出合适的下一步）；② 设计更<strong>自适应的 human-agent 交互</strong>（让 agent 更会在合适时机求澄清）；③ 用真实交互轨迹<strong>训练 user simulator</strong> 以支持离线评测——这是把 SWE-chat 当作「原料」的关键应用。作为「活数据集」，它还能支持对 agent 演化的纵向（longitudinal）分析。</p>
+
+    <h3>与相关工作的关系（基于本文自身论述）</h3>
+    <p>本文把自己定位在「野外 agent 评测 / human-agent 交互研究」这条新兴线上，与三类工作区分：① <strong>SE benchmark</strong>（SWE-bench 系列、Terminal-bench、APEX-SWE 等）——它们 curated、只评 patch，本文正是要补上交互维度；② <strong>已有 agent 数据集</strong>（SWE-smith-trajectories、AgentPack、Agent Data Protocol 等）——本文 Table 1 显示<strong>唯有 SWE-chat 同时具备真实用户 prompt + tool-use 轨迹 + code diff + 代码归属</strong>；③ <strong>野外测量类工作</strong>（McCain et al. 2026 的 agent autonomy、METR 的 time horizon、Anthropic 的经济指数报告）——本文在多处与其趋势对照（如 turn 时长、停止/push back 率），并补充了它们没有的「逐行代码归属 + 完整交互轨迹」。安全方面则把「LLM 会写不安全代码」（Pearce et al.、Perry et al.、Fu et al.）从 synthetic 设定延伸到真实 coding agent 工作流，并指出现有安全缓解手段（security-hardening fine-tune、system-prompt hardening）大多只在 synthetic benchmark 上验证过，SWE-chat 恰好提供了真实测试床。</p>
+  </section>
+
+  <footer class="foot">
+    本页为 <code>paper-reading</code> skill 生成的阅读笔记，仅作辅助，细节以
+    <a href="https://arxiv.org/abs/2604.20779" target="_blank" rel="noopener">原文</a> 为准 · 解读日期 2026-05-30
+  </footer>
+
+</article>
+</body>
+</html>

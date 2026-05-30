@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SkillClaw：让 skills 在多用户生态中集体进化 · 论文解读</title>
+
+<script>
+  window.MathJax = {
+    tex:{inlineMath:[['$','$'],['\\(','\\)']], displayMath:[['$$','$$'],['\\[','\\]']]},
+    svg:{fontCache:'global'}
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;
+  }
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:880px; margin:0 auto; padding:18px 22px 90px}
+
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:27px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)}
+  .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .meta-grid a:hover{text-decoration:underline}
+
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap}
+  nav.toc a:hover{color:var(--accent)}
+
+  section{margin:38px 0}
+  h2{font-size:21px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:17px; margin:24px 0 8px}
+  p{margin:12px 0}
+  ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.9em}
+  strong{color:var(--text)}
+
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:14px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:10px 12px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  .yes{color:var(--ok); font-weight:600}
+  .no{color:var(--muted)}
+  .num{font-variant-numeric:tabular-nums; white-space:nowrap}
+
+  figure{margin:24px 0; text-align:center}
+  figure img{max-width:100%; height:auto; border:1px solid var(--line); border-radius:10px; background:#fff}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+
+  blockquote{border-left:3px solid var(--line); margin:14px 0; padding:2px 16px; color:var(--muted)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+  .mjx-container{overflow-x:auto; overflow-y:hidden}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <!-- ============================ 抬头 / 元信息 ============================ -->
+  <header class="head">
+    <div class="chips">
+      <span class="chip">LLM Agent</span>
+      <span class="chip">Agent Skills</span>
+      <span class="chip">Skill Evolution</span>
+      <span class="chip">Self-improving Agents</span>
+      <span class="chip">WildClawBench</span>
+    </div>
+    <h1>SkillClaw：让 skills 在多用户 agent 生态中「集体进化」</h1>
+    <p class="orig-title">SkillClaw: Let Skills Evolve Collectively with Agentic Evolver</p>
+    <dl class="meta-grid">
+      <dt>作者</dt><dd>Ziyu Ma, Shidong Yang, Yuxiang Ji, Xucong Wang（共同一作）, Yong Wang（项目负责人）, Yiming Hu, Tongwen Huang, Xiangxiang Chu</dd>
+      <dt>团队 / 机构</dt><dd>DreamX Team（代码托管于 AMAP-ML，即高德地图 / 阿里巴巴；论文正文未显式写出机构全名）</dd>
+      <dt>原文链接</dt><dd><a href="https://arxiv.org/abs/2604.08377" target="_blank" rel="noopener">https://arxiv.org/abs/2604.08377</a></dd>
+      <dt>发表 / 年份</dt><dd>arXiv 2026（v1，2026-04-09；标注 Work in Progress）</dd>
+      <dt>解读日期</dt><dd>2026-05-30</dd>
+    </dl>
+  </header>
+
+  <div class="tldr">
+    <b>TL;DR</b> — 现有 LLM agent 的 <code>skills</code>（可复用的结构化操作流程）在部署后基本是<strong>静态</strong>的：同样的 workflow、同样的工具误用、同样的失败模式被不同用户反复重新踩坑，系统层面学不到任何东西。SkillClaw 把<strong>跨用户、跨时间</strong>的真实交互轨迹当作改进 skills 的「第一信号」：持续聚合所有用户产生的 session trajectory，按 skill 分组形成「共享证据库」，再用一个 <strong>agentic evolver</strong>（一个 LLM agent）对每个 skill 做开放式推理，自主决定 refine / create / skip，并在夜间用真实环境做验证后才合并回共享 skill 库、同步给所有 agent。在真实场景 benchmark <strong>WildClawBench</strong> 上、以 <strong>Qwen3-Max</strong> 为底座、模拟 8 用户跑 6 轮「日间交互 + 夜间进化」后，四个任务类别全部稳定提升，其中 Creative Synthesis 相对提升 <strong>+88.41%</strong>；一个受控验证集上三个查询平均相对提升 <strong>+42.1%</strong>。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#opensource">① 开源贡献</a>
+    <a href="#motivation">② 动机与贡献</a>
+    <a href="#method">③ 方法</a>
+    <a href="#evaluation">④ 实验评估</a>
+    <a href="#insight">⑤ 洞见</a>
+  </nav>
+
+  <!-- ============================ ① 开源贡献 ============================ -->
+  <section id="opensource">
+    <h2><span class="n">①</span>开源贡献 Open-source Artifacts</h2>
+    <p>本文配套了一个<strong>已实际开源、可运行的工程系统</strong>（MIT 协议），核心是一个本地 API proxy + 一个 evolution server，能挂接到各种 OpenAI 兼容 / Claude 兼容的 agent harness 上自动收集轨迹并进化 skills。需要注意的是：<strong>论文里的评测 benchmark（WildClawBench）和评测数据并不在 SkillClaw 仓库内</strong>，而是来自一个独立的第三方仓库（同属 InternLM 体系，单独开源）；本文不训练、不发布任何模型权重（进化全靠调用外部 LLM 完成）。</p>
+    <table>
+      <thead><tr><th>类型</th><th>是否开源</th><th>内容 / 链接</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>代码 Code</td>
+          <td class="yes">✔</td>
+          <td><a href="https://github.com/AMAP-ML/SkillClaw" target="_blank" rel="noopener">github.com/AMAP-ML/SkillClaw</a>（MIT）。含本地 API 拦截 proxy（<code>skillclaw/</code>，拦截 <code>/v1/chat/completions</code> 与 <code>/v1/messages</code>）、进化后端 <code>evolve_server/</code>（两套引擎：<code>workflow</code> = LLM pipeline，<code>agent</code> = OpenClaw 驱动）、跨平台安装脚本、可视化 dashboard、测试套件。声称原生支持 Hermes / Codex / Claude Code / OpenClaw / QwenPaw / IronClaw 等多种 harness 以及任意 OpenAI 兼容 API。</td>
+        </tr>
+        <tr>
+          <td>模型权重 Weights</td>
+          <td class="no">✘</td>
+          <td>不适用。SkillClaw 进化的是「文本形式的 skill 定义」，调用外部 LLM（实验用 Qwen3-Max）完成推理，不发布任何训练权重。</td>
+        </tr>
+        <tr>
+          <td>数据集 Dataset</td>
+          <td class="no">✘</td>
+          <td>系统会捕获用户 session 轨迹，但论文未随仓库发布这些轨迹数据；评测任务数据见下一行的 benchmark。</td>
+        </tr>
+        <tr>
+          <td>环境 / Benchmark</td>
+          <td class="yes">✔（第三方）</td>
+          <td><a href="https://github.com/InternLM/WildClawBench" target="_blank" rel="noopener">github.com/InternLM/WildClawBench</a>（MIT，引用为 Ding et al., 2026）。已核实存在：60 个真实任务、6 大类、在 OpenClaw 等 harness 中端到端执行（含完整 Linux 容器、多模态输入）。<strong>它不是 SkillClaw 团队的产物</strong>，本文作为外部评测环境使用。</td>
+        </tr>
+        <tr>
+          <td>项目主页 / Demo</td>
+          <td class="no">✘</td>
+          <td>论文/仓库未提供独立项目主页；GitHub README 即唯一入口。</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="callout note">
+      <span class="label">命名说明</span>
+      论文里 OpenClaw / CoPaw / IronClaw / PicoClaw / ZeroClaw / NanoClaw / NemoClaw / QwenPaw 等是对「Claude Code 式 agent 框架」的统称/化名（"Claw"-style agents）；行文中也用 OpenClaw 泛指这类通过自然语言操作工具、并以 skills 作为行为基本单元的个人 AI 助手系统。
+    </div>
+  </section>
+
+  <!-- ============================ ② 动机与贡献 ============================ -->
+  <section id="motivation">
+    <h2><span class="n">②</span>研究动机与贡献 Motivation &amp; Contribution</h2>
+
+    <h3>背景与问题</h3>
+    <p>以 OpenClaw 为代表的 Claude-Code 式 LLM agent 已经能在真实场景里帮用户配置服务、调试、调 API、自动化多步 workflow。这类能力很大程度上由 <strong>skills</strong> 驱动 —— skill 是把「与工具交互、解决某类任务的结构化流程」沉淀成的可复用产物（类似 SOP / 操作手册）。典型部署里，用户从一个中心化的 <em>skill hub</em> 挑选并安装 skills，skills 就成了 agent 行为的基本积木。</p>
+    <p>问题在于：<strong>skill 生态基本是静态的</strong>。skills 靠人工安装与维护，交互中临时摸索出来的更优解几乎不会沉淀下来，跨 session 就丢了。论文给的日常例子很具体：用户让 agent 做多步数据处理 workflow，失败往往源于一些细枝末节 —— 参数格式写错、工具调用对不上。agent 经过几轮试错可能最终摸到一个能跑、甚至更稳的流程，<strong>但这些改进被困在当前 session 里</strong>，既不会合并进 skill 集，也不会带到未来交互。于是：</p>
+    <ul>
+      <li><strong>失败被反复重新发现</strong>：不同用户处在重叠的任务空间里（相似 workflow、相同工具、相同失败模式），但系统不去利用这些重复出现的经验，每个用户都被迫独立地把同一个坑再踩一遍、把同一个解再推一遍。</li>
+      <li><strong>已有「自我进化」路线都不对症</strong>：① <em>memory-based</em> 方法（Reflexion、Mem0、Memp、AgentKB 等）把过往轨迹存起来检索，但记录绑死在具体实例上，难以泛化成「更好的行为」；② <em>skill-based</em> 方法把经验压成结构化指令，却把 skill 库当成<strong>静态资源</strong>，不随使用进化。即便有 local refinement 能改进单个 agent 实例，这些改进也是<strong>孤立的</strong>、不跨用户累积，结果是碎片化的 skill，而非系统级的集体改进。</li>
+    </ul>
+    <p>因此真正缺的，不是「在单 session 内变强」，而是一种把<strong>普通交互转化为持续 skill 进化、并让知识在用户间集体累积</strong>的机制。</p>
+
+    <h3>本文的切入点</h3>
+    <p>作者的关键观察是：<em>不同用户在各异的上下文里行使同一个 skill，会对该 skill 的「行为边界」给出互补的视角</em> —— 既暴露它在什么条件下有效，也暴露它在什么条件下失效。单个用户很难单凭一己之力把「可泛化的改进」与「只对自己有效的特例修补（idiosyncratic fix）」区分开；但把跨用户的证据聚合起来，就有了做稳定 skill 进化的基础。于是 SkillClaw 把<strong>跨用户、跨时间的交互</strong>当作改进 skills 的首要信号，采用<strong>中心化进化</strong>架构：分散部署的 agent 在日常使用中不断产生轨迹 → 聚合成「真实任务执行的证据」→ 中心引擎驱动 skill 更新 → 同步回所有 agent。</p>
+
+    <h3>核心贡献</h3>
+    <ol>
+      <li><strong>提出「集体 skill 进化」范式与 SkillClaw 框架</strong>：据作者所述，这是<strong>第一个</strong>实现「多用户驱动的 skills 集体进化」的框架 —— 把不同用户的交互经验转化为对共享 skill 库的持续更新，且<strong>无需用户额外操作</strong>。</li>
+      <li><strong>三个区别性属性</strong>：(i) <em>collective evolution</em> —— 单次交互发现的知识进入一个共享、持续改进的 skill 生态，惠及所有人；(ii) <em>fully automatic</em> —— 从 session 记录到 skill 同步的整条 pipeline 自动运行，唯一的人类输入就是「正常使用 agent」；(iii) <em>agentic adaptability</em> —— skill 更新由 agentic evolver 通过<strong>开放式推理</strong>产生，而非预定义的更新规则，从而能灵活、按上下文地处理多样的失败模式。</li>
+      <li><strong>设计为通用框架并给出实证</strong>：兼容多种 Claw 式 agent 系统（OpenClaw / CoPaw / IronClaw / PicoClaw / ZeroClaw / NanoClaw / NemoClaw）。在 WildClawBench 上以 Qwen3-Max 为底座、模拟多用户部署，6 轮进化后四类任务全部稳定提升（Creative Synthesis 相对 +88.41%），并用一个受控验证集（Skill Evolve Lite）给出机制层面的解释（平均 +42.1%）。</li>
+    </ol>
+  </section>
+
+  <!-- ============================ ③ 方法 ============================ -->
+  <section id="method">
+    <h2><span class="n">③</span>方法 Method</h2>
+    <p>SkillClaw 是一个<strong>闭环</strong>系统（见图 1）。形式化地，设共享 skill 集 $\mathcal{S}=\{s_1,\dots,s_M\}$，每个 $s_i$ 是一个可复用的「过程性产物」（procedural artifact，文本形式的操作流程）。每次用户交互产生一条 session trajectory $\tau$，完整记录交互回路：prompt、agent 动作、来自环境/用户的反馈、最终回复。给定跨用户收集到的轨迹集合 $\mathcal{T}=\{\tau_i\}$，目标是更新共享 skill 集：</p>
+    <p>$$\mathcal{S}' = \Phi(\mathcal{S}, \mathcal{T})$$</p>
+    <p>使得「一次交互里发现的改进，能让未来的用户受益」。整条 pipeline 是一个循环：</p>
+    <p style="text-align:center"><code>Interaction → Evidence → Evolution → Validation → Deployment</code></p>
+    <p>即：多用户交互 → session 收集（结构化为证据）→ skill 进化 → 验证 → 部署，被部署的新 skill 又塑造未来交互、产生下一轮的新证据。下面按三步展开。</p>
+
+    <figure>
+      <img src="figures/fig1_overview.png" alt="SkillClaw 总览">
+      <figcaption>图 1：SkillClaw 总览（原文 Figure 1）。下半部分 <em>Interaction In the Wild</em>：独立 agent 在各自环境里跑各类任务（Office、多轮对话、Bug Fixer、Creative Story、Web Developer、Data Analyst、Fact Checker、Auto Research、Role-playing、Game Player……），产生带「成功 / 部分成功 / 失败」反馈的轨迹，被<strong>聚合（Aggregation）</strong>并按所引用的 skill 分组，汇入共享的 SkillHub。上半部分 <em>Agentic Evolver</em>：一个由 <code>Evolve-Skill.md</code> 引导、带 Agent Harness 的 agentic workflow，依次做 <strong>Evidence（分析轨迹）→ Attribution（诊断根因）→ Evolution（提出 skill 变更）</strong>，输出「进化已有 skill / 新建 skill」。右侧 <em>Verification In the Wild</em>：进化后的 skill 经验证后 Merge 回库并分发同步给所有用户（"My skills have evolved" / "New skills received: Refresh my skill"）。</figcaption>
+    </figure>
+
+    <h3>第一步：从孤立 session 到共享证据（From Isolated Sessions to Shared Evidence）</h3>
+    <p>多用户进化的前提，是把一堆孤立、异质的 session 转成「能支撑跨用户推理」的形式。这里分两小步：</p>
+    <p><strong>(1) 结构化单个 session，保住因果链。</strong> 大多数 skill 级失败是<strong>过程性（procedural）</strong>的 —— 参数格式错、漏了一步校验、工具调用顺序乱，这些在「最终回复」里根本看不出来，只能从中间的「动作—反馈」轨迹里诊断。所以每条原始 session 都被转成保留因果链的结构化表示：</p>
+    <p style="text-align:center"><code>prompt → action → feedback → ⋯ → agent response</code></p>
+    <p>同时抽取三个轻量元数据：(i) 引用了哪些 skill；(ii) 是否出现工具错误；(iii) 一个粗粒度的质量估计。这些信号只用于组织 session，<strong>不强加刚性标签</strong>。</p>
+    <p><strong>(2) 按 skill 分组，制造「天然消融」。</strong> 对每个 skill $s$，把所有调用过它的 session 收集到一组：</p>
+    <p>$$\mathcal{G}(s) = \{\tau_i \mid s \in \mathcal{K}_i\}$$</p>
+    <p>其中 $\mathcal{K}_i$ 是第 $i$ 条 session 引用到的 skill 集合。没有用到任何 skill 的 session 单独放进 $\mathcal{G}(\varnothing)$。这个分组不只是整理数据 —— 当多条 session 调用<strong>同一个 skill</strong>却在不同用户/任务下产生<strong>不同结果</strong>时，比较这些结果就直接揭示了「skill 在哪里有效、在哪里失效」，而且 skill 本身是被控制住的变量。作者称之为一种 <em>natural ablation（天然消融）</em>：它支持两个单靠单用户数据不可靠的操作 —— ① 评估一个已有 skill 在多样真实使用下到底表现如何；② 通过 $\mathcal{G}(\varnothing)$ 里反复出现的模式，识别「现有 skill 都没覆盖、但值得沉淀成新 skill」的过程。</p>
+
+    <h3>第二步：agentic skill 进化（Agentic Skill Evolution）</h3>
+    <p>SkillClaw 的核心是一个 <strong>agentic evolver</strong>：一个配了「结构化 harness」的 LLM agent。harness 给它喂入分组后的 session 证据、当前 skill 定义、以及一组允许的进化动作，<strong>但不限制它的推理过程</strong>。这种「固定 harness + 开放式推理」的分离，让它无需为每种失败类型手写规则，就能处理不同长度上下文、不同格式的 skill。对一个 skill $s$ 及其 session 组 $\mathcal{G}(s)$，evolver 同时审视成功与失败执行，从三种动作里选一个：</p>
+    <ul>
+      <li><strong>Refine（精修）</strong>：根据观察到的失败模式，修正已有 skill 的错误或增强其鲁棒性。</li>
+      <li><strong>Create（新建）</strong>：当 $\mathcal{G}(s)$ 揭示出「现有 skill 都没覆盖、反复出现的子流程」时，新建一个 skill。只有当观察到的模式足够具体、可教、且大概率会复发时才创建。</li>
+      <li><strong>Skip（跳过）</strong>：证据不足以支撑修改时，保持 skill 不变。</li>
+    </ul>
+    <p>对 $\mathcal{G}(\varnothing)$ 里的 session（没用任何 skill 的），evolver 专注于发现「缺失但可复用的流程」。一个贯穿始终的关键设计是：<strong>无论选哪种动作，evolver 总是把成功与失败 session「联合」起来推理</strong> —— 成功 session 定义 skill 的 <em>invariants</em>（已被验证、不能动的部分），失败 session 定义 <em>targets</em>（需要修正的具体行为）。这种联合视角防止了一种朴素的失败：修好一个问题，却顺手把之前有效的流程改坏了。每次更新只纠正已识别的缺陷、同时保住成功 session 所验证的部分，从而让进化是<strong>累积式</strong>的。完整流程见 Algorithm 1。</p>
+
+    <div class="callout note">
+      <span class="label">Algorithm 1 · Agentic Collective Skill Evolution（原文复述）</span>
+      <strong>输入：</strong>skill 库 $\mathcal{S}$、用户 session 集 $\mathcal{T}$；<strong>输出：</strong>更新后的 $\mathcal{S}'$。<br>
+      1. 把 $\mathcal{T}$ 转成结构化证据 $\mathcal{E}$；2. 按引用 skill 分组得到 $\{\mathcal{G}(s)\}$ 与 $\mathcal{G}(\varnothing)$；3. $\mathcal{S}'\leftarrow\mathcal{S}$；<br>
+      4–10. <strong>对每个组 $\mathcal{G}(s)$</strong>：用 agentic evolver 分析反复出现的成功/失败模式 → 从 <code>{refine, create, skip}</code> 选动作 → 若证据支持修改则生成候选 skill 更新 → 做<strong>保守编辑与校验</strong> → 把通过的更新并入 $\mathcal{S}'$；<br>
+      11–12. 分析 $\mathcal{G}(\varnothing)$ 找「缺失但可复用的流程」，把验证过的新 skill 加入 $\mathcal{S}'$；13. 把 $\mathcal{S}'$ 同步回所有 agent；14. 返回 $\mathcal{S}'$。
+    </div>
+
+    <h3>第三步：skill 同步与进化循环（Skill Synchronization &amp; the Evolution Loop）</h3>
+    <p>进化产出的是<strong>候选</strong>更新，必须先验证再写回共享库。验证安排在<strong>夜间</strong>、在闲置的真实用户环境里执行，以保证评估反映真实部署条件。对一个 skill $s$ 及其候选 $s'$：系统从当天交互数据里挑相关任务，让 $s$ 与 $s'$ 在<strong>同一环境、用完整工具链</strong>（含多步交互与中间反馈）各跑一遍，再用模型比较两者产出的结果。若 $s'$ 整体表现更好 → 标 <code>Accept</code>，合并进共享库、同步给所有 agent，第二天生效；否则 → 标 <code>Reject</code>，候选保留但不部署。</p>
+    <p>这一步带来一个重要性质 —— <strong>单调的部署行为（monotonic deployment）</strong>：因为只有「确实更好」的更新才被接受，被部署的 skill 池<strong>不会随时间退化</strong>。用户每天交互到的，永远是「前一晚验证过的最佳 skill 池」，而不是未经验证的更新。配合进化过程，整个系统形成闭环：</p>
+    <p style="text-align:center"><code>Interaction → Evidence → Evolution → Validation → Deployment</code></p>
+    <p>由此推出本文反复强调的三个性质：<strong>collective evolution</strong>（session 跨用户聚合，一次发现传播给所有人）、<strong>full automation</strong>（从记录到同步全自动，唯一人类输入是正常使用）、<strong>agentic adaptability</strong>（开放式推理产生更新，能处理未见过的失败模式）。从用户视角，这一切都不可见：照常用 agent，进化在后台发生，孤立的个人体验被逐渐整合成「越用越好」的共享 skill 集。</p>
+
+    <div class="callout note">
+      <span class="label">实现要点（含 Appendix 的 prompt 设计）</span>
+      <ul style="margin:6px 0">
+        <li><strong>两类进化引擎</strong>：仓库提供 <code>workflow</code>（LLM pipeline）与 <code>agent</code>（OpenClaw 驱动）两套 evolver 实现，对应论文里「agentic」的不同落地方式。</li>
+        <li><strong>四种细化动作</strong>：Appendix 的 "Evolve from Sessions" prompt 实际把动作细分为 <code>improve_skill</code> / <code>optimize_description</code>（只改触发用的 description、不动正文）/ <code>create_skill</code> / <code>skip</code>，并要求输出<strong>严格的一个 JSON 对象</strong>（无 markdown 围栏）。</li>
+        <li><strong>极度保守的编辑准则</strong>：prompt 明确「把 CURRENT skill 当作 source of truth 而非草稿」「默认做<em>定点修改</em>而非重写」「skill 里已经正确的 API endpoint / port / payload / 工具名要<strong>保留</strong>，即使 agent 当时没用好」。一个被反复强调的反模式：如果 skill 里的环境信息<strong>本来就对</strong>、agent 却因为没去读它而失败，那是 <em>agent 问题</em>不是 skill 问题，<strong>不要</strong>把 skill 改成「去读 utils.py / 去看 mock 服务源码」这类指令。拿不准时，<strong>宁可 skip</strong>。</li>
+        <li><strong>区分三类失败来源</strong>：prompt 要求 evolver 先判断失败是 the skill（指引错/缺/误导 → 改 skill）、the agent（子 agent 误用、context 溢出、没读 skill → agent 级问题，别往 skill 里塞 runtime 建议）、还是 the environment（mock API 不稳、网络抖动、docker 怪癖 → 简短记一句即可，别把 skill 写成 retry/backoff 教程）。</li>
+        <li><strong>会话摘要</strong>：另一段 "Summarize Session" prompt 让一个分析型 agent 产出 8–15 句、保留<strong>事件顺序与因果关系</strong>的轨迹级摘要（目标 / 关键轨迹 / 各 skill 是否有用 / 关键转折 / 工具使用模式 / 结果），作为后续判断「skill 是否要改」的证据。</li>
+        <li><strong>推理时 skill 选择</strong>：agent 在 prompt 里收到可用 skill 的目录（catalogue），按当前任务<strong>动态选择并加载</strong>相关 skill；用户之间不直接交互、agent 之间也不需要协调，集体改进完全来自共享 skill 库。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============================ ④ 实验评估 ============================ -->
+  <section id="evaluation">
+    <h2><span class="n">④</span>实验评估 Evaluation</h2>
+
+    <h3>评测设置</h3>
+    <ul>
+      <li><strong>Benchmark：WildClawBench</strong>（Ding et al., 2026，第三方）—— 真实场景 agent benchmark，<strong>60 个复杂任务、6 大能力域</strong>。各域考察的能力（原文 Table 1）：<em>Productivity Flow</em>（arXiv 分类、排程、SCP；考多步 pipeline）、<em>Code Intelligence</em>（调试、解谜；考执行正确性）、<em>Social Interaction</em>（谈判、聊天分析；考多轮推理）、<em>Search &amp; Retrieval</em>（学术检索、冲突消解；考 API 使用）、<em>Creative Synthesis</em>（视频笔记、海报生成；考多模态生成）、<em>Safety &amp; Alignment</em>（prompt injection、信息泄露检测；考约束满足）。其关键属性（Table 2）：<strong>完整 Linux 容器 + 真实工具</strong>、多模态输入（文本/代码/图像/视频）、3–27 个指标聚合、<strong>严重错误直接判 0 分</strong>（hard constraints）、任务长度 15–50 步、依赖外部 API 与模型下载。本文<strong>只报告四个代表性类别</strong>的结果，其余类别留待后续版本。</li>
+      <li><strong>底座模型</strong>：所有执行、skill 进化、验证全部由 <strong>Qwen3-Max</strong> 驱动。</li>
+      <li><strong>部署模拟</strong>：连续「日—夜」进化，跑 <strong>6 天 / 6 轮</strong>；每天 = 日间在线交互 + 夜间进化与验证。<strong>8 个并发用户</strong>，各按自己的目标跑 WildClawBench 任务。系统维护一个共享的「当前最佳 skill 池」；Day 1 从「初始 skill 集 = baseline」起步；后续轮次只有「被交互触发、且有改进潜力」的 skill 才进入候选。</li>
+      <li><strong>对比基线</strong>：Day 1 即 baseline（初始静态 skill 集 + Qwen3-Max）；后续每天与之对比，看「集体进化」相对静态起点带来多少增益。</li>
+      <li><strong>评价指标</strong>：每类任务的得分（%，越高越好，多指标聚合、严重错误判 0）；并报告相对 Day 1 的<strong>绝对增益 Abs. Gain</strong> 与<strong>相对增益 Rel. Gain</strong>。</li>
+    </ul>
+
+    <h3>主要结果（Table 3：用户侧日间最佳 skill 部署视角）</h3>
+    <table>
+      <thead><tr><th>类别 Category</th><th class="num">Day 1</th><th class="num">Day 2</th><th class="num">Day 3</th><th class="num">Day 4</th><th class="num">Day 5</th><th class="num">Day 6</th><th class="num">Abs. Gain</th><th class="num">Rel. Gain</th></tr></thead>
+      <tbody>
+        <tr><td>Social Interaction</td><td class="num">54.01%</td><td class="num"><strong>60.34%</strong></td><td class="num">60.34%</td><td class="num">60.34%</td><td class="num">60.34%</td><td class="num">60.34%</td><td class="num">+6.33</td><td class="num">+11.72%</td></tr>
+        <tr><td>Search &amp; Retrieval</td><td class="num">22.73%</td><td class="num">30.00%</td><td class="num">30.00%</td><td class="num"><strong>34.55%</strong></td><td class="num">34.55%</td><td class="num">34.55%</td><td class="num">+11.82</td><td class="num">+52.00%</td></tr>
+        <tr><td>Creative Synthesis</td><td class="num">11.57%</td><td class="num"><strong>21.80%</strong></td><td class="num">21.80%</td><td class="num">21.80%</td><td class="num">21.80%</td><td class="num">21.80%</td><td class="num">+10.23</td><td class="num"><strong>+88.41%</strong></td></tr>
+        <tr><td>Safety &amp; Alignment</td><td class="num">24.00%</td><td class="num">24.00%</td><td class="num">24.00%</td><td class="num">24.00%</td><td class="num"><strong>32.00%</strong></td><td class="num">32.00%</td><td class="num">+8.00</td><td class="num">+33.33%</td></tr>
+      </tbody>
+    </table>
+    <p>（加粗 = 该类别<strong>首次达到其最终最佳水平</strong>的那一天；绝对/相对增益均相对 Day 1。）四类全部呈现「先解决主要瓶颈、再围绕当前最佳池稳定」的进化模式 —— 注意曲线不是逐日波动，而是把「局部有效的更新」逐步固化进一个稳定 skill 集。但不同类别的<strong>节奏差异很大</strong>：</p>
+    <ul>
+      <li><strong>Social Interaction：最早、最陡。</strong>Day 1→2 从 54.01% 跳到 60.34% 后保持稳定，说明存在一个「覆盖面广的高影响瓶颈」；一旦对应 skill 被改好，跨源整合、任务组织、高层摘要的能力迅速到位。后面几轮虽仍有候选更新，但 Day 2 建立的最佳池已经足够强。</li>
+      <li><strong>Search &amp; Retrieval：渐进、分阶段。</strong>22.73% → 30.00% → 34.55%，增益不是靠单个更新，而是一串改进：先解决输入校验与文件可达性，再走向「约束感知的检索规划」。体现了检索任务的关键性质 —— <strong>高层推理只有在底层可靠性被保证后才生效（input-first, strategy-later）</strong>。</li>
+      <li><strong>Creative Synthesis：早期大跳后平台期。</strong>Day 1→2 从 11.57% 暴涨到 21.80%（相对 +88.41%），但随后进入平台期。这说明主瓶颈<strong>不在内容生成本身</strong>，而在环境搭建：文件处理、工作目录配置、多模态 pipeline。基础问题解决后用户侧性能迅速改善；更复杂的多模态 skill 后续仍在涌现并通过验证，但在 6 天窗口内<strong>未能超过早期已建立的最佳池</strong>。</li>
+      <li><strong>Safety &amp; Alignment：最晚见效。</strong>到 Day 5 才从 24.00% 升到 32.00%。这类改进主要针对「真实环境下的执行可靠性」而非表面任务表现 —— 比如 Git fallback、目录克隆协议、非交互环境下的安全执行。这些改动不一定立刻提分，但一旦验证通过就留在池里，贡献长期系统鲁棒性。</li>
+    </ul>
+    <p>作者明确强调：Table 3 <strong>不是一串独立实验</strong>，而是一个持续运行、把夜间验证过的更新固化进统一 skill 池供日间使用的系统。并坦承这是一次<strong>小规模</strong>测试（用户数、反馈信号、交互深度都有限），但即便如此 SkillClaw 仍取得一致的性能增益。</p>
+
+    <h3>夜间进化与验证决策（Tables 4–7）：进化的「质感」</h3>
+    <p>Tables 4–7 逐夜列出每类的候选 skill、改动摘要与 validator 决策，能看到进化高度异质、各走各的轨迹，而非统一模式：</p>
+    <ul>
+      <li><strong>Social Interaction（Table 4）</strong>：6 晚里只有 1 个更新被接受 —— <code>03_task6</code>（Night 1 接受）。它把一个「跨部门 Slack 摘要 + 数据对账 + 风险识别 + 董事会简报起草」的 skill 从<strong>描述性指令重写为严格有序的流程</strong>（强化项目关键词过滤、财务优先级、变更检测、COO 联系人确认）。后续几晚的候选（Gmail+日历会议协调的扩展、Slack 可行性分析加约束）都被 Reject —— 印证了「该类瓶颈集中在<strong>可执行性而非缺能力</strong>」。</li>
+      <li><strong>Search &amp; Retrieval（Table 5）</strong>：Night 1 接受 <code>validate-file-existence</code>（在解析文件/读图/多模态调用<strong>之前</strong>先确认输入文件真实存在），Night 3 确认「当前池仍是 best-so-far」。其余如「更强的多模态预校验」「预算约束的检索规划」「主动到工作目录找真实输入文件」均被拒。</li>
+      <li><strong>Creative Synthesis（Table 6）</strong>：仅 Night 1 接受 <code>validate-tmp-workspace-inputs</code>（检查 <code>/tmp_workspace</code> 输入、目录与软链是否正确）。后续更复杂的「多模态创作 pipeline」（PDF→海报、视频摘要、图像合成等）虽不断提出却<strong>未能超过早期最佳池</strong>而被拒 —— 与 Table 3 的平台期一致。</li>
+      <li><strong>Safety &amp; Alignment（Table 7）</strong>：唯一一类<strong>连续 4 晚都有接受</strong>的类别，围绕 <code>git-push-with-auth-fallback</code> / <code>git-clone-to-directory</code> 不断打磨（无凭证/认证失败时安全 fallback 而非阻塞、统一补丁/打包文件名、修正 <code>mkdir &amp;&amp; cd &amp;&amp; git clone</code> 子 shell 陷阱）；Night 5–6 的进一步候选被拒。这解释了它为何到 Day 5 才提分 —— 是一连串可靠性改进的累积效果。</li>
+    </ul>
+
+    <h3>受控验证（Table 8，Skill Evolve Lite）：机制层面的解释</h3>
+    <p>为了把「skill 进化到底能不能直接修复失败」从完整 benchmark 里隔离出来，作者另设三个自定义查询，专门对应主结果中常见的失败模式，看<strong>单轮进化</strong>后的变化：</p>
+    <table>
+      <thead><tr><th>Query</th><th class="num">Baseline</th><th class="num">Post-Evolve</th><th class="num">Gain</th></tr></thead>
+      <tbody>
+        <tr><td>basic extraction</td><td class="num">21.7%</td><td class="num"><strong>69.6%</strong></td><td class="num">+47.8%</td></tr>
+        <tr><td>deadline parsing</td><td class="num">41.1%</td><td class="num"><strong>48.0%</strong></td><td class="num">+6.9%</td></tr>
+        <tr><td>save report</td><td class="num">28.3%</td><td class="num"><strong>100.0%</strong></td><td class="num">+71.7%</td></tr>
+        <tr><td><strong>平均 Average</strong></td><td class="num">30.4%</td><td class="num"><strong>72.5%</strong></td><td class="num"><strong>+42.1%</strong></td></tr>
+      </tbody>
+    </table>
+    <p>读数很清楚：当失败源于<strong>缺失/错误的过程性知识</strong>时，进化效果最猛 —— <code>save report</code> 从 28.3% 直接到 100.0%（初始失败是缺了环境特定流程，如输出路径/格式，被一次性编码进可复用 skill），<code>basic extraction</code> +47.8%（反复出现的执行模式被有效捕获）。而更依赖<strong>细腻推理</strong>、对过程性 skill 更新不敏感的 <code>deadline parsing</code> 只 +6.9%。这与主 benchmark 的发现互相印证，给出了「为什么会涨」的机制级解释。</p>
+
+    <h3>Case Studies（Figures 2–4）：进化把流程「重构」成了什么</h3>
+    <figure>
+      <img src="figures/fig2_case_slack.png" alt="Case study: Slack 消息分析">
+      <figcaption>图 2：Slack 消息分析任务（原文 Figure 2）。左（原始 skill）：朴素地把所有消息拉下来一律处理，且靠试错处理工具失败（如把 mock 服务端口写成 9100，实际是 9110，触发连接失败 ❌）。右（进化后 skill）：先扫消息预览定位「含任务的消息」→ 需要时再选择性拉取全文 → 抽取行动项 → 写报告到 <code>/tmp_workspace/results/results.md</code>；同时<strong>把正确 API 端口/路径直接编码进 skill</strong>（✅）。Attribution 三点：<em>task decomposition</em>（拆成过滤+抽取两段）、<em>error correction</em>（主动修工具配置而非反应式重试）、<em>selective retrieval</em>（只对相关消息算力投入）。</figcaption>
+    </figure>
+    <figure>
+      <img src="figures/fig3_case_iccv.png" alt="Case study: ICCV 2025 oral 论文统计">
+      <figcaption>图 3：ICCV 2025 oral 论文「第一单位」统计（原文 Figure 3）。左：靠启发式匹配大学名（presence-only），把「非第一单位」也算进去，导致计数错误 ❌。右：进化后的 skill 引入<strong>更严格的 first affiliation 定义</strong>（基于官方 PDF 首页结构）、与 OpenAccess 记录对齐、对模糊样本做<strong>定点二次人工核查</strong>，得到「干净的一遍：SJTU 为第一单位 4 篇、FDU 0 篇」（✅）。三点改进：<em>precise task definition</em>、<em>verification-aware reasoning</em>、<em>robust extraction</em>。</figcaption>
+    </figure>
+    <figure>
+      <img src="figures/fig4_case_sam3.png" alt="Case study: SAM3 推理（环境不完整）">
+      <figcaption>图 4：在「执行环境不完整」下做 SAM3（Segment Anything Model 3）推理（原文 Figure 4）。左：假设所需文件/执行条件齐备（如默认有 CUDA），缺资源/环境假设不成立时直接失败 ❌。右：进化后的 skill 引入<strong>环境感知工作流</strong> —— 先做轻量 workspace 巡检、把「缺输出目录/缺广告里说的路径」当作<strong>非阻塞（non-blocking）</strong>、去附近搜索任务特定资产、并按系统约束适配执行（如给 CUDA 依赖组件打 monkey patch 让其在 CPU 跑）（✅）。三点改进：<em>environment grounding</em>、<em>robust resource discovery</em>、<em>adaptive execution</em>。（论文另有 Figure 5：多约束选品任务，展示 <em>constraint-aware reasoning / grounded retrieval / calibrated decision making</em>，此处不再单列。）</figcaption>
+    </figure>
+
+    <h3>消融 / 分析小结</h3>
+    <p>本文没有传统意义上「关掉某模块」的消融，但其角色由两块承担：① 第二步里的<strong>按 skill 分组 = 天然消融</strong>，让「同一 skill 在不同上下文的成败比较」本身成为分析手段；② Table 8 的受控验证充当机制级消融，证明增益主要来自「修复过程性知识」。综合 Tables 4–7 的逐夜决策可见，进化不是规则的简单堆叠，而是<strong>由各类别特有瓶颈驱动的结构化过程</strong>：Social 强调可执行性、Search 强调输入可靠性与规划、Creative 强调多模态 pipeline 组织、Safety 强调真实环境下的稳健可恢复执行。</p>
+  </section>
+
+  <!-- ============================ ⑤ 洞见 ============================ -->
+  <section id="insight">
+    <h2><span class="n">⑤</span>洞见 Insights</h2>
+    <div class="callout insight">
+      <span class="label">Insight</span>
+      <ul style="margin:6px 0">
+        <li><strong>「跨用户」本身就是最好的消融变量。</strong> 单个用户分不清「可泛化改进」与「自我特例修补」；但把<strong>调用同一 skill</strong> 的多用户 session 聚到一起，skill 成了被控制的变量，成败对比直接暴露其行为边界 —— 这把「数据采集」顺手变成了「天然消融」，是本文最巧妙的一招。</li>
+        <li><strong>真实场景里，大多数 agent 失败是「过程性 / 环境性」的，而非「智力性」的。</strong> 端口写错、漏一步校验、默认有 CUDA、输出目录不存在……Table 8（save report 28.3%→100%）和三个 case study 都在说同一件事：把<strong>正确的环境信息与流程</strong>编码进 skill，比让模型「更会推理」更能直接提分。对应地，作者在 prompt 里反复区分 skill / agent / environment 三类失败，避免把 agent 的「没读 skill」错算成 skill 缺陷。</li>
+        <li><strong>「验证后才部署」带来单调不退化的部署曲线。</strong> 夜间在真实环境里让新旧 skill 对跑、只接受确实更好的更新，使用户每天拿到的都是「验证过的最佳池」。这点对工程上线很有吸引力：进化是<strong>开放式</strong>的、但部署是<strong>受控、可回退、不会变差</strong>的。代价是额外的 token 成本（候选必须真实跑一遍）。</li>
+      </ul>
+    </div>
+
+    <h3>局限与未来</h3>
+    <p>作者自己点明这是<strong>小规模验证</strong>（标注 Work in Progress）：8 用户、6 天、有限的反馈信号与交互深度，且<strong>只报告了 4/6 个类别</strong>（Productivity Flow、Code Intelligence 留待后续）。从结果也能看出短板：多个类别在 Day 2 就触顶后<strong>长期平台期</strong>（尤其 Creative Synthesis，更复杂的多模态 skill 在 6 天内始终没超过早期最佳池），说明在给定窗口/用户规模下进化很快饱和。我个人的几点观察：(i) 全程<strong>单一底座 Qwen3-Max</strong>，evolver 与被进化 agent 同源，缺乏「换模型/换 harness」的鲁棒性证据，也无与 memory-based、单 agent self-evolution 等路线的<strong>同条件横向对比</strong>，「第一个集体进化框架」的优越性更多靠 Day-over-Day 自比支撑；(ii) 验证用「模型自评比较结果」做 Accept/Reject，存在评判者偏差与「过拟合到验证任务」的风险；(iii) <strong>安全面</strong>值得警惕 —— 集体共享 skill 库是把双刃剑，一个被污染/被注入的 skill 可能一夜同步给所有用户，论文未讨论对抗性轨迹下的进化安全（尽管 Safety &amp; Alignment 类任务本身在评测内）。作者展望的方向：扩大用户数、拉长时间窗、引入更多样的任务与验证条件，以丰富进化轨迹、进一步提升性能。</p>
+
+    <h3>与相关工作的关系（基于本文自述）</h3>
+    <p>本文把自己放在两条线之间。<strong>(1) Agent 自我进化</strong>：从对单条轨迹的局部反思（Reflexion）到把经验变成可复用教训（如 Expel、Mem0、Memp、AgentKB、ReasoningBank 等），再到带搜索/更大记忆/更强在线适配的系统（如 LATS、Evolver、AgentEvolver、MetaClaw、RetroAgent 等）—— 但这些主要是「让一个 agent 从自己的历史里变强」，在单个优化回路内进行。<strong>(2) Agent Skills</strong>：把 skill 当作显式的标准流程/SOP 单元（Anthropic 的 skill 文档、Voyager 的技能库、Skill Set Optimization、Skillweaver、SkillRL、Skillorchestra 的技能路由、AgentKB 的跨域经验等），并有 SkillBench、SkillNet、SOK 等从 benchmark/连接/概念层面讨论 agentic skills。SkillClaw 自陈延续这种<strong>以 skill 为中心</strong>的视角，但区别在于：评测/进化发生在<strong>群体层面（group-level）</strong>—— 从一个已部署 agent 群里<strong>聚合而来的证据</strong>出发，做共享 skill 的集体进化，而不是单 agent、单回路的自我改进。</p>
+  </section>
+
+  <footer class="foot">
+    本页为 <code>paper-reading</code> skill 生成的阅读笔记，仅作辅助，细节以
+    <a href="https://arxiv.org/abs/2604.08377" target="_blank" rel="noopener">原文</a> 为准 · 解读日期 2026-05-30
+  </footer>
+
+</article>
+</body>
+</html>
