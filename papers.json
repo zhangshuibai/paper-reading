@@ -568,5 +568,28 @@
       "agent",
       "mcp"
     ]
+  },
+  {
+    "slug": "2509.24002-mcpmark",
+    "title": "MCPMark: A Benchmark for Stress-Testing Realistic and Comprehensive MCP Use",
+    "authors": "Zijian Wu, Xiangyan Liu, Xinyuan Zhang, Lingjun Chen, Fanqing Meng, Lingxiao Du, Yiran Zhao, Fanshi Zhang, Yaoqi Ye, Jiawei Wang, Zirui Wang, Jinjie Ni, Yufan Yang, Arvin Xu, Michael Qizhe Shieh",
+    "team": "TRAIL @ NUS · EvalSys · LobeHub · SJTU · Fudan",
+    "arxiv": "https://arxiv.org/abs/2509.24002",
+    "code": "https://github.com/eval-sys/mcpmark",
+    "date": "2026-05-30",
+    "published": "arXiv 2025",
+    "tldr": "用 127 个专家+AI 协作构建、带程序化验证脚本的多步 CRUD 任务，跨 Notion/GitHub/Filesystem/PostgreSQL/Playwright 五个真实 MCP server 压测 MCP 使用能力；最强 gpt-5-medium 也仅 52.56% pass@1 / 33.86% pass^4，瓶颈在多轮 tool use 稳定性。",
+    "tags": [
+      "MCP",
+      "Benchmark",
+      "Tool-Use",
+      "LLM-Eval",
+      "CRUD"
+    ],
+    "path": "papers/2509.24002-mcpmark/index.html",
+    "categories": [
+      "mcp",
+      "agent"
+    ]
   }
 ]

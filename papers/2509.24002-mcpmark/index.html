@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MCPMark：高强度压测真实 MCP 使用的 benchmark · 论文解读</title>
+
+<script>
+  window.MathJax = {
+    tex:{inlineMath:[['$','$'],['\\(','\\)']], displayMath:[['$$','$$'],['\\[','\\]']]},
+    svg:{fontCache:'global'}
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;
+  }
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:880px; margin:0 auto; padding:18px 22px 90px}
+
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:27px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)}
+  .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .meta-grid a:hover{text-decoration:underline}
+
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap}
+  nav.toc a:hover{color:var(--accent)}
+
+  section{margin:38px 0}
+  h2{font-size:21px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:17px; margin:24px 0 8px}
+  p{margin:12px 0}
+  ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.9em}
+  strong{color:var(--text)}
+
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:14px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:10px 12px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  .yes{color:var(--ok); font-weight:600}
+  .no{color:var(--muted)}
+  .num{text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap}
+
+  figure{margin:24px 0; text-align:center}
+  figure img{max-width:100%; height:auto; border:1px solid var(--line); border-radius:10px; background:#fff}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+
+  blockquote{border-left:3px solid var(--line); margin:14px 0; padding:2px 16px; color:var(--muted)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+  .mjx-container{overflow-x:auto; overflow-y:hidden}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <!-- ============================ 抬头 / 元信息 ============================ -->
+  <header class="head">
+    <div class="chips">
+      <span class="chip">MCP</span>
+      <span class="chip">agent benchmark</span>
+      <span class="chip">tool use</span>
+      <span class="chip">LLM eval</span>
+      <span class="chip">CRUD workflow</span>
+    </div>
+    <h1>MCPMark：高强度压测「真实、全面」MCP 使用能力的 benchmark</h1>
+    <p class="orig-title">MCPMark: A Benchmark for Stress-Testing Realistic and Comprehensive MCP Use</p>
+    <dl class="meta-grid">
+      <dt>作者</dt><dd>Zijian Wu, Xiangyan Liu, Xinyuan Zhang, Lingjun Chen, Fanqing Meng, Lingxiao Du, Yiran Zhao, Fanshi Zhang, Yaoqi Ye, Jiawei Wang, Zirui Wang, Jinjie Ni, Yufan Yang, Arvin Xu, Michael Qizhe Shieh（前两位为 student leads，多人 equal contribution；按随机顺序排列）</dd>
+      <dt>团队 / 机构</dt><dd>TRAIL @ National University of Singapore（NUS）、EvalSys、LobeHub、Shanghai Jiao Tong University、Fudan University</dd>
+      <dt>原文链接</dt><dd><a href="https://arxiv.org/abs/2509.24002" target="_blank" rel="noopener">https://arxiv.org/abs/2509.24002</a></dd>
+      <dt>发表 / 年份</dt><dd>arXiv preprint（Technical Report），2025-09（v1，2025-09-28）</dd>
+      <dt>解读日期</dt><dd>2026-05-30</dd>
+    </dl>
+  </header>
+
+  <div class="tldr">
+    <b>TL;DR</b> — MCPMark 是一个用来「压测」LLM/agent 真实使用 MCP（Model Context Protocol）能力的 benchmark：由领域专家与 AI agent 协作构建 <b>127 个高难度任务</b>，覆盖 Notion / GitHub / Filesystem / PostgreSQL / Playwright 这 <b>5 个真实 MCP server</b>，每个任务从一个精心准备的 initial state 出发，并配有一段<b>程序化验证脚本（programmatic verifier）</b>做客观判定。与以往「读多写少、交互浅」的 MCP benchmark 不同，它强调完整的 <b>CRUD（增删改查）</b>多步工作流。在一个刻意保持极简的 tool-calling agent 框架下评测时，最强模型 <code>gpt-5-medium</code> 也只拿到 <b>52.56% pass@1 / 33.86% pass^4</b>，<code>claude-sonnet-4</code>、<code>o3</code> 等都跌破 30% pass@1，平均每个任务需要 <b>16.2 个 turn、17.4 次 tool call</b> —— 说明当前模型在真实、长链路 MCP 场景下的稳定性与规划能力仍有巨大差距。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#opensource">① 开源贡献</a>
+    <a href="#motivation">② 动机与贡献</a>
+    <a href="#method">③ 方法</a>
+    <a href="#evaluation">④ 实验评估</a>
+    <a href="#insight">⑤ 洞见</a>
+  </nav>
+
+  <!-- ============================ ① 开源贡献 ============================ -->
+  <section id="opensource">
+    <h2><span class="n">①</span>开源贡献 Open-source Artifacts</h2>
+    <p>MCPMark 是一个<strong>完全开源</strong>的 benchmark：评测框架（<code>MCPMark-Agent</code> + orchestration 代码）、127 个标准任务、每个任务的<strong>程序化验证脚本</strong>、Docker 沙箱、指标聚合工具均在 GitHub（Apache-2.0）公开；项目主页 <a href="https://mcpmark.ai/" target="_blank" rel="noopener">mcpmark.ai</a> 托管 leaderboard（截至解读日称收录 38 个模型）；完整的执行 trajectory 日志（2.81 GB）以单独数据集形式发布在 Hugging Face（MIT）。下表逐项核实。</p>
+    <table>
+      <thead><tr><th>类型</th><th>是否开源</th><th>内容 / 链接</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>代码 / 评测框架</td>
+          <td class="yes">✔</td>
+          <td><a href="https://github.com/eval-sys/mcpmark" target="_blank" rel="noopener">github.com/eval-sys/mcpmark</a> — Apache-2.0。含 <code>MCPMark-Agent</code>（基于 LiteLLM + MCP Python SDK 的极简 tool-calling agent）、5 个 MCP server 的接入与启动配置、隔离沙箱与「one-command / auto-resume / 统一指标」的 orchestration。</td>
+        </tr>
+        <tr>
+          <td>Benchmark 任务 + verifier</td>
+          <td class="yes">✔</td>
+          <td>随代码仓库发布：<strong>127</strong> 个标准任务（基于 38 个 curated initial states），每个任务自带 <strong>programmatic verification script</strong>；另含一套 <strong>50</strong> 个轻量「easy」任务（每个 server 10 个）供小模型使用。</td>
+        </tr>
+        <tr>
+          <td>Trajectory 数据集</td>
+          <td class="yes">✔</td>
+          <td><a href="https://huggingface.co/datasets/Jakumetsu/mcpmark-trajectory-log" target="_blank" rel="noopener">huggingface.co/datasets/Jakumetsu/mcpmark-trajectory-log</a>（mcpmark-v1-0905，约 2.81 GB，MIT）。每次 run 含 <code>meta.json</code>/<code>messages.json</code>/<code>execution.log</code>，记录逐 turn 的 prompt、tool call、思考与结果，可做失败诊断。</td>
+        </tr>
+        <tr>
+          <td>Leaderboard / 项目主页</td>
+          <td class="yes">✔</td>
+          <td><a href="https://mcpmark.ai/" target="_blank" rel="noopener">mcpmark.ai</a>（含 leaderboard 与 trajectory explorer）；由 EvalSys、LobeHub、NUS TRAIL 共同维护。</td>
+        </tr>
+        <tr>
+          <td>模型权重 Weights</td>
+          <td class="no">—</td>
+          <td>不适用：本文是 benchmark，不训练/发布模型。</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="callout note">
+      <span class="label">关于第三方 MCP server 的许可证</span>
+      MCPMark 复用 5 个官方/社区 MCP server（附录 B 列出）：<code>@modelcontextprotocol/server-filesystem</code>（MIT）、GitHub MCP server（MIT）、<code>@notionhq/notion-mcp-server</code>（MIT）、<code>@playwright/mcp</code>（Apache-2.0）、<code>crystaldba/postgres-mcp</code>（MIT）。Notion 与 GitHub server 走官方 remote API，需要相应账号/密钥才能复现远程任务。
+    </div>
+  </section>
+
+  <!-- ============================ ② 动机与贡献 ============================ -->
+  <section id="motivation">
+    <h2><span class="n">②</span>研究动机与贡献 Motivation &amp; Contribution</h2>
+    <h3>背景与问题</h3>
+    <p>MCP（Model Context Protocol，Anthropic 2024 提出）是连接 LLM 与外部世界（tool、API、数据库、上下文资源）的标准化接口。它让模型在真实环境里同时拥有「眼睛和手」，被普遍视为 agentic 时代的基础设施层。但<strong>现有 MCP benchmark 的覆盖面很窄</strong>：</p>
+    <ul>
+      <li><strong>读多写少（read-heavy）。</strong>很多任务只是查询/检索信息，几乎不触发 create/update/delete，无法考察模型对环境施加真实改动的能力。</li>
+      <li><strong>交互深度有限。</strong>任务链路短、步数少，平均只需要个位数 turn（见下表对比），难以暴露模型在「长链路、多步、需要规划」时的性能边界。</li>
+      <li><strong>验证不够严格。</strong>不少 benchmark 用 LLM-as-judge 打分，或起始状态是「通用/极简初始化」，既不真实也不够可靠。</li>
+    </ul>
+    <p>结果是：这些 benchmark 任务模式单一，<strong>无法真正探到当前模型/agent 在 reasoning、planning、长上下文处理、tool use 上的天花板</strong>。作者用一张对比表（原文 Table 1）点明差异：</p>
+    <table>
+      <thead><tr><th>Benchmark</th><th>任务模式</th><th>验证方式</th><th class="num">平均 Turn</th></tr></thead>
+      <tbody>
+        <tr><td>MCPEval</td><td>Synthetic</td><td>Hybrid</td><td class="num">N/A</td></tr>
+        <tr><td>LiveMCPBench</td><td>CRUD-diverse</td><td>LLM-as-judge</td><td class="num">3.2</td></tr>
+        <tr><td>MCP-Universe</td><td>Read-heavy</td><td>Programmatic</td><td class="num">6.8</td></tr>
+        <tr><td>LiveMCP-101</td><td>N/A</td><td>LLM-as-judge</td><td class="num">5.4</td></tr>
+        <tr><td><strong>MCPMark</strong></td><td><strong>CRUD-diverse</strong></td><td><strong>Programmatic</strong></td><td class="num"><strong>16.2</strong></td></tr>
+      </tbody>
+    </table>
+
+    <h3>本文的切入点</h3>
+    <p>作者的核心主张是：要真正衡量 MCP 使用能力，benchmark 必须同时满足三点 ——（1）任务<strong>真实且全面</strong>，覆盖 create/read/update/delete 的多步工作流；（2）每个任务从<strong>有真实意义的 initial state</strong> 出发（一个填好内容的 Notion 模板、一个有真实开发历史的 GitHub 仓库、一棵真实目录树……），而不是空环境；（3）用<strong>程序化脚本</strong>而非 LLM 打分做客观、可复现的验证。为了让任务既真实又「可机器判定」，他们设计了一条 <strong>human–AI 协作</strong>的任务构建流水线（专家 + 两个 agent 角色），并配一个<strong>刻意极简、不做任何任务/模型特定优化</strong>的 agent 框架，以测出模型「内在」的 MCP 能力。</p>
+
+    <h3>核心贡献</h3>
+    <ol>
+      <li><strong>提出 MCPMark。</strong>5 个真实 MCP server、<strong>127 个高质量任务</strong>、<strong>38 个 curated initial states</strong>；任务指令平均 <strong>288.6 词</strong>，验证脚本平均 <strong>209.8 行代码</strong>。相比已有 MCP benchmark，CRUD 覆盖更广、链路更长（平均 16.2 turn / 17.4 tool call）。</li>
+      <li><strong>一条 human–AI 协作的任务构建 + 程序化验证流水线。</strong>10 位不同背景的专家（CS PhD、前端/全栈/AI infra 工程师、AI 投资人）与 task-creation / task-execution 两个 agent 迭代共建，每个任务耗费专家 <strong>3–5 小时</strong>；并配「带 sandbox + 自动 reset」的评测框架 <code>MCPMark-Agent</code>。</li>
+      <li><strong>对前沿模型的系统评测与分析。</strong>覆盖 GPT-5 系列、Claude、Grok、Gemini、o3/o4-mini 等闭源模型与 Qwen3、Kimi-K2、DeepSeek、GLM-4.5、gpt-oss 等开源模型；发现最强的 <code>gpt-5-medium</code> 仅 52.56% pass@1，并就「reasoning effort」「失败类型」「local vs remote server」「成本/turn 与表现的关系」给出可迁移结论。</li>
+    </ol>
+  </section>
+
+  <!-- ============================ ③ 方法 ============================ -->
+  <section id="method">
+    <h2><span class="n">③</span>方法 Method：benchmark 如何构建与评测</h2>
+    <p>MCPMark 的「方法」可拆成三块：<strong>(A)</strong> 选什么 server、什么 initial state、什么任务（benchmark 构建）；<strong>(B)</strong> 任务怎么被「造」出来又保证可机器判定（human–AI 协作流水线）；<strong>(C)</strong> 模型怎么被公平地跑起来并验证（evaluation framework）。整体生命周期如下图：每个任务从一个 curated initial state + 自然语言指令开始，<code>MCPMark-Agent</code> 进入 tool-calling loop 反复调用 MCP tool 直到给出最终回答，最后由 programmatic verifier 检查最终环境是否满足所有要求，验证完再把环境 reset 回初始态以便重复评测。</p>
+
+    <figure>
+      <img src="figures/fig1_pipeline.png" alt="MCPMark 评测流水线总览">
+      <figcaption>图 1：MCPMark 带「全程状态追踪」的评测流水线（出处：原文 Figure 1）。四阶段 = MCP（选 server）→ Task Initialization（初始状态 + 任务描述）→ Agent Execution（<code>MCPMark-Agent</code> 跑 tool-calling loop）→ Result Verification（程序化 verifier 逐条核对，如「新建项目 ✔ / 旧项目已删 ✔ / Skill section 至少含 3 项 ✔」）。</figcaption>
+    </figure>
+
+    <h3>(A) 5 个 MCP server 与 initial state</h3>
+    <p>选取标准是「真实、常用、覆盖差异化交互模式」。每个 server 都<strong>完整支持 CRUD</strong>，且 initial state 都被精心设计成真实使用场景的起点（而非空环境）：</p>
+    <ul>
+      <li><strong>Notion</strong>（19 tools）— 走官方 remote API 增删改查文档与数据库；initial state 由广泛使用的 Notion 模板实例化。</li>
+      <li><strong>GitHub</strong>（94 tools，部分未在图中展示）— 官方 remote API，支持项目管理与 Git 操作：CI/CD、issue、branch、PR、commit；initial state 取自有真实开发历史与配置的仓库。</li>
+      <li><strong>Filesystem</strong>（11 tools）— 本地文件 I/O、目录组织、元数据检查与搜索；initial state 是模仿真实日常使用的目录结构。</li>
+      <li><strong>PostgreSQL</strong>（9 tools）— 关系数据库的 schema 探索与 SQL 执行；initial state 是带真实 schema 的模板数据库。</li>
+      <li><strong>Playwright</strong>（21 tools）— 浏览器自动化：导航、表单填写、数据抽取、截图/PDF 导出；initial state 来自两类网页 —— 作者自建的、用于测试特定功能的网页（如 Cloudflare Turnstile 登录），以及改编自 WebArena 的 localhost 网页。</li>
+    </ul>
+    <figure>
+      <img src="figures/fig3_dist.png" alt="127 个任务在 5 个 server 上的分布">
+      <figcaption>图 2：127 个任务在 5 个 server 上的分布与 38 个 initial states（出处：原文 Figure 3 左）。任务数分别为 Filesystem 30、Notion 28、Playwright 25、GitHub 23、PostgreSQL 21；外圈标注了具体 initial state（如 GitHub 的 <code>build your own X</code>、Notion 的 <code>weekend planner</code>、Playwright 的 <code>shopping admin</code> 等）及各自的任务数。</figcaption>
+    </figure>
+    <figure>
+      <img src="figures/fig3_tools.png" alt="每个 server 的 toolset 概览">
+      <figcaption>图 3：每个 MCP server 暴露给 agent 的 toolset 概览（出处：原文 Figure 3 右）。覆盖各环境最常用的功能，且每个环境都能完成完整 CRUD —— 例如 Notion 的 <code>API-post-database-query</code>/<code>API-patch-block-children</code>、PostgreSQL 的 <code>execute_sql</code>/<code>analyze_db_health</code>、Playwright 的 <code>browser_navigate</code>/<code>browser_take_screenshot</code> 等。</figcaption>
+    </figure>
+
+    <h3>(B) human–AI 协作的任务构建流水线</h3>
+    <p>难点在于：任务既要「真实、复杂」，又要能被一段确定性脚本判定对错——纯人写或纯 agent 造都难做好。作者让<strong>人类专家</strong>与<strong>两个 agent</strong>（task creation agent + task execution agent）配合，分四步迭代：</p>
+    <ol>
+      <li><strong>Exploration（探索）：</strong>给定一个 initial state，专家与 creation agent 在一个高层指令/主题引导下共同探索环境，既建立全局认识，也挖掘出后续能支撑真实任务的深层细节。</li>
+      <li><strong>Evolvement（演化）：</strong>creation agent 提出新任务或在已有任务上「加难度」——删去冗余指令、增加信息检索难度（如把输入内容变长）、要求更多交互步骤；专家把关，确保任务仍然可行、可验证、足够有挑战。</li>
+      <li><strong>Verification（验证脚本）：</strong>creation agent 起草 programmatic 验证脚本；专家在 execution agent 协助下亲自把任务做一遍，反复打磨脚本直到与指令完全一致；专家还会手动调整最终环境状态，确认脚本对「成功」和「失败」都能正确区分（含 edge case）。</li>
+      <li><strong>Iteration（迭代）：</strong>重复 II、III 逐步提高难度，同时保持自动可验证性与场景真实性。</li>
+    </ol>
+    <p>即便有 agent 协助，每个样本仍很费人力（专家 3–5 小时/任务）。有时专家直接凭经验手写自然语言指令、绕过 creation agent，但验证脚本仍在同一流水线里生成与打磨。<strong>Quality control：</strong>所有任务经专家 cross-review 与长达一个月的社区检查；对「没有任何模型做对」的任务还会额外人工复核，确保任务虽难但有效、判定无歧义。</p>
+    <figure>
+      <img src="figures/fig2_tasks.png" alt="5 个代表性任务实例">
+      <figcaption>图 4：5 个代表性任务（上=initial state，下=任务指令；出处：原文 Figure 2）。从左到右：Playwright 完成 Cloudflare Turnstile 登录、GitHub 给所有 PR 配 ESLint 的 linting CI、Notion 用 tag 查询做周末出行规划、PostgreSQL 为项目跟踪设计 schema 与外键、Filesystem 从一堆文件中抽取联系人信息并整理成 CSV —— 都是真实、多步的工作流。</figcaption>
+    </figure>
+
+    <h3>(C) 评测框架与 MCPMark-Agent</h3>
+    <p><strong>State tracking。</strong>所有任务都在 sandbox 里执行，强制显式状态追踪，保证安全、可复现、跨模型公平比较。每次评测遵循固定生命周期：① 从良定义的 initial state 出发 → ② agent 执行 → ③ 程序化脚本检查最终环境是否满足要求 → ④ 验证后把环境 reset 回初始态，消除副作用、便于在相同条件下重复评测。</p>
+    <p><strong>MCPMark-Agent。</strong>一个刻意做得「轻量、通用」的 agent 框架，基于 <a href="https://github.com/BerriAI/litellm" target="_blank" rel="noopener">LiteLLM</a> + <a href="https://github.com/modelcontextprotocol/python-sdk" target="_blank" rel="noopener">MCP Python SDK</a>。MCP server 通过 SDK 配好、把 tools 暴露给 agent；LiteLLM 负责把这些 tool 转成 OpenAI function-call 格式，并把请求路由到各家官方 API，从而尽量发挥每个模型的原生能力。评测时 agent 走一个 <strong>tool-calling loop</strong>：模型反复调用 MCP tool、解析 server 返回、调整动作，<strong>直到产生一个不再带任何 tool call 的最终回答</strong>，loop 即终止。</p>
+    <div class="callout note">
+      <span class="label">实现要点（对复现很重要）</span>
+      <ul style="margin:6px 0">
+        <li><strong>刻意不优化。</strong>框架故意省去生产系统里常见的优化，目的就是<strong>避开任务特定 heuristics 与模型特定 bias</strong>，测「内在」能力。</li>
+        <li><strong>预算上限：</strong>每次 run 最多 <strong>100 turn</strong>、<strong>3600 秒</strong> 超时。</li>
+        <li><strong>默认推理设置：</strong>除非特别说明，所有模型用各自默认 inference 设置（temperature、top-$p$、reasoning effort）。</li>
+        <li><strong>两条执行路径：</strong>一条是经 LiteLLM 的通用 function-calling 路径；另一条是对特定模型（如 Anthropic extended thinking）的原生 tool-support 路径。</li>
+        <li><strong>三个指标</strong>（见 ④）一致用 <code>MCPMark-Agent</code> 跑出。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============================ ④ 实验评估 ============================ -->
+  <section id="evaluation">
+    <h2><span class="n">④</span>实验评估 Evaluation</h2>
+    <h3>评测设置</h3>
+    <ul>
+      <li><strong>Benchmark：</strong>全部 127 个任务，按 5 个 server 分别报告，再聚合成 overall。</li>
+      <li><strong>对比模型（baselines）：</strong>
+        <em>闭源</em> —— <code>gpt-5</code>（low/medium/high reasoning effort，以及 mini/nano 变体）、<code>gpt-4.1</code>(/mini/nano)、<code>claude-opus-4.1</code>、<code>claude-sonnet-4</code>、<code>grok-4</code>、<code>grok-code-fast-1</code>、<code>o3</code>、<code>o4-mini</code>、<code>gemini-2.5-pro</code>、<code>gemini-2.5-flash</code>；
+        <em>开源</em> —— <code>qwen3-coder-plus</code>、<code>qwen3-max</code>、<code>kimi-k2-instruct</code>、<code>deepseek-v3.1</code>、<code>glm-4.5</code>、<code>gpt-oss-120b</code>（因 benchmark 太难，未测 ≤100B 之外的更小开源模型）。</li>
+      <li><strong>指标 Metric（均越高越好）：</strong>
+        <ul>
+          <li><strong>pass@1</strong> — 单次尝试成功率（4 次独立 run 取平均，报告 mean ± std）。</li>
+          <li><strong>pass@4</strong> — 允许 4 次独立尝试，只要有一次成功即算成功（衡量重复尝试能否覆盖难题）。</li>
+          <li><strong>pass^4</strong> — 更严格：4 次独立 run <strong>全部成功</strong>才算对，是模型<strong>一致性 / 稳定性</strong>的强指标。</li>
+        </ul>
+      </li>
+    </ul>
+
+    <h3>主要结果（原文 Table 2，pass@1 按 server 拆分 + 三指标）</h3>
+    <p>下表为各模型在 5 个 server 上的 pass@1（FS=Filesystem, GH=GitHub, NT=Notion, PW=Playwright, PG=PostgreSQL）及三项总指标；本文最强模型一行加粗。</p>
+    <table>
+      <thead><tr>
+        <th>Model</th><th class="num">FS</th><th class="num">GH</th><th class="num">NT</th><th class="num">PW</th><th class="num">PG</th>
+        <th class="num">pass@1</th><th class="num">pass@4</th><th class="num">pass^4</th>
+      </tr></thead>
+      <tbody>
+        <tr><td colspan="9" style="background:var(--panel2);color:var(--muted)">闭源 Proprietary</td></tr>
+        <tr><td><strong>gpt-5-medium</strong></td><td class="num"><strong>57.50</strong></td><td class="num"><strong>47.83</strong></td><td class="num">41.96</td><td class="num">43.00</td><td class="num"><strong>76.19</strong></td><td class="num"><strong>52.56</strong></td><td class="num"><strong>68.50</strong></td><td class="num"><strong>33.86</strong></td></tr>
+        <tr><td>grok-4</td><td class="num">50.83</td><td class="num">14.13</td><td class="num">2.68</td><td class="num">35.00</td><td class="num">58.33</td><td class="num">31.69</td><td class="num">44.88</td><td class="num">18.11</td></tr>
+        <tr><td>claude-opus-4.1</td><td class="num">33.33</td><td class="num">21.74</td><td class="num">35.71</td><td class="num">24.00</td><td class="num">33.33</td><td class="num">29.92</td><td class="num">—</td><td class="num">—</td></tr>
+        <tr><td>claude-sonnet-4</td><td class="num">27.50</td><td class="num">16.30</td><td class="num">21.43</td><td class="num">26.00</td><td class="num">53.57</td><td class="num">28.15</td><td class="num">44.88</td><td class="num">12.60</td></tr>
+        <tr><td>gpt-5-mini-medium</td><td class="num">33.33</td><td class="num">18.48</td><td class="num">16.07</td><td class="num">12.00</td><td class="num">61.90</td><td class="num">27.36</td><td class="num">45.67</td><td class="num">9.45</td></tr>
+        <tr><td>o3</td><td class="num">35.83</td><td class="num">14.13</td><td class="num">24.11</td><td class="num">15.00</td><td class="num">36.90</td><td class="num">25.39</td><td class="num">43.31</td><td class="num">12.60</td></tr>
+        <tr><td>grok-code-fast-1</td><td class="num">23.33</td><td class="num">8.70</td><td class="num">2.68</td><td class="num">25.00</td><td class="num">47.62</td><td class="num">20.47</td><td class="num">30.71</td><td class="num">9.45</td></tr>
+        <tr><td>qwen3-max（注：原表列于闭源组）</td><td class="num">10.83</td><td class="num">14.13</td><td class="num">16.96</td><td class="num">8.00</td><td class="num">44.05</td><td class="num">17.72</td><td class="num">22.83</td><td class="num">11.02</td></tr>
+        <tr><td>o4-mini</td><td class="num">25.00</td><td class="num">14.13</td><td class="num">20.54</td><td class="num">12.00</td><td class="num">11.90</td><td class="num">17.32</td><td class="num">31.50</td><td class="num">6.30</td></tr>
+        <tr><td>gemini-2.5-pro</td><td class="num">24.17</td><td class="num">9.78</td><td class="num">4.46</td><td class="num">15.00</td><td class="num">26.19</td><td class="num">15.75</td><td class="num">29.92</td><td class="num">4.72</td></tr>
+        <tr><td>gemini-2.5-flash</td><td class="num">8.33</td><td class="num">15.22</td><td class="num">6.25</td><td class="num">6.00</td><td class="num">10.71</td><td class="num">9.06</td><td class="num">18.11</td><td class="num">3.94</td></tr>
+        <tr><td>gpt-4.1</td><td class="num">12.50</td><td class="num">7.61</td><td class="num">6.25</td><td class="num">8.00</td><td class="num">4.76</td><td class="num">8.07</td><td class="num">12.60</td><td class="num">3.15</td></tr>
+        <tr><td>gpt-5-nano-medium</td><td class="num">6.67</td><td class="num">7.61</td><td class="num">3.57</td><td class="num">0.00</td><td class="num">15.48</td><td class="num">6.30</td><td class="num">11.81</td><td class="num">1.57</td></tr>
+        <tr><td>gpt-4.1-mini</td><td class="num">3.33</td><td class="num">6.52</td><td class="num">1.79</td><td class="num">0.00</td><td class="num">9.52</td><td class="num">3.94</td><td class="num">7.09</td><td class="num">1.57</td></tr>
+        <tr><td>gpt-4.1-nano</td><td class="num">0.00</td><td class="num">0.00</td><td class="num">0.00</td><td class="num">0.00</td><td class="num">0.00</td><td class="num">0.00</td><td class="num">0.00</td><td class="num">0.00</td></tr>
+        <tr><td colspan="9" style="background:var(--panel2);color:var(--muted)">开源 Open-Source</td></tr>
+        <tr><td><strong>qwen3-coder-plus</strong>（开源最强）</td><td class="num">13.33</td><td class="num">19.57</td><td class="num">19.64</td><td class="num">30.00</td><td class="num">47.62</td><td class="num"><strong>24.80</strong></td><td class="num">40.94</td><td class="num">12.60</td></tr>
+        <tr><td>kimi-k2-instruct</td><td class="num">14.17</td><td class="num">16.30</td><td class="num">8.04</td><td class="num">30.00</td><td class="num">47.62</td><td class="num">21.85</td><td class="num">31.50</td><td class="num">12.60</td></tr>
+        <tr><td>deepseek-v3.1</td><td class="num">15.83</td><td class="num">9.78</td><td class="num">12.50</td><td class="num">7.00</td><td class="num">42.86</td><td class="num">16.73</td><td class="num">28.35</td><td class="num">7.87</td></tr>
+        <tr><td>glm-4.5</td><td class="num">7.50</td><td class="num">22.83</td><td class="num">21.43</td><td class="num">13.00</td><td class="num">14.29</td><td class="num">15.55</td><td class="num">24.41</td><td class="num">6.30</td></tr>
+        <tr><td>gpt-oss-120b</td><td class="num">5.83</td><td class="num">4.35</td><td class="num">3.57</td><td class="num">3.00</td><td class="num">7.14</td><td class="num">4.72</td><td class="num">13.39</td><td class="num">0.00</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>怎么读这些数字？</strong></p>
+    <ul>
+      <li><strong>对前沿模型极难。</strong>最强的 <code>gpt-5-medium</code> 也只有 52.56% pass@1；大多数闭源模型落在 15–30% pass@1，多个开源模型不到 10%。开源最强 <code>qwen3-coder-plus</code> 仅 24.80%。这印证了 benchmark 的「压测」定位。</li>
+      <li><strong>local server 普遍比 remote 好做。</strong>表现因 server 而异，且存在明显「本地 vs 远程」分水岭：PostgreSQL / Filesystem / Playwright 这类<strong>本地服务</strong>成功率高（<code>gpt-5-medium</code> 在 PG/FS/PW 分别 76.19/57.50/43.00），而 Notion / GitHub 这类<strong>远程服务</strong>大多数模型 &lt;25%。作者归因于数据可得性：本地服务容易模拟、训练数据中常见；远程服务 API 需要真实交互轨迹，规模化采集成本高、在训练里被低估。</li>
+      <li><strong>稳定性远远落后。</strong>pass@4 相对 pass@1 有可观提升（<code>gpt-5-medium</code> 68.50 vs 52.56，<code>claude-sonnet-4</code> 44.88 vs 28.15），说明「多试几次」确实能覆盖更多难题；但 pass^4 急剧下滑（gpt-5-medium 33.86、claude-sonnet-4 12.60），多数模型 pass^4 落在 5–15%。<strong>即「能偶尔做对，但很难每次都做对」——多轮 tool use 下的稳定性是普遍短板</strong>，这对真实部署是高风险信号。</li>
+      <li><strong>交互量巨大。</strong>平均 16.2 turn / 17.4 tool call/任务，远超以往 MCP benchmark（见 ② 的 Table 1）。<code>qwen3-max</code>、<code>kimi-k2-instruct</code> 甚至平均 23.85/26.95 turn、23.02/26.22 tool call。</li>
+    </ul>
+
+    <h3>分析一：reasoning effort 的作用（原文 Table 3）</h3>
+    <p>作者对 <code>gpt-5</code> 系列与 <code>claude-sonnet-4</code> 调不同 reasoning effort（low/medium/high），观察 overall pass@1：</p>
+    <table>
+      <thead><tr><th>Model</th><th>Low</th><th>Medium</th><th>High</th></tr></thead>
+      <tbody>
+        <tr><td>gpt-5</td><td class="num">46.85</td><td class="num"><strong>52.56</strong></td><td class="num">51.57</td></tr>
+        <tr><td>gpt-5-mini</td><td class="num">8.27</td><td class="num">27.36</td><td class="num"><strong>30.32</strong></td></tr>
+        <tr><td>gpt-5-nano</td><td class="num">4.33</td><td class="num"><strong>6.30</strong></td><td class="num">5.12</td></tr>
+        <tr><td>claude-sonnet-4</td><td class="num">27.36</td><td class="num">28.15 (N/A 档)</td><td class="num"><strong>28.35</strong></td></tr>
+      </tbody>
+    </table>
+    <ul>
+      <li><strong>更多 reasoning 不是免费午餐，取决于模型基座能力。</strong><code>gpt-5</code> 中/高档受益（46.85→52.56），<code>gpt-5-mini</code> 提升更明显（8.27→30.32），但 <code>gpt-5-nano</code> 几乎无变化（4%–6%）、<code>claude-sonnet-4</code> 也稳在 ~27–28%。说明「把额外 thinking token 转化为更好的 MCP 使用」并不平凡。</li>
+      <li><strong>reasoning 对 remote server 帮助最大。</strong>对 <code>gpt-5</code>，GitHub 从 low 的 27.17 翻倍到 high 的 50.00，Notion 从 36.61 升到 44.64；而本地的 PostgreSQL 稳在 72–76%、Filesystem 波动 &lt;5 个百分点。作者解读为：远程服务训练曝光少、任务更难，需要更强的 test-time 泛化，而 reasoning 正好能「以语言外推到未见情形」（呼应「language generalizes through reasoning in agents」）。</li>
+    </ul>
+
+    <h3>分析二：turn 数与失败类型</h3>
+    <figure>
+      <img src="figures/fig4_turns.png" alt="各模型成功 run 的 turn 分布">
+      <figcaption>图 5：各模型成功 run 的 turn 分布（出处：原文 Figure 4）。每个点是一次 run（灰=失败），小提琴图是成功 run 的 turn 分布，颜色编码 pass@1。结论：<strong>更强的模型往往用更少、更有针对性的 tool call 完成任务</strong>。</figcaption>
+    </figure>
+    <ul>
+      <li><strong>turn 多 ≠ 表现好。</strong>成功靠「更好的决策与定向探索」，而非盲目试错。<code>kimi-k2-instruct</code> 常进入 <em>overcalling</em> 模式（超过 30 turn 仍在调用，成功率反降，疑似卡住/陷入循环）；<code>gpt-5-medium</code> 在保持合理 turn 预算的同时拿到最高 pass@1。</li>
+      <li><strong>成本不是表现的代理（原文 Figure 22）。</strong>更高的花费并不带来更高准确率：一些最贵的 run 反而 pass@1 更低，而若干低成本 run 反而更好；即便 turn 数相近，成本也可能差很多。</li>
+      <li><strong>失败类型拆解（原文 Figure 5）：</strong>分 <em>implicit</em>（任务正常跑完但没通过验证，多由 reasoning/planning/长上下文问题导致，难归因到单一因素）与 <em>explicit</em>（可定位的显式错误：context window overflow / turn limit exceeded / abandoned / premature stop / malformed tool calls）。
+        <strong>implicit 失败占大头</strong>，普遍超过 50%：<code>gpt-5-high</code> 和 <code>kimi-k2-instruct</code> 的 implicit 失败超过 <strong>84%</strong>（能力型、隐蔽的错误）；而 <code>gemini-2.5-flash</code>(52%)、<code>gpt-4.1</code>(66%) implicit 占比更低、显式原因更多——前者多为 abandoned/premature stop（reasoning/planning 偏弱）且约 10% 是 malformed tool calls（与 tool-call 约定不匹配），<code>gpt-5-high</code> 更多是 context window overflow（长上下文吃不消），<code>kimi-k2-instruct</code> 则频繁 turn limit exceeded（重复 tool-calling loop）。</li>
+    </ul>
+
+    <h3>消融 / 设计取舍</h3>
+    <p>本文不是「带消融的 method 论文」，但其评测框架的几个取舍本身就是关键设计验证：(1) <strong>极简、无任务/模型特定优化</strong>的 agent —— 作者明确这是为了测「内在能力」、避免被工程 trick 污染（代价是绝对分数偏低，他们承认更专门的 agent 设计能提分，留作 future work）；(2) <strong>程序化 verifier + 自动 reset</strong> 取代 LLM-as-judge —— 换来客观、可复现、可重复评测；(3) <strong>pass^4 这一严格指标</strong>是本文用来「揭示稳定性差距」的决定性视角，比常用的 pass@1/pass@4 更能反映真实部署关心的「每次都对」。</p>
+  </section>
+
+  <!-- ============================ ⑤ 洞见 ============================ -->
+  <section id="insight">
+    <h2><span class="n">⑤</span>洞见 Insights</h2>
+    <div class="callout insight">
+      <span class="label">Insight</span>
+      <ul style="margin:6px 0">
+        <li><strong>真实 MCP 使用远未被解决，瓶颈在「稳定性」而非「偶尔做对」。</strong>当任务变成长链路、需 CRUD 的真实工作流时，最强模型 pass@1 也只有一半、pass^4 仅 1/3。pass@1↗pass@4↗ 但 pass^4↘ 的剪刀差，把「多轮 tool use 下的一致性/可靠性」明确标定为下一阶段的核心难题。</li>
+        <li><strong>「local vs remote」分水岭 = 训练数据可得性的镜子。</strong>本地服务（FS/PG/PW）容易模拟、数据多，模型就强；远程服务（Notion/GitHub）需要真实交互轨迹、采集贵、训练中被低估，模型就弱。<strong>数据，尤其是真实远程交互轨迹，仍是提升 MCP 能力的关键</strong>——这也解释了为何作者把 trajectory 日志开源。</li>
+        <li><strong>reasoning 与「少而准」的 tool use 才是制胜点，堆 turn / 堆成本都不灵。</strong>更强模型用更少、更有针对性的调用取胜；reasoning effort 的收益高度依赖基座能力，且对远程服务的 test-time 泛化帮助最大（「language generalizes through reasoning」）。</li>
+      </ul>
+    </div>
+    <h3>局限与未来</h3>
+    <ul>
+      <li><strong>构建难以规模化。</strong>高质量任务靠专家 3–5 小时/个手工打磨，成为产出大规模训练数据的瓶颈；作者提议走「半自动任务生成 + 缩短执行链」。</li>
+      <li><strong>难度梯度偏陡。</strong>很多任务对小/高效模型太难，限制了对这类模型的评测与引导价值；未来想引入更细的难度梯度。</li>
+      <li><strong>缺少「意图模糊」任务。</strong>当前任务指令清晰；未来想加入意图含糊的任务，考察 agent 主动澄清提问 / 推断真实意图的能力。</li>
+      <li><strong>server 多样性可再扩。</strong>纳入更多种类的 MCP server，覆盖更广的数字工具。</li>
+      <li>作者还点出三条更宏观的研究轴：更强的 <em>reasoning</em>、面向长程任务的 <em>context efficiency</em>（更好的 summarization / 更精简的 tool 输出），以及可靠落地必需的 <em>execution stability</em>（健壮的 error-handling 与自我纠错）。</li>
+    </ul>
+    <h3>与相关工作的关系</h3>
+    <p>沿 LLM agent 的发展脉络（ReAct → MetaGPT，tool use / planning / multi-agent / coding agent / GUI agent / deep research），MCP 被定位为统一「tool 与环境接入」的协议层。在 MCP 评测这一支，已有 MCPEval、MCP-Universe（多领域、长动态工作流）、LiveMCP-101（多工具交互与执行计划校验）、MCP-AgentBench（数百任务、广覆盖）等。<strong>MCPMark 的区别</strong>在于：用<strong>容器化、可复现的真实环境</strong>承载<strong>多样 CRUD</strong>任务，每个任务配<strong>程序化验证脚本</strong>与<strong>全程状态追踪</strong>，从而实现更可靠、更细粒度的评测，并把链路长度与压测强度推到新的量级（平均 16.2 turn）。</p>
+  </section>
+
+  <footer class="foot">
+    本页为 <code>paper-reading</code> skill 生成的阅读笔记，仅作辅助，细节以
+    <a href="https://arxiv.org/abs/2509.24002" target="_blank" rel="noopener">原文</a> 为准 · 解读日期 2026-05-30
+  </footer>
+
+</article>
+</body>
+</html>
