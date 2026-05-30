@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SOD：面向小模型 agent 的 step-wise on-policy distillation · 论文解读</title>
+
+<script>
+  window.MathJax = {
+    tex:{inlineMath:[['$','$'],['\\(','\\)']], displayMath:[['$$','$$'],['\\[','\\]']]},
+    svg:{fontCache:'global'}
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;
+  }
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:880px; margin:0 auto; padding:18px 22px 90px}
+
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:27px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)}
+  .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .meta-grid a:hover{text-decoration:underline}
+
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap}
+  nav.toc a:hover{color:var(--accent)}
+
+  section{margin:38px 0}
+  h2{font-size:21px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:17px; margin:24px 0 8px}
+  p{margin:12px 0}
+  ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.9em}
+  strong{color:var(--text)}
+
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:14px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:10px 12px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  .yes{color:var(--ok); font-weight:600}
+  .no{color:var(--muted)}
+  .num{font-variant-numeric:tabular-nums; text-align:right}
+
+  figure{margin:24px 0; text-align:center}
+  figure img{max-width:100%; height:auto; border:1px solid var(--line); border-radius:10px; background:#fff}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+
+  blockquote{border-left:3px solid var(--line); margin:14px 0; padding:2px 16px; color:var(--muted)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+  .mjx-container{overflow-x:auto; overflow-y:hidden}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <!-- ============================ 抬头 / 元信息 ============================ -->
+  <header class="head">
+    <div class="chips">
+      <span class="chip">LLM</span>
+      <span class="chip">Agent</span>
+      <span class="chip">On-policy Distillation</span>
+      <span class="chip">Small Language Model</span>
+      <span class="chip">Tool-Integrated Reasoning</span>
+      <span class="chip">RL / GRPO</span>
+    </div>
+    <h1>SOD：面向小模型 agent 的 step-wise on-policy distillation</h1>
+    <p class="orig-title">SOD: Step-wise On-policy Distillation for Small Language Model Agents</p>
+    <dl class="meta-grid">
+      <dt>作者</dt><dd>Qiyong Zhong, Mao Zheng, Mingyang Song, Xin Lin, Jie Sun, Houcheng Jiang, Xiang Wang, Junfeng Fang（共同一作 Qiyong Zhong &amp; Mao Zheng；通讯 Houcheng Jiang &amp; Junfeng Fang）</dd>
+      <dt>团队 / 机构</dt><dd>Zhejiang University · Tencent（Large Language Model Department, Tencent Hy）· University of Science and Technology of China · National University of Singapore</dd>
+      <dt>原文链接</dt><dd><a href="https://arxiv.org/abs/2605.07725" target="_blank" rel="noopener">https://arxiv.org/abs/2605.07725</a></dd>
+      <dt>发表 / 年份</dt><dd>arXiv preprint（2026-05；arXiv 2605.07725v1）</dd>
+      <dt>解读日期</dt><dd>2026-05-30</dd>
+    </dl>
+  </header>
+
+  <div class="tldr">
+    <b>TL;DR</b> — 把 on-policy distillation（OPD）直接搬到小模型的 tool-integrated reasoning（TIR）上会触发一种致命失效：一次错误的 tool call 把"脏" observation 注入 context，后续推理在被污染的状态上继续展开，student 与 teacher 的 divergence 沿 step 超线性放大，teacher 的 token 级监督越往后越不可靠，最终训练崩溃。<b>SOD</b> 用一个零额外开销的 step-level divergence 分数 $d_k$ 来按 step 自适应地缩放 distillation 强度：对齐良好时保留稠密监督，divergence 大（多半进入 OOD 状态）时把该 step 的监督衰减下去，从而切断 error cascade、并允许"先错后恢复"。在 math/science/code 四个 benchmark 上相对次优 baseline 最高提升 <b>20.86%</b>，0.6B student 在 AIME 2025 上拿到 <b>26.13%</b> average@32。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#opensource">① 开源贡献</a>
+    <a href="#motivation">② 动机与贡献</a>
+    <a href="#method">③ 方法</a>
+    <a href="#evaluation">④ 实验评估</a>
+    <a href="#insight">⑤ 洞见</a>
+  </nav>
+
+  <!-- ============================ ① 开源贡献 ============================ -->
+  <section id="opensource">
+    <h2><span class="n">①</span>开源贡献 Open-source Artifacts</h2>
+    <p>本文开源程度较高且经核实可下载：代码以 Apache-2.0 协议放在 GitHub（含 cold-start SFT + SOD 训练 pipeline + 评测脚本，基于 VeRL 与 Open-AgentRL 框架），三个模型权重（0.6B / 1.7B student 与 4B teacher）已上传 HuggingFace 并有真实下载量，训练/评测数据集复用上游 Gen-Verse 的 <code>Open-AgentRL</code> 系列（SFT-3K、RL-30K、Eval），均可在 HuggingFace 直接 load。下表链接均于解读日核实存在。</p>
+    <table>
+      <thead><tr><th>类型</th><th>是否开源</th><th>内容 / 链接</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>代码 Code</td>
+          <td class="yes">✔</td>
+          <td><a href="https://github.com/YoungZ365/SOD" target="_blank" rel="noopener">github.com/YoungZ365/SOD</a> — Apache-2.0；PyTorch 实现，含 SFT 冷启动、SOD 训练 pipeline、SandboxFusion 代码沙箱配置、W&amp;B 监控；评测覆盖 AIME 2024/2025、GPQA-Diamond、LiveCodeBench-v6，指标 average@32 / pass@32 / maj@32。</td>
+        </tr>
+        <tr>
+          <td>模型权重 Weights</td>
+          <td class="yes">✔</td>
+          <td>HF collection <a href="https://huggingface.co/collections/youngzhong/sod" target="_blank" rel="noopener">youngzhong/sod</a>：<a href="https://huggingface.co/youngzhong/SOD-0.6B" target="_blank" rel="noopener">SOD-0.6B</a>、<a href="https://huggingface.co/youngzhong/SOD-1.7B" target="_blank" rel="noopener">SOD-1.7B</a>（两个 student）、<a href="https://huggingface.co/youngzhong/SOD-GRPO_teacher-4B" target="_blank" rel="noopener">SOD-GRPO_teacher-4B</a>（teacher）。均基于 Qwen3 系列。</td>
+        </tr>
+        <tr>
+          <td>数据集 Dataset</td>
+          <td class="yes">✔</td>
+          <td><a href="https://huggingface.co/datasets/Gen-Verse/Open-AgentRL-SFT-3K" target="_blank" rel="noopener">Open-AgentRL-SFT-3K</a>（3k 多轮 SFT 轨迹）、<a href="https://huggingface.co/datasets/Gen-Verse/Open-AgentRL-30K" target="_blank" rel="noopener">Open-AgentRL-30K</a>（30,128 条 RL 数据，183MB parquet）、<a href="https://huggingface.co/datasets/Gen-Verse/Open-AgentRL-Eval" target="_blank" rel="noopener">Open-AgentRL-Eval</a>（评测集）。注：这套数据沿用上游 Yu et al.（Open-AgentRL，arXiv 2510.11701）的开源数据。</td>
+        </tr>
+        <tr>
+          <td>环境 / Benchmark</td>
+          <td class="yes">✔</td>
+          <td>评测环境与 harness 随代码一并开源；TIR 用 Python code interpreter（SandboxFusion）。Benchmark 本身（AIME、GPQA-Diamond、LiveCodeBench）为社区公开数据。</td>
+        </tr>
+        <tr>
+          <td>项目主页 / Demo</td>
+          <td class="no">✘</td>
+          <td>未见独立项目主页或在线 demo；README 即文档入口（含 Framework / Main Results / Get Started / Model Zoo / Citation 等章节）。</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============================ ② 动机与贡献 ============================ -->
+  <section id="motivation">
+    <h2><span class="n">②</span>研究动机与贡献 Motivation &amp; Contribution</h2>
+
+    <h3>背景与问题</h3>
+    <p>把 agent 能力下放到可端侧部署的 small language model（SLM）有很现实的价值（低延迟、低成本、隐私友好），但让 SLM 稳定、有效地做 <strong>tool-integrated reasoning（TIR）</strong> —— 即在多轮里穿插自然语言推理、tool 调用与拿到 observation 后继续推理 —— 一直很难。现有 post-training 路线主要有两条，各自有明确的痛点：</p>
+    <ul>
+      <li><strong>RL（尤其 GRPO）：</strong>TIR 任务轨迹长、决策多步、还要和外部 tool 交互，但 RL 只给稀疏的 <em>outcome-level</em> reward（整条轨迹一个分）。对容量有限、探索能力弱的小模型，稀疏监督会进一步放大 exploration failure，把 policy 卡在几乎没有有效推理信号的 cold-start 区。</li>
+      <li><strong>On-policy distillation（OPD）：</strong>近来很火。它在 <em>student 自己采样</em> 的轨迹上，由 teacher 提供稠密的 <em>token-level</em> 监督（本质是 student 访问状态上的 reverse-KL），缓解了稀疏 reward 的 credit assignment 难题、提升了样本效率与训练稳定性。但它<strong>默认 teacher 监督在 student 访问到的所有状态上都可靠</strong>。</li>
+    </ul>
+    <p>本文的实验发现：把 OPD 直接搬到 SLM 的 TIR 上会出现一种 <strong>TIR 特有的失效级联</strong>。关键在于 TIR 与纯文本推理的状态漂移方式根本不同 —— 纯文本里 student 即便偏离 teacher，状态也是沿生成的 context 连续演化、分布漂移是渐进的；而 TIR 通过 tool observation 引入<strong>不连续的状态跳变</strong>：一次错误 tool call 会把一段不是任一模型生成的、可能很长的"脏" observation 直接拼进 context，让后续推理从一个被污染的状态展开。小模型 tool 使用本就更弱，早期训练会接连犯错，状态分布迅速漂出 teacher 分布。在这种 OOD 状态下，teacher 的 token-level 监督变得不可靠甚至误导，被放大的 student–teacher 差异会带来高方差、无信息的梯度，进而训练崩溃。</p>
+
+    <figure>
+      <img src="figures/fig1_motivation.png" alt="SOD 动机：divergence 在 TIR 中加速放大、teacher entropy 变高变不稳">
+      <figcaption>原文 Figure 1（SOD 的动机，800 条轨迹统计）。(a) student–teacher divergence $d_k$ 随推理 step 变化：在 TIR 中一旦出现错误 tool call，divergence 会<strong>加速</strong>上升（红），明显不同于纯文本推理那种缓慢渐进的漂移（蓝）。(b) 在出错轨迹上，teacher 的 entropy 变化（柱）与标准差（虚线）在后段 step 迅速变大，说明 teacher 监督越往后越不可靠。(c) 四个 benchmark 的 radar 对比，SOD（红）整体外扩。</figcaption>
+    </figure>
+
+    <h3>本文的切入点</h3>
+    <p>核心观察是：<strong>teacher 监督的可靠性不是全局恒定的，而是随 step 变化的，且这种可靠性可以被低成本地度量出来。</strong>当 student 仍与 teacher 对齐时（divergence 小），应当保留满强度的稠密监督以充分吸收 teacher 指导；当偏离很大（多半因为 tool 引起的状态漂移）时，应当把对应 step 的 distillation 信号衰减下去，以免被误导。作者把"student 在第 $k$ 步上与 teacher 的差异"提炼成一个 step-level divergence 分数，并据此对每个 step 的 distillation 强度做自适应重加权 —— 这就是 <strong>SOD（Step-wise On-policy Distillation）</strong>。论文还从理论上刻画了这套失效机制并证明重加权能恢复梯度信噪比。</p>
+
+    <h3>核心贡献</h3>
+    <ol>
+      <li><strong>诊断出 TIR 下 OPD 的失效级联，并给出理论刻画。</strong>用两个命题说明：(Prop.1) tool observation 带来不连续漂移，单次错误就使 step 间 divergence 跳升 $\Omega(m\cdot\eta_{\text{tool}})$（远大于纯文本的 $O(\eta)$），连续 $j$ 次错误更是超线性复合；(Prop.2) 当 student 漂到 teacher 低支撑区（overlap $\rho_t\to0$）时，OPD loss 的二阶矩被 $\log^2(1/\epsilon)$ 量级的项支配，梯度信噪比 $\mathrm{SNR}(g_t)\to0$。</li>
+      <li><strong>提出 SOD：基于 step-level divergence 的自适应重加权。</strong>用一个能从 OPD 前向"顺手"算出、零额外前向开销的分数 $d_k$（只需 student 采样 token 上的 teacher log-prob）作为可靠性代理，按相邻 step 的 divergence 比值缩放 distillation 强度，对齐时保权重、漂移时衰减、恢复时回升（上界 $1+\delta$ 防止过度放大）。并证明（Prop.3）该机制把高 divergence step 的二阶矩抑制 $O((d_1/d_k)^2)$，恢复有界 SNR。</li>
+      <li><strong>大量实验验证有效且通用。</strong>在 AIME 2024/2025、GPQA-Diamond、LiveCodeBench 四个高难 benchmark、0.6B 与 1.7B 两个 student 上，SOD 全面超过 6 个 baseline，相对次优 baseline（OPD）平均提升 <strong>20.86%（0.6B）/ 18.50%（1.7B）</strong>；0.6B student 在 AIME 2025 达 <strong>26.13%</strong> average@32（作者称是首个达到该水平的 sub-billion 参数模型）；训练更稳、tool-call 轮数更少、且相对 OPD <strong>几乎零额外开销</strong>（0.6B 上甚至更快）。</li>
+    </ol>
+  </section>
+
+  <!-- ============================ ③ 方法 ============================ -->
+  <section id="method">
+    <h2><span class="n">③</span>方法 Method</h2>
+    <p>先看整体。SOD 仍然是"student 自己 rollout、teacher 给稠密 token-level 监督"的 OPD 框架，并叠加 GRPO 的 outcome-level reward 来做轨迹级探索；它唯一新增的东西，是<strong>按 step 给 distillation loss 乘上一个自适应可靠性权重 $w_k$</strong>。下图把直觉讲得很清楚：(a) student 多步轨迹里的错误 tool call 会沿 step 传播、(b) student 与 teacher 分布随 step 越拉越开，(c) 用 step-level divergence $d_k$ 刻画这种漂移，(d) 于是 SOD 把高 divergence step 的权重压低（如 $1, 0.7, 0.3, \dots, 0.1$），而原始 OPD 对所有 step 一视同仁（全 $1$）。</p>
+
+    <figure>
+      <img src="figures/fig2_overview.png" alt="SOD 总览：错误沿 step 传播、分布漂移、step-level divergence、按 step 衰减的 distillation 权重">
+      <figcaption>原文 Figure 2（SOD 总览）。(a) student 产生多步轨迹，错误 tool call 沿 step 传播、侵蚀 teacher 监督的可靠性；(b) 随 step 增加 student 与 teacher 分布从"对齐"到"出现 gap"再到"大 gap"；(c) step-level divergence $d_k$ 量化这种漂移；(d) SOD 在高 divergence step 衰减 distillation 权重，而 vanilla OPD 用恒定权重。</figcaption>
+    </figure>
+
+    <h3>预备：TIR、GRPO 与 OPD</h3>
+    <p>一条 TIR 轨迹记作 $\tau=(x,y_1,o_1,\dots,y_K,o_K,y_{K+1})$，其中 $x$ 是输入，$y_k$ 是模型在第 $k$ 步生成的 response（可能含推理、tool 调用或最终答案），$o_k$ 是环境返回的 observation，$y_{K+1}$ 是最终回答。关键点：<strong>policy $\pi_\theta$ 只生成模型 token，observation $\{o_k\}$ 是外部环境给的</strong>，不由任何模型生成。</p>
+    <p><strong>GRPO</strong> 提供稀疏的 outcome-level reward。对每个 $x$ 从旧 policy 采样一组 $G$ 条轨迹，各得 reward $r_i=r(\tau_i)$，用组内归一化得到 advantage：</p>
+    $$\hat{A}_i = \frac{r_i - \text{mean}(\{r_j\})}{\text{std}(\{r_j\}) + \epsilon_A},$$
+    <p>再用带 clip 的 surrogate 目标 $\mathcal{L}_{\text{GRPO}}$ 优化（$\rho_{i,t}(\theta)$ 为 token 级 importance ratio）。它只给轨迹级信号，缺少细粒度 token 监督。</p>
+    <p><strong>OPD</strong> 则在 student 采样轨迹 $y\sim\pi_\theta$ 上，对所有模型生成 token 位置 $\mathcal{T}_i$ 做：</p>
+    $$\mathcal{L}_{\text{OPD}} = \mathbb{E}\!\left[\sum_{t\in\mathcal{T}_i}\big(\log\pi_\theta(y_t\mid y_{<t}) - \log\pi_{\text{teacher}}(y_t\mid y_{<t})\big)\right],$$
+    <p>这是 student 访问状态上 reverse-KL 的采样估计。<strong>问题就在它对所有 step 一视同仁。</strong></p>
+
+    <h3>为什么 OPD 在 TIR 下会崩：两个命题</h3>
+    <p>定义第 $k$ 步的 step-level mismatch（$\mathcal{I}_k$ 是第 $k$ 步模型生成 token 的位置集合，<strong>排除 observation token</strong>）：</p>
+    $$\Delta_k = \frac{1}{|\mathcal{I}_k|}\sum_{t\in\mathcal{I}_k} D_{\mathrm{KL}}\!\big(\pi_\theta(\cdot\mid y_{<t})\,\|\,\pi_{\text{teacher}}(\cdot\mid y_{<t})\big).$$
+    <ul>
+      <li><strong>Prop.1（不连续的 divergence 放大）：</strong>纯文本里相邻 step 只差一个 token，$\Delta_{k+1}-\Delta_k=O(\eta)$（$\eta$ 为单 token 分布漂移，因 attention 把影响摊薄而很小）。但 TIR 里第 $k\!\to\!k\!+\!1$ 步要拼进长度 $m=|o_k|$ 的整段 observation，由三角不等式与 Pinsker 不等式得单步跳变 $\Delta_{k+1}-\Delta_k=\Omega(m\cdot\eta_{\text{tool}})$，且 $\eta_{\text{tool}}\gg\eta$。<strong>连续 $j$ 次错误</strong>时 divergence 超线性复合：$\Delta_{k+j}-\Delta_k=\Omega\!\big(\sum_{i=0}^{j-1} m_i\cdot\eta_{\text{tool}}^{(i)}\big)$，且因 prefix 被多重错误污染、teacher 在这种 multi-error context 上从未见过，越往后 $\eta_{\text{tool}}^{(i+1)}\ge\eta_{\text{tool}}^{(i)}$。这正对应 Figure 1(a) 里 divergence"加速"的曲线。</li>
+      <li><strong>Prop.2（梯度 SNR 退化）：</strong>记 teacher 支撑区 $S_t^\epsilon=\{v:\pi_{\text{teacher}}(v\mid y_{<t})\ge\epsilon\}$、overlap $\rho_t=\sum_{v\in S_t^\epsilon}\pi_\theta(v\mid y_{<t})$。当 $\rho_t\le\rho$ 时，OPD loss 二阶矩满足 $\mathbb{E}[\ell_t^2]\ge(1-\rho)\log^2(1/\epsilon)$，于是梯度信噪比 $\mathrm{SNR}(g_t)\to0$（当 $\rho_t\to0$）。直觉：student 漂到 teacher 几乎零概率的 OOD 区时，采样 token 的 loss 幅值巨大但只反映"teacher 没法建模这个状态"，不是有意义的学习信号；而真正有信息的 token（落在 $S_t^\epsilon$ 内）只以概率 $\rho_t$ 被采到，越来越稀有。梯度被高方差、无信息项主导，优化失稳。</li>
+    </ul>
+    <p>两者合起来：连续错误 tool call → divergence 超线性放大（Prop.1）→ 把 student 推进低 overlap 区 → OPD 梯度被高方差项主导（Prop.2）。而 OPD 对所有 step 均匀求和，会<strong>系统性地高估这些被污染 step 的权重</strong>。这就是为什么需要按 step 重加权。</p>
+
+    <h3>SOD 的核心：step-level divergence 与自适应重加权</h3>
+    <p>把轨迹切成 $K+1$ 个推理 step（每个 step = 两次 tool observation 之间、或最终答案的那段模型 response）。定义可在 OPD 前向里零成本得到的 <strong>step-level divergence 分数</strong>（只用 student 采样 token $y_t$ 上的 log-prob 差，<strong>不需要遍历整个词表</strong>，也不含 observation token）：</p>
+    $$d_k = \frac{1}{|\mathcal{I}_k|}\sum_{t\in\mathcal{I}_k}\big|\log\pi_\theta(y_t\mid y_{<t}) - \log\pi_{\text{teacher}}(y_t\mid y_{<t})\big|.$$
+    <p>$d_k$ 小说明 student 仍贴着 teacher（监督可靠），大说明严重 mismatch（多半 tool 引起的状态漂移或脏 observation）。第一步给满权重 $w_1=1$；对 $k\ge2$：</p>
+    $$w_k = \min\!\left(\prod_{u=1}^{k-1}\frac{d_u+\epsilon}{d_{u+1}+\epsilon},\; 1+\delta\right),\qquad k\ge 2,$$
+    <p>其中 $\epsilon$ 是数值稳定的小常数，$\delta$ 控制 distillation 放大的上界。注意这个连乘是<strong>相邻 step divergence 的比值</strong>，只依赖相对趋势而非绝对值，所以 $\Delta_k$ 的任意单调代理都可用 —— 论文在附录 D.5 证明 $d_k$ 与 $\Delta_k$ 单调一致（由 Jensen 不等式，$d_k$ 是单样本 MC 估计的下界且随 $\Delta_k$ 增大），因此实现中直接用 $d_k$ 代替 $\Delta_k$，零边际成本。其行为：</p>
+    <ul>
+      <li><strong>divergence 上升（$d_{u+1}>d_u$，正在漂离 teacher）：</strong>比值 &lt; 1，权重连乘后变小，<strong>衰减</strong>高 mismatch 区的监督。</li>
+      <li><strong>从早期错误中恢复（$d_{u+1}<d_u$，回到 teacher 支撑区）：</strong>比值 &gt; 1，权重回升，<strong>恢复</strong>有信息的监督 —— 论文称之为 <em>recovery from earlier errors</em>。</li>
+      <li><strong>上界 $1+\delta$：</strong>保证恢复时不过度放大任一 step，维持优化稳定。</li>
+    </ul>
+
+    <h3>训练目标</h3>
+    <p>单 token 的 OPD 项 $\ell_{\text{OPD}}(y_t)=\log\pi_\theta(y_t\mid y_{<t})-\log\pi_{\text{teacher}}(y_t\mid y_{<t})$，把第 $k$ 步内所有 token 乘上可靠性权重 $w_k$，得 step-wise OPD 目标：</p>
+    $$\mathcal{L}_{\text{OPD}}^{\text{step}} = \mathbb{E}_{y\sim\pi_\theta}\!\left[\sum_{k=1}^{K+1} w_k \sum_{t\in\mathcal{I}_k}\big(\log\pi_\theta(y_t\mid y_{<t}) - \log\pi_{\text{teacher}}(y_t\mid y_{<t})\big)\right].$$
+    <p>最终目标是它与 GRPO 的简单相加：</p>
+    $$\mathcal{L} = \mathcal{L}_{\text{GRPO}} + \mathcal{L}_{\text{OPD}}^{\text{step}}.$$
+    <p>其中 $\mathcal{L}_{\text{GRPO}}$ 提供稀疏 outcome reward 驱动轨迹探索，$\mathcal{L}_{\text{OPD}}^{\text{step}}$ 提供被 divergence 重加权过的稠密 token 监督，二者共同在 tool 引起的状态漂移下实现稳定学习。论文也证明（Prop.3）在 divergence 单调上升时，第 $k$ 步加权二阶矩 $\mathbb{E}[w_k^2\ell_t^2]\le\frac{(d_1+\epsilon)^2}{(d_k+\epsilon)^2}\mathbb{E}[\ell_t^2]$：分子由首步 divergence 决定、有界，分母随累积漂移增大，于是自动抑制方差、恢复正的梯度 SNR；恢复段则靠 $1+\delta$ 上界 + 该段 $\mathbb{E}[\ell_t^2]$ 本身下降来保证稳定。</p>
+
+    <div class="callout note">
+      <span class="label">实现要点（便于复现）</span>
+      <ul style="margin:6px 0">
+        <li><strong>三阶段算法（Algorithm 1）：</strong>① on-policy rollout —— student 与 tool 环境交互采 $G$ 条轨迹、算 $r_i$ 与组内 advantage；② 算 step-level divergence 与权重 —— 切 step、按 Eq.(6) 算 $d_k$、置 $w_1=1$、按 Eq.(7) 算 $w_{k\ge2}$；③ 联合优化 —— 合并 $\mathcal{L}_{\text{GRPO}}+\mathcal{L}_{\text{OPD}}^{\text{step}}$ 更新并同步旧 policy。</li>
+        <li><strong>SOD 仅新增两个超参：</strong>数值稳定常数 $\epsilon=10^{-6}$、上界偏移 $\delta=0.2$（即 $w_k\le1.2$）；其余训练配置与 baseline 完全一致以隔离效果。</li>
+        <li><strong>训练栈：</strong>VeRL + Open-AgentRL；rollout 用 vLLM 异步、tensor parallelism=4；多轮 agent 交互最多 16 个 tool-call turn；AdamW，lr=1e-6，train batch 64 / mini-batch 16，最多 1 epoch；max prompt 2,560 token、max response 20,480 token；训练时每 prompt 采 16 条、验证 32 条。teacher 是 Qwen3-4B 再用 GRPO 在 RL 集上优化过的版本。硬件：单节点 8×H20(96GB)，0.6B/1.7B 约 2–3 天。</li>
+        <li><strong>开销可忽略：</strong>$d_k$、$w_k$ 全部来自 OPD 前向已有的 log-prob，额外只是逐 step 平均 + $O(K)$ 次标量乘（$K\approx3\text{–}7$），<strong>不需要额外前向</strong>，peak memory 几乎不变（&lt;0.5GB 差异）。0.6B 上 SOD 反而比 OPD 每 step 快 3.5%（因为衰减了错误 tool-call 模式、rollout 更短更高效）；1.7B 上仅 +4.9% 开销。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============================ ④ 实验评估 ============================ -->
+  <section id="evaluation">
+    <h2><span class="n">④</span>实验评估 Evaluation</h2>
+    <h3>评测设置</h3>
+    <ul>
+      <li><strong>Benchmark / 数据集：</strong>
+        <strong>AIME 2024 / 2025</strong>（美国数学邀请赛，各 30 题、答案为 $[0,999]$ 整数可精确匹配，考多步推理与创造性解题；用近年题以降低数据污染）；
+        <strong>GPQA-Diamond</strong>（198 题"Google-proof"研究生级理科多选，需真实领域专业 + 多步科学推理，专家约 65%、非专家约 34%）；
+        <strong>LiveCodeBench</strong>（持续更新、抗污染的代码 benchmark，用 v6 版 1,055 题，覆盖代码生成、自修复、执行预测等）。</li>
+      <li><strong>训练数据：</strong>沿用 Yu et al.；3k 高质量 SFT 语料（s1-1k + 各 1k 的 LeetCode/ReTool，后两者经 ReasonFlux-PRM 打分留 top）；30k 多样 RL 数据（DAPO-Math 17k + Skywork-or1 数学 4,902/代码 3,586 + MegaScience 科学 3k）。</li>
+      <li><strong>对比基线（6 个）：</strong>Vanilla（base 模型零样本）、SFT（离线模仿）、GRPO（纯 RL）、<strong>OPD</strong>（on-policy distillation，本文采 $\mathcal{L}_{\text{GRPO}}+\mathcal{L}_{\text{OPD}}$ 的联合版作主基线，是次优）、OPSD<sub>gt</sub>（self-distillation，teacher 额外看 ground-truth 解）、OPSD<sub>hint</sub>（self-distillation，看从 ground-truth 蒸出的 hint）。</li>
+      <li><strong>评价指标 Metric：</strong>每题独立采 32 个样本算 <strong>average@32</strong>（准确率百分比，越高越好），温度 1.0、top_p=0.6，5 次独立运行取均值±标准差。teacher 用 Qwen3-4B（+GRPO），student 用 Qwen3-0.6B 与 Qwen3-1.7B。</li>
+    </ul>
+
+    <h3>主要结果</h3>
+    <p>下表为原文 Table 1 的核心数字（average@32，%）。本文方法 <strong>SOD</strong> 加粗；可见在两个 student 规模、四个 benchmark 上 SOD 全部第一。</p>
+    <table>
+      <thead>
+        <tr><th>Student</th><th>方法</th><th class="num">AIME 2024</th><th class="num">AIME 2025</th><th class="num">GPQA</th><th class="num">LiveCodeBench</th><th class="num">Average</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>4B teacher</td><td>GRPO（teacher 上界）</td><td class="num">67.60</td><td class="num">60.42</td><td class="num">55.19</td><td class="num">63.13</td><td class="num">61.59</td></tr>
+        <tr><td rowspan="7">0.6B</td><td>Vanilla</td><td class="num">7.71</td><td class="num">12.81</td><td class="num">13.24</td><td class="num">14.89</td><td class="num">12.16</td></tr>
+        <tr><td>SFT</td><td class="num">5.67</td><td class="num">5.42</td><td class="num">15.20</td><td class="num">9.61</td><td class="num">8.97</td></tr>
+        <tr><td>GRPO</td><td class="num">4.06</td><td class="num">4.90</td><td class="num">17.76</td><td class="num">15.95</td><td class="num">11.32</td></tr>
+        <tr><td>OPD（次优）</td><td class="num">16.82</td><td class="num">22.95</td><td class="num">17.76</td><td class="num">22.65</td><td class="num">20.04</td></tr>
+        <tr><td>OPSD<sub>gt</sub></td><td class="num">12.63</td><td class="num">17.04</td><td class="num">17.32</td><td class="num">16.73</td><td class="num">15.93</td></tr>
+        <tr><td>OPSD<sub>hint</sub></td><td class="num">9.77</td><td class="num">14.12</td><td class="num">15.98</td><td class="num">12.65</td><td class="num">13.13</td></tr>
+        <tr><td><strong>SOD</strong></td><td class="num"><strong>20.84</strong></td><td class="num"><strong>26.13</strong></td><td class="num"><strong>22.19</strong></td><td class="num"><strong>27.72</strong></td><td class="num"><strong>24.22</strong></td></tr>
+        <tr><td rowspan="7">1.7B</td><td>Vanilla</td><td class="num">9.90</td><td class="num">8.96</td><td class="num">26.80</td><td class="num">22.73</td><td class="num">17.10</td></tr>
+        <tr><td>SFT</td><td class="num">26.77</td><td class="num">22.40</td><td class="num">29.85</td><td class="num">24.63</td><td class="num">25.91</td></tr>
+        <tr><td>GRPO</td><td class="num">25.63</td><td class="num">21.67</td><td class="num">33.55</td><td class="num">20.70</td><td class="num">25.39</td></tr>
+        <tr><td>OPD（次优）</td><td class="num">43.86</td><td class="num">37.04</td><td class="num">31.73</td><td class="num">32.45</td><td class="num">36.27</td></tr>
+        <tr><td>OPSD<sub>gt</sub></td><td class="num">33.85</td><td class="num">24.69</td><td class="num">35.02</td><td class="num">22.73</td><td class="num">29.07</td></tr>
+        <tr><td>OPSD<sub>hint</sub></td><td class="num">34.42</td><td class="num">21.43</td><td class="num">33.46</td><td class="num">23.12</td><td class="num">28.11</td></tr>
+        <tr><td><strong>SOD</strong></td><td class="num"><strong>50.83</strong></td><td class="num"><strong>41.72</strong></td><td class="num"><strong>38.72</strong></td><td class="num"><strong>40.63</strong></td><td class="num"><strong>42.98</strong></td></tr>
+      </tbody>
+    </table>
+    <p>怎么读这些数字：</p>
+    <ul>
+      <li><strong>全面领先。</strong>SOD 在每个 benchmark 都最高，相对次优的 OPD 平均提升 <strong>20.86%（0.6B：20.04→24.22）/ 18.50%（1.7B：36.27→42.98）</strong>。特别地，0.6B SOD 在 AIME 2025 拿到 <strong>26.13%</strong>，作者称是首个达到该水平的 sub-billion 模型。</li>
+      <li><strong>小模型下稀疏监督/静态示范不够。</strong>在 0.6B 上 SFT(8.97) 和 GRPO(11.32) 甚至打不过 Vanilla(12.16) —— 印证了"小模型 + 稀疏 outcome reward / 离线模仿"在 TIR 上无力，而稠密但被可靠性调制的监督才管用。</li>
+      <li><strong>能跨规模、且部分弥补容量差距。</strong>1.7B SOD 恢复了 teacher 性能的 <strong>69.8%</strong>（OPD 仅 58.9%）；连 0.6B SOD 都超过了若干 1.7B baseline，说明 step-wise 重加权能部分补偿模型容量差。</li>
+    </ul>
+
+    <figure>
+      <img src="figures/fig4_dynamics.png" alt="训练动态：accuracy、policy entropy、mean tool-calling turns 随 step 变化">
+      <figcaption>原文 Figure 4（训练动态，颜色：GRPO 蓝、OPD 绿、SOD 红）。左列 AIME2025 accuracy、中列 policy entropy、右列 mean tool-calling turns；上排 0.6B、下排 1.7B。GRPO 出现严重 entropy collapse（中列蓝线骤降），policy 退化为重复输出、几乎放弃多轮 tool 交互（右列蓝线趋零），是 TIR 的致命失效；OPD 虽 entropy 平稳但 accuracy 不稳、1.7B 上早期见顶后明显回落（左下绿线）；SOD 则持续稳定上升、且用更少的 tool-call 轮数。</figcaption>
+    </figure>
+
+    <h3>消融 / 分析</h3>
+    <p><strong>(A) 组件消融（Table 2，1.7B，average）。</strong>从两个维度拆 6 个变体：</p>
+    <table>
+      <thead><tr><th>变体</th><th class="num">Average</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td>(1.1) Uniform Weighting（$w_k\equiv1$）</td><td class="num">34.70</td><td>退化为均匀加权 → 所有 step 同等暴露于被污染监督，明显掉点</td></tr>
+        <tr><td>(1.2) Heuristic Weighting（固定指数衰减 $\gamma^{k-k_{\text{err}}}$, $\gamma=0.9$）</td><td class="num">37.14</td><td>固定衰减抓不住非单调 divergence、无法捕捉"恢复"，仍落后</td></tr>
+        <tr><td>(1.3) Mask After Wrong（首次错误后全部置零）</td><td class="num">31.85</td><td>最差 —— 丢掉一次错误后的全部信息，浪费了部分正确轨迹、也阻断恢复</td></tr>
+        <tr><td>(1.4) w/o Weight Clipping（去掉 $1+\delta$ 上界）</td><td class="num">38.10</td><td>无界放大引入训练不稳</td></tr>
+        <tr><td>(2.1) w/o GRPO</td><td class="num">40.78</td><td>去掉 outcome reward → 失去轨迹级探索，掉 2.20</td></tr>
+        <tr><td>(2.2) w/o Step-wise OPD</td><td class="num">25.39</td><td>去掉稠密蒸馏 → 仅稀疏 reward，<strong>暴跌</strong>，证明稀疏信号不足以稳定小模型 TIR</td></tr>
+        <tr><td><strong>SOD（完整）</strong></td><td class="num"><strong>42.98</strong></td><td>—</td></tr>
+      </tbody>
+    </table>
+    <p>结论：<strong>自适应 step-wise 重加权是关键，静态/启发式替代都不行</strong>（Obs.3）；GRPO 与 step-wise OPD 互补且都不可或缺，但二者非对称 —— step-wise OPD 提供主要的细粒度指导（去掉它暴跌到 25.39），GRPO 在 teacher 分布之外拓展轨迹探索（Obs.4）。更尖锐的对照在附录 Table 5：<strong>naive OPD(33.79) vs. SOD w/o GRPO(40.78) = +6.99（+20.69%），完全不靠任何 RL reward</strong>，说明 SOD 的核心收益来自重加权机制本身，GRPO 只是锦上添花(+2.20)。</p>
+
+    <figure>
+      <img src="figures/fig5_patterns.png" alt="SOD 的三种 distillation pattern：stable / erroneous(error suppression) / recovery(error recovery)">
+      <figcaption>原文 Figure 5（SOD 的三种 distillation pattern）。(a) Stable：student 全程贴着 teacher，$d_k$ 小、权重高、走正常蒸馏；(b) Erroneous（error suppression）：持续偏离、$d_k$ 上升，权重被逐步压低，抑制误导监督、稳住训练；(c) Recovery（error recovery）：先偏离后回到 teacher 支撑区，权重先降后升，在纠正后的 step 上恢复有效指导。</figcaption>
+    </figure>
+
+    <p><strong>(B) 可扩展性（Figure 3 + Obs.5）。</strong>换更强的 14B teacher 蒸馏 0.6B/1.7B：<strong>OPD 反而退化</strong>（0.6B 上从 4B 换到 14B teacher 平均掉点）—— 更大的 student-teacher 容量差放大了分布 mismatch，均匀蒸馏把越来越不可靠的监督一路传播；而 <strong>SOD 一致受益于更强 teacher</strong>，说明 step-wise 重加权能吸收更强 teacher 的知识、同时压住容量差带来的有害信号。</p>
+
+    <figure>
+      <img src="figures/fig3_scalability.png" alt="不同 student-teacher 配置下 SOD 的可扩展性">
+      <figcaption>原文 Figure 3（可扩展性）。左 0.6B / 右 1.7B student；对比 Vanilla、GRPO 与 4B/14B teacher 下的 OPD 与 SOD。SOD（橙/红系）随 teacher 变强而提升，OPD 则在更大容量差下受损。</figcaption>
+    </figure>
+
+    <p><strong>(C) distillation pattern 随训练演化（Figure 6 + Obs：训练分析）。</strong>把每条轨迹按 $w_k$ 序列形状分为 Stable / Recovery / Erroneous 三类并统计占比：随训练推进，<strong>Stable 占比稳步上升、Erroneous 持续下降、Recovery 先升后稳</strong> —— 说明 student 逐渐学会"遇到难 step 不再连环犯错，而是恢复或干脆避错"；且对 0.6B（初期 Erroneous 比例高、恢复能力弱）这种"保护性抑制错误信号"在早期尤为关键。配合 Figure 4：SOD 全程稳定上升不退化，而 OPD 在 1.7B 上早熟后回落、GRPO 直接 entropy collapse。附录 case study 还给出具体轨迹的 $d_k/w_k/\bar H_k$ 数值（如稳定轨迹 $w_k$ 稳定贴着上界 1.2，teacher 条件熵 $\bar H_k$ 全程低；出错轨迹 teacher 熵从 0.85 飙到 2.14、末步 78% token 熵 &gt;1.0），直观印证"teacher 在被污染状态下确实不可信"。</p>
+  </section>
+
+  <!-- ============================ ⑤ 洞见 ============================ -->
+  <section id="insight">
+    <h2><span class="n">⑤</span>洞见 Insights</h2>
+    <div class="callout insight">
+      <span class="label">Insight</span>
+      <ol style="margin:6px 0">
+        <li><strong>"teacher 监督全程可靠"这个 OPD 默认假设，在 agentic/TIR 场景下是错的。</strong>tool observation 带来的是<em>不连续</em>状态跳变（而非纯文本那种渐进漂移），一次错误就可能把 student 推到 teacher 从未见过的 OOD 状态，此处 teacher 的高熵"指导"其实是噪声。把监督强度<strong>按状态可靠性在 step 级动态调制</strong>，是比"全局信任 teacher"更本质的设计原则 —— 作者明确把它提为 agentic 系统鲁棒训练的一般原则。</li>
+        <li><strong>可靠性可以零成本地度量。</strong>不需要额外前向或遍历词表，仅用 OPD 前向已有的、student 采样 token 上的 teacher log-prob 差 $d_k$ 就能作为 $\Delta_k$ 的单调代理；而且只用相邻 step 的<strong>比值</strong>而非绝对值，对度量的任意单调变换都鲁棒。这让"自适应重加权"几乎免费。</li>
+        <li><strong>"允许先错后恢复"比"一错就放弃"更好。</strong>硬 mask（错误后全置零，31.85）是所有变体里最差的，因为它丢掉了部分正确轨迹的信息、也阻断了 student 自我纠正；SOD 用比值连乘 + 上界让权重能在 student 回到 teacher 支撑区时<strong>回升</strong>，把"暂时偏离"和"持续偏离"区别对待，这正是它涨点的核心来源（去掉 GRPO 仍 +20.69% over naive OPD）。</li>
+      </ol>
+    </div>
+
+    <h3>局限与未来</h3>
+    <p>作者自陈两点：(1) 只在带 Python code interpreter 的 agentic TIR 上验证 —— 这是一个干净可复现、能隔离 tool 引起状态漂移的环境；web browsing、API 调用等其它 agentic 场景可能有不同漂移模式，值得探索。(2) 全部实验用 Qwen3 家族（因其跨规模稳定、多尺寸开源、被近期 OPD 研究广泛采用，便于公平对比），换其它模型家族的验证因资源所限留给未来。我的补充判断：(a) 权重只依赖相邻 step divergence 比值，对"渐进式整体漂移但每步都不剧烈"的长程任务是否仍灵敏，值得观察；(b) $d_k$ 是单样本 MC 估计，理论上是 $\Delta_k$ 的下界，在极端长轨迹或高方差 step 上代理质量如何，论文未给经验误差;(c) 方法对 teacher 选择有依赖（teacher 自身在被污染 context 上也会失准，见 Figure 1b / case study），若 teacher 与 student 推理范式差异更大，重加权能否依旧奏效尚待检验。</p>
+
+    <h3>与相关工作的关系</h3>
+    <p>（基于本文自身论述）相对 <strong>RL for agents</strong>（RLHF→PPO→GRPO，及 ReAct/Toolformer/FireAct 等结构化推理）：本文指出纯 RL 在 SLM-TIR 上受稀疏 outcome reward + compounding error 之苦，故引入稠密蒸馏。相对 <strong>OPD</strong> 一脉（Agarwal et al. 把 on/off-policy distillation 统一到 divergence；Gu et al. MiniLLM 把 OPD 形式化为 reverse-KL；以及把 OPD 解释为带隐式 per-token reward 的 KL 正则 RL、或分析其依赖 teacher-student 推理范式兼容性的工作）：本文是<strong>首批专门针对 TIR 下 OPD 失效</strong>、并给出 step-level 重加权解法的工作之一，与同期"用 OPD 缓解 RL 局限"的若干工作并行但聚焦点不同 —— 它强调的是<strong>监督可靠性随状态漂移而变</strong>这一 agentic 特性，而非纯文本设定下的 divergence objective 选择。与 OPSD（self-distillation，teacher 看 ground-truth/hint）相比，SOD 用的是真正更强的外部 teacher + 可靠性调制，实验上也更优。</p>
+  </section>
+
+  <footer class="foot">
+    本页为 <code>paper-reading</code> skill 生成的阅读笔记，仅作辅助，细节以
+    <a href="https://arxiv.org/abs/2605.07725" target="_blank" rel="noopener">原文</a> 为准 · 解读日期 2026-05-30
+  </footer>
+
+</article>
+</body>
+</html>

@@ -265,5 +265,24 @@
       "WildClawBench"
     ],
     "path": "papers/2604.08377-skillclaw-collective-skill-evolution/index.html"
+  },
+  {
+    "slug": "2605.07725-sod",
+    "title": "SOD: Step-wise On-policy Distillation for Small Language Model Agents",
+    "authors": "Qiyong Zhong, Mao Zheng, Mingyang Song, Xin Lin, Jie Sun, Houcheng Jiang, Xiang Wang, Junfeng Fang",
+    "team": "Zhejiang University; Tencent (LLM Dept); USTC; NUS",
+    "arxiv": "https://arxiv.org/abs/2605.07725",
+    "code": "https://github.com/YoungZ365/SOD",
+    "date": "2026-05-30",
+    "published": "arXiv 2026",
+    "tldr": "把 on-policy distillation 用于小模型 TIR 时，错误 tool call 会引发 error cascade 使 teacher 监督失准；SOD 用零开销的 step-level divergence 按步自适应缩放蒸馏强度，切断级联并允许先错后恢复，math/science/code 上相对次优 baseline 最高 +20.86%。",
+    "tags": [
+      "LLM",
+      "Agent",
+      "Distillation",
+      "On-Policy",
+      "Small-Models"
+    ],
+    "path": "papers/2605.07725-sod/index.html"
   }
 ]
