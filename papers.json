@@ -284,5 +284,24 @@
       "Small-Models"
     ],
     "path": "papers/2605.07725-sod/index.html"
+  },
+  {
+    "slug": "2605.15040-orchard-agentic-modeling",
+    "title": "Orchard: An Open-Source Agentic Modeling Framework",
+    "authors": "Baolin Peng, Wenlin Yao, Qianhui Wu, Hao Cheng, Xiao Yu, Rui Yang, Tao Ge, Alessandro Sordoni, Xingdi Yuan, Yelong Shen, Pengcheng He, Tong Zhang, Zhou Yu, Jianfeng Gao",
+    "team": "Microsoft Research; Columbia University; UIUC",
+    "arxiv": "https://arxiv.org/abs/2605.15040",
+    "code": "https://github.com/microsoft/Orchard",
+    "date": "2026-05-30",
+    "published": "arXiv 2026",
+    "tldr": "把 agentic 训练的环境层抽象成薄、harness-agnostic 的 Kubernetes-native 服务 Orchard Env，并在其上搭 SWE/GUI/Claw 三个 SFT+RL recipe（SWE-bench Verified 67.5% 同尺寸开源 SOTA），论证环境层是 agentic 数据与 recipe 可复用的底座。",
+    "tags": [
+      "Agentic-Modeling",
+      "RL-Environment",
+      "SWE-Agent",
+      "GUI-Agent",
+      "SFT-RL"
+    ],
+    "path": "papers/2605.15040-orchard-agentic-modeling/index.html"
   }
 ]
