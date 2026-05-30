@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MUSE-Autoskill：把 skill 当作有生命周期的资产 · 论文解读</title>
+
+<!-- 数学公式渲染（在线查看时生效；无网络时正文仍可读） -->
+<script>
+  window.MathJax = {
+    tex:{inlineMath:[['$','$'],['\\(','\\)']], displayMath:[['$$','$$'],['\\[','\\]']]},
+    svg:{fontCache:'global'}
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;
+  }
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:880px; margin:0 auto; padding:18px 22px 90px}
+
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:27px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)}
+  .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .meta-grid a:hover{text-decoration:underline}
+
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap}
+  nav.toc a:hover{color:var(--accent)}
+
+  section{margin:38px 0}
+  h2{font-size:21px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:17px; margin:24px 0 8px}
+  p{margin:12px 0}
+  ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.9em}
+  strong{color:var(--text)}
+
+  /* 开源贡献表 */
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:14px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:10px 12px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  .yes{color:var(--ok); font-weight:600}
+  .no{color:var(--muted)}
+
+  /* 图 */
+  figure{margin:24px 0; text-align:center}
+  figure img{max-width:100%; height:auto; border:1px solid var(--line); border-radius:10px; background:#fff}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+
+  /* 提示框 */
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+
+  blockquote{border-left:3px solid var(--line); margin:14px 0; padding:2px 16px; color:var(--muted)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+  .mjx-container{overflow-x:auto; overflow-y:hidden}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <!-- ============================ 抬头 / 元信息 ============================ -->
+  <header class="head">
+    <div class="chips">
+      <span class="chip">LLM Agent</span>
+      <span class="chip">Skill</span>
+      <span class="chip">Self-Evolving</span>
+      <span class="chip">Memory</span>
+      <span class="chip">Unit-test 驱动</span>
+      <span class="chip">Cross-agent Transfer</span>
+    </div>
+    <h1>MUSE-Autoskill：把 skill 当成「有生命周期、可测试、可迁移」的资产</h1>
+    <p class="orig-title">MUSE-Autoskill: Self-Evolving Agents via Skill Creation, Memory, Management, and Evaluation</p>
+    <dl class="meta-grid">
+      <dt>作者</dt><dd>Huawei Lin, Peng Li, Jie Song, Fuxin Jiang, Tieying Zhang（通讯作者 Tieying Zhang）</dd>
+      <dt>团队 / 机构</dt><dd>ByteDance Inc.（ByteBrain team）· Rochester Institute of Technology（第一作者在 ByteBrain 实习期间完成）</dd>
+      <dt>原文链接</dt><dd><a href="https://arxiv.org/abs/2605.27366" target="_blank" rel="noopener">https://arxiv.org/abs/2605.27366</a></dd>
+      <dt>发表 / 年份</dt><dd>arXiv preprint 2026（v1，2026-05-26 提交；论文头部标注 work in progress）</dd>
+      <dt>解读日期</dt><dd>2026-05-30</dd>
+    </dl>
+  </header>
+
+  <div class="tldr">
+    <b>TL;DR</b> — 现有 LLM agent 的「自动造 skill」工作大多把 skill 当成一次性、静态的产物，缺乏与 runtime 的耦合、缺乏 per-skill 的 memory、缺乏 unit-test 驱动的校验与自动修复。MUSE-Autoskill 把 skill 重新定义为有<strong>完整生命周期</strong>的长期资产，统一覆盖 <strong>creation / memory / management / evaluation / refinement</strong> 五个阶段：用内置的 <code>skill_create</code> 在 ReAct 循环里按需造 skill、用 <code>tests/</code> 里的 unit test 做「create→evaluate→register」门控、给每个 skill 配一份 <code>.memory.md</code> 记录跨任务经验、并用基于 DAG 的两级自适应 context 压缩支撑长程任务。在 SkillsBench（51 个 Docker 自动判分任务）上，三个同用 GPT-5.5 的 agent 里 MUSE 拿到最高 with-skills 成绩 <strong>68.40%（比无 skill 的 53.19% 高 +15.21 pp）</strong>；它从自己成功轨迹蒸馏出的 skill 在能造出 skill 的 35 个任务上把准确率推到 <strong>87.94%</strong>（超过人写 skill 的天花板）；这些 skill 注入到另一个 agent（Hermes）还能带来 +10.51 pp、补上对人写 skill 差距的 79%。整个方法<strong>不做任何 fine-tune / RL</strong>，纯 inference-time。</div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#opensource">① 开源贡献</a>
+    <a href="#motivation">② 动机与贡献</a>
+    <a href="#method">③ 方法</a>
+    <a href="#evaluation">④ 实验评估</a>
+    <a href="#insight">⑤ 洞见</a>
+  </nav>
+
+  <!-- ============================ ① 开源贡献 ============================ -->
+  <section id="opensource">
+    <h2><span class="n">①</span>开源贡献 Open-source Artifacts</h2>
+    <p>截至本解读日（2026-05-30），<strong>未找到 MUSE-Autoskill 的任何公开仓库、权重或数据集</strong>。论文 arXiv abstract 页与 Hugging Face papers 页都没有挂出官方 code / model / dataset 链接，PDF 正文与 LaTeX source 中也只引用了 Anthropic 的 Agent Skills 标准仓库（外部依赖，非本文产物）。论文自述其设计「已在生产系统中部署」（SkillMarket / ArkClaw / SkillHub），但这些是 ByteDance 内部产品，并未对外开放。论文头部明确标注 <em>work in progress</em>，因此目前应视为<strong>未开源 / 暂不可独立复现</strong>。</p>
+    <table>
+      <thead><tr><th>类型</th><th>是否开源</th><th>内容 / 链接</th></tr></thead>
+      <tbody>
+        <tr><td>代码 Code</td><td class="no">✘</td><td>未在论文 / arXiv / HF 页找到 MUSE-Autoskill 官方仓库；网络搜索引擎给出的 <code>KnowledgeXLab/MUSE</code> 经核实是<strong>另一篇不同论文</strong>（“Learning on the Job”, arXiv 2510.08002，与 ByteDance / Huawei Lin / SkillsBench 无关），故不予链接。</td></tr>
+        <tr><td>模型权重 Weights</td><td class="no">✘</td><td>无自训练模型；backbone 直接调用 <code>GPT-5.5 (04/24/2026)</code>，仅 API 形式，无权重发布。</td></tr>
+        <tr><td>数据集 Dataset</td><td class="no">✘</td><td>本文不构造数据集；评测用的 <strong>SkillsBench</strong> 是被引用的他人工作（[9]，arXiv 2602.12670），非本文贡献。</td></tr>
+        <tr><td>环境 / Benchmark</td><td class="no">✘</td><td>评测环境是 SkillsBench 的 Docker harness（他人维护）；本文的 agent runtime（MUSE）未释出。</td></tr>
+        <tr><td>项目主页 / Demo</td><td class="no">✘</td><td>无独立项目主页；提到的 SkillMarket / ArkClaw / SkillHub 为内部生产系统，无公开入口。</td></tr>
+      </tbody>
+    </table>
+    <div class="callout warn">
+      <span class="label">核实说明</span>
+      搜索引擎在被问到「official repository」时，把一个同名（MUSE）但内容无关的仓库当成了本文官方仓库——这是一次典型的检索幻觉。按 paper-reading 规则「Verify, don't fabricate」，此处只如实标注「未见开源」，不强行挂任何无关链接。
+    </div>
+  </section>
+
+  <!-- ============================ ② 动机与贡献 ============================ -->
+  <section id="motivation">
+    <h2><span class="n">②</span>研究动机与贡献 Motivation &amp; Contribution</h2>
+    <h3>背景与问题：skill 正在成为 agent 的「能力单元」</h3>
+    <p>LLM agent 越来越多地被用来解决要跨多步、跨工具、跨领域的真实任务。当任务规模变大，「只靠模型在 prompt 里裸推理」就不够了——agent 需要可复用的能力单元，也就是 <strong>skill</strong>：它把一段过程、一段可执行代码或一份领域知识封装起来，可以被组合进解法。skill 之所以吸引人，是因为它把「能力」从「模型权重」里解耦出来，让能力可以模块化执行、可以累积结构化领域知识，而不必每一步都靠人来手写指令。</p>
+    <p>但作者指出，现有「用 LLM 自动合成 skill」的这条线（从 Minecraft 里的 Voyager 的可执行代码库，到通用 agent 的 AutoSkill、EvoSkill、SkillGen，再到用 RL 联合优化 skill 的 Skill1、SkillOS，以及工业界 Anthropic 的 Agent Skills 标准）虽然各自能扩展 agent 的功能，却<strong>通常只覆盖 skill 生命周期的一部分</strong>，留下四个实际的硬伤：</p>
+    <ul>
+      <li><strong>creation–usage mismatch（造与用脱节）：</strong>skill 是在 agent 的 runtime context 之外被「批量生成」的，造的时候看不到 agent 真实的执行上下文，导致造出来的 skill 不一定契合实际调用场景。</li>
+      <li><strong>no structured per-skill memory（没有结构化的 per-skill 记忆）：</strong>大多只有跨任务的自由文本经验（如 Reflexion / ExpeL 的 reflection），没有「绑定到某一个具体 skill」的记忆，无法沉淀「这个 skill 已知的失败模式、输入格式坑、性能注意点」。</li>
+      <li><strong>static, unvalidated skills（静态、未校验）：</strong>skill 生成后基本不带 unit-test 驱动的评测与自动 refinement，质量没有系统性保证。</li>
+      <li><strong>poor context handling（长程上下文处理差）：</strong>扁平的对话历史在长程任务上会被截断或溢出 context window。</li>
+    </ul>
+    <h3>本文的切入点：skill 不该是一次性产物，而是「有生命周期的资产」</h3>
+    <p>作者的核心主张是：skill 应该被当成 agent 系统里<strong>长期存活、不断演化的资产（long-lived, evolving assets）</strong>，而不是一次性的生成输出。一个好用的 skill，应当：① 在 agent 的推理循环内<em>按需</em>被创建；② 带着相关经验与 metadata 一起存储；③ 在情境相关时被检索出来，并通过 test 和 runtime feedback 验证；④ 随着新证据累积被持续 refine。作者把这个视角形式化为五阶段的<strong>统一 skill lifecycle：creation、memory、management、evaluation、refinement</strong>。这一重构把 skill 从「用完即弃的产物」变成了「可管理、可测试、可迁移的基础设施」——这正是 agent 想要跨任务、跨 session、甚至跨不同 agent 系统去累积经验所需要的底座。</p>
+    <h3>核心贡献</h3>
+    <ol>
+      <li><strong>提出 skill lifecycle 框架：</strong>把 skill 从一次性生成产物重新定义为有生命周期、可被管理的长期资产，明确指出任何实用的「以 skill 为中心」的 agent 系统都必须处理 creation / memory / management / evaluation / refinement 五个阶段（Table 1 用这五个阶段 + cross-agent + training-free 两个额外维度系统比较了 9 个相关方法，MUSE 是唯一全勾选的）。</li>
+      <li><strong>提出 MUSE-Autoskill agent：</strong>一个以 skill 为中心、能随时间提升解题能力的 agent；它把 skill 创建与 runtime 执行紧耦合（内置 <code>skill_create</code> 工具从 ReAct 循环内被调用，消除 creation–usage mismatch），用 unit test + feedback 评测 skill，并在 test 失败时自动触发 refinement。</li>
+      <li><strong>提出配套基础设施：</strong>(i) 多级 memory，其中新增了一种 per-skill 的 <strong>skill-level memory</strong>（每个 skill 一份 <code>.memory.md</code>），跨任务累积该 skill 的经验；(ii) 带 cross-session 状态持久化的<strong>自适应 context 压缩</strong>；(iii) 让自动生成的 skill 可被其他 agent 直接使用的 <strong>cross-agent skill transfer</strong>。</li>
+      <li><strong>给出 SkillsBench 上的实证：</strong>在三个同用 GPT-5.5 的 agent 中拿到最佳 with-skills 成绩（68.40%，+15.21 pp）；自生成 skill 在能造出 skill 的 35 个任务上达到 87.94%，超过人写 skill 天花板；生成的 skill 注入到另一个 agent 仍几乎无损迁移。</li>
+    </ol>
+  </section>
+
+  <!-- ============================ ③ 方法 ============================ -->
+  <section id="method">
+    <h2><span class="n">③</span>方法 Method</h2>
+    <p>MUSE-Autoskill（<strong>M</strong>emory-<strong>U</strong>tilizing <strong>S</strong>kill <strong>E</strong>volution）整体是一个跑在预训练 LLM 之上的 ReAct agent：一个 Master Agent 在 <em>Planning → Action → Observation</em> 的循环里推进任务。关键在于——除了两个内置 skill（<code>skill_create</code> 与 <code>web_search</code>），<strong>其它所有能力都不是预定义的，必须通过 <code>skill_create</code> 现造</strong>，从而保证 agent 的能力是被动态构建、持续演化的。需要某个能力时，agent 要么从 Skill Bank 里检索一个现成 skill，要么调用 Skill Creator 合成一个新 skill 包，造完立刻被 Evaluator 用 unit test 校验：通过则进库、observation 回灌进 memory，失败则 Refiner 打补丁后重进循环。下图是这套生命周期的总览。</p>
+
+    <figure>
+      <img src="figures/fig2_overview.png" alt="MUSE-Autoskill 架构总览：四象限分别是 Skill Creation、Skill Management、Self-Evolution &amp; Correction、Memory Mechanism">
+      <figcaption>图 1：MUSE-Autoskill 架构总览——skill 被组织进 creation / management / evaluation / refinement / memory 的统一生命周期（出处：原文 Figure 2）</figcaption>
+    </figure>
+
+    <figure>
+      <img src="figures/fig3_agent_flow.png" alt="MUSE-Autoskill 端到端流程：Master Agent 的 ReAct 循环、Skill Bank、Skill Creator、Sandbox、Evaluator、Refiner、Memory 之间的数据流">
+      <figcaption>图 2：端到端流程——Master Agent 跑 ReAct 循环；需要 skill 时从 Skill Bank 检索或派给 Skill Creator 合成（SKILL.md + 可选 scripts/tests/resources）；Evaluator 跑 tests，pass 则 observation 进 Memory，fail 则 Refiner 打补丁重入循环（出处：原文 Figure 3）</figcaption>
+    </figure>
+
+    <h3>3.1 skill 的封装格式</h3>
+    <p>一个 skill 是一个以 kebab-case 命名的自包含目录，沿用 Anthropic 的 Agent Skills 格式：顶层一定有一份带 YAML frontmatter 的 <code>SKILL.md</code>（定义 name / description / 何时使用 / 核心不变量 / 推荐工具 / workflow），可选地带 <code>scripts/</code>（可执行代码）、<code>tests/</code>（pytest 兼容的测试）、<code>resources/</code>（按需加载的数据/文档）、<code>references/</code>（参考文档）。运行时 agent 先读 <code>SKILL.md</code> 理解接口与 SOP，再决定是读 resources、跑 scripts，还是两者都来。用 skill 的好处是<strong>省 token</strong>：不必每次都重新生成详细推理步骤，调用一个短接口即可，还能跨任务复用、避免重复劳动。</p>
+
+    <div class="callout note">
+      <span class="label">实现要点：catalog routing（按需把 skill 注入 prompt）</span>
+      这是省 token 的关键工程。每个任务开始时，runtime 只把一份 YAML <strong>catalog</strong>（每个 skill 只含 <code>name</code> + <code>description</code>）注入 system prompt，遵循 Anthropic Agent Skills 的 progressive disclosure。<code>SKILL.md</code> 的<strong>正文</strong>只有当 agent 决定要用这个 skill、调 <code>read_skill</code> 时才被拉进 context。这样每次调用的输入成本相对 skill 库规模保持<strong>平坦</strong>：一个 100-skill 的库只增加 ~5–10K token 的 catalog，而不是把每个 skill 正文都装进来所需的 ~500K token。
+    </div>
+
+    <h3>3.2 Skill Creation：现造一个可执行 + 可测试的 skill 包</h3>
+    <p>当现有 skill 不够用时，agent 给出对所需功能的高层规格（目的、输入、期望输出），系统按结构化 pipeline 构造 skill：先写 <code>SKILL.md</code> 定义接口，再规划内部结构（<code>scripts/ resources/ tests/</code>），最后生成对应文件，得到一个完整可执行的 skill 包。</p>
+
+    <h3>3.3 Skill Evaluation &amp; Refinement：create → evaluate → register 门控</h3>
+    <p>造完之后，每个 skill 都要过一道<strong>评测门控</strong>：系统在 sandbox 里跑该 skill <code>tests/</code> 目录里新写的 unit test，<strong>只有全部通过才把 skill 注册进 Skill Bank</strong>。如果 test 失败，agent 检查错误轨迹、调 <code>update_skill</code> 给包打补丁，再重跑 test。这个 create→evaluate→register 闭环保证只有可靠的 skill 才进库、可被未来任务复用，也使所有非内置功能都以「可复用、可校验、可改进」的 skill 形式存在。换句话说，<strong>「可测试」在 MUSE 里是一个系统性质（by construction），而不是作者的一种写作惯例</strong>——失败的 test 同时也是触发 refinement / 重新生成的信号。</p>
+
+    <h3>3.4 Skill Execution：复用 agent 自己的 sandbox 工具</h3>
+    <p>skill 执行就在 agent 的 ReAct 循环里完成。代码执行由一小组 sandbox 生命周期工具中介：<code>create_sandbox</code>、<code>sandbox_run</code>、<code>sandbox_upload</code>/<code>sandbox_download</code>、<code>close_sandbox</code>。每个 sandbox 是一个隔离的进程/容器，有自己的文件系统（默认根在 <code>/sandbox</code>，输入在 <code>/sandbox/inputs/</code>、产物在 <code>/sandbox/outputs/</code>），因此失败、副作用、资源占用都被限定在单次 skill 调用内。<strong>关键设计：不另起一套执行引擎，而是复用 agent 本来就在用的通用工具</strong>（文件读取、终端命令、sandbox 调用），既避免冗余基础设施，也让执行能借力 agent 的完整推理能力。</p>
+
+    <h3>3.5 Memory：三级记忆，新增 per-skill 的 skill-level memory</h3>
+    <p>memory 是 MUSE 累积能力的核心。它在前人分层记忆（MemGPT 的 OS 式分页、Generative Agents 的 memory stream + reflection、Reflexion/ExpeL 的跨 episode reflection）之上，<strong>新增了一层绑定到每个 <code>SKILL.md</code> 的 per-skill 记忆</strong>：</p>
+    <ul>
+      <li><strong>Skill-level memory（本文新增）：</strong>Skill Bank 里每个 skill 都有一份兄弟文件 <code>.memory.md</code>，agent 把跨任务累积的笔记、教训、使用观察（如已知失败模式、输入格式坑、性能 caveat）append 进去。下次同一个 skill 被加载时，这份 per-skill 经验会和它的 <code>SKILL.md</code> 接口一起被呈现，让 agent 直接受益于过往经验、而不必重新推导。注意：<code>.memory.md</code> 故意带前导点、且不随 skill 目录被 <code>.tar</code> 打包导出——即<strong>经验是 per-agent 的，迁移 skill 不迁移经验</strong>。</li>
+      <li><strong>Short-term memory：</strong>维护当前任务上下文（中间推理、observation、临时结果）。随 context 增长，它会被<em>自适应压缩</em>（见 3.6），以在不超 token budget 的前提下支撑长程任务。</li>
+      <li><strong>Long-term memory：</strong>跨 session 持久的笔记（可复用结论、环境怪癖、通用教训，如「偏好 batched I/O」「这个项目用 pinned 包版本」）。与 short-term 不同，long-term <strong>不被压缩</strong>，是一个只增的经验库。</li>
+    </ul>
+    <p>所有三种 memory 文件用同一种 append-only 的 Markdown 格式（一个时间戳标题 + 一段 agent 写的内容），只追加、不修改/删除已有条目，因而可被多 session 并发安全读取。</p>
+
+    <h3>3.6 Context Management：把 ReAct 历史建成 DAG + 两级自适应压缩</h3>
+    <p>这是支撑长程任务的关键机制。agent 把 context 维护成一张<strong>对话节点的 DAG</strong>，每个 turn 一个节点，记录该步的模型响应、tool 调用、per-call token 用量。每个节点带两套指针：一个<em>可变</em>的 <code>parent_id</code> 定义当前发给 LLM 的 <strong>active chain</strong>；一对<em>不可变</em>的 <code>history_prev / history_next</code> 定义原始 turn 的<strong>完整历史</strong>。active chain 永远是完整历史的一个子图。</p>
+    <p>当累积的 short-term context 超过 token budget 时，MUSE 做<strong>两级自适应压缩</strong>（总阈值 <code>COMPRESS_TOKEN_THRESHOLD</code> = 180K，留 ~10% 余量给一次压缩调用本身在 200K 硬上限内放得下；首尾各 <code>KEEP_FIRST/KEEP_LAST</code> = 5 个 turn 永远逐字保留，只有中间可被压缩）：</p>
+    <ul>
+      <li><strong>Level-1（单节点压缩）：</strong>扫描 active chain，把单个 turn 的 token 占用超过 per-node 阈值（<code>NODE_COMPRESS_TOKEN_THRESHOLD</code> = 15K，通常是某次 tool 输出特别大）的节点，原地替换成紧凑摘要、但保留它在链上的位置。</li>
+      <li><strong>Level-2（链压缩）：</strong>若 Level-1 后总量仍超预算，把一段连续的中间节点合并成<em>一个</em>合成摘要节点，顶替这些节点在 active chain 上的位置。</li>
+    </ul>
+    <p>作者强调「<strong>总是先试 Level-1</strong>」，因为它破坏性更小：只重写超标节点的 payload，per-turn 边界与「plan/action/observation」结构都保留，后续 turn 仍能按原位置引用更早的 turn；Level-2 会把多个 turn 塌缩成一个、丢掉 per-turn 结构，所以只在单节点摘要救不回预算时才用。两级压缩都<strong>只作用在 active chain 上，原始节点始终留在完整历史里</strong>（靠不可变的 <code>history_prev/history_next</code> 串起来），因此任何被压缩过的运行都能被「replay」复现，状态也能跨 session 恢复。Long-term memory 和 Skill Bank 单独存放、不被压缩。作者还给出一个数据支撑这一设计：preliminary 实验里，简单截断（超预算就丢最老的中间 turn）会逼着 agent 在 30–40% 的情况下重新去取早期 context（如重查输入文件名、回忆解析格式），而摘要只用 ~1/10 的 token 成本就保住了这些事实。</p>
+
+    <figure>
+      <img src="figures/fig4_context_mgmt.png" alt="ReAct turn 的 DAG 与两级自适应压缩：Level-1 原地摘要超标 turn，Level-2 把可压缩区段合并成一个合成 turn">
+      <figcaption>图 3：ReAct turn 的 DAG 与两级自适应压缩。每个 turn 是 (plan, action, observation) 三元组；首 KEEP_FIRST、尾 KEEP_LAST 个 turn 钉死不动，只有中间可压。上→中：Level-1 原地摘要个别超标 turn；中→下：仍超预算时 Level-2 把可压缩区段并成一个合成节点。原始 turn 都留在完整历史里，轨迹可完全 replay（出处：原文 Figure 4）</figcaption>
+    </figure>
+
+    <h3>3.7 Skill Management：refinement / merging / pruning + cross-session 快照</h3>
+    <p>除了检索，Skill Bank 还靠三种机制持续维护：<strong>refinement</strong>（skill 跑 test 失败或执行时输出错误，agent 据错误反馈修订/重生成）、<strong>merging</strong>（新造的 skill 与已有 skill 显著重叠时，合并成一个更通用的 skill 以去冗余）、<strong>pruning</strong>（长期反复失败或长期不用的 skill 被剪掉）。这三者让 Skill Bank 随 skill 越积越多仍保持紧凑、可靠、可扩展。此外，每个 session 结束后 agent 的<strong>完整状态</strong>（对话历史、skill 使用记录、执行 metadata）被存成快照，于是任务可以从中间状态续跑、不必从头重来——这对可能跨多个 session 的长程工作流很关键。</p>
+
+    <div class="callout note">
+      <span class="label">关键超参（SkillsBench 实验，51 个任务全程固定、不做 per-task 调参）</span>
+      backbone：<code>GPT-5.5 (04/24/2026)</code>，温度用 provider 默认（不覆盖采样）。压缩：<code>COMPRESS_TOKEN_THRESHOLD</code>=180K、<code>NODE_COMPRESS_TOKEN_THRESHOLD</code>=15K、<code>KEEP_FIRST/KEEP_LAST</code>=5。工具超时层级：<code>TOOL_TIMEOUT</code>=300s &gt; <code>VERIFY_COMPLETION_TIMEOUT</code>=120s &gt; <code>TERMINAL/EXEC_CODE_TIMEOUT</code>=60s；<code>TOOL_TEXT_LIMIT</code>=8192 字符（单次 tool 输出截断上限，防一个 log 文件刷爆 active chain）。<code>MAX_RETRY</code>=5（HTTP 429 指数退避预算）、<code>VERIFY_COMPLETION_TURN_THRESHOLD</code>=4（不足 4 个 turn 就想调 <code>final_answer</code> 会被强制先做一次 verify_completion，防过早收尾）。评测：每个「agent×任务×配置」独立跑 <strong>5 次</strong>，取平均 reward；环境出错的 run 排除，无输出的 run 记为 reward 0。
+    </div>
+  </section>
+
+  <!-- ============================ ④ 实验评估 ============================ -->
+  <section id="evaluation">
+    <h2><span class="n">④</span>实验评估 Evaluation</h2>
+    <h3>评测设置</h3>
+    <ul>
+      <li><strong>Benchmark：</strong><strong>SkillsBench</strong>（[9]，被引用的他人工作），考察 agent 在真实任务上「带/不带 skill」的端到端任务准确率。每个任务跑在隔离的 Docker 容器里，由自动 verifier 检查最终输出文件、给出 $[0,1]$ 的 reward。本文选用 51 个所有参评 agent 都不会触发环境错误的任务（便于直接做 cross-agent 比较），覆盖四个 super-domain：Science &amp; Engineering（14）、Data Analysis（15）、Document Processing（9）、Ops &amp; Planning（13）。</li>
+      <li><strong>对比基线：</strong>同样 backbone（GPT-5.5）下的另外两个 agent runtime——<strong>Codex</strong>（SkillsBench 评测 harness 自带的 CLI）与 <strong>Hermes</strong>（第三方 agent runtime）。三者共享同一个模型，因此差异反映的是 <em>agent 系统设计</em>（工具策略、context 管理、planning、skill 用法），而非模型容量。</li>
+      <li><strong>评价指标：</strong>task-level reward 的 macro-average（每个任务等权，每任务 5 次 run 取平均），即 accuracy（%），<strong>越高越好</strong>。</li>
+      <li><strong>三个对照条件：</strong><em>without skills</em>（只靠 agent 自身知识）、<em>with human skills</em>（SkillsBench 任务设计者手写的领域 skill 注入工作区）、<em>with generated skills</em>（MUSE 从自己成功轨迹蒸馏出的 skill）。</li>
+    </ul>
+
+    <h3>主要结果（一）：skill 普遍有用，MUSE 用得最好</h3>
+    <p>Table 2 的总览：所有 agent 用上人写 skill 都有 13–15 pp 的大幅提升，说明 skill 机制本身有效；而 MUSE 在带/不带 skill 两种条件下都最高，with human skills 达 <strong>68.40%</strong>。MUSE 与其它两个 agent 的差距说明它<strong>更擅长在推理循环里读懂、解读并应用 skill 内容</strong>。</p>
+    <table>
+      <thead><tr><th>方法（均用 GPT-5.5）</th><th>Without Skills</th><th>With Human Skills</th><th>Lift</th></tr></thead>
+      <tbody>
+        <tr><td>Codex</td><td>52.11%</td><td>67.28%</td><td>+15.17</td></tr>
+        <tr><td>Hermes</td><td>47.89%</td><td>61.21%</td><td>+13.33</td></tr>
+        <tr><td><strong>MUSE-Autoskill（本文）</strong></td><td><strong>53.19%</strong></td><td><strong>68.40%</strong></td><td><strong>+15.21</strong></td></tr>
+      </tbody>
+    </table>
+    <p>分 domain 看（Table 3 / 下图），MUSE 在 3/4 个 domain 拿到最高 with-skills 成绩（Data Analysis 61.78%、Document Processing 88.89%、Ops &amp; Planning 57.08%）；唯一落后的是 Science &amp; Engineering，被 Codex 高出 5.7 pp（78.57% vs 72.86%），原因是三个边界任务（<code>lake-warming-attribution</code>、<code>flood-risk-analysis</code>、<code>radar-vital-signs</code>）的 verifier 惩罚了任务规格里没钉死的方法学选择。</p>
+
+    <figure>
+      <img src="figures/fig1_headline.png" alt="SkillsBench 四个 super-domain + Overall 上三个 agent 带/不带人写 skill 的准确率柱状图">
+      <figcaption>图 4：headline 结果——四个 domain + Overall 上，三个 agent 带/不带人写 skill 的准确率（浅色=without skills，深色=with human skills）。MUSE 在 3/4 个 domain 与 Overall（68.4% vs Codex 67.3% / Hermes 61.2%）领先（出处：原文 Figure 1）</figcaption>
+    </figure>
+
+    <h3>主要结果（二）：自生成 skill 在覆盖到的任务上超过人写 skill 天花板</h3>
+    <p>这是本文最有意思的结果。自动造 skill 走两阶段协议：<strong>Phase 1</strong> 让 MUSE 在<em>无 skill</em>下解每个任务（5 次 run，复用上面的 without-skills 结果）；对至少有一次成功的任务，选最好的那条轨迹用 <code>skill_create</code> 蒸馏成一个 SKILL.md（+ 可选脚本）。<strong>Phase 2</strong> 把生成的 skill 注回去、重测 5 次。Phase 1 完全失败的任务无法造 skill，在总平均里记 0（计入分母）。</p>
+    <table>
+      <thead><tr><th>配置（MUSE-Autoskill）</th><th>Accuracy（51 个任务）</th></tr></thead>
+      <tbody>
+        <tr><td>without skills（baseline）</td><td>53.19%</td></tr>
+        <tr><td>with human skills（参考天花板）</td><td>68.40%</td></tr>
+        <tr><td><strong>self-created skills（本文）</strong></td><td><strong>60.35%</strong></td></tr>
+      </tbody>
+    </table>
+    <p>51 个任务里 MUSE 能成功造出 skill 的有 <strong>35 个</strong>（68.6%）。在这 35 个任务上，Phase 2 准确率达到 <strong>87.94%，超过了人写 skill 的 68.40% 天花板</strong>——说明从真实成功轨迹蒸馏出的 skill 能编码高度任务相关的知识。51 个任务上的整体 60.35% 之所以更低，是因为 Phase 1 完全失败的 16 个任务贡献 0%。<strong>因此真正的瓶颈是 coverage（agent 在无 skill 时能不能把任务做出来），而不是它造出来的 skill 的质量。</strong>这 16 个未覆盖任务（Table 12）集中在两类：专门的生产工具（如 <code>azure-bgp-oscillation-route-leak</code>、<code>dapt-intrusion-detection</code>，需要厂商特定遥测/日志格式知识）与数值密集的非文本推理（如 <code>earthquake-plate-calculation</code> 的数值 PDE、<code>xlsx-recover-data</code> 的损坏二进制解析）。</p>
+
+    <h3>主要结果（三）：生成的 skill 能跨 agent 迁移，且更省 token / 更快</h3>
+    <p>把 MUSE 生成的同一批 skill 文件<strong>原封不动</strong>注入 Hermes：Hermes 从 47.89% 升到 <strong>58.40%（+10.51 pp）</strong>，补上了它与「人写 skill」之间差距的 <strong>79%</strong>。更关键的是，用同一批生成 skill 时 Hermes（58.40%）与 MUSE（60.35%）只差 1.95 pp——<strong>说明 skill 内容不是为 MUSE 内部行为定制的，而是真正可迁移的、外部化的知识资产。</strong></p>
+    <table>
+      <thead><tr><th>配置</th><th>Hermes</th><th>MUSE-Autoskill（本文）</th></tr></thead>
+      <tbody>
+        <tr><td>without skills</td><td>47.89%</td><td><strong>53.19%</strong></td></tr>
+        <tr><td>with MUSE-generated skills</td><td>58.40%</td><td><strong>60.35%</strong></td></tr>
+        <tr><td>with human skills（参考）</td><td>61.21%</td><td><strong>68.40%</strong></td></tr>
+      </tbody>
+    </table>
+    <p>成本上有一个反直觉的发现（Table 6）：虽然 MUSE 的 SKILL.md 平均比人写的长 2.2×（中位 326 vs 146 行，见图 5），<strong>但用生成 skill 反而更省、更快</strong>——MUSE 的 per-task 用量从 615K token / 656s（人写 skill）降到 493K token / 411s（生成 skill，约 −20% token、−37% latency、turn 数 19→15）；Hermes 从 186K / 369s 降到 97K / 257s（−48% token、−30% latency）。直觉是：<strong>更详细的过程性 skill 用「确定的步骤」替换了「更长、更吵的探索轨迹」，于是 agent 用更少的 turn 就收尾</strong>。生成一个 skill 的一次性成本约 383K token / 164s（≈ 一次无-skill run 的 ⅔），对 MUSE 而言摊销下来约 3 次复用就回本；而 latency 的节省（每次 ~245s vs 人写、~273s vs 无 skill）在<em>第一次复用</em>就已经超过 164s 的造价。</p>
+
+    <h3>消融 / 分析</h3>
+    <p><strong>① Pareto 最优（原文 Figure 5）：</strong>在 35 个能造出 skill 的任务上，「带生成 skill」对两个 agent、两条成本轴（latency / token）都是「更高 reward + 更低 latency + 更少 token」的唯一帕累托最优点。对 MUSE，生成 skill 把平均 reward 提升 +11.0 pp（76.9%→87.9%，而人写 skill 只 +7.9 pp），同时砍 273s latency、85K token；对 Hermes 提升 +15.3 pp（69.8%→85.1%）。提升由少数「baseline 卡在 60% 以下」的 case 驱动（如 <code>flink-query</code>、<code>protein-expression-analysis</code> 跳到 100%；<code>weighted-gdp-calc</code> 20%→100%；<code>adaptive-cruise-control</code> 40%→100%），其余任务 skill 不引入错误。</p>
+    <p><strong>② 三个有领域知识的 case study：</strong>(i) <code>adaptive-cruise-control</code> 要写满足超调/稳态误差/上升时间约束的离散 PID 控制器，生成的 skill 把离散 PID 方程、anti-windup、调参启发式与 verifier 要求的 JSON 格式都写进去，Phase 2 达 100%；(ii) <code>flink-query</code> 要写 Apache Flink Java job 做微秒级 event-time sessionization，生成的 skill 打包了 schema 解析、<code>clusterdata.utils.AppBase</code> 扩展协议、event-time session 触发器与 Maven 验证流程，达 100%；(iii) <code>weighted-gdp-calc</code> 要在保留格式、不用宏/VBA 的前提下填 Excel，生成的 skill 点名用 <code>openpyxl</code>、列出公式模式、加了一步从源数据重算目标单元格的校验，20%→100%。</p>
+    <p><strong>③ 一个回归 + skill 质量审计：</strong>最大回归是 <code>hvac-control</code>（80%→20%）：它要对一阶热仿真做 PI 控制，源轨迹用了针对该仿真噪声特征的标定窗口与增益估计例程，重用到新 run 时偶尔产出落在 verifier 稳定裕度之外的 gain——这是「skill 编码了曾奏效但 out-of-distribution 不够鲁棒的过程」的典型。作者人工审计了全部 35 个生成 skill：<strong>没有任何 skill 硬编码 verifier 期望输出、按任务 id 分支、或读 ground-truth 文件</strong>（即不构成 benchmark 作弊）；但有一部分 skill 带 benchmark 特定假设（固定文件名、目录路径、源 run 推出的数值范围），可能限制泛化——清理这些假设是明确的未来工作。</p>
+
+    <figure>
+      <img src="figures/fig6_skill_anatomy.png" alt="人写 skill 与 MUSE 生成 skill 的解剖对比：SKILL.md 行数分布、各子目录占比">
+      <figcaption>图 5：skill 解剖——人写 vs MUSE 生成。(A) SKILL.md 行数：MUSE 中位 326 行 ≈ 人写 146 行的 2.2×，且 IQR 更窄（更一致、更过程化）。(B) 各组件占比：两组主流都是「只有 SKILL.md」（人写 69% / MUSE 91%），但<strong>只有 MUSE 这一组会带 tests/</strong>（生命周期对 test 通过做了门控，by construction）（出处：原文 Figure 6）</figcaption>
+    </figure>
+  </section>
+
+  <!-- ============================ ⑤ 洞见 ============================ -->
+  <section id="insight">
+    <h2><span class="n">⑤</span>洞见 Insights</h2>
+    <div class="callout insight">
+      <span class="label">Insight</span>
+      <ul>
+        <li><strong>「可测试性」应当是系统性质，而不是写作惯例。</strong>MUSE 把 unit test 做成 skill 进库的<em>门控</em>（fail 则不注册、且自动触发 refine），因此「带 tests/」成了生成 skill 独有的结构特征。这把「skill 质量保证」从「靠作者自觉」变成了「by construction」——是本文相对 Voyager / AutoSkill / Anthropic Agent Skills 等只覆盖部分生命周期的方法最实质的区别。</li>
+        <li><strong>更长、更过程化的 skill 反而更省钱更快。</strong>反直觉点：MUSE 生成的 SKILL.md 比人写长 2.2×，但 per-task token/latency/turn 全面下降。机理是「确定的步骤」替换掉了「更长更吵的探索」。这提示：评估 skill 不能只看「长度/简洁度」，而要看它在 agent 循环里替换掉了多少 ad-hoc reasoning——reward-per-extra-token 才是更诚实的成本-收益度量。</li>
+        <li><strong>瓶颈在 coverage，不在 skill 质量。</strong>自生成 skill 在<em>覆盖到</em>的 35 个任务上达 87.94%、超过人写天花板；整体 60.35% 之所以没更高，纯粹是因为 16 个任务 agent 在无 skill 时根本做不出来（贡献 0）。这把「自演化 agent」的改进方向从「把 skill 造得更好」明确切到「提升无-skill 的探索覆盖」——比如从<em>失败/部分</em>轨迹里也抽取诊断性 skill。</li>
+        <li><strong>外部化的 skill ≈ 可迁移的知识资产。</strong>生成 skill 原封不动注入另一个 agent（Hermes）仍带来 +10.51 pp、补上 79% 的差距，且两个 agent 用同批 skill 成绩只差 ~2 pp。这说明只要 skill 是「可读文档 + 脚本」而非「绑定某 runtime 内部行为」，它就能在不同 agent / 架构间共享——这正是把 skill 当基础设施而非一次性产物的价值。</li>
+      </ul>
+    </div>
+    <h3>局限与未来</h3>
+    <p>作者自己列出的局限相当坦诚：(1) 只评了 SkillsBench 94 个任务中的 51 个，被排除的任务往往 Docker 环境更复杂、可能更难，因此报告数字可能<strong>高估</strong>了系统级表现；(2) 自创实验里每个 skill 是从<em>单条</em>成功轨迹蒸馏、再在<em>同一个任务</em>上重测 5 次，尽管 verifier 是确定性的、且不喂 ground-truth，这种「skill 与源轨迹紧耦合」的协议仍可能<strong>夸大了 within-task 收益</strong>；(3) cross-agent 迁移只验证了 MUSE→Hermes 一个方向，更广的跨多 agent 泛化待证；(4) 每任务只 5 次 run，binary-reward 任务的置信区间很宽。未来计划：跑全部 94 个任务、换 GPT-5.5 之外的 backbone、在 SkillsBench 之外的独立 benchmark 上验证。<br>笔者补充判断：本文目前是 <em>work in progress</em>、<strong>未开源</strong>、且 backbone 绑定一个尚未公开规格的 GPT-5.5——这三点叠加意味着结论暂时较难被外部独立复现，应作为「方向性证据」而非定论来读；「从失败轨迹抽取部分 skill」以及「清理 skill 里的 benchmark 特定假设」是两条最值得跟进的具体后续。</p>
+    <h3>与相关工作的关系</h3>
+    <p>按本文自身的论述（Table 1）：现有自动 skill 系统沿两条线展开——(a) 在预训练 LLM 之上、不做 fine-tune 的 training-free 路线（Voyager、AutoSkill、EvoSkill、SkillGen、Anthropic Agent Skills），轻量且天然可跨 backbone，但每个只覆盖生命周期的一部分（尤其普遍缺「结构化 per-skill memory + unit-test 驱动评测 + test 触发的自动 refinement」三者同时具备）；(b) 用 RL 把 skill 行为和 policy 联合优化的路线（SkillMaster、Skill1、SkillOS、Youtu-Agent），能在训练过的环境上拿到强表现，但 skill 行为耦合到了一个被训练的 policy/curator 上，换 backbone 通常要重训、产出的 skill 也不能被另一个 agent 直接使用。MUSE 的差异化定位是：<strong>在单一 training-free 框架内同时打通五个生命周期阶段</strong>，并且是<strong>唯一用「把生成 skill 注入到不同 agent」来实证 cross-agent transfer 的通用方法</strong>（其它工作的 portability 多限于换底层 LLM 或在同一 agent 家族的产品变体间共享）。它与 Anthropic Agent Skills 关系最近——复用其 SKILL.md 格式，但补上了后者留白的 evaluation 与 refinement。</p>
+  </section>
+
+  <footer class="foot">
+    本页为 <code>paper-reading</code> skill 生成的阅读笔记，仅作辅助，细节以
+    <a href="https://arxiv.org/abs/2605.27366" target="_blank" rel="noopener">原文</a> 为准 · 解读日期 2026-05-30
+  </footer>
+
+</article>
+</body>
+</html>

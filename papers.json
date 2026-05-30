@@ -17,5 +17,24 @@
       "Visual-Skill"
     ],
     "path": "papers/2605.17933-atlasva-visual-skill-memory/index.html"
+  },
+  {
+    "slug": "2605.27366-muse-autoskill",
+    "title": "MUSE-Autoskill: Self-Evolving Agents via Skill Creation, Memory, Management, and Evaluation",
+    "authors": "Huawei Lin, Peng Li, Jie Song, Fuxin Jiang, Tieying Zhang",
+    "team": "ByteDance (ByteBrain) · Rochester Institute of Technology",
+    "arxiv": "https://arxiv.org/abs/2605.27366",
+    "code": "",
+    "date": "2026-05-30",
+    "published": "arXiv 2026",
+    "tldr": "把 skill 重新定义为有完整 lifecycle（creation/memory/management/evaluation/refinement）的长期资产：ReAct 内 skill_create 现造、unit-test 门控进库、per-skill .memory.md、DAG 两级 context 压缩；SkillsBench 上 with-skills 68.40%（+15.21pp），自生成 skill 在覆盖到的 35 个任务达 87.94%，且能跨 agent 迁移。",
+    "tags": [
+      "LLM",
+      "Agent",
+      "Skill",
+      "Self-Evolving",
+      "Memory"
+    ],
+    "path": "papers/2605.27366-muse-autoskill/index.html"
   }
 ]
