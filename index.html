@@ -54,6 +54,7 @@
   .cat.c-agent{background:rgba(122,162,255,.18); color:var(--accent)}
   .cat.c-se{background:rgba(155,140,255,.20); color:var(--accent2)}
   .cat.c-wm{background:rgba(67,197,158,.20); color:var(--ok)}
+  .cat.c-mcp{background:rgba(240,150,60,.22); color:#cf7a1f}
   .date{color:var(--muted); font-size:12px; white-space:nowrap; flex-shrink:0}
   .card h3{margin:0 0 8px; font-size:16.5px; line-height:1.4}
   .card h3 a{color:inherit; text-decoration:none}
@@ -109,8 +110,9 @@ const CATS = {
   'agent':         {label:'Agent',         cls:'c-agent'},
   'self-evolving': {label:'Self-Evolving', cls:'c-se'},
   'world-model':   {label:'World Model',   cls:'c-wm'},
+  'mcp':           {label:'MCP',           cls:'c-mcp'},
 };
-const CAT_ORDER = ['agent','self-evolving','world-model'];
+const CAT_ORDER = ['agent','self-evolving','world-model','mcp'];
 
 function esc(s){return (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function catBadges(p){

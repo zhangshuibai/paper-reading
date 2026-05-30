@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MCP-Universe：用真实世界 MCP server 给大模型做体检 · 论文解读</title>
+
+<script>
+  window.MathJax = {
+    tex:{inlineMath:[['$','$'],['\\(','\\)']], displayMath:[['$$','$$'],['\\[','\\]']]},
+    svg:{fontCache:'global'}
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;
+  }
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:880px; margin:0 auto; padding:18px 22px 90px}
+
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:27px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)}
+  .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .meta-grid a:hover{text-decoration:underline}
+
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap}
+  nav.toc a:hover{color:var(--accent)}
+
+  section{margin:38px 0}
+  h2{font-size:21px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:17px; margin:24px 0 8px}
+  p{margin:12px 0}
+  ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.9em}
+  strong{color:var(--text)}
+
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:14px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:10px 12px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  .yes{color:var(--ok); font-weight:600}
+  .no{color:var(--muted)}
+  .num{font-variant-numeric:tabular-nums; text-align:right}
+  .best{color:var(--ok); font-weight:700}
+
+  figure{margin:24px 0; text-align:center}
+  figure img{max-width:100%; height:auto; border:1px solid var(--line); border-radius:10px; background:#fff}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+
+  blockquote{border-left:3px solid var(--line); margin:14px 0; padding:2px 16px; color:var(--muted)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+  .mjx-container{overflow-x:auto; overflow-y:hidden}
+  .two-col{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+  @media (max-width:680px){ .two-col{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">MCP</span>
+      <span class="chip">benchmark</span>
+      <span class="chip">LLM agent</span>
+      <span class="chip">tool use</span>
+      <span class="chip">execution-based eval</span>
+    </div>
+    <h1>MCP-Universe：用真实世界 MCP server 给大模型做一次硬核体检</h1>
+    <p class="orig-title">MCP-Universe: Benchmarking Large Language Models with Real-World Model Context Protocol Servers</p>
+    <dl class="meta-grid">
+      <dt>作者</dt><dd>Ziyang Luo*, Zhiqi Shen*, Wenzhuo Yang*, Zirui Zhao, Prathyusha Jwalapuram, Amrita Saha, Doyen Sahoo, Silvio Savarese, Caiming Xiong, Junnan Li（*Equal Contribution）</dd>
+      <dt>团队 / 机构</dt><dd>Salesforce AI Research</dd>
+      <dt>原文链接</dt><dd><a href="https://arxiv.org/abs/2508.14704" target="_blank" rel="noopener">https://arxiv.org/abs/2508.14704</a></dd>
+      <dt>代码 / 主页</dt><dd><a href="https://github.com/SalesforceAIResearch/MCP-Universe" target="_blank" rel="noopener">GitHub</a> · <a href="https://mcp-universe.github.io" target="_blank" rel="noopener">mcp-universe.github.io</a>（含 leaderboard）</dd>
+      <dt>发表 / 年份</dt><dd>arXiv preprint, 2025-08（v1, cs.AI）</dd>
+      <dt>解读日期</dt><dd>2026-05-30</dd>
+    </dl>
+  </header>
+
+  <div class="tldr">
+    <b>TL;DR</b> — MCP（Model Context Protocol）正在成为连接 LLM 与外部数据/工具的事实标准，但已有 benchmark 太简单、脱离真实场景。本文提出 <strong>MCP-Universe</strong>：第一个让 LLM 直接接入 <strong>真实世界 MCP server</strong> 来做难任务的综合 benchmark，覆盖 6 大领域、11 个 MCP server（共 133 个 tool）、231 个人工设计的任务，并配套一套 <strong>execution-based</strong>（format / static / dynamic 三类）评测器，连实时数据任务都能自动核对答案。结论很扎心：即使是 GPT-5 也只有 <strong>43.72%</strong> 成功率，Grok-4 33.33%、Claude-4.0-Sonnet 29.44%；论文系统性地暴露出 long-context、unknown-tools、跨领域能力不均三大短板，而且企业级 agent（Cursor）并不比朴素 ReAct 更强。整套评测框架（带 UI）已开源（Apache-2.0）。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#opensource">① 开源贡献</a>
+    <a href="#motivation">② 动机与贡献</a>
+    <a href="#method">③ 方法</a>
+    <a href="#evaluation">④ 实验评估</a>
+    <a href="#insight">⑤ 洞见</a>
+  </nav>
+
+  <!-- ============================ ① 开源贡献 ============================ -->
+  <section id="opensource">
+    <h2><span class="n">①</span>开源贡献 Open-source Artifacts</h2>
+    <p>这是一篇 <strong>benchmark + 评测框架</strong> 类论文，核心交付物不是模型权重，而是一套可复现、可扩展的评测体系。作者把<strong>评测框架（含 task 配置、execution-based evaluator、Gradio UI、leaderboard）整体开源</strong>，许可证为 <strong>Apache-2.0</strong>；其中几个 MCP server（Yahoo Finance、Blender、Google Search、Weather、Date）也直接放在仓库里。以下链接均经核实可访问。</p>
+    <table>
+      <thead><tr><th>类型</th><th>是否开源</th><th>内容 / 链接</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>代码 Code（评测框架）</td>
+          <td class="yes">✔</td>
+          <td><a href="https://github.com/SalesforceAIResearch/MCP-Universe" target="_blank" rel="noopener">github.com/SalesforceAIResearch/MCP-Universe</a><br>包含 agent 实现（ReAct / Explore-ReAct / 接 OpenAI Agent SDK）、LLM Manager、MCP server 编排、evaluator 与 Gradio UI；Apache-2.0；Python 3.10+。</td>
+        </tr>
+        <tr>
+          <td>数据集 / 任务 Tasks</td>
+          <td class="yes">✔</td>
+          <td>231 个任务以 JSON 配置形式随仓库发布（<code>mcpuniverse/benchmark/configs/</code>），含每个任务对应的 evaluator 定义。<strong>无需训练数据</strong>——这是评测集而非训练集。</td>
+        </tr>
+        <tr>
+          <td>环境 / Benchmark（MCP servers）</td>
+          <td class="yes">✔</td>
+          <td>11 个 MCP server：官方的 Google Maps / GitHub / Playwright / Notion / Fetch，加上作者基于官方 API 自建并放进仓库的 Yahoo Finance、Blender、Google Search、Weather、Date，以及 PyPI 上的 Calculator。链接见下方 server 表。</td>
+        </tr>
+        <tr>
+          <td>模型权重 Weights</td>
+          <td class="no">—</td>
+          <td>不适用。论文只<strong>评测</strong>现有模型（GPT-5、Claude、Grok、Gemini、GLM-4.5、Qwen3、DeepSeek-V3 等），不训练新模型。</td>
+        </tr>
+        <tr>
+          <td>项目主页 / Demo / Leaderboard</td>
+          <td class="yes">✔</td>
+          <td><a href="https://mcp-universe.github.io" target="_blank" rel="noopener">mcp-universe.github.io</a>：持续更新的 leaderboard（ReAct / Function-Call / Agent 三个 track），并提供 Discord 社区与提交入口。</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="callout note">
+      <span class="label">小提示</span>
+      论文 v1（2025-08）报告的最高分是 GPT-5 的 43.72%。线上 leaderboard 是<strong>持续更新</strong>的，解读当日（2026-05）已收录更新的模型与 Function-Calling track 成绩（例如更高分的新一代模型条目）。本文以下所有数字一律以<strong>论文 v1 正文/表格</strong>为准，线上榜单仅作动态参考。
+    </div>
+  </section>
+
+  <!-- ============================ ② 动机与贡献 ============================ -->
+  <section id="motivation">
+    <h2><span class="n">②</span>研究动机与贡献 Motivation &amp; Contribution</h2>
+
+    <h3>背景：MCP 是什么，为什么重要</h3>
+    <p>MCP（Model Context Protocol）由 Anthropic 于 2024 年底提出，被称为 <em>“AI 界的 USB-C”</em>。它要解决的是长期存在的 <strong>“data silo / 集成碎片化”</strong> 问题：过去每接一个外部数据源或工具，都要写一套定制 integration，模型被困在信息孤岛里。MCP 用统一接口（基于 JSON-RPC 2.0，走 STDIO / SSE transport）把这件事标准化，定义了三层架构——<strong>host</strong>（AI 应用）、<strong>client</strong>（通信桥）、<strong>server</strong>（能力提供方，对外暴露 tool / prompt / resource）。发布后 OpenAI、Google Gemini 纷纷宣布支持，Cursor、Cline 等开发平台也已集成。换句话说，MCP 很可能是未来 agent 调用外部世界的统一底座。</p>
+
+    <h3>问题：现有评测配不上这个新范式</h3>
+    <p>尽管 MCP 势头很猛，<strong>怎么衡量 LLM 在 MCP 范式下的真实能力，却是空白</strong>。作者把现有工作的痛点拆得很细：</p>
+    <ul>
+      <li><strong>传统 benchmark 各管一段、且不接真实 server。</strong>instruction following（IFEval）、数学（GSM8k）、function calling（BFCL）都只考察 LLM 的孤立能力，没有“接入真实 MCP server、跨场景完成任务”的综合评估。</li>
+      <li><strong>MCP-RADAR：旧瓶装新酒。</strong>它把 HumanEval、GSM8k 等已有数据集“改写”成 MCP 形式，本质是衍生数据集，既覆盖不了真实应用的广度，也有 <strong>data leakage</strong>（数据泄漏/被预训练见过）的隐患。</li>
+      <li><strong>MCPWorld：太依赖 GUI。</strong>仍重度依赖图形界面，对 MCP 原生 workflow 覆盖不足。</li>
+      <li><strong>MCPEval / LiveMCPBench：用 LLM-as-a-judge。</strong>而很多任务依赖<strong>实时数据</strong>（航班价格、股价、GitHub issue 数…），LLM judge 的知识是静态的、根本没法判定；况且 LLM judge 还有 style bias 和幻觉问题。</li>
+    </ul>
+    <p>作者用一张表把同期 MCP benchmark 的三个关键维度摆出来对比（原文 Table 1），MCP-Universe 是唯一三项全勾的：</p>
+    <table>
+      <thead><tr><th>Benchmark</th><th>Real-World Integration<br>（接真实 server）</th><th>Temporal Dynamics<br>（含实时/时变任务）</th><th>Exec. Eval.<br>（执行式评测）</th></tr></thead>
+      <tbody>
+        <tr><td>MCPWorld</td><td class="yes">✔</td><td class="no">✘</td><td class="yes">✔</td></tr>
+        <tr><td>MCP-RADAR</td><td class="no">✘</td><td class="no">✘</td><td class="yes">✔</td></tr>
+        <tr><td>MCPEval</td><td class="no">✘</td><td class="yes">✔</td><td class="no">✘</td></tr>
+        <tr><td>LiveMCPBench</td><td class="yes">✔</td><td class="yes">✔</td><td class="no">✘</td></tr>
+        <tr><td><strong>MCP-Universe</strong></td><td class="yes"><strong>✔</strong></td><td class="yes"><strong>✔</strong></td><td class="yes"><strong>✔</strong></td></tr>
+      </tbody>
+    </table>
+
+    <h3>核心贡献</h3>
+    <ol>
+      <li><strong>第一个面向真实 MCP server 的综合 benchmark。</strong>6 大领域、11 个真实 MCP server（共 133 个 tool）、231 个人工设计的难任务（Location Navigation / Repository Management / Financial Analysis / 3D Designing / Browser Automation / Web Searching）。所有任务都连真实数据源与环境，而非模拟。</li>
+      <li><strong>一套严格的 execution-based 评测框架。</strong>放弃 LLM-as-a-judge，改用三类自动评测器——<strong>format</strong>（格式合规）、<strong>static</strong>（时间不变的内容比对）、<strong>dynamic</strong>（自动抓取实时 ground truth），使得“买未来某天的最便宜机票”“查某地实时天气”这种时变任务也能跨时间稳定打分。</li>
+      <li><strong>系统性揭示当前 agent 的根本短板。</strong>即便 SOTA 模型成功率也很低（GPT-5 43.72%），并定位出三大瓶颈：long-context challenge（步数一多 token 爆炸）、unknown-tools challenge（模型不熟悉具体 tool 的用法/参数）、cross-domain 能力高度不均；还发现企业级 Cursor agent 并不优于朴素 ReAct。框架带 UI、可扩展，方便社区接入新 agent / 新 server。</li>
+    </ol>
+  </section>
+
+  <!-- ============================ ③ 方法 ============================ -->
+  <section id="method">
+    <h2><span class="n">③</span>方法 Method</h2>
+    <p>MCP-Universe 不是一个“算法”，而是一套<strong>评测系统</strong>，由三块构成：(1) 可扩展、易用的评测框架；(2) 一批扎根真实 MCP server 场景的任务指令；(3) 一套 execution-based 评测器。下面先看一个真实任务长什么样，再讲框架结构、形式化定义、server 选型、任务与评测器设计。</p>
+
+    <figure>
+      <img src="figures/fig1_intro.png" alt="MCP-Universe 任务示例：用 Google Maps MCP 在两家酒店间找开车时间差最小的餐厅">
+      <figcaption>图 1：一个真实任务的完整轨迹（出处：原文 Figure 1）。用户住在迪拜某酒店、同事住在阿布扎比另一酒店，要求找一家“在两条到餐厅的开车时间之差最小、且评分≥4.2”的餐厅。agent 需要多步调用 Google Maps MCP 的 <code>maps_geocode</code> / <code>search_places</code> / <code>distance_matrix</code> 等 tool，逐步缩小候选、计算时间差，最终给出餐厅名与 Place ID。这张图浓缩了 benchmark 想考察的五大真实挑战：真实 tool 使用、long-horizon 多轮调用、长上下文、证据分散、tool 空间大。</figcaption>
+    </figure>
+
+    <h3>整体框架</h3>
+    <p>如下图所示，框架以“任务规格”为输入，自动编排整条评测流水线：<strong>LLM Manager</strong> 负责模型配置/API/统一 prompt 格式（支持 GPT-5、Claude-4.0-Sonnet 等）；<strong>Agent Builder</strong> 构造 agent（支持 ReAct、ReAct with Exploration 等）；<strong>MCP Server</strong> 模块按任务挂载所需 server（走 STDIO / SSE），用各自真实的 API endpoint 与鉴权；最后 <strong>Execution-Based Evaluator</strong> 对终态做客观判定，输出二元 pass/fail，并记录完整交互日志。整个流程支持单 server 与多 server 两种配置。</p>
+    <figure>
+      <img src="figures/fig2_framework.png" alt="MCP-Universe 评测框架总览">
+      <figcaption>图 2：MCP-Universe 评测框架（出处：原文 Figure 2）。框架按任务规格动态装配 LLM-agent 组合、所需 MCP server 与对应 evaluator；agent 与 server 通过 MCP 协议交互，最终由 execution-based evaluator 给出是否通过的判定（右侧可见每条 evaluator 的 ✔/✘）。</figcaption>
+    </figure>
+
+    <h3>形式化定义</h3>
+    <p>把 server 集合记为 $S=\{s_1,\dots,s_k\}$，每个 server $s_i$ 通过 MCP 暴露一组 tool $T_i=\{t_{i,1},\dots,t_{i,|T_i|}\}$。一个任务 $\tau$ 定义为三元组 $(G, C, T_{\mathrm{available}})$：</p>
+    <ul>
+      <li>$G$：goal specification，要达成的目标；</li>
+      <li>$C$：初始 context 与背景信息；</li>
+      <li>$T_{\mathrm{available}}=\bigcup_{i\in I} T_i$：本任务可用的 tool 集合，$I\subseteq\{1,\dots,k\}$ 指明挂载了哪些 server。</li>
+    </ul>
+    <p>agent 的挑战是：在仅有部分信息的情况下，<strong>识别 → 排序 → 调用</strong> $T_{\mathrm{available}}$ 中合适的 tool 来达成 $G$，过程中要适配不同 tool 接口、处理工具返回的歧义与失败。评测时，设模型集合 $M=\{m_1,\dots,m_n\}$、agent 架构集合 $A=\{a_1,\dots,a_p\}$（如 ReAct）。对某个 $(m,a)$ 与任务 $\tau$，交互产生一条对话轨迹 $R=(r_1,\dots,r_T)$，每个 $r_t$ 含 agent 的输出与工具调用。评测函数</p>
+    $$ E: M \times A \times \mathcal{T} \rightarrow \{0,1\} $$
+    <p>若任务按预定义成功标准完成则记 $1$，否则 $0$。成功由一组自动检查（核验结构化输出、终态等）共同决定。把 $E(m,a,\tau)$ 在所有任务上聚合，就得到该 agent 在 MCP 工具使用上的量化能力——这就是主表里的 <strong>success rate (SR)</strong>。</p>
+
+    <h3>6 个领域、11 个真实 MCP server</h3>
+    <p>“坚持用真实 server 而非模拟环境”是本工作的根本设计原则。11 个 server 共 133 个 tool，组织成 6 大领域：</p>
+    <ol>
+      <li><strong>Location Navigation</strong>：官方 Google Maps MCP，含地点检索、路线规划、距离计算等，考察地理空间推理。</li>
+      <li><strong>Repository Management</strong>：GitHub MCP，含仓库检索、issue 跟踪、代码编辑等真实版本控制操作。</li>
+      <li><strong>Financial Analysis</strong>：Yahoo Finance MCP，含股价监控、股东信息、期权追踪，全部基于<strong>实时</strong>行情。</li>
+      <li><strong>3D Designing</strong>：Blender MCP，含建模、资产操作、材质设置等专业 CAD 操作。</li>
+      <li><strong>Browser Automation</strong>：Playwright MCP，含浏览器导航、点击、页面快照等完整 web 自动化能力。</li>
+      <li><strong>Web Searching</strong>：Google Search MCP（搜）+ Fetch MCP（取 URL 内容），考察开放域信息搜寻。</li>
+    </ol>
+    <p>此外还挂载若干<strong>辅助 server</strong> 增加复杂度：Notion、Weather、Date、Calculator。所有 server 链接（原文 Table 6）如下，其中标“仓库内”的是作者基于官方 API 自建并随仓库发布：</p>
+    <table>
+      <thead><tr><th>MCP Server</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr><td>Google Maps</td><td>官方（modelcontextprotocol/servers-archived）</td></tr>
+        <tr><td>GitHub</td><td>官方（github/github-mcp-server）</td></tr>
+        <tr><td>Yahoo Finance</td><td>仓库内自建（基于官方 API）</td></tr>
+        <tr><td>Blender</td><td>仓库内自建</td></tr>
+        <tr><td>Playwright</td><td>官方（microsoft/playwright-mcp）</td></tr>
+        <tr><td>Google Search</td><td>仓库内自建</td></tr>
+        <tr><td>Fetch</td><td>官方（modelcontextprotocol/servers）</td></tr>
+        <tr><td>Notion</td><td>官方（makenotion/notion-mcp-server）</td></tr>
+        <tr><td>Weather / Date</td><td>仓库内自建</td></tr>
+        <tr><td>Calculator</td><td>PyPI（mcp-server-calculator）</td></tr>
+      </tbody>
+    </table>
+
+    <h3>任务设计：刻意“做难”</h3>
+    <p>因为 MCP 还很新、缺高质量用例，<strong>231 个任务全部由作者手工设计</strong>。判定难度的准则很实用：<em>如果一个任务不用 MCP server 就能轻松答出，或挂上 server 后 5 次重试内总能稳定解出，就算“太简单”，作废重想</em>。每个领域设计 4–5 类子任务覆盖最常见场景（如 Location Navigation 分 route planning / optimal stops / location searching / place finding 四类；Financial Analysis 分 portfolio analysis / financial statements / trading strategies / institutional holdings / dividend analysis 五类……）。每个任务都由其他作者<strong>交叉检查</strong>可行性、歧义性与正确性。下图是任务在各领域的分布。</p>
+    <figure>
+      <img src="figures/fig3_taskdist.png" alt="MCP-Universe 任务在 6 个领域的分布 sunburst 图">
+      <figcaption>图 3：231 个任务在 6 个领域、各子类型上的分布（出处：原文 Figure 3）。占比：Web Searching 23.8%（55）、Location Navigation 19.5%（45）、Financial Analysis 17.3%（40）、Browser Automation 16.9%（39）、Repository Management 14.3%（33）、3D Designing 8.2%（19）。</figcaption>
+    </figure>
+
+    <h3>三类 execution-based 评测器（关键创新）</h3>
+    <p>作者明确反对 LLM-as-a-judge：实时数据任务它判不了，而且 LLM judge 有 style bias 和幻觉。虽然 execution-based 路线<strong>更费人力</strong>，但作者认为这是公平、全面评测的唯一可行路径。84 个 unique evaluator 分三类：</p>
+    <ul>
+      <li><strong>Format Evaluators（4 个，4.8%）</strong>：检查 agent 是否严格遵守格式要求（如最终答案的结构）。</li>
+      <li><strong>Static Evaluators（32 个，38.1%）</strong>：答案不随时间变化的任务，人工收集正确答案后写评测器比对——例如路线里城市的数量、某球员历史进球数、历史股价。</li>
+      <li><strong>Dynamic Evaluators（48 个，57.1%）</strong>：答案需随实时数据更新的任务——例如未来某天某航班价格、某地天气、某仓库当前 issue 数。作者写<strong>自动评测器在评测时现抓 ground truth</strong>，从而保证不同时间戳下评测结果稳定。这是 MCP-Universe 区别于其他 benchmark 的核心：dynamic evaluator 占比最大（57%），意味着过半任务都是“活”的。</li>
+    </ul>
+    <div class="callout note">
+      <span class="label">实现要点（对复现重要）</span>
+      <ul style="margin:6px 0">
+        <li>主实验默认 agent 框架是 <strong>ReAct</strong>（先 thought 后 action）；唯一例外是 GPT-OSS——它指令跟随太差、无法跟 ReAct prompt，改用 <strong>OpenAI Agent SDK</strong>（因此它没有 AS 步数指标）。</li>
+        <li>所有模型 <strong>temperature=1.0</strong>。评测的开源模型均≥120B 参数；所有模型都在 lmsys Chatbot Arena 上排名靠前。</li>
+        <li>评测器实现是<strong>领域专属</strong>的，例如 Google Maps 用 stop type 校验、GitHub 用 branch 校验。</li>
+        <li>模型版本被精确锁定（如 GPT-5 = <code>gpt-5-2025-08-07</code>，Claude-4.0-Sonnet = <code>claude-sonnet-4-20250514</code>，Claude 默认<strong>不开 thinking 模式</strong>），保证可复现。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============================ ④ 实验评估 ============================ -->
+  <section id="evaluation">
+    <h2><span class="n">④</span>实验评估 Evaluation</h2>
+
+    <h3>评测设置</h3>
+    <ul>
+      <li><strong>被测模型：</strong>10 个专有 + 6 个开源。专有：GPT-5、o3、o4-mini、GPT-4.1、GPT-4o（OpenAI），Claude-4.0-Sonnet、Claude-3.7-Sonnet（Anthropic），Grok-4（xAI），Gemini-2.5-Pro/Flash（Google）。开源（≥120B）：GLM-4.5（Zai）、Kimi-K2（Moonshot）、Qwen3-Coder、Qwen3-235B-A22B（Qwen）、DeepSeek-V3-0324、GPT-OSS-120B。</li>
+      <li><strong>对比基线 / 变量：</strong>主表统一用 ReAct；另设三组对照——加 summarization agent（治 long-context）、加 exploration 阶段（治 unknown-tools）、挂更多无关 server（测鲁棒性）；以及 agent 框架对比（ReAct vs Cursor Agent vs OpenAI Agent SDK）。</li>
+      <li><strong>指标（均越高越好，除 AS）：</strong><strong>SR</strong>（success rate，任务通过率，主指标）；<strong>AE</strong>（average evaluator score，每个任务平均通过的 evaluator 比例，比 SR 更细粒度）；<strong>AS</strong>（average steps，成功任务的平均步数，衡量效率，越低越省）。</li>
+    </ul>
+
+    <h3>主结果：连 GPT-5 也只有 43.72%</h3>
+    <p>下表是原文 Table 3 的核心数字（各领域为 SR%，最右为总体 SR / AE / AS）。每列最高分标绿。</p>
+    <table>
+      <thead>
+        <tr><th>Model</th><th class="num">Loc.<br>Nav.</th><th class="num">Repo.<br>Mgmt.</th><th class="num">Fin.<br>Ana.</th><th class="num">3D</th><th class="num">Browser</th><th class="num">Web</th><th class="num">SR↑</th><th class="num">AE↑</th><th class="num">AS↓</th></tr>
+      </thead>
+      <tbody>
+        <tr><td colspan="10" style="background:var(--panel2);color:var(--muted)"><em>Proprietary Models</em></td></tr>
+        <tr><td><strong>GPT-5</strong></td><td class="num best">33.33</td><td class="num best">30.30</td><td class="num best">67.50</td><td class="num best">52.63</td><td class="num">35.90</td><td class="num best">45.45</td><td class="num best">43.72</td><td class="num best">60.23</td><td class="num">8.22</td></tr>
+        <tr><td>Grok-4</td><td class="num">28.89</td><td class="num">12.12</td><td class="num">40.00</td><td class="num">26.32</td><td class="num best">41.03</td><td class="num">41.82</td><td class="num">33.33</td><td class="num">49.01</td><td class="num">7.75</td></tr>
+        <tr><td>Claude-4.0-Sonnet</td><td class="num">22.22</td><td class="num">12.12</td><td class="num">55.00</td><td class="num">26.32</td><td class="num">38.46</td><td class="num">21.82</td><td class="num">29.44</td><td class="num">50.61</td><td class="num">7.46</td></tr>
+        <tr><td>o3</td><td class="num">26.67</td><td class="num">6.06</td><td class="num">40.00</td><td class="num">26.32</td><td class="num">25.64</td><td class="num">29.09</td><td class="num">26.41</td><td class="num">38.95</td><td class="num best">4.82</td></tr>
+        <tr><td>o4-mini</td><td class="num">26.67</td><td class="num">18.18</td><td class="num">40.00</td><td class="num">36.84</td><td class="num">23.08</td><td class="num">18.18</td><td class="num">25.97</td><td class="num">40.38</td><td class="num">7.90</td></tr>
+        <tr><td>Claude-3.7-Sonnet</td><td class="num">13.33</td><td class="num">18.18</td><td class="num">40.00</td><td class="num">36.84</td><td class="num">23.08</td><td class="num">21.82</td><td class="num">24.24</td><td class="num">40.36</td><td class="num">7.16</td></tr>
+        <tr><td>Gemini-2.5-Pro</td><td class="num">13.33</td><td class="num">12.12</td><td class="num">50.00</td><td class="num">21.05</td><td class="num">25.64</td><td class="num">12.73</td><td class="num">22.08</td><td class="num">36.93</td><td class="num">6.98</td></tr>
+        <tr><td>Gemini-2.5-Flash</td><td class="num">15.56</td><td class="num">12.12</td><td class="num">37.50</td><td class="num">21.05</td><td class="num">30.77</td><td class="num">14.55</td><td class="num">21.65</td><td class="num">33.99</td><td class="num">8.26</td></tr>
+        <tr><td>GPT-4.1</td><td class="num">8.89</td><td class="num">6.06</td><td class="num">40.00</td><td class="num">26.32</td><td class="num">23.08</td><td class="num">10.91</td><td class="num">18.18</td><td class="num">41.32</td><td class="num">5.24</td></tr>
+        <tr><td>GPT-4o</td><td class="num">8.89</td><td class="num">9.09</td><td class="num">35.00</td><td class="num">26.32</td><td class="num">12.82</td><td class="num">9.09</td><td class="num">15.58</td><td class="num">37.03</td><td class="num">6.03</td></tr>
+        <tr><td colspan="10" style="background:var(--panel2);color:var(--muted)"><em>Open-Source Models</em></td></tr>
+        <tr><td><strong>GLM-4.5</strong>（最佳开源）</td><td class="num">17.78</td><td class="num">9.09</td><td class="num">50.00</td><td class="num">26.32</td><td class="num">15.38</td><td class="num">27.27</td><td class="num">24.68</td><td class="num">41.16</td><td class="num">7.33</td></tr>
+        <tr><td>Qwen3-Coder</td><td class="num">8.89</td><td class="num">3.03</td><td class="num">50.00</td><td class="num">26.32</td><td class="num">25.64</td><td class="num">10.91</td><td class="num">19.91</td><td class="num">37.78</td><td class="num">7.78</td></tr>
+        <tr><td>Kimi-K2</td><td class="num">11.11</td><td class="num">9.09</td><td class="num">47.50</td><td class="num">15.79</td><td class="num">15.38</td><td class="num">14.55</td><td class="num">19.05</td><td class="num">35.10</td><td class="num">6.07</td></tr>
+        <tr><td>Qwen3-235B</td><td class="num">11.11</td><td class="num">9.09</td><td class="num">50.00</td><td class="num">15.79</td><td class="num">15.38</td><td class="num">9.09</td><td class="num">18.18</td><td class="num">38.53</td><td class="num">5.74</td></tr>
+        <tr><td>DeepSeek-V3</td><td class="num">11.11</td><td class="num">6.06</td><td class="num">30.00</td><td class="num">26.32</td><td class="num">12.82</td><td class="num">7.27</td><td class="num">14.29</td><td class="num">35.82</td><td class="num">5.06</td></tr>
+        <tr><td>GPT-OSS-120B</td><td class="num">6.67</td><td class="num">6.06</td><td class="num">35.00</td><td class="num">10.53</td><td class="num">5.13</td><td class="num">5.45</td><td class="num">11.26</td><td class="num">26.34</td><td class="num">—</td></tr>
+      </tbody>
+    </table>
+    <p>怎么读这些数字：</p>
+    <ul>
+      <li><strong>整体很低。</strong>最强的 GPT-5 也只有 43.72%，Grok-4 33.33%、Claude-4.0-Sonnet 29.44%。这与它们在通用 benchmark 上的“高分形象”形成巨大反差——说明在真实 MCP 环境里，<strong>通用能力 ≠ 可用能力</strong>。</li>
+      <li><strong>领域差异极大。</strong>同一个模型在不同领域可以从 67.5% 掉到个位数。Location Navigation 全员 &lt;35%，GPT-4.1/GPT-4o 甚至 &lt;10%；Repository Management 只有 GPT-5 过 30%；3D Designing 只有 GPT-5 过 50%。Grok-4 在 Browser Automation 反超所有人（41.03%），因为这块特别吃“在复杂网页里推理+操作”的能力。</li>
+      <li><strong>开源仍有明显差距，但 GLM-4.5 是亮点。</strong>GLM-4.5 以 24.68% 成为最佳开源模型，甚至高于 o4-mini（25.97% 略高，但 GLM 高于 Claude-3.7-Sonnet 24.24%、o4-mini 之外的多数）；总体看 SOTA 专有与开源之间的 gap 依然显著。</li>
+      <li><strong>SR 与 AE 不总是同向。</strong>Claude-4.0-Sonnet 的 AE（50.61%）甚至略高于 Grok-4（49.01%），但 Grok-4 的 SR 更高（33.33% vs 29.44%）——说明“通过更多 evaluator”不等于“完整做完任务”。</li>
+      <li><strong>效率维度（AS）有意思。</strong>o3 只用 4.82 步就排到 SR 第四（26.41%），是最“惜步”的模型；而 GPT-5（8.22 步）、Grok-4（7.75 步）靠更多步数换更高成功率。开源里 DeepSeek-V3 最省（5.06 步）。</li>
+    </ul>
+
+    <h3>分评测器类型：失败主要发生在“内容”而非“格式”</h3>
+    <p>原文 Table 4 把成绩拆成 format / static / dynamic 三类（成功率%）。一个清晰的结论：很多模型 <strong>format ≥80%</strong>（DeepSeek-V3 96.58%、Claude-4.0-Sonnet 98.29%、GPT-4.1 95.73%），但 static/dynamic 普遍只有 40–60%。也就是说，<strong>瓶颈在内容正确性，而不是格式合规</strong>。</p>
+    <table>
+      <thead><tr><th>Model</th><th class="num">Format</th><th class="num">Static</th><th class="num">Dynamic</th></tr></thead>
+      <tbody>
+        <tr><td>GPT-5</td><td class="num">88.89</td><td class="num best">61.92</td><td class="num best">65.96</td></tr>
+        <tr><td>Claude-4.0-Sonnet</td><td class="num best">98.29</td><td class="num best">61.92</td><td class="num">54.74</td></tr>
+        <tr><td>Grok-4</td><td class="num">88.03</td><td class="num">49.04</td><td class="num">52.98</td></tr>
+        <tr><td>DeepSeek-V3</td><td class="num">96.58</td><td class="num">52.88</td><td class="num">48.07</td></tr>
+        <tr><td>GPT-4.1</td><td class="num">95.73</td><td class="num">57.53</td><td class="num">49.47</td></tr>
+        <tr><td>Gemini-2.5-Pro</td><td class="num">64.10</td><td class="num">39.18</td><td class="num">42.46</td></tr>
+        <tr><td>Gemini-2.5-Flash</td><td class="num">51.28</td><td class="num">45.21</td><td class="num">30.88</td></tr>
+        <tr><td>o3</td><td class="num">73.50</td><td class="num">38.63</td><td class="num">43.16</td></tr>
+      </tbody>
+    </table>
+    <p>反直觉的一点：一些 <strong>reasoning 模型反而格式更差</strong>——o3 只有 73.50%、Gemini-2.5-Pro 64.10%、Gemini-2.5-Flash 51.28%，明显不如非 reasoning 的 Claude-4.0-Sonnet（98.29%）。作者在附录给了个“naive error”例子：o3 有时会直接把 prompt 里的格式要求原样抄下来、啥也不干，对这种强模型来说相当诡异。</p>
+
+    <h3>三大挑战的专项分析（决定性实验）</h3>
+    <p><strong>① Long-context challenge。</strong>Location Navigation、Browser Automation、Financial Analysis 这三块的 server 会返回超大内容（Google Maps 一次返回大量地点详情、Playwright 可能返回整页 HTML、Yahoo Finance 返回长时间跨度的逐日行情）。如图 4 左，<strong>输入 token 随交互步数迅速膨胀</strong>，常常撑爆上下文窗口、拖垮多步任务（该实验基于 Claude-4.0-Sonnet）。作者试了个直接的解法——在每步加一个 summarization agent 压缩 server 原始输出（图 4 右）——结果<strong>喜忧参半</strong>：在 Location Navigation 上能提升 GPT-4.1、Claude-4.0-Sonnet，但在 Browser Automation / Financial Analysis 上要么没用要么变差。结论：简单 summary 救不了，long-context 是这个 benchmark 的真·硬骨头。</p>
+    <div class="two-col">
+      <figure>
+        <img src="figures/fig4a_tokengrowth.png" alt="平均输入 token 随步数增长">
+        <figcaption>图 4（左）：平均输入 token 随交互步数快速增长（LN / BA / FA 三域，基于 Claude-4.0-Sonnet）。出处：原文 Figure 4 左。</figcaption>
+      </figure>
+      <figure>
+        <img src="figures/fig4b_summarize.png" alt="加 summarization agent 的效果">
+        <figcaption>图 4（右）：加入 summarization agent 后的成功率变化——只在部分域有效。出处：原文 Figure 4 右。</figcaption>
+      </figure>
+    </div>
+    <p><strong>② Unknown-tools challenge。</strong>错误分析显示模型常常<strong>不会用</strong>这些 tool。一个典型例子（图 5 左）：Yahoo Finance 取股价要求 start/end 日期不同，但模型经常把两者填成同一天 → 直接报错。作者引入一个 <strong>exploration 阶段</strong>：先让模型自由地试用 tool、建立对其能力/约束的认知（exploitation 阶段再用 ReAct 正式解题）。效果同样<strong>不是万灵药</strong>（图 5 右）：GPT-4.1 在 Browser Automation +7.69 个点（到 30.77%）、Claude-4.0-Sonnet 在 Financial Analysis +7.50 个点（到 62.50%）；但 Claude 在 Browser Automation 反而下降、GPT-4.1 在 Financial Analysis 没动。结论：exploration 对“信息搜寻/推理类”有帮助，对“需要规划状态变更”的任务不灵。</p>
+    <figure>
+      <img src="figures/fig5_exploration.png" alt="加 exploration 阶段的效果">
+      <figcaption>图 5（右）：加入 exploration 阶段后在选定领域的成功率变化（出处：原文 Figure 5 右）。提升仅限部分域，并非普适。</figcaption>
+    </figure>
+    <p><strong>③ 挂更多无关 server（鲁棒性）。</strong>主表只挂与任务直接相关的 server。这里给所有任务统一挂 7 个 server（94 个 tool）引入噪声，性能<strong>明显下滑</strong>：Claude-4.0-Sonnet 在 Location Navigation 从 22.22% 掉到 11.11%；GPT-4.1 在 Browser Automation 从 23.08% 掉到 15.38%。说明 tool 空间一变大，模型挑对工具的能力就明显吃紧。</p>
+
+    <h3>企业级 agent 不一定更强（原文 Table 5）</h3>
+    <p>同样用 Claude-4.0-Sonnet 做 backbone：朴素 <strong>ReAct（29.44%）反而高于企业级 Cursor Agent（26.41%）</strong>。Cursor 在 Browser Automation 更强（43.59% vs 38.46%），但在 Web Searching 严重拉胯（7.27% vs 21.82%）——因为它倾向用自己的内部工具而非 benchmark 的 MCP server。另一边，o3 用 <strong>OpenAI Agent SDK（31.60%）则明显高于 o3+ReAct（26.41%）</strong>，且是所有 agent-backbone 组合里的最高分。两个事实合起来说明：<strong>agent 框架设计确实影响很大，但“企业级”不等于“更好”，关键是 agent 与具体模型的匹配</strong>。</p>
+  </section>
+
+  <!-- ============================ ⑤ 洞见 ============================ -->
+  <section id="insight">
+    <h2><span class="n">⑤</span>洞见 Insights</h2>
+    <div class="callout insight">
+      <span class="label">Insight</span>
+      <ul style="margin:6px 0">
+        <li><strong>“真实 + 时变”是 MCP 评测的灵魂。</strong>本文最有方法论价值的设计是 <strong>dynamic evaluator</strong>（占 57%）：不预存答案、评测时现抓 ground truth。这把“实时数据任务无法客观评测”这个老大难直接解决了，也顺带绕开了 LLM-as-a-judge 的 style bias / 幻觉。任何想做“活的、接真实世界”的 agent benchmark 都可借鉴这一招。</li>
+        <li><strong>当前 LLM 的失败不在“格式”而在“内容”。</strong>format 普遍 ≥80% 但 content（static/dynamic）只有 40–60%——说明这一代模型“会按规矩输出”，但在真实工具链上“做对事”仍很弱。把研究火力放在内容正确性（正确选 tool、正确填参、正确串多步），比继续优化格式合规更值。</li>
+        <li><strong>长上下文与 unknown-tools 没有便宜的解法。</strong>summarization 和 exploration 这两个直觉上很对的补丁都只在部分域有效、在另一些域反而有害。这反过来证明 MCP-Universe 抓到了真问题，也提示需要更自适应的 context 管理与 tool 学习机制，而非一刀切的 trick。</li>
+      </ul>
+    </div>
+
+    <h3>局限与未来</h3>
+    <ul>
+      <li><strong>规模相对小、且重人工。</strong>231 个任务、84 个 evaluator 全靠手工设计与交叉检查；execution-based 路线作者自己也承认“依赖大量人力”。扩规模/扩领域的成本不低。</li>
+      <li><strong>依赖真实外部服务，存在维护与不稳定风险。</strong>接真实 server 的代价是：API 变更、限流、服务下线都可能影响可复现性（这也是为何要把部分 server 收进仓库自建）。dynamic evaluator 缓解了“答案漂移”，但“服务可用性漂移”仍在。</li>
+      <li><strong>补丁式方法收效有限，呼唤更强 agent 设计。</strong>作者把 summarization / exploration 定位为 preliminary 探索；真正的提升空间留给了未来——更鲁棒的 long-context 处理、在线 tool 学习、模型-框架协同设计。</li>
+      <li><strong>榜单会过时。</strong>论文 v1 的 GPT-5 43.72% 只是某一时刻的快照；线上 leaderboard 持续刷新，读者应以官网为准看“当下最强多少”。</li>
+    </ul>
+
+    <h3>与相关工作的关系</h3>
+    <p>按本文自身的论述定位：相对 <strong>web navigation</strong>（WebArena、Mind2Web 系列等）、<strong>GUI 操作</strong>（OSWorld、WindowsAgentArena、UI-Vision）、<strong>软件工程</strong>（SWE-bench、DevBench）、<strong>function/tool calling</strong>（APIBank、ToolBench、GAIA、AppWorld、τ-Bench、BFCLv3）这些已有 agent benchmark，MCP-Universe 的差异在于专门面向 <strong>MCP 协议 + 真实 server + 时变任务 + 执行式评测</strong> 的组合。对同期 MCP benchmark，它用一张三维对照表（real-world / temporal / exec-eval）把自己摆成唯一全勾者：MCPWorld 缺时变、MCP-RADAR 是改写旧数据且不接真实 server、MCPEval 与 LiveMCPBench 用 LLM-as-judge 难以应对实时任务。一句话——MCP-Universe 想做的是 MCP 时代“接真实世界、还能自动判分”的标准考场。</p>
+  </section>
+
+  <footer class="foot">
+    本页为 <code>paper-reading</code> skill 生成的阅读笔记，仅作辅助，细节以
+    <a href="https://arxiv.org/abs/2508.14704" target="_blank" rel="noopener">原文</a> 为准 · 解读日期 2026-05-30
+  </footer>
+
+</article>
+</body>
+</html>

@@ -453,5 +453,28 @@
       "agent",
       "world-model"
     ]
+  },
+  {
+    "slug": "2508.14704-mcp-universe-benchmark",
+    "title": "MCP-Universe: Benchmarking Large Language Models with Real-World Model Context Protocol Servers",
+    "authors": "Ziyang Luo, Zhiqi Shen, Wenzhuo Yang, Zirui Zhao, Prathyusha Jwalapuram, Amrita Saha, Doyen Sahoo, Silvio Savarese, Caiming Xiong, Junnan Li",
+    "team": "Salesforce AI Research",
+    "arxiv": "https://arxiv.org/abs/2508.14704",
+    "code": "https://github.com/SalesforceAIResearch/MCP-Universe",
+    "date": "2026-05-30",
+    "published": "arXiv 2025",
+    "tldr": "第一个让 LLM 接入真实世界 MCP server 的综合 benchmark：6 领域 / 11 server（133 tools）/ 231 难任务 + execution-based 评测器（dynamic 评测自动抓实时 ground truth）；连 GPT-5 也只有 43.72% 成功率，Grok-4 33.33%、Claude-4-Sonnet 29.44%。框架 Apache-2.0 开源。",
+    "tags": [
+      "MCP",
+      "Benchmark",
+      "LLM-Agent",
+      "Tool-Use",
+      "Execution-Eval"
+    ],
+    "path": "papers/2508.14704-mcp-universe-benchmark/index.html",
+    "categories": [
+      "mcp",
+      "agent"
+    ]
   }
 ]
