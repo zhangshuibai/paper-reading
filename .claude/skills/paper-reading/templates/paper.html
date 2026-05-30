@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 填写: 页面标题 = 中文短标题 · 论文解读 -->
+<title>{{TITLE_ZH}} · 论文解读</title>
+
+<!-- 数学公式渲染（在线查看时生效；无网络时正文仍可读） -->
+<script>
+  window.MathJax = {
+    tex:{inlineMath:[['$','$'],['\\(','\\)']], displayMath:[['$$','$$'],['\\[','\\]']]},
+    svg:{fontCache:'global'}
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;
+  }
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:880px; margin:0 auto; padding:18px 22px 90px}
+
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:27px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)}
+  .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .meta-grid a:hover{text-decoration:underline}
+
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap}
+  nav.toc a:hover{color:var(--accent)}
+
+  section{margin:38px 0}
+  h2{font-size:21px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:17px; margin:24px 0 8px}
+  p{margin:12px 0}
+  ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.9em}
+  strong{color:var(--text)}
+
+  /* 开源贡献表 */
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:14px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:10px 12px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  .yes{color:var(--ok); font-weight:600}
+  .no{color:var(--muted)}
+
+  /* 图 */
+  figure{margin:24px 0; text-align:center}
+  figure img{max-width:100%; height:auto; border:1px solid var(--line); border-radius:10px; background:#fff}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+
+  /* 提示框 */
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+
+  blockquote{border-left:3px solid var(--line); margin:14px 0; padding:2px 16px; color:var(--muted)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+  .mjx-container{overflow-x:auto; overflow-y:hidden}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <!-- ============================ 抬头 / 元信息 ============================ -->
+  <header class="head">
+    <div class="chips">
+      <!-- 填写: 主题标签，如 <span class="chip">RLHF</span> -->
+      {{TAG_CHIPS}}
+    </div>
+    <h1>{{TITLE_ZH}}</h1>
+    <p class="orig-title">{{TITLE_EN}}</p>
+    <dl class="meta-grid">
+      <dt>作者</dt><dd>{{AUTHORS}}</dd>
+      <dt>团队 / 机构</dt><dd>{{TEAM}}</dd>
+      <dt>原文链接</dt><dd><a href="{{ARXIV_URL}}" target="_blank" rel="noopener">{{ARXIV_URL}}</a></dd>
+      <dt>发表 / 年份</dt><dd>{{VENUE_YEAR}}</dd>
+      <dt>解读日期</dt><dd>{{READ_DATE}}</dd>
+    </dl>
+  </header>
+
+  <div class="tldr">
+    <b>TL;DR</b> — <!-- 填写: 2~4 句话讲清楚“这篇做了什么、为什么重要、核心结论” -->{{TLDR}}
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#opensource">① 开源贡献</a>
+    <a href="#motivation">② 动机与贡献</a>
+    <a href="#method">③ 方法</a>
+    <a href="#evaluation">④ 实验评估</a>
+    <a href="#insight">⑤ 洞见</a>
+  </nav>
+
+  <!-- ============================ ① 开源贡献 ============================ -->
+  <section id="opensource">
+    <h2><span class="n">①</span>开源贡献 Open-source Artifacts</h2>
+    <p><!-- 填写: 一句话概述本文开源了哪些东西；务必先去 GitHub / Hugging Face / 项目主页核实，区分“论文声称”与“实际可下载”。 --></p>
+    <table>
+      <thead><tr><th>类型</th><th>是否开源</th><th>内容 / 链接</th></tr></thead>
+      <tbody>
+        <tr><td>代码 Code</td><td class="yes">✔ / ✘</td><td><a href="{{CODE_URL}}" target="_blank" rel="noopener">{{CODE_URL}}</a><!-- 说明：框架/训练/推理脚本范围 --></td></tr>
+        <tr><td>模型权重 Weights</td><td>—</td><td><!-- HF 链接 + 规模/许可证 --></td></tr>
+        <tr><td>数据集 Dataset</td><td>—</td><td><!-- HF/链接 + 规模/构造方式 --></td></tr>
+        <tr><td>环境 / Benchmark</td><td>—</td><td><!-- 评测环境、harness、benchmark 是否开源 --></td></tr>
+        <tr><td>项目主页 / Demo</td><td>—</td><td><!-- 链接 --></td></tr>
+      </tbody>
+    </table>
+    <!-- 若某类未开源，标 ✘ 并简述（如“仅 API”“需申请”“将开源/未公布”）。删掉用不到的行。 -->
+  </section>
+
+  <!-- ============================ ② 动机与贡献 ============================ -->
+  <section id="motivation">
+    <h2><span class="n">②</span>研究动机与贡献 Motivation &amp; Contribution</h2>
+    <h3>背景与问题</h3>
+    <p><!-- 填写: 领域现状、已有方法、它们的具体痛点/失败模式。讲清“为什么这个问题值得做、为什么难”。 --></p>
+    <h3>本文的切入点</h3>
+    <p><!-- 填写: 作者的关键观察 / 假设 / insight 是什么，凭什么认为能解决上面的痛点。 --></p>
+    <h3>核心贡献</h3>
+    <ol>
+      <li><!-- 填写: 贡献 1（尽量具体：提出了什么、量化结论是什么） --></li>
+      <li><!-- 贡献 2 --></li>
+      <li><!-- 贡献 3 --></li>
+    </ol>
+  </section>
+
+  <!-- ============================ ③ 方法 ============================ -->
+  <section id="method">
+    <h2><span class="n">③</span>方法 Method</h2>
+    <p><!-- 填写: 先给整体框架/流程的高层概览（一段话 + 总览图），再分模块展开。 --></p>
+
+    <figure>
+      <!-- 填写: 总览图。优先用原文图（papers/<slug>/figures/xxx.png）。 -->
+      <img src="figures/{{OVERVIEW_FIG}}" alt="方法总览">
+      <figcaption>图 1：{{OVERVIEW_FIG_CAP}}（出处：原文 Figure X）</figcaption>
+    </figure>
+
+    <h3>关键组件 / 步骤</h3>
+    <p><!-- 填写: 逐个讲清楚。涉及公式时用 $...$ / $$...$$，并解释每个符号的含义与直觉。 --></p>
+    <!-- 例：
+    $$\mathcal{L} = \mathbb{E}_{x\sim\mathcal{D}}\big[\,\ell(f_\theta(x),y)\,\big]$$
+    其中 $f_\theta$ 是……，直觉上这一项在惩罚……
+    -->
+
+    <div class="callout note">
+      <span class="label">实现要点</span>
+      <!-- 填写: 训练细节、超参、技巧、容易被忽略但对复现重要的点。 -->
+    </div>
+  </section>
+
+  <!-- ============================ ④ 实验评估 ============================ -->
+  <section id="evaluation">
+    <h2><span class="n">④</span>实验评估 Evaluation</h2>
+    <h3>评测设置</h3>
+    <ul>
+      <li><strong>Benchmark / 数据集：</strong><!-- 填写: 用了哪些，各自考察什么能力 --></li>
+      <li><strong>对比基线：</strong><!-- 填写: 和谁比 --></li>
+      <li><strong>评价指标 Metric：</strong><!-- 填写: 指标定义 + 越高/越低越好 --></li>
+    </ul>
+
+    <h3>主要结果</h3>
+    <!-- 填写: 用表格呈现关键数字（可直接搬原文主表的核心列），并加粗本文方法。 -->
+    <table>
+      <thead><tr><th>方法</th><th>Benchmark A</th><th>Benchmark B</th></tr></thead>
+      <tbody>
+        <tr><td>Baseline</td><td>—</td><td>—</td></tr>
+        <tr><td><strong>本文</strong></td><td><strong>—</strong></td><td><strong>—</strong></td></tr>
+      </tbody>
+    </table>
+    <p><!-- 填写: 解读这些数字——本文方法到底带来了多少提升/改变，在什么设定下最有效，哪些地方没提升甚至变差。 --></p>
+
+    <h3>消融 / 分析</h3>
+    <p><!-- 填写: 关键消融说明了哪个设计真正起作用；有意思的分析实验。 --></p>
+  </section>
+
+  <!-- ============================ ⑤ 洞见 ============================ -->
+  <section id="insight">
+    <h2><span class="n">⑤</span>洞见 Insights</h2>
+    <div class="callout insight">
+      <span class="label">Insight</span>
+      <!-- 填写: 本文最值得记住的 1~3 个洞见——可迁移的方法论、反直觉的发现、对领域的启示。 -->
+    </div>
+    <h3>局限与未来</h3>
+    <p><!-- 填写: 方法的边界、未解决的问题、可能的后续方向（含你自己的判断）。 --></p>
+    <h3>与相关工作的关系</h3>
+    <p><!-- 填写: 和同期/经典工作的区别与联系（基于本文自身的论述，不要去翻本仓库其他解读）。 --></p>
+  </section>
+
+  <footer class="foot">
+    本页为 <code>paper-reading</code> skill 生成的阅读笔记，仅作辅助，细节以
+    <a href="{{ARXIV_URL}}" target="_blank" rel="noopener">原文</a> 为准 · 解读日期 {{READ_DATE}}
+  </footer>
+
+</article>
+</body>
+</html>

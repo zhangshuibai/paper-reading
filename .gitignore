@@ -1,0 +1,20 @@
+# Per-paper working downloads live OUTSIDE the repo (e.g. /tmp/paper-reading/...),
+# but ignore them here too in case anyone runs the pipeline inside the tree.
+_work/
+*.tar.gz
+*.pdf
+# keep figures that are committed under papers/<slug>/figures/
+!papers/**/figures/**
+
+# os / editor cruft
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# python
+__pycache__/
+*.pyc
+.venv/
+venv/
