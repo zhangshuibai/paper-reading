@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Online Autoresearch：用真实线上反馈跑自动化研究 · 论文解读</title>
+
+<!-- 数学公式渲染（在线查看时生效；无网络时正文仍可读） -->
+<script>
+  window.MathJax = {
+    tex:{inlineMath:[['$','$'],['\\(','\\)']], displayMath:[['$$','$$'],['\\[','\\]']]},
+    svg:{fontCache:'global'}
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;
+  }
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:880px; margin:0 auto; padding:18px 22px 90px}
+
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:27px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)}
+  .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .meta-grid a:hover{text-decoration:underline}
+
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap}
+  nav.toc a:hover{color:var(--accent)}
+
+  section{margin:38px 0}
+  h2{font-size:21px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:17px; margin:24px 0 8px}
+  p{margin:12px 0}
+  ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.9em}
+  strong{color:var(--text)}
+
+  /* 开源贡献表 */
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:14px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:10px 12px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  .yes{color:var(--ok); font-weight:600}
+  .no{color:var(--muted)}
+
+  /* 图 */
+  figure{margin:24px 0; text-align:center}
+  figure img{max-width:100%; height:auto; border:1px solid var(--line); border-radius:10px; background:#fff}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+
+  /* 提示框 */
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+
+  blockquote{border-left:3px solid var(--accent); margin:14px 0; padding:6px 16px; color:var(--text); background:var(--panel); border-radius:0 8px 8px 0}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+  .mjx-container{overflow-x:auto; overflow-y:hidden}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <!-- ============================ 抬头 / 元信息 ============================ -->
+  <header class="head">
+    <div class="chips">
+      <span class="chip">Blog</span>
+      <span class="chip">Agent</span>
+      <span class="chip">AutoResearch</span>
+      <span class="chip">SFT</span>
+      <span class="chip">Online Feedback</span>
+      <span class="chip">Online ELO</span>
+      <span class="chip">A/B</span>
+      <span class="chip">Distribution Matching</span>
+    </div>
+    <h1>Online Autoresearch：把自动化研究 loop 接到真实线上反馈上</h1>
+    <p class="orig-title">Online Autoresearch: Running Autoresearch with Real Online Feedback</p>
+    <dl class="meta-grid">
+      <dt>作者</dt><dd>Alex Xi · mouse · nociza · ZireVahn</dd>
+      <dt>团队 / 机构</dt><dd>Kaon Labs (KaonAI)，San Francisco · Beijing</dd>
+      <dt>原文链接</dt><dd><a href="https://research.kaonai.com/blog/online-autoresearch" target="_blank" rel="noopener">https://research.kaonai.com/blog/online-autoresearch</a></dd>
+      <dt>类型 / 发表</dt><dd>技术博客（KaonAI Blog），2026 年 5 月 25 日</dd>
+      <dt>解读日期</dt><dd>2026-05-30</dd>
+    </dl>
+  </header>
+
+  <div class="tldr">
+    <b>TL;DR</b> — KaonAI 把一个 autoresearch 的 agent loop 直接接到了拥有 millions DAU 的消费级产品的<strong>真实线上流量</strong>上：agent 自己提出 hypothesis、过滤数据、跑 fixed-budget 的 SFT、部署 candidate model，然后用真实用户在产品里的两两偏好（online ELO）作为<strong>唯一 reward signal</strong> 来决定保留还是丢弃。两天里跑了 7 个实验，把线上偏好 win rate 从 <strong>56.0% 提到 60.1%</strong>。最反直觉、也是全文核心的发现是：<strong>更「脏」、历史 context 更杂的训练数据，反而打赢了更干净的 expert 数据</strong>——真正决定 fine-tune 是否有效的，是数据分布有没有匹配 deployment distribution，而不是怎么精调 hyperparameter。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#opensource">① 开源贡献</a>
+    <a href="#motivation">② 动机与贡献</a>
+    <a href="#method">③ 方法</a>
+    <a href="#evaluation">④ 实验评估</a>
+    <a href="#insight">⑤ 洞见</a>
+  </nav>
+
+  <!-- ============================ ① 开源贡献 ============================ -->
+  <section id="opensource">
+    <h2><span class="n">①</span>开源贡献 Open-source Artifacts</h2>
+    <p>这是一篇<strong>公司研究博客（engineering blog）</strong>，不是带开源 release 的 paper。需要特别说明的是：<strong>本文没有开源任何 KaonAI 自己的 artifact</strong>——无论是 autoresearch harness 的代码、训练出来的 model、还是训练用的数据集，都没有放出。文中出现的 GitHub / Hugging Face / 博客链接，全部是<strong>「引用 / 参考，非本文开源」</strong>的他方工作（Karpathy、OpenAI、Google、Cursor、Dario Amodei）。下表把这一点逐项核实清楚，避免把「引用的参考」误读成「博客自己的开源」。</p>
+    <table>
+      <thead><tr><th>类型</th><th>是否本文开源</th><th>内容 / 链接（核实结论）</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>代码 Code（autoresearch harness）</td>
+          <td class="no">✘</td>
+          <td>博客详细描述了 harness 的接口与 loop，但<strong>未放出任何代码仓库</strong>；也未找到 Kaon Labs / KaonAI 的 GitHub org。文末唯一的行动号召是招聘链接（"come join us"）。</td>
+        </tr>
+        <tr>
+          <td>模型权重 Weights</td>
+          <td class="no">✘</td>
+          <td>训练得到的 candidate model（基于 Gemma 4 26B 的 SFT 产物）<strong>未开源</strong>，仅在自家产品内部 serving。</td>
+        </tr>
+        <tr>
+          <td>数据集 Dataset</td>
+          <td class="no">✘</td>
+          <td>训练数据来自<strong>清洗自家历史对话</strong>（涉及真实用户），<strong>未公开</strong>。</td>
+        </tr>
+        <tr>
+          <td>环境 / Benchmark</td>
+          <td class="no">✘</td>
+          <td>评测用的 online ELO / arena 系统是<strong>自家产品内置的线上评测系统</strong>，依赖真实流量，不可对外复现，<strong>未开源</strong>。</td>
+        </tr>
+        <tr>
+          <td>引用 / 参考（非本文开源）</td>
+          <td class="no">引用</td>
+          <td>
+            ① <a href="https://github.com/karpathy/autoresearch" target="_blank" rel="noopener">karpathy/autoresearch</a>（Andrej Karpathy，MIT，已核实存在：让 agent 在单 GPU 上自动跑 nanochat 训练研究）——<strong>灵感来源，非本文产出</strong>；<br>
+            ② <a href="https://github.com/openai/parameter-golf" target="_blank" rel="noopener">openai/parameter-golf</a>（OpenAI，MIT，已核实存在：把 LM 压进 16MB 的挑战）——<strong>引用</strong>；<br>
+            ③ <a href="https://huggingface.co/google/gemma-4-26B-A4B-it" target="_blank" rel="noopener">google/gemma-4-26B-A4B-it</a>（Google 的 base model，本文拿来做 SFT 的<strong>底座</strong>，非 KaonAI 发布）；<br>
+            ④ Cursor 的 <a href="https://cursor.com/blog/composer-2-5" target="_blank" rel="noopener">Composer 2.5</a> / <a href="https://cursor.com/blog/composer-2-technical-report" target="_blank" rel="noopener">Composer 2 技术报告</a> / <a href="https://cursor.com/blog/tab-rl" target="_blank" rel="noopener">Tab RL</a> / <a href="https://cursor.com/blog/real-time-rl-for-composer" target="_blank" rel="noopener">Real-Time RL for Composer</a>，及 <a href="https://www.darioamodei.com/essay/the-adolescence-of-technology" target="_blank" rel="noopener">Dario Amodei 的 essay</a>——均为<strong>引用</strong>。
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="callout warn">
+      <span class="label">核实结论</span>
+      截至解读日，KaonAI 在本文中<strong>没有任何可下载的开源 artifact</strong>。文中所有 GitHub / HF 链接都是引用他人工作。请勿把 <code>karpathy/autoresearch</code> 或 <code>openai/parameter-golf</code> 当成本博客的开源成果。
+    </div>
+  </section>
+
+  <!-- ============================ ② 动机与贡献 ============================ -->
+  <section id="motivation">
+    <h2><span class="n">②</span>研究动机与贡献 Motivation &amp; Contribution</h2>
+
+    <figure>
+      <img src="figures/distributions-hero.png" alt="若干分布曲线，其中一条带颗粒噪点">
+      <figcaption>题图：几条 distribution 曲线，其中一条带颗粒噪点——隐喻全文主题「更脏、更杂的数据分布」。图源：KaonAI 博客（post-hero-evaluation）。</figcaption>
+    </figure>
+
+    <h3>背景与问题：autoresearch 正在从想法变成工程范式</h3>
+    <p>过去几个月里，<strong>autoresearch</strong>（让 agent 自动做研究）正从一个有趣的想法演变为可落地的工程范式。Karpathy 的 <a href="https://github.com/karpathy/autoresearch" target="_blank" rel="noopener">autoresearch</a> 给出了清晰方向：让 agent 不只是回答问题，而是<strong>提出实验、跑训练、读结果、再进入下一轮</strong>。类似思路也出现在偏算法搜索 / heuristic learning 的工作里（如 OpenAI 的 <a href="https://github.com/openai/parameter-golf" target="_blank" rel="noopener">Parameter Golf</a>，以及用 agent 在物理仿真环境中发现可解释 heuristic policy 的实验）。Cursor 的 Composer 系列也在反复强调同一点：一个真正有用的 agent，不该只在静态 benchmark 上好看，而应该能在一个<strong>逼近真实工作环境的 harness</strong> 里持续完成复杂任务。</p>
+
+    <h3>切入点：offline evaluation 不够，得接真实线上反馈</h3>
+    <p>KaonAI 的关键观察是——<strong>offline evaluation 根本不够</strong>。在对话模型里，用户偏好往往来自非常细的细节：语气（tone）、节奏（pacing）、回复长度、模型有没有接住上下文、用户还想不想继续聊。这些信号<strong>很多 offline metric 是不敏感的</strong>。原文说得很直白：</p>
+    <blockquote>"Loss 能帮你选 checkpoint，但它几乎没法告诉你哪种 data distribution 对线上用户更好。"</blockquote>
+    <p>更糟的是，他们一开始也保留了 training loss、validation loss、固定 case 的 judge、通用 benchmark 等 offline 辅助信号，结果发现这些信号<strong>不仅不能对齐线上主目标，反而会干扰模型的决策</strong>——因为 agent「极其容易做错误归因（misattribution）」，把某个 offline 指标的变化错当成线上会变好的依据。于是他们最终<strong>只保留 online evaluation</strong>。</p>
+
+    <h3>核心贡献</h3>
+    <ol>
+      <li><strong>把 autoresearch loop 接到真实线上流量上、并以 online ELO 作为唯一 reward signal。</strong>在一个 millions DAU 的消费级 AI-native 产品里，用户在真实使用中对两个模型回复做两两偏好选择，系统聚合成各 candidate model 的 win rate；agent 据此（结合 sample count 与 convergence）决定保留或丢弃实验。当评测、选数据、训练决策<strong>全部锚定同一个线上分布</strong>时，整个迭代过程是 <strong>on-policy</strong> 的。</li>
+      <li><strong>用很朴素的算力（单台 8×H100）+ 严格 fixed budget，跑出了真实增益。</strong>两天、7 个 SFT 实验，online 偏好 win rate 从 <strong>56.0% → 60.1%</strong>（best run）。fixed budget 的设计是为了防止 autoresearch 退化成无脑 grid search。</li>
+      <li><strong>得到一个可迁移、且反直觉的结论：</strong>对一个本就很强的 base model，fine-tune 是否有效，主要取决于<strong>数据分布是否匹配 deployment context distribution</strong>，而不是 hyperparameter 调得多细——agent 是「发现了更好的训练分布」，而不是「调出了更好的超参」。</li>
+    </ol>
+  </section>
+
+  <!-- ============================ ③ 方法 ============================ -->
+  <section id="method">
+    <h2><span class="n">③</span>方法 Method：autoresearch harness 与 agent loop</h2>
+    <p>整体设计可以概括为：<strong>一个被严格约束的 harness + 一个能在其上安全组合「研究动作」的 agent</strong>。产品本身是一个 millions DAU 的消费级 AI-native 内容平台，内置 arena 式线上评测系统——用户在真实使用中对两个模型回复做偏好选择，系统持续聚合这些选择，为每个 candidate model 计算 ELO。这给了 agent 一个<strong>天然、高频的 online reward signal</strong>，直接插进它的研究 loop。</p>
+
+    <h3>整体 loop</h3>
+    <p>完整的循环是：</p>
+    <blockquote><code>fetch raw data → filtering → fixed-budget sampling → SFT training → candidate deployment → online ELO evaluation → result aggregation → next experiment</code></blockquote>
+    <p>硬件规模并不奢侈：<strong>单台 8×H100</strong>，训练一个 <a href="https://huggingface.co/google/gemma-4-26B-A4B-it" target="_blank" rel="noopener">Gemma 4（26B）</a>。每个实验都被限制在<strong>固定预算</strong>内，而不是让 agent 自由 scale up。默认 setup 为：</p>
+    <ul>
+      <li>单节点，8×H100；</li>
+      <li>固定 data budget（fixed data budget）；</li>
+      <li>固定 training recipe；</li>
+      <li>固定 online ELO 评测协议；</li>
+      <li><strong>每个实验只改一个主变量（one primary variable）。</strong></li>
+    </ul>
+    <div class="callout note">
+      <span class="label">为什么要 fixed budget</span>
+      原文强调这个约束很关键：没有预算边界，autoresearch 很容易退化成<strong>自动化 grid search</strong>——agent 会一味试更多 step、更多数据、更多参数，最后得到一堆<strong>无法归因（impossible to attribute）</strong>的结果。harness 的设计目标，就是让每一轮足够便宜，同时让<strong>每一次变量改动都可解释</strong>。
+    </div>
+
+    <h3>harness 提供的受控接口</h3>
+    <p>harness 给 agent 提供一组<strong>受控接口（controlled interfaces）</strong>，让它能安全地组合研究动作——agent 可以提出 hypothesis、改训练分布、发起实验，但<strong>不能任意改动所有变量</strong>：</p>
+    <ul>
+      <li><strong>Data interface：</strong>对训练数据做 filter、sample、split。</li>
+      <li><strong>Training interface：</strong>在一个可比较的 budget 内固定训练过程。</li>
+      <li><strong>Deployment interface：</strong>把 candidate model 接入内部 serving 与评测栈。</li>
+      <li><strong>Evaluation interface：</strong>提交 online ELO，读取聚合后的指标。</li>
+      <li><strong>Memory interface：</strong>持久化上一轮的结论、研究约束（constraints）、下一轮计划。</li>
+      <li><strong>Cleanup interface：</strong>停止实验、释放资源、清理临时配置。</li>
+    </ul>
+    <p>其中 <strong>memory layer</strong> 很重要：它记录当前实验约束、已验证的判断、中间 hypothesis 和下一轮计划，让 agent 在长 loop 中不必只依赖即时 context。新想法先被记成 hypothesis，再翻译成 data filter / training config / evaluation 实验；即便一个长任务被打断，agent 也能从这些持久化的 constraints 与 plans 里<strong>恢复当前研究方向</strong>。</p>
+
+    <h3>agent 自己「发现」的调度模式：one-step-off pipeline</h3>
+    <p>这是方法里很有意思的一处<strong>涌现行为</strong>。如果每一轮都严格串行（train → deploy → eval → analyze → next train），整个 loop 会非常慢：online evaluation 要等真实流量、deployment 有 cold start、本地训练资源又不能闲置。跑了多轮之后，agent 逐渐<strong>自己收敛到一个「错一拍（one-step-off）」的四 lane 并行调度</strong>，把不同资源塞满：</p>
+
+    <figure>
+      <svg viewBox="0 0 820 250" width="100%" role="img" aria-label="four-lane one-step-off scheduling">
+        <style>
+          .lane{fill:var(--panel2); stroke:var(--line);}
+          .blk{stroke:var(--line); rx:6;}
+          .t{font:600 13px -apple-system,Segoe UI,Roboto,sans-serif; fill:var(--text);}
+          .lt{font:600 12px -apple-system,Segoe UI,Roboto,sans-serif; fill:var(--muted);}
+          .bt{font:12px -apple-system,Segoe UI,Roboto,sans-serif; fill:var(--text);}
+          .g1{fill:rgba(122,162,255,.30)} .g2{fill:rgba(155,140,255,.30)}
+          .g3{fill:rgba(67,197,158,.30)} .g4{fill:rgba(255,180,84,.28)}
+        </style>
+        <!-- time axis -->
+        <text x="150" y="20" class="lt">t</text><text x="330" y="20" class="lt">t+1</text>
+        <text x="510" y="20" class="lt">t+2</text><text x="690" y="20" class="lt">t+3</text>
+        <!-- lanes -->
+        <text x="6" y="55" class="lt">GPU</text>
+        <text x="6" y="105" class="lt">Network</text>
+        <text x="6" y="155" class="lt">Remote</text>
+        <text x="6" y="205" class="lt">CPU</text>
+        <!-- GPU lane: train N -->
+        <rect class="blk g1" x="90" y="40" width="160" height="28"/><text x="100" y="59" class="bt">train Exp N</text>
+        <rect class="blk g1" x="270" y="40" width="160" height="28"/><text x="280" y="59" class="bt">train Exp N+1</text>
+        <rect class="blk g1" x="450" y="40" width="160" height="28"/><text x="460" y="59" class="bt">train Exp N+2</text>
+        <!-- Network lane: prepare/upload N-1 -->
+        <rect class="blk g2" x="90" y="90" width="160" height="28"/><text x="98" y="109" class="bt">upload Exp N−1</text>
+        <rect class="blk g2" x="270" y="90" width="160" height="28"/><text x="280" y="109" class="bt">upload Exp N</text>
+        <rect class="blk g2" x="450" y="90" width="160" height="28"/><text x="460" y="109" class="bt">upload Exp N+1</text>
+        <!-- Remote lane: deploy+eval N-1 -->
+        <rect class="blk g3" x="90" y="140" width="160" height="28"/><text x="96" y="159" class="bt">deploy+eval N−1</text>
+        <rect class="blk g3" x="270" y="140" width="160" height="28"/><text x="282" y="159" class="bt">deploy+eval N</text>
+        <rect class="blk g3" x="450" y="140" width="160" height="28"/><text x="458" y="159" class="bt">deploy+eval N+1</text>
+        <!-- CPU lane: analyze N-2 + prepare N+1 -->
+        <rect class="blk g4" x="90" y="190" width="160" height="28"/><text x="96" y="209" class="bt">analyze N−2 · prep</text>
+        <rect class="blk g4" x="270" y="190" width="160" height="28"/><text x="280" y="209" class="bt">analyze N−1 · prep</text>
+        <rect class="blk g4" x="450" y="190" width="160" height="28"/><text x="460" y="209" class="bt">analyze N · prep</text>
+      </svg>
+      <figcaption>图 1：agent 自发收敛出的「错一拍」四 lane 并行调度示意（依原文描述重绘）。GPU lane 训练第 N 个实验，同时 Network/Remote lane 在准备、上传、部署并评测第 N−1 个，CPU lane 在分析第 N−2 个并准备第 N+1 个。靠这种 pipeline，<strong>单个实验从训练到拿到可用线上信号，通常能压到「一小时多一点」的量级</strong>。</figcaption>
+    </figure>
+
+    <ul>
+      <li><strong>GPU lane：</strong>训练实验 N。</li>
+      <li><strong>Network lane：</strong>准备 / 上传实验 N−1。</li>
+      <li><strong>Remote lane：</strong>部署 + online eval 实验 N−1。</li>
+      <li><strong>CPU lane：</strong>分析实验 N−2 + 准备实验 N+1。</li>
+    </ul>
+    <p>原文点明：如果 agent 频繁闲置，就撑不住研究进度——而这种 one-step-off 的流水线，正是 agent 在 harness 约束下为了「不让任何资源 idle」而自己摸索出来的。</p>
+  </section>
+
+  <!-- ============================ ④ 实验评估 ============================ -->
+  <section id="evaluation">
+    <h2><span class="n">④</span>实验评估 Evaluation</h2>
+
+    <h3>评测设置：win rate 怎么用线上 A/B 流量量出来</h3>
+    <ul>
+      <li><strong>评测对象：</strong>每个 candidate model（基于 Gemma 4 26B 的不同 SFT 产物）。</li>
+      <li><strong>评测方式 / Benchmark：</strong><strong>online ELO</strong>——所有 candidate 进入同一个真实线上流量池，用户在产品里对两个回复做两两偏好选择（arena / A/B 形式），系统把这些选择聚合成可比较的 win rate。原文强调 ELO 的好处是「简单直接」：信号就是<strong>真实用户到底更喜欢哪个回复</strong>。</li>
+      <li><strong>对比基线 Baseline：</strong>起点是 win rate <strong>56.0%</strong> 的 baseline model。</li>
+      <li><strong>指标 Metric：</strong>online 偏好 <strong>win rate（%）</strong>，<strong>越高越好</strong>。agent 综合 win rate、sample count、收敛情况（convergence）来判定保留 / 丢弃。</li>
+    </ul>
+    <div class="callout note">
+      <span class="label">on-policy 的含义</span>
+      因为评测、选数据、训练决策都锚定<strong>同一个线上分布</strong>，整个 autoresearch 迭代是 on-policy 的：每一个判断都<strong>直接来自、并直接作用于</strong>真实 deployment 环境。这与「在 offline 固定集上调好再上线」的范式有本质区别。
+    </div>
+
+    <h3>主要结果：7 个实验的 win rate 轨迹</h3>
+    <figure>
+      <img src="figures/autoresearch-progress.png" alt="Auto-Research Progress：7 个实验的 online ELO win rate 轨迹">
+      <figcaption>图 2：7 个实验的 online ELO win rate 轨迹。绿点 = 被保留（kept），灰点 = 被研究 loop 丢弃（discarded），绿线 = running best。Exp 6 仍在进行（in progress）。原文注明「内部实验名已匿名」。图源：KaonAI 博客（post-hero-autoresearch）。</figcaption>
+    </figure>
+
+    <p>把图 2 里能读到的点逐一列出（百分比按图中标注 / 刻度读取，灰点为近似值）：</p>
+    <table>
+      <thead><tr><th>实验</th><th>online ELO win rate</th><th>判定</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td>Baseline</td><td>56.0%</td><td class="yes">保留（baseline 起点）</td><td>running best 起点。</td></tr>
+        <tr><td>Exp 1</td><td><strong>57.5%</strong></td><td class="yes">保留 ✔</td><td>running best 抬升到 57.5%。</td></tr>
+        <tr><td>Exp 2</td><td>≈ 49.0%</td><td class="no">丢弃 ✘</td><td>明显低于 baseline，被 loop 丢弃。</td></tr>
+        <tr><td>Exp 3</td><td><strong>60.1%</strong></td><td class="yes">保留 ✔（best）</td><td><strong>本轮最佳结果</strong>，running best 跳到 60.1%。</td></tr>
+        <tr><td>Exp 4</td><td>≈ 52.6%</td><td class="no">丢弃 ✘</td><td>低于当前 best。</td></tr>
+        <tr><td>Exp 5</td><td>≈ 54.1%</td><td class="no">丢弃 ✘</td><td>低于当前 best。</td></tr>
+        <tr><td>Exp 6</td><td>—（running）</td><td class="no">进行中</td><td>截稿时仍在跑。</td></tr>
+      </tbody>
+    </table>
+    <p>所以 <strong>running best 的轨迹是 56.0% → 57.5% → 60.1%</strong>，净提升约 <strong>+4.1 个百分点</strong>。7 个实验里只有少数被保留，多数被丢弃——这恰恰说明 online ELO 作为筛选信号在<strong>真的起作用</strong>：agent 不是把每个实验都当成进步，而是用真实用户偏好把大部分尝试挡在了门外。</p>
+
+    <h3>关键消融 / 分析：「更脏」的数据反而赢了</h3>
+    <p>这是全文最有分量的分析。直觉上我们通常假设：用更强的 <strong>expert model</strong> 生成训练数据，student model 应该学得更好——expert 的回复更稳、更干净、错误更少，看起来更适合当 teacher。但在 online ELO 里，agent 对比了用不同数据源训练出来的 candidate 的 win rate 曲线，观察到一个<strong>反直觉</strong>的结果：</p>
+    <blockquote>用一个相对「没那么 expert」的数据源做 fine-tune，反而<strong>打赢了</strong>用更强、更干净的 expert 数据。</blockquote>
+    <p>在分析训练数据与线上结果时，<strong>agent 自己提出了一个 hypothesis</strong>：这个「更弱」的数据源拥有<strong>更异质（heterogeneous）的历史 context</strong>——它的对话历史里包含了<strong>不同模型、在不同阶段</strong>产生的回复，因此更像真实的线上 runtime 环境；而 expert model 的数据虽然更干净、更自洽（self-consistent），却也更像一个<strong>封闭分布（closed distribution）</strong>。</p>
+    <p>这个 hypothesis 反过来改变了后续实验方向，正好对应图 2 里的故事线：</p>
+    <ul>
+      <li><strong>Experiment 1</strong>：数据「看起来质量更高」，但<strong>没有带来线上提升</strong>；</li>
+      <li><strong>Experiment 2</strong>：teacher 不一定更强，但它的<strong>历史分布更接近真实产品流量</strong>，于是表现更好；</li>
+      <li><strong>Experiment 3</strong>：进一步<strong>放大这个 distribution-matching 信号</strong>，成为本轮迭代的<strong>最佳结果（60.1%）</strong>。</li>
+    </ul>
+    <div class="callout note">
+      <span class="label">叙事与图表如何对应</span>
+      需要诚实指出一处细节：原文正文里讲的 "Experiment 1/2/3" 是围绕<strong>数据分布</strong>展开的<strong>叙事线索</strong>（哪种数据更匹配线上），并未逐一给出每个实验的精确 win rate 数字；而图 2 给的是<strong>实际跑出的 kept / discarded 点</strong>（Baseline 56.0% → Exp 1 57.5% → Exp 3 60.1% 为绿色 running best，Exp 2/4/5 为灰色被丢弃）。两者从不同角度描述同一轮迭代，本解读把可核实的图表数字与文字叙事并列呈现，未做强行一一对齐。
+    </div>
+  </section>
+
+  <!-- ============================ ⑤ 洞见 ============================ -->
+  <section id="insight">
+    <h2><span class="n">⑤</span>洞见 Insights</h2>
+    <div class="callout insight">
+      <span class="label">Insight</span>
+      <ol style="margin:6px 0">
+        <li><strong>分布匹配 &gt; 调参。</strong>对一个已经很强的 base model，fine-tune 是否有效，往往取决于<strong>你喂的数据是否真的匹配 deployment context distribution</strong>，而不是 hyperparameter grid 扫得多细。agent 的增益来自「发现了更好的训练分布」，不是「调出了更好的超参」。</li>
+        <li><strong>「更脏 / 更杂」可能正是优点。</strong>包含多个模型、多个阶段回复的<strong>异质历史</strong>，比单一 expert 的干净数据更像线上真实环境；过于干净、自洽的数据反而是个<strong>封闭分布</strong>，与部署时遇到的输入分布脱节。</li>
+        <li><strong>reward signal 选错会主动误导 agent。</strong>offline metric（loss、固定 case judge、通用 benchmark）不仅不敏感于 tone / pacing / 长度等真实偏好信号，还会诱导 agent 做<strong>错误归因</strong>。把 reward 收敛到<strong>唯一的真实线上目标</strong>，反而让整个 loop 更干净、更 on-policy。</li>
+        <li><strong>harness 的约束本身就是方法。</strong>fixed budget + 每次只改一个变量，防止 autoresearch 退化成无法归因的 grid search；而「不让资源 idle」这种工程约束，竟能让 agent 自发涌现出 one-step-off 的并行调度。</li>
+      </ol>
+    </div>
+
+    <h3>局限与未来</h3>
+    <p>作者自己点了两个主要局限，并给出下一步方向：</p>
+    <ul>
+      <li><strong>反馈周期还是偏长。</strong>online ELO 和 Session A/B 虽然都是真实线上反馈，但要累积足够多的用户选择才收敛——<strong>单次判断常常要几十分钟到数小时</strong>。下一步想做一个<strong>更实时的 online evaluation 系统</strong>：仍源自真实用户 / 真实产品行为，但能更快产出稳定可用的本地信号，把研究 loop 从「每轮几小时」压缩到「每轮几十分钟」。</li>
+      <li><strong>当前还不是真正的 on-policy 数据。</strong>现在的训练数据来自<strong>清洗历史对话</strong>，并不是「正在被训练的那个模型自己采样出来的」on-policy 数据。下一步想让<strong>已部署的模型把自己的真实交互数据直接作为下一轮训练的输入</strong>，让每一轮的训练分布<strong>就是</strong>部署分布，形成 <strong>on-policy data flywheel</strong>：更好的模型 → 更高质量的线上交互 → 更好的训练数据 → 更好的模型。</li>
+    </ul>
+    <p>从我个人的判断看，这篇博客的样本量与统计严谨度（灰点 win rate 只能从图里近似读、未给置信区间 / 显著性）决定了它更像一份<strong>工程实践报告而非严格论文</strong>；「dirtier data wins」也很可能<strong>强依赖于「对话产品 + 历史对话即训练数据」这一特定 setting</strong>，未必能无条件外推到别的任务。但它把「online reward + on-policy 迭代」这条路用很小的算力跑通并拿到正增益，方法论上的启发是实打实的。</p>
+
+    <h3>与相关工作的关系</h3>
+    <p>按本文自身的论述，它把 Karpathy 的 <strong>autoresearch</strong>（agent 自动提实验、跑训练、读结果、再迭代）这条线，从 Karpathy 原版的「单 GPU 上自动跑 nanochat 训练、用 validation 指标自评」推进到了<strong>用真实线上用户偏好作为 reward</strong> 的版本。它与 OpenAI <strong>Parameter Golf</strong>、以及在物理仿真里用 agent 发现可解释 heuristic policy 的工作，共享「让 agent 做算法 / 启发式搜索」的精神；而与 Cursor 的 <strong>Composer 系列 / Tab RL / Real-Time RL for Composer</strong> 最为同频——都强调 agent 要在<strong>逼近真实工作环境的 harness</strong> 里被评测，Cursor 已在 code completion / 多文件编辑里验证了类似的 on-policy loop，本文则把它搬到了<strong>消费级对话产品的真实线上流量</strong>上。文末引用 Dario Amodei 「a country of geniuses in a datacenter」的比喻收尾：真正重要的也许不只是模型多聪明，而是我们能否为这些 agent 造出足够好的 <strong>harness</strong>——让它们接触真实反馈、遵守实验约束、积累长期 memory，把能力转化成可验证的进展。</p>
+  </section>
+
+  <footer class="foot">
+    本页为 <code>paper-reading</code> skill 生成的阅读笔记，仅作辅助，细节以
+    <a href="https://research.kaonai.com/blog/online-autoresearch" target="_blank" rel="noopener">原文</a> 为准 · 解读日期 2026-05-30
+  </footer>
+
+</article>
+</body>
+</html>

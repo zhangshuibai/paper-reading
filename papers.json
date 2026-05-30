@@ -56,5 +56,24 @@
       "RL"
     ],
     "path": "papers/2605.24426-seal-coevolution-agents-environments/index.html"
+  },
+  {
+    "slug": "2026-05-30-kaonai-online-autoresearch",
+    "title": "Online Autoresearch: Running Autoresearch with Real Online Feedback",
+    "authors": "Alex Xi 等",
+    "team": "Kaon Labs (KaonAI)",
+    "arxiv": "https://research.kaonai.com/blog/online-autoresearch",
+    "code": "",
+    "date": "2026-05-30",
+    "published": "KaonAI Blog 2026",
+    "tldr": "把 autoresearch 的 agent loop 接到真实线上流量，用 online ELO win rate 作为唯一 reward，两天 7 个 SFT 实验把 win rate 从 56.0% 提到 60.1%；核心发现是更脏、更匹配 deployment distribution 的数据胜过干净的 expert 数据。",
+    "tags": [
+      "Blog",
+      "Agent",
+      "AutoResearch",
+      "RL",
+      "Online-Feedback"
+    ],
+    "path": "papers/2026-05-30-kaonai-online-autoresearch/index.html"
   }
 ]
