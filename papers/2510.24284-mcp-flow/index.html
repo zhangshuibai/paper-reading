@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MCP-Flow：用 web agent 自动造数据，教 LLM 用真实 MCP 工具 · 论文解读</title>
+<script>
+  window.MathJax = {
+    tex:{inlineMath:[['$','$'],['\\(','\\)']], displayMath:[['$$','$$'],['\\[','\\]']]},
+    svg:{fontCache:'global'}
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;
+  }
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:880px; margin:0 auto; padding:18px 22px 90px}
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:27px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)}
+  .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .meta-grid a:hover{text-decoration:underline}
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap}
+  nav.toc a:hover{color:var(--accent)}
+  section{margin:38px 0}
+  h2{font-size:21px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:17px; margin:24px 0 8px}
+  p{margin:12px 0}
+  ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.9em}
+  strong{color:var(--text)}
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:13.5px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:8px 10px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  .yes{color:var(--ok); font-weight:600}
+  .no{color:var(--muted)}
+  .hl td{background:rgba(122,162,255,.10)}
+  figure{margin:24px 0; text-align:center}
+  figure img{max-width:100%; height:auto; border:1px solid var(--line); border-radius:10px; background:#fff}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+  .kpis{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin:16px 0}
+  .kpi{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:12px 14px; text-align:center}
+  .kpi .v{font-size:20px; font-weight:700; color:var(--accent2)}
+  .kpi .l{font-size:12px; color:var(--muted); margin-top:3px}
+  @media (max-width:640px){ .kpis{grid-template-columns:repeat(2,1fr)} }
+  blockquote{border-left:3px solid var(--line); margin:14px 0; padding:2px 16px; color:var(--muted)}
+  pre{background:var(--panel2); border:1px solid var(--line); border-radius:10px; padding:12px 14px; overflow:auto; font-size:12.5px; line-height:1.5}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+  .mjx-container{overflow-x:auto; overflow-y:hidden}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">MCP</span>
+      <span class="chip">LLM agent</span>
+      <span class="chip">tool use</span>
+      <span class="chip">function calling</span>
+      <span class="chip">data synthesis</span>
+      <span class="chip">ACL 2026</span>
+    </div>
+    <h1>MCP-Flow：用 web agent 自动造数据，教 LLM 掌握真实、多样、可扩展的 MCP 工具</h1>
+    <p class="orig-title">MCP-Flow: Facilitating LLM Agents to Master Real-World, Diverse and Scaling MCP Tools</p>
+    <dl class="meta-grid">
+      <dt>作者</dt><dd>Wenhao Wang, Peizhi Niu, Zhao Xu, Zhaoyu Chen, Jian Du, Yaxin Du, Xianghe Pang, Keduan Huang, Yanfeng Wang, Qiang Yan, Siheng Chen</dd>
+      <dt>团队 / 机构</dt><dd>TikTok · Shanghai Jiao Tong University · Zhejiang University · University of Illinois at Urbana–Champaign（一作在 TikTok 实习期间完成）</dd>
+      <dt>原文链接</dt><dd><a href="https://arxiv.org/abs/2510.24284" target="_blank" rel="noopener">arXiv:2510.24284</a>（v3, 2026-04-16）</dd>
+      <dt>代码 / 数据</dt><dd><a href="https://github.com/wwh0411/MCP-Flow" target="_blank" rel="noopener">github.com/wwh0411/MCP-Flow</a> · <a href="https://huggingface.co/datasets/wwh0411/MCP-Flow" target="_blank" rel="noopener">🤗 datasets/wwh0411/MCP-Flow</a></dd>
+      <dt>发表 / 年份</dt><dd>ACL 2026 Main（Camera Ready）</dd>
+      <dt>解读日期</dt><dd>2026-05-30</dd>
+    </dl>
+  </header>
+
+  <div class="tldr">
+    <b>TL;DR</b> — 现有研究里，LLM 其实<strong>不太会用 MCP（Model Context Protocol）工具</strong>，而专门用来「教模型用 MCP」的大规模高质量数据几乎是空白。MCP-Flow 用一个 <strong>web agent（Playwright）自动爬遍 6 大 MCP marketplace</strong>，发现并本地部署 server，再用 few-shot 生成 + slot-fill + WizardLM evolution 合成指令、并经严格过滤，得到覆盖 <strong>1166 个 server、11536 个 tool</strong> 的 <strong>68733 条 instruction–function call pair</strong> 与 <strong>6439 条 trajectory</strong>。在此数据上用 LoRA 微调出的<strong>小模型（Qwen3-0.6B/4B、Llama3.1-8B）反超 GPT-4o、Claude-4-Sonnet 等大模型</strong>，并能泛化到未见过的 tool/server；该数据还能以 RAG 形式增强闭源模型、并在 GAIA 上降本提效。本质上它回答的是：「MCP 这个新生态里，怎样可扩展地造数据，才能让 agent 真正会调工具。」
+  </div>
+
+  <div class="kpis">
+    <div class="kpi"><div class="v">1166 / 11536</div><div class="l">server 数 / tool 数</div></div>
+    <div class="kpi"><div class="v">68733</div><div class="l">instruction–function call</div></div>
+    <div class="kpi"><div class="v">6439</div><div class="l">多轮 trajectory</div></div>
+    <div class="kpi"><div class="v">≈¢25 / server</div><div class="l">自动采集成本</div></div>
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#opensource">① 开源贡献</a>
+    <a href="#motivation">② 动机与贡献</a>
+    <a href="#method">③ 方法</a>
+    <a href="#evaluation">④ 实验评估</a>
+    <a href="#insight">⑤ 洞见</a>
+  </nav>
+
+  <!-- ① 开源贡献 -->
+  <section id="opensource">
+    <h2><span class="n">①</span>开源贡献 Open-source Artifacts</h2>
+    <p>这是一篇 <strong>pipeline + 数据集</strong> 为核心的工作，开源程度较高：GitHub 放出采集/合成/训练/评测的代码骨架，完整数据集托管在 Hugging Face。下表链接均于解读日（2026-05-30）逐项核实。</p>
+    <table>
+      <thead><tr><th>类型</th><th>是否开源</th><th>内容 / 链接（核实情况）</th></tr></thead>
+      <tbody>
+        <tr><td>代码 Code</td><td class="yes">✔</td><td><a href="https://github.com/wwh0411/MCP-Flow" target="_blank" rel="noopener">github.com/wwh0411/MCP-Flow</a>（标题标注 [ACL 2026 Main]，核实当日 ~21 star）。README 列出 <code>./src/</code>（server 部署核心脚本）、<code>./data/mcp_config/</code>、<code>./data/tools/</code>、<code>./data/function_call/</code>、<code>./data/trajectory/</code>、<code>./wizard_utils/</code> 与 <code>requirements.txt</code>。覆盖数据采集 → 合成 → 训练（基于 LLaMA-Factory）→ 评测链路。</td></tr>
+        <tr><td>数据集 Dataset</td><td class="yes">✔</td><td><a href="https://huggingface.co/datasets/wwh0411/MCP-Flow" target="_blank" rel="noopener">huggingface.co/datasets/wwh0411/MCP-Flow</a>（公开、非 gated，API 核实存在；约 2 GB，下载量数十）。字段含 <code>instruction</code> / <code>function_call</code> / <code>conversations</code> / <code>tools</code> / <code>server_name</code> / <code>tool_name</code>；按来源市场（smithery / glama / mcphub / mcpso / pipedream / deepnlp）组织，并含 <code>test_data/</code>（tool 数 5/10/20/30/40/100 的多档测试集）。</td></tr>
+        <tr><td>模型权重 Weights</td><td class="no">✘</td><td>README 与论文均未提供微调后 checkpoint 的下载链接；需用开源 base model（Qwen3-0.6B/4B、Llama3.1-8B）+ 提供的脚本自行复现。</td></tr>
+        <tr><td>环境 / Benchmark</td><td class="yes">✔</td><td>评测集（seen-test / unseen-tool / unseen-server 三档 + 不同 tool size）随数据集发布；采用 <strong>BFCL 的 AST 指标</strong>、并用 <strong>GAIA</strong> 评测 agentic 能力。评测代码在仓库内。</td></tr>
+        <tr><td>License</td><td class="no">未标注</td><td>GitHub README 与 HF 数据卡均<strong>未显式声明 license</strong>；HF metadata 也提示缺失。引用前建议向作者确认授权范围。</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:13px;color:var(--muted)">说明：arXiv v1 提交于 2025-10-28，v3 修订于 2026-04-16，被 ACL 2026 Main 接收。早期网络检索曾出现「license not specified」提示，本文如实标注为「未标注」而非臆测。</p>
+  </section>
+
+  <!-- ② 动机与贡献 -->
+  <section id="motivation">
+    <h2><span class="n">②</span>研究动机与贡献 Motivation &amp; Contribution</h2>
+
+    <h3>背景：MCP 是什么，为什么重要</h3>
+    <p><strong>Model Context Protocol (MCP)</strong> 是 Anthropic（2024）提出的开放协议，为 LLM 提供一套<strong>统一接口</strong>去发现、调用、组合外部 tool 与数据源。与「接口固定、灵活性有限」的传统 REST API 不同，MCP 提供一个动态、context-aware 的环境，让 LLM agent 能适配异构 server 与持续演化的功能。围绕 MCP 已经涌现出一批 marketplace（Smithery、Glama、MCP.so、PulseMCP、MCPHub、PipeDream 等），server / tool 数量爆炸式增长。</p>
+
+    <h3>痛点：协议有了，但模型并不会用，且没有训练数据</h3>
+    <p>作者指出：实证表明即便是 SOTA 模型也难以充分利用 MCP 工具（正文实验中 GPT-4o、Claude-4-Sonnet 在真实 MCP 上的 <strong>AST 准确率不足 60%</strong>）。如其 Table 1 所总结，现有 MCP 研究有三大局限：</p>
+    <ol>
+      <li><strong>覆盖少、靠人工 (limited coverage &amp; manual curation)</strong>：多数工作只用 ≤20 个 server。例如 MCPToolBench++ 号称 4000 个 server 却只在 12 个上做实验；MCP-Zero 用 308 个 server 但只做「按位置检索」的简化任务，没有真实 user query。</li>
+      <li><strong>采集跟不上生态增长 (not scalable)</strong>：现有 server 收集严重依赖人力或为每个站点手写爬虫代码，无法跟上社区里 MCP server 的快速涌现。</li>
+      <li><strong>没有训练支持 (no training resources)</strong>：现有 benchmark 只能当评测平台用，无法把「评测发现的不足」转化为模型的实际提升——根因是缺少大规模、高质量的训练数据。</li>
+    </ol>
+    <p>更深一层的对比是：传统 tool learning（ToolBench、ToolLLM、APIGen、ToolACE、Gorilla 等）要么是合成数据「不够真实、不可执行」，要么基于不稳定且无统一协议的 REST API；而 MCP 恰好提供了「接口标准化、但内容高度多样且高速增长」的独特环境——这正是 MCP-Flow 想对症下药的地方。</p>
+
+    <h3>核心贡献</h3>
+    <ol>
+      <li><strong>一条 web-agent 驱动的自动化 pipeline</strong>：能从各 marketplace 自动发现、采集、增量更新真实、多样、持续扩张的 MCP server，而不是人工维护列表。</li>
+      <li><strong>一个大规模高质量数据集</strong>：覆盖 <strong>1166 server / 11536 tool</strong>（超过此前所有相关工作之和），含 <strong>68733 条 instruction–function call pair</strong> 与 <strong>6439 条 trajectory</strong>；同时支持训练、评测与 retrieval augmentation。</li>
+      <li><strong>一套紧凑的微调模型与三种用法验证</strong>：(a) 训练小模型显著提升 MCP tool 选择与调用格式化；(b) 作为 retrieval database 增强不可微调的闭源模型；(c) 作为「playground」反过来评测 MCP server / tool 本身的质量与异质性。</li>
+    </ol>
+  </section>
+
+  <!-- ③ 方法 -->
+  <section id="method">
+    <h2><span class="n">③</span>方法 Method</h2>
+    <p>MCP-Flow 的数据构造分两大组件：<strong>server 发现（§3.1）</strong> 与 <strong>data synthesis（§3.2 生成 + §3.3 过滤）</strong>，最终产出可训练的单轮 pair 与多轮 trajectory。下图是整体流程总览。</p>
+
+    <figure>
+      <img src="figures/fig1_overview.png" alt="MCP-Flow pipeline overview">
+      <figcaption>原文 Figure 1：Pipeline 总览。左侧 <b>Server &amp; Tool Collection</b>——web agent 从各 marketplace 爬取 server 元数据，本地部署后抽取 tool 信息；右侧 <b>Data Generation + Data Filtration</b>——ICL Generation / Slot-Fill Revision / WizardLM Evolution 产出 instruction 与 function call，配合 tool response 组装 trajectory，再经 Embedding Similarity / Tool Invocation / Quality Score 三道过滤。</figcaption>
+    </figure>
+
+    <h3>Stage 1：web-agent 自动采集 server 与 tool（§3.1）</h3>
+    <p><strong>用 web agent 而非传统爬虫。</strong>作者用 <strong>Playwright</strong>（一个 MCP-compatible 的 web agent）系统化浏览 <strong>Smithery、Glama、MCP.so、MCPHub、PipeDream、PulseMCP(DeepNLP)</strong> 等站点。在一个人工定义的 workflow 内，agent 自主导航到目标 server 页面，并通过 page snapshot 取回其 JSON 配置文件。关键优势：传统爬虫需要为每个站点的 HTML 结构写细致的解析逻辑，而该 agent 用<strong>高层指令</strong>操作、避免低级代码依赖，因而能跨平台泛化、易适配新市场；大规模采集后，后续只需对<strong>新发布的 server 做增量爬取</strong>，无需重跑全流程。</p>
+
+    <figure>
+      <img src="figures/figA_webagent.png" alt="web-agent automated server crawling steps" style="max-width:340px">
+      <figcaption>原文 Figure 10：web-agent 自动爬取 server 的流程示意（取 server 列表 → 进入详情页 → 抽取配置）。效率分析见原文 §B.6。</figcaption>
+    </figure>
+
+    <p><strong>去重 (Deduplication)。</strong>同一个热门 server 常出现在多个站点（如 context7 出现在所有 endpoint）。作者发现区分 server 最可靠的标准<strong>不是名字或 provider，而是其 tool descriptions</strong>：若两个 server 的 tool 描述列表完全相同，就视为同一实体。</p>
+    <p><strong>本地部署与 tool 抽取。</strong>用自研 MCP client（基于流行仓库 <code>dolphin-mcp</code>）本地部署 server：基于 stdio 的 server 通过 <code>npm</code> / <code>uvx</code> 部署，基于 SSE 的通过其 URL 连接。对每个成功部署的 server 抽取 tool 名称、描述与参数（input schema）。需要 API key 或专有软件的 server 因敏感与部署约束被排除（作者把它列为 future work）。最终 <strong>1166 个 server 都有 tool 信息与生成的 function call，但只有 356 个能产生 valid response 与 trajectory</strong>（即 6439 条 trajectory 来自这 356 个真正可执行的 server）。</p>
+
+    <h3>Stage 2：大规模 data synthesis（§3.2 生成）</h3>
+    <p>这一步从「tool 的静态描述」造出「可训练的样本」，由若干环节串成：</p>
+    <ol>
+      <li><strong>Few-Shot Generation（ICL 生成）。</strong>为保证有 ground-truth 标签，作者从 <strong>tool 视角</strong>出发：对<strong>每个 tool 基于人工示例生成 5 条不同 instruction</strong>，且都必须用到该目标 tool——天然得到「instruction ↔ 正确 tool」配对。</li>
+      <li><strong>Slot-Fill Revision（槽位填充修订）。</strong>把 tool 要求的每个参数当作一个 slot；若原 query 没提供，就自动生成一个合法值并改写 query 使其通顺。仍残留占位符的，用专门的正则规则（§D.3）检测并替换为本地预收集的候选值。这一步确保所有必填参数都被指定。</li>
+      <li><strong>WizardLM Evolution（指令进化）。</strong>采用 Xu et al. (2023) 的 evolution 方法提升 instruction 的复杂度与多样性：为每条 query 随机选一个进化方向（如 concretization 或 reasoning），<strong>evolution depth 设为 2</strong> 以平衡成本与质量。</li>
+      <li><strong>Function Call Generation。</strong>给定 ground-truth tool、其 input schema 和对应 instruction，<strong>用 GPT-4o 生成形式化的 function call</strong>（对强模型而言这一步没有干扰因素、较直接），再交给后续过滤把关正确性。</li>
+      <li><strong>Tool Response Collection &amp; Trajectory。</strong>根据 function call 通过本地 client 与 MCP server 通信取回 tool response，assistant 再总结结果生成 final response；把「(过滤后的) instruction + function call + tool response + final response」拼起来即一条完整 <strong>trajectory</strong>。</li>
+    </ol>
+
+    <figure>
+      <img src="figures/fig3_example.png" alt="data example: MCPollinations server">
+      <figcaption>原文 Figure 3：一条完整数据样本（Smithery 上的 MCPollinations 图像生成 server）。第一列是 §3.1 采集到的 server/tool 元数据，其余是 §3.2 合成的 Initial → Revised → Evolved Instruction、Function Call、Tool Response（返回一个图片 URL）与 Final Response，组成 trajectory。注意：全部 1166 个 server 都有 tool 信息与 function call，但并非都能产生 valid tool response。</figcaption>
+    </figure>
+
+    <h3>Stage 3：严格过滤（§3.3）</h3>
+    <p>质量的关键在三道过滤，依次为：</p>
+    <ul>
+      <li><strong>Embedding Similarity Filtration。</strong>有些 instruction 与 tool description 过于相似，会让 tool selection 变得 trivial。作者计算 instruction–description 的 embedding 相似度，<strong>阈值 0.8，超过即丢弃</strong>（embedding 用 <code>mxbai-embed-large-v1</code>）。</li>
+      <li><strong>Tool Invocation Filtration。</strong>为校验 ground-truth 标签可靠性，让 <strong>GPT-4o 与 DeepSeek-V3</strong> 从「标注 tool + 2 个随机候选」里选正确 tool；两个模型在这种简化设定下都选错的样本被丢弃。结果只剔除极少量，反证标注质量高。</li>
+      <li><strong>Quality Score Filtration。</strong>用与生成器不同的 <strong>DeepSeek-V3</strong> 作为 judge（LiveMCPBench 表明它与人工标注高度一致）给 instruction 与 function call 打分，<strong>低于 6/10 的丢弃</strong>。</li>
+    </ul>
+    <p><strong>数据质量的人工核验（原文 Table 5）：</strong>对 300 条随机样本（每个 split 100 条、双人标注），<strong>Correctness（ground-truth tool 是否为 10 个候选中的最优）平均 >96%</strong>（seen 99.0 / unseen-tool 96.0 / unseen-server 97.25），Correlation error（任务是否真的需要用工具）≤2.5%——说明过滤管线确实产出了高质量、可靠的数据。</p>
+
+    <div class="callout note">
+      <span class="label">实现要点（复现向，取自正文与 Appendix C/Table 15–16）</span>
+      <ul style="margin:6px 0">
+        <li><strong>训练框架：</strong>LLaMA-Factory；小模型用 <strong>LoRA</strong>（rank 16 / alpha 32），DeepSpeed ZeRO stage 0，BF16。<strong>注意：本文只做 SFT/LoRA，没有用 RL。</strong></li>
+        <li><strong>训练超参：</strong>learning rate 5e-5，cosine scheduler，warmup ratio 0.1，gradient accumulation 8，max length(in+out) 8192。默认只训 <strong>1 epoch</strong> 防过拟合（消融里也有 2 epoch）。</li>
+        <li><strong>数据 split（防泄漏）：</strong>每个 marketplace 先按 server 12:1 划出 unseen-server；在剩余 seen server 内按 tool 11:1 划出 unseen-tool；其余再按 10:1 分 train / seen-test。共 6 marketplace × 4 split = 24 子集。</li>
+        <li><strong>训练 tool size：</strong>默认每条样本配 <strong>10 个候选 tool</strong>（从 seen tool pool 随机采）；另做了 tool size = 5/10/.../100 的消融。</li>
+        <li><strong>角色分工：</strong>生成器 = GPT-4o；judge / 标签校验 = DeepSeek-V3；被训练的是开源小模型 Qwen3-0.6B/4B、Llama3.1-8B。</li>
+        <li><strong>硬件：</strong>8×H100；推理用 vLLM。Qwen3-4B 全量 function-call 数据训 2 epoch 约 12 小时 / 2 GPU。采集成本：爬 100 个最新 server 约 2 美元（单 server ≈¢24.87）。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ④ 实验评估 -->
+  <section id="evaluation">
+    <h2><span class="n">④</span>实验评估 Evaluation</h2>
+
+    <h3>评测设置</h3>
+    <ul>
+      <li><strong>测试 split：</strong><code>seen-test</code> / <code>unseen-tool</code>（来自见过的 server，但 tool 没见过）/ <code>unseen-server</code>（整个 server 没见过），分别考察记忆与泛化。</li>
+      <li><strong>指标（严格度递增，越高越好，%）：</strong><b>Tool</b> = tool 选择准确率；<b>Param</b> = 参数格式准确率（递归比对所有 ground-truth 参数名，<strong>all-or-nothing</strong>，少一个就算错，不要求顺序）；<b>AST</b> = 取自 BFCL 的抽象语法树匹配（函数名精确匹配且所有参数值落在允许集合内，作者称其与真实执行结果高度一致）。agentic 任务用 <b>SR</b>（GAIA 成功率）与 <b>WS</b>（Weighted Step，按 token 价格加权的步数 / 成本，越低越好）。</li>
+      <li><strong>baseline：</strong>大模型 GPT-4o / GPT-4.1 / Claude-4-Sonnet / Gemini-2.5-Pro / DeepSeek-V3 / Kimi-K2（Azure API）；小模型 Qwen3-0.6B/4B/8B、Llama3.1-8B；tool-specialized 的 Groq-8B-Tool-Use、ToolACE-8B；以及在另一数据集 <strong>MCPToolBench++</strong> 上微调的对照。</li>
+    </ul>
+
+    <h3>主结果之一：训练小模型（原文 Table 2，候选 10 个 tool）</h3>
+    <p>下表为各 split 上的 Tool / Param / AST。<strong>加粗</strong>为本文方法（MCP-Flow 微调）。</p>
+    <table>
+      <thead>
+        <tr><th rowspan="2">模型</th><th colspan="3">Seen Test</th><th colspan="3">Unseen Tool</th><th colspan="3">Unseen Server</th></tr>
+        <tr><th>Tool</th><th>Param</th><th>AST</th><th>Tool</th><th>Param</th><th>AST</th><th>Tool</th><th>Param</th><th>AST</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>GPT-4o</td><td>88.6</td><td>68.2</td><td>58.8</td><td>85.0</td><td>71.4</td><td>62.0</td><td>81.4</td><td>55.6</td><td>50.8</td></tr>
+        <tr><td>Claude-4-Sonnet</td><td>85.8</td><td>68.6</td><td>56.6</td><td>83.0</td><td>74.4</td><td>63.6</td><td>72.6</td><td>56.0</td><td>48.4</td></tr>
+        <tr><td>Gemini-2.5-Pro</td><td>54.2</td><td>42.8</td><td>36.8</td><td>55.4</td><td>50.6</td><td>42.4</td><td>49.6</td><td>38.0</td><td>32.2</td></tr>
+        <tr><td>DeepSeek-V3</td><td>84.2</td><td>67.2</td><td>58.8</td><td>82.0</td><td>70.8</td><td>59.8</td><td>77.6</td><td>55.6</td><td>48.8</td></tr>
+        <tr><td>Kimi-K2</td><td>85.6</td><td>68.0</td><td>55.0</td><td>82.4</td><td>73.0</td><td>60.2</td><td>74.4</td><td>53.0</td><td>47.4</td></tr>
+        <tr><td>Qwen3-4B (base)</td><td>79.6</td><td>66.2</td><td>57.8</td><td>81.8</td><td>75.4</td><td>65.4</td><td>74.8</td><td>55.2</td><td>46.8</td></tr>
+        <tr><td>Qwen3-8B (base)</td><td>83.6</td><td>69.6</td><td>59.6</td><td>86.0</td><td>76.4</td><td>65.6</td><td>76.4</td><td>57.2</td><td>48.2</td></tr>
+        <tr><td>Llama3.1-8B (base)</td><td>75.8</td><td>55.0</td><td>32.4</td><td>74.0</td><td>53.6</td><td>33.8</td><td>74.8</td><td>55.8</td><td>33.2</td></tr>
+        <tr><td>ToolACE-8B</td><td>89.4</td><td>49.8</td><td>45.6</td><td>83.4</td><td>49.0</td><td>44.4</td><td>88.4</td><td>51.8</td><td>46.0</td></tr>
+        <tr><td>MCPToolBench++ · Qwen3-4B</td><td>91.4</td><td>77.2</td><td>62.2</td><td>91.6</td><td>76.0</td><td>63.0</td><td>80.4</td><td>57.2</td><td>47.6</td></tr>
+        <tr class="hl"><td><strong>MCP-Flow · Qwen3-0.6B</strong></td><td>96.8</td><td>87.2</td><td>75.4</td><td>98.2</td><td>86.8</td><td>75.2</td><td>98.4</td><td>70.6</td><td>58.0</td></tr>
+        <tr class="hl"><td><strong>MCP-Flow · Qwen3-4B</strong></td><td><strong>99.2</strong></td><td><strong>91.8</strong></td><td>81.2</td><td>98.6</td><td><strong>91.4</strong></td><td>78.2</td><td>98.4</td><td>72.2</td><td>59.8</td></tr>
+        <tr class="hl"><td><strong>MCP-Flow · Llama3.1-8B</strong></td><td>98.6</td><td>91.0</td><td><strong>81.6</strong></td><td><strong>99.0</strong></td><td>91.2</td><td>77.6</td><td><strong>99.4</strong></td><td><strong>77.0</strong></td><td><strong>65.2</strong></td></tr>
+      </tbody>
+    </table>
+    <p><strong>怎么读这张表（老实评估）：</strong></p>
+    <ul>
+      <li><strong>小模型全面反超大模型。</strong>仅 <strong>0.6B</strong> 的 MCP-Flow 模型在所有 9 个指标上都已超过 GPT-4o / Claude-4-Sonnet（如 seen AST 75.4 vs GPT-4o 58.8 / Claude 56.6）；4B / 8B 进一步把 Tool 拉到 ~99、AST 到 ~80+。说明在「用 MCP 工具」这个垂直能力上，对症的数据比更大的通用模型更管用。</li>
+      <li><strong>提升集中在难指标。</strong>base 模型的 Tool 起点本就不低（75～86），真正拉胯的是 Param / AST；MCP-Flow 补得最多的也正是这两项——例如 Llama3.1-8B 的 seen AST 从 32.4 → 81.6（+49 点）。直觉：模型「大概知道选哪个工具」，但<strong>写不对完整调用、填不对参数</strong>，而这恰是数据补齐的部分。</li>
+      <li><strong>泛化是真的。</strong>unseen-server 最难（几乎所有模型都掉分），但 MCP-Flow 模型在 unseen-tool / unseen-server 上仍大幅高于 backbone，且 unseen-tool 因与 seen 共享 server 而接近 seen-test。</li>
+      <li><strong>数据规模/质量优于同类。</strong>同样做 MCP 数据的 MCPToolBench++ 数据质量相当，但规模与覆盖有限，微调收益明显小于 MCP-Flow（如 seen AST 62.2 vs 81.6）。tool-specialized 的旧模型（ToolACE-8B 基于传统 API；Groq-8B-Tool-Use 常输出「I can't help」）在真实 MCP 上也不行。</li>
+    </ul>
+
+    <h3>主结果之二：候选 tool 暴增到 100（原文 Table 3，三 split 平均）</h3>
+    <table>
+      <thead><tr><th>模型</th><th>Tool</th><th>Param</th><th>AST</th></tr></thead>
+      <tbody>
+        <tr><td>GPT-4o</td><td>72.3</td><td>66.9</td><td>53.8</td></tr>
+        <tr><td>Claude-4-Sonnet</td><td>68.3</td><td>63.3</td><td>51.6</td></tr>
+        <tr><td>Qwen3-4B (base)</td><td>61.7</td><td>59.8</td><td>49.0</td></tr>
+        <tr><td>Groq-8B-Tool-Use</td><td>2.9</td><td>1.4</td><td>1.3</td></tr>
+        <tr><td>ToolACE-8B</td><td>60.9</td><td>51.9</td><td>35.9</td></tr>
+        <tr class="hl"><td><strong>MCP-Flow · Qwen3-0.6B</strong></td><td>64.7</td><td>63.4</td><td>51.6</td></tr>
+        <tr class="hl"><td><strong>MCP-Flow · Qwen3-4B</strong></td><td><strong>81.7</strong></td><td><strong>82.1</strong></td><td><strong>67.0</strong></td></tr>
+      </tbody>
+    </table>
+    <p>候选从 10 增到 100，所有模型都掉分（干扰更大、更难），但 <strong>MCP-Flow-Qwen3-4B 仍以 81.7/82.1/67.0 大幅领先 GPT-4o（72.3/66.9/53.8）</strong>；Groq-8B-Tool-Use 直接崩到 ~3%。这印证了正文论点：候选 tool 越多，SOTA 大模型退化越明显，而 MCP-Flow 训练出的模型更稳健（消融也显示「用更大 tool size 训练」对大候选集更鲁棒）。</p>
+
+    <h3>用法二：RAG 增强闭源大模型（原文 §4.2 / Figure 4）</h3>
+    <p>对无法微调的闭源模型，把数据集当 <strong>retrieval database</strong>：收到 user instruction 后用 Sentence-Transformers embedding + Faiss 检索 <strong>top-5</strong> 最相似样本拼进 system prompt（类似 RAG）。结论：(1) 加入检索到的 function-call 范例<strong>一致地提升</strong>模型表现（在 Smithery 上 GPT-4o、Claude-4-Sonnet 多个指标 +2～+6 点）；(2) <strong>Claude-4-Sonnet 增益大于 GPT-4o</strong>（可能因其更强推理）；(3) 即便加了检索，这些大模型在 unseen-server 上仍不及微调后的小模型——再次印证小而专模型的价值。</p>
+
+    <h3>用法三：在 GAIA 上增强 agent（原文 Table 4）</h3>
+    <table>
+      <thead><tr><th>Backbone</th><th>方法</th><th>SR（成功率）</th><th>WS（加权步数/成本，↓）</th></tr></thead>
+      <tbody>
+        <tr><td>Qwen3-4B</td><td>Base</td><td>10.68</td><td>1.88</td></tr>
+        <tr class="hl"><td>Qwen3-4B</td><td><strong>+MCP-Flow</strong></td><td><strong>21.36</strong>（+100%）</td><td>2.01（−7%）</td></tr>
+        <tr><td>GPT-4o</td><td>Base</td><td>29.13</td><td>3.07</td></tr>
+        <tr class="hl"><td>GPT-4o</td><td><strong>+MCP-Flow</strong></td><td><strong>33.98</strong>（+17%）</td><td>1.92（+32% 省）</td></tr>
+        <tr><td>Claude-4-Sonnet</td><td>Base</td><td>55.34</td><td>6.01</td></tr>
+        <tr class="hl"><td>Claude-4-Sonnet</td><td><strong>+MCP-Flow</strong></td><td><strong>57.28</strong>（+4%）</td><td>5.29（+12% 省）</td></tr>
+      </tbody>
+    </table>
+    <p>做法是用 MCP-Flow 模型<strong>生成 agent 的「首个 function call」</strong>，之后交回原 agent 继续。提升来自两点：(1) <strong>提高调工具倾向</strong>——Qwen3、GPT-4o 常「偷懒」只用内部知识答题（易过时/幻觉），用 MCP-Flow 起步能把 agent 引上更有效的工具交互路径（Qwen3-4B 成功率直接翻倍 10.68→21.36）；(2) <strong>过滤掉不可用 server</strong>，减少无效尝试。同时多数情况下还降低了整体成本（WS 下降）。<strong>诚实地说</strong>：对本已很强的 Claude-4-Sonnet 增益较小（+4%），收益与 backbone 自身能力相关。</p>
+
+    <h3>关键消融与分析</h3>
+    <figure>
+      <img src="figures/fig2_stats.png" alt="dataset statistics">
+      <figcaption>原文 Figure 2：数据集统计。(a) 来自 6 个 marketplace 的 server/tool 分布；(b) instruction embedding 的 T-SNE（每市场 1000 个随机样本）显示语义高度分散、多样性强；(c) 每个 server 归入 10 个品类之一，分布反映跨市场的异质性。</figcaption>
+    </figure>
+    <figure>
+      <img src="figures/fig5_scaling.png" alt="scaling law on Qwen3-4B">
+      <figcaption>原文 Figure 5(c)：数据规模的 scaling（Qwen3-4B，Smithery seen-test）。性能随数据量上升；其中 <b>Tool 准确率很快逼近 ~100% 饱和，而 AST 仍有上升空间</b>。同等数据量下 MCP-Flow 比 MCPToolBench++ 提升更快、且规模更大。</figcaption>
+    </figure>
+    <ul>
+      <li><strong>Scaling law（Figure 5c / §4.4）：</strong>性能随数据规模增长；Tool 指标最先饱和（接近 100%），AST 仍有提升潜力——说明「调用结构正确」是更难、更吃数据的目标。相比 MCPToolBench++，MCP-Flow 既「涨得更快」又「规模更大」。</li>
+      <li><strong>跨市场对比（Figure 5a）：</strong>各平台上 MCP-Flow 都稳超 baseline；<strong>MCPHub / Glama 比 Smithery 更难</strong>（含更多冷门 server，模型见得少更难预测），但市场间差异不至于构成严重的 data heterogeneity（各市场都聚合了大规模多样 server，分布大体可比）。</li>
+      <li><strong>候选 tool size（Figure 5b）：</strong>测试时候选越多、性能越低（干扰更大）；<strong>用更大 tool size 训练的模型对大候选集更鲁棒</strong>。</li>
+      <li><strong>一个有意思的发现（§B.5）：</strong>部分 MCP.so 的 server 缺乏严格符合 OpenAI tool-calling 协议的 tool description，导致<strong>大 API 模型在 MCP.so 上反而比带 reasoning 的小模型更差</strong>——提示 agent 面对「不规范 MCP 工具」时的鲁棒性是个真问题。</li>
+    </ul>
+  </section>
+
+  <!-- ⑤ 洞见 -->
+  <section id="insight">
+    <h2><span class="n">⑤</span>洞见 Insights</h2>
+    <div class="callout insight">
+      <span class="label">Insight</span>
+      <ol style="margin:6px 0">
+        <li><strong>「会用工具」的瓶颈不在选工具，而在写对调用、填对参数。</strong>base 模型 Tool 起点不低，真正差的是 Param/AST；MCP-Flow 的增益也集中在这两项（Llama3.1-8B 的 AST +49 点）。做 tool-use 训练应把数据/目标重点压在「完整、合法、参数正确的 function call」，而不只是「选对工具」。</li>
+        <li><strong>数据「真实 + 可执行 + 多样」胜过「单纯堆量」。</strong>execution 校验（tool invocation 过滤）、schema 化的 slot-fill、以及覆盖 6 市场 10 品类的多样性，是 MCP-Flow 区别于 ToolBench/ToolACE（不可执行）的根本；同等规模下它比 MCPToolBench++ 涨得更快。对真实工具生态，「能跑通、品类广」是性价比最高的投资。</li>
+        <li><strong>「用 agent 造数据、再训 agent」是应对快速膨胀工具世界的可扩展范式。</strong>用 VLM/web agent 自动爬 marketplace、自动抽 schema、自动 execution-validate，相比人工维护静态 API 列表可随生态增长持续扩充（增量爬 100 server 仅 ~2 美元）。这套闭环是本文最有想象力之处，也解释了它为何能「规模超过此前所有相关工作之和」。</li>
+      </ol>
+    </div>
+
+    <h3>局限与未来（作者自述 + 解读判断）</h3>
+    <ul>
+      <li><strong>数据会过时、依赖 live server。</strong>采集与 execution 校验依赖真实 server 的实时可用性；server 可能因连接/配置问题失效，或随时间被弃用、功能退化，影响数据集长期可靠性。</li>
+      <li><strong>合成数据 vs 真实用户行为存在固有 gap。</strong>合成任务难以完全还原真实用户那种杂乱、不可预测的行为——这是所有合成数据 pipeline 的通病。</li>
+      <li><strong>偏单轮。</strong>作者明确指出 MCP-Flow <strong>当前以单轮 tool-invocation 数据为主</strong>，可能不足以覆盖需要迭代推理、context-aware 决策的多轮 agentic workflow（这也与 GAIA 上对强 backbone 增益有限相印证）。</li>
+      <li><strong>未覆盖需 API key / 专有软件的 server，也未处理 adversarial server。</strong>作者把「扩展到这两类 server」与「检测恶意/被投毒的 MCP server」列为重要 future work——后者在公开 marketplace 上是现实安全隐患。</li>
+    </ul>
+
+    <h3>与相关工作的关系（仅据本文论述）</h3>
+    <p>本文处在三条线的交叉：<strong>(a) tool learning</strong>（ToolBench/ToolLLM/APIGen/ToolACE/Gorilla）——但前作要么合成数据不真实/不可执行，要么依赖不稳定的 REST API；<strong>(b) MCP benchmark</strong>（MCPBench、MCP-Universe、LiveMCPBench、MCP-Zero、MCPToolBench++、InfoMosaic-Bench 等）——它们多为「只评测、不训练、server 少、靠人工」，本文补上了缺失的<strong>大规模可执行训练数据 + 自动化采集</strong>；<strong>(c) web/GUI agent</strong>——本文把 web agent 创新性地<strong>用作「数据采集器」</strong>。三者结合成「web agent 采真实数据 → 生成+三道过滤 → LoRA 微调小模型 → seen/unseen 评测 + RAG 增强 + GAIA」的完整闭环。</p>
+
+    <div class="callout warn">
+      <span class="label">归纳</span>
+      MCP-Flow 的价值不在某个新模型或新算法，而在把「真实、持续膨胀的 MCP 生态」工程化地变成<strong>可执行、可验证、可扩展、带 trajectory</strong>的训练 + 评测 + 检索资源，并扎实证明：在「用 MCP 工具」这个垂直能力上，<strong>对症数据 + LoRA 微调能让 0.6B–8B 的开源小模型反超 GPT-4o / Claude-4-Sonnet</strong>，还能泛化到没见过的 tool/server、并以 RAG / 首调用注入两种「免训练」方式增强闭源 agent 并降本。对想落地 MCP agent 的团队，这套 pipeline 与数据是很现成的起点；主要待补的是多轮长程能力与 server 安全性。
+    </div>
+  </section>
+
+  <footer class="foot">
+    本页为 <code>paper-reading</code> skill 生成的阅读笔记，基于公开论文 <a href="https://arxiv.org/abs/2510.24284" target="_blank" rel="noopener">arXiv:2510.24284</a>（ACL 2026 Main）。所有数字与结论取自原文（正文 Table 1–5、Appendix Table 14–16 等），图片来自原文 Figure 1/2/3/5/10（由 LaTeX 源 / PDF 渲染）。开源信息（GitHub <a href="https://github.com/wwh0411/MCP-Flow" target="_blank" rel="noopener">wwh0411/MCP-Flow</a>、HF <a href="https://huggingface.co/datasets/wwh0411/MCP-Flow" target="_blank" rel="noopener">datasets/wwh0411/MCP-Flow</a>）于解读日核实存在，license 未标注、模型权重未发布。细节以原文为准 · 解读日期 2026-05-30。
+  </footer>
+
+</article>
+</body>
+</html>

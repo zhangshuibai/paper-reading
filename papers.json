@@ -499,5 +499,28 @@
       "mcp",
       "agent"
     ]
+  },
+  {
+    "slug": "2510.24284-mcp-flow",
+    "title": "MCP-Flow: Facilitating LLM Agents to Master Real-World, Diverse and Scaling MCP Tools",
+    "authors": "Wenhao Wang, Peizhi Niu, Zhao Xu, Zhaoyu Chen, Jian Du, Yaxin Du, Xianghe Pang, Keduan Huang, Yanfeng Wang, Qiang Yan, Siheng Chen",
+    "team": "TikTok; Shanghai Jiao Tong University; Zhejiang University; UIUC",
+    "arxiv": "https://arxiv.org/abs/2510.24284",
+    "code": "https://github.com/wwh0411/MCP-Flow",
+    "date": "2026-05-30",
+    "published": "ACL 2026",
+    "tldr": "用 web agent 自动爬 6 大 MCP marketplace，造出覆盖 1166 server / 11536 tool 的 68733 条 function-call 数据 + 6439 条 trajectory；在其上 LoRA 微调的 0.6B–8B 小模型在真实 MCP 工具调用三指标上反超 GPT-4o / Claude-4-Sonnet，并泛化到 unseen tool/server。",
+    "tags": [
+      "MCP",
+      "LLM-Agent",
+      "Tool-Use",
+      "Function-Calling",
+      "Data-Synthesis"
+    ],
+    "path": "papers/2510.24284-mcp-flow/index.html",
+    "categories": [
+      "mcp",
+      "agent"
+    ]
   }
 ]
