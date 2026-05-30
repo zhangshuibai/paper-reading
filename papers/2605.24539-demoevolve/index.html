@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DemoEvolve：用 demonstration 破解 sparse feedback 下的 harness evolution · 论文解读</title>
+
+<script>
+  window.MathJax = {
+    tex:{inlineMath:[['$','$'],['\\(','\\)']], displayMath:[['$$','$$'],['\\[','\\]']]},
+    svg:{fontCache:'global'}
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;
+  }
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:880px; margin:0 auto; padding:18px 22px 90px}
+
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:27px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)}
+  .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .meta-grid a:hover{text-decoration:underline}
+
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap}
+  nav.toc a:hover{color:var(--accent)}
+
+  section{margin:38px 0}
+  h2{font-size:21px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:17px; margin:24px 0 8px}
+  p{margin:12px 0}
+  ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.9em}
+  strong{color:var(--text)}
+
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:14px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:10px 12px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  .yes{color:var(--ok); font-weight:600}
+  .no{color:var(--muted)}
+  .num{font-variant-numeric:tabular-nums; text-align:right}
+
+  figure{margin:24px 0; text-align:center}
+  figure img{max-width:100%; height:auto; border:1px solid var(--line); border-radius:10px; background:#fff}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+
+  pre{background:var(--panel2); border:1px solid var(--line); border-radius:10px; padding:14px 16px;
+      overflow-x:auto; font-size:13px; line-height:1.55; margin:14px 0}
+  pre code{background:none; padding:0}
+
+  blockquote{border-left:3px solid var(--line); margin:14px 0; padding:2px 16px; color:var(--muted)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+  .mjx-container{overflow-x:auto; overflow-y:hidden}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <!-- ============================ 抬头 / 元信息 ============================ -->
+  <header class="head">
+    <div class="chips">
+      <span class="chip">LLM Agent</span>
+      <span class="chip">Harness Evolution</span>
+      <span class="chip">Demonstrations</span>
+      <span class="chip">Self-Evolving</span>
+      <span class="chip">Sparse Reward</span>
+      <span class="chip">Frozen Model</span>
+    </div>
+    <h1>DemoEvolve：用 demonstration 破解 sparse feedback 下的 agent harness evolution</h1>
+    <p class="orig-title">DemoEvolve: Overcoming Sparse Feedback in Agentic Harness Evolution with Demonstrations</p>
+    <dl class="meta-grid">
+      <dt>作者</dt><dd>Lirong Che, Yuzhe Yang, Peiwen Lin, Chuang Wang, Xueqian Wang, Jian Su</dd>
+      <dt>团队 / 机构</dt><dd>AgiBot（智元机器人）；Lirong Che 同时挂 Tsinghua University</dd>
+      <dt>原文链接</dt><dd><a href="https://arxiv.org/abs/2605.24539" target="_blank" rel="noopener">https://arxiv.org/abs/2605.24539</a></dd>
+      <dt>发表 / 年份</dt><dd>arXiv preprint（NeurIPS 2026 模板），2026 年 5 月 23 日提交</dd>
+      <dt>解读日期</dt><dd>2026-05-30</dd>
+    </dl>
+  </header>
+
+  <div class="tldr">
+    <b>TL;DR</b> — 当一个 frozen LLM 想适应新任务时，可以不动模型权重、只让一个 coding proposer 反复改写它外围的 <b>harness</b>（prompt、state tracking、action filter、tool、control flow），这被称作 <b>harness evolution</b>。已有做法（如 Meta-Harness）靠 agent 自己的 <b>self-rollout</b> 当反馈来搜索更好的 harness；但在 long-horizon、随机、sparse-reward 的任务里，rollout 分数噪声大、failure 难归因，self-evolution 会被「噪声选择」误导，挑中一个根本没生效的 harness edit。本文提出 <b>DemoEvolve</b>：把<b>少量人类高水平 demonstration trajectory</b> 喂给 proposer 作为「专家参照经验」，让它把失败 rollout 和称职玩法对照、定位缺失的机制并做出可审计（auditable）的 harness 编辑。在 TextArena Liar's Dice（短 horizon）与 Balatro（长 horizon roguelike）上，相同预算下 DemoEvolve 比 self-rollout-only 和「纯文字攻略」基线都更稳、性能更好，且能通过审计证明所改机制是真正起作用的。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#opensource">① 开源贡献</a>
+    <a href="#motivation">② 动机与贡献</a>
+    <a href="#method">③ 方法</a>
+    <a href="#evaluation">④ 实验评估</a>
+    <a href="#insight">⑤ 洞见</a>
+  </nav>
+
+  <!-- ============================ ① 开源贡献 ============================ -->
+  <section id="opensource">
+    <h2><span class="n">①</span>开源贡献 Open-source Artifacts</h2>
+    <p>这是一篇<strong>方法 / 实证型 preprint</strong>，截至解读日（2026-05-30）<strong>没有发布任何官方代码、模型权重或数据集</strong>。论文正文、首页、脚注、abstract 页面均未给出 GitHub / Hugging Face / project page 链接，arXiv 页面也无 Comments 字段或代码指引。我通过 WebSearch 检索 "DemoEvolve … AgiBot github" 仅命中论文本身的 arXiv HTML 页，以及一些<strong>无关或第三方</strong>仓库（如他人复现 Meta-Harness 的 harness-evolver、另一篇 Agentic Harness Engineering 的官方库、AgiBot 的机器人硬件库等），均非本文产出。论文所依赖的两个游戏环境（BalatroLLM / BalatroBench、TextArena）是<strong>第三方既有的开源 / 公开资源</strong>，本文在其上构建实验但未声称重新开源。</p>
+    <table>
+      <thead><tr><th>类型</th><th>是否开源</th><th>内容 / 链接</th></tr></thead>
+      <tbody>
+        <tr><td>代码 Code（DemoEvolve / outer-loop）</td><td class="no">✘</td><td>未发布；论文未给出任何仓库链接，也未声明「将开源」。</td></tr>
+        <tr><td>模型权重 Weights</td><td class="no">✘</td><td>不适用——agent 用 frozen 商用 / 开源模型（GPT-5.4-low、Qwen-3.5-4B），proposer 用 Claude Opus 4.7 Max，均非本文训练。</td></tr>
+        <tr><td>数据集 / human trajectories</td><td class="no">✘</td><td>核心输入是「人类高水平 demonstration」（Balatro 每个 dev seed 9 条、共 9 条；Liar's Dice 同格式），论文未发布这些轨迹。</td></tr>
+        <tr><td>环境 / Benchmark（第三方）</td><td class="no">✘（非本文）</td><td>Balatro 实验沿用 <a href="https://balatrobench.com/" target="_blank" rel="noopener">BalatroBench</a> 与 <a href="https://github.com/coder/balatrollm" target="_blank" rel="noopener">BalatroLLM</a>；Liar's Dice 用 <a href="https://arxiv.org/abs/2504.11442" target="_blank" rel="noopener">TextArena</a>。均为外部已有项目，非本文新开源。</td></tr>
+        <tr><td>项目主页 / Demo</td><td class="no">✘</td><td>未见。</td></tr>
+      </tbody>
+    </table>
+    <div class="callout warn">
+      <span class="label">核实说明</span>
+      论文对实验做了较细的协议描述（seed 划分、迭代数、成本估算等），具备一定可复现性参考价值，但<strong>没有开源代码 / 数据</strong>意味着第三方要完整重跑（尤其是「人类 demonstration 的采集与表示」）需要自行实现。报告均依据论文与 arXiv 页面核实，未见任何官方 artifact，故全部标 ✘。
+    </div>
+  </section>
+
+  <!-- ============================ ② 动机与贡献 ============================ -->
+  <section id="motivation">
+    <h2><span class="n">②</span>研究动机与贡献 Motivation &amp; Contribution</h2>
+
+    <h3>背景：harness evolution 是什么、为什么诱人</h3>
+    <p>一个 LLM agent 的能力，不只由模型权重决定，也由它外围那套<strong>执行结构</strong>决定——prompt 怎么写、observation 怎么表示、哪些 action / tool 暴露给模型、模型输出怎么 parse、多步怎么编排。本文用 <strong>harness</strong> 统称这些「围绕 frozen model 的可执行程序」。近期一类工作（Meta-Harness、ADAS、AFlow、Darwin-Gödel Machine、Autoharness 等）把 harness 当作<strong>可搜索 / 可编辑的对象</strong>：让一个 coding proposer 检查历史代码、分数、execution trace，然后写出新的 candidate harness，外层循环不断迭代。其吸引力在于：这等于把「agent 变强」变成一种 <strong>sample-efficient fast adaptation</strong>——<strong>不重训模型、不冒权重空间干扰通用能力的风险</strong>，只改外部 harness 就能获得 task-specific 的能力。</p>
+
+    <h3>痛点：在 long-horizon、随机、sparse-reward 的世界里，self-evolution 会失灵</h3>
+    <p>问题是，已有 harness evolution 的成功几乎都集中在<strong>文本 / 代码为中心</strong>的领域（现代 LLM 在这些领域已有很强先验，改 harness 主要是「把潜在能力激发出来」）。本文追问：同一范式能不能迁到 <strong>LLM-non-native</strong> 的任务世界——那里光靠激发潜在知识不够，harness 必须帮 agent <strong>构建 state abstraction、动作优先级、resource management</strong>。作者用<strong>回合制游戏</strong>作为受控的过渡 regime（见图 1）：fixed seed + 明确 action 接口让 candidate 之间可复现地比较，但随机事件与延迟结果又让任务真的「有动态、有状态」。</p>
+    <p>在这种中间 regime 下，harness evolution 的一个核心假设被压力测试：<strong>「过往经验必须足够可诊断，才能指导下一次程序编辑」</strong>。短 horizon 任务里这通常成立（failure 局部、trace 短、容易归因）；但长 horizon 交互世界里，sparse 的最终结果可能<strong>延迟且具误导性</strong>——一次失败 run 里可能有几百个 state transition，早期一个小决定就会重塑后续 state 分布，而随机性会让一个<strong>根本没生效</strong>的 harness edit「碰巧」拿到高分。于是真正的难点不只是「在 harness 程序空间里搜索」，而是 <strong>credit assignment</strong>：从噪声极大的 trajectory-level 反馈里，推断「到底该改外部哪个机制」。</p>
+    <p>作者把两类「变好」严格区分开：</p>
+    <ul>
+      <li><strong>score improvement（分数变好）</strong>：dev rollout 上分数升高——但可能纯属 trajectory variance / seed-specific 选择噪声。</li>
+      <li><strong>functional harness improvement（功能性变好）</strong>：新 harness 逻辑<strong>确实改变了 model-facing 接口或执行行为</strong>，且这种改变是可审计的。后者才是真改进。</li>
+    </ul>
+
+    <h3>切入点：用「人类 demonstration」当 proposer 的专家参照</h3>
+    <p>核心 insight：当「只看 reward」的搜索过于发散、过于嘈杂时，<strong>少量称职的人类 demonstration trajectory 可以充当 proposer 的专家参照经验</strong>。因为人类轨迹用<strong>和 agent rollout 完全相同的 observation-action 格式</strong>记录，它同时暴露了「<strong>称职动作</strong>」以及「这些动作发生在<strong>哪些具体 state</strong>」。这让 proposer 能把失败的 agent rollout 与称职玩法直接对照，从而<strong>定位</strong>缺失的 state abstraction、糟糕的 action priority、薄弱的 resource management 或缺失的 tool——也就是把 sparse、难归因的 failure 变得 <strong>diagnosable & localizable</strong>。关键是：human trajectory 在这里<strong>不是监督式 action label、也不用于 fine-tune 模型</strong>，而是作为 proposer 做诊断/编辑时的 <strong>behavioral exemplar + diagnostic reference</strong>。</p>
+
+    <h3>核心贡献</h3>
+    <ol>
+      <li><strong>提出 DemoEvolve</strong>：一种 demonstration-bootstrapped 的 harness evolution 方法。它在 self-rollout archive 之外，额外给 proposer 提供一个<strong>称职人类轨迹库</strong>，作为 harness-level 诊断与编辑的「proposer-side 参照经验」。</li>
+      <li><strong>揭示 self-rollout evolution 在交互任务里的「noisy-selection 失效模式」</strong>：即便同一 fixed seed，frontier LLM 早期动作也会抖动；同 seed 的 rollout variance + 轨迹漂移累积，会让 sparse 分数<strong>偏爱 inactive / noncausal 的 harness edit</strong>。论文用 Balatro 上的一次「render-level 审计」给出实锤（见 ④）。</li>
+      <li><strong>用 Balatro 证明 demonstration 让 sparse-feedback evolution 更有效且可审计</strong>：相同有限预算下，DemoEvolve 产出<strong>真正 model-facing、active</strong> 的编辑，性能优于 self-rollout 与 text-guided 变体，并给出行为层（economy curve 更像人）与诊断层（edit localization 更准）的证据。</li>
+    </ol>
+  </section>
+
+  <!-- ============================ ③ 方法 ============================ -->
+  <section id="method">
+    <h2><span class="n">③</span>方法 Method</h2>
+
+    <figure>
+      <img src="figures/fig2_regimes.png" alt="DemoEvolve 三种 information regime 总览">
+      <figcaption>图 1：DemoEvolve 的 outer-loop 与三种 information regime（出处：原文 Figure 2）。一个 coding proposer P 围绕 frozen model 演化 task harness：agent 跑出 rollout / execution trace / score，写入文件系统 archive $\mathcal{D}_t$；proposer 读取 archive 后提出新的 harness $h_{t+1}$。三种 regime 只在「proposer 能看到什么额外信息」上不同：仅 self-rollout archive（Meta-Harness）、archive + 外部文字信息（OpenResearch）、archive + 人类轨迹（DemoEvolve）。</figcaption>
+    </figure>
+
+    <h3>3.1 问题形式化：围绕 frozen model 优化一个不可微 harness</h3>
+    <p>沿用 Meta-Harness 的视角，把 harness evolution 看成对「围绕 frozen model 的可执行程序」做端到端优化。设 $W_T$ 是一个 task world，$x\sim\mathcal{X}_T$ 是一个 episode 实例，$\pi_\phi$ 是 frozen model（参数 $\phi$ 全程不变），$h\in\mathcal{H}_T$ 是面向任务的 harness。$W_T,\pi_\phi,h$ 三者共同诱导出一个关于交互 trajectory 的 rollout 分布。优化目标为：</p>
+    $$ h^{*}=\arg\max_{h\in\mathcal{H}_T}\ \mathbb{E}_{x\sim\mathcal{X}_T,\ \tau\sim p_{W_T,\pi_\phi,h}(\cdot\mid x)}\big[R_T(\tau,x)\big]. $$
+    <p>其中 $\tau=(o_0,a_0,o_1,a_1,\ldots,o_T)$ 是 task-world 交互 trajectory，$R_T(\tau,x)$ 是一个 <strong>sparse task reward</strong>，通常只在整段 rollout 结束后才观测到。<strong>所有改进都来自改写可执行 harness $h$，模型权重一动不动。</strong></p>
+
+    <h3>3.2 受控动态：区分 evaluator 视角与 agent-facing uncertainty</h3>
+    <p>作者刻意把「评测者看到的 fixed-seed 模拟器」和「agent 通过 harness 看到的视角」分开。设完整 task-world 状态为 $\tilde{s}_t$，给 agent 看到的 observation 为 $o_t=\Omega(\tilde{s}_t)$，episode seed 为 $\rho$。固定 seed 下，全状态转移可以是确定性的 $\tilde{s}_{t+1}=F_\rho(\tilde{s}_t,a_t)$——这保证了<strong>同 seed 重复评测可复现</strong>。但「评测者可复现」不等于「agent 知道自己动作的未来后果」：agent 只能依据自己的 observation-action history $\eta_t=(o_0,a_0,\ldots,o_t)$ 行动，下一个 observation 在 agent 接口处仍然是<strong>不确定</strong>的：</p>
+    $$ p_\rho(o_{t+1}\mid \eta_t,a_t)=\sum_{\tilde{s}\in\mathcal{S}} p_\rho(\tilde{s}_t=\tilde{s}\mid \eta_t)\,\mathbf{1}\!\left[o_{t+1}=\Omega(F_\rho(\tilde{s},a_t))\right]. $$
+    <p>作者称之为 <strong>agent-facing uncertainty</strong>：它来自「observation 把完整 state 压缩后导致 agent 信息不全」，而非「模拟器变量定死后还残留的内在随机性」。回合制游戏因此提供了一个理想的受控动态 regime：既有 action-conditioned 的未来后果与延迟反馈，又保留 fixed seed + 明确 action 接口以支持可复现的 harness evolution。</p>
+
+    <div class="callout note">
+      <span class="label">为什么这是个「程序级 credit assignment」难题</span>
+      在标准 RL 里，sparse outcome 通过预定义的 learning rule 连到 policy/value 更新；而这里被优化的对象是一个<strong>不可微的可执行 harness</strong>（prompt、state tracking、action filter、tool exposure、control flow）。一个 terminal reward <strong>对某条具体 harness edit 不提供任何直接的更新目标</strong>，proposer 只能从 trajectory、execution log、sparse reward 里<strong>推断</strong>「是哪个 harness 机制导致了下游成败」。这正是 sparse + noisy 时最脆弱的环节。
+    </div>
+
+    <h3>3.3 outer-loop proposer 与三种 information regime（核心）</h3>
+    <p>用一个 outer-loop proposer $P$ 来优化 $h$。注意 $P$ 是一个 <strong>coding agent，而非执行任务的 agent 本身</strong>。每轮迭代，它检查历史 harness 及其评测产物、诊断可能的 failure mode，写出一个或多个 candidate harness。沿用 Meta-Harness 的 search loop，维护一个不断增长的<strong>文件系统 archive</strong> $\mathcal{D}_t$：每个被评测过的 harness 贡献一个 evaluation directory，里面有它的源码、dev-set 分数、rollout trajectory、以及 raw execution trace（记录给模型看的 context、模型输出、parse 出的 action、tool call、报错、harness 侧 log）。<strong>proposer 通过普通的文件读写去查询这个 archive，而不是收到一份压缩摘要</strong>——这点对「能否真正定位机制」很关键。</p>
+    <p>记第 $t$ 轮提出的 candidate 数为 $k_t$，更新规则：</p>
+    $$ \{h^{(t+1,j)}\}_{j=1}^{k_t}\leftarrow P(I_t),\qquad \mathcal{D}_{t+1}=\mathcal{D}_t\cup\{\mathrm{EvalDir}(h^{(t+1,j)})\}_{j=1}^{k_t}, $$
+    <p>其中 $I_t$ 是<strong>当前 proposer 能看到的信息</strong>，$\mathrm{EvalDir}(\cdot)$ 是 candidate 在 dev 实例上跑完后写出的评测目录。最终 test 实例全程对 proposer 不可见（held out）。本文的<strong>唯一变量就是 $I_t$</strong>，由此定义三个 regime：</p>
+    $$ I_t^{\mathrm{meta}}=\mathcal{D}_t,\qquad I_t^{\mathrm{open}}=\mathcal{D}_t\cup K^{\mathrm{text}},\qquad I_t^{\mathrm{demo}}=\mathcal{D}_t\cup T^{\mathrm{human}}. $$
+    <ul>
+      <li><strong>Meta-Harness（self-rollout-only，本文的主基线）</strong>：proposer 只看 archive $\mathcal{D}_t$——历史 harness 代码、分数、自己跑出来的 rollout、raw trace。</li>
+      <li><strong>OpenResearch（text-guided）</strong>：在 $\mathcal{D}_t$ 之外，额外给 proposer 外部<strong>文字</strong>任务信息 $K^{\mathrm{text}}$（规则、tutorial、攻略、reference code，Balatro 实验中甚至允许 proposer 联网搜索）。它检验「光有高层文字知识够不够」。</li>
+      <li><strong>DemoEvolve（本文）</strong>：在 $\mathcal{D}_t$ 之外，额外给 proposer 一组<strong>称职人类轨迹</strong>
+        $$ T^{\mathrm{human}}=\{(\tau_j^H,\,R_T(\tau_j^H,x_j))\}_{j=1}^{m},\qquad \tau_j^H=(o_0^H,a_0^H,o_1^H,a_1^H,\ldots,o_{T_j}^H). $$
+        这些人类轨迹用<strong>与 agent rollout 相同的 observation-action 格式</strong>表示，但动作来自称职的人类玩法。</li>
+    </ul>
+
+    <div class="callout insight">
+      <span class="label">DemoEvolve 的精髓</span>
+      human trajectory <strong>不是</strong>用来做 imitation learning / supervised action label / 模型 fine-tune 的数据；它是给 <strong>coding proposer</strong> 的「行为范例 + 诊断参照」。因为它同时给出<strong>称职动作</strong>和<strong>这些动作发生时的具体 state</strong>，proposer 就能做一件 self-rollout 做不到的事：把失败 rollout 与称职玩法<strong>逐 state 对照</strong>，进而判断「该在哪个 state 注入什么 harness 机制」。换言之，reward 告诉你「哪里亏了价值」，demonstration 告诉你「称职玩法在那个 state 会怎么做」，于是把原本发散的 program 搜索<strong>收窄到一个更小、更有效的 harness 编辑空间</strong>。
+    </div>
+
+    <h3>3.4 实现协议要点（影响复现）</h3>
+    <div class="callout note">
+      <span class="label">实现要点</span>
+      <ul>
+        <li><strong>统一起点与预算</strong>：所有演化条件都从<strong>同一个初始 harness</strong> 出发（Balatro 用 BalatroLLM）、跑 <strong>10 轮 outer-loop</strong>，每轮典型产出 ~2 个 candidate；唯一差异就是 proposer 可见信息。</li>
+        <li><strong>模型设定</strong>：Balatro 的执行 agent 全用 frozen <strong>GPT-5.4-low</strong>；coding proposer 全用 <strong>Claude Opus 4.7 Max</strong>。Liar's Dice 还测了 GPT-5.4-low 与 Qwen-3.5-4B 的多种对局/自对弈组合。</li>
+        <li><strong>seed 划分（防 leakage）</strong>：Balatro 用 BalatroBench 的 5 个 fixed seed，A/B/C 作 development（演化期可见，每 candidate 每 seed 1 条 rollout），D/E 全程 held out 仅用于最终评测；选中的 harness 再在全部 5 个 seed 上各跑 3 条独立 rollout 重评。DemoEvolve 的人类轨迹也只给 dev seed A/B/C（每 seed 3 条、共 9 条），D/E 无人类轨迹。</li>
+        <li><strong>选择规则</strong>：candidate 只能用 development rollout 来选；以 A/B/C 上的<strong>平均 final round</strong> 为主指标、completion rate 作 tie-breaker。</li>
+        <li><strong>成本量级</strong>（按 GPT-5.4-low 计，仅 task-execution rollout，不含 proposer）：一次完整演化 run 约 $128（10×2×3=60 条 dev rollout）；加上选中 harness 的 fixed-seed 终评（5 seed×3 rollout=15 条，约 $32），<strong>总计约 $160 / run</strong>。</li>
+        <li><strong>Liar's Dice 搜索预算更小</strong>：candidate 评测常用 $N{=}5$ 个 dev seed（部分 Small3 用 $N{=}10$），终评用 30 个逻辑 held-out seed 做 paired-side control（每 seed 两局、交换先后手，胜=1/平=0.5/负=0）。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============================ ④ 实验评估 ============================ -->
+  <section id="evaluation">
+    <h2><span class="n">④</span>实验评估 Evaluation</h2>
+
+    <h3>评测设置</h3>
+    <ul>
+      <li><strong>Benchmark：</strong>
+        <ul>
+          <li><strong>TextArena Liar's Dice（短 horizon「正对照」）</strong>：含随机骰、隐藏信息、对手博弈、legal-action 约束的回合制博弈。两个变体——<em>Small3</em>（三骰、顺序叫注/质疑）与 <em>OneCall-Wild1</em>（五骰、ones 为 wild、首次 [Call] 立即结束）。episode 短，失败容易归因，用来确认「当反馈可归因时，self-rollout evolution 本来就能 work」。</li>
+          <li><strong>Balatro（长 horizon「困难情形」）</strong>：扑克 build 类 roguelike，要在 seed-dependent 抽牌、shop、boss blind、joker synergy 下做延迟的 resource management。terminal 反馈 sparse、high-variance、难归因——专门用来检验 demonstration 能否让搜索更可诊断。</li>
+        </ul>
+      </li>
+      <li><strong>对比基线：</strong><strong>BalatroLLM</strong>（不做 outer-loop 的固定 harness）、<strong>Meta-Harness</strong>（self-rollout-only evolution，<em>即「只靠自我演化」的对照</em>）、<strong>OpenResearch</strong>（text-guided evolution）；本文为 <strong>DemoEvolve</strong>。</li>
+      <li><strong>指标：</strong>Balatro 用 <em>capped mean final round</em>（生存深度，越高越好）+ 括号里的 <em>completion rate</em>；TextArena 用 30 个 held-out seed 上的 <em>mean paired reward</em>（越高越好）；另有「attrition-adjusted shop-entry money」economy curve 与「与人类曲线的平均绝对距离 human dist.」（越低越像人）。</li>
+    </ul>
+
+    <figure>
+      <img src="figures/fig1_taskset.png" alt="把回合制游戏定位为受控 testbed">
+      <figcaption>图 2：用游戏作为 task-world adaptation 的受控 testbed（出处：原文 Figure 1）。横轴是 task-world dynamics、纵轴是 adaptation 需求。Text&amp;Math、Terminal-Bench2 等是 model-native、短 horizon 的；回合制游戏（Balatro / Slay the Spire）位于中间——有 action-conditioned 的未来后果与 sparse long-horizon feedback，但仍可用 fixed seed 复现；再往外才是 Minecraft、真实机器人等 open-ended 实时世界。</figcaption>
+    </figure>
+
+    <h3>结果一：Liar's Dice——self-rollout 也能发现紧凑的可执行 heuristic（正对照成立）</h3>
+    <p>当 horizon 短、failure 可归因时，outer-loop 确实能把观测到的失败转成可执行的 harness 结构。如图 3，6 组对局/模型配置里<strong>全部 6 组的 held-out paired reward 都提升</strong>；task-balanced 的 macro held-out reward 从 base 的 <strong>0.392 → 0.800</strong>（绝对 +0.408）；Small3 从 0.400→0.828、OneCall-Wild1 从 0.383→0.772。机理上，演化出的 harness 反复加上 task-specific 结构：observation parsing、legal-action guard、bid repair、概率估计、expected-value 的 call 阈值、开局策略、保守的 safety override。附录的 case study 显示，弱模型（Qwen Small3）下选中的 harness 近乎变成一个 <strong>near-symbolic threshold policy</strong>（几乎绕开模型决策）；更强模型 / 更难变体下则保留 <strong>neuro-symbolic 分工</strong>——代码管 legality / 概率 / 风险，模型管残余的战略判断。</p>
+
+    <figure>
+      <img src="figures/fig3_textarena.png" alt="TextArena Liar's Dice held-out paired reward">
+      <figcaption>图 3：development-only 选择后的 TextArena held-out 表现（出处：原文 Figure 3）。每根 bar 用 30 个 held-out seed，误差棒为标准误；蓝数字是「evolved − base」的 reward 差。灰=base harness，蓝=选中的 evolved harness。6 组全部在 held-out seed 上提升（+0.18 ~ +0.50）。</figcaption>
+    </figure>
+
+    <h3>结果二：Balatro——sparse 反馈会误导长 horizon 搜索，而 DemoEvolve 不会</h3>
+    <p>这是全文最关键的对照。下表（原文 Table 1）显示：</p>
+    <table>
+      <thead>
+        <tr><th>方法</th><th class="num">ID-A</th><th class="num">ID-B</th><th class="num">ID-C</th><th class="num">OOD-D</th><th class="num">OOD-E</th><th class="num">ID 均值</th><th class="num">OOD 均值</th><th class="num">Overall</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>BalatroLLM（固定 harness）</td><td class="num">12.0 (0/3)</td><td class="num">22.0 (1/3)</td><td class="num">17.0 (2/3)</td><td class="num">12.7 (0/3)</td><td class="num">21.0 (2/3)</td><td class="num">17.00 (3/9)</td><td class="num">16.83 (2/6)</td><td class="num">16.93 (5/15)</td></tr>
+        <tr><td>Meta-Harness（self-rollout-only）</td><td class="num">16.7 (0/3)</td><td class="num">23.0 (2/3)</td><td class="num">18.3 (2/3)</td><td class="num">13.7 (0/3)</td><td class="num">19.0 (2/3)</td><td class="num">19.33 (4/9)</td><td class="num">16.33 (2/6)</td><td class="num">18.13 (6/15)</td></tr>
+        <tr><td>OpenResearch（text-guided）</td><td class="num">17.3 (0/3)</td><td class="num">15.0 (1/3)</td><td class="num">17.7 (1/3)</td><td class="num">14.0 (0/3)</td><td class="num">20.0 (2/3)</td><td class="num">16.67 (2/9)</td><td class="num">17.00 (2/6)</td><td class="num">16.80 (4/15)</td></tr>
+        <tr><td><strong>DemoEvolve（本文）</strong></td><td class="num"><strong>22.0 (2/3)</strong></td><td class="num"><strong>24.0 (3/3)</strong></td><td class="num"><strong>24.0 (3/3)</strong></td><td class="num"><strong>16.0 (1/3)</strong></td><td class="num"><strong>24.0 (3/3)</strong></td><td class="num"><strong>23.33 (8/9)</strong></td><td class="num"><strong>20.00 (4/6)</strong></td><td class="num"><strong>22.00 (12/15)</strong></td></tr>
+      </tbody>
+    </table>
+    <p>读这张表的关键不在「谁分高」，而在<strong>归因可靠性</strong>：</p>
+    <ul>
+      <li><strong>Meta-Harness 出现了「假提升」</strong>：它在 ID seed 上 final round 从 17.00→19.33、completion 从 3/9→4/9，<em>看起来</em>有效；但<strong>不迁移</strong>——OOD 从 16.83→16.33、completion 仍 2/6。作者于是对选中的 harness 做了 <strong>render-level 审计</strong>（见下方），证明它的「提升」其实是<strong>高方差 rollout 评测下的 noisy candidate selection</strong>，而非真正的功能性改进。</li>
+      <li><strong>OpenResearch（光给文字攻略）也没用</strong>：Overall 仅 4/15，甚至不如 self-rollout，说明<strong>高层文字知识本身不足以驱动长 horizon harness 改进</strong>。</li>
+      <li><strong>DemoEvolve 在 ID 与 OOD 上都真正变好</strong>：ID 8/9、OOD 4/6、Overall 12/15 完成；且审计显示其编辑是 <strong>active、model-facing</strong> 的，注入了 state 相关、phase 相关的信息，根植于人类轨迹证据。</li>
+    </ul>
+
+    <div class="callout warn">
+      <span class="label">实锤：self-rollout 的 noisy-selection 失效（附录 C.3 的 functional audit）</span>
+      Meta-Harness 选中的最佳 candidate 名为 <code>face_exposure_shop_hook</code>，号称为 boss blind「The Plant」（会 debuff 所有 face card）在 SHOP 阶段加一个 face-card 相关的 hook，source diff <em>非空</em>。作者把这个 harness 在固定 seed 下加 logging 重放、检查 A/B/C 三条 validation rollout 共 <strong>517 个 request</strong>，统计该 hook 的标志性字符串出现次数：
+      <pre><code>Expected hook string            Occurrences
+Face-Card Exposure Metrics      0
+Deck face cards                 0
+face-dependent jokers           0
+The Plant boss disables         0</code></pre>
+      <strong>全部为 0</strong>——所宣称的机制<strong>从未真正进入过 model-facing context</strong>。它的 dev-set 增益因此不能归因于该 hook，而是「同 seed、近乎相同 prompt 下，frontier LLM 早期动作仍会抖动 → 一次 shop 购买 / discard / 出牌就改变后续 state 分布 → 在每 candidate 只跑少量长 rollout 时，一个 inert edit 也能碰巧拿高分」。结论：<strong>long-horizon harness evolution 不能只看 source-level diff，必须在 rendered-context / execution 层审计「所改机制是否真的在该生效的 state 上生效」。</strong>
+    </div>
+
+    <h3>结果三：行为分析——人类 demonstration 迁移的是「策略层模式」，不是「运气」</h3>
+    <p>作者进一步问：DemoEvolve 分数更高，到底是行为变了、还是只是抽到好 harness？他们用 Balatro 的 <strong>economy</strong>（经济管理）作为长 horizon 策略的粗粒度但可测的探针——既要保住钱、又要把资源转成足够的得分力。为避免 survivorship bias，定义<strong>attrition-adjusted shop-entry money</strong>：对在第 $r$ 个 shop 前已经「死掉」的 rollout 记 0。</p>
+    $$ \widetilde{M}_{m,s}(r)=\frac{1}{N_{m,s}}\sum_{i=1}^{N_{m,s}}\widehat{M}_i(r),\qquad \widehat{M}_i(r)=\begin{cases}M_i(r),& \text{若 rollout } i \text{ 到达 shop } r,\\[2pt]0,& \text{否则.}\end{cases} $$
+    <p>这样后期 round 的曲线同时反映「生存」与「钱的管理」。结果（原文 Table 2）很说明问题：</p>
+    <table>
+      <thead><tr><th>方法</th><th class="num">Adj. entry mean</th><th class="num">Late adj. entry</th><th class="num">Late reach</th><th class="num">Human dist.↓</th><th class="num">Late human dist.↓</th></tr></thead>
+      <tbody>
+        <tr><td>Human trajectories（参照）</td><td class="num">42.99</td><td class="num">61.87</td><td class="num">1.00</td><td class="num">0.00</td><td class="num">0.00</td></tr>
+        <tr><td>BalatroLLM</td><td class="num">10.89</td><td class="num">6.61</td><td class="num">0.39</td><td class="num">32.10</td><td class="num">55.25</td></tr>
+        <tr><td>Meta-Harness</td><td class="num">12.16</td><td class="num">6.97</td><td class="num">0.45</td><td class="num">30.83</td><td class="num">54.89</td></tr>
+        <tr><td>OpenResearch</td><td class="num">18.96</td><td class="num">13.51</td><td class="num">0.32</td><td class="num">24.03</td><td class="num">48.36</td></tr>
+        <tr><td><strong>DemoEvolve（本文）</strong></td><td class="num"><strong>30.73</strong></td><td class="num"><strong>55.37</strong></td><td class="num"><strong>0.81</strong></td><td class="num"><strong>12.26</strong></td><td class="num"><strong>6.49</strong></td></tr>
+      </tbody>
+    </table>
+    <p>Meta-Harness 的 economy profile 相对 BalatroLLM <strong>几乎没变</strong>（overall human dist. 仅 32.10→30.83，late 仍很高）；OpenResearch 整体靠近了人类曲线（24.03），但 late reach 仅 0.32，<strong>没可靠转成生存</strong>。DemoEvolve 则<strong>质变</strong>：overall human dist. 降到 12.26、<strong>late human dist. 从 ~55 骤降到 6.49</strong>、late reach 仍达 0.81——支持「人类轨迹帮 evolved harness 形成了类人的 resource-management 模式」，而不是靠 lucky harness 选择刷高最终分。图 4 直观可见：DemoEvolve（绿）在各 seed 上都贴着 Human trace（橙）走，而其它基线（灰/蓝/紫）后期都趴在低位。</p>
+
+    <figure>
+      <img src="figures/fig4_economy.png" alt="Balatro attrition-adjusted shop-entry economy 曲线">
+      <figcaption>图 4：Balatro 的 attrition-adjusted shop-entry economy（出处：原文 Figure 4）。死掉的 rollout 在后续 shop 记 0，故后期数值同时反映生存与理财。A/B/C 为 ID seed，D/E 为 held-out（人类轨迹只作事后参照、演化期不可见）。前景粗线为三回合滑动平均。绿色 DemoEvolve 的经济曲线明显比其它基线更贴近橙色 Human trace。</figcaption>
+    </figure>
+
+    <h3>结果四：localization 分析——demonstration 改善「state-conditioned 的编辑定位」</h3>
+    <p>作者用一个独立于演化 run 的 <strong>5×3 诊断/设计研究</strong>把「定位能力」单独拎出来：所有 arm 都看<strong>同一批固定的 BalatroLLM rollout</strong>，只在「额外证据」上不同——none / human notes（人类文字笔记）/ human trajectories；每个 arm 用 5 个独立 proposer replica 去诊断 failure 并提出具体 edit site。按「context 注入粒度」给 edit 分类：Pers.（持久 context）、Phase（仅由环境 phase 字段触发的 middleware）、State（harness 触发的、在注入前计算 decision 变量）、Tool（对当前 state 做 model-invoked 计算）。报告 <code>Comp. rate = (State + Tool) / total</code>，即「提供可执行决策支持」的 edit 占比。</p>
+    <table>
+      <thead><tr><th>额外证据</th><th class="num">Pers.</th><th class="num">Phase</th><th class="num">State</th><th class="num">Tool</th><th class="num">Comp. rate</th></tr></thead>
+      <tbody>
+        <tr><td>None（只看 rollout）</td><td class="num">7/26</td><td class="num">7/26</td><td class="num">10/26</td><td class="num">2/26</td><td class="num">46.2%</td></tr>
+        <tr><td>Notes（人类文字笔记）</td><td class="num">9/23</td><td class="num">9/23</td><td class="num">1/23</td><td class="num">4/23</td><td class="num">21.7%</td></tr>
+        <tr><td>Human trajectories（本文）</td><td class="num">8/22</td><td class="num">4/22</td><td class="num">6/22</td><td class="num">4/22</td><td class="num">45.5%</td></tr>
+      </tbody>
+    </table>
+    <p>有意思的对照：<strong>只看 rollout</strong> 时 Comp. rate 反而高（46.2%），但这是「负向证据」——rollout 只能定位<strong>失败处的可见缺陷</strong>（哪里崩了），却说不出「称职玩法本该怎么做」。<strong>只给文字 Notes</strong> 时，proposer 拿到的是「原则」，但缺乏 observation-action 对齐，编辑大多退化成持久 / phase 级提醒，Comp. rate 掉到 21.7%。<strong>人类轨迹</strong>提供了正向的 state-action counterfactual：既恢复了可比的 Comp. rate（45.5%），又把「计算型干预」<strong>锚定在「应在何时注入/调用」的具体 state 上</strong>。</p>
+    <div class="callout note">
+      <span class="label">一个具体例子（economy 管理）</span>
+      rollout-only 只能看到「事后症状」：超支、丢了 interest bonus、后期 buffer 薄弱——所以它的编辑偏向「购买侧的 safeguard」。Notes 给的是原则（「没出的手牌应转成回合末收入」），但缺 state 边界。人类轨迹则显示：run 早期、还没出任何手牌、剩多个 discard 且没有强得分手时，称职玩家往往<strong>先 discard 再用更少的手清掉该回合</strong>——这就把「原则」变成一个 <strong>state-computing 干预</strong>，例如 <code>round1_dig_hint</code>，由 <code>hands_played==0、discards_left≥2</code> 与 early ante 来 gate。结论：<strong>rollout 定位价值损失、notes 给出原则、human trajectory 指定 harness 干预该在何时触发。</strong>
+    </div>
+  </section>
+
+  <!-- ============================ ⑤ 洞见 ============================ -->
+  <section id="insight">
+    <h2><span class="n">⑤</span>洞见 Insights</h2>
+    <div class="callout insight">
+      <span class="label">Insight 1 · 「分数变好」≠「harness 真变好」</span>
+      在 long-horizon、sparse、high-variance 的任务里，dev rollout 分数提升<strong>极易是 noisy-selection 假象</strong>：同 seed 下 frontier LLM 早期动作的抖动 + 轨迹漂移，会让一个<strong>从未真正生效</strong>的 edit 也能刷出高分。本文用一次「517 个 request、目标 hook 出现 0 次」的 render-level 审计把这点钉死。可迁移的方法论：<strong>评估 self-evolving agent / harness 时，必须在 rendered-context 或 execution 层做 functional audit，而不能只看 source diff 或最终分数。</strong>
+    </div>
+    <div class="callout insight">
+      <span class="label">Insight 2 · demonstration 的价值在「状态对齐的 counterfactual」，而非动作标签</span>
+      把 human trajectory 用作 <strong>coding proposer 的诊断参照</strong>（而非 imitation 的监督信号），关键在于它同时给出「称职动作」和「动作发生的具体 state」。这恰好补上 reward 缺的那一维：reward 说「哪里亏了」，demonstration 说「称职玩法在那个 state 会怎么做」。对照实验显示，光给「文字攻略 / 笔记」远不如给「轨迹」——因为前者缺 <strong>observation-action 对齐</strong>，无法把原则落成 state-conditioned 的 harness 干预。
+    </div>
+    <div class="callout insight">
+      <span class="label">Insight 3 · harness evolution 优化的是「model+harness 整体系统」</span>
+      Liar's Dice 的 case study 显示：在弱模型上，演化会把脆弱的 free-form 决策<strong>整体外移成 near-symbolic 的确定性代码</strong>；在强模型 / 难任务上则形成 neuro-symbolic 分工（代码管 legality/概率/风险，模型管残余战略判断）。这说明 harness evolution 不被「保留模型固定角色」约束，它优化的是整个 model–harness 系统的行为。
+    </div>
+
+    <h3>局限与未来</h3>
+    <p>作者自陈的<strong>主要局限是任务覆盖面</strong>：DemoEvolve 主要在 <strong>Balatro</strong> 上评测，TextArena Liar's Dice 仅作短 horizon 正对照——Balatro 虽是有用的长 horizon 随机 testbed，但<strong>仍只是单一游戏环境</strong>。未来应检验 demonstration-bootstrapped harness evolution 能否推广到更广的交互场景：其它游戏、tool-use agent、terminal task、web agent、embodied environment。此外（我个人判断）：① 方法对「<strong>高水平人类轨迹</strong>」有依赖，采集成本与「称职」标准在更复杂任务里可能成为瓶颈；② 论文强调的 functional audit 目前是<strong>人工 / 半自动</strong>的，如何让它在 outer-loop 内自动化、变成 proposer 的 selection 信号，是个自然的后续；③ 实验规模偏小（10 轮、每 candidate 仅少量 long rollout），作者也明确说这是<strong>工程上的权衡</strong>而非「分数无方差」的断言，数字宜与 held-out 迁移 + 审计 + 行为分析<strong>合起来看</strong>。</p>
+
+    <h3>与相关工作的关系（基于本文自述）</h3>
+    <p>DemoEvolve 直接建立在 <strong>Meta-Harness</strong> 的「把 harness 当端到端可优化程序、用文件系统 archive 驱动 outer-loop 搜索」框架之上，并把它当作 self-rollout-only 的主基线；同一脉络还包括 ADAS、AFlow、Darwin-Gödel Machine、AlphaEvolve、Autoharness、self-improving coding agent 等。另一条相关线是「把交互历史转成可复用的 reflection / memory / skill」（Reflexion、Voyager、ExpeL、Skillclaw、Memevolve 等），它们通常<strong>假设过往 trajectory/log 里能抽出改进信号</strong>；本文的差异在于：明确研究<strong>当 self-generated experience 在 non-model-native、长 horizon、failure 稀疏且难归因时是否还够用</strong>，并给出否定证据 + demonstration 的补救。与 imitation learning / learning from demonstrations（DAgger、GAIL、DQfD 等）相比，本文「精神相通但对象不同」：<strong>模型权重保持 frozen，被优化的是外部 harness</strong>，demonstration 与 opponent-conditioned 轨迹是用于 harness-level 诊断/编辑的反馈，而非直接训练 policy。它也呼应 curriculum / 探索文献中「控制早期经验分布、reach 到 informative state」能提升优化稳定性与样本效率的观点。</p>
+  </section>
+
+  <footer class="foot">
+    本页为 <code>paper-reading</code> skill 生成的阅读笔记，仅作辅助，细节以
+    <a href="https://arxiv.org/abs/2605.24539" target="_blank" rel="noopener">原文</a> 为准 · 解读日期 2026-05-30
+  </footer>
+
+</article>
+</body>
+</html>

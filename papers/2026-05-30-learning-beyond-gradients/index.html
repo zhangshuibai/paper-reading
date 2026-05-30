@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>学习，超越梯度 · 论文解读</title>
+
+<!-- 数学公式渲染（在线查看时生效；无网络时正文仍可读） -->
+<script>
+  window.MathJax = {
+    tex:{inlineMath:[['$','$'],['\\(','\\)']], displayMath:[['$$','$$'],['\\[','\\]']]},
+    svg:{fontCache:'global'}
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;
+  }
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:880px; margin:0 auto; padding:18px 22px 90px}
+
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:27px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)}
+  .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .meta-grid a:hover{text-decoration:underline}
+
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap}
+  nav.toc a:hover{color:var(--accent)}
+
+  section{margin:38px 0}
+  h2{font-size:21px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:17px; margin:24px 0 8px}
+  h4{font-size:15px; margin:18px 0 6px; color:var(--accent2)}
+  p{margin:12px 0}
+  ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.9em}
+  pre{background:var(--panel2); border:1px solid var(--line); border-radius:10px; padding:12px 14px; overflow-x:auto; font-size:13px; line-height:1.55}
+  pre code{background:none; padding:0}
+  strong{color:var(--text)}
+
+  /* 表格 */
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:14px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:10px 12px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  .yes{color:var(--ok); font-weight:600}
+  .no{color:var(--muted)}
+  .num{font-variant-numeric:tabular-nums}
+
+  /* 图 */
+  figure{margin:24px 0; text-align:center}
+  figure img{max-width:100%; height:auto; border:1px solid var(--line); border-radius:10px; background:#fff}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+
+  /* 提示框 */
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+
+  blockquote{border-left:3px solid var(--line); margin:14px 0; padding:2px 16px; color:var(--muted)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+  .mjx-container{overflow-x:auto; overflow-y:hidden}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <!-- ============================ 抬头 / 元信息 ============================ -->
+  <header class="head">
+    <div class="chips">
+      <span class="chip">Blog</span>
+      <span class="chip">Heuristic Learning</span>
+      <span class="chip">Coding Agent</span>
+      <span class="chip">RL</span>
+      <span class="chip">Continual Learning</span>
+      <span class="chip">Atari / MuJoCo / VizDoom</span>
+    </div>
+    <h1>学习，超越梯度：用 coding agent 维护「会生长的代码策略」</h1>
+    <p class="orig-title">Learning Beyond Gradients</p>
+    <dl class="meta-grid">
+      <dt>作者</dt><dd>Jiayi Weng (trinkle23897)</dd>
+      <dt>团队 / 机构</dt><dd>个人博客（EnvPool 作者；声明仅代表个人观点，与任何公司项目无关）</dd>
+      <dt>原文链接</dt><dd><a href="https://trinkle23897.github.io/learning-beyond-gradients" target="_blank" rel="noopener">https://trinkle23897.github.io/learning-beyond-gradients</a></dd>
+      <dt>代码 / 实验仓库</dt><dd><a href="https://github.com/Trinkle23897/learning-beyond-gradients" target="_blank" rel="noopener">github.com/Trinkle23897/learning-beyond-gradients</a></dd>
+      <dt>发表 / 年份</dt><dd>Blog post, 2026 年 5 月</dd>
+      <dt>解读日期</dt><dd>2026-05-30</dd>
+    </dl>
+  </header>
+
+  <div class="tldr">
+    <b>TL;DR</b> — 这是一篇博客（非论文）。作者提出 <strong>Heuristic Learning（HL）</strong>：不训练神经网络，而是让 coding agent（codex / gpt-5.4）读环境 reward、testcase、日志、视频、回放等多模态反馈，<strong>直接改写一套手写的、基于规则的代码策略</strong>（rule / state machine / controller / MPC / 宏动作），让它像软件系统一样持续生长。被长期维护的对象称为 <strong>Heuristic System（HS）</strong>。实验里在不训练 NN 的前提下，Atari Breakout 打到理论满分 <code>864</code>、MuJoCo Ant 到 <code>6146</code>、HalfCheetah 到 <code>11836.7</code>、VizDoom 纯 CV 控制可用，整套 Atari57（342 条无人值守搜索）中位数 HNS 进入 PPO baseline 的区间。作者主张 HL 在<strong>可解释性、样本效率、抗 catastrophic forgetting</strong>（旧能力固化进 test / 文档）上更优，但承认它受代码表达力限制（解决不了 ImageNet 级感知、长程规划如 Montezuma），最终愿景是 NN + HL 的 System 1/2 混合架构。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#opensource">① 开源贡献</a>
+    <a href="#motivation">② 动机与贡献</a>
+    <a href="#method">③ 方法</a>
+    <a href="#evaluation">④ 实验评估</a>
+    <a href="#insight">⑤ 洞见</a>
+  </nav>
+
+  <!-- ============================ ① 开源贡献 ============================ -->
+  <section id="opensource">
+    <h2><span class="n">①</span>开源贡献 Open-source Artifacts</h2>
+    <p>这是一篇带<strong>完整可复现实验仓库</strong>的博客，而非传统论文。作者把博客正文、所有实验的代码、trial 日志、CSV、样本效率曲线和录制视频都放进了同一个 GitHub repo（截至解读日 526 stars / 53 forks）。核心 artifact 我已逐一访问核实，链接均真实可达；唯一需要注意的是<strong>该仓库没有任何 LICENSE 文件</strong>（解读日 <code>LICENSE / LICENSE.md / LICENSE.txt / COPYING</code> 均返回 404），即默认保留版权、未授予开源许可，复用前需向作者确认。</p>
+    <table>
+      <thead><tr><th>类型</th><th>是否开源</th><th>内容 / 链接</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>代码 Code</td><td class="yes">✔</td>
+          <td><a href="https://github.com/Trinkle23897/learning-beyond-gradients" target="_blank" rel="noopener">Trinkle23897/learning-beyond-gradients</a><br>含 <code>atari/</code>（pong、breakout、montezuma、atari57）、<code>mujoco/</code>（ant、halfcheetah）、<code>vizdoom/</code>、<code>heuristic_learning/</code> 核心模块，以及每个任务的 <code>heuristic_*.py</code> 策略、<code>trials.jsonl</code>、<code>*_summary.csv</code>、<code>sample_efficiency.png</code>、<code>README.md</code>。语言构成 Python 77.4% / HTML 22.5%。</td>
+        </tr>
+        <tr>
+          <td>模型权重 Weights</td><td class="no">✘（不适用）</td>
+          <td>方法本身<strong>不训练神经网络</strong>，因此没有权重产物。策略即纯 Python 代码文件。</td>
+        </tr>
+        <tr>
+          <td>数据集 Dataset</td><td class="no">— 实验记录代替</td>
+          <td>无传统训练数据集；但开放了等价的「学习轨迹」：如 <a href="https://github.com/Trinkle23897/learning-beyond-gradients/blob/main/atari/breakout/heuristic_breakout_trials.jsonl" target="_blank" rel="noopener">breakout trials.jsonl</a>、<a href="https://github.com/Trinkle23897/learning-beyond-gradients/blob/main/atari/atari57/atari57_aggregate_curve_steps.csv" target="_blank" rel="noopener">atari57 聚合曲线 CSV</a>、HNS 归一化表等。</td>
+        </tr>
+        <tr>
+          <td>环境 / Benchmark</td><td class="yes">✔（依赖现成）</td>
+          <td>评测基于 <a href="https://github.com/sail-sg/envpool" target="_blank" rel="noopener">EnvPool</a>（作者本人维护）上的 Atari / MuJoCo / VizDoom；只需 <code>pip</code> 安装即可，VizDoom 无需本地编译。Atari57 批量提示词模板亦开源：<a href="https://github.com/Trinkle23897/learning-beyond-gradients/blob/main/atari/atari57/atari57_prompt_template.txt" target="_blank" rel="noopener">atari57_prompt_template.txt</a>。</td>
+        </tr>
+        <tr>
+          <td>项目主页 / Demo</td><td class="yes">✔</td>
+          <td>博客本体（中英双语）：<a href="https://trinkle23897.github.io/learning-beyond-gradients" target="_blank" rel="noopener">GitHub Pages</a>。仓库内含多段策略行为录像（如 Breakout 387/507/839/864、Ant 6146、VizDoom 10-seed、Montezuma 400 分回放）。</td>
+        </tr>
+        <tr>
+          <td>License</td><td class="no">✘ 未提供</td>
+          <td>仓库无 LICENSE 文件，<strong>未声明任何开源许可证</strong>，默认 All rights reserved。可读可复现，但商用 / 再分发需联系作者。</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>复现入口（A.2 节给出，默认已 <code>clone</code> 仓库并装好 <code>requirements.txt</code>）覆盖：Pong 21、Breakout <code>387/507/839</code> 中间节点、Ant residual MPC、HalfCheetah staged-tree MPC、VizDoom D1/D3 纯 CV、Montezuma 400 分回放。例如最简单的 Pong：</p>
+    <pre><code>python atari/pong/heuristic_pong.py --policy ram --episodes 1 --seed 0
+# 期望输出包含 episode=0 score=21.0 与 mean=21.000</code></pre>
+  </section>
+
+  <!-- ============================ ② 动机与贡献 ============================ -->
+  <section id="motivation">
+    <h2><span class="n">②</span>研究动机与贡献 Motivation &amp; Contribution</h2>
+
+    <h3>背景与问题：一个意外发现</h3>
+    <p>起因非常工程化。作者在业余维护 EnvPool 时，想要一个<strong>比随机策略强很多、但又便宜可复现</strong>的策略来跑 CI 测试环境正确性——总不能每次 CI 都跑神经网络，太费测试资源。最初的问题只是：「能不能写一些便宜、可复现、比随机强很多的 heuristic，专门把环境跑到有信息量的状态？」</p>
+    <p>于是作者用 codex（gpt-5.4）写了一个<strong>完全不依赖 NN 的、基于规则的版本</strong>，结果远超预期：Breakout 一路 <code>387 → 507 → 839 → 864</code> 打到理论满分；Ant 纯 Python 程序先学会节律步态、再接上短视窗模型规划，上了 <code>6000+</code> 分；HalfCheetah 到 <code>11836.7</code>；VizDoom 只用 cv2/NumPy 搓屏幕 CV 也能玩。最让作者震撼的不是分数，而是意识到：<strong>codex 没有训练任何神经网络，它在维护一套还能继续生长的软件系统</strong>。Breakout 最后长出来的策略远不止「球在左边就往左」，而是动作探测、状态读取、球/挡板检测、落点预测、卡住循环检测、回归测试、视频回放和实验记录的集合。</p>
+
+    <h3>本文的切入点：被更新的对象，从「权重」变成「软件系统」</h3>
+    <p>作者由此提出一个新概念：被迭代的对象已经不只是一个 policy 函数，而是<strong>一套带有 memory、反馈入口和回归机制的软件系统</strong>。深度 RL 的核心循环（state → action → feedback → update）依旧成立，但 <strong>update 的对象从神经网络参数换成了软件结构</strong>，update 的执行者从梯度下降换成了 coding agent。</p>
+    <div class="callout note">
+      <span class="label">关键观察</span>
+      过去很多 heuristic「看起来没前途」，问题往往不在它们本身太弱，而在<strong>维护成本太高</strong>——人类手工堆规则迟早变成屎山。coding agent 改变的正是这条「heuristic 维护成本曲线」。作者类比：人力维护专家系统像工业革命前手工纺纱，规模一大稳定性和成本就压死人；纺织机改变的是产能曲线，coding agent 改变的是维护曲线。于是<strong>有一类原来因维护成本太高而不值得写的 heuristic，现在突然值得长期拥有了</strong>。
+    </div>
+
+    <h3>核心贡献</h3>
+    <ol>
+      <li><strong>提出并定义 Heuristic Learning（HL）/ Heuristic System（HS）</strong>：把「coding agent 消化多模态反馈、直接改写代码策略」这一过程形式化为一个新的学习范式，并系统地与 Deep RL 在 policy / state / action / feedback / update / memory 六个维度逐一对照。</li>
+      <li><strong>给出一套可工作的「反馈闭环」工作流</strong>：不是只交一个 <code>policy.py</code>，而是让 agent 维护「探测动作观测 → 写状态检测器 → 写策略 → 跑完整回合 → 记录 trials/summary → 出视频/曲线 → 看失败模式 → 改策略 → 简化并回归」的完整闭环。</li>
+      <li><strong>把 continual learning 重新表述为「软件维护问题」</strong>：旧能力固化成回归测试、固定 seed replay、golden trace、失败视频、版本 diff，从而把「怎么更新参数」变成「怎么维护一个持续吸收反馈的软件系统」，并提出健康 HS 必备的两个操作——吸收反馈、压缩历史。</li>
+      <li><strong>提出「耦合复杂度（coupling complexity）」概念</strong>，刻画 coding agent 能维护多复杂的策略，并指出它不由代码行数决定，而由相互牵连的状态/规则/测试/反馈/历史的数量决定。</li>
+      <li><strong>大规模实证</strong>：在 Atari（含完整 57 游戏、342 条无人值守搜索轨迹）、MuJoCo（Ant / HalfCheetah）、VizDoom（D1 / D3 纯 CV）上，在<strong>不训练 NN</strong> 的前提下取得与常见 Deep RL 同量级的结果，并全部开源可复现。</li>
+      <li><strong>诚实地划出边界</strong>：用 Montezuma 作反例说明普通 <code>if-else</code> 装不下长程规划，并据此提出下一步范式——NN + HL 的 System 1/2 分层混合架构。</li>
+    </ol>
+  </section>
+
+  <!-- ============================ ③ 方法 ============================ -->
+  <section id="method">
+    <h2><span class="n">③</span>方法 Method</h2>
+    <p>HL 的整体形态可以一句话概括：<strong>把「训练神经网络」替换成「让 coding agent 维护一套会生长的代码策略系统」</strong>。它与 Deep RL 共享 state / action / feedback / update 的闭环，但每个环节的载体都变了。下图（博客 banner 配图）形象地表达了核心隐喻——coding agent 像一条「输送智力的营养管道」，把反馈持续接进软件系统，让它自己迭代生长。</p>
+
+    <figure>
+      <img src="figures/overview_hero.png" alt="coding agent 把反馈接进软件生长">
+      <figcaption>图 1：核心隐喻——coding agent 把多模态反馈接进一套会持续生长的 Heuristic System。（图源：Learning Beyond Gradients 博客）</figcaption>
+    </figure>
+
+    <h3>HL 与 Deep RL 的逐维度对照</h3>
+    <p>作者用一张表把两种范式摆在一起。理解 HL 的关键是看到：它<strong>不是抛弃 RL 的框架，而是替换框架里每个组件的实现介质</strong>——把隐式的、不可读的神经网络对象，换成显式的、可读可删可重构的代码对象。</p>
+    <table>
+      <thead><tr><th>维度</th><th>Deep RL</th><th>Heuristic Learning (HL)</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Policy</strong> 策略</td><td>神经网络参数</td><td>代码：规则、state machine、controller、MPC、宏动作</td></tr>
+        <tr><td><strong>State</strong> 状态</td><td>通常是显式观测</td><td>显式写成变量、检测器、缓存等</td></tr>
+        <tr><td><strong>Action</strong> 动作</td><td>神经网络一次 forward 生成</td><td>执行代码逻辑生成</td></tr>
+        <tr><td><strong>Feedback</strong> 反馈</td><td>主要是固定 reward</td><td>由 coding agent 按 context 提供：reward、testcase、日志、回放都算 context</td></tr>
+        <tr><td><strong>Update</strong> 更新</td><td>RL 算法对参数做梯度更新</td><td>coding agent 直接改代码</td></tr>
+        <tr><td><strong>Memory</strong> 历史</td><td>on-policy 几乎没有；off-policy 用 replay buffer</td><td>显式记录 trials、summary、失败原因、回放、版本 diff</td></tr>
+      </tbody>
+    </table>
+
+    <h3>方法核心一：HL 的反馈闭环（the HL loop）</h3>
+    <p>作者强调最关键的「认知转变」在于：一开始他直接让 codex「写一个能解决 Breakout 的策略」，效果一般——因为<strong>低分没有解释力</strong>，agent 分不清是动作语义错了、状态检测错了、评测设置错了，还是策略结构本身不行。后来把任务改成「别只交 <code>policy.py</code>，要维护完整闭环」，任务的「形状」就变了。这个闭环长这样：</p>
+    <pre><code>探测动作和观测
+ -&gt; 写状态检测器
+ -&gt; 写策略
+ -&gt; 跑完整回合
+ -&gt; 记录 trials.jsonl 和 summary.csv
+ -&gt; 生成视频或曲线
+ -&gt; 看失败模式
+ -&gt; 改策略
+ -&gt; 简化代码并做回归</code></pre>
+    <p>当人类介入次数随模型能力提升而减少，这个循环就能在「边界明确」的系统里<strong>自动闭合</strong>，实现用 HL 批量生产 HS：</p>
+    <pre><code>环境反馈 / 测试失败 / 日志异常
+ -&gt; coding agent 读 context
+ -&gt; 修改 policy / test / memory
+ -&gt; 重新运行
+ -&gt; 把结果写回 trials 和 summary
+ -&gt; 下一轮继续</code></pre>
+
+    <h3>方法核心二：HL 怎么做 continual learning（旧能力如何不被遗忘）</h3>
+    <p>这是本文回应「catastrophic forgetting」的核心。神经网络的遗忘是新数据把参数推向新任务、旧能力被覆盖。作者坦承 <strong>HL 也会忘</strong>——新规则修好一个 case 却破坏旧场景、新 memory 反复把 agent 带偏、测试太窄被策略钻空子、patch 改了公共接口让旧调用方悄悄坏掉、规则越堆越多到 agent 自己也维护不动。</p>
+    <p>所以 HL <strong>不会自动解决 continual learning</strong>，而是把「防遗忘」变成更工程化的东西：旧能力可以被<strong>显式固化</strong>成回归测试、固定 seed 的 replay、golden trace、失败视频、版本 diff、明确写下来的失败方向。这与神经网络把经验隐式压进权重完全不同——<strong>HL 的历史是显式、可读、可删、可重构的</strong>。由此提出健康 HS 必备的两个操作：</p>
+    <ol>
+      <li><strong>吸收反馈（absorb feedback）</strong>：把新失败、新日志、新 reward 写回系统；</li>
+      <li><strong>压缩历史（compress history）</strong>：把一堆局部补丁折回更简单、更可维护的表示。</li>
+    </ol>
+    <div class="callout warn">
+      <span class="label">反面教材</span>
+      作者特别警告：<strong>只增长不压缩的 HS，最后一定会变成屎山代码</strong>——它确实「记住」了很多东西，但记住的方式太差，导致谁也不敢动，从而腐化。这把 continual learning 从「怎么更新参数」彻底重述为「怎么维护一个持续吸收反馈的软件系统」。
+    </div>
+
+    <h3>方法核心三：耦合复杂度（coupling complexity）</h3>
+    <p>作者定义<strong>耦合复杂度 = coding agent 能维护多复杂的策略来支持 HL</strong>，也就是「一次更新必须同时照顾多少相互牵连的状态、规则、测试、反馈和历史」。它<strong>不能按代码行数算</strong>：500 行但模块边界清楚、测试完整、状态可复现的策略可能很好维护；80 行但每行互相牵制、没日志没回放的策略可能一碰就崩。它受两侧因素制约：</p>
+    <ul>
+      <li><strong>代码一侧</strong>：模块边界、接口稳定性、测试覆盖、日志观测性、回滚成本、状态可复现性。好的模块化把全局耦合切成局部耦合；好的测试让 agent 不必每次在脑子里模拟整个系统。</li>
+      <li><strong>agent 一侧</strong>：模型能力、上下文长度、memory 质量、工具质量、迭代速度。更强的模型能同时处理更多相互作用；更长上下文少丢线索；memory 留下跨轮经验；搜索/定位/运行/回放等工具把认知负担搬到外部。</li>
+    </ul>
+    <p>由此得到几条判断：反馈越清楚，单位 agent 智力能维护的耦合复杂度越高；同等工具反馈下模型越强能处理的耦合复杂度越高；模块化/测试/回放会把一部分耦合复杂度转移到环境里；memory 和工具提高 agent 有效上下文；只增长不压缩的 HS 会让耦合复杂度持续上升直到超过维护能力。</p>
+
+    <div class="callout note">
+      <span class="label">实现要点（来自附录 A.1）</span>
+      ① 全部实验 codex 模型版本为 <strong>gpt-5.4</strong>，实验报告由 codex 自行撰写。② Atari 初始化固定：<code>frame_skip=1</code>、<code>reward_clip=False</code>、<code>sticky_action=0</code>。③ 所有真正 step 过环境的 probe/debug/trial 都<strong>必须计入 cumulative_env_steps</strong>（样本效率口径诚实）。④ 硬约束：不训练 NN、不读环境源码/测试/ROM 细节/隐藏状态；<code>native_obs</code> 模式只能用原生 obs，<code>ram</code> 模式才可用 <code>info["ram"]</code>。⑤ 停止规则：Atari frame budget = 20M，刷新 best score 后必须进入「代码简化」阶段、确认不掉分才保留——简化即一种工程正则化。
+    </div>
+  </section>
+
+  <!-- ============================ ④ 实验评估 ============================ -->
+  <section id="evaluation">
+    <h2><span class="n">④</span>实验评估 Evaluation</h2>
+    <h3>评测设置</h3>
+    <ul>
+      <li><strong>Benchmark / 环境：</strong>均基于 EnvPool。<em>Atari</em>（Pong、Breakout、Montezuma、完整 Atari57）考察离散动作、几何/感知/长程规划；<em>MuJoCo</em>（Ant 8 关节、HalfCheetah）考察连续控制与动力学；<em>VizDoom</em>（D1 Basic、D3 Battle）考察第一人称视觉控制。</li>
+      <li><strong>对比基线：</strong>常见 Deep RL 结果，重点是 <strong>OpenRL Benchmark 保存的 PPO2（OpenAI Baselines）与 CleanRL EnvPool PPO</strong> 的训练曲线。</li>
+      <li><strong>评价指标：</strong>单环境用原始 episode 得分（越高越好）；跨 Atari 用 <strong>HNS（human-normalized score）</strong>——把每个游戏分数按人类基线归一化后再比较，1.0 即达人类水平。样本效率用「分数 vs 累计环境步」曲线衡量；<strong>注意：coding agent 读日志/写代码/看视频的开销没有折算进计算成本，比较的是环境交互效率</strong>。</li>
+    </ul>
+
+    <h3>单点结果一：Atari Breakout —— 打到理论满分 864</h3>
+    <p>RAM 模式下，策略从 <code>387 → 507 → 839 → 864</code> 一路爬到理论最高分（默认配置三局复测 <code>864/864/864</code>）。每一跳都对应一个被 agent 定位的<strong>具体失败模式 + 一个机制</strong>：</p>
+    <table>
+      <thead><tr><th>分数</th><th>失败模式 → 加入的机制</th></tr></thead>
+      <tbody>
+        <tr><td class="num">99 → 387</td><td>能稳定接球（RAM 截距），但把球送进一个不死也不清砖的循环</td></tr>
+        <tr><td class="num">387 → 507</td><td><strong>打破循环</strong>：长时间无 reward 就在预测落点上周期性加偏移，把球打出局部循环</td></tr>
+        <tr><td class="num">507 → 839</td><td><strong>处理高速低位球</strong>：加 <code>fast_low_ball_lead_steps=3</code>，避免过度前视带偏挡板</td></tr>
+        <tr><td class="num">839 → 864</td><td><strong>后期收偏移</strong>：过第一面墙后卡住偏移只在离挡板远时生效、快接球时逐步收掉；外加补一步动作延迟的小漂移补偿</td></tr>
+      </tbody>
+    </table>
+    <p>更说明问题的是<strong>能力迁移</strong>：在 RAM 版本摸出几何控制 / 打破循环 / 后期收偏移这些<strong>结构</strong>之后，把状态读取层从 RAM 换成纯 RGB 检测器，纯图像版 7 个本地回合后第一次到 <code>864</code>，仅花 <code>14,504</code> 个本地环境步。作者诚实强调：这 14.5K 是「<strong>迁移预算</strong>」，不能写成「纯图像从零 14.5K 步到满分」。</p>
+    <figure>
+      <img src="figures/breakout_sample_efficiency.png" alt="Breakout 样本效率">
+      <figcaption>图 2：Breakout 样本效率曲线（分数 vs 累计环境步）。（图源：Learning Beyond Gradients 博客）</figcaption>
+    </figure>
+
+    <h3>单点结果二：MuJoCo Ant —— 节律步态 + residual MPC，到 6146</h3>
+    <p>作者没有预先指定「用 CPG」或「用 MPC」，只给约束：别训练 NN、能本地复现、每轮留记录、继续把分数往上推。codex 自己提出第一版四腿相位振荡器（左右腿反相 CPG + PD），一上来 5 个随机种子均值就 <code>2291</code>。真正的<strong>跃迁来自 residual MPC</strong>——保留节律步态作为基础反射，每个真实步在本地 MuJoCo 模型里采样几十条残差动作序列、打分后只执行第一个残差动作，下一步重新规划并用上一轮计划热启动。完整轨迹：</p>
+    <table>
+      <thead><tr><th>trial</th><th>score (mean)</th><th>累计环境步</th><th>机制</th></tr></thead>
+      <tbody>
+        <tr><td>ant_lr_cpgpd_v1</td><td class="num">2291.9</td><td class="num">5,000</td><td>左右腿反相 CPG + PD</td></tr>
+        <tr><td>ant_yawaxis_grid_v2</td><td class="num">2857.9</td><td class="num">20,000</td><td>偏航反馈 + 重调参数</td></tr>
+        <tr><td>ant_h3_428_v1</td><td class="num">3162.0</td><td class="num">50,000</td><td>二阶/三阶谐波</td></tr>
+        <tr><td>ant_mpc_residual_v1_ep1</td><td class="num">3635.5</td><td class="num">62,000</td><td>residual MPC，视窗=6 候选=32</td></tr>
+        <tr><td>ant_mpc_residual_cfg4_eval5</td><td class="num">3964.7</td><td class="num">67,000</td><td>视窗=8 候选=48</td></tr>
+        <tr><td>ant_mpc_residual_cand07_eval5</td><td class="num">4647.1</td><td class="num">73,000</td><td>围绕 MPC 配置局部搜索</td></tr>
+        <tr><td>ant_mpc_residual_narrow04_eval5</td><td class="num">4871.3</td><td class="num">79,000</td><td>降 z 目标、增大 kp/候选数</td></tr>
+        <tr><td>ant_mpc_residual_warm02_eval5</td><td class="num">5165.2</td><td class="num">85,000</td><td>热启动残差计划</td></tr>
+        <tr><td>ant_mpc_fast065x060_sigma008_clip012</td><td class="num">5759.4</td><td class="num">95,000</td><td>更快步态 + 更大残差</td></tr>
+        <tr><td>ant_mpc_term001_ep1</td><td class="num">6054.5</td><td class="num">100,000</td><td>终端速度代价</td></tr>
+        <tr><td><strong>ant_mpc_default_adaptive_ep1</strong></td><td class="num"><strong>6146.2</strong></td><td class="num">106,300</td><td>速度自适应相位 + 支撑期</td></tr>
+      </tbody>
+    </table>
+    <p>最终 <code>6146.2</code>（5 seeds 均值）<strong>进入常见 Deep RL 结果的量级</strong>。其价值在于模块可拆：相位、支撑期、速度自适应、滚转/俯仰/偏航反馈、脚部接触、模型内展开、残差平滑、终端代价、热启动衰减——人类能写其中一两个模块，但要在短时间内同时照顾实验记录 / 代码 / 视频 / 失败方向，难度完全不同。</p>
+    <figure>
+      <img src="figures/ant_sample_efficiency.png" alt="Ant 样本效率">
+      <figcaption>图 3：MuJoCo Ant 样本效率曲线，节律步态阶段后 residual MPC 带来跃迁。（图源：Learning Beyond Gradients 博客）</figcaption>
+    </figure>
+
+    <h3>单点结果三：MuJoCo HalfCheetah —— 11836.7</h3>
+    <p>策略 <code>mpc-staged-tree-asym-pd-cpg</code>：先用 CPG/PD 形成高分步态，再用短视窗模型评分 + staged swing-amplitude schedule 修正动作。seeds <code>100..104</code> 复测：<strong>均值 11836.7、最小 11735.0、最大 12041.2</strong>，同样进入常见 Deep RL 量级，且全程用可解释的步态/姿态规则。</p>
+    <figure>
+      <img src="figures/halfcheetah_sample_efficiency.png" alt="HalfCheetah 样本效率">
+      <figcaption>图 4：MuJoCo HalfCheetah 样本效率曲线。（图源：Learning Beyond Gradients 博客）</figcaption>
+    </figure>
+
+    <h3>单点结果四：VizDoom —— 纯 CV、零 NN 训练</h3>
+    <ul>
+      <li><strong>D1 Basic：</strong>纯 CV 版用亮度阈值、形态学 close/dilate、连通域找 medikit，用 bbox 中心决定转向/前进；血量高且离血包太近时先 staging、等掉血再吃。10 seeds：<strong>mean=0.9441、min=0.2900</strong>（object/info 版上限约 1.01）。只依赖 pip EnvPool + <code>render()</code> 屏幕像素 + 公开 <code>HEALTH</code>。</li>
+      <li><strong>D3 Battle：</strong>更像 FPS smoke policy，把行为拆成三个闭环——<em>看见怪就杀 / 低血低弹找补给 / 长时间无目标高速探索</em>。屏幕侧 cv2+NumPy 做颜色阈值与连通域，info 只用公开 game variables（<code>HEALTH/AMMO2/HITCOUNT/DAMAGECOUNT/KILLCOUNT</code>）。10 seeds：<strong>mean=557.0、min=440.0</strong>。早期试过的地图/object info/seed 特判后来都删掉了。</li>
+    </ul>
+
+    <h3>规模化结果：Atari57 —— 342 条无人值守搜索</h3>
+    <p>这是验证「方法离开单个漂亮案例后还剩多少」的关键实验：<strong>57 游戏 × 2 输入（ram + native_obs）× 3 次重复 = 342 条 coding-agent 搜索轨迹</strong>，全程<strong>无人工提示</strong>，每个 agent 拿同一模板、不同 <code>ENV_ID/OBS_MODE/REPEAT_INDEX</code> 自己跑到停止。结果按口径汇报：</p>
+    <table>
+      <thead><tr><th>口径</th><th>Codex (HL)</th><th>PPO2 / Baselines</th><th>CleanRL EnvPool PPO</th></tr></thead>
+      <tbody>
+        <tr><td>median HNS @ 1M 步（native / ram）</td><td class="num"><strong>0.32 / 0.26</strong></td><td colspan="2">明显高于图中 PPO 早期曲线</td></tr>
+        <tr><td>median HNS @ 9.7M 步（native / ram）</td><td class="num"><strong>0.81 / 0.59</strong></td><td colspan="2">PPO 曲线 @10M ≈ 0.88 / 0.92</td></tr>
+        <tr><td>final median HNS（每游戏取 best input）</td><td class="num"><strong>0.83</strong></td><td class="num">0.80</td><td class="num">0.98</td></tr>
+        <tr><td>best single run median HNS</td><td class="num"><strong>1.18</strong></td><td class="num">—</td><td class="num">—</td></tr>
+      </tbody>
+    </table>
+    <p>读法要克制：<code>@1M</code> 步处 HL 中位数已明显高于 PPO 早期曲线，说明<strong>环境交互效率高</strong>；但 PPO 充分训练（10M 步）后中位数仍略高。作者反复声明：HL 的 agent 计算开销没折算进来，这<strong>不能替代严格训练曲线比较</strong>，只说明「一个还很粗糙的无人值守批量流程，在完全不看中途结果时，已能把 Atari57 中位数推进到接近这些 baseline 的区间」。</p>
+    <figure>
+      <img src="figures/atari57_openrl_context.png" alt="Atari57 样本效率对比 OpenRL Benchmark">
+      <figcaption>图 5：Atari57 中位数 HNS 样本效率曲线，对比 OpenRL Benchmark 的 PPO2 / CleanRL PPO。（图源：Learning Beyond Gradients 博客）</figcaption>
+    </figure>
+    <p><strong>逐游戏方差很大</strong>，揭示了 HL 的能力边界：在 Breakout、Krull、DoubleDunk、Boxing、DemonAttack 上 HL 与 PPO 都远超人类；在 Asterix、Jamesbond、Centipede、Bowling、Skiing、Tennis 这类<strong>几何/规则清晰</strong>的游戏上 HL 相对突出；但在 Atlantis、VideoPinball、UpNDown、Assault、RoadRunner、StarGunner 这类<strong>复杂感知</strong>任务上 PPO 明显强很多。</p>
+    <figure>
+      <img src="figures/atari57_per_game_hns.png" alt="Atari57 每个游戏 HNS 对比">
+      <figcaption>图 6：Atari57 逐游戏 HNS 对比——几何任务 HL 强、复杂感知任务 PPO 强。（图源：Learning Beyond Gradients 博客）</figcaption>
+    </figure>
+    <p>作者点出 Atari57 最有意思之处：<strong>样本效率的来源变了</strong>。传统 NN 要在每个环境从高维输入重新学表示、信用分配、动作含义；而 codex 做的是把环境拆成可维护的小程序系统（射击游戏的瞄准/躲避、接球游戏的反弹、躲避游戏的位置规则、环境包装器细节，以及每个环境自己的失败实验记录）。</p>
+
+    <h3>边界案例：Montezuma's Revenge —— 表达力的天花板</h3>
+    <p>之前单独搜 Montezuma 的状态图搜索能把钥匙距离从 <code>72</code> 推到 <code>28</code>，但 reward 仍是 <code>0</code>。Atari57 纯图像批量里有一条无人值守 run 到了 <code>400.0</code> 分（best 回放 <code>repair_replay_r1_t19734</code>，seed <code>10001</code>，<code>1769</code> 环境步），但本质是一条 <strong>86 个宏动作组成的开环路线</strong>。这恰恰暴露了表达力问题：普通 <code>policy.py</code> 状态机很难装下这类路线——动作必须对齐时机、失败后要能恢复、中间状态要能重新进入计划。作者认为这类失败「对 HL 很有价值」，因为它指明了下一层抽象大概该长什么样：<strong>可组合宏动作、可恢复搜索状态、搜索、长期 memory</strong>。</p>
+  </section>
+
+  <!-- ============================ ⑤ 洞见 ============================ -->
+  <section id="insight">
+    <h2><span class="n">⑤</span>洞见 Insights</h2>
+    <div class="callout insight">
+      <span class="label">Insight 1 · 真正变的是「维护成本曲线」</span>
+      本文最反直觉、也最值得记住的一点：HL 能成立，<strong>不是因为规则本身比神经网络强，而是因为 coding agent 改变了 heuristic 的维护成本曲线</strong>。同样一句话作者在正文和结语各说了一遍。很多 heuristic 过去「没前途」纯粹败在没人养得起；当维护成本被 agent 压下来，「哪些代码值得被长期拥有」这件事就被重写了。这是一个关于「能力来自工具改变成本结构」的方法论判断，可迁移到任何「过去因维护昂贵而被放弃」的工程方向。
+    </div>
+    <div class="callout insight">
+      <span class="label">Insight 2 · 把「学习」重新定义为「软件维护」</span>
+      HL 把 RL 的 state/action/feedback/update 闭环原样保留，只替换实现介质，从而把若干难题翻译成了熟悉的软件工程问题：<strong>抗遗忘 = 写回归测试 / golden case；样本效率 = 一次有效代码 edit 直接跳到新策略；防过拟合 = 简化 + 多 seed + 回归（工程正则化）；可解释 = 规则能翻译成人话</strong>。continual learning 于是从「怎么更新参数」变成「怎么维护一个持续吸收反馈、且会主动压缩历史的软件系统」——并配套提出「耦合复杂度」来量度 agent 的维护上限。
+    </div>
+    <div class="callout insight">
+      <span class="label">Insight 3 · 样本效率的「来源」被偷换了</span>
+      Atari57 的对比里，HL 在 1M 步就把中位数 HNS 推到高于 PPO 早期曲线，但这不是「同一种学习更快」，而是<strong>学习的内容根本不同</strong>：NN 在每个环境从零学表示/信用分配/动作语义，HL 直接把环境拆成可维护的小程序。读这类样本效率数字时务必记住作者的诚实声明——<strong>agent 的 token / 读视频开销没折算进计算成本</strong>，比较的只是环境交互效率。
+    </div>
+
+    <h3>局限与未来</h3>
+    <p>作者罕见地把边界划得很清楚：</p>
+    <ul>
+      <li><strong>受代码表达力限制。</strong>HL 做不了所有 NN 能做的事——复杂感知（作者直言「想不出有 agent 能搓出纯 Python、不训 NN 去解决 ImageNet」）、从高维原始输入的长程泛化、本质需要学到表示的任务。</li>
+      <li><strong>长程规划需要更强的程序形态。</strong>Montezuma 显示普通 <code>if-else</code> 不够，需要可组合宏动作 / 可恢复搜索状态 / 长期 memory 这类下一层抽象。</li>
+      <li><strong>「只增不压」会失控。</strong>耦合复杂度若持续上升而无压缩，HS 终将超过维护能力变成屎山。</li>
+      <li><strong>混合架构尚处早期。</strong>提出的下一步是 <strong>NN + HL 的 System 1/2 分层结构</strong>：浅层专用 NN（感知/分类/物体状态估计）+ HL（数据处理、规则、测试、回放、memory、安全边界、局部恢复）共同充当 System 1；LLM agent 充当 System 2，给 HL 提供反馈、改进数据，并<strong>周期性提取 HL 生成的数据来更新自身</strong>。机器人场景可继续拆成「关节级 → 肢体级 → 全身平衡 → 任务级」的层级 HL。未解的核心难题是：<strong>HL 产出的特定数据分布如何不让 LLM 的周期性更新崩溃</strong>——一个经典的 post-training 稳定性问题。</li>
+    </ul>
+
+    <h3>与相关工作的关系</h3>
+    <p>按作者自身的框定：HL 的<strong>前身是专家系统 / 规则系统</strong>，过去因人力维护成本太高而式微；coding agent 的出现改变了这条曲线，使其重新可行。在范式演进的脉络上，作者把它接在 <strong>pretrain → RLHF → large-scale RL / RLVR</strong> 之后：「凡是可以验证的，都开始能被解决」；而 HL 借助 RLVR 产出的 agentic coding 能力，把这句话往前推一步——<strong>「凡是可以被持续迭代的，都开始能被解决」</strong>，并据此部分解决 online learning 与 continual learning。它与 Deep RL 不是替代而是互补：RL 负责需要学习表示的部分，HL 负责可显式编码、可回归、可维护的部分。</p>
+
+    <div class="callout note">
+      <span class="label">解读者按</span>
+      这是一篇「单作者 + 强工程证据 + 诚实划界」的观点型博客，份量在于<strong>可复现 artifact</strong>而非理论证明。需要清醒看待的几点：(1) 样本效率对比未计入 agent 的巨大推理开销，严格的「总计算成本」对比仍缺失；(2) 多处成绩（如 Breakout 纯图像 14.5K 步）是<strong>迁移预算</strong>而非从零学习，作者已主动澄清；(3) gpt-5.4 这一具体强模型是结果的关键前提，方法的可复制性与模型能力强耦合。但其核心论断——「agent 改变维护成本曲线，从而让一类旧 heuristic 重新值得拥有」——作为方法论是清晰且可迁移的。
+    </div>
+  </section>
+
+  <footer class="foot">
+    本页为 <code>paper-reading</code> skill 生成的阅读笔记，仅作辅助，细节以
+    <a href="https://trinkle23897.github.io/learning-beyond-gradients" target="_blank" rel="noopener">原文博客</a>
+    及其 <a href="https://github.com/Trinkle23897/learning-beyond-gradients" target="_blank" rel="noopener">实验仓库</a> 为准 · 解读日期 2026-05-30 · 所有图源：Learning Beyond Gradients 博客
+  </footer>
+
+</article>
+</body>
+</html>

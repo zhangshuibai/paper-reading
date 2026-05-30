@@ -94,5 +94,81 @@
       "Open-Ended"
     ],
     "path": "papers/2601.06487-arenarl/index.html"
+  },
+  {
+    "slug": "2605.26494-minimax-m2",
+    "title": "The MiniMax-M2 Series: Mini Activations Unleashing Max Real-World Intelligence",
+    "authors": "MiniMax",
+    "team": "MiniMax (MiniMaxAI)",
+    "arxiv": "https://arxiv.org/abs/2605.26494",
+    "code": "https://github.com/MiniMax-AI/MiniMax-M2",
+    "date": "2026-05-30",
+    "published": "arXiv 2026",
+    "tldr": "229.9B 总参 / 9.8B 激活的 MoE，用 agent 数据 pipeline + Forge RL 系统 + M2.7 self-evolution，把小激活推到逼近闭源前沿的 agentic coding/cowork/reasoning 水平。",
+    "tags": [
+      "LLM",
+      "MoE",
+      "Agent",
+      "RL",
+      "Self-Evolving"
+    ],
+    "path": "papers/2605.26494-minimax-m2/index.html"
+  },
+  {
+    "slug": "2605.23904-skillopt",
+    "title": "SkillOpt: Executive Strategy for Self-Evolving Agent Skills",
+    "authors": "Yifan Yang, Ziyang Gong, Weiquan Huang, Qihao Yang, Ziwei Zhou, Zisu Huang, Yan Li, Xuemei Gao, Qi Dai, Bei Liu, Kai Qiu, Yuqing Yang, Dongdong Chen, Xue Yang, Chong Luo",
+    "team": "Microsoft; SJTU; Tongji; Fudan",
+    "arxiv": "https://arxiv.org/abs/2605.23904",
+    "code": "https://github.com/microsoft/SkillOpt",
+    "date": "2026-05-30",
+    "published": "arXiv 2026",
+    "tldr": "把 agent 的 skill 文档当成 frozen 模型的可训练外部状态：独立 optimizer 提出有界 add/delete/replace 编辑，仅当 held-out validation 严格变好才接受；52 个 cell 全部 best-or-tied，部署零权重更新。",
+    "tags": [
+      "LLM",
+      "Agent",
+      "Skill",
+      "Self-Evolving",
+      "Optimization"
+    ],
+    "path": "papers/2605.23904-skillopt/index.html"
+  },
+  {
+    "slug": "2605.24539-demoevolve",
+    "title": "DemoEvolve: Overcoming Sparse Feedback in Agentic Harness Evolution with Demonstrations",
+    "authors": "Lirong Che, Yuzhe Yang, Peiwen Lin, Chuang Wang, Xueqian Wang, Jian Su",
+    "team": "AgiBot · Tsinghua University",
+    "arxiv": "https://arxiv.org/abs/2605.24539",
+    "code": "",
+    "date": "2026-05-30",
+    "published": "arXiv 2026",
+    "tldr": "用少量人类 demonstration 轨迹当 coding proposer 的诊断参照，破解 long-horizon、sparse-reward 下 self-rollout harness evolution 被噪声误导、改动不生效的问题，使 harness 编辑更有效、可定位、可审计。",
+    "tags": [
+      "LLM",
+      "Agent",
+      "Harness",
+      "Demonstrations",
+      "Self-Evolving"
+    ],
+    "path": "papers/2605.24539-demoevolve/index.html"
+  },
+  {
+    "slug": "2026-05-30-learning-beyond-gradients",
+    "title": "Learning Beyond Gradients",
+    "authors": "Jiayi Weng",
+    "team": "trinkle23897 (personal blog)",
+    "arxiv": "https://trinkle23897.github.io/learning-beyond-gradients",
+    "code": "https://github.com/Trinkle23897/learning-beyond-gradients",
+    "date": "2026-05-30",
+    "published": "Blog 2026",
+    "tldr": "提出 Heuristic Learning：不训练神经网络，而让 coding agent 读 reward/测试/日志/视频等多模态反馈直接改写手写代码策略，像软件系统一样持续生长；Atari/MuJoCo/VizDoom 上取得与 Deep RL 同量级结果。",
+    "tags": [
+      "Blog",
+      "Heuristic-Learning",
+      "Agent",
+      "RL",
+      "Continual-Learning"
+    ],
+    "path": "papers/2026-05-30-learning-beyond-gradients/index.html"
   }
 ]

@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SkillOpt：把 agent skill 当成「可训练状态」来优化 · 论文解读</title>
+
+<!-- 数学公式渲染（在线查看时生效；无网络时正文仍可读） -->
+<script>
+  window.MathJax = {
+    tex:{inlineMath:[['$','$'],['\\(','\\)']], displayMath:[['$$','$$'],['\\[','\\]']]},
+    svg:{fontCache:'global'}
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;
+  }
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:880px; margin:0 auto; padding:18px 22px 90px}
+
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:27px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)}
+  .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .meta-grid a:hover{text-decoration:underline}
+
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap}
+  nav.toc a:hover{color:var(--accent)}
+
+  section{margin:38px 0}
+  h2{font-size:21px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:17px; margin:24px 0 8px}
+  p{margin:12px 0}
+  ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.9em}
+  strong{color:var(--text)}
+
+  /* 开源贡献表 */
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:14px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:10px 12px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  .yes{color:var(--ok); font-weight:600}
+  .no{color:var(--muted)}
+  .num{font-variant-numeric:tabular-nums; text-align:right; white-space:nowrap}
+  .win{color:var(--ok); font-weight:700}
+
+  /* 图 */
+  figure{margin:24px 0; text-align:center}
+  figure img{max-width:100%; height:auto; border:1px solid var(--line); border-radius:10px; background:#fff}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+
+  /* 提示框 */
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+
+  blockquote{border-left:3px solid var(--line); margin:14px 0; padding:2px 16px; color:var(--muted)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+  .mjx-container{overflow-x:auto; overflow-y:hidden}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <!-- ============================ 抬头 / 元信息 ============================ -->
+  <header class="head">
+    <div class="chips">
+      <span class="chip">LLM Agent</span>
+      <span class="chip">Agent Skill</span>
+      <span class="chip">Self-Evolving</span>
+      <span class="chip">Text-Space Optimization</span>
+      <span class="chip">Domain Adaptation</span>
+      <span class="chip">No Weight Update</span>
+    </div>
+    <h1>SkillOpt：把 agent skill 当成「可训练的外部状态」来优化</h1>
+    <p class="orig-title">SkillOpt: Executive Strategy for Self-Evolving Agent Skills</p>
+    <dl class="meta-grid">
+      <dt>作者</dt><dd>Yifan Yang*‡, Ziyang Gong*, Weiquan Huang*, Qihao Yang*, Ziwei Zhou*, Zisu Huang*, Yan Li, Xuemei Gao, Qi Dai, Bei Liu, Kai Qiu, Yuqing Yang, Dongdong Chen, Xue Yang*‡, Chong Luo（*共同一作，‡通讯作者）</dd>
+      <dt>团队 / 机构</dt><dd>Microsoft；Shanghai Jiao Tong University；Tongji University；Fudan University</dd>
+      <dt>原文链接</dt><dd><a href="https://arxiv.org/abs/2605.23904" target="_blank" rel="noopener">https://arxiv.org/abs/2605.23904</a></dd>
+      <dt>代码</dt><dd><a href="https://github.com/microsoft/SkillOpt" target="_blank" rel="noopener">github.com/microsoft/SkillOpt</a>（aka.ms/SkillOpt，MIT license）</dd>
+      <dt>发表 / 年份</dt><dd>Microsoft Tech Report · arXiv 2026（v2，2026-05-25）</dd>
+      <dt>解读日期</dt><dd>2026-05-30</dd>
+    </dl>
+  </header>
+
+  <div class="tldr">
+    <b>TL;DR</b> — SkillOpt 把 agent 的 <code>skill.md</code> 文档当成「frozen 模型的可训练外部状态」，用一个<strong>独立的 optimizer model</strong> 把打过分的 rollout 转成<strong>有预算上限的 add / delete / replace 编辑</strong>，并且<strong>只有当一次编辑在 held-out validation split 上严格变好时才接受</strong>。它把 deep-learning optimizer 的那套纪律（learning rate budget、rejected-edit buffer、epoch-wise slow/meta update、validation gate）原封不动搬到 text-space，从而让 skill 的进化第一次变得「可控、可审计、可复现」。在 6 个 benchmark × 7 个 target model × 3 个 execution harness 共 <strong>52 个 cell 上全部取得 best-or-tied</strong>，GPT–5.5 direct chat 平均 <strong>+23.5</strong> 分，且部署时<strong>对 target model 零额外推理调用、不改一个权重</strong>。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#opensource">① 开源贡献</a>
+    <a href="#motivation">② 动机与贡献</a>
+    <a href="#method">③ 方法</a>
+    <a href="#evaluation">④ 实验评估</a>
+    <a href="#insight">⑤ 洞见</a>
+  </nav>
+
+  <!-- ============================ ① 开源贡献 ============================ -->
+  <section id="opensource">
+    <h2><span class="n">①</span>开源贡献 Open-source Artifacts</h2>
+    <p>本文的代码已在 Microsoft 官方 GitHub 仓库 <a href="https://github.com/microsoft/SkillOpt" target="_blank" rel="noopener">microsoft/SkillOpt</a>（论文首页给出短链 <code>aka.ms/SkillOpt</code>，301 重定向到项目主页 <code>microsoft.github.io/SkillOpt/</code>）以 <strong>MIT license</strong> 公开，含完整训练循环、eval-only 模式、各 benchmark 的 dataloader 与 WebUI dashboard。本方法<strong>本身就不涉及任何模型权重更新</strong>，因此「不放出权重」是设计使然而非缺失；它优化的产物是一个轻量的 <code>best_skill.md</code> 文本文件。数据集均直接复用现有公开 benchmark，仓库不重新分发，需使用者自行准备。下表为<strong>已逐项核实</strong>的结果（核实日 2026-05-30）。</p>
+    <table>
+      <thead><tr><th>类型</th><th>是否开源</th><th>内容 / 链接</th></tr></thead>
+      <tbody>
+        <tr><td>代码 Code</td><td class="yes">✔</td><td><a href="https://github.com/microsoft/SkillOpt" target="_blank" rel="noopener">github.com/microsoft/SkillOpt</a> · MIT · 含 <code>scripts/train.py</code>（训练循环）、<code>scripts/eval_only.py</code>（仅评测）、各 benchmark dataloader 与评测 metric、WebUI dashboard；optimizer 的 8 个 prompt contract 内嵌于流水线（见附录 C.2，本解读 §③ 完整复述）。</td></tr>
+        <tr><td>模型权重 Weights</td><td class="no">✘（设计上无需）</td><td>方法对 target model 与 optimizer model 都是 <strong>frozen / API 调用</strong>，不训练、不发布任何权重。target/optimizer 用的是 GPT–5.x、Qwen3.5/3.6 等现成模型。</td></tr>
+        <tr><td>数据集 Dataset</td><td class="no">✘（复用公开 benchmark）</td><td>不重新分发数据；用 split_seed=42 在公开 benchmark 上确定性地切 train/selection/test。</td></tr>
+        <tr><td>环境 / Benchmark</td><td class="yes">✔（均为已有公开 benchmark）</td><td>SearchQA、SpreadsheetBench、OfficeQA(Pro)、DocVQA、LiveMathematicianBench、ALFWorld；harness 复用 Codex CLI、Claude CLI；transfer 实验另用 OlympiadBench、Omni-MATH。</td></tr>
+        <tr><td>项目主页 / Demo</td><td class="yes">✔</td><td><a href="https://microsoft.github.io/SkillOpt/" target="_blank" rel="noopener">microsoft.github.io/SkillOpt/</a> · 含论文链接、各 benchmark 的 skill 演化示例与 <a href="https://youtu.be/JUBMDTCiM0M" target="_blank" rel="noopener">YouTube 概览视频</a>；另有姊妹项目 <a href="https://microsoft.github.io/SkillLens/" target="_blank" rel="noopener">SkillLens</a>。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============================ ② 动机与贡献 ============================ -->
+  <section id="motivation">
+    <h2><span class="n">②</span>研究动机与贡献 Motivation &amp; Contribution</h2>
+
+    <h3>背景与问题</h3>
+    <p>frontier LLM 越来越多地以 agent 的形式部署：从单 prompt 调用，到挂着 tool、file、verifier 的多步 execution harness（ReAct、Toolformer、Voyager、SWE-agent 这条线）。在这种场景里，domain adaptation 已经不只是改权重或改 prompt，更要改 agent 的<strong>「程序（procedure）」</strong>——它如何搜证据、如何调 tool、如何遵守领域约定、如何格式化输出。<strong>agent skill</strong>（近期 SkillsBench、SoK on agentic skills 提出的概念）正好是承载这套程序的天然载体：一份可移植的自然语言文档，打包了 procedure、domain heuristics、tool policy、output constraint 与 failure mode，让一个 frozen agent 仅靠「外部文本」就能适应新领域。</p>
+    <p>作者点破一个被忽视的基本问题：<strong>如果 skill 就是真正的 adaptation layer，那它本身就应该「被训练」，可现有做法没一个真把它当成可优化对象来对待。</strong>具体的失败模式有三类：</p>
+    <ul>
+      <li><strong>人手写 / 一次性生成（hand-crafted / one-shot LLM skill）</strong>：质量取决于先验是否恰好对上 benchmark，且写完就不动——<strong>观察到 rollout 失败后无法自我纠正</strong>，在陌生 domain 或 harness 下很脆。</li>
+      <li><strong>松散自我修订式进化（Trace2Skill、EvoSkill、SkillForge 等）</strong>：能把执行经验蒸成文本 artifact、做 failure analysis、长出 skill library，但<strong>缺少「held-out 验证门」</strong>，一次看似合理的改写可能反而拖垮 target model；改动幅度也不受控，容易整段重写、抹掉有用规则、过拟合到单次失败。</li>
+      <li><strong>prompt 自动优化（TextGrad、GEPA、DSPy 这条线）</strong>：把语言 artifact 当可优化对象、直接吃执行反馈，但它们针对的是 <em>prompt / system 设计 / 整套 configuration</em>，<strong>不是一份可训练、可验证、可导出、可复用的持久 skill 文档</strong>。</li>
+    </ul>
+    <p>更根本的痛点是：weight 级的 adaptation 对闭源 frontier 模型常常根本不可用，对开源模型也昂贵。于是「在 text-space 里像训权重一样训练 skill」就成了一条务实且通用的路径——前提是要把权重优化里那套<strong>让结果可复现的纪律</strong>搬过来。</p>
+
+    <h3>本文的切入点</h3>
+    <p>核心 idea 一句话：<strong>把 skill editing 当成一个「可控的 domain-adaptation 训练过程」</strong>——skill 文档是被优化的 <em>external state</em>，<strong>另一个 frontier 模型充当 optimizer</strong>，并对「用什么证据、步长多大、怎么验证、往哪个方向改」施加 training-style 的控制。作者把这套类比讲得很干脆（见 Figure 1 右上的对照表）：</p>
+    <div class="callout note">
+      <span class="label">Text-space optimization 类比（原文 Figure 1）</span>
+      parameter（参数）→ <strong>skill document</strong>；&nbsp;
+      gradient direction（梯度方向）→ <strong>trajectory-derived edit direction</strong>（由 rollout 推出的编辑方向）；&nbsp;
+      learning rate（学习率）→ <strong>edit budget $L_t$</strong>（一步最多改几处）；&nbsp;
+      validation check → <strong>held-out selection gate</strong>；&nbsp;
+      stable training setting（batch / minibatch / schedule / gate）→ <strong>rollout batch / reflection minibatch / LR schedule / 验证门</strong>。
+    </div>
+    <p>关键洞察是：<strong>「有界 + 验证门控」的更新是这套类比能成立的命门。</strong>如果连续几次 skill 修订改得太猛、方向不一致，那么 rejected edits 和此前 accepted edits 就不再构成有意义的优化历史；只有让每次修订都贴着上一版小步走，后续的 optimizer 调用才学得到「什么有用、什么失败、什么该保留」。这正是 deep-learning optimizer 之所以可复现的纪律，作者把它原样移植到文本上。</p>
+
+    <h3>核心贡献</h3>
+    <ol>
+      <li><strong>提出问题范式 + 方法</strong>：首次把 agent-skill learning 形式化为「在一个自然语言外部状态上的优化」，并提出 <strong>SkillOpt</strong>——一个 harness-agnostic 的 text-space optimizer，配齐了 rollout batch、reflection minibatch、add/delete/replace 编辑、textual learning rate 与 schedule、held-out 接受门、rejected-edit buffer、epoch-wise slow/meta update 这一整套训练机件。</li>
+      <li><strong>大规模实证</strong>：在 6 个 benchmark × 7 个 target model（从 frontier 级 GPT–5.5 到小模型 Qwen3.5–4B）× 3 个 execution harness（direct chat、Codex、Claude Code）共 <strong>52 个 cell 上全部 best-or-tied</strong>，且<strong>逐 cell 都打赢了 no-skill / human-skill / one-shot LLM-skill / Trace2Skill / TextGrad / GEPA / EvoSkill</strong>。GPT–5.5 平均 +23.5（direct chat）/ +24.8（Codex）/ +19.1（Claude Code）。</li>
+      <li><strong>验证设计 + 三类迁移</strong>：通过 component ablation 验证每个机件的作用，并展示 <strong>cross-model / cross-harness / cross-benchmark</strong> 三种迁移都为正——说明导出的 skill artifact <strong>compact、可复用、无需改权重即可部署</strong>，把「优化一次、到处复用」的应用价值坐实。</li>
+    </ol>
+  </section>
+
+  <!-- ============================ ③ 方法 ============================ -->
+  <section id="method">
+    <h2><span class="n">③</span>方法 Method</h2>
+    <p>整体框架（Figure 1 的几何直觉 + Figure 2 的工程流水线）：一个 <strong>frozen 的 target model $M$</strong> 拿着当前 skill 去执行任务，产出打分的 rollout；一个<strong>独立的 optimizer model $O$</strong> 读这些 rollout、反思成功与失败、提出有预算上限的 add/delete/replace 编辑；编辑被层级化地合并、排序、按 edit budget 截断成一个 candidate skill；这个 candidate <strong>必须先过 held-out selection gate</strong>，只有严格变好才被接受成新的 current skill（更好则同时刷新 <code>best_skill.md</code>），否则被拒、并把「试过哪些编辑、掉了多少分」写进 rejected-edit buffer 作为负反馈。跨 epoch 还有一个 slow/meta update 捕捉更长视野的规律。<strong>部署时只导出那一份 <code>best_skill.md</code>（约 300–2,000 token），target model 与 harness 保持不变，没有任何额外推理时模型调用。</strong></p>
+
+    <figure>
+      <img src="figures/fig1_teaser.png" alt="SkillOpt 几何直觉与 text-space 优化类比">
+      <figcaption>原文 Figure 1：在「Skill Space」上把 Val. Error 当作待最小化的损失曲面。蓝色实线是 SkillOpt 的 <strong>bounded skill edits</strong>——小步、受 held-out selection gate 把关、稳定下降；灰色虚线是 <em>ad hoc updates</em>（大幅语义跳跃、不稳定、跑向 suboptimal skill）；红色虚线是被验证门挡掉的 rejected side updates。右上角给出 text-space optimization 与权重优化的逐项类比。</figcaption>
+    </figure>
+
+    <h3>0｜问题设定（Problem Setup）</h3>
+    <p>skill $s$ 是一段插入 agent context 的自然语言 policy（direct-chat 里 prepend 到 system/developer 指令，tool-use harness 里作为持久 procedural memory）。对 harness $h$、任务 $x$、skill $s$，执行得到 trajectory $\tau$ 与一个标量分数 $r$：</p>
+    $$(\tau(s),\,r(s)) = h(M,\,x,\,s),\qquad r(s)\in[0,1].$$
+    <p>把数据切成 train / selection / test 三份 $D_{\mathrm{tr}},D_{\mathrm{sel}},D_{\mathrm{test}}$：<strong>$D_{\mathrm{tr}}$ 供经验、$D_{\mathrm{sel}}$ 把关更新、$D_{\mathrm{test}}$ 只在最终报数时用一次</strong>。SkillOpt 用 $D_{\mathrm{tr}}$ 生成一组 candidate skill $\mathcal{C}(D_{\mathrm{tr}})$，在 $D_{\mathrm{sel}}$ 上选最好的那个，再在 $D_{\mathrm{test}}$ 上报告：</p>
+    $$s^\star_{\mathrm{sel}} = \arg\max_{s\in\mathcal{C}(D_{\mathrm{tr}})}\ \frac{1}{|D_{\mathrm{sel}}|}\sum_{x\in D_{\mathrm{sel}}} r(s),\qquad
+      \mathrm{Test}(s^\star_{\mathrm{sel}}) = \frac{1}{|D_{\mathrm{test}}|}\sum_{x\in D_{\mathrm{test}}} r(s^\star_{\mathrm{sel}}).$$
+    <p>由于 selection 和 test 是<strong>不相交的</strong> split，报告的数字衡量的是泛化而非 validation-set fit。optimizer 的状态包含：current skill、best validation-gated skill、cached skill hash（避免重复评估）、epoch-local 的 rejected-step buffer、以及可选的 slow/meta-update 状态。<strong>最终只把 best accepted skill 导出为 <code>best_skill.md</code></strong>。</p>
+
+    <figure>
+      <img src="figures/fig2_pipeline.png" alt="SkillOpt 完整流水线">
+      <figcaption>原文 Figure 2：完整流水线。frozen target model 用当前 skill 跑一个 rollout batch；optimizer model 在 success/failure 的 minibatch 上分别反思、提出有界 add/delete/replace 编辑；这些编辑按 edit budget 合并排序成 candidate skill，<strong>过 held-out validation gate 才被接受</strong>，否则进 rejected-edit buffer。跨 epoch 的 slow/meta update（下方虚线框）在「不动 target model」的前提下保留更长视野的经验。</figcaption>
+    </figure>
+
+    <h3>1｜Forward Pass：Rollout Evidence（前向 = 收集证据）</h3>
+    <p>每个优化 step，target model 用 current skill 从 $D_{\mathrm{tr}}$ 跑一个 rollout batch，记录任务 metadata、消息、tool call、observation、命令输出、最终答案、verifier 反馈，以及 benchmark 特有的上下文（spreadsheet 预览、文档引用、压缩的执行 trace）。<strong>这个 batch 就是「证据单元」</strong>：小 batch 更新快但噪声大，大 batch 在 skill 改动前能暴露更多复现型规律。实现还支持 <strong>accumulation</strong>（先在几个 rollout batch 上反思再合并成一次更新），把执行吞吐与更新频率解耦——这对应 Algorithm 1 里的 accumulation factor $A$。</p>
+
+    <h3>2｜Backward Pass：Minibatch Reflection（反向 = 把轨迹变成编辑）</h3>
+    <p>optimizer model 把 trajectory 转成 skill 编辑（沿 Reflexion / Self-Refine / 反思式 prompt evolution 这条线）。关键做法是：<strong>先把 failure 与 success 分开，各自再切成 reflection minibatch</strong>。理由是单条 trajectory 往往只暴露偶发修复，而 minibatch 能暴露<strong>反复出现的 procedural error</strong>（agent 老在错的地方搜、老用错格式写答案、老不去 verify tool 结果）。failure minibatch 提「缺失/纠正型规则」，success minibatch 提「保留已奏效行为」。每次反思返回结构化的 add/delete/replace 编辑（patch 模式），或在 rewrite 模式下返回少量改写建议。</p>
+    <p>局部提案<strong>层级化合并</strong>：先各自合并 failure-driven 与 success-driven 编辑，再以「failure 纠正优先」合二为一；这一步过滤掉重复、互相矛盾、过于 example-specific 的建议。</p>
+
+    <h3>3｜Bounded Text Updates：edit budget = textual learning rate（有界更新）</h3>
+    <p>SkillOpt 里的「学习率」就是 <strong>edit budget $L_t$</strong>：第 $t$ 步最多施加的编辑条数。合并后，optimizer 按「预期收益」对编辑池排序，<strong>截断到 top-$L_t$ 条</strong>。这正是它与 ad hoc prompt rewriting 的本质区别——</p>
+    <div class="callout note">
+      <span class="label">为什么必须有界</span>
+      无界改写会抹掉有用规则、引入不兼容指令、过拟合到某次局部失败；<strong>有界更新在「能学到新 procedure」与「保持版本间连续性」之间取得平衡</strong>，让相邻 skill 版本足够接近，使后续 optimizer 调用能从修订历史里学习。支持 <code>constant / linear / cosine / autonomous</code> 四种 schedule；默认 <strong>cosine</strong>：早期步长大、后期衰减到更小的巩固性小改（默认 $L_t=4$，floor $L_t=2$）。
+    </div>
+    <p>编辑有两种作用模式：<strong>patch 模式</strong>是局部操作 <code>append / insert_after / replace / delete</code>；<strong>rewrite 模式</strong>是用选中的建议条件出一次整段改写。step 级编辑<strong>不能覆写受保护的 slow-update 区域</strong>（见下文），从而把「快的局部改动」与「慢的 epoch 级巩固」隔离开。</p>
+
+    <h3>4｜Validation Gate + Rejected-Edit Buffer（验证门 + 拒绝缓冲）</h3>
+    <p>每个 candidate skill 用<strong>同一个 frozen target model 与同一 harness</strong> 在 $D_{\mathrm{sel}}$ 上评估：</p>
+    <ul>
+      <li>若分数<strong>严格高于</strong>当前 selection 分 → 成为新的 current skill；若还超过历史最好分 → 同时刷新 <code>best_skill.md</code>；</li>
+      <li>否则<strong>拒绝</strong>（注意：<strong>平手也拒绝</strong>，gate 是 <em>strictly greater than</em>，所以部署的 skill 永不会悄悄漂移）。</li>
+    </ul>
+    <p>这个门把「反思」从无条件自我编辑变成了 <strong>propose-and-test 优化</strong>——很关键，因为「听起来合理」的文本改动照样可能拖垮 target model。被拒的更新也不浪费：optimizer 维护一个 <strong>epoch-local buffer</strong>，记录观察到的 failure pattern，以及被拒 step 里「试过哪些编辑、造成多少掉分」。同一 epoch 内后续的反思调用会读到这个 buffer，从而<strong>避免重复失败的编辑、聚焦未解决的失败</strong>。这相当于给训练循环加了负反馈，而<strong>不增加任何推理时成本</strong>（buffer 只在训练时存在）。</p>
+
+    <h3>5｜Epoch-Wise Slow/Meta Update（慢更新 + 元技能 ≈ momentum）</h3>
+    <p>快更新只看当前 batch；<strong>slow update 看相邻 epoch</strong>。一个 epoch 末，SkillOpt 在「同一批训练样本」上分别用上一 epoch 与本 epoch 的 skill 重跑，把结果归成 <strong>improvements / regressions / persistent failures / stable successes</strong> 四类，然后让 optimizer 写一段简洁的纵向指导，注入 skill 文档里一个<strong>受保护的 slow-update 区域</strong>（由 <code>&lt;!-- SLOW_UPDATE_START --&gt;</code> / <code>&lt;!-- SLOW_UPDATE_END --&gt;</code> 标记围住，step 级编辑碰不得）；这段注入<strong>同样要过 validation gate</strong>。作者把它类比成 <strong>momentum</strong>：跨 epoch 携带稳定的编辑方向、捕捉持久的 domain lesson。</p>
+    <p>此外还有一个 <strong>meta skill（optimizer memory）</strong>，<strong>只在 optimizer 一侧</strong>：它总结「哪些编辑模式有用、哪些被拒、哪些失败跨 epoch 持续」，prepend 到未来 optimizer 的反思/合并/排序 prompt 里，<strong>但绝不随 target skill 一起发布</strong>。好处是 separation of concerns——部署的 skill 保持紧凑可移植，而训练受益于一份更丰富的「编辑过程档案」。</p>
+
+    <h3>6｜Harness-Agnostic Deployment（与 harness 解耦）</h3>
+    <p>SkillOpt 通过一个轻量 <strong>adapter 接口</strong> 与 harness 解耦：adapter 负责构造 train/eval batch、把当前 skill 注入 agent context、跑原生 harness、回传打分 trajectory。于是同一个 optimizer 既能服务 direct QA，也能服务 spreadsheet 执行、文档推理、multimodal QA、embodied 环境，以及 Codex / Claude Code 式的执行循环。三种 harness 都消费同一种 <code>best_skill.md</code> 格式——<strong>这正是 cross-harness transfer 能成立的工程前提</strong>。其中 Codex harness 会把当前 skill 渲染成每任务的 <code>SKILL.md</code>，并回读一段压缩执行 trace（<code>codex_trace_summary.txt</code>）喂给反思，<strong>让 optimizer 学到 agent「实际做了什么」而不只是最终答案</strong>。</p>
+
+    <div class="callout note">
+      <span class="label">实现要点（默认超参，复现关键，来自正文 §4 与附录 C）</span>
+      <ul style="margin:6px 0">
+        <li><strong>4 个 epoch</strong>；rollout batch size <strong>40</strong>/step；reflection minibatch size <strong>8</strong>（16 个 analyst worker 并行反思，merge batch size 8）。</li>
+        <li>textual learning rate <strong>$L_t=4$</strong>，cosine 衰减，floor $L_t=2$。</li>
+        <li>held-out gating <strong>严格大于</strong>当前 selection 分（平手即拒）。</li>
+        <li>slow update 每 epoch 采 <strong>20</strong> 个任务做纵向对比；optimizer-side meta skill 开启（teacher-only，不发布）。</li>
+        <li>默认 <code>patch</code> 编辑模式（备选 <code>rewrite_from_suggestions</code>）；可选 rejected-edit buffer 开启。</li>
+        <li>teacher 反思每 minibatch 最多 3 轮 refinement；student 与 teacher 调用默认 <code>medium</code> reasoning effort。</li>
+        <li>训练池很小的 benchmark 会等比缩 batch 但保持同样的 gate/scheduler/slow-update 机件：<strong>LiveMath</strong> 每 epoch 35 个训练任务、rollout batch 200；<strong>ALFWorld</strong> 39 训练任务、140 selection、134 test。</li>
+        <li>所有 split 由固定 <code>split_seed=42</code> 确定性切分，默认比例约 train:selection:test = 2:1:7（部分用 4:1:5）。</li>
+        <li>每步落盘 <code>edit_apply_report.json</code> 记录逐条编辑的 accept/skip 状态——<strong>事后可完整溯源 <code>best_skill.md</code> 的每一处改动</strong>。</li>
+      </ul>
+    </div>
+
+    <div class="callout note">
+      <span class="label">optimizer 的 8 个 prompt contract（附录 C.2，全部强制 JSON 输出，target model 看不到这些 prompt）</span>
+      流水线由 8 段算子化 prompt 串起来：<code>analyst_error.md</code>（失败分析，要求只补共性缺口、不 hardcode 任务专属值）、<code>analyst_success.md</code>（成功分析，只对 skill 尚未覆盖的模式提案、优先强化已有 section）、<code>merge_failure.md</code> / <code>merge_success.md</code>（各自层级合并、去重、给每条编辑估 <code>support_count</code>）、<code>merge_final.md</code>（最终合并，<strong>failure 优先于 success</strong>）、<code>ranking.md</code>（按 systematic impact &gt; complementarity &gt; generality &gt; actionability 排序选 top-$L_t$）、<code>slow_update.md</code>（写覆写式纵向指导进受保护区）、<code>meta_skill.md</code>（写 optimizer-side 元指导）。编辑 JSON 形如 <code>{"op":"append|insert_after|replace|delete", "target":..., "content":..., "support_count":..., "source_type":"failure|success"}</code>；<strong>所有 prompt 都被显式禁止改动 <code>SLOW_UPDATE</code> 受保护区</strong>。
+    </div>
+  </section>
+
+  <!-- ============================ ④ 实验评估 ============================ -->
+  <section id="evaluation">
+    <h2><span class="n">④</span>实验评估 Evaluation</h2>
+
+    <h3>评测设置</h3>
+    <ul>
+      <li><strong>Benchmark / 数据集（6 个，覆盖 QA / 表格 / 文档 / 数学 / embodied）：</strong>
+        <strong>SearchQA</strong>（抽取式问答，单轮）、<strong>SpreadsheetBench</strong>（表格代码 + tool 使用，真实 openpyxl/pandas runtime，默认 <code>mode=multi</code>，最多 24 次 tool call）、<strong>OfficeQA(Pro)</strong>（端到端 grounded 推理，多轮 codegen，最多 30 轮）、<strong>DocVQA</strong>（multimodal 文档推理）、<strong>LiveMathematicianBench (LiveMath)</strong>（数学多选 MCQ）、<strong>ALFWorld</strong>（持久 embodied 决策，每 episode 最多 50 步）。迁移实验另用 <strong>OlympiadBench → Omni-MATH</strong>。</li>
+      <li><strong>Target model（7 个，跨尺度）：</strong>GPT–5.5、GPT–5.4、GPT–5.4-mini、GPT–5.4-nano、GPT–5.2、Qwen3.5–4B、Qwen3.6–35B-A3B。</li>
+      <li><strong>Execution harness（3 个）：</strong>direct chat（单次 chat completion，skill 进 system prompt）、<strong>Codex</strong>（codex CLI，workspace-write sandbox，回读执行 trace）、<strong>Claude Code</strong>（claude CLI，同样的 workspace 合约）。ALFWorld 因需持久 embodied 交互，不在 Codex/Claude Code 下评测。</li>
+      <li><strong>对比基线（7 个）：</strong>no skill（frozen + benchmark 默认 prompt）、human skill（专家手写）、one-shot LLM skill（GPT–5.5 一次性生成、不再更新）、<strong>Trace2Skill</strong>（trajectory 级 skill 蒸馏）、<strong>TextGrad</strong>（梯度式自然语言 prompt 优化）、<strong>GEPA</strong>（Pareto 反思式 prompt evolution）、<strong>EvoSkill</strong>（harness 侧、靠 failure analysis 演化 skill-folder）。所有基线共享同一 target model、同一 held-out test split、同一 scorer，<strong>隔离掉「prompt 模板/打分流水线」等次要因素，只比较 adaptation procedure 本身</strong>。</li>
+      <li><strong>Metric：</strong>各 benchmark 的原生 hard score 或 exact-match accuracy（百分比，越高越好），全部在<strong>不相交的 held-out test split</strong> 上算。</li>
+    </ul>
+
+    <h3>主要结果（Table 1 节选，GPT–5.5）</h3>
+    <p>下表摘 GPT–5.5 在三种 harness 下的核心数字（绿色 = 相对 no-skill 的增量）。完整 Table 1 覆盖全部 7 个 model，结论是 <strong>SkillOpt 在全部 52 个 (model, benchmark, harness) cell 上都是 best-or-tied，且相对 no-skill 全为正增益</strong>。</p>
+    <table>
+      <thead><tr><th>harness / 方法（GPT–5.5）</th><th class="num">SearchQA</th><th class="num">Spreadsheet</th><th class="num">OfficeQA</th><th class="num">DocVQA</th><th class="num">LiveMath</th><th class="num">ALFWorld</th></tr></thead>
+      <tbody>
+        <tr><td>direct chat · No skill</td><td class="num">77.7</td><td class="num">41.8</td><td class="num">33.1</td><td class="num">78.8</td><td class="num">37.6</td><td class="num">83.6</td></tr>
+        <tr><td>direct chat · 最强 per-cell 基线</td><td class="num">84.8</td><td class="num">73.6</td><td class="num">66.9</td><td class="num">90.1</td><td class="num">49.2</td><td class="num">93.3</td></tr>
+        <tr><td><strong>direct chat · SkillOpt</strong></td><td class="num win">87.3</td><td class="num win">80.7</td><td class="num win">72.1</td><td class="num win">91.2</td><td class="num win">66.9</td><td class="num win">95.5</td></tr>
+        <tr><td style="color:var(--muted)">（增量 vs no-skill）</td><td class="num" style="color:var(--muted)">+9.6</td><td class="num" style="color:var(--muted)">+38.9</td><td class="num" style="color:var(--muted)">+39.0</td><td class="num" style="color:var(--muted)">+12.4</td><td class="num" style="color:var(--muted)">+29.3</td><td class="num" style="color:var(--muted)">+11.9</td></tr>
+        <tr><td>Codex · No skill</td><td class="num">81.8</td><td class="num">27.5</td><td class="num">38.3</td><td class="num">87.2</td><td class="num">35.2</td><td class="num">—</td></tr>
+        <tr><td><strong>Codex · SkillOpt</strong></td><td class="num win">87.3</td><td class="num win">85.0</td><td class="num win">51.1</td><td class="num win">92.2</td><td class="num win">78.4</td><td class="num">—</td></tr>
+        <tr><td>Claude Code · No skill</td><td class="num">81.9</td><td class="num">22.1</td><td class="num">57.6</td><td class="num">86.6</td><td class="num">40.8</td><td class="num">—</td></tr>
+        <tr><td><strong>Claude Code · SkillOpt</strong></td><td class="num win">85.9</td><td class="num win">80.4</td><td class="num win">71.5</td><td class="num win">90.1</td><td class="num win">56.5</td><td class="num">—</td></tr>
+      </tbody>
+    </table>
+    <p><strong>怎么读这些数字：</strong></p>
+    <ul>
+      <li><strong>增益异常大（对一个不动权重的方法而言）。</strong>GPT–5.5 direct chat 六 benchmark 均值从 58.8（no skill）升到 <strong>82.3（+23.5）</strong>；而「逐 cell 挑六个基线里最好那个」的 oracle 也只有 76.9，SkillOpt 还<strong>领先这个 oracle 5.4 分</strong>。Codex/Claude Code 下平均 +24.8 / +19.1。</li>
+      <li><strong>procedural benchmark 提升最猛。</strong>SpreadsheetBench 41.8→80.7、OfficeQA 33.1→72.1、LiveMath 37.6→66.9——这些「严格 procedure + 严格答案格式」最能暴露 zero-shot frontier 模型的短板，也最吃 skill；而 SearchQA 这类 no-skill 已接近天花板的，增益最小（+9.6）。</li>
+      <li><strong>对小模型同样有效，相对收益更大。</strong>七个 direct-chat target 平均 +17.6 分：GPT–5.4 +12.7、5.4-mini +15.4、<strong>5.4-nano +26.7</strong>、5.2 +16.6、Qwen3.5–4B +19.2、Qwen3.6–35B-A3B +9.1。GPT–5.4-nano 在 DocVQA 近乎翻倍、ALFWorld（34.3→69.4）约 ×2——印证「compact skill 能补上小模型权重里还没有的 procedural knowledge」。</li>
+      <li><strong>增益不是单纯堆 prompt 长度。</strong>human skill 本就有 145–516 token、常比 one-shot LLM skill 还长，却在每个 direct-chat cell 上都被 SkillOpt 打赢，而后者学到的 artifact 反而更紧凑。也不是单纯靠 optimizer 强：连 GPT–5.4-nano 当 target 时 SkillOpt 也领先所有基线。</li>
+    </ul>
+
+    <h3>消融 / 分析（Table 2 / 3 + Figure 3）</h3>
+    <p>消融用 GPT–5.5 同时当 target 与 optimizer。总信息：<strong>增益对「rollout batch / reflection minibatch / 学习率具体取值」相当不敏感，但对「bounded text-space learning、validation gating、rejected-edit feedback、epoch-wise slow/meta update」这几个机件高度敏感</strong>——正是这些让 skill 编辑「行为上像一个受控训练循环」的设计。</p>
+    <table>
+      <thead><tr><th>组件（Table 3，GPT–5.5）</th><th class="num">SearchQA</th><th class="num">Spreadsheet</th><th class="num">LiveMath</th></tr></thead>
+      <tbody>
+        <tr><td><strong>完整 SkillOpt（lr=4 默认）</strong></td><td class="num win">87.1</td><td class="num win">77.5</td><td class="num win">61.3</td></tr>
+        <tr><td>without lr（无界改写，去掉 learning rate）</td><td class="num">84.6</td><td class="num">75.7</td><td class="num">57.3</td></tr>
+        <tr><td>without rejected buffer</td><td class="num">85.5</td><td class="num">72.9</td><td class="num">58.9</td></tr>
+        <tr><td>without meta skill &amp; slow update</td><td class="num">86.3</td><td class="num">55.0</td><td class="num">59.7</td></tr>
+      </tbody>
+    </table>
+    <ul>
+      <li><strong>有界 vs 无界（决定性）。</strong>去掉 learning rate 让 skill 无预算地整段改写，三 benchmark 全跌（最多 LiveMath −4.0）。作者强调质性结论才是要点：<strong>任何「中等强度的有界 edit budget」都已打赢「无预算改写」的基线</strong>。扫 $L_t\in\{1,2,4,8,16\}$ 与四种 schedule（constant/cosine/linear）都在窄带内波动——<strong>故事不依赖某个特定学习率或调度器</strong>，依赖的是「有界」本身。</li>
+      <li><strong>rejected buffer 是稳定器。</strong>去掉后 SearchQA −1.6、SpreadsheetBench −4.6、LiveMath −2.4，证实它在默认循环里把失败编辑转成有效负反馈。</li>
+      <li><strong>slow/meta update 对长视野 procedural benchmark 尤其关键。</strong>同时去掉 meta skill 与 slow update，<strong>SpreadsheetBench 暴跌 77.5→55.0（−22.5，全消融中最大）</strong>——因为这同时抽走了「跨 epoch 的长视野证据流」和「保护区合约（防局部编辑覆写持久 procedure lesson）」。</li>
+      <li><strong>证据量：procedural benchmark 越多证据越好。</strong>训练集从 1 example→100% 时 SpreadsheetBench 47.5→78.0、LiveMath 59.1→70.5；而 SearchQA 在 20% 后就饱和在 84–86。reflection minibatch（1→32）与 rollout batch（8→full epoch）两个维度都很平——增益不是脆弱的 prompt-search batch 调出来的。</li>
+      <li><strong>validation gate 真的在选「会泛化」的 checkpoint。</strong>Figure 3 显示，validation 选出的 epoch checkpoint 与「在 unseen test 上泛化最好」的 checkpoint 高度对齐，而非只拟合 selection split。</li>
+    </ul>
+
+    <figure>
+      <img src="figures/fig3_epoch_trends.png" alt="跨 epoch checkpoint 的性能曲线">
+      <figcaption>原文 Figure 3：三个 benchmark 上「Train rollout（蓝实线）/ Selection best（橙虚线）/ Unseen test（绿点划线）」随 epoch checkpoint 的变化。<strong>橙线（validation 选出的 checkpoint）与绿线（test 泛化）走势贴合</strong>，说明 held-out gate 倾向选出真正泛化的 skill，而非只拟合 selection split；SpreadsheetBench / LiveMath 还能看出 procedural skill 在多 epoch 后仍持续精进。</figcaption>
+    </figure>
+
+    <h3>迁移、optimizer 强度、与 skill 的「经济性」（Table 4 / 5 / 6 + Figure 4）</h3>
+    <p><strong>三类迁移（Table 4）全为正、无一跌破 target 的 no-skill 基线：</strong></p>
+    <ul>
+      <li><strong>Cross-model：</strong>GPT–5.4 上训的 SpreadsheetBench skill 迁到 5.4-mini(+9.4)/5.4-nano(+3.0)，LiveMath skill 迁到 5.4-mini(+4.5)/5.4-nano(+5.6)；其中 LiveMath→5.4-nano 的迁移分(28.8)<strong>甚至超过其 in-domain SkillOpt(27.2)</strong>——说明部分学到的 procedure 本就 target-model agnostic。</li>
+      <li><strong>Cross-harness（最强的部署信号）：</strong>Codex 上训的 SpreadsheetBench skill 迁到 Claude Code <strong>+59.7</strong>（22.1→81.8，略超 in-domain Claude Code 的 80.4）；反向 Claude Code→Codex +43.6。说明学到的是 workbook 级 procedure（结构优先检查、formula-aware 验证、静态值物化），<strong>一次优化的成本能在相关执行环境间摊销</strong>。</li>
+      <li><strong>Cross-benchmark（最严格）：</strong>OlympiadBench→Omni-MATH 在三个尺度上 +3.7 / +1.8 / +1.3，全正——支持「学到的是可复用数学 procedure 而非记住 benchmark 格式」。</li>
+    </ul>
+    <p><strong>optimizer 强度是「训练时杠杆」（Table 5）：</strong>因为 optimizer 只在离线训练时跑、部署时绝不调用，所以「用更强的 frontier optimizer（GPT–5.5）」能在<strong>不增加任何部署成本</strong>的前提下把 deployed skill 做得更好（每个 cell 增益都更大）。而「与 target 同尺度的 optimizer」也远未崩溃——能回收强 optimizer 增益的 56–74%，<strong>说明 SkillOpt 不是「强 teacher 蒸到弱 student」的蒸馏管线，优化循环本身贡献了实质价值</strong>。</p>
+    <p><strong>学到的 skill 紧凑、廉价、procedural（Table 6 + Figure 4）：</strong></p>
+    <table>
+      <thead><tr><th>benchmark（GPT–5.5/5.5 student/teacher）</th><th class="num">初始 tok</th><th class="num">最终 tok</th><th class="num">accepted 编辑数</th><th class="num">训练 token</th><th class="num">每提升 1 分的 token</th></tr></thead>
+      <tbody>
+        <tr><td>SearchQA</td><td class="num">16</td><td class="num">857</td><td class="num">4</td><td class="num">213.8M</td><td class="num">37.9M</td></tr>
+        <tr><td>SpreadsheetBench</td><td class="num">224</td><td class="num">1,995</td><td class="num">4</td><td class="num">21.4M</td><td class="num">0.6M</td></tr>
+        <tr><td>OfficeQA</td><td class="num">145</td><td class="num">883</td><td class="num">1</td><td class="num">20.8M</td><td class="num">1.1M</td></tr>
+        <tr><td>DocVQA</td><td class="num">81</td><td class="num">959</td><td class="num">3</td><td class="num">188.2M</td><td class="num">46.4M</td></tr>
+        <tr><td>LiveMath</td><td class="num">154</td><td class="num">379</td><td class="num">1</td><td class="num">23.2M</td><td class="num">3.6M</td></tr>
+        <tr><td>ALFWorld</td><td class="num">516</td><td class="num">1,321</td><td class="num">2</td><td class="num">59.3M</td><td class="num">15.9M</td></tr>
+      </tbody>
+    </table>
+    <ul>
+      <li><strong>极少编辑撬动大增益。</strong>最终 skill 全部 ≤2,000 token（中位约 920），accepted 编辑数<strong>仅 1–4 条（中位 2.5）</strong>：LiveMath 的 +29.3、OfficeQA 的 +39.0 都各只来自<strong>一条 accepted 编辑</strong>。这是 validation gate 在干实事的直接证据——optimizer 每 epoch 提案远多于此，但只有少数过门、活进部署 skill；大量 text-space 搜索被 rejected buffer 接住、从不送达 target model。</li>
+      <li><strong>cost 一次性付清。</strong>procedural benchmark 每分仅 0.6–3.6M token；轨迹长/multimodal 的（SearchQA 37.9M、DocVQA 46.4M）贵一个量级。但这是<strong>训练时一次性成本</strong>，导出后 <code>best_skill.md</code> 对 target agent 零额外 optimizer 调用、零权重更新。</li>
+      <li><strong>学到的规则是 procedural 而非 instance-specific（Figure 4 逐 benchmark 各一条原文规则）。</strong>例如 SpreadsheetBench 学到「先查 workbook 结构与公式，再把求值后的静态值写进整个目标区间，而不是依赖 Excel 重算」；LiveMath 学到「按 theorem strength 排序选项、偏好有更强论证的更强结论」；ALFWorld 学到「维护 horizon-aware 的 visited/frontier 账本、对同类失败后多样化搜索、别反复折返目标」。这些恰是 frontier 模型 zero-shot 不会自觉遵守的纪律。§4.5 的两个 case study 进一步显示：SkillOpt <strong>不是用无关 prompt 替换初始 skill，而是围绕反复出现的 failure mode 增补紧凑约束</strong>——ALFWorld skill 从泛化的「搜-变换-放置」策略演化成带物体身份、搜索记忆、进度锁、loop breaker 的有限状态执行 policy（49.3→74.6）。</li>
+    </ul>
+  </section>
+
+  <!-- ============================ ⑤ 洞见 ============================ -->
+  <section id="insight">
+    <h2><span class="n">⑤</span>洞见 Insights</h2>
+    <div class="callout insight">
+      <span class="label">Insight</span>
+      <ol style="margin:6px 0">
+        <li><strong>「可控」比「会改」更重要。</strong>同样是把执行经验写回文本，真正解锁稳定增益的不是「让模型自我改写 skill」这件事本身，而是把权重优化里那套<strong>有界步长 + held-out 验证门 + 拒绝缓冲 + 慢更新</strong>的纪律移植过来。消融里一旦抽掉这些机件（尤其无界改写、去掉 slow/meta），增益就显著塌掉——这给所有「self-evolving / self-refine」类工作一个明确警示：<strong>没有验证门控的自我编辑，可能正在悄悄变差。</strong></li>
+        <li><strong>把「训练时算力」与「部署时成本」彻底解耦，是一个被低估的设计自由度。</strong>optimizer 只在离线训练跑，因此可以肆意用更强的 frontier 模型把 skill 打磨得更好，而 deployed <code>best_skill.md</code> 对 target agent 是零额外调用、零权重更新的纯文本。换句话说，<strong>「用强模型训练、用任意模型部署」在 text-space 里天然成立</strong>，且产物可审计（每处改动可由 <code>edit_apply_report.json</code> 溯源）、可在 model/harness/benchmark 间迁移。</li>
+        <li><strong>1–4 条编辑就能撬动 +20~40 分</strong>这件事本身很反直觉：它说明 frontier 模型缺的往往不是「能力」，而是几条它 zero-shot 不会自觉遵守的 <strong>procedural discipline</strong>（答案格式、证据绑定、静态值物化、搜索前沿管理）。validation gate 的作用，是从 optimizer 的海量提案里把这少数几条真正泛化的规则筛出来。</li>
+      </ol>
+    </div>
+
+    <h3>局限与未来</h3>
+    <p>作者自陈的边界（附录 B）：<strong>(1)</strong> 优化循环依赖「打分的 trajectory + held-out selection split」，因此最适用于<strong>有自动 verifier / exact-match / 可执行检查</strong>的任务；对成功本身主观、多维或评判昂贵的开放式领域，validation gate 可能需要更强的 human/model-based 评估。<strong>(2)</strong> 虽然部署 artifact 只是一份 compact <code>best_skill.md</code>，但<strong>训练阶段仍需额外的 rollout 计算与 optimizer 调用</strong>；这笔成本在「同一 skill 反复复用」时摊薄，对一次性任务则不划算（Table 6 也显示 SearchQA/DocVQA 每分要数千万 token）。<strong>(3)</strong> SkillOpt 刻意只优化「单个 portable skill」而非长一个大 skill library，部署简单，但对需要许多互不相交 procedure 的高度异构领域，单一 skill 可能不够。<strong>(4)</strong> 优化出的 skill 会编码 training distribution 的 domain heuristic，迁到差异很大的 model/harness/task 前仍需谨慎的 held-out 评估。<br>未来方向（§Outlook）：跨域共享机件的 <strong>skill library</strong>、跨 benchmark 复用 optimizer-side meta skill、面向开放式任务的 reward-free / preference-driven 验证门，以及把优化后的 skill <strong>self-distill 回 target model 权重</strong>，作为通往 weight-level adaptation 的踏脚石。</p>
+
+    <h3>与相关工作的关系（基于本文自身论述）</h3>
+    <p>本文把自己定位在三条线之间并各自划清边界：<strong>(a) prompt 自动优化（GEPA、ABSTRAL、EvoTest、TextGrad、DSPy）</strong>——同样把语言 artifact 当可优化对象、直接吃执行反馈，但优化的是 prompt / system 设计 / 整套 configuration；SkillOpt 优化的是一份<strong>可训练、可验证、可导出、可复用的持久 skill 文档</strong>，并把语言级可控性施加到一个稳定的 procedural skill 状态上。<strong>(b) skill construction / evolution（SkillsBench、SoK、Trace2Skill、SkillX、Memp、EvoSkill、SkillClaw、SkillRL、AutoSkill 等）</strong>——这些强调 skill 发现、repository 增长、共享、进化式搜索或 policy 优化；SkillOpt 研究一个更窄的问题：<strong>如何用 deep-learning-style 的控制（rollout batch、reflection minibatch、textual learning rate、validation gate、rejected-edit buffer、slow/meta update）去「训练」一份紧凑 domain skill</strong>，从而产出一个可控、可审计的 <code>best_skill.md</code> 而不动权重。<strong>(c) reflection / self-refine（Reflexion、Self-Refine）</strong>——SkillOpt 的 minibatch reflection 沿用这条思路，但关键差别是<strong>把「反思」用 held-out gate 变成了 propose-and-test 的优化</strong>，而不是无条件的自我编辑。总结一句：SkillOpt 的中心设计抉择是<strong>「target model、harness、evaluator 全部 frozen，只优化那份可复用的 skill artifact」</strong>。</p>
+  </section>
+
+  <footer class="foot">
+    本页为 <code>paper-reading</code> skill 生成的阅读笔记，仅作辅助，细节以
+    <a href="https://arxiv.org/abs/2605.23904" target="_blank" rel="noopener">原文</a> 为准 · 解读日期 2026-05-30
+  </footer>
+
+</article>
+</body>
+</html>
