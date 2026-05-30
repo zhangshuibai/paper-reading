@@ -322,5 +322,24 @@
       "Token-Efficiency"
     ],
     "path": "papers/2604.02268-skill-zero-skill-internalization/index.html"
+  },
+  {
+    "slug": "2605.10906-datamaster-data-centric-autonomous-ai",
+    "title": "DataMaster: Data-Centric Autonomous AI Research",
+    "authors": "Yaxin Du, Xiyuan Yang, Zhifan Zhou, Wanxu Liu, Zixing Lei, Zimeng Chen, Fenyi Liu, Haotian Wu, Yuzhu Cai, Zexi Liu, Xinyu Zhu, WenHao Wang, Linfeng Zhang, Chen Qian, Siheng Chen",
+    "team": "SJTU; CMU; Zhejiang University; BUAA",
+    "arxiv": "https://arxiv.org/abs/2605.10906",
+    "code": "https://github.com/sjtu-sai-agents/DataMaster",
+    "date": "2026-05-30",
+    "published": "arXiv 2026",
+    "tldr": "固定 learning algorithm、只在数据侧优化（外部数据发现/选择/清洗/转换）的自主 data-engineering 框架：DataTree 树搜索 + 共享 Data Pool + 累积 Global Memory；MLE-Bench Lite medal rate +32.27pt、PostTrainBench 平均 +22.70pt，GPQA 超人类专家 instruct。消融显示 Global Memory 是收益命门。",
+    "tags": [
+      "Data-Centric-AI",
+      "LLM-Agent",
+      "Tree-Search",
+      "AutoML",
+      "Post-Training"
+    ],
+    "path": "papers/2605.10906-datamaster-data-centric-autonomous-ai/index.html"
   }
 ]

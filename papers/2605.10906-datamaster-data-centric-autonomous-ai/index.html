@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DataMaster：以数据为中心的自主 AI 研究 · 论文解读</title>
+
+<script>
+  window.MathJax = {
+    tex:{inlineMath:[['$','$'],['\\(','\\)']], displayMath:[['$$','$$'],['\\[','\\]']]},
+    svg:{fontCache:'global'}
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;
+  }
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:880px; margin:0 auto; padding:18px 22px 90px}
+
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:27px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)}
+  .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .meta-grid a:hover{text-decoration:underline}
+
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap}
+  nav.toc a:hover{color:var(--accent)}
+
+  section{margin:38px 0}
+  h2{font-size:21px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:17px; margin:24px 0 8px}
+  p{margin:12px 0}
+  ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.9em}
+  strong{color:var(--text)}
+
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:14px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:10px 12px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  .yes{color:var(--ok); font-weight:600}
+  .no{color:var(--muted)}
+  .num{font-variant-numeric:tabular-nums; white-space:nowrap}
+
+  figure{margin:24px 0; text-align:center}
+  figure img{max-width:100%; height:auto; border:1px solid var(--line); border-radius:10px; background:#fff}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+
+  blockquote{border-left:3px solid var(--line); margin:14px 0; padding:2px 16px; color:var(--muted)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+  .mjx-container{overflow-x:auto; overflow-y:hidden}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">data-centric AI</span>
+      <span class="chip">LLM agent</span>
+      <span class="chip">tree search</span>
+      <span class="chip">AutoML</span>
+      <span class="chip">LLM post-training</span>
+    </div>
+    <h1>DataMaster：以数据为中心的自主 AI 研究</h1>
+    <p class="orig-title">DataMaster: Data-Centric Autonomous AI Research</p>
+    <dl class="meta-grid">
+      <dt>作者</dt><dd>Yaxin Du, Xiyuan Yang（共同一作）, Zhifan Zhou, Wanxu Liu, Zixing Lei, Zimeng Chen, Fenyi Liu, Haotian Wu, Yuzhu Cai, Zexi Liu, Xinyu Zhu, WenHao Wang, Linfeng Zhang, Chen Qian, Siheng Chen（通讯）</dd>
+      <dt>团队 / 机构</dt><dd>Shanghai Jiao Tong University · Carnegie Mellon University · Zhejiang University · Beijing University of Aeronautics and Astronautics</dd>
+      <dt>原文链接</dt><dd><a href="https://arxiv.org/abs/2605.10906" target="_blank" rel="noopener">https://arxiv.org/abs/2605.10906</a>（arXiv:2605.10906v2, cs.LG）</dd>
+      <dt>发表 / 年份</dt><dd>arXiv 预印本，2026 年 5 月（v1 5/11，v2 5/13）</dd>
+      <dt>解读日期</dt><dd>2026-05-30</dd>
+    </dl>
+  </header>
+
+  <div class="tldr">
+    <b>TL;DR</b> — 当 model、训练配方、算力都越来越标准化之后，ML 的性能差异越来越多地由<strong>数据</strong>决定。本文提出一个新问题 <em>task-conditioned autonomous data engineering</em>：固定 learning algorithm（模型代码、超参、训练脚本都不动），让一个 agent <strong>只在数据侧</strong>做优化——发现外部数据、选择与组合、清洗与转换、构造特征——去最大化下游表现。为此提出 <strong>DataMaster</strong>，把数据工程组织成一棵 <strong>DataTree</strong> 的树搜索（<em>red node</em> 探索新外部数据、<em>black node</em> 清洗整合并真正跑下游训练拿反馈），配一个跨分支共享的 <strong>Data Pool</strong> 和累积式 <strong>Global Memory</strong>。在 MLE-Bench Lite 上 medal rate 相对最强初始解 <strong>+32.27%</strong>（35.91%→68.18%），在 PostTrainBench 上平均分 <strong>+22.70</strong> 个点（8.47%→31.17%），并在 GPQA 上超过人类专家训练的 instruct model（31.02% vs 30.35%）。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#opensource">① 开源贡献</a>
+    <a href="#motivation">② 动机与贡献</a>
+    <a href="#method">③ 方法</a>
+    <a href="#evaluation">④ 实验评估</a>
+    <a href="#insight">⑤ 洞见</a>
+  </nav>
+
+  <!-- ============================ ① 开源贡献 ============================ -->
+  <section id="opensource">
+    <h2><span class="n">①</span>开源贡献 Open-source Artifacts</h2>
+    <p>论文首页 Abstract 直接给出了代码仓库链接，经核实仓库真实存在、采用 <strong>Apache-2.0</strong> 许可证，包含 DataTree 核心 workflow 与 MLE-Bench 的接入/评测代码（README 有中英双语 + 安装与 quick-start）。但仓库<strong>明确声明不包含</strong> MLE-Bench/Kaggle 数据、模型 checkpoint 及生成产物；<strong>PostTrainBench 部分标注「Coming soon」</strong>，模型权重与数据集均未随仓库发布。可以认为「框架/搜索逻辑 + MLE-Bench harness」已开源，权重/数据/post-training 流水线尚未完整放出。</p>
+    <table>
+      <thead><tr><th>类型</th><th>是否开源</th><th>内容 / 链接</th></tr></thead>
+      <tbody>
+        <tr><td>代码 Code</td><td class="yes">✔（部分）</td><td><a href="https://github.com/sjtu-sai-agents/DataMaster" target="_blank" rel="noopener">github.com/sjtu-sai-agents/DataMaster</a> · Apache-2.0 · 含 DataTree 核心 workflow 与 baseline MLE-Bench workflow；构建于 EvoMaster 框架，Python ≥3.10,&lt;3.13。MLE-Bench 流程已发布，<strong>PostTrainBench 标注 Coming soon</strong>。</td></tr>
+        <tr><td>模型权重 Weights</td><td class="no">✘</td><td>未发布。README 明确「不含 model checkpoints」；PostTrainBench 用到的 base model 为 Qwen3-1.7B-Base（外部已有，非本文产物）。</td></tr>
+        <tr><td>数据集 Dataset</td><td class="no">✘</td><td>未发布。agent 自主发现/curate 的训练集、生成产物均未随仓库提供；MLE-Bench/Kaggle 数据需用户自行获取。</td></tr>
+        <tr><td>环境 / Benchmark</td><td class="yes">✔（接入代码）</td><td>仓库内含 vendored 的 MLE-Bench 接入与评测工具；MLE-Bench Lite / PostTrainBench 本身是第三方 benchmark（分别见 ref [8] 与 ref [29]）。</td></tr>
+        <tr><td>项目主页 / Demo</td><td class="no">✘</td><td>未见独立 project page 或在线 demo；以 GitHub 仓库为准。</td></tr>
+      </tbody>
+    </table>
+    <p class="num" style="color:var(--muted);font-size:13px">注：本解读核实于 2026-05-30。仓库状态（尤其 PostTrainBench 部分）可能随时间更新，以仓库实际内容为准。</p>
+  </section>
+
+  <!-- ============================ ② 动机与贡献 ============================ -->
+  <section id="motivation">
+    <h2><span class="n">②</span>研究动机与贡献 Motivation &amp; Contribution</h2>
+
+    <h3>背景与问题</h3>
+    <p>ML 的进步历史上由「更好的模型、更好的算法、更多算力」驱动。但作者观察到一个趋势：<strong>模型开发本身正在被标准化</strong>——pretrained backbone 随处可用、训练配方易于复用、开源栈让 fine-tune 越来越「即插即用」、评测流水线也更可复现。于是性能差异越来越多地由<strong>数据</strong>塑造：用什么数据、怎么选怎么清洗、怎么混合、与下游目标匹配得多好。这把 ML 推向一个更强的 data-centric 阶段，也改变了「自主系统应该优化什么」这件事。</p>
+    <p>然而当前的自主 ML 系统（autonomous ML / ML engineering agents）<strong>仍然是 model-centric 的</strong>：像 AIDE、SELA、MLZero、MLE-STAR、ML-Master 这些 agent 擅长写代码、调 debug、调超参、从 validation 反馈迭代，但它们把<strong>训练数据当成固定给定（fixed given）</strong>，action space 局限在模型代码/架构/超参，数据本身从不被优化。更新的 PostTrainBench 虽然允许 agent 在 post-training 时 curate 数据，但数据 curation 仍被当作一个辅助性的 action 维度，而非优化的中心对象。data-centric 一侧已有的工作（如 CAAFE 做 feature engineering、Co-STEER、Dataforge、LAMBDA、DatawiseAgent，以及 Spider2-V、KramaBench 等 benchmark）则各自只覆盖流水线的一部分，而且<strong>很少被下游训练反馈串起来</strong>——它们大多假设数据源「事先给定」，agent 只负责处理给定的数据集。</p>
+    <p>作者把「在数据侧系统性提升下游表现」这件事单独拎出来，定义为 <em>task-conditioned autonomous data engineering</em>，并指出它比「多搜几个数据集拼到训练集里」要难得多，难点有三：</p>
+    <ol>
+      <li><strong>数据搜索是开放式的（open-ended）。</strong> 有用的数据散落在各种 repository 和开放网络上，质量参差、license 不清、与任务的相关性高度可变；搜索空间无法事先枚举。</li>
+      <li><strong>发现的数据很少能「即插即用」。</strong> schema 对齐、label 映射、格式转换、过滤、去重，往往要先合成处理，数据才能进训练。</li>
+      <li><strong>数据迭代本质是累积的（cumulative）。</strong> 为避免重复走失败方向、并在过去成功上继续建构，agent 必须记住「在哪搜过、试过哪些 transformation、哪些 adapter 有效、什么数据真的提升了表现」。</li>
+    </ol>
+
+    <h3>本文的切入点</h3>
+    <p>作者的关键判断：上面三个难点（open-ended 搜索、branch-dependent 的精修、delayed validation）天然对应「<strong>树 + 记忆</strong>」的结构。数据迭代是可分支的（branchable）、路径依赖的（path-dependent）、累积的，而且<strong>只有通过真实下游训练才可验证</strong>。因此把数据工程显式建成一棵在「可执行数据状态」上做的树搜索，并辅以跨分支共享的候选数据层和持久记忆，就能把原本零散的数据操作变成一个有结构的搜索过程——让 agent 复用成功选择、避开重复失败、把有限预算花在更有希望的方向上。</p>
+
+    <h3>核心贡献</h3>
+    <ol>
+      <li><strong>提出问题：</strong> 将 <em>task-conditioned autonomous data engineering</em> 形式化为一等研究问题——在固定 learning algorithm 的前提下，把<strong>数据状态</strong>（而非模型代码）作为主要优化对象，用下游训练表现作为<strong>唯一</strong>质量信号来驱动搜索。</li>
+      <li><strong>提出方法：</strong> 设计 <strong>DataMaster</strong>，一个 memory-augmented 的 data-agent 框架。其 <strong>DataTree</strong> 把自主数据工程组织成对「数据状态」的树搜索（red node 探索外部数据 / black node 数据精修并下游验证），配以跨分支共享的 <strong>Data Pool</strong> 和累积复用的 <strong>Global Memory</strong>；在有限评测预算下用 growth policy + UCB1 风格的 scheduling policy 控制树的生长与调度。</li>
+      <li><strong>系统验证：</strong> 在两个互补 benchmark 上评测——MLE-Bench Lite（经典 ML 工程，提供初始数据）与 PostTrainBench（LLM post-training，<strong>不提供任何训练数据</strong>，全靠 agent 从零发现）。结果显示「只动数据侧」即可在两种设定下都显著提升强初始解：MLE-Bench Lite medal rate +32.27%（→68.18%）、PostTrainBench 平均分 +22.70 点（→31.17%），并在 GPQA 上超过人类专家训练的 instruct model。</li>
+    </ol>
+  </section>
+
+  <!-- ============================ ③ 方法 ============================ -->
+  <section id="method">
+    <h2><span class="n">③</span>方法 Method</h2>
+
+    <h3>问题形式化</h3>
+    <p>定义一个<strong>数据状态</strong> $D$ 为在固定 learning algorithm 下、由数据侧操作产生的<strong>可执行配置</strong>：它指定了可用数据源、被选中并组合的训练子集、以及把它们转换成算法最终消费的输入所需的处理逻辑。问题输入是：下游任务 $T$、固定算法 $a_0$、初始可执行数据状态 $D_0$、以及一个资源预算 $B$（按时间或算力度量）。对任意候选数据状态 $D$，用 $E(T,a_0,D)$ 表示其下游表现。agent 在从 $D_0$ 出发、预算 $B$ 内可达的数据状态集合 $\Pi_B(D_0)$ 上搜索，终止于表现最优的精修状态 $D^*$：</p>
+    <p>$$ D^{*} = \arg\max_{D\in\Pi_B(D_0)} E(T, a_0, D). $$</p>
+    <p>这里 $a_0$ 始终不变，$D^*$ 是最终喂给算法产出下游模型的数据配置。这个问题难在两点：<strong>open-world</strong>——有用数据可能来自任意外部 repository 和网络，搜索空间无法事先枚举；<strong>long-horizon</strong>——一个数据侧决策的价值往往要等到后续精修和真正训练之后才显现。因此求解既需要广泛的候选探索，又需要对过去发现/转换/结果的累积记忆。</p>
+
+    <h3>整体框架</h3>
+    <p>DataMaster 用一个自主 agent 来近似上述搜索：不做一次性的数据集 curation，而是<strong>增量地</strong>搜新数据、试不同精修选择、并用下游训练反馈更新后续决策。这要求三种能力——从同一当前状态尝试多个下一步、跨分支共享发现的外部数据集、复用早先尝试学到的东西——分别由三个耦合组件承载（见图 1）：<strong>DataTree</strong>（树搜索骨架）、<strong>Data Pool</strong>（共享候选数据层）、<strong>Global Memory</strong>（持久记录层），再加上树的<strong>生长与调度</strong>机制让有限预算的搜索更高效。</p>
+
+    <figure>
+      <img src="figures/fig1_overview.png" alt="DataMaster 方法总览">
+      <figcaption>图 1：DataMaster 总览。DataTree 把自主数据工程组织成树搜索——<span style="color:#c0392b">red node</span> 通过发现外部数据集来拓宽搜索、并写入共享 Data Pool；<span>black node</span> 利用现有候选构造可执行数据状态、跑下游训练拿反馈（节点上数字即下游 score，0.93 为 best）。Global Memory 存可复用产物、节点结果与历史发现，让后续节点能复用数据、避开重复失败、在有限预算下协调跨分支搜索。（出处：原文 Figure 1）</figcaption>
+    </figure>
+
+    <h3>DataTree：在可执行数据状态上的树搜索</h3>
+    <p>形式上 DataTree 记为 $\mathcal{T}=(\mathcal{V},\mathcal{E})$：根节点 $v_0$ 关联初始数据状态 $D_0$；$\mathcal{V}$ 是已执行的数据工程节点集合；每条边 $\mathcal{E}$ 表示父到子的<strong>上下文继承</strong>，让子节点能引用父节点累积的数据状态、产物、决策与下游反馈，再做下一步数据侧决策。每个节点代表 agent 在当前分支上下文中执行的<strong>一步</strong>数据工程。DataTree 含两类节点：</p>
+    <ul>
+      <li><strong>Red Node（数据探索 / Data Exploration）。</strong> 负责<strong>拓宽</strong>搜索——为下游任务发现可能有用的外部数据集。给定当前搜索上下文、共享 Data Pool $\mathcal{P}$ 和从 Global Memory 取回的记忆 $\mathcal{M}_v$，red node 先根据任务描述、目标 metric、数据 schema、失败案例与历史记忆<strong>生成搜索 query</strong>，做开放式外部搜索 + 轻量筛选（看 metadata、schema 兼容性、modality、规模、label 结构、样本预览，并过滤掉重复源和 benchmark 受限源），输出一批新发现的数据条目 $\Delta\mathcal{P}_v$ 追加进 $\mathcal{P}$，供之后 black node 利用。每个保留条目存一份<strong>紧凑 manifest</strong>：本地路径/源指针、格式、schema 摘要、任务相关性、筛选备注。这一步把「开放世界外部搜索」变成一个可复用的候选层，<strong>把数据获取与下游精修解耦</strong>。</li>
+      <li><strong>Black Node（数据利用 / Data Exploitation）。</strong> 负责<strong>加深</strong>搜索——利用 Data Pool 中的候选来改进当前训练数据流水线。它从 $\mathcal{P}$ 中选有用的源、调整组合、应用清洗与转换规则、构造特征、并适配到固定下游训练接口。这些决策被物化为一个可执行的 <code>DataLoader</code> 及相关数据处理逻辑，产出该节点特定的数据状态 $D_v$，再通过固定的 <code>submit</code> 接口提交、在固定算法 $a_0$ 下实例化下游评测 $E(T,a_0,D_v)$，得到 score $y_v$ 与诊断 $\phi_v$ 写回 $\mathcal{M}$。换言之，black node 把「候选数据集」转成「可执行训练假设」，并用<strong>真实下游训练</strong>来比较、诊断、精修数据侧决策，而非仅靠启发式选择。</li>
+    </ul>
+
+    <h3>Global Memory &amp; Data Pool：共享搜索状态</h3>
+    <p><strong>Global Memory $\mathcal{M}$</strong> 是 DataTree 的持久记录层，对每个已执行节点维护一条一一对应的记录，追踪分支级搜索历史、节点输出、下游结果与可复用发现：</p>
+    <p>$$ r_v = \begin{cases} (\texttt{red},\ \Delta\mathcal{P}_v,\ \phi_v), & v\text{ 是 red node},\\[4pt] (\texttt{black},\ D_v,\ y_v,\ \phi_v), & v\text{ 是 black node}. \end{cases} $$</p>
+    <p>对节点 $v$，默认取回的上下文继承自其父节点与兄弟节点：$\mathcal{M}_v = \{r_{\mathrm{Par}(v)}\}\cup\{r_u \mid u\in \mathrm{Sib}(v)\}$，其中 $\mathrm{Par}(v)$ 是父节点、$\mathrm{Sib}(v)$ 是兄弟集合。除默认取回外，agent 还可主动 query 其他 red/black 节点记录，并把新发现写回 $\mathcal{M}$。这让搜索树「相互协调」而非各自独立：red node 避免重复发现并瞄准未覆盖方向，black node 复用已验证状态、迁移成功的处理选择，更高效地花训练预算。</p>
+    <p><strong>Data Pool $\mathcal{P}$</strong> 是共享候选数据层，把 red node 发现的外部源转成 black node 可复用的候选。每个条目存下游使用所需信息：本地路径、源描述、格式、schema、metadata、规模、modality、任务相关性、轻量筛选结果。red node 把 $\Delta\mathcal{P}_v$ 追加进 $\mathcal{P}$，black node 从 $\mathcal{P}$ 读取来选/组合/适配候选。<strong>分工要点：</strong>DataTree 维护分支局部的搜索结构，Global Memory 存节点级结果，而 Data Pool 把<strong>发现的数据源</strong>做成跨分支可复用——三者各司其职、避免把「发现的数据源」与「搜索记忆」混为一谈。</p>
+
+    <h3>有限预算下的树生长与调度</h3>
+    <p>由于每个候选状态都可能要跑一次下游训练评测，预算有限时无法枚举 $\Pi_B(D_0)$。DataMaster 用两个预算控制机制：</p>
+    <ul>
+      <li><strong>Growth policy（生长策略）：</strong> 决定下一步是开一个 red node（拓宽候选空间）还是开一批 black node（深挖利用）。树的生长是<strong>动态自适应</strong>的：red node 的输出只是「潜在数据集」，其是否真有用必须等被选中、适配、由 black node 测过才知道。因此每个 red node 后面跟一<strong>小批并行的 black node</strong>，探索对新候选的不同利用假设。某个 black node 评完后，由一个轻量外部 controller 根据最新训练反馈与当前分支上下文，决定该分支是继续 black-node 精修、还是开新 red node 做更广探索——当前配置还有提升空间就「深挖」，分支覆盖不足或候选基本用尽就「拓宽」。</li>
+      <li><strong>Scheduling policy（调度策略）：</strong> 在待执行节点间分配下一单位评测预算。采用贪心调度，选「估计最有助于逼近高分数据状态」的下一个未执行节点。下一执行节点 $v_{\text{next}}=\arg\max_{v\in\mathcal{N}}\mathrm{Score}(v)$（$\mathcal{N}$ 为已生成但未执行的 frontier 节点），用一个 Upper Confidence Bound（UCB1）风格的规则平衡分支质量与探索不足：</li>
+    </ul>
+    <p>$$ \mathrm{Score}(v) = \frac{R_v}{N_v} + c_t\sqrt{\frac{\log N_{\mathrm{Par}(v)}}{N_v}}, $$</p>
+    <p>其中 $R_v$、$N_v$ 是以 $v$ 为根的分支的累积 reward 与访问次数，$N_{\mathrm{Par}(v)}$ 是父节点对应计数，$c_t$ 是<strong>随时间衰减</strong>的探索系数。black node 的评测 score 会向上 backpropagate 更新分支统计，使反复成功的分支更容易被优先，同时仍保留对探索不足方向的激励。</p>
+
+    <div class="callout note">
+      <span class="label">实现要点（多取自 Appendix C，对复现重要）</span>
+      <ul>
+        <li><strong>即时 reward 设计：</strong>$r_v=\epsilon$（red node 无错完成，$\epsilon=0.01$ 小正常数，保证数据发现步拿到非零信用但不盖过真实训练信号）；$r_v=y_v$（black node 的评测 score）；$r_v=0$（buggy/失败节点）。</li>
+        <li><strong>Backpropagation：</strong>节点 $v$ 完成后，沿从 $v$ 到 root 的整条路径 $\mathrm{Path}(v)$ 更新：$N_u\!\leftarrow\!N_u+1$、$R_u\!\leftarrow\!R_u+r_v$，使父/祖父节点累积对其子树质量的证据，从而在不同深度的分支间公平比较。</li>
+        <li><strong>新节点初始化：</strong>$N_v=0,R_v=0$；为避免 UCB1 除零，未访问节点 $\mathrm{Score}=+\infty$（乐观初始化），保证每个新 frontier 节点都先被执行一次，再回到标准 UCB1。</li>
+        <li><strong>探索系数衰减：</strong>$c_t$ 三段分段线性——探索期（$t<t_1$）保持 $c_0$；过渡期（$t_1\!\le\!t\!\le\!t_2$）线性衰减 $\max(c_0-\alpha(t-t_1),c_{\min})$；利用期（$t>t_2$）钳到 $c_{\min}$。</li>
+        <li><strong>默认超参（Table 10）：</strong>$c_0\!=\!1.414(\approx\!\sqrt2)$、$c_{\min}\!=\!0.5$、$\alpha\!=\!0.01$、相位比 $(p_1,p_2)\!=\!(0.3,0.7)$、$\epsilon\!=\!0.01$、最大预算 $T\!=\!40$ 轮；树结构 <code>num_red=1</code>、初始 <code>num_black=5</code>、<code>max_black_per_red=5</code>。</li>
+        <li><strong>硬件：</strong>MLE-Bench Lite 在 8×NVIDIA H20 上跑，每 4 个任务分配 1 张 H20 以支持并行；主结果统一用 GLM-5 作 backbone、12 小时时限、各任务相同训练算力预算。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============================ ④ 实验评估 ============================ -->
+  <section id="evaluation">
+    <h2><span class="n">④</span>实验评估 Evaluation</h2>
+
+    <h3>评测设置</h3>
+    <ul>
+      <li><strong>Benchmark：</strong> 两个互补设定，差别在「是否提供初始数据」。
+        <ul>
+          <li><strong>MLE-Bench Lite</strong>（ref [8] 的 held-out 子集，22 个 Kaggle 竞赛，跨 tabular / vision / NLP / time-series）：每个任务给定固定竞赛数据 + 初始代码解，agent <strong>只能</strong>在数据侧操作（选子集、清洗、特征工程、调格式），模型训练代码不变。考察「在已有数据上做数据优化」。</li>
+          <li><strong>PostTrainBench</strong>（ref [29]，7 项能力）：衡量 agent 在只给算力与时间预算、<strong>不给任何训练数据</strong>的情况下能多好地 post-train 一个 base LM——必须从零发现并 curate 数据。7 项能力为：AIME 2025（数学推理）、Arena-Hard Writing（指令跟随/创作，LLM-as-judge）、BFCL（function calling）、GPQA（研究生级科学知识）、GSM8K（小学算术推理）、HealthBench Easy（医疗问答）、HumanEval（代码生成）。考察「开放世界数据发现」。</li>
+        </ul>
+      </li>
+      <li><strong>对比基线（四类）：</strong>(i) Frontier agents——Claude Code CLI、Codex CLI；(ii) Dataset Search Agent——DatasetResearch（纯数据搜索，发现后用 Claude Code 适配，并控制总数据量与 DataMaster best node 对齐）；(iii) End-to-End ML Agent——ML-Master 2.0（可同时改数据与代码）；(iv) Data-Centric Training Framework——DataFlex（建于 LLaMA-Factory，<strong>只做训练时</strong>的数据选择/混合比/重加权，不做自主数据发现；收到与 DataMaster best node 相同的 curated 数据集，用以隔离「训练时优化」与「数据发现」）。</li>
+      <li><strong>参照点（Reference Points）：</strong>
+        <ul>
+          <li><strong>Initial Score（初始解）：</strong>MLE-Bench Lite 上 = 把 ML-Master 2.0 的代码<strong>去掉数据模块</strong>后跑出的成绩（隔离固定训练流水线本身的贡献），medal/gold = 35.91% / 22.73%；PostTrainBench 上 = base model Qwen3-1.7B-Base 不做 fine-tune。</li>
+          <li><strong>Human Score（人类专家）：</strong>PostTrainBench 上 = Qwen3-1.7B 的官方 instruct 版（阿里专家团队用精心 curate 的数据训出），作为「专家级 post-training」的强参照，平均分 46.91%。</li>
+        </ul>
+      </li>
+      <li><strong>指标（方向）：</strong> MLE-Bench Lite 四指标——<strong>Medal Rate</strong>（达到 Kaggle 奖牌线的竞赛比例，↑）、<strong>Gold Medal Rate</strong>（限金牌，↑）、<strong>Avg. Overcome Rate</strong>（DataTree 中提交分数超过初始解的节点比例，↑）、<strong>Performance Gain</strong>（DataTree best 相对初始解的平均相对提升，↑）；PostTrainBench——每项能力的准确率 + 宏平均 <strong>Avg</strong>（↑）。除特别标注外，所有 agentic 系统都用 GLM-5 驱动（Codex 用 GPT-5.2-Codex）。</li>
+    </ul>
+
+    <h3>主要结果</h3>
+    <p>主表（原文 Table 1，统一 GLM-5 backbone、12 小时、相同训练算力）：DataMaster 在两个 benchmark 上都<strong>同时</strong>超过初始解与所有基线。</p>
+    <table>
+      <thead>
+        <tr><th>System</th><th class="num">MLE Medal</th><th class="num">MLE Gold</th><th class="num">BFCL</th><th class="num">GPQA</th><th class="num">GSM8K</th><th class="num">HealthBench&nbsp;Easy</th><th class="num">HumanEval</th><th class="num">PTB&nbsp;Avg</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Initial Score（初始解）</td><td class="num">35.91%</td><td class="num">22.73%</td><td class="num">22.56%</td><td class="num">18.75%</td><td class="num">9.02%</td><td class="num">0.00%</td><td class="num">8.53%</td><td class="num">8.47%</td></tr>
+        <tr><td>Human Score（instruct）</td><td class="num">—</td><td class="num">—</td><td class="num">30.35%</td><td class="num">30.35%</td><td class="num">86.95%</td><td class="num">35.76%</td><td class="num">60.36%</td><td class="num">46.91%</td></tr>
+        <tr><td>Codex* (GPT-5.2-Codex)</td><td class="num">22.73%</td><td class="num">18.18%</td><td class="num">40.67%</td><td class="num">29.54%</td><td class="num">24.31%</td><td class="num">9.17%</td><td class="num">25.41%</td><td class="num">18.46%</td></tr>
+        <tr><td>Claude Code</td><td class="num">36.36%</td><td class="num">22.12%</td><td class="num">31.00%</td><td class="num">14.29%</td><td class="num">2.58%</td><td class="num">1.16%</td><td class="num">29.27%</td><td class="num">11.47%</td></tr>
+        <tr><td>DatasetResearch</td><td class="num">59.09%</td><td class="num">27.27%</td><td class="num">22.64%</td><td class="num">18.00%</td><td class="num">9.33%</td><td class="num">3.56%</td><td class="num">6.00%</td><td class="num">8.50%</td></tr>
+        <tr><td>DataFlex</td><td class="num">—</td><td class="num">—</td><td class="num">22.58%</td><td class="num">28.80%</td><td class="num">48.37%</td><td class="num">6.22%</td><td class="num">25.41%</td><td class="num">19.09%</td></tr>
+        <tr><td>ML-Master 2.0</td><td class="num">40.91%</td><td class="num">27.27%</td><td class="num">31.43%</td><td class="num">18.57%</td><td class="num">31.45%</td><td class="num">8.24%</td><td class="num">16.84%</td><td class="num">15.69%</td></tr>
+        <tr><td><strong>DataMaster</strong></td><td class="num"><strong>68.18%</strong></td><td class="num"><strong>45.45%</strong></td><td class="num"><strong>34.27%</strong></td><td class="num"><strong>31.02%</strong></td><td class="num"><strong>49.43%</strong></td><td class="num"><strong>34.93%</strong></td><td class="num"><strong>43.29%</strong></td><td class="num"><strong>31.17%</strong></td></tr>
+      </tbody>
+    </table>
+    <p style="color:var(--muted);font-size:13px">表中 PTB = PostTrainBench（仅列出差异最明显的 5 项能力 + 宏平均；完整含 AIME 25 / Arena-Hard Writing，DataMaster 分别为 3.33% / 21.93%）。MLE-Bench Lite 上 DataFlex/Codex* 的 medal 项与 PostTrainBench 的适用性见正文 baseline 说明。</p>
+    <p><strong>怎么读这些数字：</strong></p>
+    <ul>
+      <li><strong>vs 初始解：</strong>MLE-Bench Lite medal 35.91%→<strong>68.18%（+32.27pt）</strong>、gold 22.73%→<strong>45.45%（+22.72pt）</strong>，证明「训练代码一字不改、只动数据」就能带来可观下游收益。PostTrainBench 平均 8.47%→<strong>31.17%（+22.70pt）</strong>，其中 GSM8K（9.02→49.43）、HealthBench Easy（0.00→34.93）、HumanEval（8.53→43.29）提升尤其大。</li>
+      <li><strong>vs 其他基线：</strong>两个 benchmark 上 DataMaster 全面领先。MLE-Bench Lite 比最强搜索基线 DatasetResearch 在 medal 上高 9.09pt、gold 上高 18.18pt——说明「外部数据发现 + 迭代精修」比「只搜不精修」更有效。PostTrainBench 平均分 31.17% 为全场最高：Codex 单点很强（BFCL 40.67%）但 long-horizon 精修弱，DataMaster 七项更<strong>均衡</strong>；DataFlex 拿到同样 curated 数据但只做训练时优化，平均低 12.08pt，说明<strong>数据 curation 质量比单纯训练时调度更重要</strong>。</li>
+      <li><strong>逼近/超越人类专家：</strong>在 <strong>GPQA</strong> 上 DataMaster <strong>31.02% &gt; instruct 30.35%</strong>，提示自主数据工程在特定能力上可以接近甚至超过专家 curate 的 post-training 数据。</li>
+    </ul>
+
+    <h3>跨 backbone LLM（消融之一）</h3>
+    <figure>
+      <img src="figures/fig2_llms.png" alt="PostTrainBench 跨 LLM 的逐任务表现">
+      <figcaption>图 2：PostTrainBench 上 DataMaster 用四种 frontier LLM（GLM-5 / Claude-4.6-Sonnet / Qwen3.5-plus / GPT-5.4）驱动时的逐任务准确率，对比 Base Model 与 Instruct Model。GLM-5/Claude-4.6/Qwen3.5-plus 平均都达到约 30%（远高于 Base 的 8.47%），并在选定能力上达到或超过 instruct 参照。（出处：原文 Figure 2）</figcaption>
+    </figure>
+    <p>关键发现：① GLM-5、Claude-4.6-Sonnet、Qwen3.5-plus 平均都约 30%，<strong>跨多个强 backbone 都有效</strong>；② 在选定能力上达到或超过人类专家 instruct（GLM-5 在 GPQA、Claude-4.6 在 HealthBench Easy、Qwen3.5-plus 在 HumanEval）；③ <strong>GPT-5.4 反而较差（平均 14.64%）</strong>——它每节点的 tool call 远少于其他 backbone（11.3 vs GLM-5 的 40.7），说明<strong>tool 用得不够会限制 long-horizon 的数据搜索与精修</strong>。</p>
+
+    <h3>Test-Time Scaling</h3>
+    <figure>
+      <img src="figures/fig3_scaling.png" alt="GPQA 上随训练时间的 test-time scaling">
+      <figcaption>图 3：PostTrainBench GPQA 上 best-node score 随 wall-clock 时间的阶梯式上升。从 base 18.75% 起，依次通过「加 natural-science-reasoning + science_questions」「2× 增训练数据量」「加 MMLU 科学子集」「加 MMLU-Pro + MedQA」逐步爬升到 31.02%（超过虚线的 instruct 参照），说明更多搜索预算产出更强的任务专属数据配置，而非仅仅是更长的运行时间。（出处：原文 Figure 3）</figcaption>
+    </figure>
+
+    <h3>组件消融（MLE-Bench Lite，10 个任务）</h3>
+    <p>逐一关掉 red node / black node / Global Memory 中的一个（另两个保留）。<em>initial-code</em> 指初始解节点质量、<em>best-node</em> 指全树最优提交：</p>
+    <table>
+      <thead><tr><th>Red</th><th>Black</th><th>Memory</th><th class="num">best Medal</th><th class="num">best Gold</th><th class="num">Overcome</th></tr></thead>
+      <tbody>
+        <tr><td class="no">✘</td><td class="yes">✔</td><td class="yes">✔</td><td class="num">80%</td><td class="num">70%</td><td class="num"><strong>72.40%</strong></td></tr>
+        <tr><td class="yes">✔</td><td class="no">✘</td><td class="yes">✔</td><td class="num">70%</td><td class="num">50%</td><td class="num">52.41%</td></tr>
+        <tr><td class="yes">✔</td><td class="yes">✔</td><td class="no">✘</td><td class="num">50%</td><td class="num">20%</td><td class="num">28.57%</td></tr>
+        <tr><td class="yes">✔</td><td class="yes">✔</td><td class="yes">✔</td><td class="num"><strong>90%</strong></td><td class="num"><strong>80%</strong></td><td class="num">69.96%</td></tr>
+      </tbody>
+    </table>
+    <p>结论：① <strong>Memory 使能跨迭代学习</strong>——去掉 memory，overcome rate 从 69.96% 掉到 28.57%、best gold 从 80% 掉到 20%，几乎抹掉全部收益；② <strong>red 与 black 互补</strong>——去掉 red node，内部精修仍提升（overcome 72.40%）但 best gold 掉 10pt，说明外部发现有独特价值；去掉 black node，发现的数据无法被适配（medal 更低），说明外部源需要在地精修；③ <strong>三者齐全才最强</strong>，full system 达 90% medal rate。</p>
+
+    <h3>对初始算法的鲁棒性</h3>
+    <p>每个 MLE-Bench Lite 任务都带一个含 DataLoader 与 Algorithm 的初始解。对比 <strong>Full-code</strong>（两部分都给）与 <strong>Algo-only</strong>（只给算法骨架、agent 须自建 DataLoader）：① 两种设定下 DataMaster 都超过各自初始解，说明数据侧优化对不同的固定算法起点都<strong>稳健</strong>；② Algo-only 起点更低（initial medal 35.91% vs 45.45%）却拿到更大绝对增益（+32.27pt vs +27.28pt）、更高 overcome（67.31% vs 60.40%），说明 DataMaster <strong>能靠构造更好的数据流水线补偿较弱的起点</strong>。</p>
+
+    <h3>成本结构与数据泄漏审计</h3>
+    <p><strong>成本（原文 Table 4，641 red / 340 black 节点）：</strong>black node 更贵——用 3.0× 的 API 预算、2.4× 的时间（数据选择/处理/构造 DataLoader/下游训练评测）；red node 主导搜索<strong>广度</strong>，执行次数近 black node 两倍，体现开放式外部发现的特性。整体上 DataMaster 比基线更「重」（原文 Table 7：平均每任务输入 2690.3K / 输出 596.3K token、API 成本 \$1.61、用时 718.7 min），换来明显更高的 medal/gold——属于「用更多搜索预算换更强数据配置」的取舍。</p>
+    <figure>
+      <img src="figures/fig4_leakage.png" alt="PostTrainBench GPQA 的测试集泄漏审计">
+      <figcaption>图 4：开放式数据搜索的 test-set contamination 审计（PostTrainBench GPQA，over 7,479 个发现的训练样本 / 448 个测试样本）。Exact Match 与 Fuzzy(≥90%) 均为 <strong>0.00%</strong>，仅有低 n-gram 重叠（3-gram 1.06% / 4-gram 0.26% / 5-gram 0.08%），提示是术语重叠而非测试集照搬。（出处：原文 Figure 4）</figcaption>
+    </figure>
+    <p>作者用多层协议防泄漏：① <strong>source filtering</strong>（屏蔽 benchmark 页面、竞赛讨论、含 test-split 名的 URL）；② <strong>hash-based dedup</strong>（存 test-set hash，过滤精确匹配的训练样本）；③ <strong>provenance tracking</strong>（对每个外部数据点记 URL、时间戳、内容 hash 以便审计）。这一审计回应了「自主搜外部数据是否会作弊」的核心质疑。</p>
+  </section>
+
+  <!-- ============================ ⑤ 洞见 ============================ -->
+  <section id="insight">
+    <h2><span class="n">⑤</span>洞见 Insights</h2>
+    <div class="callout insight">
+      <span class="label">Insight</span>
+      <ul>
+        <li><strong>「只动数据、不动代码」是一条被低估的优化杠杆。</strong> 当模型/训练配方日益标准化，把 agent 的整个 action space 限定在<strong>数据状态</strong>上（发现、选择、清洗、转换、复用），仍能在经典 ML 工程与 LLM post-training 两端都大幅提升强初始解，甚至在 GPQA 上超过人类专家 curate 的数据。这把「data-centric AI」从「人手工调数据」推进到「agent 自主在数据侧做闭环搜索」。</li>
+        <li><strong>开放式数据工程天然适配「树 + 共享记忆」。</strong> 数据迭代是可分支、路径依赖、累积、且只能由下游训练验证的——用 DataTree 组织搜索、Data Pool 跨分支共享候选、Global Memory 累积复用，把零散数据操作变成有结构的搜索。消融显示 <strong>Memory 是收益的命门</strong>（去掉它几乎抹平全部增益），印证了「累积记忆」对 long-horizon 数据迭代的决定性作用。</li>
+        <li><strong>数据 curation 的质量 &gt; 训练时调度。</strong> 在收到同样 curated 数据集的前提下，只做训练时优化的 DataFlex 平均落后 DataMaster 12.08pt——说明<strong>「发现并构造对的数据」比「在给定数据上调混合比/重加权」更值钱</strong>，两者正交、原则上可叠加。另外，backbone 的 tool-use 能力（每节点 tool call 数）直接限制了 long-horizon 数据搜索的上限（GPT-5.4 的反例）。</li>
+      </ul>
+    </div>
+
+    <h3>局限与未来</h3>
+    <ul>
+      <li><strong>成本偏高：</strong>DataMaster 的 token/时间/API 开销明显高于轻量基线（每任务约 \$1.61、12 小时上限、近 3M token），black node 的下游训练评测尤其贵；在更紧的预算或更大规模任务下的性价比仍需观察。</li>
+      <li><strong>泄漏风险需持续治理：</strong>开放世界搜数据天然带 contamination 风险，本文用三层协议 + n-gram 审计缓解并报告了零精确匹配，但这是工程性防护、依赖 blocklist/hash 的覆盖度，换任务/换数据源时需要重新审计。</li>
+      <li><strong>开源不完整：</strong>截至解读日，仓库只放出 MLE-Bench workflow，PostTrainBench 部分标注「Coming soon」，权重与 agent 自建的数据集均未发布，复现 PostTrainBench 结果暂受限。</li>
+      <li><strong>评测面有限：</strong>主结果集中在 GLM-5 backbone、MLE-Bench Lite（22 个 Kaggle 任务）与 PostTrainBench（7 项、Qwen3-1.7B-Base）；更大模型、更多模态/任务上的泛化是自然的后续。作者在结论中也呼吁未来自主 ML 系统应更重视「数据如何被发现、选择、转换、验证与跨任务复用」这一数据侧维度。</li>
+    </ul>
+
+    <h3>与相关工作的关系（基于本文自身论述）</h3>
+    <p>与 <strong>ML engineering agents</strong>（AIDE、SELA、MLZero、MLE-STAR、ML-Master）相比：它们把数据当固定给定、只在模型代码/架构/超参上做树搜索；DataMaster 反过来——代码固定，整个 action space 作用在数据状态上，并以下游训练表现为<strong>唯一</strong>优化信号。PostTrainBench 朝「数据感知」迈了一步（允许 post-training 时 curate 数据），但数据仍是辅助 action 而非中心目标。与 <strong>data-centric agents</strong>（CAAFE 做 feature engineering、Co-STEER 的全 data-centric 开发环、Dataforge 双反馈环清洗 tabular、LAMBDA 迭代代码生成、DatawiseAgent 编排 notebook 工作流）相比：这些工作里<strong>数据源都「事先给定」</strong>，agent 只处理/变换给定数据集，而 Spider2-V、KramaBench 等 benchmark 也揭示这类 agent 在复杂异构真实流水线上仍吃力。DataMaster 的根本不同在于<strong>源空间本身是开放式的</strong>——agent 必须从零发现、评估、适配外部数据，并把下游训练表现作为引导这一过程的<strong>唯一质量信号</strong>；它面向「模型代码固定、整个 action 都在数据侧」这一互补 regime，并跨迭代累积记忆。</p>
+  </section>
+
+  <footer class="foot">
+    本页为 <code>paper-reading</code> skill 生成的阅读笔记，仅作辅助，细节以
+    <a href="https://arxiv.org/abs/2605.10906" target="_blank" rel="noopener">原文</a> 为准 · 解读日期 2026-05-30
+  </footer>
+
+</article>
+</body>
+</html>
