@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Toolathlon：真实、多样、长程的 language agent 工具使用 benchmark · 论文解读</title>
+
+<script>
+  window.MathJax = {
+    tex:{inlineMath:[['$','$'],['\\(','\\)']], displayMath:[['$$','$$'],['\\[','\\]']]},
+    svg:{fontCache:'global'}
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;
+  }
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:880px; margin:0 auto; padding:18px 22px 90px}
+
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:27px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)}
+  .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .meta-grid a:hover{text-decoration:underline}
+
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap}
+  nav.toc a:hover{color:var(--accent)}
+
+  section{margin:38px 0}
+  h2{font-size:21px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:17px; margin:24px 0 8px}
+  p{margin:12px 0}
+  ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.9em}
+  strong{color:var(--text)}
+
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:14px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:10px 12px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  .yes{color:var(--ok); font-weight:600}
+  .no{color:var(--muted)}
+  .num{font-variant-numeric:tabular-nums; text-align:right}
+
+  figure{margin:24px 0; text-align:center}
+  figure img{max-width:100%; height:auto; border:1px solid var(--line); border-radius:10px; background:#fff}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+
+  blockquote{border-left:3px solid var(--line); margin:14px 0; padding:2px 16px; color:var(--muted)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+  .mjx-container{overflow-x:auto; overflow-y:hidden}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">agent</span>
+      <span class="chip">benchmark</span>
+      <span class="chip">MCP</span>
+      <span class="chip">tool use</span>
+      <span class="chip">long-horizon</span>
+    </div>
+    <h1>Toolathlon（Tool Decathlon）：真实、多样、长程的 language agent 工具使用 benchmark</h1>
+    <p class="orig-title">The Tool Decathlon: Benchmarking Language Agents for Diverse, Realistic, and Long-Horizon Task Execution</p>
+    <dl class="meta-grid">
+      <dt>作者</dt><dd>Junlong Li, Wenshuo Zhao, Jian Zhao, Weihao Zeng, Haoze Wu（共同一作）等 21 人；通讯作者 Junxian He</dd>
+      <dt>团队 / 机构</dt><dd>HKUST（香港科技大学，hkust-nlp）· All Hands AI · Carnegie Mellon University · Duke University</dd>
+      <dt>原文链接</dt><dd><a href="https://arxiv.org/abs/2510.25726" target="_blank" rel="noopener">arXiv:2510.25726</a> · <a href="https://toolathlon.xyz" target="_blank" rel="noopener">toolathlon.xyz</a></dd>
+      <dt>发表 / 年份</dt><dd>ICLR 2026（v1 2025-10-29，v2 2026-02-26；cs.CL）</dd>
+      <dt>解读日期</dt><dd>2026-05-30</dd>
+    </dl>
+  </header>
+
+  <div class="tldr">
+    <b>TL;DR</b> — Toolathlon 是一个面向 language agent 的工具使用 benchmark，主打<strong>真实（real）、多样（diverse）、长程（long-horizon）</strong>三件事：它把 agent 接到 <strong>32 个真实软件应用、604 个工具</strong>（绝大多数来自 MCP server），用 <strong>108 个人工编写/采集的任务</strong>考察 agent 在跨应用工作流中的表现。与以往 benchmark 不同，它强调<strong>真实的初始环境状态</strong>（如有几十个学生的 Canvas 课程、真实财务表格）、<strong>故意写得模糊的用户指令</strong>，以及<strong>基于环境状态的确定性脚本评测（execution-based）</strong>而非 LLM judge。结论很扎眼：最强的 Claude-4.5-Sonnet 也只有 <strong>38.6%</strong> 成功率（平均 20.2 个 tool-calling turn），最强开源模型 DeepSeek-V3.2-Exp 仅 <strong>20.1%</strong>——说明当前模型离"能可靠干真实长程活儿"还差得远。代码、评测环境、17 个模型的完整 trajectory 已全部开源。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#opensource">① 开源贡献</a>
+    <a href="#motivation">② 动机与贡献</a>
+    <a href="#method">③ 方法</a>
+    <a href="#evaluation">④ 实验评估</a>
+    <a href="#insight">⑤ 洞见</a>
+  </nav>
+
+  <!-- ============================ ① 开源贡献 ============================ -->
+  <section id="opensource">
+    <h2><span class="n">①</span>开源贡献 Open-source Artifacts</h2>
+    <p>本文是一个"benchmark + 评测环境"型工作，作者把<strong>三样东西完整开源</strong>：评测代码与环境框架（含 32 个 MCP server 的实现/修订）、17 个 SOTA 模型在全部任务上的执行 trajectory 数据集，外加一个由第三方（eigent-ai）基于本工作扩展、完全本地化（PostgreSQL，免外部 API key）的 gym 复现环境。以下链接均已逐一核实可访问。</p>
+    <table>
+      <thead><tr><th>类型</th><th>是否开源</th><th>内容 / 链接</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>代码 / 评测框架 Code</td>
+          <td class="yes">✔</td>
+          <td><a href="https://github.com/hkust-nlp/Toolathlon" target="_blank" rel="noopener">github.com/hkust-nlp/Toolathlon</a><br>
+          官方仓库（ICLR 2026）。包含 agent 评测框架（基于 OpenAI Agents SDK v0.0.15 改造）、108 个任务的初始化脚本与评测脚本、32 个 MCP server 的封装/修订、容器化并行评测流程。README 描述支持三种模式：public 评测服务、本地容器化部署、解耦的 agent loop。<strong>许可证：仓库未在抓取到的文本中显式声明 LICENSE（截至解读日未见）。</strong></td>
+        </tr>
+        <tr>
+          <td>数据集 Dataset（trajectory）</td>
+          <td class="yes">✔</td>
+          <td><a href="https://huggingface.co/datasets/hkust-nlp/Toolathlon-Trajectories" target="_blank" rel="noopener">huggingface.co/datasets/hkust-nlp/Toolathlon-Trajectories</a><br>
+          17 个模型 × 3 次运行 = 51 个 trajectory 文件，每文件约 108 个任务，合计 5000+ 条任务执行记录（JSONL）。每条含完整对话历史 <code>messages</code>、可用工具 <code>tool_calls</code>、任务配置 <code>config</code>（MCP server / 本地工具 / system prompt）、统计 <code>key_stats</code>（turns/tokens/耗时）与 <code>agent_cost</code>。<strong>许可证：CC-BY-4.0。</strong></td>
+        </tr>
+        <tr>
+          <td>环境 / Benchmark</td>
+          <td class="yes">✔</td>
+          <td>本体即 benchmark + 环境（见上方官方仓库）。第三方扩展复现环境：<a href="https://github.com/eigent-ai/toolathlon_gym" target="_blank" rel="noopener">github.com/eigent-ai/toolathlon_gym</a> —— 由 eigent-ai 在本工作基础上扩展，提供 <strong>503 个多工具任务、25 个 MCP server</strong>，全部由<strong>本地 PostgreSQL</strong> 支撑（6 个数据域：Canvas LMS / Snowflake / WooCommerce / Yahoo Finance / YouTube / 铁路），<strong>无需外部 API</strong>，Docker Compose 一键启动。其文档明确写道任务格式、评测框架、MCP server 接口、数据库 schema 均源自 HKUST-NLP 的 Toolathlon。<strong>许可证：Apache-2.0。</strong></td>
+        </tr>
+        <tr>
+          <td>模型权重 Weights</td>
+          <td class="no">—</td>
+          <td>本文不训练模型，无权重发布（纯评测工作）。</td>
+        </tr>
+        <tr>
+          <td>项目主页 / Demo</td>
+          <td class="yes">✔</td>
+          <td><a href="https://toolathlon.xyz" target="_blank" rel="noopener">toolathlon.xyz</a>（含 leaderboard）；社区 Discord 见 README。</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="callout note">
+      <span class="label">关于数字口径的说明</span>
+      官方 README 里有"600+ tools / 600+ tasks"这类口语化表述，但<strong>论文正文权威口径是：32 个应用、604 个工具、108 个任务</strong>（本文统一采用论文数字）。另需注意：eigent-ai 的 gym 是一个独立的、本地数据库化的<strong>扩展/复现</strong>版本（503 任务、25 server、Apache-2.0），与官方 108 任务版本不是同一套，引用时勿混淆。
+    </div>
+  </section>
+
+  <!-- ============================ ② 动机与贡献 ============================ -->
+  <section id="motivation">
+    <h2><span class="n">②</span>研究动机与贡献 Motivation &amp; Contribution</h2>
+
+    <h3>背景与问题</h3>
+    <p>tool-based language agent 已经在软件工程（SWE-bench、Terminal-Bench）、deep research、web browsing 等领域显出价值；而 <strong>MCP（Model Context Protocol）</strong>的出现，让 agent 以统一标准接入成千上万的应用成为可能。但现有评测 benchmark 跟真实世界的差距很大，作者把这种差距拆成几条具体的失败模式：</p>
+    <ul>
+      <li><strong>工具/环境是"假"的。</strong> τ-Bench、BFCL、ACEBench 这类只测 function-calling 的正确性，要么 mock 实现、要么用 LLM 模拟工具返回——回避了真实工具在不可预测环境里执行带来的所有麻烦（参数对不上、资源不存在、返回超长等）。</li>
+      <li><strong>接了真 API，但环境状态是"空"或"合成"的。</strong> AppWorld、MCPWorld、MCP-RADAR、MCPEval 等连到了真实应用，但任务大多从零状态或人工构造的简化状态起步，且偏单应用。作者强调：<em>diversity gap 远不止工具名字/描述的不同，真正难的是跨应用的环境状态多样性 + 长程交互。</em></li>
+      <li><strong>更真实的几个并发工作仍有短板。</strong> LiveMCPBench、LiveMCP-101、MCPAtlas、MCPUniverse、MCPMark 等用上了 production 级 MCP server，但要么领域窄、要么状态初始化不真实、要么指令"过度详细"。比如 MCPUniverse 只 6 个域、90% 任务单应用、合成初始状态、交互 <8 turn；MCPMark 只 5 个 app 且 prompt 写得过细；GAIA2 只覆盖 mobile 域、合成环境。</li>
+      <li><strong>评测方式不可靠。</strong> 不少 benchmark 用 LLM-as-judge 打分 trajectory，作者认为对真实长程任务而言，<strong>用确定性规则核验最终环境状态</strong>才是可复现、可信赖的做法。</li>
+    </ul>
+
+    <h3>本文的切入点</h3>
+    <p>作者的核心主张是：要真正测出 agent 的真实战力，必须同时把<strong>四个维度</strong>都拉满——(1) 真实的工具与软件环境（real env），(2) 真实复杂的初始状态（states init），(3) 跨应用、长程的任务（cross-app, long-horizon），(4) 模糊的真实用户指令（realistic fuzzy prompt）+ 确定性可验证评测（verifiable execution）。论文的 Table 1 把十几个 benchmark 在这几栏上逐一打勾，Toolathlon 是唯一一个四栏全 ✓ 且 app 数（32）、平均 turn 数（26.8，Claude-4-Sonnet 作 proxy）都最高的。</p>
+    <p>为了让"真实状态"可规模化地复现，作者做了一个很实际的折中：能用远程真实应用（Google Sheets/Calendar/Gmail/Snowflake…）就用；难以为每个 benchmark 用户注册几十上百账号、且每次评测都要重置状态的场景，就<strong>用开源软件本地容器化替代</strong>——poste.io 代替 Gmail、Canvas 做课程管理、Kubernetes 做集群编排、WooCommerce 代替 Shopify。这样既有真实复杂的 observation，又能可扩展地铺设几十个账号和复杂初始状态。</p>
+
+    <h3>核心贡献</h3>
+    <ol>
+      <li><strong>提出 Toolathlon benchmark：</strong>32 个真实应用、604 个工具、108 个人工任务，覆盖 Research/Campus/Finance/Tech/Business/Daily/E-commerce 七大主题；任务平均需跨多个应用、约 20 turn（proxy 口径 26.8 turn）完成，是目前同类里"真实度 × 长程度"最高的之一。</li>
+      <li><strong>一套真实且可规模化的环境构造方法：</strong>远程真实应用 + 本地容器化开源软件（poste.io / Canvas / K8s / WooCommerce）并用，配合每个任务的状态初始化脚本，实现"非空、真实、可重置"的初始环境；67%（72/108）的任务带状态初始化。</li>
+      <li><strong>可靠的 execution-based 评测框架：</strong>每个任务配一个手写的确定性评测脚本，对最终环境状态做匹配（静态 ground-truth 快照，或按 reference workflow 动态拉取实时信息，如 NVIDIA 股东、12306 车次）；容器隔离 + 并行，Claude-4.5-Sonnet 跑完 108 任务仅约 70 分钟（10 并行进程）。</li>
+      <li><strong>对 17 个 SOTA 模型的系统评测与诊断：</strong>给出主表与多维分析（tool-call 错误、long-context、超长输出、成本/token），并指出长程任务里"过早结束、探索不足"是普遍瓶颈；全部 trajectory 开源。</li>
+    </ol>
+  </section>
+
+  <!-- ============================ ③ 方法 ============================ -->
+  <section id="method">
+    <h2><span class="n">③</span>方法 Method（benchmark 与评测框架怎么搭）</h2>
+
+    <p>Toolathlon 把每个任务形式化为一个 <strong>POMDP</strong> $(\mathcal{S},\mathcal{A},\mathcal{O},\mathcal{T},\mathcal{R},\mathcal{U})$：状态空间 $\mathcal{S}$（如当前邮箱里的状态）、动作空间 $\mathcal{A}$（该任务可用的工具集合）、观测空间 $\mathcal{O}$（喂给模型的工具返回）、转移函数 $\mathcal{T}:\mathcal{S}\times\mathcal{A}\to\mathcal{S}\times\mathcal{O}$（由工具实现直接定义）、奖励/评测 $\mathcal{R}:\mathcal{S}\to[0,1]$（基于最终环境状态的 execution-based 评测）、以及指令空间 $\mathcal{U}$。直觉很简单：<strong>真实工具与环境天然产生比合成环境复杂得多的状态和观测</strong>，难度就来自这里。整体闭环见下图。</p>
+
+    <figure>
+      <img src="figures/fig2-framework.png" alt="Toolathlon 评测框架总览">
+      <figcaption>图 1：Toolathlon 评测框架总览。Task Instruction → Language Agent 发出 Tool Call → 经 MCP &amp; 本地工具 Execute 作用于真实软件环境（环境带 Realistic State Initialization）→ 工具输出回灌 agent，最终做 State-based Evaluation。（原文 Figure 2）</figcaption>
+    </figure>
+
+    <h3>3.1 工具与环境：尽量真实，难复现的就本地容器化</h3>
+    <p><strong>MCP server（工具来源）。</strong>作者先定下一批想评测的真实应用，再去找对应的开源 MCP server；找不到就自己实现。由于很多开源 MCP server 有 bug 或缺少完成任务所需的工具，作者对它们做了大量修订与增强，最终得到一套高质量的 <strong>32 个 MCP server</strong>（附录 A 给了完整清单与来源，下表节选）。值得强调的是：虽然工具大多来自 MCP，但<strong>benchmark 本身并不绑定模型方必须用 MCP</strong>——只要把账号/密码/token 等凭据明确给 agent，这些任务也能用纯 GUI 或 CLI 流程完成。</p>
+
+    <table>
+      <thead><tr><th>领域</th><th>代表 MCP server（节选，共 32）</th><th>Local/Remote · 可写</th></tr></thead>
+      <tbody>
+        <tr><td>日常 / 生活</td><td>Google Calendar、Google Maps、Notion、HowToCook、YouTube、12306（铁路）</td><td>多为 Remote；Notion/Calendar 可写</td></tr>
+        <tr><td>办公 / 文件</td><td>Filesystem、Git、Excel、Word、PowerPoint、PDF Tools、Memory、Terminal</td><td>多为 Local，可写</td></tr>
+        <tr><td>教育 / 校园</td><td><strong>Canvas-LMS</strong>（本地容器，可写）、Google Forms、Scholarly、Arxiv / Arxiv-Latex</td><td>Canvas 为 Local 可写</td></tr>
+        <tr><td>商业 / 电商</td><td><strong>WooCommerce</strong>（自研，本地容器，可写）、Snowflake、Yahoo Finance、Google Sheets</td><td>WooCommerce/Snowflake/Sheets 可写</td></tr>
+        <tr><td>技术 / DevOps</td><td><strong>Kubernetes</strong>（本地容器，可写）、Github、Google Cloud（自研）、Weights &amp; Biases、Hugging Face、Playwright、Fetch</td><td>K8s/GitHub/GCloud 可写</td></tr>
+        <tr><td>邮件</td><td><strong>Emails（Poste.io）</strong>（自研，本地容器，可写）</td><td>Local，可写</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>远程 + 本地容器化环境。</strong>工具只是接口，环境才是状态所在。完全用远程真实应用（如真 Gmail）来 benchmark"会改状态的任务"几乎不可行——要为每个 benchmark 用户注册上百账号、每次评测前还得重置收件箱。以往工作要么只允许读操作、要么用合成数据结构假装环境，真实度大打折扣。Toolathlon 的做法是<strong>两者并用</strong>：能远程就远程；需要复杂可重置状态的，就本地容器跑开源软件（poste.io / Canvas / K8s / WooCommerce），从而高效铺设几十个账号与复杂初始状态。相比 SWE-Bench 这类单一沙箱，它覆盖的软件种类更广。</p>
+
+    <p><strong>agent 框架（4 项关键增强）。</strong>框架基于 <strong>OpenAI Agents SDK v0.0.15</strong>，每个 turn 模型可选地显式 reason 并发起 tool call。为在嘈杂真实环境里稳健评测，作者做了四处增强（附录 B）：</p>
+    <ol>
+      <li><strong>Tool Error Handling：</strong>SDK 默认在调到不存在的工具或工具报错时直接 break 退出 loop；作者改成<strong>把错误作为 observation 喂回 agent 而不中断</strong>，让 agent 像在真实噪声环境里一样自己处理、继续往下走。</li>
+      <li><strong>Overlong Tool Response Handling：</strong>超长工具输出（如巨大 HTML、整库 dump）极易撑爆 context。框架把输出<strong>截断到 100K 字符</strong>，同时把原始长输出缓存起来，提供一个分页（默认 page size 10K 字符）检索/导航工具，避免信息丢失。该工具对所有任务可用。</li>
+      <li><strong>Context history management：</strong>提供工具让模型查看当前累计 token / turn 数，并主动丢弃历史 turn 来缓解 context 压力；被丢弃的历史仍可检索。当 context 超限且模型未干预时，框架自动只保留最近 10 turn 的预览 + 初始用户输入，作为兜底保证 agent 持续运行。</li>
+      <li><strong>额外本地工具：</strong>除 MCP server 外，内置 (a) Python（执行任意 Python）、(b) Web Search（Google 驱动）、(c) <code>Done</code>（显式声明任务完成）、(d) <code>Sleep</code>（等待）。统计上共 7 个本地 toolkit、16 个本地工具。</li>
+    </ol>
+
+    <h3>3.2 真实初始状态（67% 任务带初始化）</h3>
+    <p>真实世界里任务很少从空状态开始。更关键的是：<strong>任务难度不只由指令决定，也由底层环境状态决定</strong>——同样一句话，在"只有一个相关文件的文件夹"里做，远比在"十个有用/无关文件混在一起的文件夹"里做容易（图 2 例 #2 即是后者）。因此带初始状态的任务（72/108，67%）每个都配一个<strong>状态初始化脚本</strong>在运行时铺设状态，和/或一个预置文件的初始 workspace 目录。下图两个真实例子直观展示了这种"非空、真实、带干扰"的初始环境。</p>
+
+    <figure>
+      <img src="figures/fig1-main-example.png" alt="Toolathlon 两个任务示例及其真实初始环境">
+      <figcaption>图 2：两个任务示例与其真实初始环境状态。<strong>例 #1</strong>（上）：查邮箱里 homework2 的提交、下载附件里的 Python 文件到本地、在 terminal 里逐个执行查错，正确给 10 分否则 0 分，并写回 Canvas——涉及 Email(Poste.io)/Filesystem/PDF/Terminal/Canvas-LMS。<strong>例 #2</strong>（下）：在 Snowflake 数据库里找出超出首次响应时限的工单，按 PDF 操作手册里的模板给相应负责人发提醒邮件、给所有涉及用户发致歉邮件——涉及 Snowflake/Filesystem/PDF/Email。注意环境里混入了大量无关 distractor。（原文 Figure 1）</figcaption>
+    </figure>
+
+    <h3>3.3 可靠的 execution-based 评测</h3>
+    <p>两条评测原则：<strong>(1) 必须真执行</strong>——传统 function-calling benchmark 在固定 context 下测单步 tool-call 正确率、不真正执行，作者认为这对真实场景不可靠；<strong>(2) 用确定性规则核验最终环境状态</strong>，而非 LLM judge——后者不够可复现。落地方式是：<strong>每个任务配一个唯一、手写的评测脚本</strong>，要么对 ground-truth 环境的静态快照做稳健匹配，要么按 reference 执行流程动态拉取并匹配实时信息（如 NVIDIA 股东名单）。</p>
+    <p>评测时每个任务有一个配置文件，只声明该任务<strong>必要的 MCP server（&lt;10 个）和工具</strong>，而不是把全部 32 个 server 都给。但对每个选中的 server，作者<strong>不再筛选/检索子集，而是加载该 server 内全部工具</strong>（与主流 agent 框架现状一致）——这意味着模型仍会看到不少无关工具，需要自己识别相关工具、忽略干扰项（统计：每任务平均 69.9、最少 28、最多 128 个工具可见）。</p>
+
+    <div class="callout note">
+      <span class="label">实现要点（容易被忽略但影响复现）</span>
+      <ul style="margin:6px 0">
+        <li><strong>容器隔离 + 并行：</strong>每个任务在独立容器里跑，严格 workspace 隔离防止互相干扰；标准 Ubuntu 24.04、16 CPU / 64 GB 机器上，10 并行进程约 70 分钟评完 Claude-4.5-Sonnet 全部 108 任务——对模型开发者拿"真实场景即时反馈"很友好。</li>
+        <li><strong>动态 ground-truth：</strong>涉及实时信息的任务（股东、实时车次）走 reference workflow 动态取值再匹配，避免快照过期。</li>
+        <li><strong>极简 system prompt：</strong>除工具 schema 外，system prompt 很短，只交代 workspace 目录、相对路径如何拼接、以及"自己独立完成、不要找用户确认"；并明确告知 <code>claim done</code> 会立即终止任务、不再有机会补做（用于约束"做完再退出"，但实测仍有模型提前 claim done）。</li>
+        <li><strong>任务制作成本：</strong>实现单个任务平均要一名 CS 研究生 4–6 小时；定稿阶段还有 5–6 名资深作者交叉审查，每任务每轮约 5 小时，前后历时数周。</li>
+      </ul>
+    </div>
+
+    <h3>3.4 模糊的真实指令（fuzzy prompt）</h3>
+    <p>任务采集遵循三原则：真实用户需求、多应用编排、领域多样（两阶段采集：先在 50+ 应用上自由采，再针对"重要但代表性不足"的应用补采）。最有特色的是<strong>指令故意写得模糊</strong>——模仿真实用户那种简短、含糊的表达，但真实意图可以从环境状态里确定性地推断出来。例如"按 workspace 里的简历更新 Notion 的 HR Record 子页面……如果申请的岗位当前不招就发邮件"——指令既没说按什么格式填（要 agent 自己去看 Notion 里已有的样例条目），也没说去哪查岗位是否在招（要 agent 自己去 Notion 找）。这逼着 agent 去<strong>探索环境、推断意图、自主规划、并处理 tool-call 报错等意外</strong>。与之相对，MCPMark 等把详细 step-by-step 计划直接写进 prompt，削弱了 agent 的规划角色。</p>
+
+    <figure>
+      <img src="figures/fig3-fuzzy-prompt.png" alt="Toolathlon 的模糊指令 vs MCPMark 的详细指令对比">
+      <figcaption>图 3：指令风格对比。<strong>左：Toolathlon</strong> 指令简短模糊，需 agent 从环境（已有样例、岗位 head count、简历）里推断格式与该做什么；<strong>右：MCPMark</strong> 给出清晰的逐步操作指引。（原文 Figure 3）</figcaption>
+    </figure>
+
+    <figure>
+      <img src="figures/fig4-task-dist.png" alt="Toolathlon 任务主题分布">
+      <figcaption>图 4：108 个任务的主题分布。Tech 17.6%、Campus 16.7%、Business 16.7%、Daily 15.7%、Research 13.9%、E-commerce 10.1%、Finance 9.3%；每个大类下又细分为 Course / Stock Trading / DevOps Sweep / Travel Helper / Data Auditing 等具体场景。（原文 Figure 4）</figcaption>
+    </figure>
+  </section>
+
+  <!-- ============================ ④ 实验评估 ============================ -->
+  <section id="evaluation">
+    <h2><span class="n">④</span>实验评估 Evaluation</h2>
+
+    <h3>评测设置</h3>
+    <ul>
+      <li><strong>参评模型：</strong>商业模型 GPT-5 / GPT-5-mini / GPT-5-high、o3 / o4-mini、Claude-4-Sonnet、Claude-4.5-Sonnet / -Haiku、Gemini-2.5-Pro / -Flash、Grok-4 / -Fast、Grok-Code-Fast-1；开源/开放权重模型 Qwen-3-Coder、DeepSeek-V3.2-Exp、Kimi-K2-0905、GLM-4.6。</li>
+      <li><strong>预算与配置：</strong>最大 turn 数统一设为 100；主设定下只给任务"有用的"MCP server 与常用工具（但每个 server 内的多个相关工具全给，所以仍有不少无关工具混入）。</li>
+      <li><strong>指标（均为越高越好）：</strong>每个模型跑 3 次，报告平均 <strong>Pass@1</strong>（成功率）及其标准差；<strong>Pass@3</strong>（3 次里至少 1 次成功的任务比例，衡量能力覆盖上限）；<strong>Pass^3</strong>（3 次全对的任务比例，衡量可靠一致性，沿用 τ-bench 的 pass^k）；以及平均 turn 数。成功与否由每任务的确定性评测脚本判定。</li>
+    </ul>
+
+    <h3>主要结果</h3>
+    <p>下表为原文 Table 3 主结果（7 个主题分列 Pass@1 + 总 Pass@1±std / Pass@3 / Pass^3 / 平均 turn；按总 Pass@1 排序，加粗为各列最高）。</p>
+    <table>
+      <thead>
+        <tr><th>模型</th><th class="num">Research</th><th class="num">Campus</th><th class="num">Finance</th><th class="num">Tech</th><th class="num">Business</th><th class="num">Daily</th><th class="num">E-com</th><th class="num">Pass@1</th><th class="num">Pass@3</th><th class="num">Pass^3</th><th class="num"># Turns</th></tr>
+      </thead>
+      <tbody>
+        <tr><td colspan="12" style="color:var(--muted);font-size:12.5px;background:var(--panel2)">Proprietary 商业模型</td></tr>
+        <tr><td><strong>Claude-4.5-Sonnet</strong></td><td class="num">31.1</td><td class="num"><strong>42.6</strong></td><td class="num"><strong>33.3</strong></td><td class="num">42.1</td><td class="num">42.6</td><td class="num">35.3</td><td class="num"><strong>39.4</strong></td><td class="num"><strong>38.6±2.7</strong></td><td class="num"><strong>51.9</strong></td><td class="num"><strong>20.4</strong></td><td class="num">20.2</td></tr>
+        <tr><td>GPT-5</td><td class="num">20.0</td><td class="num">33.3</td><td class="num">13.3</td><td class="num">40.4</td><td class="num">38.9</td><td class="num"><strong>39.2</strong></td><td class="num">12.1</td><td class="num">30.6±1.5</td><td class="num">43.5</td><td class="num">16.7</td><td class="num">18.7</td></tr>
+        <tr><td>Claude-4-Sonnet</td><td class="num"><strong>33.3</strong></td><td class="num">33.3</td><td class="num">30.0</td><td class="num">26.3</td><td class="num">25.9</td><td class="num">33.3</td><td class="num">27.3</td><td class="num">29.9±1.6</td><td class="num">41.7</td><td class="num">17.6</td><td class="num">27.3</td></tr>
+        <tr><td>GPT-5-high</td><td class="num">15.6</td><td class="num">31.5</td><td class="num">23.3</td><td class="num">29.8</td><td class="num"><strong>44.4</strong></td><td class="num">33.3</td><td class="num">15.2</td><td class="num">29.0±3.1</td><td class="num">42.6</td><td class="num">16.7</td><td class="num">19.0</td></tr>
+        <tr><td>Grok-4</td><td class="num">24.4</td><td class="num">22.2</td><td class="num">13.3</td><td class="num"><strong>43.9</strong></td><td class="num">24.1</td><td class="num">27.5</td><td class="num">30.3</td><td class="num">27.5±1.7</td><td class="num">38.9</td><td class="num">16.7</td><td class="num">20.3</td></tr>
+        <tr><td>Claude-4.5-Haiku</td><td class="num">11.1</td><td class="num">22.2</td><td class="num">26.7</td><td class="num">29.8</td><td class="num">27.8</td><td class="num">37.3</td><td class="num">27.3</td><td class="num">26.2±1.9</td><td class="num">39.8</td><td class="num">13.0</td><td class="num">21.9</td></tr>
+        <tr><td>Grok-Code-Fast-1</td><td class="num">20.0</td><td class="num">14.8</td><td class="num">16.7</td><td class="num">19.3</td><td class="num">14.8</td><td class="num">21.6</td><td class="num">24.2</td><td class="num">18.5±2.0</td><td class="num">30.6</td><td class="num">9.3</td><td class="num">20.2</td></tr>
+        <tr><td>Grok-4-Fast</td><td class="num">15.6</td><td class="num">22.2</td><td class="num">16.7</td><td class="num">24.6</td><td class="num">14.8</td><td class="num">13.7</td><td class="num">21.2</td><td class="num">18.5±2.0</td><td class="num">32.4</td><td class="num">5.6</td><td class="num">15.9</td></tr>
+        <tr><td>o3</td><td class="num">15.6</td><td class="num">14.8</td><td class="num">10.0</td><td class="num">22.8</td><td class="num">13.0</td><td class="num">29.4</td><td class="num">6.1</td><td class="num">17.0±0.9</td><td class="num">25.0</td><td class="num">9.3</td><td class="num">19.4</td></tr>
+        <tr><td>o4-mini</td><td class="num">13.3</td><td class="num">11.1</td><td class="num">20.0</td><td class="num">17.5</td><td class="num">11.1</td><td class="num">21.6</td><td class="num">9.1</td><td class="num">14.8±0.8</td><td class="num">26.9</td><td class="num">3.7</td><td class="num">16.6</td></tr>
+        <tr><td>GPT-5-mini</td><td class="num">11.1</td><td class="num">16.7</td><td class="num">20.0</td><td class="num">15.8</td><td class="num">9.3</td><td class="num">21.6</td><td class="num">6.1</td><td class="num">14.5±1.2</td><td class="num">23.1</td><td class="num">5.6</td><td class="num">19.7</td></tr>
+        <tr><td>Gemini-2.5-Pro</td><td class="num">4.4</td><td class="num">3.7</td><td class="num">3.3</td><td class="num">15.8</td><td class="num">5.6</td><td class="num">27.5</td><td class="num">9.1</td><td class="num">10.5±1.9</td><td class="num">21.3</td><td class="num">2.8</td><td class="num"><strong>26.5</strong></td></tr>
+        <tr><td>Gemini-2.5-Flash</td><td class="num">4.4</td><td class="num">3.7</td><td class="num">6.7</td><td class="num">3.5</td><td class="num">1.9</td><td class="num">3.9</td><td class="num">3.0</td><td class="num">3.7±1.5</td><td class="num">8.3</td><td class="num">0.0</td><td class="num">8.3</td></tr>
+        <tr><td colspan="12" style="color:var(--muted);font-size:12.5px;background:var(--panel2)">Open-Source 开放权重模型</td></tr>
+        <tr><td><strong>DeepSeek-V3.2-Exp</strong></td><td class="num">11.1</td><td class="num">16.7</td><td class="num">23.3</td><td class="num">19.3</td><td class="num">14.8</td><td class="num">29.4</td><td class="num">30.3</td><td class="num"><strong>20.1±1.2</strong></td><td class="num">27.8</td><td class="num">12.0</td><td class="num">26.0</td></tr>
+        <tr><td>GLM-4.6</td><td class="num">22.2</td><td class="num">18.5</td><td class="num">20.0</td><td class="num">17.5</td><td class="num">16.7</td><td class="num">11.8</td><td class="num">30.3</td><td class="num">18.8±2.2</td><td class="num">29.6</td><td class="num">9.3</td><td class="num">27.9</td></tr>
+        <tr><td>Qwen-3-Coder</td><td class="num">4.4</td><td class="num">16.7</td><td class="num">10.0</td><td class="num">19.3</td><td class="num">14.8</td><td class="num">17.6</td><td class="num">15.2</td><td class="num">14.5±1.9</td><td class="num">21.3</td><td class="num">6.5</td><td class="num">28.5</td></tr>
+        <tr><td>Kimi-K2-0905</td><td class="num">8.9</td><td class="num">22.2</td><td class="num">16.7</td><td class="num">14.0</td><td class="num">5.6</td><td class="num">9.8</td><td class="num">15.2</td><td class="num">13.0±2.0</td><td class="num">22.2</td><td class="num">5.6</td><td class="num">26.6</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>怎么读这张表：</strong></p>
+    <ul>
+      <li><strong>整体很低，benchmark 确实难。</strong>第一名 Claude-4.5-Sonnet 也只有 38.6%；GPT-5 / Claude-4-Sonnet / Grok-4 / Claude-4.5-Haiku 组成第二梯队（26%–30%）；其余全部 ≤20%。区分度很好。</li>
+      <li><strong>开源仍明显落后。</strong>开放权重最强的 DeepSeek-V3.2-Exp 仅 20.1%，与商业头部差距清晰。</li>
+      <li><strong>"想更久"没用，"多看环境"才有用。</strong>同系拉高 reasoning effort（GPT-5 vs GPT-5-high）并无收益——说明在 agentic 任务里，<strong>探索新观测比延长内部推理更重要</strong>。Gemini-2.5 则吃亏在"理解需求 + 主动探索"不足，容易漏要求或中途放弃。</li>
+      <li><strong>Pass@3 远高于 Pass^3 → 一致性是大问题。</strong>例如 Claude-4.5-Sonnet 的 Pass@3 达 51.9% 但 Pass^3 仅 20.4%：很多任务"能做对但不稳定"。要真实可用，<strong>高成功率 + 强一致性</strong>缺一不可。</li>
+      <li><strong>领域擅长各异：</strong>Claude-4.5-Sonnet 几乎全能（Campus/E-com 尤强）；GPT-5 在 Daily 最强；Grok-4 在 Tech 突出。</li>
+    </ul>
+
+    <h3>分析（论文最有信息量的部分）</h3>
+    <p><strong>(1) tool-call 错误。</strong>作者区分两类错误：<strong>幻觉出不存在的工具名</strong>（wrong tool name）与<strong>工具执行报错</strong>（tool call error）。结论有点反直觉：执行报错与总成功率<strong>没有显著相关</strong>——因为错误信息反而能帮模型理解工具结构、在后续 turn 里修正；真正更影响最终分数的是<strong>调错工具名</strong>，而头部模型很少犯这种错（附录 C 的 Figure 9 进一步对比"含错误 vs 无错误 trajectory"的成功率差异，多数模型确实因 tool-call 错误而受损，GPT-5 上负面影响最明显）。</p>
+
+    <figure>
+      <img src="figures/fig6-difficulty.png" alt="按平均 turn 数分组的难度-成功率">
+      <figcaption>图 5：按"任务平均 turn 数"把任务三等分为 Easy[4.2,15.6] / Medium[15.7,23.8] / Hard[24.1,52.7]，展示 5 个代表模型在各组的成功率与平均 turn。可见 turn 越多成功率总体越低、Claude-4.5-Sonnet 全组领先；但 Medium 与 Hard 难度差异不明显，甚至 Claude-4.5-Sonnet / GPT-5 在 Hard 反而高于 Medium。（原文 Figure 6）</figcaption>
+    </figure>
+
+    <p><strong>(2) long-context 挑战。</strong>把任务按"所有模型上的平均执行 turn"三等分为 Easy/Medium/Hard。结果显示 turn 越多成功率总体越低；但有意思的是 <strong>Medium 与 Hard 难度差异不明显，部分头部模型在 Hard 上甚至比 Medium 更好</strong>——这说明 benchmark 的难度<strong>不完全来自标准的多步长程执行</strong>，而很可能来自<strong>模型在观测探索不充分时就过早结束任务</strong>导致失败。</p>
+
+    <p><strong>(3) 超长工具输出。</strong>各模型遇到 overlong tool output（如抓超长 HTML、直接列整库数据）的 trajectory 占比约 15%–35%；大多数模型在遇到超长输出时成功率会下降，只有少数能基本维持。讽刺的是，这类任务逻辑上往往很直白（价格比较、数据抽取），但模型常常<strong>卡在处理这堆超长输出上</strong>。</p>
+
+    <p><strong>(4) 成本与 token。</strong>大多数模型每任务成本 &lt; $1；Claude-4-Sonnet、Grok-4 偏贵；Claude-4.5-Sonnet 成绩第一但成本仅排第三。Grok-4-Fast、Grok-Code-Fast-1、DeepSeek-V3.2-Exp 成本很低，是预算受限时的强力替代。输出 token 上多数模型集中在 5K–10K；o4-mini、GPT-5(-high) 等推理型产出更多 token，而 Claude 系与 Grok-4 用更少 token 拿到更好结果——再次印证"靠观测而非堆内部推理"。</p>
+
+    <figure>
+      <img src="figures/fig8-cost.png" alt="成功率与平均成本的关系">
+      <figcaption>图 6：平均任务成功率 vs 平均成本（每任务美元，对数轴）。Claude-4.5-Sonnet 性能最高但成本仅第三；Grok-4-Fast / Grok-Code-Fast-1 / DeepSeek-V3.2-Exp 等以很低成本提供有竞争力的性价比。（原文 Figure 8 左）</figcaption>
+    </figure>
+
+    <p><strong>(5) 典型失败模式（附录 C/E 案例）：</strong></p>
+    <ul>
+      <li><strong>用不好给定的工具/资源：</strong>如 dataset-license-issue 任务里，已提示用 <code>.hf_token</code> 去更新 HF 数据集页（因为 HF MCP 不支持更新），DeepSeek-V3.1 却反复尝试在 server 上访问或改用 web search，而不去写 terminal/Python 直接用 token 操作——即使已查到正确许可证（ODC-BY）仍失败。</li>
+      <li><strong>真实复杂状态里"迷路"：</strong>task-tracker 任务要检查 10+ 开发者的所有分支并更新 Notion，模型没遍历完所有文件夹/分支，Notion 只填了 91 行而 ground-truth 是 116 行，漏项导致失败。</li>
+      <li><strong>长程任务"偷懒"：</strong>music-analysis 要逐年（1940s）分析，Grok-Code-Fast-1 干完 1940 一年就在第 66 turn 声称完成、把 1941–1949 甩回给用户，触发提前 <code>claim done</code> 而连第一项完整性检查都没过。</li>
+    </ul>
+  </section>
+
+  <!-- ============================ ⑤ 洞见 ============================ -->
+  <section id="insight">
+    <h2><span class="n">⑤</span>洞见 Insights</h2>
+    <div class="callout insight">
+      <span class="label">Insight</span>
+      <ul style="margin:6px 0">
+        <li><strong>真实环境的难，主要不在"步数多"，而在"愿不愿意把活干完、能不能充分探索观测"。</strong>Medium/Hard 难度趋平、头部模型甚至在 Hard 更好、以及大量"过早 claim done / 漏遍历 / 把活甩回用户"的失败案例，共同指向一个反直觉结论：当前 agent 的瓶颈更像是<strong>"耐心/彻底性/主动探索"</strong>，而不是单纯的长程推理深度。这也解释了为什么"调高 reasoning effort 没用，多看环境才有用"。</li>
+        <li><strong>评测真实 agent，应当 execution-based + 确定性脚本，而不是 LLM judge。</strong>本文用"核验最终环境状态"的方式给出可复现、可信赖的信号；这对"benchmark 是否值得被优化"至关重要——一个能被 LLM judge 糊弄过去的指标，会把研究带偏。</li>
+        <li><strong>tool-call 报错不可怕，调错工具名才致命。</strong>错误信息可作为 observation 帮模型自我纠偏；这提示框架设计上"把错误回灌而非中断 loop"是对的，也提示模型训练应重点压低"工具名幻觉"。</li>
+        <li><strong>方法论可迁移：用本地容器化开源软件复刻真实环境状态。</strong>poste.io/Canvas/K8s/WooCommerce 这套"以开源软件 + 容器 + 初始化脚本实现可规模化、可重置的真实状态"的做法，是任何想做真实 agent 评测/训练的人都能直接借鉴的工程范式。</li>
+      </ul>
+    </div>
+
+    <h3>局限与未来</h3>
+    <ul>
+      <li><strong>规模与统计噪声：</strong>108 个任务在保证"每个都真实可验证"的前提下已属可观，但单类别样本不大（如 Finance 9.3%），±std 也不小，跨类别细粒度结论需谨慎。</li>
+      <li><strong>构造成本高、扩展慢：</strong>单任务 4–6 小时实现 + 多轮人工审查，难以快速扩到上千任务；这也是为什么会出现 eigent-ai 用本地 PostgreSQL 化来降低部署门槛的扩展版本（503 任务）。</li>
+      <li><strong>评测脚本的覆盖边界：</strong>确定性脚本对"正确的最终状态"匹配可靠，但对"过程合理性"或"多种合法解法"的覆盖天然有限；动态 ground-truth（实时信息）也带来对外部世界稳定性的依赖。</li>
+      <li><strong>未来方向（作者立场 + 笔者判断）：</strong>推动模型在长 context、稳健 tool-call、主动探索与"做完再退出"上的改进；本文开源的 5000+ 条 trajectory 天然是分析失败模式、乃至做 SFT/RL 训练信号的好素材。</li>
+    </ul>
+
+    <h3>与相关工作的关系</h3>
+    <p>作者把 tool-agent benchmark 放在一条"从全模拟 → 真 API+合成环境 → 真工具+真实环境"的谱系上（见正文 Table 1 与 §6）：<strong>纯模拟端</strong>（τ-Bench、BFCL、ACEBench）测 function-calling 正确率但用 mock/LLM 模拟工具；<strong>中间段</strong>（AppWorld、MCPWorld、MCP-RADAR、MCPEval、MCP-AgentBench）接真 API 但多从零/合成状态起、偏单应用；<strong>较真实端</strong>（LiveMCPBench、LiveMCP-101、MCPAtlas、MCPUniverse、MCPMark、GAIA2）用上 production MCP server，但在领域多样性、初始状态真实性、指令自然度上仍有缺口。Toolathlon 的定位是把这条线推到"真工具 + 真实环境 + 跨应用长程 + 模糊指令 + 确定性可验证"五者同时满足，并在 app 数与平均 turn 数上居前。</p>
+  </section>
+
+  <footer class="foot">
+    本页为 <code>paper-reading</code> skill 生成的阅读笔记，仅作辅助，细节以
+    <a href="https://arxiv.org/abs/2510.25726" target="_blank" rel="noopener">原文</a> 为准 · 解读日期 2026-05-30
+  </footer>
+
+</article>
+</body>
+</html>

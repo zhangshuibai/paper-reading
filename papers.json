@@ -545,5 +545,28 @@
       "mcp",
       "agent"
     ]
+  },
+  {
+    "slug": "2510.25726-toolathlon",
+    "title": "The Tool Decathlon: Benchmarking Language Agents for Diverse, Realistic, and Long-Horizon Task Execution",
+    "authors": "Junlong Li, Wenshuo Zhao, Jian Zhao, Weihao Zeng, Haoze Wu, et al. (21 authors)",
+    "team": "HKUST (hkust-nlp) · All Hands AI · CMU · Duke",
+    "arxiv": "https://arxiv.org/abs/2510.25726",
+    "code": "https://github.com/hkust-nlp/Toolathlon",
+    "date": "2026-05-30",
+    "published": "ICLR 2026",
+    "tldr": "面向 language agent 的真实/多样/长程工具使用 benchmark（又名 Toolathlon）：32 个真实软件、604 个工具（多为 MCP server）、108 个可确定性脚本验证的跨应用长程任务；最强 Claude-4.5-Sonnet 仅 38.6% Pass@1，最强开源 DeepSeek-V3.2-Exp 仅 20.1%。",
+    "tags": [
+      "Agent",
+      "Benchmark",
+      "MCP",
+      "Tool-Use",
+      "Long-Horizon"
+    ],
+    "path": "papers/2510.25726-toolathlon/index.html",
+    "categories": [
+      "agent",
+      "mcp"
+    ]
   }
 ]
