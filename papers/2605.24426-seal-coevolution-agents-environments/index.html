@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SEAL：agent 与训练环境的协同演化 · 论文解读</title>
+
+<!-- 数学公式渲染（在线查看时生效；无网络时正文仍可读） -->
+<script>
+  window.MathJax = {
+    tex:{inlineMath:[['$','$'],['\\(','\\)']], displayMath:[['$$','$$'],['\\[','\\]']]},
+    svg:{fontCache:'global'}
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;
+  }
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:880px; margin:0 auto; padding:18px 22px 90px}
+
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:27px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)}
+  .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .meta-grid a:hover{text-decoration:underline}
+
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap}
+  nav.toc a:hover{color:var(--accent)}
+
+  section{margin:38px 0}
+  h2{font-size:21px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:17px; margin:24px 0 8px}
+  p{margin:12px 0}
+  ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.9em}
+  strong{color:var(--text)}
+
+  /* 开源贡献表 */
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:14px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:10px 12px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  .yes{color:var(--ok); font-weight:600}
+  .no{color:var(--muted)}
+
+  /* 图 */
+  figure{margin:24px 0; text-align:center}
+  figure img{max-width:100%; height:auto; border:1px solid var(--line); border-radius:10px; background:#fff}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+
+  /* 提示框 */
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+
+  blockquote{border-left:3px solid var(--line); margin:14px 0; padding:2px 16px; color:var(--muted)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+  .mjx-container{overflow-x:auto; overflow-y:hidden}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <!-- ============================ 抬头 / 元信息 ============================ -->
+  <header class="head">
+    <div class="chips">
+      <span class="chip">LLM</span>
+      <span class="chip">Agent</span>
+      <span class="chip">Self-Evolving</span>
+      <span class="chip">Environment</span>
+      <span class="chip">Tool-Use</span>
+      <span class="chip">RL / GRPO</span>
+    </div>
+    <h1>SEAL：让 agent 与它的训练环境协同演化</h1>
+    <p class="orig-title">SEAL: Synergistic Co-Evolution of Agents and Learning Environments</p>
+    <dl class="meta-grid">
+      <dt>作者</dt><dd>Yihao Hu, Zhihao Wen (通讯), Xiujin Liu, Pan Wang, Xin Zhang, Wei Wu</dd>
+      <dt>团队 / 机构</dt><dd>Ant Group · Westlake University · University of Michigan–Ann Arbor · University of Science and Technology of China</dd>
+      <dt>原文链接</dt><dd><a href="https://arxiv.org/abs/2605.24426" target="_blank" rel="noopener">https://arxiv.org/abs/2605.24426</a></dd>
+      <dt>发表 / 年份</dt><dd>arXiv 2026（2026-05-23 提交）</dd>
+      <dt>解读日期</dt><dd>2026-05-30</dd>
+    </dl>
+  </header>
+
+  <div class="tldr">
+    <b>TL;DR</b> — 现有 LLM agent 的 self-evolution 大多只演化 <em>policy</em> 一侧或只演化 <em>environment</em> 一侧，导致训练环境跟不上 agent 不断变化的能力边界——作者把这一结构性错配命名为 <strong>Agent-Environment Misalignment</strong>。SEAL 提出一个闭环协同演化框架：在 executable verifier 下采 on-policy trajectory，把失败的 rollout 诊断成 turn-level 的失败标签，再把这同一份诊断当作 <strong>共享信号</strong>同时驱动两侧——一边演化 training-time 的 learning interface（补上 tool affordance、约束信息、recovery 反馈），一边用 diagnosis-guided advantage reweighting 更新 policy。在 multi-turn tool-use 评测上，仅用 <strong>400 条训练样本</strong>就在三个 backbone 上拿到 <strong>+8.25 ~ +26.25</strong> 的平均分提升，并有正向 OOD transfer。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#opensource">① 开源贡献</a>
+    <a href="#motivation">② 动机与贡献</a>
+    <a href="#method">③ 方法</a>
+    <a href="#evaluation">④ 实验评估</a>
+    <a href="#insight">⑤ 洞见</a>
+  </nav>
+
+  <!-- ============================ ① 开源贡献 ============================ -->
+  <section id="opensource">
+    <h2><span class="n">①</span>开源贡献 Open-source Artifacts</h2>
+    <p>本文开源了<strong>代码与项目主页</strong>：GitHub 仓库给出训练配置、BFCL executable environment 接入、failure diagnosis 模块与数据切分脚本（Apache-2.0，解读日约 47 stars）；project page 提供论文 PDF、poster 与 BibTeX。<strong>未发布</strong>训练好的模型权重，也未单独打包发布数据集（训练/评测直接复用公开 benchmark：BFCL V3/V4 与 $\tau^2$-bench）。以下链接均于解读当日核实可访问。</p>
+    <table>
+      <thead><tr><th>类型</th><th>是否开源</th><th>内容 / 链接</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>代码 Code</td>
+          <td class="yes">✔</td>
+          <td><a href="https://github.com/yihaohu0118/SEAL" target="_blank" rel="noopener">github.com/yihaohu0118/SEAL</a><br>含训练配置（<code>exp/SEAL.yaml</code>）、BFCL 执行环境接入、diagnostic 模块、task 管理与训练/评测 split；许可证 <strong>Apache-2.0</strong>。未提供 release / checkpoint。</td>
+        </tr>
+        <tr>
+          <td>模型权重 Weights</td>
+          <td class="no">✘</td>
+          <td>未发布。三个 backbone（Qwen2.5-3B/7B-Instruct、ToolACE-2-Llama-3.1-8B）本身是公开模型，但 SEAL 训练后的 checkpoint 未在仓库或 HF 上提供。</td>
+        </tr>
+        <tr>
+          <td>数据集 Dataset</td>
+          <td class="no">✘（复用公开 benchmark）</td>
+          <td>不单独发布数据集。低资源训练集是从 <strong>BFCL V3 multi-turn</strong>（800 例）每类抽 100、共 <strong>400 例</strong>构造，切分脚本随代码给出；评测用 BFCL V4 与 $\tau^2$-bench。</td>
+        </tr>
+        <tr>
+          <td>环境 / Benchmark</td>
+          <td class="no">✘（沿用官方）</td>
+          <td>SEAL 不改动 benchmark 与 verifier；所用 <a href="https://gorilla.cs.berkeley.edu/leaderboard.html" target="_blank" rel="noopener">BFCL</a> 与 $\tau^2$-bench 均为现成公开评测，仓库提供的是接入这些环境、并在训练期叠加 SEAL interface 的代码。</td>
+        </tr>
+        <tr>
+          <td>项目主页 / Demo</td>
+          <td class="yes">✔（主页，无 demo）</td>
+          <td><a href="https://yihaohu0118.github.io/SEAL/" target="_blank" rel="noopener">yihaohu0118.github.io/SEAL/</a>：含 paper PDF、poster、GitHub 链接、BibTeX；无在线 demo、无权重/数据集下载。</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============================ ② 动机与贡献 ============================ -->
+  <section id="motivation">
+    <h2><span class="n">②</span>研究动机与贡献 Motivation &amp; Contribution</h2>
+
+    <h3>背景与问题</h3>
+    <p>LLM agent 越来越靠<strong>交互</strong>而非静态监督来变强：采 rollout trajectory、拿反馈、再通过 reflection / RL / self-generated supervision 迭代精炼自己——这就是 <em>self-evolution through interaction</em>。它把交互反馈变成可复用的监督来源，比纯离线训练更可扩展。但作者指出，现有 self-evolving agent 几乎都<strong>只演化交互闭环里的一侧</strong>，于是分裂成两条单边路线：</p>
+    <ul>
+      <li><strong>(i) Model-centric evolution</strong>：通过 rollout replay、self-reflection、reward optimization、post-training 来改 policy。问题在于它们把 agent 优化在一个<strong>基本固定</strong>的环境上，学习信号完全依赖当前 policy 自己的 rollout 分布。在 long-horizon、sparse-reward 的交互设定里，这种自指（self-referential）分布会带来 <em>policy-induced exploration bias</em>、recovery 不稳定、credit assignment 低效。</li>
+      <li><strong>(ii) Environment-centric evolution</strong>：去演化 curriculum、task 分布、synthetic instruction、交互经验。它们意识到能力不只由优化决定，也由训练中暴露的经验塑造。但若这种演化<strong>没有 grounding 在当前 agent 真实可执行的失败上</strong>（它能解什么、在哪反复失败、为什么失败），演化出的环境就只是「更难 / 更多样」，未必命中真正卡住性能的能力缺口。</li>
+    </ul>
+    <p>两条路线表面不同，却暴露<strong>同一个结构性 bug</strong>：训练环境跟不上 agent 不断移动的能力边界，于是给出的信号要么太静态、要么瞄不准、要么信息量不足。作者把这种错配命名为 <strong>Agent-Environment Misalignment</strong>。需要强调的是，这里的 "environment" 特指 <strong>training-time learning substrate</strong>（任务暴露、observation interface、action 约束、recovery 反馈），<em>不是</em>去动评测 benchmark、tool 语义或 executable verifier。</p>
+
+    <div class="callout note">
+      <span class="label">一个具体例子</span>
+      当一次 tool call 因为「该填 airport code 却填了 city name」而失败时，固定环境往往只回一句 generic execution error。这只告诉 agent「这条 trajectory 失败了」，却说不清失败到底来自<strong>漏了一步前置查询</strong>、<strong>用错了 argument 类型</strong>、还是<strong>错误后没能 recover</strong>。结果 policy 只拿到很弱的 diagnostic 监督，而下一批 trajectory 又在同样贫乏的条件下被采出来——错配自我延续。
+    </div>
+
+    <figure>
+      <img src="figures/fig1_paradigm.png" alt="三种 self-evolution 范式对比">
+      <figcaption>原文 Figure 1：三种 LLM agent self-evolution 范式的概念对比。左：Model-centric（自指反馈、bias accumulation）；中：Environment-centric（与 learner 弱耦合、无 failure diagnosis）；右：SEAL 用 verifier-grounded failure diagnosis 作为共享信号闭环，做 failure-grounded adaptation + diagnosis-guided optimization。</figcaption>
+    </figure>
+
+    <h3>本文的切入点</h3>
+    <p>作者的关键观察是：失败的 rollout 本身就是<strong>关于 agent 当前能力缺口的结构化证据</strong>，只要它来自 executable 的交互轨迹，就可以被<strong>确定性地</strong>诊断出「哪一步、什么类型的失败」。于是 SEAL 用 <strong>verifier-grounded failure diagnosis</strong> 作为<strong>一份被两侧共享的信号</strong>：同一份诊断既用来演化 training-time interface（补 schema cue、约束、recovery 反馈），又用来按「诊断效用」给 policy-gradient 做 reweight。这带来一种 <em>capability-aware</em> 的环境适配——不靠笼统的「调难度 / 扩数据」，而是<strong>对着当前 policy 反复犯的错</strong>去调整训练接口，从而采出更有信息量的 rollout，同时<strong>保持 benchmark 协议完全不变</strong>。</p>
+
+    <h3>核心贡献</h3>
+    <ol>
+      <li><strong>提出并命名 Agent-Environment Misalignment</strong>：把「policy 能力边界在动、而 learning environment 静止或与 agent 暴露出的失败弱耦合」这一普遍但少被点名的结构性问题显式化，并指出 model-centric 与 environment-centric 两条单边路线其实共享同一个闭环瓶颈。</li>
+      <li><strong>提出 SEAL 闭环协同演化框架</strong>：用 verifier-grounded failure diagnosis 作为<strong>共享信号</strong>，同时 (a) 演化 training-time learning interface、(b) 通过 diagnosis-guided advantage reweighting 引导 policy 优化；全程不改 tool 语义、task label、reward 与 evaluation verifier。</li>
+      <li><strong>在低资源 multi-turn tool-use 上验证有效</strong>：仅 <strong>400 条</strong>训练样本，在 Qwen2.5-3B/7B-Instruct 与 ToolACE-2-Llama-3.1-8B 三个 backbone 上较各自原始 checkpoint 提升 <strong>+8.25 / +26.25 / +14.75</strong> 平均分（较受控的 Vanilla RL 也多 +4.75 / +9.50 / +8.25），并在 BFCL V4、$\tau^2$-bench 上展现正向 OOD transfer。</li>
+    </ol>
+  </section>
+
+  <!-- ============================ ③ 方法 ============================ -->
+  <section id="method">
+    <h2><span class="n">③</span>方法 Method</h2>
+    <p><strong>核心 idea</strong>：不把 environment 当成只吐 sparse 标量 reward 的固定 executor，而是在<strong>训练期</strong>额外开一个 <em>verifier-grounded diagnostic interface</em>，把失败交互转成「关于 agent 当前能力缺口」的结构化证据——同时保持 tool 语义、task label、reward 与 evaluation verifier 不变。整个流程是一个闭环：agent 在带 interface 的环境里采 multi-turn trajectory → 诊断成 verifier-grounded 的失败类型 → 这份诊断<strong>同时</strong>驱动 environment 侧的 interface evolution 与 model 侧的 policy 优化（见下图）。</p>
+
+    <figure>
+      <img src="figures/fig2_loop.png" alt="SEAL 训练期协同演化闭环">
+      <figcaption>原文 Figure 2：SEAL training-time co-evolution loop。Tool-use agent 与 executable tool environment 交互产生 multi-turn trajectory → Verifier-Grounded Failure Diagnosis（Invalid Tool Call / Missing Tool Call / State Mismatch / Response Mismatch / Correct Abstention …）→ 左路 <strong>Environment Evolution</strong>（识别隐含信息、改 training interface、给出 adapted observation）；右路 <strong>Model Evolution</strong>（聚合 failure profile、算 trajectory weight、调 GRPO advantage）。tool 语义与 evaluation 保持固定。</figcaption>
+    </figure>
+
+    <h3>3.1 问题形式化</h3>
+    <p>把 interactive tool use 建成一个部分可观测决策过程
+    $$\mathcal{M}=\langle \mathcal{S},\mathcal{A},\mathcal{O},\mathcal{T},O_{\mathcal{E}},H,\mathcal{S}_{\mathrm{goal}}\rangle,$$
+    其中 $\mathcal{S}$ 是隐状态空间、$\mathcal{A}$ 是 action 空间（含自然语言回复与对 tool set $\mathcal{F}$ 的可执行 tool call）、$\mathcal{O}$ 是 observation 空间（含对话上下文、tool 输出、execution error）、$\mathcal{T}$ 是转移、$O_{\mathcal{E}}$ 是观测函数、$H$ 是 horizon、$\mathcal{S}_{\mathrm{goal}}$ 是目标状态。给定指令 $q\sim\mathcal{D}$，policy $\pi_\theta$ 与 executable environment $\mathcal{E}$ 交互，诱导出一条 rollout
+    $$\tau=\{(u_i,a_i,o_i)\}_{i=1}^{T}\sim P_{\mathcal{E}}(\cdot\mid q,\pi_\theta),\quad T\le H,$$
+    $u_i$ 是对话上下文、$a_i$ 是模型 action、$o_i$ 是环境 observation。executable verifier $\mathcal{V}$ 给出<strong>终局二值 reward</strong> $r(\tau)=\mathcal{V}(\tau,q,\mathcal{E})\in\{0,1\}$，标准 RL 目标即最大化期望成功 $J(\pi_\theta)=\mathbb{E}_{q,\tau}[r(\tau)]$。</p>
+    <p>问题在于：这个标量 reward 只说「成没成」，不说「为什么失败」。SEAL 因此把训练期反馈<strong>增广</strong>成一对 $\big(r(\tau),\,Z(\tau)\big)$——$Z(\tau)$ 是从 executable 交互轨迹里抽出的<strong>结构化失败诊断</strong>。关键是：verifier reward、tool 语义、evaluation 协议<strong>一律不动</strong>。</p>
+
+    <h3>3.2 Verifier-Grounded Failure Diagnosis（失败诊断）</h3>
+    <p>对每条 rollout $\tau$，SEAL 产出 <strong>turn-level</strong> 的诊断标签 $Z(\tau)=\{z_1,\dots,z_T\}$，每个 $z_i\in\mathcal{Z}$ 标出第 $i$ 轮的主导结果 / 失败模式。诊断函数写成
+    $$z_i=\Psi(a_i,\xi_i,s_{i-1},s_i,\mathcal{F}),$$
+    其中 $\xi_i$ 是第 $i$ 轮可拿到的 <em>executable evidence</em>（parser 检查、tool-schema 校验、execution error、可观测的状态转移、verifier 比对），$s_{i-1},s_i$ 是动作前后的状态（如可得）。注意 $\Psi$ 是一个<strong>确定性、基于规则</strong>的分类器（不是 free-form 的模型 critique），而且<strong>优先归因到直接可执行的失败</strong>，而非下游的 verifier-level 失败。</p>
+    <p>当同一轮检测到多种失败信号时，按一个<strong>固定优先级</strong>取主导标签（优先级表如下）。这样可以避免「明明早先有具体的 tool/argument 错误，却把整条 trajectory 归成笼统的 response 错」：</p>
+    <table>
+      <thead><tr><th>优先级</th><th>标签 Label</th><th>判据 Rationale</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td><code>invalid_tool_call</code></td><td>action 无法解析，或调用了不存在的 tool。</td></tr>
+        <tr><td>2</td><td><code>argument_mismatch</code></td><td>tool 合法，但必填字段 / 类型 / enum 值 / argument 结构非法。</td></tr>
+        <tr><td>3</td><td><code>state_mismatch</code></td><td>action 执行了，但没产生预期的可观测状态转移。</td></tr>
+        <tr><td>4</td><td><code>recovery_failure</code></td><td>拿到了 executable error 反馈，但后续轮次仍未能 recover。</td></tr>
+        <tr><td>5</td><td><code>missing_tool_call</code></td><td>该用 tool 却跳过 / 过早作答，导致失败。</td></tr>
+        <tr><td>6</td><td><code>response_mismatch</code></td><td>tool 交互可接受，但最终回答没过 verifier。</td></tr>
+      </tbody>
+    </table>
+    <p>诊断<strong>不改 reward</strong>：失败 trajectory 在原 verifier 下仍是 0 分，标签只是为「interface 演化」和「policy 优化」额外加上训练期结构。</p>
+
+    <h3>3.3 Learning-Interface Evolution（环境侧：演化训练接口）</h3>
+    <p>SEAL 只演化 <strong>training-time learning interface</strong>，不碰 benchmark verifier、tool signature、tool 输出或 task label。记原始 observation 为 $o_i$，SEAL 构造增广后的训练期 observation
+    $$\tilde{o}_i=\Omega_t\!\left(o_i,\mathcal{F},H_t,C_t\right),$$
+    其中 $H_t$ 是从过往 rollout 累积的 diagnostic context，$C_t$ 是当前 policy 的<strong>聚合失败画像</strong>（aggregate failure profile，由近期诊断算出）。变换 $\Omega_t$ <em>只改变已有环境信息「怎样被暴露」</em>，由三个轻量组件相加构成：
+    $$\Omega_t(o_i,\mathcal{F},H_t,C_t)=o_i\;\oplus\;\phi_{\mathrm{schema}}(\mathcal{F})\;\oplus\;\phi_{\mathrm{err}}(o_i,H_t)\;\oplus\;\phi_{\mathrm{cap}}(C_t).$$</p>
+    <ul>
+      <li>$\phi_{\mathrm{schema}}$ —— 暴露 <strong>schema 隐含的 tool affordance</strong>：必填 argument、enum 约束、argument 类型、合法的 tool-call 格式。（实现里对应 <code>observation_lite</code>：给参数加 <code>[required]</code> 标注、列出 <code>Allowed values</code>，并附一句「marked [required] 的参数必须如实提供，不要发明 schema 之外的 tool」。）</li>
+      <li>$\phi_{\mathrm{err}}$ —— 把 execution error 转成<strong>面向 recovery 的反馈</strong>，但<strong>不泄露正确答案</strong>。（对应 <code>tool_feedback_evolution</code>：只对失败交互加 hint，例如「缺了必填 argument，请带上这些 key 重发」「该 tool 不接受这个 argument，请按 schema 去掉」「argument 类型不对，请核对 string/int/list」；这些只点明<strong>错误类别与被违反的约束</strong>，不给下一步正确 call、不给实例级参数值、不给 ground-truth 轨迹。）</li>
+      <li>$\phi_{\mathrm{cap}}$ —— 从当前 failure profile 里<strong>挑能力相关的 cue</strong>，让反复出现的错拿到针对性反馈。（对应 <code>diagnostic_evolution</code>：读近期失败统计，往 system prompt 注入<strong>能力级</strong>行为准则，如 [Cautious-call] / [Active-respond] / [State-aware] / [Scope] / [Format]——是「该不该调 tool、调之前先核对状态」这类通用准则，而非 per-instance 提示。）</li>
+    </ul>
+    <p>关键设计：<strong>interface 更新按 failure type 选择，而不是按 benchmark instance 选择</strong>。例如 <code>argument_mismatch</code> 激活 schema/约束 cue，<code>missing_tool_call</code> 激活 tool-affordance cue，<code>recovery_failure</code> 激活结构化 error 反馈。这些 cue 只教「怎么修这一<strong>类</strong>错」，不暴露 reference tool 序列、隐藏参数或答案。<strong>评测时 interface 整个被移除</strong>。</p>
+
+    <h3>3.4 Diagnosis-Guided Advantage Reweighting（模型侧：诊断引导的优势加权）</h3>
+    <p>sparse verifier reward 只说一条 trajectory「成没成」，不说它对 policy improvement「有多大用」。在 multi-turn tool use 里，两条同样拿 0 分的失败 trajectory 学习价值可能差很多：「invalid argument / missed tool call」通常比「只在最终回答才暴露的失败」给出更清晰的修正信号。SEAL 因此用诊断去估每条 trajectory 的 <em>learning utility</em> 并据此分配优化压力。</p>
+    <p>先把 turn-level 标签汇成<strong>经验诊断分布</strong>
+    $$p_j(z)=\frac{1}{T_j}\sum_{i=1}^{T_j}\mathbf{1}[z_i=z],\quad z\in\mathcal{Z},$$
+    捕捉该 trajectory 的主导失败模式。再定义诊断效用函数 $\rho:\mathcal{Z}\to\mathbb{R}_{+}$，$\rho(z)$ 衡量诊断类型 $z$ 有多<strong>可操作、可归因</strong>：有具体 executable 证据、修复方向明确的失败拿更大效用；更含糊的（如 <code>response_mismatch</code>）拿更小效用。$\rho(z)$ 在所有 backbone 与训练 run 中<strong>固定不变</strong>，附录给出的取值如下表：</p>
+    <table>
+      <thead><tr><th>诊断标签</th><th>$\rho(z)$</th><th>理由</th></tr></thead>
+      <tbody>
+        <tr><td><code>spurious_tool_call</code></td><td>2.0</td><td>无效/多余的 tool 调用最易直接归因。</td></tr>
+        <tr><td><code>correct_abstention</code></td><td>1.8</td><td>奖励「该不调 tool 时正确弃权」。</td></tr>
+        <tr><td><code>empty_turn_model_response</code></td><td>1.5</td><td>捕捉漏调 tool / 过早不作为。</td></tr>
+        <tr><td><code>state_mismatch</code></td><td>1.0</td><td>未达到预期环境状态。</td></tr>
+        <tr><td><code>response_mismatch</code></td><td>0.9</td><td>最终回答错，但归因不够局部化。</td></tr>
+        <tr><td><code>instance_mismatch</code></td><td>0.6</td><td>实例级错误有用，但更 noisy、更不局部。</td></tr>
+        <tr><td><code>pass</code></td><td>1.0</td><td>成功 trajectory 保持基线更新尺度。</td></tr>
+      </tbody>
+    </table>
+    <p>然后算<strong>trajectory 级诊断权重</strong>并裁剪：
+    $$w_j=\operatorname{clip}\!\Big(\textstyle\sum_{z\in\mathcal{Z}}p_j(z)\rho(z),\;w_{\min},\;w_{\max}\Big),\qquad [w_{\min},w_{\max}]=[0.5,\,2.0],$$
+    裁剪是为了防止稀有或 noisy 的诊断模式诱发过大的 policy 更新。给定原始 group-relative 的 GRPO advantage $A_j$，SEAL 得到<strong>诊断加权 advantage</strong>
+    $$\widetilde{A}_j=w_j A_j.$$</p>
+    <div class="callout note">
+      <span class="label">为什么这不算「篡改 reward」</span>
+      因为 $w_j>0$，advantage 的<strong>符号不变</strong>——方向仍由 verifier reward 经 $A_j$ 决定，$w_j$ 只缩放「每条 trajectory 贡献多少」。所以 SEAL 没有改 benchmark reward、success 判据或 verifier 诱导的排序，本质上是对 policy-gradient 信号做一次 <strong>verifier-grounded 的 preconditioning</strong>：优先放大那些失败「更可归因、更可恢复、更有信息量」的 trajectory。
+    </div>
+
+    <h3>3.5 SEAL 训练闭环</h3>
+    <p>SEAL 在「采样 → 诊断 → interface 演化 → policy 优化」之间交替。第 $t$ 轮：从训练分布抽 prompt，当前 policy $\pi_{\theta_t}$ 在<strong>带 interface $\Omega_t$ 的环境</strong>里采 $\{\tau_j\}_{j=1}^{N}\sim P_{\mathcal{E}_{\Omega_t}}(\cdot\mid\pi_{\theta_t})$；每条经原 verifier 得 $r(\tau_j)$、经 $\Psi$ 得 $Z(\tau_j)$；把诊断聚合成 policy-specific 失败画像 $C_t=\operatorname{Agg}(\{Z(\tau_j)\})$；据此演化接口 $\Omega_{t+1}=\operatorname{Evolve}(\Omega_t,C_t)$；同时用诊断加权的 GRPO 更新
+    $$\theta_{t+1}=\operatorname{GRPO}\!\big(\theta_t;\{\tau_j,r(\tau_j),\widetilde{A}_j\}_{j=1}^{N}\big),\quad \widetilde{A}_j=w_jA_j.$$
+    于是 policy 暴露能力缺口 → interface 围着缺口适配 → 模型把反馈内化进 policy，形成闭环。全程 tool 语义、task label、转移动态、reward、evaluation verifier 都固定。<strong>评测时丢掉 interface wrapper</strong>，在原始环境 + 原 verifier 下评 $\pi_{\theta_R}$（附录 Algorithm 1 给出完整伪代码）。</p>
+
+    <div class="callout note">
+      <span class="label">复现要点（来自正文 + 附录）</span>
+      <strong>优化器</strong>：GRPO，每个 prompt 采 8 条 rollout；actor lr $1\times10^{-6}$，train batch 32，PPO mini-batch 8，micro-batch 1/GPU；training temperature 1.0、validation 0.0。<strong>长度</strong>：max prompt / response / model length = 8192 / 4096 / 16384；多轮 rollout 开启，max interaction steps 20。<strong>正则</strong>：reward KL penalty 关闭，actor KL loss 系数 0.001，entropy 系数 0。<strong>工具格式</strong>：<code>llama3_json</code>，BFCL tool prompt 模式 <code>bfcl_qwen_fc</code>；base tool prompt 对 Vanilla RL 与 SEAL <strong>共享</strong>。<strong>硬件</strong>：4 GPU，TP=1，GPU 显存利用率 0.6，max env workers 32，vLLM 异步 rollout。<strong>受控对比</strong>：Vanilla RL 与 SEAL 用同一初始 checkpoint、同 400 样本、同 rollout 预算、同 optimizer、同 decoding；唯一区别是 SEAL 额外启用 diagnosis、interface 演化、闭环 failure-profile 更新与诊断加权。两方训练期都<strong>不</strong>接触 ground-truth 轨迹、隐藏参数值、reference 中间动作或最终答案。注意：主 rerun 的 active 配置实际只开了 base prompt + <code>observation_lite</code>，<code>tool_feedback_evolution</code> 与 <code>diagnostic_evolution</code> 作为完整实现的可选组件记录在附录。<br>
+      <em>一处需留意的口径</em>：附录优先级表用的标签集（<code>invalid_tool_call</code> / <code>argument_mismatch</code> / …）与诊断效用表用的标签集（<code>spurious_tool_call</code> / <code>correct_abstention</code> / …）命名并不完全一致，本文按原文如实呈现两张表。
+    </div>
+  </section>
+
+  <!-- ============================ ④ 实验评估 ============================ -->
+  <section id="evaluation">
+    <h2><span class="n">④</span>实验评估 Evaluation</h2>
+    <h3>评测设置</h3>
+    <ul>
+      <li><strong>In-distribution benchmark：</strong><strong>BFCL V3 multi-turn</strong> 子集，800 例、四类——<em>Base</em>（信息完整的标准多轮 function calling）、<em>Missing Functions</em>（能否识别「所需 tool 不可用 / 无合适 tool」）、<em>Missing Parameters</em>（能否处理欠定参数而非 hallucinate）、<em>Long Context</em>（长对话历史下的状态跟踪与 tool 使用一致性）。<strong>低资源设定</strong>：每类抽 100、共 <strong>400 例</strong>训练，剩 400 例做 held-in 评测。</li>
+      <li><strong>OOD benchmark：</strong>BFCL V4 的 <em>Web Search</em> 与 <em>Memory</em> 轨道，以及 $\tau^2$-bench 的 <em>Retail / Airline / Telecom</em> 三个客服域。它们在 tool 域、schema 结构、交互模式上都与 BFCL V3 不同；模型只在 BFCL V3 的 400 例上训练，OOD 全程不见。</li>
+      <li><strong>Backbone（三个）：</strong>Qwen2.5-3B-Instruct、Qwen2.5-7B-Instruct（通用 instruction-tuned agent）、ToolACE-2-Llama-3.1-8B（更强的 tool-specialized 初始化）。</li>
+      <li><strong>对比基线：</strong>核心是同设定下的 <strong>Vanilla RL</strong>（同 split / rollout 预算 / optimizer / verifier reward 的<strong>受控对比</strong>）；另列若干闭源（Gemini-3-Pro-Preview、Claude-Sonnet-4.5、GPT-4o、Gemini-2.5-Flash）与开源（GLM-4.6 355B、Qwen3-32B、Qwen2.5-14B、xLAM-2-3b-fc-r 等）系统，仅作<strong>参考点</strong>（规模/训练配方不同，非受控基线）。</li>
+      <li><strong>指标：</strong>success rate $\mathrm{SR}=\frac{1}{|\mathcal{Q}|}\sum_q \mathbf{1}[\mathcal{V}(\tau_q,q,\mathcal{E})=1]$，<strong>越高越好</strong>；类别分在对应子集上算，Average 为各类算术平均。所有评测在原始 benchmark 环境 + 官方 verifier 下进行，SEAL 的训练期 interface 一律关闭。</li>
+    </ul>
+
+    <h3>主要结果（BFCL V3，in-distribution）</h3>
+    <p>下表为 BFCL V3 multi-turn 的主结果（同 400 样本预算），加粗为 SEAL 行；括号是相对各自原始 backbone 的提升。</p>
+    <table>
+      <thead>
+        <tr><th>模型（%）</th><th>Avg</th><th>Base</th><th>Miss Func</th><th>Miss Param</th><th>Long Ctx</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Qwen2.5-3B-Instruct</td><td>5.75</td><td>11.00</td><td>6.00</td><td>3.00</td><td>3.00</td></tr>
+        <tr><td>&nbsp;&nbsp;+ Vanilla RL</td><td>9.25 <span class="no">(+3.50)</span></td><td>16.00</td><td>9.00</td><td>6.00</td><td>6.00</td></tr>
+        <tr><td>&nbsp;&nbsp;<strong>+ SEAL</strong></td><td><strong>14.00 (+8.25)</strong></td><td><strong>19.00</strong></td><td><strong>15.00</strong></td><td><strong>12.00</strong></td><td><strong>10.00</strong></td></tr>
+        <tr><td>Qwen2.5-7B-Instruct</td><td>14.00</td><td>22.00</td><td>14.00</td><td>10.00</td><td>10.00</td></tr>
+        <tr><td>&nbsp;&nbsp;+ Vanilla RL</td><td>30.75 <span class="no">(+16.75)</span></td><td>46.00</td><td>27.00</td><td>27.00</td><td>23.00</td></tr>
+        <tr><td>&nbsp;&nbsp;<strong>+ SEAL</strong></td><td><strong>40.25 (+26.25)</strong></td><td><strong>58.00</strong></td><td><strong>36.00</strong></td><td><strong>34.00</strong></td><td><strong>33.00</strong></td></tr>
+        <tr><td>ToolACE-2-Llama-3.1-8B</td><td>32.00</td><td>45.00</td><td>26.00</td><td>35.00</td><td>22.00</td></tr>
+        <tr><td>&nbsp;&nbsp;+ Vanilla RL</td><td>38.50 <span class="no">(+6.50)</span></td><td>52.00</td><td>30.00</td><td>40.00</td><td>32.00</td></tr>
+        <tr><td>&nbsp;&nbsp;<strong>+ SEAL</strong></td><td><strong>46.75 (+14.75)</strong></td><td><strong>58.00</strong></td><td><strong>46.00</strong></td><td><strong>44.00</strong></td><td><strong>39.00</strong></td></tr>
+      </tbody>
+    </table>
+    <p>作为参考点（非受控、规模差异大）：闭源 Claude-Sonnet-4.5 / Gemini-3-Pro-Preview 在该子集约 61 / 60.75，GPT-4o 42.50；开源 GLM-4.6 355B 68.00、Qwen3-32B 47.88、xLAM-2-3b-fc-r 58.38。<strong>怎么读这些数字：</strong></p>
+    <ul>
+      <li><strong>三个 backbone 一致提升</strong>：较原始 checkpoint，Average 分别 +8.25 / +26.25 / +14.75——既不局限于某个规模，也对已经 tool-specialized 的 ToolACE-2 有效，说明收益不是「只在弱模型上捡漏」。</li>
+      <li><strong>受控对比下仍显著赢 Vanilla RL</strong>：在同 split / 预算 / optimizer / verifier 下，SEAL 较 Vanilla RL 多 <strong>+4.75 / +9.50 / +8.25</strong> 平均分。这说明<strong>光靠 sparse 终局 reward 不足以高效学 multi-turn tool use</strong>；而且 7B / 8B（起点已较强）上的增益最明显，verifier-grounded diagnosis 的价值并不随起点变强而消失。</li>
+      <li><strong>增益集中在「结构化 tool-use 失败」</strong>：对 Qwen2.5-7B，Missing Functions 14.00→36.00、Missing Parameters 10.00→34.00——正是方法针对的错误类型；Long Context 也涨（更好的多轮状态跟踪与 recovery）。这些恰是实际 tool use 里最常见的失败：选对 tool、填对 argument、跨多轮保持一致。值得注意的是，受控的 7B+SEAL（40.25）已超过同口径下若干参考系统的量级（如 GPT-4o 42.50 附近）。</li>
+    </ul>
+
+    <h3>OOD 泛化（BFCL V4 + $\tau^2$-bench）</h3>
+    <p>只在 BFCL V3 的 400 例上训练，迁移到 held-out 设定：</p>
+    <table>
+      <thead>
+        <tr><th>模型</th><th>V4 Avg</th><th>V4 Web Search</th><th>V4 Memory</th><th>$\tau^2$ Avg</th><th>Retail</th><th>Airline</th><th>Telecom</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Qwen2.5-3B-Instruct</td><td>4.69</td><td>0.00</td><td>9.38</td><td>9.64</td><td>5.26</td><td>14.00</td><td>9.65</td></tr>
+        <tr><td>&nbsp;&nbsp;+ Vanilla RL</td><td>5.98</td><td>0.50</td><td>11.26</td><td>10.60</td><td>6.14</td><td>16.00</td><td>9.65</td></tr>
+        <tr><td>&nbsp;&nbsp;<strong>+ SEAL</strong></td><td><strong>8.63</strong></td><td><strong>2.00</strong></td><td><strong>15.26</strong></td><td><strong>11.76</strong></td><td><strong>8.77</strong></td><td><strong>16.00</strong></td><td><strong>10.52</strong></td></tr>
+        <tr><td>Qwen2.5-7B-Instruct</td><td>9.17</td><td>6.50</td><td>11.83</td><td>16.11</td><td>16.67</td><td>20.00</td><td>11.67</td></tr>
+        <tr><td>&nbsp;&nbsp;+ Vanilla RL</td><td>10.26</td><td>7.50</td><td>13.02</td><td>17.19</td><td>19.30</td><td>20.00</td><td>12.28</td></tr>
+        <tr><td>&nbsp;&nbsp;<strong>+ SEAL</strong></td><td><strong>12.71</strong></td><td><strong>9.50</strong></td><td><strong>15.92</strong></td><td><strong>20.79</strong></td><td><strong>26.32</strong></td><td><strong>22.00</strong></td><td><strong>14.04</strong></td></tr>
+      </tbody>
+    </table>
+    <p>两个 backbone 在 BFCL V4 与 $\tau^2$-bench 的聚合指标上都被 SEAL 提升、且都赢 Vanilla RL（如 7B 的 $\tau^2$-bench 16.11→20.79）。作者据此论证 SEAL 学到的是<strong>可迁移的 tool-use 行为</strong>（argument grounding、error recovery、多轮状态管理），而非仅仅拟合那 400 条 BFCL V3 样本。但作者也<strong>如实承认</strong>：OOD 绝对分仍偏低，跨 benchmark 泛化依旧困难。</p>
+
+    <h3>消融与训练动态</h3>
+    <p>由于 diagnosis 是所有组件的共享输入，完全去掉它就退化成 Vanilla RL，所以作者对建立在诊断之上的三个机制做<strong>留一消融</strong>（Qwen2.5-7B，%）：</p>
+    <table>
+      <thead><tr><th>设置</th><th>Average</th><th>Base</th><th>Miss Func</th><th>Miss Param</th><th>Long Ctx</th></tr></thead>
+      <tbody>
+        <tr><td>Qwen2.5-7B-Instruct</td><td>14.00</td><td>22.00</td><td>14.00</td><td>10.00</td><td>10.00</td></tr>
+        <tr><td>&nbsp;&nbsp;+ Vanilla RL</td><td>30.75</td><td>46.00</td><td>27.00</td><td>27.00</td><td>23.00</td></tr>
+        <tr><td>&nbsp;&nbsp;w/o Environment-Side Adaptation</td><td>35.75</td><td>52.00</td><td>31.00</td><td>32.00</td><td>28.00</td></tr>
+        <tr><td>&nbsp;&nbsp;w/o Diagnosis-Guided Reweighting</td><td>32.75</td><td>48.00</td><td>27.00</td><td>31.00</td><td>25.00</td></tr>
+        <tr><td>&nbsp;&nbsp;w/o Closed-Loop Update</td><td>33.00</td><td>46.00</td><td>32.00</td><td>28.00</td><td>26.00</td></tr>
+        <tr><td>&nbsp;&nbsp;<strong>Full SEAL</strong></td><td><strong>40.25</strong></td><td><strong>58.00</strong></td><td><strong>36.00</strong></td><td><strong>34.00</strong></td><td><strong>33.00</strong></td></tr>
+      </tbody>
+    </table>
+    <ul>
+      <li><strong>哪块最关键</strong>：去掉 <em>diagnosis-guided reweighting</em>（掉到 32.75）比去掉 <em>environment-side adaptation</em>（35.75）跌得更多——说明诊断标签对「<strong>分配 policy-gradient 压力</strong>」尤其重要。但 environment-side adaptation 也贡献了相对「无它变体」的 +4.50；去掉 closed-loop update 同样掉到 33.00。</li>
+      <li><strong>两侧互补</strong>：Full SEAL（40.25）显著高于任一单边变体，证明优势<strong>不来自单一配料</strong>，而来自「更好的训练期反馈」与「对所采 rollout 更好的优化」之结合。</li>
+    </ul>
+    <figure>
+      <img src="figures/fig3_dynamics.png" alt="Vanilla RL 与 SEAL 在 BFCL V3 各子集上的训练动态">
+      <figcaption>原文 Figure 3：训练动态（validation accuracy vs. training steps），阴影为各 100 例验证子集的二项标准误。SEAL（绿）在多数子集上<strong>更快上升、收敛更高</strong>，在 Missing Functions / Missing Parameters 上与 Vanilla RL（紫）拉开明显差距；Long Context 对两者都最难，但 SEAL 仍更稳更高。右侧 Overall 曲线 SEAL 全程更平滑、更高。</figcaption>
+    </figure>
+    <p>训练动态印证了闭环设计：随着 policy 的主导失败<strong>在变</strong>，training interface 被更新去暴露更相关的 cue，而 Vanilla RL 始终只收到同一种 sparse 终局信号——于是早期之后差距持续拉大，提升是<strong>跨失败类型累积</strong>而非靠单一子集撑起。附录还给了四个 BFCL 定性案例（文件系统状态跟踪、API 参数 recovery、跨域 tool 组合、车控长程状态）与一个 $\tau^2$-bench Telecom 的 OOD 案例：典型对照是 base 模型把猜错的 airport code / stock symbol 当成最终结果、或只口头算油量却从不真正调 <code>fillFuelTank</code>，而 SEAL 模型会把 execution error 当作可恢复证据、补调 <code>get_nearest_airport_by_city</code> / <code>get_symbol_by_name</code> 等前置 tool、并在改状态前先核对当前状态。</p>
+  </section>
+
+  <!-- ============================ ⑤ 洞见 ============================ -->
+  <section id="insight">
+    <h2><span class="n">⑤</span>洞见 Insights</h2>
+    <div class="callout insight">
+      <span class="label">Insight</span>
+      <ol style="margin:6px 0">
+        <li><strong>「同一份诊断、两处复用」是这篇最值得记住的方法论</strong>：把失败 rollout 诊断出的 turn-level 标签<strong>既</strong>用来改环境暴露的信息、<strong>又</strong>用来给 policy-gradient 加权，让 environment 与 policy 围着「当前能力缺口」同步演化——这正是修复 Agent-Environment Misalignment 的杠杆点，也把两条原本割裂的 self-evolution 路线统一进一个闭环。</li>
+        <li><strong>「失败为什么发生」是被 sparse reward 浪费掉的免费监督</strong>：在 executable 环境里，失败的归因本可由 parser / schema / 状态转移 / verifier 比对<strong>确定性地</strong>读出来，却被压成一个 0/1 标量丢弃。SEAL 表明，把这份结构化证据捡回来，就足以在<strong>仅 400 样本</strong>下把 multi-turn tool use 学得又快又稳。</li>
+        <li><strong>「保持 benchmark 不变」是一个克制但聪明的协议设计</strong>：只动 training-time interface、且 advantage 加权恒正（不改符号、不改 verifier 排序），使「提升来自模型真的内化了更好的行为」而非「测试时拿到额外信息」可被干净地归因——这对「自演化是否在作弊」这类常见质疑是有力的回应。</li>
+      </ol>
+    </div>
+
+    <h3>局限与未来</h3>
+    <p>作者自陈的边界：(1) SEAL <strong>依赖 executable 环境</strong>——要有 tool schema、execution trace、verifier 反馈，所以更开放、监督更弱的域需要更丰富的诊断机制；(2) 环境演化<strong>刻意保守</strong>，只改训练接口、不动 tool 语义或 evaluation 规则，保住了公平性却也<strong>限制了适配范围</strong>；(3) 诊断效用权重 $\rho(z)$ 跨任务/backbone <strong>固定</strong>，且跨域泛化仍困难、OOD 绝对分偏低。未来方向：把诊断扩到结构化程度更低的环境、<strong>学习自适应的 utility 权重</strong>、并研究协同演化如何扩展到更大的 tool 生态与更长 horizon 的 agentic workflow。<br>
+    我的补充判断：固定的规则诊断器 $\Psi$ 与手调的 $\rho(z)$ 是当前最依赖人工先验的两处；主 rerun 实际只开了 <code>observation_lite</code>，<code>tool_feedback_evolution</code> / <code>diagnostic_evolution</code> 的独立增益尚未被单独量化；另外附录两张诊断标签表命名口径不一，复现时建议以开源代码为准。</p>
+
+    <h3>与相关工作的关系</h3>
+    <p>按本文自身的框定：相对 <strong>model-side self-improvement</strong>（recursive skill learning、self-consolidation、reflective prompt 适配、memory-based、interaction-feedback RL——经验只内化进 policy/prompt/memory/skill，环境基本固定），SEAL 是<strong>互补</strong>的——它把失败 trajectory 不只用于改模型，还当作 verifier-grounded 证据去适配「未来 trajectory 从中被采出的环境」。相对 <strong>environment-side adaptation</strong>（curriculum / automatic curriculum design / synthetic instruction / task evolution / tool 构造，多停留在 task 多样性、难度、覆盖层面），SEAL 做的是 <strong>failure-conditioned</strong> 适配：由 verifier-grounded 诊断决定暴露哪些 affordance cue、约束、recovery 反馈与训练信号，去精准命中当前 policy 的能力缺口。相对 <strong>agent–environment co-evolution</strong> 这一新近视角，SEAL 最接近，但执行的是<strong>更严格的协议</strong>：benchmark task、tool 语义、executable verifier 全部固定，只以 failure-conditioned、verifier-grounded 的方式演化 training-time learning interface。</p>
+  </section>
+
+  <footer class="foot">
+    本页为 <code>paper-reading</code> skill 生成的阅读笔记，仅作辅助，细节以
+    <a href="https://arxiv.org/abs/2605.24426" target="_blank" rel="noopener">原文</a> 为准 · 解读日期 2026-05-30
+  </footer>
+
+</article>
+</body>
+</html>

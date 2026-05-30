@@ -36,5 +36,25 @@
       "Memory"
     ],
     "path": "papers/2605.27366-muse-autoskill/index.html"
+  },
+  {
+    "slug": "2605.24426-seal-coevolution-agents-environments",
+    "title": "SEAL: Synergistic Co-Evolution of Agents and Learning Environments",
+    "authors": "Yihao Hu, Zhihao Wen, Xiujin Liu, Pan Wang, Xin Zhang, Wei Wu",
+    "team": "Ant Group · Westlake University · University of Michigan–Ann Arbor · University of Science and Technology of China",
+    "arxiv": "https://arxiv.org/abs/2605.24426",
+    "code": "https://github.com/yihaohu0118/SEAL",
+    "date": "2026-05-30",
+    "published": "arXiv 2026",
+    "tldr": "提出 Agent-Environment Misalignment 问题，并用 verifier-grounded failure diagnosis 作为共享信号，闭环协同演化 training-time learning interface 与 policy（diagnosis-guided advantage reweighting）；仅 400 样本即在三个 backbone 上拿到 +8.25~+26.25 平均分提升并正向 OOD transfer。",
+    "tags": [
+      "LLM",
+      "Agent",
+      "Self-Evolving",
+      "Environment",
+      "Tool-Use",
+      "RL"
+    ],
+    "path": "papers/2605.24426-seal-coevolution-agents-environments/index.html"
   }
 ]
