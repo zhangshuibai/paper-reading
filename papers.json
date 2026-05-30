@@ -189,5 +189,24 @@
       "Control"
     ],
     "path": "papers/2603.19312-leworldmodel/index.html"
+  },
+  {
+    "slug": "2605.15155-sdar",
+    "title": "Self-Distilled Agentic Reinforcement Learning",
+    "authors": "Zhengxi Lu, Zhiyuan Yao, Zhuowen Han, Zi-Han Wang, Jinyang Wu, Qi Gu, Xunliang Cai, Weiming Lu, Jun Xiao, Yueting Zhuang, Yongliang Shen",
+    "team": "Zhejiang University (ZJU-REAL) · Meituan LongCat · Tsinghua University",
+    "arxiv": "https://arxiv.org/abs/2605.15155",
+    "code": "https://github.com/ZJU-REAL/SDAR",
+    "date": "2026-05-30",
+    "published": "arXiv 2026",
+    "tldr": "把 OPSD 当作 RL 之上的 gated 辅助 objective：用 detached sigmoid gate 对 teacher 背书的 positive-gap token 加强 distillation、对 negative rejection 柔性衰减，稳住多轮 agentic RL，全面超过 GRPO 与 hybrid baseline。",
+    "tags": [
+      "LLM",
+      "Agent",
+      "RL",
+      "Distillation",
+      "Self-Distillation"
+    ],
+    "path": "papers/2605.15155-sdar/index.html"
   }
 ]

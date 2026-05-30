@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SDAR：自蒸馏的 Agentic RL · 论文解读</title>
+
+<!-- 数学公式渲染（在线查看时生效；无网络时正文仍可读） -->
+<script>
+  window.MathJax = {
+    tex:{inlineMath:[['$','$'],['\\(','\\)']], displayMath:[['$$','$$'],['\\[','\\]']]},
+    svg:{fontCache:'global'}
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;
+  }
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:880px; margin:0 auto; padding:18px 22px 90px}
+
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:27px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)}
+  .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .meta-grid a:hover{text-decoration:underline}
+
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap}
+  nav.toc a:hover{color:var(--accent)}
+
+  section{margin:38px 0}
+  h2{font-size:21px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:17px; margin:24px 0 8px}
+  p{margin:12px 0}
+  ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.9em}
+  strong{color:var(--text)}
+
+  /* 开源贡献表 */
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:14px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:10px 12px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  .yes{color:var(--ok); font-weight:600}
+  .no{color:var(--muted)}
+  .num{font-variant-numeric:tabular-nums; text-align:right}
+
+  /* 图 */
+  figure{margin:24px 0; text-align:center}
+  figure img{max-width:100%; height:auto; border:1px solid var(--line); border-radius:10px; background:#fff}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+
+  /* 提示框 */
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+
+  blockquote{border-left:3px solid var(--line); margin:14px 0; padding:2px 16px; color:var(--muted)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+  .mjx-container{overflow-x:auto; overflow-y:hidden}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <!-- ============================ 抬头 / 元信息 ============================ -->
+  <header class="head">
+    <div class="chips">
+      <span class="chip">LLM</span>
+      <span class="chip">Agent</span>
+      <span class="chip">RL</span>
+      <span class="chip">Distillation</span>
+      <span class="chip">Self-Distillation</span>
+      <span class="chip">GRPO</span>
+      <span class="chip">Multi-turn</span>
+    </div>
+    <h1>SDAR：以 gated self-distillation 稳住多轮 agentic RL</h1>
+    <p class="orig-title">Self-Distilled Agentic Reinforcement Learning</p>
+    <dl class="meta-grid">
+      <dt>作者</dt><dd>Zhengxi Lu, Zhiyuan Yao, Zhuowen Han, Zi-Han Wang, Jinyang Wu, Qi Gu, Xunliang Cai, Weiming Lu, Jun Xiao, Yueting Zhuang, Yongliang Shen</dd>
+      <dt>团队 / 机构</dt><dd>Zhejiang University（浙大 ZJU-REAL lab）、Meituan（美团 LongCat，实习期间完成）、Tsinghua University；通讯作者 Yongliang Shen</dd>
+      <dt>原文链接</dt><dd><a href="https://arxiv.org/abs/2605.15155" target="_blank" rel="noopener">https://arxiv.org/abs/2605.15155</a></dd>
+      <dt>发表 / 年份</dt><dd>arXiv 2026（v1，2026-05-14）</dd>
+      <dt>解读日期</dt><dd>2026-05-30</dd>
+    </dl>
+  </header>
+
+  <div class="tldr">
+    <b>TL;DR</b> — 多轮 agent 的 RL 只有 trajectory-level 的稀疏 reward，On-Policy Self-Distillation (OPSD) 能补上 teacher 给的 dense token-level 监督，但直接搬到多轮上会因 compounding drift 而训练崩溃，而且 privileged teacher 给出的信号是「非对称」的（正向背书可信、负向 rejection 可能只是 skill 检索/利用质量差导致的噪声）。<b>SDAR</b> 把 OPSD 当成 RL 之上的一个 <b>gated 辅助 objective</b>：把 detached 的 token-level teacher-student gap 经过 sigmoid gate 转成一个有界的 trust weight，<b>对 teacher 背书的 positive-gap token 加强蒸馏、对 negative rejection 柔性衰减</b>，同时严格保留 GRPO advantage 的无偏性。在 Qwen2.5 / Qwen3 三个 scale、ALFWorld / WebShop / Search-QA 三个 benchmark 上，相比 GRPO 分别 +9.4%（ALFWorld）、+7.0%（Search-QA）、+10.2%（WebShop-Acc），并彻底避开了 naïve GRPO+OPSD 的灾难性失稳，全面超过 Skill-SD、RLSD 等 hybrid baseline。</b>
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#opensource">① 开源贡献</a>
+    <a href="#motivation">② 动机与贡献</a>
+    <a href="#method">③ 方法</a>
+    <a href="#evaluation">④ 实验评估</a>
+    <a href="#insight">⑤ 洞见</a>
+  </nav>
+
+  <!-- ============================ ① 开源贡献 ============================ -->
+  <section id="opensource">
+    <h2><span class="n">①</span>开源贡献 Open-source Artifacts</h2>
+    <p>已在 GitHub 开源官方实现 <a href="https://github.com/ZJU-REAL/SDAR" target="_blank" rel="noopener">ZJU-REAL/SDAR</a>（Apache-2.0），含三套环境（ALFWorld / WebShop / Search-QA）的 setup 与训练脚本，并实现了 SDAR 与全部 6 个 baseline（GRPO、Skill-GRPO、OPSD、GRPO+OPSD、Skill-SD、RLSD）。<b>未释出预训练权重</b>；论文中训练用的 base model 是公开的 Qwen2.5 / Qwen3-Instruct 系列，所用 SkillBank 来自外部工作 SkillRL，benchmark 本身均为公开数据/环境。下表区分「论文声称」与「实际可下载」（已通过 WebFetch 核实 README）。</p>
+    <table>
+      <thead><tr><th>类型</th><th>是否开源</th><th>内容 / 链接</th></tr></thead>
+      <tbody>
+        <tr><td>代码 Code</td><td class="yes">✔</td><td><a href="https://github.com/ZJU-REAL/SDAR" target="_blank" rel="noopener">github.com/ZJU-REAL/SDAR</a> · Apache-2.0 · Python（vLLM + flash-attn，Python 3.12）；含 ALFWorld/WebShop/Search 三环境 setup、<code>examples/</code> 训练脚本、FSDP/Megatron checkpoint 合并工具；SDAR 及 6 个 baseline 全部复现。截至解读日 153★ / 8 commits。</td></tr>
+        <tr><td>模型权重 Weights</td><td class="no">✘</td><td>未释出训练后权重；base 为公开 Qwen2.5-3B/7B-Instruct、Qwen3-1.7B-Instruct。</td></tr>
+        <tr><td>数据集 Dataset</td><td class="no">△</td><td>无新数据集发布；提供 Search-QA 的数据准备脚本（需自行下载 index 与 Wikipedia 数据）。训练任务取自 ALFWorld、Search-R1（NQ/HotpotQA）、WebShop 等公开来源。</td></tr>
+        <tr><td>环境 / Benchmark</td><td class="no">△</td><td>三个评测环境均为公开第三方：ALFWorld、WebShop、Search-QA（Search-R1 setup，E5 retriever）；repo 提供接入这些环境的脚本。</td></tr>
+        <tr><td>Skill 库</td><td class="no">△</td><td>三环境统一使用外部工作 SkillRL（Xia et al., 2026）的 <code>SkillBank</code>，非本文新增。</td></tr>
+        <tr><td>项目主页 / Demo</td><td class="no">✘</td><td>未见独立项目主页 / 在线 demo。</td></tr>
+      </tbody>
+    </table>
+    <p style="color:var(--muted);font-size:13px">说明：✔=确认可下载；△=非本文原创但脚本/准备流程已提供且依赖公开资源；✘=未释出。</p>
+  </section>
+
+  <!-- ============================ ② 动机与贡献 ============================ -->
+  <section id="motivation">
+    <h2><span class="n">②</span>研究动机与贡献 Motivation &amp; Contribution</h2>
+
+    <h3>背景与问题</h3>
+    <p>把 LLM 训练成能在环境里多轮交互的 agent，已成为 post-training 的核心命题。和静态的单轮 reasoning 不同，多轮 agent 在一个有限 horizon 上不断与环境交互：每一步 action 都会改变后续 observation，而自己生成的 response 又会成为下一步决策的 context。围绕这个场景自然出现两股互补的力量：</p>
+    <ul>
+      <li><strong>RL（如 GRPO）</strong>：用环境/verifier 的 reward 做 task-level 优化，信号扎实但极其稀疏——整条 trajectory 往往只有一个 trajectory-level 的 outcome reward，对长 horizon 的 credit assignment 太粗。</li>
+      <li><strong>OPSD（On-Policy Self-Distillation）</strong>：在 student 自己采样的序列上做监督，由一个用「privileged context」（训练期才有的额外信息，如 reference answer、检索到的 skills）增强的 self-teacher 提供 dense 的 token-level 指导。它不需要一个独立更强的 teacher，只靠同一 policy 加上 privileged 上下文即可。</li>
+    </ul>
+    <p>问题是：OPSD 不能干净地迁移到多轮 agent。作者把失败归结为两个观察：</p>
+    <p><strong>[观察一] Multi-turn OPSD Instability（多轮失稳）。</strong>一旦 student agent 不可避免地偏离 teacher 支持的 trajectory，原本有用的 token-level 监督就越来越不可靠；误差在多轮中复利式累积（compounding error），导致 per-turn KL divergence 飙升、任务表现灾难性退化（见图 2 左）。已有的 TCOD 试图用 curriculum 缓解，但依赖僵硬的时间表 / trajectory-depth 阈值。</p>
+    <p><strong>[观察二] Asymmetric Trust in Privileged Guidance（privileged 指导的非对称可信度）。</strong>OPSD 的 teacher 并不是一个独立更强的模型，而是同一 policy 加上 privileged 的 <em>training-only</em> 上下文（例如检索到的 skills）。这使它的 token-level 指导<strong>本质上是非对称的</strong>：
+    </p>
+    <ul>
+      <li>若 privileged teacher 对 student 采样到的 token $y_t$ 赋予<strong>更高</strong>概率（positive gap），这是一个 endorsement——它在背书一个 student 已经会做、但尚未充分内化的 on-policy 行为，特别适合拿来蒸馏；</li>
+      <li>若 teacher 赋予<strong>更低</strong>概率（negative gap），就要谨慎得多：它可能确实该被抑制，但在 skill-conditioned OPSD 里也可能只是 privileged context 本身不靠谱造成的——(1) <strong>Skill Quality</strong>：检索到的 skill 不相关/不完整/冗余；(2) <strong>Skill Utilization</strong>：teacher 没能把相关 skill 落到 token-level 偏好；(3) <strong>Multi-turn Drift</strong>：随 trajectory 展开 teacher-student gap 跨轮变宽（图 3 中），早期的错配被逐步放大。作者在 Qwen2.5-3B-Instruct 上的 preliminary study 发现：<strong>negative-gap token 占全部 token 50% 以上</strong>（图 3 左），问题极其普遍。</li>
+    </ul>
+    <p>一个鲜明的判断由此浮现：对多轮 agent 而言，<strong>RL 应当继续作为主优化 backbone，OPSD 退居为一个被谨慎控制的辅助角色</strong>。但「怎么控制」是关键——已有的 RLSD 直接用 self-divergence 去 re-weight token-level RL advantage，在训练早期 teacher-student 错配大时会过度放大更新，反而引入 RLSD-style 失稳（图 2 右，KL Loss 在前期猛涨）。</p>
+
+    <figure>
+      <img src="figures/fig2_instability.png" alt="多轮 OPSD 失稳与 RLSD 失稳">
+      <figcaption>原文 Figure 2。<strong>左</strong>：Multi-turn OPSD 的 success rate（上）随训练抖动停滞、KL divergence（下）随 turn step 单调上升——compounding drift 的直接证据；<strong>右</strong>：RLSD-style 失稳，RLSD（绿）的 KL Loss 在前 ~70 步暴涨，远高于 GRPO / GRPO+OPSD。</figcaption>
+    </figure>
+
+    <h3>本文的切入点</h3>
+    <p>SDAR 不去碰 RL 的 policy loss（从而严格保留 GRPO advantage 的语义与无偏性），而是把 OPSD loss 当作一个<strong>直接、独立的辅助优化 objective</strong>叠加上去。核心哲学只有一句：<em>let each token decide the intensity of its own supervision</em>——让每个 token 自己决定它该被蒸馏多强。具体做法是给每个 student 采样的 token 一个 detached 的 <strong>token-level gate</strong> $g_t\in(0,1)$，由该 token 上的 teacher-student gap（或 student entropy）经 sigmoid 得到：gap 越正（teacher 越背书）权重越大，gap 越负权重越被柔性压低。这相当于一个在<strong>最细粒度（单个 token）上自适应、平滑、self-paced 的 curriculum</strong>，取代 Skill-SD / HDPO 那种人工、僵硬的时间表。</p>
+
+    <h3>核心贡献</h3>
+    <ol>
+      <li><strong>诊断出多轮 OPSD 的两个根因</strong>：compounding 的 multi-turn instability，以及 privileged guidance 的非对称可信度（并实证 negative-gap token >50%），据此提出「RL 为主、OPSD 为受控辅助」的范式。</li>
+      <li><strong>提出 SDAR 与 token-level gated distillation</strong>：用 detached sigmoid gate 实现非对称 token-level 调制——positive-gap token 加强蒸馏、negative rejection 柔性衰减；gate 经 stop-gradient，梯度只流经 student log-prob，从而把蒸馏写成一个稳定的「gate 加权的 likelihood」更新，且不改动 RL advantage 的无偏性。给出三种 gating（entropy / gap / soft-OR）与 reverse-KL 对齐的设计，并配套理论分析（5 条 proposition，证明 gate 单调有界、辅助梯度不被放大、不 detach gate 会引入不稳定自指项）。</li>
+      <li><strong>在 Qwen2.5 / Qwen3 三个 scale × 三个 benchmark 上系统验证</strong>：较 GRPO 在 ALFWorld +9.4%、Search-QA +7.0%、WebShop-Acc(7B) +10.2%；彻底避开 naïve GRPO+OPSD 的崩溃（Qwen3-1.7B 上 OPSD 在 Search-QA 近乎归零、GRPO+OPSD 退化到 32.0 vs 46.1）；并超过 hybrid 的 Skill-SD、RLSD。鲁棒性分析显示即使用 Random Retrieval 也仍优于 GRPO——增益主要来自 gated distillation 而非 retrieval 质量。同时证明 SDAR 真正把 privileged 知识<strong>内化</strong>进参数：推理时不再需要任何 skill，仍超过带 skill 的 Skill-GRPO*。</li>
+    </ol>
+  </section>
+
+  <!-- ============================ ③ 方法 ============================ -->
+  <section id="method">
+    <h2><span class="n">③</span>方法 Method</h2>
+    <p>整体 pipeline 如图 4：三个块协同。<strong>左（Agent Loop）</strong>：policy（student）在环境里多轮交互，每轮看 observation、出 action，直到第 N 轮。<strong>右（GRPO）</strong>：用 trajectory 的 outcome reward 算 group-relative 的 token-level advantage，构成主优化目标。<strong>中（OPSD）</strong>：先检索 task-relevant 的 skills 作为 privileged context 喂给 self-teacher，self-teacher 与 self-student 在同一批 student 采样的 token 上算 per-token 的 gap，经 <strong>Token-Level Gating</strong> 得到权重，再乘到蒸馏 loss 上。最终目标是 GRPO loss 与 $\lambda\cdot$ OPSD loss 的加和。</p>
+
+    <figure>
+      <img src="figures/fig4_method.png" alt="SDAR 框架总览">
+      <figcaption>原文 Figure 4：SDAR 框架。Agent Loop（左）产生多轮 rollout；OPSD（中）用检索到的 Skills 作 privileged context，self-teacher 与 self-student 在同一 token 上算 gap，经 Token-Level Gating 调制；GRPO（右）从 task-outcome 算 token-level advantage。两路合成 $\mathcal{L}_{\mathrm{GRPO}} + \lambda\cdot\mathcal{L}_{\mathrm{SDAR}}$。</figcaption>
+    </figure>
+
+    <h3>问题设定与记号</h3>
+    <p>考虑一个在有限 horizon 上交互的多轮 agent：给定初始 prompt / 任务描述 $x$，第 $k$ 轮收到 observation $o_k$、生成 response $a_k$、环境返回 $o_{k+1}$。每个 $a_k$ 既含 reasoning token 也含可执行的 action token。为记号简洁，把一条 trajectory 里所有有效 response token 拉平成一个序列 $y=(y_1,\dots,y_T)\sim\pi_\theta(\cdot\mid x)$，$\pi_\theta$ 是 student policy，$T$ 是有效 response token 总数。在第 $t$ 个 token 位置，定义</p>
+    <p><strong>self-student context</strong>（推理时也有的普通上下文）：$\;s_t=(x,y_{<t})$；<br>
+    <strong>self-teacher context</strong>（叠加了 privileged 信息）：$\;s_t^{+}=(x,c^{+},y_{<t})$，</p>
+    <p>其中 $c^{+}$ 是只有 teacher branch 才能访问的 <strong>privileged training-only context</strong>——如 reference answer、检索到的 skills（本文）或其他测试时拿不到的辅助信息。注意 teacher 与 student 是<strong>同一套参数 $\theta$</strong>，区别只在喂进去的上下文。</p>
+
+    <h3>Skills Retrieval（privileged 上下文怎么来）</h3>
+    <p>「skill」是紧凑、结构化的示范，编码领域知识（如 sub-goal 分解、action 模板）。作者实现了四种检索策略以测鲁棒性：(1) <strong>UCB Retrieval</strong>，(2) <strong>Keyword Matching (KM)</strong>，(3) <strong>Full Retrieval</strong>，(4) <strong>Random Retrieval</strong>。其中 UCB 把检索建模为 skill 库 $\mathcal{E}=\{e_1,\dots,e_M\}$ 上的 multi-armed bandit，按 UCB 准则挑得分最高的单个 skill 文件：</p>
+    $$\mathrm{score}(e)=\bar r(e)+c\sqrt{\frac{\ln N_{\mathrm{ucb}}}{n(e)}},$$
+    <p>$\bar r(e)$ 是 $e$ 作为上下文时历史 reward 的滑动均值，$N_{\mathrm{ucb}}$ 是同类任务的总检索次数，$n(e)$ 是 $e$ 被选中的次数，$c$ 控制 exploration–exploitation。主实验默认用 KM（直接按任务描述里的关键词匹配预定义类别再取对应 skill 文件）。</p>
+
+    <h3>总优化目标</h3>
+    <p>SDAR 设计成标准 GRPO 之上的一个辅助 objective：</p>
+    $$\mathcal{L}(\theta)=\mathcal{L}_{\mathrm{GRPO}}(\theta)+\lambda_{\mathrm{SDAR}}\cdot\mathcal{L}_{\mathrm{SDAR}}(\theta).$$
+    <p>定义 masked token 平均（$m_t\in\{0,1\}$ 标记 token 是否有效）：$\;\mathrm{Agg}(z_{1:T})=\dfrac{\sum_{t=1}^{T} m_t z_t}{\sum_{t=1}^{T} m_t}$。</p>
+    <p><strong>RL 部分（GRPO）。</strong>对每个 $x$ 采一组 $G$ 条 response $\{y^{(i)}\}_{i=1}^G$，由环境 reward 得 sequence-level advantage $A^{(i)}$，配合 reference policy $\pi_{\mathrm{ref}}$：</p>
+    $$\mathcal{L}_{\mathrm{GRPO}}(\theta)=-\frac1G\sum_{i=1}^G \mathrm{Agg}\Big(\min\big(r_t^{(i)}A^{(i)},\,\mathrm{clip}(r_t^{(i)},1-\epsilon,1+\epsilon)A^{(i)}\big)\Big)+\beta\cdot\frac1G\sum_{i=1}^G\mathrm{Agg}\big(D_{\mathrm{KL}}(\pi_\theta(\cdot\mid s_t^{(i)})\,\|\,\pi_{\mathrm{ref}}(\cdot\mid s_t^{(i)}))\big),$$
+    <p>$r_t^{(i)}=\pi_\theta(y_t^{(i)}\mid s_t^{(i)})/\pi_{\theta_{\mathrm{old}}}(y_t^{(i)}\mid s_t^{(i)})$ 是 importance sampling 比值。<strong>SDAR 完全不动这一项</strong>，因此 advantage 的语义与无偏性被严格保留。</p>
+
+    <h3>OPSD 信号：reverse-KL 对齐的 teacher-student gap</h3>
+    <p>在固定 token 位置 $t$，teacher 与 student 分别诱导出条件分布 $\pi_T(\cdot\mid s_t^{+})$ 与 $\pi_\theta(\cdot\mid s_t)$。per-token 的 <strong>reverse KL</strong> 为</p>
+    $$D_{\mathrm{RKL}}^{(t)}=D_{\mathrm{KL}}\big(\pi_\theta(\cdot\mid s_t)\,\|\,\pi_T(\cdot\mid s_t^{+})\big)=\sum_{v\in\mathcal V}\pi_\theta(v\mid s_t)\log\frac{\pi_\theta(v\mid s_t)}{\pi_T(v\mid s_t^{+})}.$$
+    <p>为避免对整个 vocabulary 求和（昂贵），在 student 采样到的 token $y_t\sim\pi_\theta(\cdot\mid s_t)$ 上取单样本估计，其负值正好给出 <strong>Teacher-Student log-probability gap</strong>：</p>
+    $$\Delta_t=-\widehat{D}_{\mathrm{RKL}}^{(t)}=\log\pi_T(y_t\mid s_t^{+})-\log\pi_\theta(y_t\mid s_t).$$
+    <p>直觉：$\Delta_t>0$ 意味着 teacher 比 student 更看好这个 token（背书 / positive gap）；$\Delta_t<0$ 意味着 teacher 想压低它（rejection / negative gap）。选 reverse KL 而非 forward KL 是有意为之——reverse KL 是 <em>mode-seeking</em> 的，鼓励 student 把概率质量集中在 teacher 支持的少数 mode 上；在 teacher 信号经常「不靠谱」的弱 teacher 场景里，这种 selectivity 会自然下调 teacher 概率低的 token，恰好与显式的 gating 互补。相对地 forward KL 是 mode-covering，会逼 student 把质量摊到所有 teacher 支持的 token 上，无差别地吸收不可靠指导（消融见图 9）。</p>
+
+    <h3>Token-Level Gating（核心机制）</h3>
+    <p>关键想法：把 privileged teacher 指导转换成一个 token-level 的 trust weight，而把 verifier 驱动的 RL objective 原封不动。引入 gate $g_t\in(0,1)$ 调制每个 student 采样 token 上的 OPSD 信号。先定义两个 raw score——<strong>detached</strong> 的 teacher-student gap 与 student entropy（$\mathrm{sg}(\cdot)$ 表示 stop-gradient）：</p>
+    $$\Delta_t=\mathrm{sg}\big(\log\pi_\theta^{+}(y_t\mid s_t^{+})-\log\pi_\theta(y_t\mid s_t)\big),\qquad h_t=-\sum_{v\in\mathcal V}\pi_\theta(v\mid s_t)\log\pi_\theta(v\mid s_t).$$
+    <p>再用 logistic sigmoid $\sigma$ 把 raw score 压成平滑、可导、天然落在 $(0,1)$ 的 gate；sharpness $\beta>0$ 控制从「保守衰减」到「强激活」的过渡。三种互补 gating：</p>
+    <ol>
+      <li><strong>Entropy gating</strong>：$g_t=\sigma(\beta h_t)$ —— 盯住 student 最不确定（高 entropy）的位置；</li>
+      <li><strong>Gap gating</strong>（默认）：$g_t=\sigma(\beta\Delta_t)$ —— 给 teacher 背书的 positive-gap token 更大权重、对 negative-gap token 柔性衰减；</li>
+      <li><strong>Soft-OR gating</strong>：$g_t=\sigma\big(\beta[1-(1-h_t)(1-\Delta_t)]\big)$ —— student 不确定性与 teacher-student gap 的一种「或」式组合。</li>
+    </ol>
+    <p>三种情况里 gate 都经 $\mathrm{sg}(\cdot)$ detach，梯度<strong>只</strong>流经 student log-prob。token-level loss 与其聚合为</p>
+    $$\ell_t^{\mathrm{SDAR}}=g_t\cdot\big(\log\pi_\theta^{+}(y_t\mid s_t^{+})-\log\pi_\theta(y_t\mid s_t)\big),\qquad \mathcal{L}_{\mathrm{SDAR}}=\mathrm{Agg}\big(\ell_t^{\mathrm{SDAR}}\big).$$
+    <p>用 gap gating 时，这个 sigmoid gate 实现的正是<strong>非对称 token-level 调制</strong>：positive-gap token 拿到更强的辅助蒸馏，negative-gap token 被柔性压低——精准呼应观察二。</p>
+
+    <div class="callout note">
+      <span class="label">实现要点（含理论保证）</span>
+      <p style="margin-top:2px"><strong>超参</strong>（Table 3）：所有方法 $\eta=10^{-6}$、group size $G=8$、PPO clip $\epsilon=0.2$、对 reference 的 KL 系数 $\alpha_{\mathrm{KL}}=0.01$；SDAR 取 <strong>$\lambda_{\mathrm{SDAR}}=0.01$、$\beta=5.0$</strong>、检索用 KM。训练 150 步、8×H800 GPU；三环境 SkillBank 统一取自 SkillRL。ALFWorld 每 batch 16 任务 × 8 rollouts、prompt 上限 2048；Search-QA 每 batch 128 任务、prompt 上限 4096（E5 retriever，训练用 NQ/HotpotQA 为 in-domain，其余为 OOD）；WebShop 每 batch 16 任务 × 8 rollouts、prompt 上限 4096。</p>
+      <p><strong>训练时一次额外 forward。</strong>每步：先 on-policy rollout，再算 sequence-level advantage 与 GRPO loss；随后对 $(x,c^{+},y^{(i)})$ 做一次 forward 拿 teacher logits，算 $\Delta_t$、$g_t=\sigma(\beta\Delta_t)$、$\ell_t$，聚合成 $\mathcal{L}_{\mathrm{SDAR}}$，最后按 $\mathcal{L}_{\mathrm{GRPO}}+\lambda\mathcal{L}_{\mathrm{SDAR}}$ 联合更新（Algorithm 1）。推理时 $c^{+}$ / skill 留空，无需任何外部信息。</p>
+      <p><strong>理论（Appendix A，5 条 proposition）。</strong><em>Prop 1</em>：因 $g_t$ 与 $\log\pi_T(y_t\mid s_t^{+})$ 都 detached，$\mathcal{L}_{\mathrm{SDAR}}=C-\mathrm{Agg}(g_t\log\pi_\theta(y_t\mid s_t))$（$C$ 与 $\theta$ 无关），等价于一个 gate 加权的 log-likelihood 目标。<em>Prop 2</em>：梯度 $\nabla_\theta\mathcal{L}_{\mathrm{SDAR}}=-\mathrm{Agg}(g_t\nabla_\theta\log\pi_\theta(y_t\mid s_t))$，被有界标量 gate 严格调制。<em>Prop 3</em>：$g_t=\sigma(\beta\Delta_t)$ 关于 $\Delta_t$ 单调增、导数 $\partial g_t/\partial\Delta_t=\beta\sigma(1-\sigma)\in(0,\beta/4]$，构成 online 的 token-level curriculum。<em>Prop 4</em>：若每 token $\|\nabla_\theta\log\pi_\theta\|\le B_t$，则 $\|\nabla_\theta\mathcal{L}_{\mathrm{SDAR}}\|\le\mathrm{Agg}(B_t)$——gate 不会把辅助梯度放大到超过无权重 likelihood 梯度（因 $0<g_t<1$）。<em>Prop 5</em>：若<strong>不</strong>对 gate 做 stop-gradient，会引入不稳定的自指耦合项 $\nabla_\theta\tilde\ell_t=-(g_t+\beta\Delta_t g_t(1-g_t))\nabla_\theta\log\pi_\theta$——这从理论上解释了为什么必须 detach gate。</p>
+    </div>
+  </section>
+
+  <!-- ============================ ④ 实验评估 ============================ -->
+  <section id="evaluation">
+    <h2><span class="n">④</span>实验评估 Evaluation</h2>
+
+    <h3>评测设置</h3>
+    <ul>
+      <li><strong>Benchmark：</strong>
+        <strong>ALFWorld</strong>——与 ALFRED embodied 对齐的 text 游戏，3,827 个任务、6 类家务（Pick / Look / Clean / Heat / Cool / Pick2），考察长 horizon embodied 决策；<strong>Search-QA</strong>——search-augmented QA，含 single-hop（NQ、TriviaQA、PopQA）与 multi-hop（HotpotQA、2Wiki、MuSiQue、Bamboogle），考察检索 + 多跳推理；<strong>WebShop</strong>——真实网购环境，agent 在网页界面里按用户需求找/买商品，验证集取 128 个固定任务。</li>
+      <li><strong>对比基线（3 类）：</strong>(1) <em>Training-free</em>：Vanilla、Skill-Prompt（KM 检索 skill 拼到 prompt）；(2) <em>Post-training</em>：GRPO、OPSD、Skill-GRPO（用 KM 注入 skill，可带/不带 skill 推理，记 Skill-GRPO*）；(3) <em>Hybrid（RL+蒸馏）</em>：GRPO+OPSD（直接把 OPSD loss 叠加）、Skill-SD、RLSD。三个 base model：Qwen2.5-3B-Instruct、Qwen2.5-7B-Instruct、Qwen3-1.7B-Instruct。</li>
+      <li><strong>指标：</strong>ALFWorld 报 success rate(%)，Search-QA 报 accuracy(%)，WebShop 报 Score / Acc(%)；均<strong>越高越好</strong>。带 * 表示推理时验证仍带 skill。</li>
+    </ul>
+
+    <h3>主要结果</h3>
+    <p>下表摘自原文 Table 1 的核心列（各 benchmark 的 Avg / 总分），加粗本文方法 SDAR。括号内为相对 GRPO 的提升（按论文正文口径）。</p>
+    <table>
+      <thead><tr><th>方法</th><th class="num">ALFWorld Avg</th><th class="num">Search-QA Avg</th><th class="num">WebShop Score</th><th class="num">WebShop Acc</th></tr></thead>
+      <tbody>
+        <tr><td colspan="5" style="color:var(--muted)"><em>Qwen2.5-3B-Instruct</em></td></tr>
+        <tr><td>Vanilla</td><td class="num">21.9</td><td class="num">26.3</td><td class="num">6.7</td><td class="num">0.8</td></tr>
+        <tr><td>OPSD</td><td class="num">28.1</td><td class="num">0.1</td><td class="num">11.3</td><td class="num">3.1</td></tr>
+        <tr><td>GRPO</td><td class="num">75.0</td><td class="num">42.0</td><td class="num">79.7</td><td class="num">63.3</td></tr>
+        <tr><td>GRPO+OPSD</td><td class="num">66.4</td><td class="num">45.2</td><td class="num">76.3</td><td class="num">66.4</td></tr>
+        <tr><td>Skill-SD</td><td class="num">73.4</td><td class="num">44.0</td><td class="num">75.9</td><td class="num">64.0</td></tr>
+        <tr><td>RLSD</td><td class="num">79.7</td><td class="num">41.5</td><td class="num">84.4</td><td class="num">66.4</td></tr>
+        <tr><td><strong>SDAR</strong></td><td class="num"><strong>84.4</strong> (+9.4)</td><td class="num"><strong>44.8</strong></td><td class="num"><strong>85.0</strong></td><td class="num"><strong>68.0</strong></td></tr>
+        <tr><td colspan="5" style="color:var(--muted)"><em>Qwen2.5-7B-Instruct</em></td></tr>
+        <tr><td>GRPO</td><td class="num">81.2</td><td class="num">45.1</td><td class="num">80.9</td><td class="num">72.6</td></tr>
+        <tr><td>GRPO+OPSD</td><td class="num">76.5</td><td class="num">47.3</td><td class="num">76.9</td><td class="num">76.5</td></tr>
+        <tr><td>Skill-SD</td><td class="num">82.0</td><td class="num">46.9</td><td class="num">86.1</td><td class="num">76.5</td></tr>
+        <tr><td>RLSD</td><td class="num">82.0</td><td class="num">46.8</td><td class="num">87.4</td><td class="num">77.3</td></tr>
+        <tr><td><strong>SDAR</strong></td><td class="num"><strong>85.9</strong></td><td class="num"><strong>46.3</strong></td><td class="num"><strong>89.4</strong></td><td class="num"><strong>82.8</strong> (+10.2)</td></tr>
+        <tr><td colspan="5" style="color:var(--muted)"><em>Qwen3-1.7B-Instruct</em></td></tr>
+        <tr><td>OPSD</td><td class="num">0.3</td><td class="num">5.3</td><td class="num">4.5</td><td class="num">1.7</td></tr>
+        <tr><td>GRPO</td><td class="num">46.1</td><td class="num">43.5</td><td class="num">75.7</td><td class="num">46.1</td></tr>
+        <tr><td>GRPO+OPSD</td><td class="num">32.0</td><td class="num">40.7</td><td class="num">70.7</td><td class="num">38.3</td></tr>
+        <tr><td>Skill-SD</td><td class="num">52.3</td><td class="num">45.4</td><td class="num">74.0</td><td class="num">53.9</td></tr>
+        <tr><td>RLSD</td><td class="num">42.2</td><td class="num">46.4</td><td class="num">74.0</td><td class="num">50.8</td></tr>
+        <tr><td><strong>SDAR</strong></td><td class="num"><strong>53.9</strong></td><td class="num"><strong>45.3</strong></td><td class="num"><strong>76.8</strong></td><td class="num"><strong>58.6</strong></td></tr>
+      </tbody>
+    </table>
+    <p>读数：</p>
+    <ul>
+      <li><strong>对 GRPO 的稳定增益。</strong>3B 上 ALFWorld 84.4 vs 75.0（+9.4），Search-QA +7.0，WebShop-Acc +4.7；7B 上 WebShop-Acc +10.2。几乎所有设定下 SDAR 拿到 best 或 second-best。</li>
+      <li><strong>避开 naïve 组合的崩溃。</strong>standalone OPSD 灾难性失败（Search-QA 上近乎归零）；naïve GRPO+OPSD 在 Qwen3-1.7B 上严重退化（ALFWorld 32.0 vs GRPO 46.1）——无界的蒸馏梯度压垮了 RL 信号。SDAR 靠 gate 把蒸馏梯度限在有界范围内（Prop 4），在所有 scale 上保持稳定增益。</li>
+      <li><strong>更强的泛化（vs hybrid）。</strong>在最难的 Qwen3-1.7B（小模型用不好检索 skill）上对比尤为明显：Skill-GRPO 跌到 ALFWorld 21.1（远低于 GRPO 46.1）、RLSD 42.2，而 SDAR 拿到 53.9。作者归因于「衰减不确定的 negative 指导、保留 positive 背书」让 privileged 知识的注入更鲁棒。</li>
+      <li><strong>真正内化了 privileged 知识。</strong>Skill-GRPO 去掉推理时 skill 会大跌（3B 上 60.2 vs 80.5），甚至不如 vanilla GRPO（有害的分布依赖）；而 SDAR <strong>推理时根本不用 skill</strong>，仍在多数设定超过带 skill 的 Skill-GRPO*（ALFWorld-3B 84.4、ALFWorld-1.7B 53.9 vs 28.1），说明 gated distillation 把底层知识真正写进了参数。</li>
+    </ul>
+
+    <figure>
+      <img src="figures/fig1_teaser.png" alt="训练曲线与总体表现">
+      <figcaption>原文 Figure 1。<strong>上</strong>：SDAR（橙）相比 GRPO+OPSD（蓝），Teacher-Student Gap 更稳地收敛、Success Rate 更高更稳；<strong>下</strong>：三 benchmark 的总体表现条形图——training-free / training / hybrid 三类方法对比，SDAR（最右深色）均居前。</figcaption>
+    </figure>
+
+    <h3>训练动态与鲁棒性</h3>
+    <p><strong>Training Dynamics（图 5，Qwen2.5-7B / ALFWorld）。</strong>(a) 平均 Teacher-Student gap $\bar\Delta=\mathbb{E}_t[\Delta_t]$ 全程为<strong>负</strong>——teacher 平均给 student 采样 token 的概率比 student 自己还低，证实「partial asymmetric trust」：若无脑全盘蒸馏只会伤害性能；但 $\bar\Delta$ 稳步收敛向 0，说明 gate 成功识别并上权了 teacher 确实有益的那部分 token 子集。(b) gate activation ratio（$g_t>0.5$ 的 token 占比）在早期训练大多严格 <0.5（正确压制带负信号的 token），随 student 进化逐步上升（越来越多 token 进入「建设性 teacher 指导」区间）。</p>
+    <p><strong>Robust Analysis（Table 2，固定 $\lambda=0.01,\beta=5.0$）。</strong>四种检索质量都稳定超过纯 GRPO（w/o OPSD）。即便<strong>零任务感知的 Random Retrieval</strong> 也带来 ALFWorld +1.9 / WebShop-Score +1.6 / WebShop-Acc +1.0；KM 进一步放大到 +4.7/+8.5/+10.2 且在 WebShop 上超过 UCB。结论：增益主要源于 gated distillation 本身——gating 过滤掉了低质 skill 的噪声、只蒸馏有益信号，而非依赖 retrieval 的高保真度。</p>
+
+    <figure>
+      <img src="figures/fig3_gap_analysis.png" alt="Teacher-Student Gap 分析">
+      <figcaption>原文 Figure 3。<strong>左</strong>：按 gap 值划分的 token-count 分布，均值 −0.1168——大量 token 落在 negative-gap 一侧（>50%）；<strong>中</strong>：平均 gap 按 multi-turn step 索引，跨轮逐步变宽（drift）；<strong>右</strong>：平均 gap 按单轮内相对位置索引。</figcaption>
+    </figure>
+
+    <h3>消融 / 分析</h3>
+    <ul>
+      <li><strong>Gating 策略（图 6）。</strong>Teacher-Student Gap gating 一致优于 entropy 与 soft-OR，渐近 success rate 最高（~0.84）、前 100 步后爬升更陡。原因：$\Delta_t$ 直接度量 teacher 对 student 所选 token 的「异议」，是最直接的 importance signal；entropy 是间接 proxy，可能在「不确定但其实已处理好」的 token 上误激活；soft-OR 在只有一项中等大时就触发，稀释了 selectivity。</li>
+      <li><strong>Sharpness $\beta$（图 7）。</strong>$\beta\in\{0,1,5,10\}$，最优在 $\beta=5$。$\beta$ 太小（含 $\beta=0$ 的 no-gate）= 无差别蒸馏，继承 naïve OPSD 的多轮失稳；$\beta$ 太大则把 gate 二值化，丢掉对 borderline token 给「部分学分」的平滑调制。</li>
+      <li><strong>蒸馏系数 $\lambda$（图 8）。</strong>$\lambda\in\{0.001,0.01,0.1\}$，最优 $\lambda=0.01$。$\lambda=0.1$ 时蒸馏梯度压过 RL——因 teacher 在多轮里平均<em>不比</em> student 自信（$\bar\Delta<0$），过重的项会把 student 推向更差行为，性能急剧下滑；$\lambda=0.001$ 则纠正力度不足。</li>
+      <li><strong>蒸馏目标（图 9，Qwen2.5-7B）。</strong>reverse KL（默认）明显优于 forward KL 与 JSD。reverse KL 的 mode-seeking 与「弱 teacher、信号常丢」的设定天然契合（自动下调 teacher 概率低的 token），与显式 gating 互补；forward KL 的 mode-covering 会无差别吸收不可靠指导，JSD 居中。</li>
+    </ul>
+  </section>
+
+  <!-- ============================ ⑤ 洞见 ============================ -->
+  <section id="insight">
+    <h2><span class="n">⑤</span>洞见 Insights</h2>
+    <div class="callout insight">
+      <span class="label">Insight</span>
+      <ul style="margin:6px 0">
+        <li><strong>不要碰 RL 的 loss，把蒸馏外挂成一个 detached、有界的辅助项。</strong>SDAR 与 RLSD 的根本分野在于：RLSD 用 self-divergence 去 re-weight RL advantage（侵入主目标、早期易爆），而 SDAR 把蒸馏写成一个独立的 gate 加权 likelihood，gate 全程 stop-gradient——既严格保住 GRPO advantage 的无偏性，又用 $0<g_t<1$ 从理论上保证辅助梯度不会被放大（Prop 4）。这是一种很可迁移的「主目标不可侵犯、辅助信号必须有界且 detach」的工程范式。</li>
+        <li><strong>当 teacher 是「privileged 的同一 policy」而非更强模型时，它的指导是非对称的，必须区别对待正负信号。</strong>论文实证 negative-gap token 占比 >50% 且平均 gap 为负——盲目蒸馏只会受伤。「positive 背书可信、negative rejection 可疑（可能只是 skill 质量/利用/drift 的噪声）」这个洞见，加上 sigmoid gate 的非对称调制，是 self-distillation 在 noisy privileged context 下能 work 的关键，且对任何「用训练期特权信息做 dense 监督」的设定都适用。</li>
+        <li><strong>最细粒度的 self-paced curriculum：让每个 token 自己决定监督强度。</strong>相比 Skill-SD / HDPO / TCOD 那种人工、按 turn-depth 或时间表的 curriculum，把 curriculum 下放到单个 token（gate = token 级别的 trust），更自适应也更不脆。训练动态里 gate activation ratio 随 student 变强而自然上升，印证了它确实是个会「自己长出来」的 curriculum。</li>
+      </ul>
+    </div>
+
+    <h3>局限与未来</h3>
+    <p>从本文论述与设定看，可注意几点：(1) 每个训练步都要对 $(x,c^{+},y)$ 多做一次 teacher forward，带来额外算力（虽无需独立 teacher 模型）；(2) 评测限于 Qwen2.5/Qwen3 三个 ≤7B scale、三个 benchmark、150 训练步，更大模型与更长 horizon 上的表现尚待验证；(3) gate 的两个超参 $\lambda,\beta$ 需较仔细标定（$\lambda$ 过大即崩、$\beta$ 决定平滑/二值），论文用单组 $(\lambda{=}0.01,\beta{=}5)$ 跑全部实验，跨任务的自适应取值是自然的后续；(4) privileged context 这里主要是检索 skills，换成 reference answer 等其他特权信息时 gate 行为是否同样稳健，论文未系统展开。</p>
+
+    <h3>与相关工作的关系</h3>
+    <p>按本文自身的 framing：在 <strong>Agentic RL</strong> 脉络上，SDAR 承接 GRPO/DeepSeekMath 等 verifiable-reward RL，把它扩展到多轮 agent。在 <strong>OPD/OPSD</strong> 脉络上，GKD 式方法最小化 token-level divergence 但需全 vocabulary 的 teacher 分布；PG 式（含 RLSD、TIP）把差异转成 token-level reward 但有高方差/放大更新的风险；TCOD 用 turn-level curriculum 缓解 drift 但依赖僵硬时间表；OPSD（Zhao et al.; He et al.）进一步省掉独立 teacher、只靠 privileged context。SDAR 受 TIP「用 token-level 信号控制学习」的启发，但把它落成<strong>严格分离的辅助 objective + 自适应有界 token-level gate</strong>。相对 <strong>Hybrid 方法</strong>（Skill-SD、RLSD、HDPO）「人工时间表 / 侵入式放大 RL 更新」的做法，SDAR 的关键区别是：保住 RL advantage 的无偏性，只<strong>选择性</strong>注入有益 teacher 信号。</p>
+  </section>
+
+  <footer class="foot">
+    本页为 <code>paper-reading</code> skill 生成的阅读笔记，仅作辅助，细节以
+    <a href="https://arxiv.org/abs/2605.15155" target="_blank" rel="noopener">原文</a> 为准 · 解读日期 2026-05-30
+  </footer>
+
+</article>
+</body>
+</html>
