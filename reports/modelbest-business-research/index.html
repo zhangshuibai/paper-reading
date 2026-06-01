@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>面壁智能 (ModelBest) 商业调研报告</title>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --bad:#ff6b81; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --bad:#d23651; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;}
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:920px; margin:0 auto; padding:18px 22px 90px}
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:28px; line-height:1.3; margin:14px 0 6px}
+  .sub{color:var(--muted); font-size:15px; margin:0 0 14px}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:13.5px; margin:12px 0 0}
+  .meta-grid dt{color:var(--muted)} .meta-grid dd{margin:0}
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px; padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap; line-height:2}
+  nav.toc a:hover{color:var(--accent)}
+  section{margin:38px 0}
+  h2{font-size:21px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:17px; margin:24px 0 8px}
+  p{margin:12px 0} ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)} strong{color:var(--text)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.88em}
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:13.5px; overflow:hidden; border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:9px 11px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  .yes{color:var(--ok); font-weight:600} .no{color:var(--bad); font-weight:600} .mid{color:var(--warn); font-weight:600}
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .swot{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:16px 0}
+  .swot .box{border:1px solid var(--line); border-radius:10px; padding:12px 16px; background:var(--panel)}
+  .swot .box h4{margin:0 0 6px; font-size:14px}
+  .swot .s h4{color:var(--ok)} .swot .w h4{color:var(--bad)} .swot .o h4{color:var(--accent)} .swot .t h4{color:var(--warn)}
+  @media(max-width:640px){.swot{grid-template-columns:1fr}}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+  .src{font-size:12.5px; color:var(--muted)}
+  .legend{font-size:12.5px; color:var(--muted); margin:8px 0}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">端侧大模型</span>
+      <span class="chip">MiniCPM</span>
+      <span class="chip">Agentic · Tool Use</span>
+      <span class="chip">商业调研</span>
+      <span class="chip">竞争格局</span>
+    </div>
+    <h1>面壁智能（ModelBest）商业调研报告</h1>
+    <p class="sub">端侧高效大模型 · MiniCPM 小钢炮 · 模型 size 与应用场景 · Agentic / Tool Use / Coding 专题</p>
+    <dl class="meta-grid">
+      <dt>调研日期</dt><dd>2026-06-01</dd>
+      <dt>官网</dt><dd><a href="https://modelbest.cn/" target="_blank" rel="noopener">modelbest.cn</a> · <a href="https://github.com/OpenBMB" target="_blank" rel="noopener">github.com/OpenBMB</a> · <a href="https://huggingface.co/openbmb" target="_blank" rel="noopener">huggingface.co/openbmb</a></dd>
+      <dt>方法</dt><dd>6 路并行检索 + 一手来源（官网 / GitHub / Hugging Face / arXiv 技术报告 / 36氪·量子位等）交叉核验；数字区分官方宣称 vs 平台实测</dd>
+    </dl>
+  </header>
+
+  <div class="tldr">
+    <b>TL;DR</b> — 面壁智能是清华 NLP 实验室（THUNLP）与 OpenBMB 开源社区孵化的 <strong>「高效大模型 / 端侧 AI」</strong> 公司，以开源 <strong>MiniCPM「小钢炮」</strong> 系列建立口碑，核心叙事是自创的 <strong>Densing Law（密度法则）</strong>——能力密度每约 3.3 个月翻倍，已发表于 <em>Nature Machine Intelligence</em>。商业模式是「开源引流 + To B 端侧方案变现」，最硬的落地是<strong>汽车座舱</strong>（长安马自达 EZ-60、吉利银河 M9 两款真实量产车）。2026 Q1 由中国电信、深创投等领投，累计融资超 10 亿元、估值迈入独角兽。
+    <br><br>
+    <strong>两个重点结论：</strong>（1）<strong>模型 size</strong> 全系覆盖 0.5B / 1B / 2.4B / 4B / 8B，明确押注「端侧能跑」，多模态 MiniCPM-V/o 是手机端 VLM 标杆；自 MiniCPM4 起转 Apache-2.0 可商用。（2）<strong>Agentic</strong> 布局国内最完整之一（function calling 上 BFCL 榜、端侧 MCP agent、端侧手机 GUI agent、ChatDev ⭐33k），但 <strong>coding 绝对实力非第一梯队</strong>（无专用 code 模型，真实编程榜落后 Qwen3 / Phi-4），老牌 agent 框架已停更、重心转向「模型原生 agentic + 端侧」。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#s1">① 公司概况</a>
+    <a href="#s2">② 模型 size 与应用场景</a>
+    <a href="#s3">③ Agentic：Tool Use 与 Coding</a>
+    <a href="#s4">④ 开源生态 GitHub/HF</a>
+    <a href="#s5">⑤ 竞争格局</a>
+    <a href="#s6">⑥ 商业判断 SWOT</a>
+    <a href="#s7">⑦ 存疑点</a>
+    <a href="#src">来源</a>
+  </nav>
+
+  <!-- ① 公司概况 -->
+  <section id="s1">
+    <h2><span class="n">①</span>公司概况</h2>
+    <table>
+      <thead><tr><th>维度</th><th>内容</th><th>确定性</th></tr></thead>
+      <tbody>
+        <tr><td>全称</td><td>北京面壁智能科技有限责任公司（英文 ModelBest）</td><td class="yes">高</td></tr>
+        <tr><td>成立</td><td>源自清华 NLP 实验室 + OpenBMB 社区，2021 年由刘知远牵头筹组，2022 年 8 月公司化</td><td class="yes">高</td></tr>
+        <tr><td>核心人物</td><td>刘知远（清华副教授，联合创始人 / 首席科学家）；李大海（CEO，原知乎 CTO）。知乎为重要早期股东</td><td class="yes">高</td></tr>
+        <tr><td>定位</td><td>「以高效为第一性原理的大模型公司」，主打端侧 AI / 高效大模型</td><td class="yes">高</td></tr>
+        <tr><td>商业模式</td><td>开源 MiniCPM 引流 + To B 行业落地（汽车座舱 / AI 手机 / AI PC / 法律政务），C 端有多模态助手「露卡 Luca」</td><td class="yes">高</td></tr>
+        <tr><td>上市</td><td>截至 2026-06 尚未上市，仍处一级市场融资阶段，无明显负面新闻</td><td class="yes">高</td></tr>
+      </tbody>
+    </table>
+
+    <h3>融资路径</h3>
+    <p class="legend">金额多为「数千万 / 数亿」模糊披露，估值为媒体口径。</p>
+    <table>
+      <thead><tr><th>时间</th><th>轮次 / 规模</th><th>主要投资方</th></tr></thead>
+      <tbody>
+        <tr><td>2023.04</td><td>天使，数千万元</td><td>知乎领投、智谱 AI 跟投</td></tr>
+        <tr><td>2024.04</td><td>数亿元</td><td>春华创投、华为哈勃领投，北京市 AI 产业投资基金跟投</td></tr>
+        <tr><td>2024.12</td><td>数亿元</td><td>龙芯创投、鼎晖百孚、中关村科学城、赛富领投</td></tr>
+        <tr><td>2025 全年</td><td>数亿元</td><td>北京国资持续加注</td></tr>
+        <tr><td>2026 Q1</td><td><strong>累计超 10 亿元，估值迈入独角兽</strong></td><td>中国电信领投；深创投、汇川产投领投，道禾、国泰海通创新投等跟投（北京/深圳双城国资布局）</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout insight">
+      <span class="label">理论壁垒 · Densing Law（密度法则）</span>
+      刘知远团队 2024-12 提出：开源 LLM 的最大「能力密度」（达到同等性能所需的「有效参数量」/ 实际参数量）<strong>每约 3.3 个月翻一倍</strong>，对标摩尔定律。这是面壁「小模型打大模型」叙事的理论根基，论文已发表于 <em>Nature Machine Intelligence</em>（arXiv 2412.04315）。
+    </div>
+  </section>
+
+  <!-- ② 模型 size 与应用场景 -->
+  <section id="s2">
+    <h2><span class="n">②</span>重点一：模型 size 与应用场景</h2>
+
+    <h3>2.1 文本主线（size × 定位）</h3>
+    <table>
+      <thead><tr><th>模型</th><th>参数量</th><th>上下文</th><th>发布</th><th>关键特性</th><th>许可</th></tr></thead>
+      <tbody>
+        <tr><td>MiniCPM-2B (1.0)</td><td>2.4B</td><td>2K→128K</td><td>2024-02</td><td>首代端侧，公开 benchmark 媲美 Mistral-7B</td><td>权重需问卷</td></tr>
+        <tr><td>MiniCPM-S-1B</td><td>1B</td><td>—</td><td>2024-07</td><td>稀疏激活，FFN FLOPs −84%</td><td>Apache-2.0</td></tr>
+        <tr><td><strong>MiniCPM3-4B</strong></td><td>4B</td><td>32K</td><td>2024-09</td><td>超 Phi-3.5-mini / GPT-3.5；<strong>原生 function call + 代码解释器</strong></td><td>Apache-2.0</td></tr>
+        <tr><td>MiniCPM4-0.5B</td><td>0.5B</td><td>32K</td><td>2025-06</td><td>端侧极小，配三值量化 BitCPM4</td><td>Apache-2.0</td></tr>
+        <tr><td><strong>MiniCPM4-8B</strong></td><td>8B</td><td>32K→128K</td><td>2025-06</td><td><strong>InfLLM v2 可训练稀疏注意力</strong>；端侧比 Qwen3-8B 快 ~7×；8T tokens 达 Qwen3-8B(36T) 水平</td><td>Apache-2.0</td></tr>
+        <tr><td>MiniCPM4.1-8B</td><td>8B</td><td>64K→128K+</td><td>2025-09</td><td>混合推理 <code>&lt;think&gt;</code>，~3× 推理加速</td><td>Apache-2.0</td></tr>
+        <tr><td>MiniCPM5-1B</td><td>1B</td><td>长上下文</td><td>2026-05</td><td>SOTA 1B 端侧，原生 tool call，混合推理</td><td>Apache-2.0</td></tr>
+      </tbody>
+    </table>
+
+    <h3>2.2 多模态 MiniCPM-V / MiniCPM-o（手机端 VLM 标杆）</h3>
+    <table>
+      <thead><tr><th>模型</th><th>参数量</th><th>模态</th><th>发布</th><th>对标宣称（官方）</th></tr></thead>
+      <tbody>
+        <tr><td>MiniCPM-V 2.6</td><td>8B</td><td>单图/多图/视频</td><td>2024-08</td><td>GPT-4V 级，OpenCompass 65.2</td></tr>
+        <tr><td><strong>MiniCPM-o 2.6</strong></td><td>8B</td><td>+ <strong>音频/语音/实时直播</strong></td><td>2025-01</td><td>GPT-4o 级，OpenCompass 70.2</td></tr>
+        <tr><td>MiniCPM-V 4.5</td><td>8B</td><td>高 FPS 视频</td><td>2025-08</td><td>超 GPT-4o-latest / Qwen2.5-VL 72B，77.0</td></tr>
+        <tr><td>MiniCPM-o 4.5</td><td>9B</td><td>全模态</td><td>2026-02</td><td>Gemini 2.5 Flash 级</td></tr>
+        <tr><td>MiniCPM-V 4.6</td><td>1.3B</td><td>图/视频</td><td>2026-05</td><td>「手机原生」，~6GB 内存</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout note">
+      <span class="label">端侧定位的硬证据</span>
+      BitCPM 三值量化位宽 −90%；MiniCPM5-1B INT4 仅 <strong>0.5GB</strong>；MiniCPM4-8B 在 Jetson AGX Orin 上长文本解码比 Qwen3-8B 快 <strong>~7×</strong>；InfLLM v2 使 128K 长文本每 token 仅计算 &lt;5% token；官方支持 llama.cpp / Ollama / vLLM / SGLang。
+      <br><span class="mid">⚠️ 注意：</span>网传「<strong>220× 加速</strong>」是极端长文本场景的营销口径，技术报告正文实测为 <strong>5–7×</strong>。
+    </div>
+
+    <h3>2.3 应用场景与客户（汽车座舱为最硬主线）</h3>
+    <p class="legend">性质：<span class="yes">✅ 量产/签约</span> · 合作/适配 · <span class="no">❌ 不成立</span></p>
+    <table>
+      <thead><tr><th>案例</th><th>性质</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td><strong>长安马自达 EZ-60</strong></td><td class="yes">✅ 量产</td><td>2025-04 上市，「首个纯端侧模型量产车」，搭载纯端侧助手 cpmGO</td></tr>
+        <tr><td><strong>吉利银河 M9</strong></td><td class="yes">✅ 量产</td><td>2025-09，与吉利中央研究院联合开发端侧 <strong>VLA 0.9B</strong> 多模态，舱内外感知决策闭环</td></tr>
+        <tr><td>瑞芯微 Rockchip</td><td class="yes">✅ 签约</td><td>2026-04 战略合作，MiniCPM-o 4.5 + 芯片做座舱 AI Box</td></tr>
+        <tr><td>英特尔</td><td class="yes">✅ 量产/适配</td><td>AI PC + 「全球首个大规模量产 AI Box」（Core Ultra，最高 180 TOPS）</td></tr>
+        <tr><td>中科创达</td><td class="yes">✅ 签约</td><td>基于滴水 OS 打造下一代智能座舱</td></tr>
+        <tr><td>联想 / 易来 IoT / 百度智能云</td><td>合作</td><td>伙伴名单级（PC / 智能家居 / 具身边缘）</td></tr>
+        <tr><td>华为</td><td class="mid">资本 + 适配</td><td>哈勃投资 + 昇腾芯片适配，<strong>非整机搭载公告</strong></td></tr>
+        <tr><td>招商银行 / 西门子 / 易车等 ToB</td><td class="mid">中等确定</td><td>来自二手综述，缺一手新闻稿（金融 / 营销场景）</td></tr>
+        <tr><td>梅赛德斯-奔驰</td><td class="no">❌ 不成立</td><td>经核实无任何合作证据；奔驰车载 AI 走 Azure + Google 路线</td></tr>
+      </tbody>
+    </table>
+    <p><strong>商业逻辑：</strong>端侧模型主打<strong>离线可用、低延迟、隐私安全</strong>，参数压到 0.9–1.3B（INT4 后 0.5GB），覆盖手机 / PC / 座舱 / IoT / 机器人本地运行。2025-07 将「汽车业务线」升为一级组织，正从<strong>模型供应商 → 「芯片+模型」座舱方案商</strong>演进。</p>
+  </section>
+
+  <!-- ③ Agentic -->
+  <section id="s3">
+    <h2><span class="n">③</span>重点二：Agentic 能力（Tool Use 与 Coding）</h2>
+
+    <h3>3.1 Tool use / function calling / MCP —— 强</h3>
+    <ul>
+      <li><strong>MiniCPM3-4B 原生 function call</strong>，并有专门微调版 <strong>MiniCPM3-4B-FC</strong>，已入 Berkeley Function-Calling Leaderboard（<strong>BFCL v2 = 76.0</strong>，超 Llama3.1-8B、Qwen2-7B、GLM-4-9B）。</li>
+      <li><strong>MiniCPM4-MCP（8B）</strong>：端侧 MCP agent，跨 16 个 MCP server（Github、Slack、Filesystem、Desktop-Commander 等），函数选择准确率 88.3%。</li>
+      <li><strong>MiniCPM5-1B</strong>：1B 手机本地 agent，原生 tool call，推荐 SGLang 后端（内置 parser 转 OpenAI 兼容 <code>tool_calls</code>）。</li>
+    </ul>
+
+    <h3>3.2 Agent 框架与端侧 GUI agent</h3>
+    <table>
+      <thead><tr><th>项目</th><th>是什么</th><th>⭐ (2026-06)</th><th>状态</th></tr></thead>
+      <tbody>
+        <tr><td><strong>ChatDev</strong></td><td>LLM 多智能体协作软件开发</td><td>33.3k</td><td class="yes">✅ 活跃</td></tr>
+        <tr><td>ToolBench / ToolLLM</td><td>工具学习训练/评测平台（ICLR'24 spotlight）</td><td>5.7k</td><td class="yes">在更新</td></tr>
+        <tr><td>XAgent</td><td>自主 LLM agent</td><td>8.5k</td><td class="mid">⚠️ 停更(2024-08)</td></tr>
+        <tr><td>AgentVerse</td><td>多智能体部署框架</td><td>5.0k</td><td class="mid">⚠️ 停更(2024-09)</td></tr>
+        <tr><td><strong>AgentCPM-GUI</strong></td><td>端侧手机 GUI agent（8B，操作中文 App，动作均 9.7 token）</td><td>1.4k</td><td class="yes">✅ 中文 App SOTA 91.28%</td></tr>
+      </tbody>
+    </table>
+    <div class="callout insight">
+      <span class="label">判断</span>
+      Agentic「三层」齐全——<strong>框架层</strong>（ChatDev / ToolBench）、<strong>数据基准层</strong>（ToolBench / UltraTool）、<strong>模型原生层</strong>（MiniCPM3-4B-FC / MiniCPM4-MCP / MiniCPM5-1B / AgentCPM-GUI）。差异化护城河 = <strong>端侧 / 小模型 agent</strong>。但通用 agent 框架重心已从 XAgent/AgentVerse 明显转向「模型原生 agentic + 端侧 MCP/GUI」，ChatDev 是唯一仍高活跃的框架。
+    </div>
+
+    <h3>3.3 Coding 能力 —— 够用、同尺寸领先，但非第一梯队</h3>
+    <ul>
+      <li><strong>无专用 code 模型</strong>（不同于 Qwen-Coder / DeepSeek-Coder），coding 是通用能力副产品。</li>
+      <li>MiniCPM3-4B：HumanEval+ 68.3 / MBPP+ 63.2 / <strong>LiveCodeBench v3 仅 22.6</strong> —— HumanEval/MBPP 刷分友好虚高，真实竞赛榜偏低。</li>
+      <li>MiniCPM4.1-8B（深度推理）：HumanEval 95.7、AIME 领先 Qwen3-8B，但 <strong>LiveCodeBench v5/v6 仍输 Phi-4-14B 与 R1 蒸馏版</strong>。</li>
+      <li><strong>官方自承</strong>：极小模型「在更难的数学与编程任务上更弱，归因于模型尺寸限制推理能力」。</li>
+    </ul>
+    <div class="callout warn">
+      <span class="label">公认局限</span>
+      复杂 coding 与 <strong>long-horizon agent</strong>（多步工具链、仓库级任务）是小模型结构性短板：步数增长准确率急剧下降、单步工具错误级联放大、长程规划弱。对受 KV 缓存与单步精度限制的端侧小模型尤其致命。
+    </div>
+  </section>
+
+  <!-- ④ 开源生态 -->
+  <section id="s4">
+    <h2><span class="n">④</span>开源生态（GitHub / Hugging Face）</h2>
+    <p><strong>OpenBMB</strong>（Open Lab for Big Model Base）= 清华 THUNLP（研究）+ 面壁 ModelBest（商业化）共建。GitHub 组织自我宣称总 star <strong>13万+</strong>（未由第三方排名站独立复核）。</p>
+    <table>
+      <thead><tr><th>平台</th><th>项目 / 组织</th><th>关键指标（2026-06-01）</th><th>性质</th></tr></thead>
+      <tbody>
+        <tr><td>GitHub</td><td>ChatDev</td><td>⭐ 33.3k</td><td>实测</td></tr>
+        <tr><td>GitHub</td><td>MiniCPM-V（含 MiniCPM-o）</td><td>⭐ 25.5k，Apache-2.0</td><td>实测</td></tr>
+        <tr><td>GitHub</td><td>VoxCPM（语音）</td><td>⭐ 24k</td><td>实测</td></tr>
+        <tr><td>GitHub</td><td>MiniCPM</td><td>⭐ 9.3k，Apache-2.0</td><td>实测</td></tr>
+        <tr><td>GitHub</td><td>ToolBench / XAgent / AgentVerse</td><td>⭐ 5.7k / 8.5k / 5.0k</td><td>实测</td></tr>
+        <tr><td>GitHub</td><td>CPM.cu（自研端侧 CUDA 推理栈）</td><td>⭐ 240，Apache-2.0</td><td>实测</td></tr>
+        <tr><td>Hugging Face</td><td>openbmb 组织</td><td>151 模型 / 39 数据集 / 11 Spaces</td><td>实测</td></tr>
+        <tr><td>Hugging Face</td><td>MiniCPM-V-4.6</td><td>月下载 45.9万，赞 1.08k</td><td>实测</td></tr>
+        <tr><td>Hugging Face</td><td>MiniCPM5-1B</td><td>月下载 45.7k</td><td>实测</td></tr>
+        <tr><td>Hugging Face</td><td>Ultra-FineWeb（数据集）</td><td>月下载 65.4k</td><td>实测</td></tr>
+        <tr><td>跨平台</td><td>MiniCPM/-V 累计下载</td><td>「破千万 / 近 3000 万」</td><td class="mid">宣称</td></tr>
+        <tr><td>生态</td><td>llama.cpp / Ollama / vLLM / SGLang</td><td>官方支持（README 明示）</td><td>实测</td></tr>
+      </tbody>
+    </table>
+    <p class="legend">许可：代码与近期模型为 Apache-2.0；早期 MiniCPM 权重用「通用模型许可协议」——学术免费，端侧部署 ≤5,000 台或 DAU&lt;100 万可免费商用，超出需申请。整体趋向更宽松的 Apache-2.0。</p>
+  </section>
+
+  <!-- ⑤ 竞争格局 -->
+  <section id="s5">
+    <h2><span class="n">⑤</span>竞争格局（端侧 / 小模型赛道）</h2>
+    <table>
+      <thead><tr><th>维度</th><th>面壁 MiniCPM</th><th>阿里 Qwen3</th><th>Google Gemma3</th><th>MS Phi-4</th><th>智谱 GLM</th></tr></thead>
+      <tbody>
+        <tr><td>同尺寸综合实力</td><td>强</td><td><strong>最强、迭代最快</strong></td><td>强、多模态好</td><td>推理/coding 强</td><td>强（中文好）</td></tr>
+        <tr><td><strong>Coding 绝对值</strong></td><td>中</td><td><strong>强（有 Coder 专线）</strong></td><td>中</td><td><strong>强（LCB 领先）</strong></td><td>中</td></tr>
+        <tr><td><strong>端侧推理栈</strong></td><td><strong>最突出</strong></td><td>有但非核心</td><td>量化友好</td><td>一般</td><td>有 GLM-Edge</td></tr>
+        <tr><td>多模态端侧</td><td><strong>手机 VLM 标杆</strong></td><td>Qwen-VL 强</td><td>强</td><td>弱</td><td>—</td></tr>
+        <tr><td>理论叙事</td><td><strong>Densing Law 独家</strong></td><td>工程规模化</td><td>安全/多模态</td><td>数据质量</td><td>—</td></tr>
+      </tbody>
+    </table>
+    <p><strong>差异化定位：</strong>不打「最强 coding」，而打「<strong>端侧最高性能密度 + 最完整端侧推理软件栈（CPM.cu / InfLLM v2 / BitCPM 三值量化 / ArkInfer 多后端）+ 手机多模态</strong>」。在纯编程 SOTA 上不与 Qwen-Coder / Phi-4 正面硬刚，而是打「同等体积下综合更强 + 跑得动在边缘芯片」。</p>
+  </section>
+
+  <!-- ⑥ SWOT -->
+  <section id="s6">
+    <h2><span class="n">⑥</span>商业判断（SWOT）</h2>
+    <div class="swot">
+      <div class="box s"><h4>Strengths 优势</h4>
+        性能密度真实领先（22% tokens 达 Qwen3-8B 水平）；端侧软硬一体壁垒国内最深；独家 Densing Law 叙事（上 Nature MI）+ 手机 VLM 口碑；两款真实量产车背书。</div>
+      <div class="box w"><h4>Weaknesses 劣势</h4>
+        无专用 code 模型，真实编程 / 长程 agent 是公认短板；「以小博大」对标多为同尺寸或上一代闭源（GPT-3.5），面对 Qwen3-4B-2507 等新对手领先不稳固。</div>
+      <div class="box o"><h4>Opportunities 机会</h4>
+        座舱「芯片+模型」AI Box 方案商；AI 手机 / AI PC 端侧浪潮；具身智能 VLA；端侧 MCP/GUI agent。</div>
+      <div class="box t"><h4>Threats 威胁</h4>
+        Qwen 小尺寸迭代极快且全栈布局；端侧模型授权变现天花板与商业化节奏存疑；座舱方案商竞争（高通 / 厂商自研）。</div>
+    </div>
+    <p class="callout insight"><span class="label">一句话</span>面壁 MiniCPM 是「端侧高性能密度 + 推理工程」的标杆，coding「够用且同尺寸领先」，但<strong>不是为复杂编程 / 长程 Agent 而生</strong>；护城河是效率与端侧部署栈，而非编程 SOTA——后者仍由 Qwen（含 Coder 专线）与 Phi-4 把持。</p>
+  </section>
+
+  <!-- ⑦ 存疑 -->
+  <section id="s7">
+    <h2><span class="n">⑦</span>需注意的存疑点（诚实披露）</h2>
+    <ol>
+      <li><span class="no">❌ 奔驰合作不成立</span>——经核实无任何证据。</li>
+      <li><span class="mid">⚠️「220× 加速」</span>为营销口径，技术报告实测 5–7×。</li>
+      <li>「千万 / 3000 万累计下载」「13 万 star」为<strong>官方/媒体宣称</strong>，HF 仅给月下载，无法逐项独立复核。</li>
+      <li>招商银行 / 西门子等 ToB 客户来自二手综述，缺一手新闻稿。</li>
+      <li>华为为资本 + 适配关系，<strong>非整机搭载</strong>；手机整机量产搭载暂无官方公告。</li>
+      <li>各轮融资金额与估值均为模糊或媒体口径，公司未公布精确数字。</li>
+    </ol>
+  </section>
+
+  <!-- 来源 -->
+  <section id="src">
+    <h2>主要来源</h2>
+    <p class="src">
+      官网 <a href="https://modelbest.cn/" target="_blank" rel="noopener">modelbest.cn</a> ·
+      <a href="https://github.com/OpenBMB" target="_blank" rel="noopener">GitHub OpenBMB</a> ·
+      <a href="https://huggingface.co/openbmb" target="_blank" rel="noopener">Hugging Face openbmb</a><br>
+      技术报告：<a href="https://arxiv.org/abs/2506.07900" target="_blank" rel="noopener">MiniCPM4 (arXiv 2506.07900)</a> ·
+      <a href="https://arxiv.org/abs/2404.06395" target="_blank" rel="noopener">MiniCPM (2404.06395)</a> ·
+      <a href="https://arxiv.org/abs/2412.04315" target="_blank" rel="noopener">Densing Law (2412.04315)</a> /
+      <a href="https://www.nature.com/articles/s42256-025-01137-0" target="_blank" rel="noopener">Nature MI</a> ·
+      <a href="https://arxiv.org/abs/2506.01391" target="_blank" rel="noopener">AgentCPM-GUI (2506.01391)</a><br>
+      模型卡：<a href="https://huggingface.co/openbmb/MiniCPM3-4B" target="_blank" rel="noopener">MiniCPM3-4B</a> ·
+      <a href="https://huggingface.co/openbmb/MiniCPM4-MCP" target="_blank" rel="noopener">MiniCPM4-MCP</a> ·
+      <a href="https://huggingface.co/openbmb/MiniCPM-o-2_6" target="_blank" rel="noopener">MiniCPM-o 2.6</a> ·
+      <a href="https://gorilla.cs.berkeley.edu/leaderboard.html" target="_blank" rel="noopener">BFCL Leaderboard</a><br>
+      榜单/项目：<a href="https://github.com/OpenBMB/ChatDev" target="_blank" rel="noopener">ChatDev</a> ·
+      <a href="https://github.com/OpenBMB/AgentCPM-GUI" target="_blank" rel="noopener">AgentCPM-GUI</a> ·
+      <a href="https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507" target="_blank" rel="noopener">Qwen3-4B-2507</a><br>
+      公司/融资：<a href="https://www.36kr.com/p/2728647825646857" target="_blank" rel="noopener">36氪</a> ·
+      <a href="https://www.qbitai.com/2024/12/231764.html" target="_blank" rel="noopener">量子位</a> ·
+      <a href="https://finance.eastmoney.com/a/202604093699228297.html" target="_blank" rel="noopener">东方财富</a> ·
+      <a href="https://www.cls.cn/detail/2338712" target="_blank" rel="noopener">财联社</a>；
+      落地：长安马自达 EZ-60（<a href="https://ithome.com/0/848/497.htm" target="_blank" rel="noopener">IT之家</a>）· 吉利银河 M9（<a href="https://db.m.auto.sohu.com/model_7673/a/938174512_122362510" target="_blank" rel="noopener">搜狐汽车</a>）· 瑞芯微（<a href="https://www.stcn.com/article/detail/3893255.html" target="_blank" rel="noopener">证券时报</a>）
+    </p>
+  </section>
+
+  <footer class="foot">
+    本报告由 <code>deep-research</code> 工作流（6 路并行检索 + 交叉核验）生成，仅供参考，关键商业决策请以官方一手信息二次核验 · 调研日期 2026-06-01。
+  </footer>
+
+</article>
+</body>
+</html>
