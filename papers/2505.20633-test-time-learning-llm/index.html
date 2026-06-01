@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TLM：大模型的 Test-Time Learning · 论文解读</title>
+
+<script>
+  window.MathJax = {
+    tex:{inlineMath:[['$','$'],['\\(','\\)']], displayMath:[['$$','$$'],['\\[','\\]']]},
+    svg:{fontCache:'global'}
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;
+  }
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:880px; margin:0 auto; padding:18px 22px 90px}
+
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:27px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)}
+  .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .meta-grid a:hover{text-decoration:underline}
+
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap}
+  nav.toc a:hover{color:var(--accent)}
+
+  section{margin:38px 0}
+  h2{font-size:21px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:17px; margin:24px 0 8px}
+  p{margin:12px 0}
+  ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.9em}
+  strong{color:var(--text)}
+
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:14px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:10px 12px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  .yes{color:var(--ok); font-weight:600}
+  .no{color:var(--muted)}
+  .num{font-variant-numeric:tabular-nums; text-align:right}
+
+  figure{margin:24px 0; text-align:center}
+  figure img{max-width:100%; height:auto; border:1px solid var(--line); border-radius:10px; background:#fff}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+
+  blockquote{border-left:3px solid var(--line); margin:14px 0; padding:2px 16px; color:var(--muted)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+  .mjx-container{overflow-x:auto; overflow-y:hidden}
+  .twofig{display:grid; grid-template-columns:1fr 1fr; gap:16px}
+  @media (max-width:640px){.twofig{grid-template-columns:1fr}}
+  .twofig figure{margin:8px 0}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">test-time learning</span>
+      <span class="chip">domain adaptation</span>
+      <span class="chip">perplexity minimization</span>
+      <span class="chip">LoRA</span>
+      <span class="chip">unsupervised</span>
+    </div>
+    <h1>TLM：用最小化 input perplexity 让大模型在 test-time 自我适应</h1>
+    <p class="orig-title">Test-Time Learning for Large Language Models</p>
+    <dl class="meta-grid">
+      <dt>作者</dt><dd>Jinwu Hu, Zitian Zhang, Guohao Chen（共同一作）, Xutao Wen, Chao Shuai, Wei Luo, Bin Xiao, Yuanqing Li, Mingkui Tan（通讯）</dd>
+      <dt>团队 / 机构</dt><dd>South China University of Technology（华南理工大学软件学院）、Pazhou Laboratory（琶洲实验室）、Zhejiang University、South China Agricultural University、Chongqing University of Posts and Telecommunications</dd>
+      <dt>原文链接</dt><dd><a href="https://arxiv.org/abs/2505.20633" target="_blank" rel="noopener">https://arxiv.org/abs/2505.20633</a></dd>
+      <dt>发表 / 年份</dt><dd>ICML 2025（arXiv 预印本，2025-05-27）</dd>
+      <dt>解读日期</dt><dd>2026-06-01</dd>
+    </dl>
+  </header>
+
+  <div class="tldr">
+    <b>TL;DR</b> — 当 LLM 遇到训练时没见过的领域或语言风格（distribution shift），性能会明显下降。TLM 提出一种 <b>Test-Time Learning（TTL）</b>范式：测试阶段只用<strong>无标注</strong>的测试输入 $x$，通过<strong>最小化 input perplexity</strong> 来在线更新模型。核心论据是「input perplexity 与 output perplexity 同涨同跌」，所以压低看得见的 $\mathcal{P}(x)$ 就能间接压低看不见的 $\mathcal{P}(y\,|\,x)$。再配上「只挑 high-perplexity 样本更新」的 Sample-Efficient 策略和「用 LoRA 而非全参更新」来抑制 catastrophic forgetting。作者构建了 <b>AdaptEval</b> benchmark，在 4 个 LLM 上相比原始模型在 domain 任务上提升 ≥20%，且代码、数据、权重均已开源。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#opensource">① 开源贡献</a>
+    <a href="#motivation">② 动机与贡献</a>
+    <a href="#method">③ 方法</a>
+    <a href="#evaluation">④ 实验评估</a>
+    <a href="#insight">⑤ 洞见</a>
+  </nav>
+
+  <!-- ① 开源贡献 -->
+  <section id="opensource">
+    <h2><span class="n">①</span>开源贡献 Open-source Artifacts</h2>
+    <p>这篇是 <strong>开源比较完整</strong> 的一篇：论文正文第 5.1 节明确给出代码地址，仓库自报已被 ICML 2025 接收，包含 offline / online 两套 TTL 实现、AdaptEval 评测脚本，并把 AdaptEval 数据集与 TLM 权重都托管到了 Hugging Face。以下链接均已逐一核实存在。</p>
+    <table>
+      <thead><tr><th>类型</th><th>是否开源</th><th>内容 / 链接</th></tr></thead>
+      <tbody>
+        <tr><td>代码 Code</td><td class="yes">✔</td>
+          <td><a href="https://github.com/Fhujinwu/TLM" target="_blank" rel="noopener">github.com/Fhujinwu/TLM</a><br>基于 LLaMA-Factory 框架，含 <code>offline_ttl.yaml</code> / <code>online_ttl.yaml</code> 配置、<code>src/</code> 核心实现与 <code>evaluation/</code>（ROUGE、BERTScore、BLEURT 等）。许可证 <strong>Apache-2.0</strong>。</td></tr>
+        <tr><td>数据集 / Benchmark<br>（AdaptEval）</td><td class="yes">✔</td>
+          <td><a href="https://huggingface.co/datasets/Jinwu01/AdaptEval" target="_blank" rel="noopener">huggingface.co/datasets/Jinwu01/AdaptEval</a><br>含 DomainBench / InstructionBench / ReasoningBench 共 10 个子集，每子集各随机抽 5k 样本。许可证标 MIT。（注：截至解读日 HF 在线 viewer 因 <code>MetaMathQA</code> 子集多一个 <code>solution</code> 列而报 cast 错误，但文件本身可下载。）</td></tr>
+        <tr><td>模型权重 Weights</td><td class="yes">✔</td>
+          <td><a href="https://huggingface.co/Jinwu01/TLM" target="_blank" rel="noopener">huggingface.co/Jinwu01/TLM</a><br>safetensors 格式，许可证 MIT；README 为空，未附详细说明卡。</td></tr>
+        <tr><td>项目主页 / Demo</td><td class="no">✘</td>
+          <td>未见独立 project page 或在线 demo。</td></tr>
+      </tbody>
+    </table>
+    <p class="no" style="font-size:13px">说明：AdaptEval 本身是把 HF 上 10 个现成公开数据集（GeoSignal、Agriculture-QA、GenMedGPT-5k、Wealth-Alpaca-LoRA、Alpaca-GPT4、Dolly-15k、InstructionWild、GSM8K、MetaMathQA、LogiQA）各抽 5k 重新打包成统一的 TTL 评测套件，而非全新采集的语料。</p>
+  </section>
+
+  <!-- ② 动机与贡献 -->
+  <section id="motivation">
+    <h2><span class="n">②</span>研究动机与贡献 Motivation &amp; Contribution</h2>
+    <h3>背景与问题</h3>
+    <p>LLM 靠海量预训练拿到了通用能力，但部署到真实环境时会撞上 <strong>distribution shift</strong>，主要有两类：1) <strong>Vertical Domain Shift</strong>——医学、法律、农业等垂域里的稀有术语和结构，模型没专门训过；2) <strong>非特定领域的分布漂移</strong>——用户意图、方言、俚语等 linguistic diversity 让测试分布偏离训练分布。两者都会让生成质量显著下滑。</p>
+    <p>作者把已有的应对手段归成四类，并逐一指出痛点（原文 Table 1）：</p>
+    <ul>
+      <li><strong>Fine-tuning</strong>：要大量<strong>有标注</strong>数据，垂域标注昂贵、在线更新场景更难拿到。</li>
+      <li><strong>RAG</strong>：不更新参数、靠外部检索，但效果强依赖检索质量，且引入额外延迟，不适合时间敏感任务。</li>
+      <li><strong>Test-Time Adaptation (TTA)</strong>：用无标注测试数据在线更新参数——方向对，但绝大多数 TTA 沿用<strong>entropy minimization</strong>，这忽视了 LLM 的 autoregressive 依赖结构，直接套用反而<strong>有害</strong>（见下文 Figure 1a，熵最小化把 ROUGE 从 0.245 砸到 0.078）。</li>
+      <li><strong>Test-Time Training (TTT)</strong>：推理时从训练集/知识库检索近邻再 fine-tune，但<strong>假设能访问训练数据或知识库</strong>，现实里常不成立，且检索本身有开销。</li>
+    </ul>
+    <p>归纳起来三条核心 limitation：① 有标注数据难获取；② 现有方法忽视 autoregressive 依赖、误用 entropy minimization；③ 训练开销大且容易 catastrophic forgetting。</p>
+
+    <h3>本文的切入点</h3>
+    <p>作者定义了一个比 TTA / TTT 都更苛刻的设定 <strong>Test-Time Learning（TTL）</strong>：<strong>既没有源数据、也没有标注、也没有外部知识库，只有当前这批无标注测试输入 $x$</strong>，要求 self-supervised 地把模型适配到目标分布。关键观察（也是全文支柱）是：</p>
+    <blockquote>测试时拿不到答案 $y$，但 input 的 perplexity $\mathcal{P}(x)$ 和 output 的 perplexity $\mathcal{P}(y\,|\,x)$ <strong>趋势一致</strong>——所以最小化看得见的 $\mathcal{P}(x)$ 就能间接压低看不见的 $\mathcal{P}(y\,|\,x)$，从而提升答案质量。</blockquote>
+
+    <h3>核心贡献</h3>
+    <ol>
+      <li><strong>提出 input perplexity minimization 作为 TTL 目标</strong>：给出经验证据（Figure 1b 四个垂域里 input/output perplexity 强正相关）和一阶 Taylor 展开的理论分析，论证最小化 $\mathcal{P}(x)$ 能降低 $\mathcal{P}(y\,|\,x)$，把 self-supervised 适配落地。</li>
+      <li><strong>Sample-Efficient Learning Strategy</strong>：发现 high-perplexity 样本对更新贡献更大、而 very-low-perplexity 样本甚至有害，于是用基于 perplexity 的权重函数主动筛选并加权 high-perplexity 样本做反向传播，省算力又提点。</li>
+      <li><strong>用 LoRA 而非全参更新</strong>来抑制 catastrophic forgetting（Observation 3 / Figure 2：全参更新在 GSM8K 等通用能力上崩盘，LoRA 几乎不掉）。</li>
+      <li><strong>构建 AdaptEval benchmark</strong>（DomainBench / InstructionBench / ReasoningBench，共 10 子集），并在 4 个 LLM 上验证 TLM 相比原始模型在 domain 知识适配上 <strong>≥20%</strong> 提升。</li>
+    </ol>
+  </section>
+
+  <!-- ③ 方法 -->
+  <section id="method">
+    <h2><span class="n">③</span>方法 Method</h2>
+    <p>TLM 的 pipeline（原文 Algorithm 1）很轻：给训练好的 LLM 挂上 LoRA，逐 batch 处理测试样本——先正向算出预测与每个样本的 perplexity，据此算 selection score $S(x)$ 决定要不要 / 多大权重地更新，再用 input perplexity 损失反传，只更新 LoRA 参数。整体由三个组件构成：(1) input perplexity minimization 目标、(2) sample-efficient 的样本选择、(3) LoRA 轻量更新。下面逐一展开，并用三个 observation 把设计动机串起来。</p>
+
+    <h3>3.1 为什么最小化 input perplexity 有效</h3>
+    <p>Perplexity 定义为平均负对数似然的指数：对 token 序列 $\{x_1,\dots,x_T\}$，</p>
+    $$\mathcal{P}(\{x_1,\dots,x_T\}) = \exp\!\Big(-\tfrac{1}{T}\textstyle\sum_{t=1}^{T}\log p(x_t\,|\,x_{1:t-1};\Theta)\Big).$$
+    <p>其中 $p(x_t\,|\,x_{1:t-1};\Theta)$ 是模型在参数 $\Theta$ 下、给定前文预测第 $t$ 个 token 的条件概率；$T$ 是序列长度。perplexity 越低代表模型对这段文本越「自信」、越贴合数据真实分布，也即拟合得越好。</p>
+    <p>理想情况下我们想直接压低答案的 perplexity $\mathcal{P}(y\,|\,x;\Theta)$，但测试时只有输入 $x$、没有答案 $y$。作者退而求其次去最小化 $\mathcal{P}(x;\Theta)$，并用<strong>一阶 Taylor 展开</strong>说明这步合理。记一次 TTL 更新后参数为 $\Theta' = \Theta - \eta\nabla_\Theta(-\log\mathcal{P}(x;\Theta))$，则：</p>
+    $$\log \mathcal{P}_{\Theta'}(y\,|\,x) \approx \log \mathcal{P}_{\Theta}(y\,|\,x) + \eta\underbrace{[\nabla_\Theta\log\mathcal{P}(x;\Theta)]^{\top}\nabla_\Theta\log\mathcal{P}_{\Theta}(y\,|\,x)}_{\text{cross-gradient 项}} + O(\eta^2).$$
+    <p>符号含义：$\eta$ 是学习率；第一项是更新前的答案对数似然；关键是<strong>cross-gradient 项</strong>，即「压低 input perplexity 的梯度方向」与「提升答案似然的梯度方向」的内积 $\langle\nabla_x,\nabla_y\rangle$。只要这个内积 $\geq 0$（即对语义对齐的 QA 对，两个梯度方向不冲突），那么对足够小的 $\eta$ 就能保证 $\log\mathcal{P}_{\Theta'}(y\,|\,x)\geq\log\mathcal{P}_{\Theta}(y\,|\,x)$——答案似然不降反升。作者在 DomainBench / LLaMA3.1-8B 上用 400 个 batch 实测，<strong>98.75%</strong> 的 batch 满足非负条件，平均内积 $\langle\nabla_x,\nabla_y\rangle = +5.60$，为这个假设提供了经验支撑。</p>
+
+    <div class="twofig">
+      <figure>
+        <img src="figures/entropy_vs_ppl.png" alt="熵最小化 vs perplexity 最小化">
+        <figcaption>原文 Figure 1a：entropy minimization 把 ROUGE-LSUM 从 0.245 砸到 0.078（有害），perplexity minimization 反而升到约 0.319。</figcaption>
+      </figure>
+      <figure>
+        <img src="figures/input_vs_output_ppl.png" alt="input perplexity 与 output perplexity 趋势一致">
+        <figcaption>原文 Figure 1b：四个垂域里 input perplexity 与 output perplexity 呈强正相关（已归一化）——这是「压 $\mathcal{P}(x)$ 即压 $\mathcal{P}(y\,|\,x)$」的经验依据（Observation 1）。</figcaption>
+      </figure>
+    </div>
+
+    <h3>3.2 Sample-Efficient Learning Strategy</h3>
+    <p><strong>Observation 2</strong>：不是所有测试样本对更新一样有用。把样本按 perplexity 排序后分批训练，发现 <strong>high-perplexity 样本贡献更大</strong>，而 very-low-perplexity 样本甚至<strong>拖累</strong>性能——因为低 perplexity 样本本就被模型建模得很好，没新信息，硬学反而 overfit。</p>
+    <p>于是优化目标加上一个逐样本权重 $S(x)$：</p>
+    $$\min_{\Theta}\; S(x)\,\mathcal{P}(x;\Theta),\qquad
+      S(x) = \lambda\cdot e^{\,[\log\mathcal{P}(x;\Theta)-\log P_0]}\cdot \mathbb{I}_{\{\mathcal{P}(x;\Theta)>P_0\}}(x).$$
+    <p>其中 $\mathbb{I}_{\{\cdot\}}$ 是指示函数，$P_0$ 是 perplexity 阈值，$\lambda$ 是缩放系数。直觉：perplexity 低于 $P_0$ 的样本直接被门控掉（$S(x)=0$，省去反向传播），高于阈值的样本按超出量做<strong>指数加权</strong>，越「难」权重越大。注意 $S(x)$ 只需正向算 perplexity、<strong>不涉及反向传播</strong>，所以筛选本身几乎免费。论文取 $\lambda=0.10$、$P_0=e^3$。</p>
+
+    <figure>
+      <img src="figures/sample_select.png" alt="high vs low perplexity 样本对比">
+      <figcaption>原文 Figure 1c：相同训练样本比例下，用 high-perplexity 样本（橙）训练的 ROUGE-LSUM 始终高于 low-perplexity 样本（绿）（Observation 2）。</figcaption>
+    </figure>
+
+    <h3>3.3 用 LoRA 抑制 catastrophic forgetting</h3>
+    <p><strong>Observation 3</strong>：在 DomainBench 上分别用全参更新和 LoRA 做 TTL，再回头测 GSM8K / DomainBench EM。全参更新会把模型原本学到的通用知识冲掉（forgetting 严重），而 LoRA 因为只动很小一部分参数，相当于自带正则，几乎不掉点。于是 TTL 的更新只作用在 LoRA 增量上：</p>
+    $$\min_{\Delta\Theta}\; S(x)\,\mathcal{P}(x;\,\Theta+\Delta\Theta),\qquad \Delta\Theta = BA,$$
+    <p>其中 $\Delta\Theta=BA$ 是低秩增量，$A$ 用随机高斯初始化、$B$ 初始化为零（故训练开始时 $\Delta\Theta=0$，不扰动原模型），TTL 期间<strong>只更新 $\Delta\Theta$</strong>、冻结原始权重 $\Theta$。这既轻量又保留了原始知识。</p>
+
+    <figure>
+      <img src="figures/lora_forgetting.png" alt="LoRA vs 全参更新的遗忘对比">
+      <figcaption>原文 Figure 2：DomainBench 上 LoRA（红）几乎贴着 Origin LLM（橙虚线），而 Full-Param 更新（绿）EM 大幅崩塌——LoRA 显著缓解 catastrophic forgetting（Observation 3）。</figcaption>
+    </figure>
+
+    <div class="callout note">
+      <span class="label">实现要点</span>
+      优化器 Adam；<strong>batch size = 1</strong>；学习率按 benchmark 分别取 DomainBench/InstructionBench/ReasoningBench = <code>5e-5 / 5e-5 / 1e-6</code>；样本选择 $\lambda=0.10$、$P_0=e^3$（消融显示 $e^3$ 在多数垂域最优，过高过低都掉点）。所有实验用 <strong>greedy decoding（temperature=0）</strong>稳定输出。online 设定下每 100 个样本才更新一次参数。还验证了在 4-bit NF4 量化（QLoRA 风格）模型上同样有效。
+    </div>
+  </section>
+
+  <!-- ④ 实验评估 -->
+  <section id="evaluation">
+    <h2><span class="n">④</span>实验评估 Evaluation</h2>
+    <h3>评测设置</h3>
+    <ul>
+      <li><strong>Benchmark（AdaptEval，10 子集 ×5k）：</strong>
+        <strong>DomainBench</strong>（Geography / Agriculture / Medicine / Finance，考察垂域知识适配）、
+        <strong>InstructionBench</strong>（Alpaca-GPT4 / Dolly / InstructionWild，考察指令跟随）、
+        <strong>ReasoningBench</strong>（GSM8K / MetaMath / LogiQA，考察数学与逻辑推理）。</li>
+      <li><strong>LLM：</strong>Llama3.2-3B-Instruct、Llama3-8B-Instruct、Llama2-13B-chat、Qwen2.5-7B-Instruct（覆盖不同规模与系列）。</li>
+      <li><strong>对比基线：</strong>原始 LLM，以及三种 SOTA TTA 方法 <strong>Tent</strong>、<strong>EATA</strong>、<strong>COME</strong>（均为无标注在线更新；为公平对比都改成了 offline 设定）。</li>
+      <li><strong>指标：</strong>DomainBench / InstructionBench 用 <strong>ROUGE-LSUM</strong>，ReasoningBench 用 <strong>Exact Match (EM)</strong>，均<strong>越高越好</strong>。</li>
+    </ul>
+
+    <h3>主要结果</h3>
+    <p>核心结论：<strong>TLM 在全部数据集、全部模型上都稳定优于原始 LLM</strong>；而 Tent / EATA / COME 这些基于 entropy 的 TTA 方法在 LLM 上经常<strong>大幅倒退</strong>（很多格子掉到接近 0）。下表摘自原文 Table 2/3，挑 Llama3-8B-Instruct 为例（TLM 加粗）：</p>
+    <table>
+      <thead><tr><th>方法 (Llama3-8B-Instruct)</th><th class="num">Geography</th><th class="num">Medicine</th><th class="num">Finance</th><th class="num">GSM8K</th><th class="num">Alpaca-GPT4</th></tr></thead>
+      <tbody>
+        <tr><td>Origin LLM</td><td class="num">0.2450</td><td class="num">0.1265</td><td class="num">0.2329</td><td class="num">0.7610</td><td class="num">0.3752</td></tr>
+        <tr><td>Tent</td><td class="num">0.0778</td><td class="num">0.0105</td><td class="num">0.0372</td><td class="num">0.7578</td><td class="num">0.2001</td></tr>
+        <tr><td>EATA</td><td class="num">0.2081</td><td class="num">0.0127</td><td class="num">0.1257</td><td class="num">0.0250</td><td class="num">0.1397</td></tr>
+        <tr><td>COME</td><td class="num">0.0048</td><td class="num">0.0301</td><td class="num">0.0328</td><td class="num">0.7479</td><td class="num">0.1424</td></tr>
+        <tr><td><strong>TLM (Ours)</strong></td><td class="num"><strong>0.3212</strong></td><td class="num"><strong>0.2372</strong></td><td class="num"><strong>0.3242</strong></td><td class="num"><strong>0.8074</strong></td><td class="num"><strong>0.4274</strong></td></tr>
+      </tbody>
+    </table>
+    <p><strong>诚实解读：</strong></p>
+    <ul>
+      <li><strong>垂域提升最显著</strong>：DomainBench 上相比原始模型「至少 20%」的提点站得住，部分格子（如 Medicine：0.1265→0.2372，约 +87%）提升巨大。摘要里的「≥20%」主要指 domain 知识适配。</li>
+      <li><strong>基线方法集体翻车</strong>：Tent/EATA/COME 在多数垂域和 InstructionBench 上掉得很惨，印证了「entropy minimization 不适合 autoregressive 的 LLM」这一核心论点——TLM 的优势很大一部分来自<strong>换掉了优化目标</strong>。</li>
+      <li><strong>推理任务提升较温和</strong>：ReasoningBench 上 GSM8K 仅约 +6.1%（0.7610→0.8074），EM 这类硬指标天花板更紧；在 Llama2-13B-chat 上 GSM8K/MetaMath 几乎持平（0.3458→0.3508、0.2498→0.2576），说明 TTL 对已经较弱或较饱和的能力增益有限，主要发力点仍是 domain/instruction 适配。</li>
+    </ul>
+
+    <h3>消融 / 分析</h3>
+    <ul>
+      <li><strong>input perplexity minimization 是主力</strong>（Table 4）：仅加 input perplexity 最小化（w/o SEL）相比原始 Llama3-8B 就有 >30% 相对提升，Medicine 上达 <strong>+83.9%</strong>——这一步贡献了绝大部分增益。</li>
+      <li><strong>Sample-Efficient 策略锦上添花</strong>：在 w/o SEL 基础上再加样本选择，性能再涨约 <strong>+2%</strong>（Agriculture +5.1%），同时<strong>反向传播次数减少约 4.6%</strong>（5000→4772）——既提点又省算力。</li>
+      <li><strong>阈值 $P_0$ 敏感性</strong>（Figure 3）：$P_0=e^3$ 在 Geography/Medicine/Finance 最优、Agriculture 近最优；过高会筛掉太多 high-perplexity 样本、过低会混入无用的 low-perplexity 样本。</li>
+      <li><strong>online 设定</strong>（Table 5）：每 100 样本更新一次，TLM 仍稳超原模型，且因「样本越学越简单被门控掉」，反向传播次数狂降 <strong>69.7%</strong>（5000→1514）。</li>
+      <li><strong>量化兼容</strong>：4-bit NF4 量化的 Llama3-8B 上，TLM 在 DomainBench 四子集仍 ≥25% 提升，说明该方案对量化部署友好。</li>
+    </ul>
+  </section>
+
+  <!-- ⑤ 洞见 -->
+  <section id="insight">
+    <h2><span class="n">⑤</span>洞见 Insights</h2>
+    <div class="callout insight">
+      <span class="label">Insight</span>
+      <ol style="margin:0">
+        <li><strong>把 CV 里的 TTA 直接搬到 LLM 是错的。</strong>视觉 TTA 的看家本领 entropy minimization，在 autoregressive 的 LLM 上会主动破坏生成质量（0.245→0.078）。换成 perplexity minimization——一个天然贴合 next-token prediction 的目标——才对路。优化目标必须匹配模型的归纳结构。</li>
+        <li><strong>用可观测的代理量优化不可观测的目标。</strong>测试时拿不到答案 $y$，但 input 和 output 的 perplexity 同涨同跌，于是「压 $\mathcal{P}(x)$」成了「压 $\mathcal{P}(y\,|\,x)$」的免费代理。这种「找一个梯度方向不冲突的可观测代理」的思路可迁移到很多 self-supervised 适配场景。</li>
+        <li><strong>难样本更值钱，且 LoRA 是天然的抗遗忘正则。</strong>high-perplexity 样本信息量大、low-perplexity 样本反而有害；用 LoRA 的低秩约束做更新，几乎白送一层 forgetting 防护——这两点对任何在线/持续学习系统都有借鉴价值。</li>
+      </ol>
+    </div>
+    <h3>局限与未来</h3>
+    <p>方法的边界比较清楚：(1) 增益高度集中在 <strong>domain/instruction 适配</strong>，对 <strong>reasoning</strong> 这类硬能力提升有限甚至持平（Llama2-13B 上 GSM8K 几乎不动）；(2) cross-gradient 非负只是<strong>经验上 98.75% 成立</strong>的假设，并非保证，对语义不对齐的 QA 对理论上可能失效；(3) batch size=1、逐样本更新，吞吐受限；(4) AdaptEval 是把现成公开数据各抽 5k 重组，shift 的「真实性/严苛度」取决于这些源数据。作者自列的未来方向是 <strong>Cross-Domain Continuous Adaptation</strong>——跨多领域连续适配而不过拟合到单一领域。</p>
+    <h3>与相关工作的关系</h3>
+    <p>论文用 Table 1 把自己定位在四类方法之外的新格子：相比 <strong>Fine-tuning</strong> 不需要标注；相比 <strong>RAG</strong> 不依赖外部知识库与检索；相比 <strong>TTA</strong> 改用 perplexity（而非 entropy）目标并显式处理 autoregressive 依赖；相比 <strong>TTT</strong> 不假设可访问训练数据或知识库——TLM 的设定「只有无标注测试输入」是其中最干净也最苛刻的一档，作者称其学习类型为 <strong>self-supervised</strong>。</p>
+  </section>
+
+  <footer class="foot">
+    本页为 <code>paper-reading</code> skill 生成的阅读笔记，仅作辅助，细节以
+    <a href="https://arxiv.org/abs/2505.20633" target="_blank" rel="noopener">原文</a> 为准 · 解读日期 2026-06-01
+  </footer>
+
+</article>
+</body>
+</html>

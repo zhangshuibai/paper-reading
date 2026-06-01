@@ -39,6 +39,25 @@
     "path": "papers/2504.16084-ttrl-test-time-reinforcement-learning/index.html"
   },
   {
+    "slug": "2505.20633-test-time-learning-llm",
+    "title": "Test-Time Learning for Large Language Models",
+    "authors": "Jinwu Hu, Zitian Zhang, Guohao Chen, et al.",
+    "team": "South China University of Technology; Pazhou Laboratory",
+    "arxiv": "https://arxiv.org/abs/2505.20633",
+    "code": "https://github.com/Fhujinwu/TLM",
+    "date": "2026-06-01",
+    "published": "ICML 2025",
+    "tldr": "TLM：测试时只用无标注输入，通过最小化 input perplexity（+高perplexity样本选择+LoRA抗遗忘）让 LLM 在线适配目标域，domain 任务提升≥20%；含 AdaptEval benchmark。",
+    "tags": [
+      "test-time-learning",
+      "domain-adaptation",
+      "perplexity",
+      "LoRA",
+      "unsupervised"
+    ],
+    "path": "papers/2505.20633-test-time-learning-llm/index.html"
+  },
+  {
     "slug": "2605.17933-atlasva-visual-skill-memory",
     "title": "AtlasVA: Self-Evolving Visual Skill Memory for Teacher-Free VLM Agents",
     "authors": "Pan Wang, Yihao Hu, Xiujin Liu, Jingchu Yang, Hang Wang, Zhihao Wen",
