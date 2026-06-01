@@ -90,7 +90,9 @@
   <div class="tldr">
     <b>TL;DR</b> — 面壁智能是清华 NLP 实验室（THUNLP）与 OpenBMB 开源社区孵化的 <strong>「高效大模型 / 端侧 AI」</strong> 公司，以开源 <strong>MiniCPM「小钢炮」</strong> 系列建立口碑，核心叙事是自创的 <strong>Densing Law（密度法则）</strong>——能力密度每约 3.3 个月翻倍，已发表于 <em>Nature Machine Intelligence</em>。商业模式是「开源引流 + To B 端侧方案变现」，最硬的落地是<strong>汽车座舱</strong>（长安马自达 EZ-60、吉利银河 M9 两款真实量产车）。2026 Q1 由中国电信、深创投等领投，累计融资超 10 亿元、估值迈入独角兽。
     <br><br>
-    <strong>两个重点结论：</strong>（1）<strong>模型 size</strong> 全系覆盖 0.5B / 1B / 2.4B / 4B / 8B，明确押注「端侧能跑」，多模态 MiniCPM-V/o 是手机端 VLM 标杆；自 MiniCPM4 起转 Apache-2.0 可商用。（2）<strong>Agentic</strong> <strong>布局</strong>国内最完整之一（function calling 上 BFCL、端侧 MCP agent、端侧手机 GUI agent、ChatDev ⭐33k），但硬成绩只来自<strong>静态 / 自建基准</strong>——真实多轮 agentic（MCP-Universe、MCPMark）与 agentic coding（Terminal-Bench、SWE-bench）<strong>均未见参评</strong>，「真实 agentic 编排能力」尚无第三方背书；<strong>coding 绝对实力也非第一梯队</strong>（无专用 code 模型，真实编程榜落后 Qwen3 / Phi-4）。
+    <strong>两个核心结论：</strong>
+    <br><br>① <strong>定位就是 8B 以下端侧小模型。</strong> 全系覆盖 0.5B / 1B / 2.4B / 4B / 8B，主力 ≤8B，押注「手机 / PC / 座舱本地能跑」（INT4 量化后最小仅 0.5GB）；多模态 MiniCPM-V/o 是手机端 VLM 标杆，自 MiniCPM4 起转 Apache-2.0 可商用。
+    <br><br>② <strong>agentic 能力一般，且没在正规基准上验证过。</strong> tool-use 只在<strong>静态 function calling（BFCL）+ 厂商自建 MCP 测试集</strong>上报过分，<strong>从未在正规 MCP agentic 基准（MCP-Universe、MCPMark）或 agentic coding 基准（Terminal-Bench、SWE-bench）上测过</strong>——这些榜由前沿大模型把持（MCP-Universe 上 GPT-5 才 43.72%、Claude-4-Sonnet 29.44%），8B 端侧模型基本到不了台面。框架层 ChatDev（⭐33k）、端侧 GUI grounding（AgentCPM-GUI）算亮点，但「真实多轮 agentic 编排」无第三方背书；coding 同样非第一梯队（无专用 code 模型，真实编程榜落后 Qwen3 / Phi-4）。
   </div>
 
   <nav class="toc">
