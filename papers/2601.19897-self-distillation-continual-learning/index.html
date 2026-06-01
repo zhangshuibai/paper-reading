@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SDFT：自蒸馏让模型实现持续学习 · 论文解读</title>
+
+<script>
+  window.MathJax = {
+    tex:{inlineMath:[['$','$'],['\\(','\\)']], displayMath:[['$$','$$'],['\\[','\\]']]},
+    svg:{fontCache:'global'}
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;
+  }
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:880px; margin:0 auto; padding:18px 22px 90px}
+
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:27px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)}
+  .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .meta-grid a:hover{text-decoration:underline}
+
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap}
+  nav.toc a:hover{color:var(--accent)}
+
+  section{margin:38px 0}
+  h2{font-size:21px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:17px; margin:24px 0 8px}
+  p{margin:12px 0}
+  ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.9em}
+  strong{color:var(--text)}
+
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:14px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:10px 12px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  .yes{color:var(--ok); font-weight:600}
+  .no{color:var(--muted)}
+
+  figure{margin:24px 0; text-align:center}
+  figure img{max-width:100%; height:auto; border:1px solid var(--line); border-radius:10px; background:#fff}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+
+  blockquote{border-left:3px solid var(--line); margin:14px 0; padding:2px 16px; color:var(--muted)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+  .mjx-container{overflow-x:auto; overflow-y:hidden}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">continual learning</span>
+      <span class="chip">catastrophic forgetting</span>
+      <span class="chip">on-policy distillation</span>
+      <span class="chip">self-distillation</span>
+      <span class="chip">in-context learning</span>
+      <span class="chip">SFT</span>
+    </div>
+    <h1>SDFT：自蒸馏让模型实现持续学习</h1>
+    <p class="orig-title">Self-Distillation Enables Continual Learning (SDFT)</p>
+    <dl class="meta-grid">
+      <dt>作者</dt><dd>Idan Shenfeld, Mehul Damani, Jonas Hübotter, Pulkit Agrawal</dd>
+      <dt>团队 / 机构</dt><dd>MIT · Improbable AI Lab · ETH Zurich</dd>
+      <dt>原文链接</dt><dd><a href="https://arxiv.org/abs/2601.19897" target="_blank" rel="noopener">https://arxiv.org/abs/2601.19897</a></dd>
+      <dt>发表 / 年份</dt><dd>arXiv 2026（v1, 2026-01-27）</dd>
+      <dt>解读日期</dt><dd>2026-06-01</dd>
+    </dl>
+  </header>
+
+  <div class="tldr">
+    <b>TL;DR</b> — 标准 SFT 从专家 demonstration 学习时是 off-policy 的，会带来严重的 catastrophic forgetting。本文提出 <b>Self-Distillation Fine-Tuning (SDFT)</b>：把<b>同一个模型</b>当作自己的 teacher——teacher 额外看到一条 demonstration（in-context），student 只看到 query，然后在 student 自己采样出的 on-policy 轨迹上最小化与 teacher 的 reverse-KL。这样既能从 demonstration 学到新技能，又因为 teacher 的输出分布离 base model 很近（0.68 vs SFT 的 1.26 nats），forgetting 大幅减小。在 skill learning、knowledge acquisition 以及三个技能的顺序连续学习实验里，SDFT 都稳定优于 SFT，并能让单个模型持续累积技能而不退化。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#opensource">① 开源贡献</a>
+    <a href="#motivation">② 动机与贡献</a>
+    <a href="#method">③ 方法</a>
+    <a href="#evaluation">④ 实验评估</a>
+    <a href="#insight">⑤ 洞见</a>
+  </nav>
+
+  <!-- ① 开源贡献 -->
+  <section id="opensource">
+    <h2><span class="n">①</span>开源贡献 Open-source Artifacts</h2>
+    <p>论文在首页给出项目页 <code>idanshenfeld.com/SDFT</code>（重定向到 <code>self-distillation.github.io/SDFT.html</code>），声明「Code and Datasets are available」。解读日核实：<strong>代码仓库真实可访问</strong>，含基于 Hugging Face TRL 的 SDFT 训练实现与部分评测脚本，并附带 tool-use / science 两个任务的数据；medical、wiki 数据标注为后续补充。未见单独发布的模型权重或 Hugging Face 数据集页（实验全部基于公开的 Qwen2.5 / Olmo-3 与公开数据集构建）。仓库未声明明确的开源 license。</p>
+    <table>
+      <thead><tr><th>类型</th><th>是否开源</th><th>内容 / 链接</th></tr></thead>
+      <tbody>
+        <tr><td>代码 Code</td><td class="yes">✔</td><td><a href="https://github.com/idanshen/Self-Distillation" target="_blank" rel="noopener">github.com/idanshen/Self-Distillation</a> — TRL 实现的 on-policy 自蒸馏 trainer（<code>distil_trainer.py</code>、<code>main.py</code>、<code>distil_config.py</code>）+ tool-use / science 评测脚本。README 含安装与训练/评测命令；未见 LICENSE 文件。</td></tr>
+        <tr><td>模型权重 Weights</td><td class="no">✘</td><td>未单独发布。base policy 用公开的 Qwen2.5-3B/7B/14B-Instruct、Olmo-3-7B-Think。</td></tr>
+        <tr><td>数据集 Dataset</td><td class="yes">✔（部分）</td><td>仓库 data 目录含 tool-use / science 数据；medical、wiki（2025 灾害知识库）标注为陆续补充。底层来源：ToolAlpaca、SciKnowEval、HuatuoGPT-o1、GPT-5 生成的 Wikipedia QA。</td></tr>
+        <tr><td>环境 / Benchmark</td><td class="no">—</td><td>无新建 benchmark；通用能力评测复用公开 LM Evaluation Harness（HellaSwag / MMLU / TruthfulQA / IFEval / Winogrande / HumanEval）。</td></tr>
+        <tr><td>项目主页 / Demo</td><td class="yes">✔</td><td><a href="https://self-distillation.github.io/SDFT.html" target="_blank" rel="noopener">self-distillation.github.io/SDFT.html</a>（含 paper + code 链接，无在线 demo）。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ② 动机与贡献 -->
+  <section id="motivation">
+    <h2><span class="n">②</span>研究动机与贡献 Motivation &amp; Contribution</h2>
+    <h3>背景与问题</h3>
+    <p>Foundation model 部署后基本是「静态」的：可以靠 retrieval / prompting 在 inference 时调整行为，却不会更新参数去真正习得新技能、内化新知识。要走向持续学习（continual learning），就得让模型在不断学新任务的同时<strong>不退化已有能力</strong>。近期一批工作发现关键在于 <strong>on-policy</strong>：当模型在「自己当前 policy 产生的数据」上训练时，catastrophic forgetting 远小于 off-policy。但目前成功的 on-policy 方法几乎都在 RL 框架里，依赖一个显式的 reward function——而现实里很多任务<strong>没有可用的 reward</strong>，只有专家 demonstration。</p>
+    <p>从 demonstration 学习的主流是 <strong>SFT</strong>：直接模仿一个固定的离线数据分布。简单可扩展，但本质是 off-policy。Ross et al. (2011) 早已指出 off-policy imitation 会有 compounding error——测试时 policy 一旦漂移到 demonstration 没覆盖的状态，误差迅速累积；在 continual learning 里更糟：顺序 SFT 会造成严重的 forgetting 与泛化退化。一个看似自然的出路是 IRL（先从 demonstration 反推 reward，再做 on-policy RL），但 IRL 通常需要很强的 reward 结构先验、难以扩展。</p>
+    <h3>本文的切入点</h3>
+    <p>作者的关键观察是：大模型有很强的 <strong>in-context learning</strong> 能力——只要把一条 demonstration 放进 context，它就能在不更新参数的情况下表现得像「学会了这个任务」。于是不必显式反推 reward：<strong>把「看到 demonstration 的自己」当作 teacher，把「只看到 query 的自己」当作 student</strong>，在 student 自己采样的轨迹上做 on-policy 蒸馏即可。论文用一个 In-Context Assumption 把这件事和 IRL 联系起来：demonstration-conditioned 的 policy $\pi(\cdot\mid x,c)$ 近似 trust-region 正则化 RL 的最优下一步 policy $\pi^*_{k+1}$，从而隐式定义了一个 reward。直觉上，这个 teacher 既能产生正确的新行为，又因为只是「在 context 里被点拨了一下」而<strong>始终锚定在 base model 附近</strong>，这正是少 forgetting 的关键。</p>
+    <h3>核心贡献</h3>
+    <ol>
+      <li>提出 <strong>SDFT</strong>：一个用 demonstration-conditioned 自身当 teacher、在 on-policy 轨迹上做 reverse-KL 蒸馏的算法，实现「无需显式 reward、直接从 demonstration 做 on-policy 学习」。</li>
+      <li>给出理论联系：证明该自蒸馏目标<strong>等价于</strong>最大化一个由 demonstration 与模型 ICL 能力定义的隐式 reward（IRL 视角），并提出可经验验证的 In-Context Assumption（optimality + minimal deviation 两个条件）。</li>
+      <li>实证验证 teacher 质量：在 ToolAlpaca 上，conditioned teacher 把准确率从 42% 拉到 100%，同时与 base model 的 KL 仅 0.68 nats（SFT 模型为 1.26 nats，约一半）。</li>
+      <li>在 skill learning 与 knowledge acquisition 两类任务上，SDFT 在「新任务准确率」与「保留旧能力」两个维度上都取得更好的 Pareto trade-off；knowledge acquisition 的 OOD 准确率几乎追平 oracle RAG。</li>
+      <li>顺序连续学习：单个模型依次学 Tool Use → Science → Medical 三个技能，SDFT 能稳定累积而几乎不退化，SFT 则一学新任务旧任务即崩。</li>
+      <li>额外发现：SDFT 收益随模型规模增大（3B 反而落后 SFT 3.3 点，7B +4.0，14B +6.9）；并能在「只有最终答案、没有 reasoning trace」的数据上训练 reasoning model 而不导致 reasoning 坍缩。</li>
+    </ol>
+  </section>
+
+  <!-- ③ 方法 -->
+  <section id="method">
+    <h2><span class="n">③</span>方法 Method</h2>
+    <p>整体流程很简洁：给定 policy $\pi$，对每个 query $x$ 让<strong>同一个模型</strong>扮演两个角色。<strong>Student</strong> 只看 query，输出分布 $P=\pi_\theta(\cdot\mid x)$；<strong>Teacher</strong> 额外看到一条专家 demonstration $c$，输出分布 $Q=\pi(\cdot\mid x,c)$。先用 student 采样一条 on-policy 回答 $y\sim\pi_\theta(\cdot\mid x)$，再让 student 在这条自己生成的轨迹上去匹配 teacher 的逐 token 分布。teacher 因为「context 里有 demonstration」而知道正确答案，却又离 base model 不远——这正是同时获得「学到新技能」与「不 forgetting」的来源。</p>
+
+    <figure>
+      <img src="figures/fig1_method_overview.png" alt="SDFT 方法总览">
+      <figcaption>图 1：SDFT 总览。同一模型分饰 Student（只看 query）与 Teacher（看 query + demonstration）两角；在 student 采样的 on-policy 轨迹上最小化 $\mathbb{E}_{y\sim P}\log(P/Q)$。右图直觉：conditioning 让 teacher 既达到 target 行为、又停留在离 base policy 较近处。（出处：原文 Figure 2 左 + teaser）</figcaption>
+    </figure>
+
+    <h3>构造 teacher：用一段 prompt 触发 ICL</h3>
+    <p>teacher 不是另训的模型，而是用如下模板把 demonstration 喂进 context：</p>
+    <blockquote>&lt;Question&gt;<br>This is an example for a response to the question:<br>&lt;Demonstration&gt;<br>Now answer with a response of your own, including the thinking process:</blockquote>
+    <p>作者发现这个 prompt 足以阻止模型逐字照抄 $c$，转而产生「体现了对 demonstration 意图的理解」的新回答——这正是 ICL 在起作用，而不是简单的复制。</p>
+
+    <h3>训练目标：on-policy reverse-KL</h3>
+    <p>对每个 $x$，从 student 采样 $y\sim\pi_\theta(\cdot\mid x)$，最小化 student 与 teacher 的 <strong>reverse KL</strong>：</p>
+    $$\mathcal{L}(\theta)=D_{\mathrm{KL}}\!\big(\pi_\theta(\cdot\mid x)\,\|\,\pi(\cdot\mid x,c)\big)=\mathbb{E}_{y\sim\pi_\theta(y\mid x)}\!\left[\log\frac{\pi_\theta(y\mid x)}{\pi(y\mid x,c)}\right]$$
+    <p>其中 $\pi_\theta(\cdot\mid x)$ 是 student（待训练），$\pi(\cdot\mid x,c)$ 是 demonstration-conditioned 的 teacher（其分布在计算梯度时<strong>视为固定</strong>）。注意期望是在 student 自己的分布下取的——这就是 on-policy 的含义。利用自回归结构，可把它拆成 token 级损失，梯度估计为：</p>
+    $$\nabla_\theta\mathcal{L}(\theta)=\mathbb{E}_{y\sim\pi_\theta}\!\left[\sum_t\sum_{y_t\in V}\log\frac{\pi_\theta(y_t\mid y_{<t},x)}{\pi(y_t\mid y_{<t},x,c)}\,\nabla_\theta\log\pi_\theta(y_t\mid y_{<t},x)\right]$$
+    <p>$V$ 是词表。直觉上：在 student 当前会走到的每个 token 位置，把它往「demonstration-aware 的、更聪明的自己」拉。</p>
+
+    <h3>IRL 视角：自蒸馏 = 最大化隐式 reward</h3>
+    <p>从 trust-region RL 出发，$\pi_{k+1}=\arg\max_\pi \mathbb{E}_{y\sim\pi}[r(y,x)]-\beta D_{\mathrm{KL}}(\pi\|\pi_k)$ 的最优解是 tilted 分布 $\pi^*_{k+1}\propto\pi_k\exp(\tfrac1\beta r)$，反解出 $r(y,x)=\beta(\log\pi^*_{k+1}-\log\pi_k)+C$。本文的 <strong>In-Context Assumption</strong> 用 $\pi(\cdot\mid x,c)$ 近似未知的 $\pi^*_{k+1}$，于是得到隐式 reward：</p>
+    $$r(y,x,c)=\log\pi(y\mid x,c)-\log\pi_k(y\mid x)$$
+    <p>它正是「demonstration-aware 自己」相对「当前自己」的 log-prob 提升；再拆成 token 级 $r_t=\log\frac{\pi(y_t\mid y_{<t},x,c)}{\pi_k(y_t\mid y_{<t},x)}$，做策略梯度后可证明<strong>在期望意义上等价于上面的 reverse-KL 蒸馏梯度</strong>。该假设的两个条件也被经验验证：(i) optimality——conditioned teacher 在 ToolAlpaca 上达 100% 且 50 条 reasoning trace 人工检查均语义正确；(ii) minimal deviation——teacher 离 base 的 KL（0.68 nats）远小于 SFT（1.26 nats）。</p>
+
+    <div class="callout note">
+      <span class="label">实现要点</span>
+      <ul>
+        <li><strong>teacher 用 student 的 EMA</strong>（指数滑动平均 $\phi\leftarrow\alpha\theta+(1-\alpha)\phi$，并始终条件在 $c$ 上）。消融显示：用 frozen base 当 teacher 稳定但偏弱（跟不上学习进度）；直接用当前 student 当 teacher 会因 on-policy 反馈环放大噪声而<strong>训练发散</strong>；EMA 是兼顾稳定与性能的折中。</li>
+        <li>每个样本<strong>只需一次 on-policy rollout</strong>；监督在 token（甚至 logit）级，credit assignment 比 GRPO 的 trajectory-level advantage 更稠密。</li>
+        <li>用 HF TRL，单卡 H200，<strong>全参数</strong> fine-tune。SDFT 受益于多 epoch（skill learning 约 2 epoch、knowledge acquisition 约 4 epoch），而 SFT 通常 1 epoch 后就过拟合。</li>
+        <li>训练用 VLLM 采样时，需加 importance sampling 修正推理引擎与训练代码间的分布差异。</li>
+        <li><strong>artifact 修复</strong>：student 有时会沿用 teacher 因 context 带出的口头禅（如「Based on the text…」「Following the example…」）；对 loss 屏蔽前几个 token 即可有效抑制，且不损准确率（作者承认这只是 heuristic）。</li>
+        <li>成本：相比 SFT 约 2.5× FLOPs、4× wall-clock；但若对手是 Re-invoke 这种「先 SFT 再补训」多阶段方法，SDFT 反而可能更省总时间。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ④ 实验评估 -->
+  <section id="evaluation">
+    <h2><span class="n">④</span>实验评估 Evaluation</h2>
+    <h3>评测设置</h3>
+    <ul>
+      <li><strong>两类 continual learning 设定：</strong>(a) <em>Skill Learning</em>——三个任务 Tool Use（ToolAlpaca）、Science Q&amp;A（SciKnowEval 化学子集）、Medical（HuatuoGPT-o1），用 demonstration 提升任务表现；(b) <em>Knowledge Acquisition</em>——把 base model 截止日之后的 2025 自然灾害 Wikipedia 知识灌进模型。</li>
+      <li><strong>对比基线：</strong>Skill Learning 比 SFT、DFT（用重要性采样把离线数据近似当 on-policy）、SFT+Re-invoke（SFT 后再在通用 prompt 上从 base 蒸馏以恢复旧能力）；Knowledge Acquisition 比 CPT（继续预训练）、SFT、以及带 oracle retriever 的 RAG（ICL 上界）。</li>
+      <li><strong>指标方向（均越高越好）：</strong>新任务准确率；旧能力保留（HellaSwag/MMLU/TruthfulQA/IFEval/Winogrande/HumanEval 综合，用 LM Eval Harness）；knowledge 设定下的 strict / lenient / OOD 准确率；pass@k（查是否真学到技能而非熵坍缩）。base policy 默认 Qwen2.5-7B-Instruct，3 个随机种子。</li>
+    </ul>
+
+    <h3>主要结果</h3>
+    <p>Skill Learning（图 4）：在「新任务准确率 vs 旧能力保留」的二维图上，SDFT 在三项任务上都占据更靠右上的 <strong>Pareto 前沿</strong>——它是唯一一个能提升新任务又几乎不损旧能力的方法。SFT 普遍带来明显 forgetting；Re-invoke 能部分恢复但回不到 base 水平；DFT 介于两者之间。</p>
+    <p>Knowledge Acquisition（原文 Table 1，下表，strict 口径）：</p>
+    <table>
+      <thead><tr><th>方法</th><th>Accuracy (strict)</th><th>Accuracy (lenient)</th><th>OOD Accuracy</th></tr></thead>
+      <tbody>
+        <tr><td>Base</td><td>0</td><td>0</td><td>0</td></tr>
+        <tr><td>Oracle RAG（上界）</td><td>91</td><td>100</td><td>100</td></tr>
+        <tr><td>CPT</td><td>9</td><td>37</td><td>7</td></tr>
+        <tr><td>SFT</td><td>80</td><td>95</td><td>80</td></tr>
+        <tr><td><strong>SDFT（本文）</strong></td><td><strong>89</strong></td><td><strong>100</strong></td><td><strong>98</strong></td></tr>
+      </tbody>
+    </table>
+    <p>解读：base 完全答不出这些新知识；CPT 几乎无效；SFT 把答案「背」下来但 OOD（换个问法）只有 80；SDFT 在 strict 上 89、几乎追平 oracle RAG，OOD 高达 98——说明 on-policy 蒸馏是把事实<strong>整合进模型知识体系</strong>，而非死记硬背特定答案。</p>
+    <p>Reasoning model（原文 Table 2）：在「只有最终答案、无 CoT」的 medical 数据上微调 Olmo-3-7B-Think，SFT 把准确率从 31.2% 拉<strong>低</strong>到 23.5%（回答平均 token 从 4612 缩到 3273，reasoning 坍缩）；SDFT 反而升到 <strong>43.7%</strong>（token 4180，基本保住 reasoning 深度）。</p>
+
+    <figure>
+      <img src="figures/fig3_continual.png" alt="顺序连续学习 SDFT vs SFT">
+      <figcaption>图 2：单模型依次学 Tool Use → Science → Medical。左 SDFT：每学一个新技能，旧技能曲线基本维持，能稳定累积；右 SFT：一换任务旧技能立刻崩，呈震荡而非累积。纵轴线性归一化（0=base、1=两法最高值）。（出处：原文 Figure 3）</figcaption>
+    </figure>
+
+    <h3>消融 / 分析</h3>
+    <p><strong>是 teacher 好，还是 on-policy 重要？</strong>（图 4，原文 Figure 6）用同一个 teacher 做三种用法：on-policy SDFT、offline distillation（在 teacher 生成的固定数据上做 KL）、SFT-from-teacher。结论：两种 offline 用法都优于普通 SFT 但都<strong>明显不如 on-policy SDFT</strong>——收益不能只归因于 teacher 质量，<strong>on-policy 本身是必要的</strong>。</p>
+    <p><strong>规模效应</strong>（图 3，原文 Figure 5 左）：SDFT vs SFT 在 Science Q&amp;A 上，3B 时 <strong>−3.3</strong>（ICL 太弱，teacher 信号没用）、7B <strong>+4.0</strong>、14B <strong>+6.9</strong>。方法收益与模型 ICL 能力强绑定，规模越大越占优。</p>
+    <p><strong>不是熵坍缩</strong>：pass@k（k 到 128）上 SDFT 相对 base 与 SFT 的优势在所有 k 上一致保持，说明是真技能获取而非分布锐化。</p>
+    <p><strong>teacher context</strong>（原文 Figure 7）：teacher 同时看「文章原文 + 答案」strict 达 89%，只看文本 75%，只看答案 37%——完整 demonstration context 对知识迁移至关重要。</p>
+
+    <figure>
+      <img src="figures/fig5_scaling.png" alt="SDFT 随规模的收益">
+      <figcaption>图 3：SDFT 相对 SFT 的增益随模型规模单调上升（3B −3.3 → 14B +6.9），印证「方法依赖 ICL、而 ICL 随规模变强」。（出处：原文 Figure 5 左）</figcaption>
+    </figure>
+  </section>
+
+  <!-- ⑤ 洞见 -->
+  <section id="insight">
+    <h2><span class="n">⑤</span>洞见 Insights</h2>
+    <div class="callout insight">
+      <span class="label">Insight</span>
+      <ul>
+        <li><strong>ICL 是免费的「最优 policy 近似」。</strong>无需训 reward model 或反推 IRL reward——把 demonstration 塞进 context，模型自己就给出了一个「既正确、又离 base 很近」的目标分布。少 forgetting 的本质就是这个「minimal deviation」：teacher 只比当前自己「聪明一点」，而不是跳到一个陌生分布。</li>
+        <li><strong>off/on-policy 的差别比 teacher 质量更关键。</strong>同一个 teacher，offline 蒸馏就是不如在 student 自己轨迹上 on-policy 蒸馏。这把「continual learning 要 on-policy」的经验从 RL 推广到了「只有 demonstration」的 imitation 场景。</li>
+        <li><strong>用自蒸馏保住「行为风格」。</strong>因为 target 来自 demonstration-conditioned 的<em>同一个模型</em>，即便外部数据只有简短最终答案，监督信号仍保留模型原有的长 CoT 风格——于是能「无 reasoning 数据训 reasoning model」。</li>
+      </ul>
+    </div>
+    <h3>局限与未来</h3>
+    <p>(1) <strong>强依赖 ICL</strong>：小模型（如 3B）ICL 太弱，teacher 信号无意义，SDFT 反而不如 SFT。(2) <strong>不擅长大幅行为改写</strong>：SDFT 适合「在保留旧能力的前提下加新技能/知识」，但当目标需要根本性改变生成模式时会吃力——例如把一个非 reasoning 模型改造成会输出显式 CoT 的模型很困难。(3) <strong>artifact 仍靠 heuristic</strong>：屏蔽前几 token 虽有效，但是权宜之计。(4) 即便如此，旧能力仍有<strong>少量</strong>退化，尚未完全消除。(5) 成本高于 SFT（约 2.5× FLOPs、4× 时间）。未来方向：与 on-policy RL 结合（SDFT 当初始化或混合 demonstration/reward 信号）、进一步压低 forgetting、扩展到非专家/含噪 demonstration 乃至用户对话等非结构化数据。</p>
+    <h3>与相关工作的关系</h3>
+    <p>与 <strong>IRL</strong>：传统 IRL 需对 reward 结构施加强先验（max-entropy、对抗式、偏好式 RLHF）才能可辨识；本文不显式建模 reward，而是借 ICL 提取 on-policy 学习信号，规避了 reward 工程。与 <strong>context distillation</strong>（让带额外信息的模型教不带信息的自己）：以往多是 offline、且 context 是固定的全局 prompt/guideline；本文两点不同——蒸馏是 <strong>on-policy</strong>（teacher 能纠正 student 当下犯的错），且 context 是<strong>逐样本</strong>挑选的具体 demonstration，能表达细粒度任务意图，因此更像一个 IRL 机制而非 prompt 压缩。与 <strong>on-policy RL</strong>：二者是互补而非替代——RL 假设有 reward 并靠探索优化 return，SDFT 处理「只有 demonstration、无 reward」的场景；且 SDFT 提升 pass@k，可作为后续 RL 的更强初始化。</p>
+  </section>
+
+  <footer class="foot">
+    本页为 <code>paper-reading</code> skill 生成的阅读笔记，仅作辅助，细节以
+    <a href="https://arxiv.org/abs/2601.19897" target="_blank" rel="noopener">原文</a> 为准 · 解读日期 2026-06-01
+  </footer>
+
+</article>
+</body>
+</html>
