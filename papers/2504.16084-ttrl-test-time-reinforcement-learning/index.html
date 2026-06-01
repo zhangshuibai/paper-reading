@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TTRL：无标签测试数据上的测试时强化学习 · 论文解读</title>
+
+<script>
+  window.MathJax = {
+    tex:{inlineMath:[['$','$'],['\\(','\\)']], displayMath:[['$$','$$'],['\\[','\\]']]},
+    svg:{fontCache:'global'}
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;}
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:880px; margin:0 auto; padding:18px 22px 90px}
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:27px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)} .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .meta-grid a:hover{text-decoration:underline}
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap}
+  nav.toc a:hover{color:var(--accent)}
+  section{margin:38px 0}
+  h2{font-size:21px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:17px; margin:24px 0 8px}
+  p{margin:12px 0} ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.9em}
+  strong{color:var(--text)}
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:13.5px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:9px 11px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  .yes{color:var(--ok); font-weight:600} .no{color:var(--muted)}
+  figure{margin:24px 0; text-align:center}
+  figure img{max-width:100%; height:auto; border:1px solid var(--line); border-radius:10px; background:#fff}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+  blockquote{border-left:3px solid var(--line); margin:14px 0; padding:2px 16px; color:var(--muted)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+  .mjx-container{overflow-x:auto; overflow-y:hidden}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">Test-Time Training</span>
+      <span class="chip">RL for Reasoning</span>
+      <span class="chip">Majority Voting</span>
+      <span class="chip">Unlabeled Data</span>
+      <span class="chip">GRPO</span>
+      <span class="chip">Self-Evolution</span>
+    </div>
+    <h1>TTRL：在无标签测试数据上做强化学习，用「多数投票」自己造 reward</h1>
+    <p class="orig-title">TTRL: Test-Time Reinforcement Learning</p>
+    <dl class="meta-grid">
+      <dt>作者</dt><dd>Yuxin Zuo*, Kaiyan Zhang*, Li Sheng, Shang Qu, Ganqu Cui 等（*共同一作；Kaiyan Zhang & Ganqu Cui 主导）· Ning Ding、Bowen Zhou 通讯</dd>
+      <dt>团队 / 机构</dt><dd>Tsinghua University · Shanghai AI Lab（PRIME-RL 团队）</dd>
+      <dt>原文链接</dt><dd><a href="https://arxiv.org/abs/2504.16084" target="_blank" rel="noopener">arXiv:2504.16084</a></dd>
+      <dt>发表 / 年份</dt><dd>NeurIPS 2025（arXiv v3, 2025-06-30）</dd>
+      <dt>解读日期</dt><dd>2026-06-01</dd>
+    </dl>
+  </header>
+
+  <div class="tldr">
+    <b>TL;DR</b> — RL 训 LLM 推理需要 reward，而 reward 通常来自<strong>标注好的标准答案</strong>——可真正难、真正新的题目恰恰<em>没有标签</em>。TTRL 的做法极简：对一道无标签测试题<strong>采样多份解答 → 多数投票得到一个「伪标签」$y$ → 谁的答案等于 $y$ 就给 reward 1、否则 0</strong>，再拿这个 reward 跑 GRPO。就这么个「自己给自己打分」的闭环，把 Qwen2.5-Math-7B 在 AIME 2024 上的 pass@1 从 12.9 拉到 40.2（<strong>+211%</strong>），四个 benchmark 平均涨 76%——<strong>全程不用任何标注</strong>。更反直觉的是：它不仅<em>超过</em>了自己投票准确率（maj@n）这个看似天花板的信号，还逼近了「偷看标准答案直接训」的上界。代码已 MIT 开源（<code>PRIME-RL/TTRL</code>）。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#opensource">① 开源贡献</a>
+    <a href="#motivation">② 动机与贡献</a>
+    <a href="#method">③ 方法</a>
+    <a href="#evaluation">④ 实验评估</a>
+    <a href="#insight">⑤ 洞见</a>
+  </nav>
+
+  <!-- ① 开源贡献 -->
+  <section id="opensource">
+    <h2><span class="n">①</span>开源贡献 Open-source Artifacts</h2>
+    <p>TTRL 以<strong>完整训练代码</strong>开源（MIT 协议），核实于 <code>github.com/PRIME-RL/TTRL</code>：基于 <strong>verl</strong> 框架（v0.4.1+），提供数据预处理（JSON→Parquet）与可一键复现的 bash 脚本（如 <code>examples/ttrl/Qwen2.5/aime.sh</code>），并附 W&amp;B 训练日志与三次独立运行结果。本文不发布新模型权重或新数据集——它在<em>已有的公开 benchmark 测试集</em>上现场自训。</p>
+    <table>
+      <thead><tr><th>类型</th><th>是否开源</th><th>内容 / 链接</th></tr></thead>
+      <tbody>
+        <tr><td>代码 Code</td><td class="yes">✔</td><td><a href="https://github.com/PRIME-RL/TTRL" target="_blank" rel="noopener">github.com/PRIME-RL/TTRL</a> · MIT · 基于 verl · 含训练脚本与复现配方（⭐ ~1.1k）</td></tr>
+        <tr><td>模型权重 Weights</td><td class="no">✘</td><td>不发布成品权重；TTRL 产出的是「在某个测试集上现训」的 checkpoint。基座用公开模型（Qwen2.5-Math-1.5B/7B、Qwen2.5-7B/32B、Qwen3-8B、LLaMA-3.1/3.2、Mistral、DeepSeek-R1 等）</td></tr>
+        <tr><td>数据集 Dataset</td><td class="no">✘</td><td>无新数据集；复用 AIME 2024、AMC、MATH-500、GPQA-Diamond 的公开测试集（仅用题目、不用标签）</td></tr>
+        <tr><td>环境 / Benchmark</td><td class="yes">✔</td><td>评测与训练脚本随仓库开源，可换模型/benchmark</td></tr>
+        <tr><td>项目主页 / Demo</td><td class="no">✘</td><td>无独立 demo，以 GitHub 为准</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ② 动机与贡献 -->
+  <section id="motivation">
+    <h2><span class="n">②</span>研究动机与贡献 Motivation &amp; Contribution</h2>
+    <h3>背景与问题：RL 推理很强，但被「标签」卡住了</h3>
+    <p>DeepSeek-R1、OpenAI o1 这类 Large Reasoning Models（LRMs）证明了 <strong>RL 是激发 long-CoT 推理的关键</strong>，但它们靠的是<em>昂贵的人工标注数据</em>。问题是：真正困难、真正新的题目源源不断地涌现，而它们<strong>恰恰没有标签</strong>——比如 o3 在 ARC-AGI-1 上能到 75.7%，到了新发布的 ARC-AGI-2 上只剩 4%。靠「堆更多标注数据 + 算力」既不可持续、也未必有效。Silver &amp; Sutton 倡导的「experience 时代」正是在说：要让模型<em>从自己的经验里自我进化</em>，而不是死磕人类监督。</p>
+    <p>于是一个尖锐的技术问题浮现：<strong>测试时（test-time）做 RL，reward 从哪来？</strong> 没有标准答案，rule-based reward 就无从计算。这既是 test-time training（TTT）的核心障碍，也暴露了当前 RL「严重依赖标注、难以规模化」的普遍局限。</p>
+
+    <h3>本文的切入点</h3>
+    <p>作者的关键观察是：<strong>Test-Time Scaling（TTS）里那套「多数投票 / majority voting」其实就能造出足够好的 reward。</strong> 既然投票出来的共识答案在实践中相当靠谱，那就把它当成<em>伪标签</em>，喂进 rule-based reward，再驱动一轮 RL。这样就把「推理时多采样几次」（TTS，省事但不改权重）和「测试时更新权重」（TTT）<strong>缝合进同一个 RL 闭环</strong>——模型自己生成经验、自己估计 reward、自己变强。</p>
+
+    <h3>核心贡献</h3>
+    <ol>
+      <li>提出 <strong>TTRL</strong>：第一个系统性地在<em>无标签测试数据</em>上做 RL 的方法，用 majority voting 估计 reward，实现 LLM 的「自我进化」。</li>
+      <li>实证有效且普适：把 Qwen2.5-Math-7B 在 AIME 2024 上 <strong>+211%</strong>（12.9→40.2），四 benchmark 平均 <strong>+76%</strong>；在 1.5B→32B、base/instruct/LRM、Qwen/LLaMA/Mistral/DeepSeek 多个家族上都有一致增益，且兼容 GRPO/PPO/PRIME。</li>
+      <li>给出三个反直觉发现：TTRL <strong>能超过</strong>自身 maj@n 这个「监督上界」、<strong>逼近</strong>「偷看标签直接训」的经验上界；并解释了「为什么标签估计很差时它还能work」（即 <strong>Lucky Hit</strong>）。</li>
+    </ol>
+  </section>
+
+  <!-- ③ 方法 -->
+  <section id="method">
+    <h2><span class="n">③</span>方法 Method</h2>
+    <p>TTRL 的 pipeline 一句话说清：<strong>对一道测试题，先用「多采样 + 多数投票」估出一个伪标签，再用「答案是否等于伪标签」算 0/1 reward，最后用这个 reward 跑标准 RL（默认 GRPO）更新权重。</strong> 整个过程只看题目、不看答案。</p>
+
+    <figure>
+      <img src="figures/overview.png" alt="TTRL 方法总览">
+      <figcaption>图 1：TTRL 总览（原文 Figure 2）。左半「Label Estimation」是 TTS：测试题 $q$ 喂给 LLM 多采样得到一堆预测 $\hat y_1\dots\hat y_M$，多数投票出伪标签 $y$；右半「Reward Calculation + Policy Optimization」是 TTT：逐个算 reward $R(\hat y_i, y)$ 再回传更新 LLM。两步合成一个在线自进化闭环。</figcaption>
+    </figure>
+
+    <h3>形式化：没有真标签的 RL 目标</h3>
+    <p>给定题目（state）$x$，模型按 policy $\pi_\theta(y\mid x)$ 采样输出（action）$y$。没有 ground-truth，于是<strong>重复采样</strong> $N$ 份候选 $\{y_1,\dots,y_N\}$，用某种聚合（这里是多数投票）得到共识输出 $y^*$ 当作「最优 action 的代理」。环境据此给 reward $r(y, y^*)$。优化目标与梯度更新就是标准 policy gradient：</p>
+    <p>$$\max_{\theta}\ \mathbb{E}_{y\sim\pi_\theta(\cdot\mid x)}\big[\,r(y, y^*)\,\big],\qquad \theta \leftarrow \theta + \eta\,\nabla_\theta\,\mathbb{E}_{y\sim\pi_\theta(\cdot\mid x)}\big[\,r(y, y^*)\,\big].$$</p>
+    <p>这里 $\eta$ 是学习率。和普通 RL 唯一的区别，就是 $y^*$ 不是人给的标签，而是模型<em>自己投票投出来的</em>。</p>
+
+    <h3>Majority Voting Reward：就两步</h3>
+    <p>给定题目 $x$，先让 LLM 生成一组输出，answer extractor 抽出预测答案集合 $P=\{\hat y_i\}_{i=1}^N$；对 $P$ 做多数投票得到出现最频繁的预测 $y$（即伪标签）。然后用最朴素的 rule-based reward：</p>
+    <p>$$R(\hat y_i,\,y)=\begin{cases}1, & \text{if } \hat y_i = y,\\[2pt] 0, & \text{otherwise.}\end{cases}$$</p>
+    <p>就是「你的答案等于投票答案就得 1 分，否则 0 分」。伪代码也只有十几行：抽答案 → <code>Counter</code> 数出多数答案 → 逐个比对打分。</p>
+
+    <div class="callout note">
+      <span class="label">实现要点（对复现很关键）</span>
+      默认 <strong>GRPO</strong>；cosine LR、峰值 <strong>$5\times10^{-7}$</strong>、AdamW。<strong>vote-then-sample 策略</strong>：每题先采 <strong>64</strong> 份用于投票估标签，再<em>下采样 32</em> 份用于训练（省算力又不掉点）。temperature 0.6（Qwen2.5-Math 与 LRM 用 1.0）。最大生成长度 3,072 token（LRM 用 32,768）。episodes 按数据集大小设为 MATH-500=10 / AMC=30 / AIME=80。全部在 <strong>8×A100 80G</strong> 上跑。<br>
+      ⚠️ 超参敏感：temperature 设 0.6 vs 1.0、batch size 设置不当都会导致<strong>熵不下降、训练崩掉</strong>——难/小数据集需要更高 temperature 与更多 episodes 来充分探索。
+    </div>
+  </section>
+
+  <!-- ④ 实验评估 -->
+  <section id="evaluation">
+    <h2><span class="n">④</span>实验评估 Evaluation</h2>
+    <h3>评测设置</h3>
+    <ul>
+      <li><strong>Benchmark：</strong>3 个数学推理——AIME 2024（竞赛级，极难）、AMC、MATH-500；外加 GPQA-Diamond（研究生级、Google-proof 的科学问答）。<em>每个 benchmark 单独跑 TTRL 再评测</em>。</li>
+      <li><strong>对比基线：</strong>主要和 backbone 模型自身比（因为「用 TTT 做推理」此前没人做过）；附录 A 另与在大规模<em>有标签</em>数据上训练的 SOTA RL 方法对比。</li>
+      <li><strong>指标：</strong>pass@1（越高越好，非零温采 16 份取平均；部分用 greedy）；分析里还看 maj@n（多数投票准确率）、avg@n、以及 label accuracy / reward accuracy。</li>
+    </ul>
+
+    <h3>主要结果</h3>
+    <p>下表是 6 个代表性模型（原文 Table 1，pass@1）。<strong>所有模型在 AIME 2024 上最少 +105%</strong>，1.5B 模型在 MATH-500 上单点暴涨 40.3。</p>
+    <table>
+      <thead><tr><th>模型</th><th>AIME 2024</th><th>AMC</th><th>MATH-500</th><th>GPQA</th><th>Avg</th></tr></thead>
+      <tbody>
+        <tr><td>Qwen2.5-Math-1.5B</td><td>7.7</td><td>28.6</td><td>32.7</td><td>24.9</td><td>23.5</td></tr>
+        <tr><td><strong>＋TTRL</strong></td><td><strong>15.8</strong></td><td><strong>48.9</strong></td><td><strong>73.0</strong></td><td><strong>26.1</strong></td><td><strong>41.0</strong></td></tr>
+        <tr><td>Qwen2.5-Math-7B</td><td>12.9</td><td>35.6</td><td>46.7</td><td>29.1</td><td>31.1</td></tr>
+        <tr><td><strong>＋TTRL</strong></td><td><strong>40.2</strong> <span style="color:var(--ok)">(+211%)</span></td><td><strong>68.1</strong></td><td><strong>83.4</strong></td><td>27.7</td><td><strong>54.9</strong> <span style="color:var(--ok)">(+76.5%)</span></td></tr>
+        <tr><td>Qwen2.5-7B</td><td>7.9</td><td>34.8</td><td>60.5</td><td>31.8</td><td>33.8</td></tr>
+        <tr><td><strong>＋TTRL</strong></td><td><strong>23.3</strong></td><td><strong>56.6</strong></td><td><strong>80.5</strong></td><td><strong>33.6</strong></td><td><strong>48.5</strong></td></tr>
+        <tr><td>Qwen2.5-32B</td><td>7.9</td><td>32.6</td><td>55.8</td><td>33.2</td><td>32.4</td></tr>
+        <tr><td><strong>＋TTRL</strong></td><td><strong>24.0</strong></td><td><strong>59.3</strong></td><td><strong>83.2</strong></td><td><strong>37.7</strong></td><td><strong>51.1</strong></td></tr>
+        <tr><td>Qwen3-8B*</td><td>26.9</td><td>57.8</td><td>82.3</td><td>48.1</td><td>53.8</td></tr>
+        <tr><td><strong>＋TTRL</strong></td><td><strong>46.7</strong></td><td><strong>69.1</strong></td><td><strong>89.3</strong></td><td><strong>53.0</strong></td><td><strong>64.5</strong></td></tr>
+      </tbody>
+    </table>
+    <p>更多家族（LLaMA-3.2-3B、Mistral、DeepSeek-Math、DeepSeek-R1-LLaMA-8B 等）见原文 Table 2：连已经做过昂贵 post-training 的 LRM（DeepSeek-R1-LLaMA-8B、Skywork-OR1、Qwen3-8B thinking）都还能再涨约 10 分。<strong>诚实地说</strong>：增益高度依赖 backbone 是否「有底子」——Mistral-Nemo 在 AIME 上甚至 −0.8，弱基座在难任务上几乎吃不到红利（见下文 Q3）。</p>
+
+    <h3>三个关键分析（也是全文的灵魂）</h3>
+    <p><strong>Q1 · 能多强？连两个「上界」都被它逼近甚至越过。</strong> ① 直觉上 TTRL 的天花板应该是初始模型的 <strong>maj@n</strong>（因为监督信号就来自投票）——但训练后 avg@16 反超初始 maj@16 <em>20 多分</em>；avg@64 也全面高于 backbone 的 maj@64。② 另一个上界是「<strong>RL (Leakage)</strong>」即偷看真标签直接在测试集上训，TTRL 的学习曲线竟<em>紧贴</em>它。</p>
+    <figure>
+      <img src="figures/voting_performance_comparison.png" alt="TTRL avg@64 vs backbone maj@64">
+      <figcaption>图 2：TTRL 把「投票上界」当起点而非终点（原文 Figure 7）。Qwen2.5-Math-7B 上，<strong>TTRL 的 avg@64（浅蓝）已普遍超过 backbone 的 maj@64（深灰）</strong>，再叠加投票后的 maj@64（深蓝）更高——模型「拽着自己的鞋带把自己拎起来」。</figcaption>
+    </figure>
+
+    <p><strong>Q2 · 为什么能work？核心是「Lucky Hit」。</strong> 在 AIME 这种难题上，多数投票估出的<em>标签准确率只有 ~37%</em>，可 <strong>reward 准确率却高达 ~92%</strong>。为什么？因为数学 verifier 是靠「比对」给 0/1 的：对一个<em>错</em>的预测，只要它和（同样错的）伪标签<em>不一样</em>，就照样会被正确地判为 0 分——而这正是我们想要的负 reward。当模型很弱、错误答案<strong>高度分散</strong>（最高频答案只占 16.6%）时，绝大多数错误预测都能「碰巧」拿到正确的 0 分。于是出现反直觉结论：<em>模型越弱、错得越散，reward 估计反而越准</em>。</p>
+    <figure>
+      <img src="figures/reward_calculations_example.png" alt="Lucky Hit 玩具示例">
+      <figcaption>图 3：「Lucky Hit」玩具示例（原文 Figure 10）。真标签是 3，8 个采样预测 <code>1 1 2 2 2 4 5 6</code> 投票出错误伪标签 2。但拿伪标签 2 去打分得到的 reward（<code>0 0 1 1 1 0 0 0</code>）和拿真标签 3 打分（全 0）相比，<strong>8 个里有 5 个 reward 是对的（Reward Hit Rate 62.5%）</strong>——标签错了，多数 reward 仍然对。</figcaption>
+    </figure>
+    <p>另外两根支柱：<strong>reward 比 label 更稠密</strong>（一个 rollout 里多份输出给了多次「纠错」机会，比单一标签鲁棒）；以及 <strong>online learning</strong>——TTRL 是在线 RL，模型一边变强、投票质量一边提高，形成传统离线 self-training 没有的「越滚越好」的正反馈（pass@1 与 maj@n 同步上升，见原文 Figure 6）。</p>
+
+    <p><strong>Q3 · 什么时候会失败？</strong> TTRL 本质仍是 RL，继承了 RL 的老毛病并被放大：① <strong>缺乏先验</strong>——题目太难、超出 backbone 知识范围时直接学不动。MATH-500 按难度分 L1–L5 的消融显示：L1 涨 +45.4 分（+175%），到 L5 只涨 +16.8 分（+75%），<em>越难红利越薄</em>。② <strong>超参不当</strong>——temperature/batch/episodes 设错会让熵持续偏高、训练失败。</p>
+  </section>
+
+  <!-- ⑤ 洞见 -->
+  <section id="insight">
+    <h2><span class="n">⑤</span>洞见 Insights</h2>
+    <div class="callout insight">
+      <span class="label">Insight</span>
+      <strong>① 「reward 的方向对」比「label 的值对」重要得多。</strong> TTRL 最颠覆直觉的一点是：标签准确率 37%、reward 准确率却 92%。因为 RL 的 reward 本质是<em>探索的方向信号</em>而非精确监督，而数学 verifier 的「比对」机制让「错得分散的错误预测」也能拿到正确的负 reward。这解释了一个长期困惑——为什么自标注/自奖励在实践中没有想象的那么脆弱。<br><br>
+      <strong>② 「监督信号的上界」不等于「学习的上界」。</strong> 用 maj@n 当 reward，却能稳定超过 maj@n 本身——因为 online RL 把<em>静态的投票分布</em>变成了<em>动态的、随能力提升而提升的</em>课程。这给「self-training 必然受限于初始模型」的旧认知打了个问号：在线性 + RL 的组合下，自举（bootstrap）可以真的往上走。<br><br>
+      <strong>③ 它把 TTS 与 TTT 缝在了一起。</strong> 此前「多采样投票」（TTS，不改权重）和「测试时训练」（TTT，改权重）是两条线；TTRL 用「投票造 reward → RL 改权重」把它们合一，且逼近「偷看答案直接训」的上界——这意味着<em>无标签的测试集本身就是一座可开采的训练数据矿</em>。
+    </div>
+    <h3>局限与未来</h3>
+    <p>作者坦承这是 test-time RL 的<strong>初步探索</strong>：对「先验知识」与「超参」的影响还需更系统的消融；方法对弱基座 / 超难任务无能为力（没有 data filtering 做 curriculum）；也存在 RL 固有的崩溃风险。未来方向包括：<strong>收敛性的理论分析</strong>（如何朝两个上界优化）、<strong>流式数据上的在线学习 / test-time adaptation</strong>、<strong>大规模自监督 RL 训练</strong>，以及推广到 <strong>agentic 任务与科学发现</strong>等开放域。</p>
+    <h3>与相关工作的关系</h3>
+    <p>用本文自身的框架定位：相比 <strong>TTS</strong>（self-consistency、best-of-N、MCTS、reward-guided search——只在推理时花算力、不改权重），TTRL 把那份算力<em>转化成了权重更新</em>。相比 <strong>TTT</strong>（多用于视频、少量用于 LLM），TTRL 首次把 test-time scaling 与 RL 结合。相比 <strong>RL for reasoning</strong>（RLHF/PPO、DeepSeek-R1 的 GRPO 等），它们都要<em>有标签的训练数据</em>与可验证输出；TTRL 去掉了标签依赖。相比已有的 <strong>self-rewarding / self-play</strong>（多面向开放域指令、或用 DPO 这类偏好优化），TTRL 聚焦数学推理、且坚持<em>在线</em> RL。这些区分均出自本文自身论述。</p>
+  </section>
+
+  <footer class="foot">
+    本页为 <code>paper-reading</code> skill 生成的阅读笔记，仅作辅助，细节以
+    <a href="https://arxiv.org/abs/2504.16084" target="_blank" rel="noopener">原文</a> 为准 · 解读日期 2026-06-01
+  </footer>
+
+</article>
+</body>
+</html>

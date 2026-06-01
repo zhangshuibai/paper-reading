@@ -19,6 +19,26 @@
     "path": "papers/2605.27276-sia-self-improving-ai/index.html"
   },
   {
+    "slug": "2504.16084-ttrl-test-time-reinforcement-learning",
+    "title": "TTRL: Test-Time Reinforcement Learning",
+    "authors": "Yuxin Zuo, Kaiyan Zhang, Li Sheng, Shang Qu, Ganqu Cui, et al.",
+    "team": "Tsinghua University · Shanghai AI Lab (PRIME-RL)",
+    "arxiv": "https://arxiv.org/abs/2504.16084",
+    "code": "https://github.com/PRIME-RL/TTRL",
+    "date": "2026-06-01",
+    "published": "NeurIPS 2025",
+    "tldr": "在无标签测试数据上用多数投票造伪标签与 reward 跑 RL，让 LLM 自我进化：Qwen2.5-Math-7B 在 AIME 2024 上 pass@1 +211%，且能超过自身 maj@n 并逼近偷看标签直训的上界。",
+    "tags": [
+      "test-time-training",
+      "RL",
+      "reasoning",
+      "majority-voting",
+      "unlabeled",
+      "GRPO"
+    ],
+    "path": "papers/2504.16084-ttrl-test-time-reinforcement-learning/index.html"
+  },
+  {
     "slug": "2605.17933-atlasva-visual-skill-memory",
     "title": "AtlasVA: Self-Evolving Visual Skill Memory for Teacher-Free VLM Agents",
     "authors": "Pan Wang, Yihao Hu, Xiujin Liu, Jingchu Yang, Hang Wang, Zhihao Wen",
