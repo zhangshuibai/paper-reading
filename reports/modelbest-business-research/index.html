@@ -90,7 +90,7 @@
   <div class="tldr">
     <b>TL;DR</b> — 面壁智能是清华 NLP 实验室（THUNLP）与 OpenBMB 开源社区孵化的 <strong>「高效大模型 / 端侧 AI」</strong> 公司，以开源 <strong>MiniCPM「小钢炮」</strong> 系列建立口碑，核心叙事是自创的 <strong>Densing Law（密度法则）</strong>——能力密度每约 3.3 个月翻倍，已发表于 <em>Nature Machine Intelligence</em>。商业模式是「开源引流 + To B 端侧方案变现」，最硬的落地是<strong>汽车座舱</strong>（长安马自达 EZ-60、吉利银河 M9 两款真实量产车）。2026 Q1 由中国电信、深创投等领投，累计融资超 10 亿元、估值迈入独角兽。
     <br><br>
-    <strong>两个重点结论：</strong>（1）<strong>模型 size</strong> 全系覆盖 0.5B / 1B / 2.4B / 4B / 8B，明确押注「端侧能跑」，多模态 MiniCPM-V/o 是手机端 VLM 标杆；自 MiniCPM4 起转 Apache-2.0 可商用。（2）<strong>Agentic</strong> 布局国内最完整之一（function calling 上 BFCL 榜、端侧 MCP agent、端侧手机 GUI agent、ChatDev ⭐33k），但 <strong>coding 绝对实力非第一梯队</strong>（无专用 code 模型，真实编程榜落后 Qwen3 / Phi-4），老牌 agent 框架已停更、重心转向「模型原生 agentic + 端侧」。
+    <strong>两个重点结论：</strong>（1）<strong>模型 size</strong> 全系覆盖 0.5B / 1B / 2.4B / 4B / 8B，明确押注「端侧能跑」，多模态 MiniCPM-V/o 是手机端 VLM 标杆；自 MiniCPM4 起转 Apache-2.0 可商用。（2）<strong>Agentic</strong> <strong>布局</strong>国内最完整之一（function calling 上 BFCL、端侧 MCP agent、端侧手机 GUI agent、ChatDev ⭐33k），但硬成绩只来自<strong>静态 / 自建基准</strong>——真实多轮 agentic（MCP-Universe、MCPMark）与 agentic coding（Terminal-Bench、SWE-bench）<strong>均未见参评</strong>，「真实 agentic 编排能力」尚无第三方背书；<strong>coding 绝对实力也非第一梯队</strong>（无专用 code 模型，真实编程榜落后 Qwen3 / Phi-4）。
   </div>
 
   <nav class="toc">
@@ -198,12 +198,16 @@
   <section id="s3">
     <h2><span class="n">③</span>重点二：Agentic 能力（Tool Use 与 Coding）</h2>
 
-    <h3>3.1 Tool use / function calling / MCP —— 强</h3>
+    <h3>3.1 Tool use / function calling / MCP —— 有完整布局，但只在静态 / 自建基准上验证</h3>
     <ul>
-      <li><strong>MiniCPM3-4B 原生 function call</strong>，并有专门微调版 <strong>MiniCPM3-4B-FC</strong>，已入 Berkeley Function-Calling Leaderboard（<strong>BFCL v2 = 76.0</strong>，超 Llama3.1-8B、Qwen2-7B、GLM-4-9B）。</li>
-      <li><strong>MiniCPM4-MCP（8B）</strong>：端侧 MCP agent，跨 16 个 MCP server（Github、Slack、Filesystem、Desktop-Commander 等），函数选择准确率 88.3%。</li>
+      <li><strong>MiniCPM3-4B 原生 function call</strong>，并有专门微调版 <strong>MiniCPM3-4B-FC</strong>，入 Berkeley Function-Calling Leaderboard（<strong>BFCL v2 = 76.0</strong>，超 Llama3.1-8B、Qwen2-7B、GLM-4-9B）。<span class="mid">注意：BFCL 是<strong>静态、单轮</strong>的 function-calling 基准（curated 数据集），不等于真实多轮 agentic。</span></li>
+      <li><strong>MiniCPM4-MCP（8B）</strong>：端侧 MCP agent，跨 16 个 MCP server。func/param/value 三指标平均 88.3% / 76.1% / 51.2%——<span class="mid">经核实，这是 OpenBMB <strong>自建的 MCP 测试集</strong>（仅与 gpt-4o、qwen3 比），<strong>不是第三方基准 MCP-Universe 或 MCPMark</strong>。</span></li>
       <li><strong>MiniCPM5-1B</strong>：1B 手机本地 agent，原生 tool call，推荐 SGLang 后端（内置 parser 转 OpenAI 兼容 <code>tool_calls</code>）。</li>
     </ul>
+    <div class="callout warn">
+      <span class="label">评测覆盖缺口（重要）</span>
+      面壁<strong>未在主流的真实 agentic 基准上公开成绩</strong>：tool-use/MCP 侧的 <strong>MCP-Universe</strong>（231 任务、11 真实 server）、<strong>MCPMark</strong>，以及 agentic coding 侧的 <strong>Terminal-Bench</strong>、<strong>SWE-bench</strong>，榜单里都<strong>没有 MiniCPM</strong>。这些榜由前沿大模型把持——MCP-Universe 上 GPT-5 仅 43.72%、Claude-4.0-Sonnet 29.44%；Terminal-Bench 头部是 Claude Sonnet 4.5（50.0%）。8B 量级的端侧模型在这类多轮、长程、真实环境任务上通常接近底部，因此「agentic 强」<strong>目前缺乏第三方硬基准支撑</strong>，更准确的说法是「<strong>function calling / 单步工具调用能力达到同尺寸领先，但真实 agentic 编排能力未经独立验证</strong>」。
+    </div>
 
     <h3>3.2 Agent 框架与端侧 GUI agent</h3>
     <table>
@@ -217,8 +221,8 @@
       </tbody>
     </table>
     <div class="callout insight">
-      <span class="label">判断</span>
-      Agentic「三层」齐全——<strong>框架层</strong>（ChatDev / ToolBench）、<strong>数据基准层</strong>（ToolBench / UltraTool）、<strong>模型原生层</strong>（MiniCPM3-4B-FC / MiniCPM4-MCP / MiniCPM5-1B / AgentCPM-GUI）。差异化护城河 = <strong>端侧 / 小模型 agent</strong>。但通用 agent 框架重心已从 XAgent/AgentVerse 明显转向「模型原生 agentic + 端侧 MCP/GUI」，ChatDev 是唯一仍高活跃的框架。
+      <span class="label">判断（已修正）</span>
+      Agentic「三层」<strong>布局</strong>齐全——框架层（ChatDev / ToolBench）、数据基准层（ToolBench / UltraTool）、模型原生层（MiniCPM3-4B-FC / MiniCPM4-MCP / MiniCPM5-1B / AgentCPM-GUI）。差异化方向 = <strong>端侧 / 小模型 agent</strong>。但要把「布局完整」与「能力强」分开看：<strong>可验证的硬成绩集中在 ① 静态 function calling（BFCL）、② 自建 MCP 评测、③ 端侧 GUI grounding（AgentCPM-GUI，中文 App 有真实 benchmark）</strong>；而真实多轮 agentic（MCP-Universe/MCPMark）与 agentic coding（Terminal-Bench/SWE-bench）<strong>未见参评</strong>。同时通用 agent 框架重心已从 XAgent/AgentVerse（均停更）转向「模型原生 agentic + 端侧」，ChatDev 是唯一仍高活跃的框架。<strong>结论：端侧 agent 方向布局领先、GUI grounding 有亮点，但「真实 agentic 编排能力」尚无第三方背书。</strong>
     </div>
 
     <h3>3.3 Coding 能力 —— 够用、同尺寸领先，但非第一梯队</h3>
@@ -230,7 +234,7 @@
     </ul>
     <div class="callout warn">
       <span class="label">公认局限</span>
-      复杂 coding 与 <strong>long-horizon agent</strong>（多步工具链、仓库级任务）是小模型结构性短板：步数增长准确率急剧下降、单步工具错误级联放大、长程规划弱。对受 KV 缓存与单步精度限制的端侧小模型尤其致命。
+      所报 coding 成绩全部是 <strong>代码生成类</strong>（HumanEval / MBPP / LiveCodeBench），<strong>未见 agentic coding 基准</strong>（Terminal-Bench、SWE-bench——这两个榜由 Claude Sonnet 4.5、GPT-5.5 等前沿模型把持，无 MiniCPM）。复杂 coding 与 <strong>long-horizon agent</strong>（多步工具链、仓库级任务）是小模型结构性短板：步数增长准确率急剧下降、单步工具错误级联放大、长程规划弱。对受 KV 缓存与单步精度限制的端侧小模型尤其致命。
     </div>
   </section>
 
@@ -281,7 +285,7 @@
       <div class="box s"><h4>Strengths 优势</h4>
         性能密度真实领先（22% tokens 达 Qwen3-8B 水平）；端侧软硬一体壁垒国内最深；独家 Densing Law 叙事（上 Nature MI）+ 手机 VLM 口碑；两款真实量产车背书。</div>
       <div class="box w"><h4>Weaknesses 劣势</h4>
-        无专用 code 模型，真实编程 / 长程 agent 是公认短板；「以小博大」对标多为同尺寸或上一代闭源（GPT-3.5），面对 Qwen3-4B-2507 等新对手领先不稳固。</div>
+        agentic / coding 硬成绩只来自静态或自建基准，真实 agentic 榜（MCP-Universe、Terminal-Bench、SWE-bench）未参评、缺第三方背书；无专用 code 模型；「以小博大」对标多为同尺寸或上一代闭源（GPT-3.5），面对 Qwen3-4B-2507 等新对手领先不稳固。</div>
       <div class="box o"><h4>Opportunities 机会</h4>
         座舱「芯片+模型」AI Box 方案商；AI 手机 / AI PC 端侧浪潮；具身智能 VLA；端侧 MCP/GUI agent。</div>
       <div class="box t"><h4>Threats 威胁</h4>
@@ -300,6 +304,7 @@
       <li>招商银行 / 西门子等 ToB 客户来自二手综述，缺一手新闻稿。</li>
       <li>华为为资本 + 适配关系，<strong>非整机搭载</strong>；手机整机量产搭载暂无官方公告。</li>
       <li>各轮融资金额与估值均为模糊或媒体口径，公司未公布精确数字。</li>
+      <li><span class="mid">⚠️ agentic / coding 评测口径</span>：面壁报的 BFCL 是<strong>静态 function calling</strong>、MiniCPM4-MCP 的 88.3% 是<strong>自建 MCP 测试集</strong>；真实 agentic 基准 <strong>MCP-Universe / MCPMark</strong>，以及 agentic coding 的 <strong>Terminal-Bench / SWE-bench</strong> 均<strong>未见 MiniCPM 参评</strong>。引用其「agentic 能力」时务必区分「单步工具调用」与「多轮真实编排」。</li>
     </ol>
   </section>
 
@@ -322,6 +327,10 @@
       榜单/项目：<a href="https://github.com/OpenBMB/ChatDev" target="_blank" rel="noopener">ChatDev</a> ·
       <a href="https://github.com/OpenBMB/AgentCPM-GUI" target="_blank" rel="noopener">AgentCPM-GUI</a> ·
       <a href="https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507" target="_blank" rel="noopener">Qwen3-4B-2507</a><br>
+      真实 agentic 基准（用于对照，MiniCPM 未参评）：<a href="https://mcp-universe.github.io/" target="_blank" rel="noopener">MCP-Universe</a> ·
+      <a href="https://mcpmark.ai/leaderboard" target="_blank" rel="noopener">MCPMark</a> ·
+      <a href="https://www.tbench.ai/leaderboard/terminal-bench/2.0" target="_blank" rel="noopener">Terminal-Bench</a> ·
+      <a href="https://www.swebench.com/" target="_blank" rel="noopener">SWE-bench</a><br>
       公司/融资：<a href="https://www.36kr.com/p/2728647825646857" target="_blank" rel="noopener">36氪</a> ·
       <a href="https://www.qbitai.com/2024/12/231764.html" target="_blank" rel="noopener">量子位</a> ·
       <a href="https://finance.eastmoney.com/a/202604093699228297.html" target="_blank" rel="noopener">东方财富</a> ·
