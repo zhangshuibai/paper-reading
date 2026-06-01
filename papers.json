@@ -136,6 +136,26 @@
     "path": "papers/2026-06-01-rl-for-test-time-scaling/index.html"
   },
   {
+    "slug": "2026-06-01-agentic-sft-masking-multiturn",
+    "title": "Agentic SFT 笔记：tool response 该不该 mask + 多轮怎么组样本",
+    "authors": "对话调研整理",
+    "team": "—",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-01",
+    "published": "笔记 2026",
+    "tldr": "多轮工具调用 SFT 中 tool response 一律 mask；不带 thinking 整段一条、带 thinking 按轮拆 N 条(删历史思考)，One-Pass to Reason 给等价高效解。",
+    "tags": [
+      "agentic-sft",
+      "tool-use",
+      "MCP",
+      "loss-masking",
+      "multi-turn",
+      "reasoning"
+    ],
+    "path": "papers/2026-06-01-agentic-sft-masking-multiturn/index.html"
+  },
+  {
     "slug": "2605.17933-atlasva-visual-skill-memory",
     "title": "AtlasVA: Self-Evolving Visual Skill Memory for Teacher-Free VLM Agents",
     "authors": "Pan Wang, Yihao Hu, Xiujin Liu, Jingchu Yang, Hang Wang, Zhihao Wen",

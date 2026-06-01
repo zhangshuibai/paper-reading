@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agentic SFT 的 mask 与多轮组样本 · 笔记</title>
+
+<script>
+  window.MathJax = {
+    tex:{inlineMath:[['$','$'],['\\(','\\)']], displayMath:[['$$','$$'],['\\[','\\]']]},
+    svg:{fontCache:'global'}
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;}
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:880px; margin:0 auto; padding:18px 22px 90px}
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:25px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)} .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap; line-height:2}
+  nav.toc a:hover{color:var(--accent)}
+  section{margin:38px 0}
+  h2{font-size:21px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:17px; margin:24px 0 8px}
+  p{margin:12px 0} ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)} strong{color:var(--text)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.88em}
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:13.5px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:9px 11px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  figure{margin:24px 0; text-align:center}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+  blockquote{border-left:3px solid var(--accent); margin:14px 0; padding:6px 16px; color:var(--muted); background:var(--panel2); border-radius:0 8px 8px 0}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+  .mjx-container{overflow-x:auto; overflow-y:hidden}
+  .svgwrap{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 8px}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">Agentic SFT</span>
+      <span class="chip">Tool Use / MCP</span>
+      <span class="chip">Loss Masking</span>
+      <span class="chip">多轮组样本</span>
+      <span class="chip">Reasoning</span>
+    </div>
+    <h1>Agentic SFT 实操笔记：tool response 要不要 mask，多轮会话怎么组样本</h1>
+    <p class="orig-title">两个常被搞混的工程问题 + 出处梳理（含「带 thinking 的多轮为什么必须拆开」细讲）</p>
+    <dl class="meta-grid">
+      <dt>整理</dt><dd>对话调研笔记，非论文；结论均给一手出处</dd>
+      <dt>日期</dt><dd>2026-06-01</dd>
+    </dl>
+  </header>
+
+  <div class="tldr">
+    <b>TL;DR</b> — ① 多轮工具调用 SFT 里，<strong>tool response（工具返回 / observation）会被 mask 掉、不计入 loss</strong>；只有 assistant 自己生成的 token（reasoning + tool call + 最终答案）算 loss——否则模型会学着<em>自己编造工具返回</em>。② 一条 K 轮会话怎么变成训练数据，看有没有 <strong>thinking</strong>：<strong>普通多轮 / 多轮工具调用 → 整段打成「一条」</strong>（靠 mask 同时学所有 assistant 轮）；<strong>带 thinking 的多轮 → 按轮拆成 N 条</strong>（每条删掉历史轮的 `&lt;think&gt;`），因为历史 thinking 在推理时不可见、单次 forward 会造成 train/inference mismatch。<strong>One-Pass to Reason</strong> 用 token 复制 + 块稀疏 mask 让「不拆」也能等价、还更省。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#s1">① 哪些 token 算 loss（tool response 要 mask）</a>
+    <a href="#s2">② 整段一条 vs 拆 N 条</a>
+    <a href="#s3">③ 为什么带 thinking 的必须拆（细讲）</a>
+    <a href="#s4">④ One-Pass：不拆也等价</a>
+    <a href="#s5">⑤ 速记 + 出处</a>
+  </nav>
+
+  <!-- ① -->
+  <section id="s1">
+    <h2><span class="n">①</span>一条多轮会话里，哪些 token 算 loss</h2>
+    <p>把一条带工具调用的会话摊平成 token 序列后，SFT 的 cross-entropy <strong>只算在 assistant 自己生成的部分</strong>上；<code>system</code> / <code>user</code> / <code>tool</code>（工具返回）的 token 全部把 label 置成 <code>-100</code>，被 <code>CrossEntropyLoss</code> 忽略。</p>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 720 150" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12.5">
+        <g>
+          <rect x="12" y="40" width="96" height="46" rx="7" fill="#eef1fb" stroke="#b9c2e0"/>
+          <text x="60" y="60" text-anchor="middle" fill="#1a1f33">system</text>
+          <text x="60" y="77" text-anchor="middle" fill="#8a93ad" font-size="11">mask</text>
+
+          <rect x="116" y="40" width="120" height="46" rx="7" fill="#eef1fb" stroke="#b9c2e0"/>
+          <text x="176" y="60" text-anchor="middle" fill="#1a1f33">user：Q（问题）</text>
+          <text x="176" y="77" text-anchor="middle" fill="#8a93ad" font-size="11">mask</text>
+
+          <rect x="244" y="40" width="150" height="46" rx="7" fill="#cdeae6" stroke="#2c8a7d"/>
+          <text x="319" y="58" text-anchor="middle" fill="#13433b" font-weight="600">assistant</text>
+          <text x="319" y="76" text-anchor="middle" fill="#13433b" font-size="11">reasoning ＋ tool_call ✔算 loss</text>
+
+          <rect x="402" y="40" width="150" height="46" rx="7" fill="#fbe3e3" stroke="#d9534f"/>
+          <text x="477" y="58" text-anchor="middle" fill="#7a1f1f" font-weight="600">tool：返回结果</text>
+          <text x="477" y="76" text-anchor="middle" fill="#a23b3b" font-size="11">← 这里 mask（关键）</text>
+
+          <rect x="560" y="40" width="148" height="46" rx="7" fill="#cdeae6" stroke="#2c8a7d"/>
+          <text x="634" y="58" text-anchor="middle" fill="#13433b" font-weight="600">assistant</text>
+          <text x="634" y="76" text-anchor="middle" fill="#13433b" font-size="11">最终答案 ✔算 loss</text>
+
+          <text x="12" y="24" fill="#5a627a" font-size="12">一条会话摊平后的 token 段（→ 时间顺序）：</text>
+          <text x="12" y="112" fill="#138a6e" font-size="11.5">绿 = 算 loss（assistant 生成）</text>
+          <text x="200" y="112" fill="#d9534f" font-size="11.5">红 = tool 返回，mask</text>
+          <text x="360" y="112" fill="#8a93ad" font-size="11.5">灰 = system/user，mask</text>
+        </g>
+      </svg>
+      </div>
+      <figcaption>多轮工具调用 SFT 的 loss 分布（本笔记绘）。assistant 的 reasoning＋tool_call＋最终答案算 loss；tool 返回与 user/system 一律 mask。</figcaption>
+    </figure>
+    <p><strong>为什么 tool response 必须 mask？</strong> 它是<em>环境</em>产生的、不是模型该生成的。若把它算进 loss，等于训练模型去<strong>凭空编造工具返回值（hallucinate observations）</strong>——推理时模型就会跳过真实调用、自己瞎编 API 结果。所以只让模型学「<em>何时调、怎么调</em>」，把「返回什么」交给真实环境。</p>
+    <p><strong>出处。</strong> 框架层最直白的是 LLaMA-Factory 的 ShareGPT 格式：<code>human/observation</code> 在奇数位、<code>gpt/function</code> 在偶数位，文档原话「<strong>The gpt and function will be learned by the model.</strong>」——即 assistant 的工具调用（<code>function</code>）要学、工具返回（<code>observation</code>）不学。机制层是 HuggingFace <code>apply_chat_template(return_assistant_tokens_mask=True)</code> 配合模板里的 <code>{% generation %}</code> 关键字（assistant token 标 1、其余标 0），驱动 TRL <code>SFTTrainer</code> 的 <code>assistant_only_loss</code>。</p>
+    <p class="src" style="color:var(--muted);font-size:13px">出处：<a href="https://github.com/hiyouga/LLaMA-Factory/blob/main/data/README.md" target="_blank" rel="noopener">LLaMA-Factory data/README</a> · <a href="https://huggingface.co/docs/transformers/en/chat_templating_writing" target="_blank" rel="noopener">HF chat templating（tool calls vs tool responses）</a> · <a href="https://huggingface.co/docs/trl" target="_blank" rel="noopener">TRL assistant_only_loss</a></p>
+    <div class="callout note">
+      <span class="label">连回 ACC（2605.21850）</span>
+      ACC 整篇的动机正是冲这个惯例来的：标准 agent SFT「把 tool response 全 mask、只监督 turn-level 的 tool selection」造成<strong>监督盲区</strong>——散落各 turn 的长程证据被浪费。ACC 把 trajectory 编译成 long-context QA 对，让答案梯度<em>绕过 mask、直接触达每个证据 token</em>。
+    </div>
+  </section>
+
+  <!-- ② -->
+  <section id="s2">
+    <h2><span class="n">②</span>一条 K 轮会话 → 几条训练数据？两种做法</h2>
+    <p><strong>做法 A：整段打成「一条」样本（默认、高效）。</strong> 整个 K 轮拼成一个 token 序列、一次 forward 过完，loss 靠 masking 同时算在<em>所有 assistant 轮</em>上。共享前缀只编码一次，开销 $O(N)$。LLaMA-Factory 默认、TRL <code>assistant_only_loss</code>、ms-swift 都是这套。</p>
+    <p><strong>做法 B：按 turn 拆成 N 条。</strong> K 轮 → K 条，第 $i$ 条 =「前 $i\!-\!1$ 轮历史当 context ＋ 第 $i$ 轮 assistant 当 target」，每条只算当前轮 assistant 的 loss。</p>
+    <blockquote>
+      例：会话 <code>[sys, u1, a1(调用), tool1, a2(最终)]</code><br>
+      · 做法 A → <strong>1 行</strong>：labels 里只有 <code>a1</code>、<code>a2</code> 激活，其余 mask。<br>
+      · 做法 B → <strong>2 行</strong>：<code>[sys,u1]→a1</code> 和 <code>[sys,u1,a1,tool1]→a2</code>。
+    </blockquote>
+    <p>分水岭是：<strong>有没有 thinking、且它要不要从后续 context 删掉。</strong>普通多轮 / 多步工具调用（历史原样保留）走 A 即可；带 <code>&lt;think&gt;</code> 的多轮通常被迫走 B——原因见下一节。</p>
+  </section>
+
+  <!-- ③ -->
+  <section id="s3">
+    <h2><span class="n">③</span>为什么「带 thinking 的多轮」单次 forward 不行（细讲）</h2>
+    <p>先记两个事实：</p>
+    <ul>
+      <li><strong>事实 1：</strong>单次 forward = 整段拼成一个序列跑一遍；causal attention 下每个 token 能注意到<em>它前面的所有 token</em>。</li>
+      <li><strong>事实 2：</strong>reasoning 模型（Qwen3 / DeepSeek-R1）推理时，<em>历史轮的 <code>&lt;think&gt;</code> 已被删掉</em>，回答第 2 轮时看到的历史里只有第 1 轮的<strong>答案</strong>、没有第 1 轮的<strong>思考</strong>。即第 2 轮的真实 context = <code>[Q1, A1, Q2]</code>，<strong>不含 T1</strong>。</li>
+    </ul>
+    <p>矛盾就出在这。若把整段 <code>[Q1, T1, A1, Q2, T2, A2]</code> 拼成<strong>一条</strong>训练（T=thinking，A=答案）：</p>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 720 360" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="13">
+        <defs>
+          <marker id="m-bad" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#d9534f"/></marker>
+        </defs>
+        <!-- 训练行 -->
+        <text x="12" y="26" fill="#5a627a">训练（图省事打成一条序列，causal attention）：</text>
+        <g font-size="12.5" text-anchor="middle">
+          <rect x="14" y="40" width="70" height="38" rx="6" fill="#eef1fb" stroke="#b9c2e0"/><text x="49" y="63" fill="#1a1f33">Q1</text>
+          <rect x="92" y="40" width="90" height="38" rx="6" fill="#f3e2cf" stroke="#c08a3e"/><text x="137" y="63" fill="#7a4f12">T1（think）</text>
+          <rect x="190" y="40" width="70" height="38" rx="6" fill="#cdeae6" stroke="#2c8a7d"/><text x="225" y="63" fill="#13433b">A1</text>
+          <rect x="268" y="40" width="70" height="38" rx="6" fill="#eef1fb" stroke="#b9c2e0"/><text x="303" y="63" fill="#1a1f33">Q2</text>
+          <rect x="346" y="40" width="90" height="38" rx="6" fill="#f3e2cf" stroke="#c08a3e"/><text x="391" y="63" fill="#7a4f12">T2（think）</text>
+          <rect x="444" y="40" width="70" height="38" rx="6" fill="#cdeae6" stroke="#2c8a7d"/><text x="479" y="63" fill="#13433b">A2</text>
+        </g>
+        <path d="M391,40 C330,4 200,4 137,38" fill="none" stroke="#d9534f" stroke-width="1.8" marker-end="url(#m-bad)"/>
+        <text x="250" y="98" text-anchor="middle" fill="#d9534f" font-size="12">✗ 训练时 T2 能注意到 T1（物理上在前面）</text>
+
+        <!-- 推理行 -->
+        <text x="12" y="150" fill="#5a627a">推理（第 2 轮，模型真正看到的）：</text>
+        <g font-size="12.5" text-anchor="middle">
+          <rect x="14" y="164" width="70" height="38" rx="6" fill="#eef1fb" stroke="#b9c2e0"/><text x="49" y="187" fill="#1a1f33">Q1</text>
+          <rect x="92" y="164" width="90" height="38" rx="6" fill="#ececec" stroke="#ccc" stroke-dasharray="4 3"/><text x="137" y="187" fill="#aaa" text-decoration="line-through">T1 已删</text>
+          <rect x="190" y="164" width="70" height="38" rx="6" fill="#cdeae6" stroke="#2c8a7d"/><text x="225" y="187" fill="#13433b">A1</text>
+          <rect x="268" y="164" width="70" height="38" rx="6" fill="#eef1fb" stroke="#b9c2e0"/><text x="303" y="187" fill="#1a1f33">Q2</text>
+          <rect x="346" y="164" width="160" height="38" rx="6" fill="#fff5e6" stroke="#c08a3e"/><text x="426" y="187" fill="#7a4f12">→ 在「没有 T1」下生成 T2,A2</text>
+        </g>
+        <text x="250" y="222" text-anchor="middle" fill="#b3701a" font-size="12">↑ 训练条件 ≠ 推理条件 → train/inference mismatch</text>
+
+        <!-- 解法行 -->
+        <text x="12" y="266" fill="#5a627a">解法：拆成 2 条，每条删掉该轮不该看的历史 thinking：</text>
+        <g font-size="12">
+          <rect x="14" y="282" width="330" height="40" rx="8" fill="#f3f4f8" stroke="#b9c2e0"/>
+          <text x="28" y="300" fill="#1a1f33">样本 1： [Q1]</text>
+          <text x="28" y="316" fill="#138a6e">→ 学 T1, A1（context 只有 Q1）</text>
+          <rect x="360" y="282" width="346" height="40" rx="8" fill="#f3f4f8" stroke="#b9c2e0"/>
+          <text x="374" y="300" fill="#1a1f33">样本 2： [Q1, A1, Q2]（T1 删了）</text>
+          <text x="374" y="316" fill="#138a6e">→ 学 T2, A2（与推理时一致）</text>
+        </g>
+        <text x="360" y="348" text-anchor="middle" fill="#5a627a" font-size="11.5">K 轮 → K 条 → N 次 forward；样本 2 重编码 Q1,A1,Q2，故总开销 O(N³)</text>
+      </svg>
+      </div>
+      <figcaption>带 thinking 的多轮：单次 forward 的 mismatch 与「拆 N 条」解法（本笔记绘）。</figcaption>
+    </figure>
+    <p><strong>那为什么不能只加个 attention mask、在单条里把 T1 挡住？</strong> 卡点在 <code>A1</code>：第 1 轮答案 <code>A1</code> <em>本身必须看见 T1</em>（模型「先想 T1 再答 A1」，这因果要训练）；可 <code>A1</code> 之后的 <code>Q2/T2/A2</code> 又<em>必须看不见 T1</em>。一条序列里只有<strong>一份 A1</strong>，它被要求同时满足两件互斥的事：① 当训练目标时带 T1 的信息；② 当第 2 轮的历史时是「不带 T1 的干净版」。一份 token 做不到 → 最简单就只能<strong>拆开</strong>，每条单独服务一个轮次。</p>
+    <p class="src" style="color:var(--muted);font-size:13px">出处：<a href="https://github.com/QwenLM/Qwen3/discussions/1398" target="_blank" rel="noopener">QwenLM/Qwen3 Discussion #1398</a>——官方维护者原话「the thinking content of the previous turns should be removed except for multi-step tool calls」，并给出拆分示例 <code>[Q1,T1,A1,Q2,T2,A2,Q3,T3,A3]</code> → <code>[Q1,T1,A1]</code>、<code>[Q1,A1,Q2,T2,A2]</code>、<code>[Q1,A1,Q2,A2,Q3,T3,A3]</code>。</p>
+    <div class="callout warn">
+      <span class="label">注意那句「except for multi-step tool calls」</span>
+      多步<strong>工具调用</strong>里，中间轮的 reasoning 往往要<em>保留</em>（后面步骤依赖前面想法），所以纯 tool-use 的多轮常常可以走做法 A 不拆；真正逼你拆的是「<strong>历史 thinking 要删</strong>」这一条。
+    </div>
+  </section>
+
+  <!-- ④ -->
+  <section id="s4">
+    <h2><span class="n">④</span>One-Pass to Reason：不拆也能等价、还更省</h2>
+    <p>拆成 N 条虽然正确，但把共享前缀反复重编码，时间 $O(N^3)$、很浪费。<strong>《One-Pass to Reason》（IJCNLP-AACL Findings 2025，DevRev）</strong>给了个巧解：把 <code>A1</code> 这种「既要被训练、又要当干净 context」的 token <strong>复制成两份</strong>（一份带 T1 用于算它自己的 loss，一份不带 T1 用于给后续轮当历史），再配一个 <strong>block-sparse attention mask</strong> 精确控制可见性，于是<strong>一条序列、单次 forward</strong> 就能得到与 N-pass <em>完全相同的 loss</em>，时间从 $O(N^3)$ 降到 $O(N^2)$、显存不变。</p>
+    <blockquote>原文：「Fine-tuning LLMs on multi-turn reasoning datasets requires <strong>N (number of turns) separate forward passes</strong> per conversation due to reasoning token visibility constraints.」——这句正是「带 thinking 必须拆」的权威表述。</blockquote>
+    <p class="src" style="color:var(--muted);font-size:13px">出处：<a href="https://arxiv.org/abs/2504.18246" target="_blank" rel="noopener">arXiv:2504.18246</a> · <a href="https://github.com/devrev/One-Pass-to-Reason" target="_blank" rel="noopener">代码</a></p>
+  </section>
+
+  <!-- ⑤ -->
+  <section id="s5">
+    <h2><span class="n">⑤</span>速记表 + 出处清单</h2>
+    <table>
+      <thead><tr><th>场景</th><th>怎么组样本</th><th>loss 算在哪</th><th>开销</th><th>出处</th></tr></thead>
+      <tbody>
+        <tr><td>普通多轮 / 多步工具调用（历史原样留）</td><td><strong>1 条整段</strong></td><td>所有 assistant 轮（tool/user mask）</td><td>$O(N)$</td><td>LLaMA-Factory 默认 / TRL <code>assistant_only_loss</code></td></tr>
+        <tr><td>带 thinking 的多轮（历史 think 要删）</td><td><strong>拆 N 条</strong>，每条删历史 think</td><td>仅当前轮 assistant（含 think）</td><td>$O(N^3)$</td><td>Qwen3 #1398</td></tr>
+        <tr><td>想要 B 的正确性 + A 的效率</td><td>1 条 ＋ token 复制 ＋ 块稀疏 mask</td><td>等价 N-pass</td><td>$O(N^2)$</td><td>One-Pass to Reason</td></tr>
+      </tbody>
+    </table>
+    <p><strong>一句话：</strong>tool response 一律 mask（别让模型编造环境返回）；<strong>不带 thinking 就整段一条、带 thinking 就按轮拆 N 条</strong>（删历史思考）——这是 Qwen3 官方建议，而 One-Pass to Reason 给了不用拆也等价的高效解法。</p>
+    <h3>全部出处</h3>
+    <ul>
+      <li><a href="https://github.com/hiyouga/LLaMA-Factory/blob/main/data/README.md" target="_blank" rel="noopener">LLaMA-Factory · data/README</a>（roles：gpt/function 学，human/observation mask）</li>
+      <li><a href="https://huggingface.co/docs/transformers/en/chat_templating_writing" target="_blank" rel="noopener">HF Transformers · 写 chat template</a>（tool calls 走 assistant、tool responses 是单独 <code>tool</code> 角色）＋ <code>return_assistant_tokens_mask</code> / <code>{% generation %}</code></li>
+      <li><a href="https://huggingface.co/docs/trl" target="_blank" rel="noopener">TRL · SFTTrainer <code>assistant_only_loss</code></a> · <a href="https://github.com/modelscope/ms-swift/issues/4681" target="_blank" rel="noopener">ms-swift #4681</a></li>
+      <li><a href="https://github.com/QwenLM/Qwen3/discussions/1398" target="_blank" rel="noopener">QwenLM/Qwen3 Discussion #1398</a>（多轮 reasoning 按轮拆、删历史 think）</li>
+      <li><a href="https://arxiv.org/abs/2504.18246" target="_blank" rel="noopener">One-Pass to Reason（2504.18246）</a> · <a href="https://github.com/devrev/One-Pass-to-Reason" target="_blank" rel="noopener">代码</a></li>
+      <li>相关背景：<a href="https://yonigottesman.github.io/2024/05/13/mask-user-tokens.html" target="_blank" rel="noopener">Mask Your User Tokens</a>、ToolLLM/ToolBench（<a href="https://arxiv.org/pdf/2307.16789" target="_blank" rel="noopener">2307.16789</a>）、ACC（2605.21850）</li>
+    </ul>
+  </section>
+
+  <footer class="foot">
+    对话调研笔记，仅作梳理；结论与引文以各原始来源为准 · 整理日期 2026-06-01
+  </footer>
+
+</article>
+</body>
+</html>
