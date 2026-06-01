@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ECHO：terminal agent 顺带白嫖一个 world model · 论文解读</title>
+
+<!-- 数学公式渲染（在线查看时生效；无网络时正文仍可读） -->
+<script>
+  window.MathJax = {
+    tex:{inlineMath:[['$','$'],['\\(','\\)']], displayMath:[['$$','$$'],['\\[','\\]']]},
+    svg:{fontCache:'global'}
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;
+  }
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:880px; margin:0 auto; padding:18px 22px 90px}
+
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:27px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)}
+  .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .meta-grid a:hover{text-decoration:underline}
+
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap}
+  nav.toc a:hover{color:var(--accent)}
+
+  section{margin:38px 0}
+  h2{font-size:21px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:17px; margin:24px 0 8px}
+  p{margin:12px 0}
+  ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.9em}
+  strong{color:var(--text)}
+
+  /* 开源贡献表 */
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:14px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:10px 12px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  .yes{color:var(--ok); font-weight:600}
+  .no{color:var(--muted)}
+
+  /* 图 */
+  figure{margin:24px 0; text-align:center}
+  figure img{max-width:100%; height:auto; border:1px solid var(--line); border-radius:10px; background:#fff}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+
+  /* 提示框 */
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+
+  blockquote{border-left:3px solid var(--line); margin:14px 0; padding:2px 16px; color:var(--muted)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+  .mjx-container{overflow-x:auto; overflow-y:hidden}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <!-- ============================ 抬头 / 元信息 ============================ -->
+  <header class="head">
+    <div class="chips">
+      <span class="chip">terminal agent</span>
+      <span class="chip">world model</span>
+      <span class="chip">agent RL</span>
+      <span class="chip">GRPO</span>
+      <span class="chip">auxiliary loss</span>
+      <span class="chip">TerminalBench</span>
+    </div>
+    <h1>ECHO：让 terminal agent 在 RL 时顺带「白嫖」一个 world model</h1>
+    <p class="orig-title">ECHO: Terminal Agents Learn World Models for Free</p>
+    <dl class="meta-grid">
+      <dt>作者</dt><dd>Vaishnavi Shrivastava, Piero Kauffmann, Ahmed Awadallah, Dimitris Papailiopoulos</dd>
+      <dt>团队 / 机构</dt><dd>Microsoft Research（MSR AI Frontiers）</dd>
+      <dt>原文链接</dt><dd><a href="https://arxiv.org/abs/2605.24517" target="_blank" rel="noopener">https://arxiv.org/abs/2605.24517</a></dd>
+      <dt>代码</dt><dd><a href="https://github.com/microsoft/echo-rl" target="_blank" rel="noopener">github.com/microsoft/echo-rl</a>（MIT License）</dd>
+      <dt>发表 / 年份</dt><dd>arXiv preprint, 2026（v1, 2026-05-23）</dd>
+      <dt>解读日期</dt><dd>2026-06-01</dd>
+    </dl>
+  </header>
+
+  <div class="tldr">
+    <b>TL;DR</b> — terminal/CLI agent 用 GRPO 做 RL 时，reward 是稀疏的、二值的、延迟到 episode 末尾才给（常常 &lt;15% 的 rollout 才解出任务），于是绝大多数交互几乎不产生 policy-gradient 信号。但每一条 rollout 里其实早就躺着大量监督信号——terminal 对每个命令返回的 stdout、报错、文件内容、stack trace。<b>ECHO（Environment Cross-entropy Hybrid Objective）</b>在原本的 GRPO action-token loss 之外，加一项 auxiliary cross-entropy：让同一个 policy 去预测「自己的命令导致的 terminal 输出 token」。它复用 GRPO 已经算好的同一次 forward pass、不需要额外 rollout / teacher / 第二次前向，几乎零成本。结果：TerminalBench-2.0 的 pass@1 在 Qwen3-8B 上从 2.70%→5.17%、在 Qwen3-14B 上从 5.17%→10.79%，几乎翻倍；且学到的 policy 能更准地预测 terminal dynamics（连别的模型生成的 off-policy 轨迹都预测得更准），并能在不用 ∼15k 专家示范的情况下追平 expert-SFT。论文的主张是：environment observation 不只是「下一步动作的 context」，它本身就是一份密集、on-policy、每条 rollout 都自带的监督信号。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#opensource">① 开源贡献</a>
+    <a href="#motivation">② 动机与贡献</a>
+    <a href="#method">③ 方法</a>
+    <a href="#evaluation">④ 实验评估</a>
+    <a href="#insight">⑤ 洞见</a>
+  </nav>
+
+  <!-- ============================ ① 开源贡献 ============================ -->
+  <section id="opensource">
+    <h2><span class="n">①</span>开源贡献 Open-source Artifacts</h2>
+    <p>本文已开源<strong>训练代码</strong>（<a href="https://github.com/microsoft/echo-rl" target="_blank" rel="noopener">microsoft/echo-rl</a>，MIT License）：以 SkyRL 为底层 RL 栈，仓库额外提供 terminal-agent 集成、ECHO 的 environment-prediction loss 实现（<code>echo_rl/world_modeling/</code>）、GRPO 与 ECHO 两套示例 config、以及一个对 SkyRL 的 hook patch。<strong>模型权重与本文自建的训练任务语料/PyTerm 等数据集未见发布</strong>；但论文复用的多数公开产物（OpenThinker-Agent-v1-SFT、Endless Terminals、OpenThoughts 系列数据、TerminalBench-2.0、Harbor/Terminus-2 harness）本身在 Hugging Face / GitHub 上是开放的。</p>
+    <table>
+      <thead><tr><th>类型</th><th>是否开源</th><th>内容 / 链接</th></tr></thead>
+      <tbody>
+        <tr><td>代码 Code</td><td class="yes">✔</td><td><a href="https://github.com/microsoft/echo-rl" target="_blank" rel="noopener">github.com/microsoft/echo-rl</a> — 基于 SkyRL 的 terminal-agent RL 训练栈 + ECHO auxiliary loss + 示例 config，MIT License。</td></tr>
+        <tr><td>模型权重 Weights</td><td class="no">✘</td><td>未见发布（论文训练的 Qwen3-8B/14B、OT-SFT 的 ECHO checkpoint 未提供下载）。</td></tr>
+        <tr><td>数据集 Dataset</td><td class="no">部分</td><td>本文自建语料（8870 tasks）、PyTerm（928 合成任务）<strong>未单独发布</strong>；但其来源/复用的公开数据可下载：<a href="https://huggingface.co/datasets/obiwan96/endless-terminals" target="_blank" rel="noopener">Endless Terminals</a>、<a href="https://huggingface.co/datasets/open-thoughts/OpenThoughts-Agent-v1-RL" target="_blank" rel="noopener">OpenThoughts-Agent-v1-RL</a>、<a href="https://huggingface.co/datasets/open-thoughts/OpenThoughts-TBLite" target="_blank" rel="noopener">OpenThoughts-TBLite</a>。</td></tr>
+        <tr><td>环境 / Benchmark</td><td class="yes">✔（第三方）</td><td>评测用 <a href="https://openreview.net/forum?id=a7Qa4CcHak" target="_blank" rel="noopener">TerminalBench-2.0</a> + <a href="https://github.com/harbor-framework/harbor" target="_blank" rel="noopener">Harbor</a> / Terminus-2 harness（均第三方开源）；起始 policy <a href="https://huggingface.co/open-thoughts/OpenThinker-Agent-v1-SFT" target="_blank" rel="noopener">OpenThinker-Agent-v1-SFT</a> 公开。</td></tr>
+        <tr><td>项目主页 / Demo</td><td class="no">✘</td><td>未见独立项目主页（信息以 arXiv + GitHub README 为主）。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============================ ② 动机与贡献 ============================ -->
+  <section id="motivation">
+    <h2><span class="n">②</span>研究动机与贡献 Motivation &amp; Contribution</h2>
+    <h3>背景与问题</h3>
+    <p>CLI/terminal agent 是 language model 目前最接近「embodied 具身」的设定：模型发出一条 bash 命令，terminal 执行它，并把后果（stdout、stderr、exit code、文件内容、日志、stack trace）作为下一个 observation 返回。理论上这是一个信息极其丰富的反馈流，但<strong>主流 agent RL 把它当成了纯 context 丢掉了</strong>。具体而言，GRPO（Shao et al., 2024）这类做法只在 <em>action token</em> 上施加 policy-gradient loss，并由稀疏、延迟、二值的 outcome-level reward（任务最终单元测试过/不过）驱动；observation token 虽然进了 forward pass、也会影响后续动作，但<strong>本身不进 loss</strong>。</p>
+    <p>这个问题在 terminal-agent 训练里尤其严重：作者在 Qwen3-8B 设定下观察到，常常<strong>不到 15% 的 on-policy rollout 能解出任务</strong>。在 GRPO 里，全 0 的 group 没有 reward 对比、根本不产生有效梯度；混合 group 里失败轨迹也只拿到一个轨迹级负信号——于是学习几乎全靠那少数成功 rollout，样本效率极低。可这些失败轨迹远非毫无信息：它们装着 agent 真实运行得到的 file listing、build error、config 内容、grep 结果、stack trace……「每一个 terminal token 都进了模型的前向计算，却没有一个进 loss」。</p>
+    <h3>本文的切入点</h3>
+    <p>作者借用语言建模里一条由来已久的直觉——<strong>「会预测就意味着会理解」</strong>（Sutskever 的说法：把 next token 预测好「意味着你理解了产生这个 token 的底层 reality」）。把它搬到 agent 上：terminal 输出是 container 真实状态的一个 <em>lossy 文本投影</em>，它暴露了 stdout/stderr/exit code/文件内容/trace，但看不到完整文件系统、进程树、隐藏的任务状态。<strong>要想把这些 observation 预测准，policy 就必须追踪自己命令带来的潜在后果</strong>：哪些文件被创建、哪些假设失败了、哪些测试坏了、下一步可能暴露什么状态。一个能把 terminal 输出预测好的 policy，在一个小而真实的意义上，就是一个「懂 terminal」的 policy——也就是一个 world model。</p>
+    <h3>核心贡献</h3>
+    <ol>
+      <li><strong>把 terminal 输出变成监督信号。</strong>提出一个 on-policy 的 hybrid objective：在 GRPO 的 action-token loss 之外，对 terminal 输出（stdout / 报错 / 文件 / 工具 trace）token 加一项 cross-entropy 监督。两项 loss 共享同一次 forward pass，不需要 teacher、不增加任何额外 rollout。（§3）</li>
+      <li><strong>稳定优于 GRPO。</strong>在 Qwen3-8B、OpenThinker-Agent-v1-SFT、Qwen3-14B 三个起始 policy 上，内部评测和 TerminalBench-2.0 全面提升，8B 与 14B 的 TB2 pass@1 几乎翻倍。（§5.1）</li>
+      <li><strong>确实学到了 terminal dynamics。</strong>在更强的 Qwen3-32B 生成的 held-out off-policy 轨迹上，ECHO 大幅降低 environment-token cross-entropy，而单独 GRPO 几乎不变——说明它真的学会了「预测 terminal 会怎么回应」，且能迁移到不是自己生成的轨迹。（§5.2）</li>
+      <li><strong>减少对专家示范的依赖。</strong>从 base Qwen3-8B 出发，ECHO 在不使用任何 ∼15k 专家示范的前提下，内部评测追平 expert-SFT+GRPO，TB2 上补回约一半 gap。（§5.3）</li>
+      <li><strong>verifier-free 自我提升。</strong>在某些设定下，仅靠 environment-prediction loss（关掉 verifier 与 policy gradient），policy 也能在没见过的 OOD 任务上继续变好。（§5.5）</li>
+    </ol>
+  </section>
+
+  <!-- ============================ ③ 方法 ============================ -->
+  <section id="method">
+    <h2><span class="n">③</span>方法 Method</h2>
+    <p>一条 terminal-agent rollout 的结构是：<code>[sys][task]</code> 之后交替出现 <code>[action₁][obs₁][action₂][obs₂]…[actionₖ][obsₖ]</code>。记 $A$ 为 assistant-action token 的位置集合、$O$ 为 environment-observation token 的位置集合。标准 GRPO 在整条序列上算 log-prob（每个动作都依赖之前的 observation），但 policy-gradient loss <strong>只施加在 $A$ 上</strong>；$O$ 里的 token 被「conditioned on」，却拿不到任何直接训练信号。ECHO 做的事，本质上就是<strong>换一个 loss mask</strong>：把已经算好的 logits 在 $O$ 的位置也收集起来，加一项预测它们的 cross-entropy。</p>
+
+    <figure>
+      <img src="figures/overview.png" alt="ECHO 方法总览">
+      <figcaption>图 1：ECHO 把 terminal 反馈变成 agent RL 中的监督。上半部分：一条 rollout 交替着 action 与 environment observation；GRPO 的 loss 只作用在 action 位置 $A$、且当 advantage $\hat A=0$ 时被「silenced」失效，而 ECHO 的 Env loss 作用在 observation 位置 $O$、<strong>每条 rollout 都激活</strong>。最终目标是 $\mathcal{L}_{\text{ECHO}}=\mathcal{L}_{\text{GRPO}}(A)+\lambda\,\mathcal{L}_{\text{Env}}(O)$。下半部分：三个 held-out 评测上，ECHO（粉）相对匹配的 GRPO-only（青）不仅最终分更高，还能提前 220–260 步达到 GRPO 的峰值。（出处：原文 Figure 1）</figcaption>
+    </figure>
+
+    <h3>ECHO 目标函数</h3>
+    <p>整体目标是 GRPO 的 policy-gradient loss 与一项 environment-prediction loss 的线性组合：</p>
+    $$\mathcal{L}_{\text{ECHO}}(\theta) \;=\; \mathcal{L}_{\text{GRPO}}(\theta;\,A) \;+\; \lambda\,\mathcal{L}_{\text{Env}}(\theta;\,O').$$
+    <p>其中 $\theta$ 是 policy 参数，$\lambda$ 是混合权重，$A$ 是 action token 位置，$O'\subseteq O$ 是被选作训练目标的那一部分 observation token（下面会讲为什么不是整个 $O$）。</p>
+
+    <p><strong>第一项——GRPO（只回顾要点）。</strong>对 prompt $x$、采样到的一组 rollout $\{y^{(i)}\}_{i=1}^n$、二值 reward $r^{(i)}\in\{0,1\}$，每条 rollout 得到一个 group 内归一化的标量 advantage $\hat A^{(i)}$，均匀地施加到它的 action token 上，配合 clip 的 importance ratio $\rho^{(i)}_t$：</p>
+    $$\mathcal{L}_{\text{GRPO}}(\theta;A)=-\frac{1}{\sum_i|A^{(i)}|}\sum_i\sum_{t\in A^{(i)}}\min\!\Big(\rho^{(i)}_t\,\hat A^{(i)},\ \mathrm{clip}(\rho^{(i)}_t,1-\epsilon,1+\epsilon)\,\hat A^{(i)}\Big).$$
+    <p>关键就是：当一个 group 全 0（无成功 rollout）时没有 reward 对比，整组贡献为零；这就是稀疏 reward 浪费样本的根源。</p>
+
+    <p><strong>第二项——Environment-Prediction Loss（本文新增）。</strong>就是一项在 observation token 上的、长度归一化的 next-token cross-entropy：</p>
+    $$\mathcal{L}_{\text{Env}}(\theta;O')=-\frac{1}{Z}\sum_{t\in O'}\log p_\theta(x_t\mid x_{<t}),\qquad Z=|O|.$$
+    <p>逐符号解释：$p_\theta(x_t\mid x_{<t})$ 是 policy 在位置 $t$ 对真实 token $x_t$ 给出的概率；求和只在被选中的目标子集 $O'$ 上；归一化常数 $Z$ 用的是<strong>整条序列的总 observation 长度 $|O|$ 而不是 $|O'|$</strong>——这样不同目标子集（比如「只 env」vs「全 obs」）的配置在「每条 observation」尺度上仍可比较。直觉上，这一项在逼着同一个 policy 网络学会「给定我刚发的命令，terminal 会吐回什么」，从而 reshape 它的内部表示、对「哪些后续命令更可能暴露有用状态、修复错误、推进任务」形成更好的先验。</p>
+
+    <div class="callout note">
+      <span class="label">为什么说「for free」</span>
+      两项 loss <strong>共享同一次 actor forward pass</strong>：同一批 logits，只是用不同的 mask 去 gather（$A$ 给 GRPO，$O'$ 给 Env loss）。昂贵的 attention/MLP 计算本来就要在整条 rollout 上跑一遍（为了算 action token 的 log-prob），ECHO 只是把已经算好的 logits 在 terminal-output 位置也收集进同一次 backward——<strong>唯一新增的开销是一次 masked log-prob 求和</strong>。因此不需要第二次 rollout、不需要 teacher 模型、不需要第二次前向。而且因为目标来自当前 policy 自己的 rollout，ECHO 是 <strong>on-policy</strong> 的：随着 agent 变强、访问到新的 terminal 状态，environment 也产生新的响应去预测，形成一个自演化的 curriculum。
+    </div>
+
+    <h3>选哪些 observation token 当目标（$O'$）</h3>
+    <p>一条 observation message 内部其实有结构：前面是 harness 的 <code>WARNINGS:</code> 块（当上一个 tool call 解析失败或违反格式约束时，规则触发的提示），后面才是 <code>&lt;command_output&gt;…&lt;/command_output&gt;</code> 这段真正的命令输出（env token）。ECHO <strong>把 $O'$ 设为「只 env token、剔除 warning 前缀」</strong>。理由是经验性的：warning token entropy 很低，模型大约 60 个 training step 就背下来了，之后 warn-only 配置几乎没有有用梯度；而 terminal-output token 编码的是任务相关的反馈（文件名、测试失败、字节数、错误格式），在整个训练过程中持续提供信息梯度。Appendix A 的曲线印证：warning CE 在约 60 步内从 ∼5.6 nats 掉到 &lt;0.05 nats，而 env CE 稳定在 0.05–0.10 nats（真实 terminal 输出的不可约 entropy）持续提供梯度。</p>
+
+    <h3>调 $\lambda$</h3>
+    <p>作者扫了 $\lambda\in\{0.001,0.005,0.01,0.02,0.05,0.1,0.2\}$，发现有效区间是 <strong>0.01–0.05</strong>。低于这个区间，auxiliary 梯度太小、不足以稳定 reshape 表示（env loss 会乱跳甚至上升）；高于这个区间，observation 目标开始和 policy 更新争夺容量——$\lambda=0.1$ 时 policy 质量持平或退化，$\lambda=0.2$ 时甚至会塌缩成「terminal 输出特别好预测但毫无用处」的退化 rollout。所有正式实验用<strong>常数 $\lambda=0.05$</strong>（SFT 起点用 0.02）。常数权重天然「self-annealing」：模型一旦学会 terminal 输出的统计规律，$\mathcal{L}_{\text{Env}}$ 迅速下降，auxiliary 贡献自动变小，不需要显式 schedule。</p>
+
+    <div class="callout note">
+      <span class="label">复现要点（Appendix B）</span>
+      Optimizer AdamW（$\beta_1{=}0.9,\beta_2{=}0.95$，weight decay 0.01）；lr $1\times10^{-6}$ 常数（无 warmup/decay），grad clip 0.2；GRPO 每个 prompt $n{=}16$ 个 rollout、batch size 16、无 KL penalty、prompt-level advantage 归一化、$\epsilon_{lo}{=}0.2,\epsilon_{hi}{=}0.28$（即 clip-higher）；训练温度 0.8、评测温度 0.6。Episode 最多 16 轮、16k context、每轮最多 2048 token，跑在 Docker 里由 Harbor 编排，episode 末用单元测试判定成功（10 分钟 agent / 2 分钟 verifier 超时）。每个模型在 8 张 B200 上训 500 个 GRPO step。reward：最终测试过 = 1，否则 = 0。ECHO 与 stabilization 技巧（void-trajectory filtering、overlong filtering、clip-higher、KL 正则）<strong>正交可组合</strong>——后者稳定 policy gradient，ECHO 只是在 observation token 上并联一项监督 loss。
+    </div>
+  </section>
+
+  <!-- ============================ ④ 实验评估 ============================ -->
+  <section id="evaluation">
+    <h2><span class="n">④</span>实验评估 Evaluation</h2>
+    <h3>评测设置</h3>
+    <ul>
+      <li><strong>起始 policy（3 个）：</strong>Qwen3-8B、Qwen3-14B（base），以及 OpenThinker-Agent-v1-SFT（OT-SFT，是在 ∼15k 来自 GLM-4.6 的专家 terminal-agent 示范上 SFT 过的 Qwen3-8B）。每个 policy 各跑 matched 的 GRPO 与 ECHO，唯一变量就是「要不要在 terminal-output token 上加 cross-entropy」。</li>
+      <li><strong>训练语料：</strong>8870 个 terminal 任务（来自 Endless Terminals、OpenThoughts-Agent-v1-RL，外加用改造的 Endless Terminals pipeline 新生成的 6170 个；只保留 GPT-5 在 16 次里至少解出 1 次的任务），训练 8770、留 100 做 in-distribution 验证（val100）。</li>
+      <li><strong>Benchmark / 各考察什么：</strong>val100（与训练同分布的 in-dist 验证，100 任务）；ITD = internal-dev（71 个 OOD 任务，来自 TerminalBench 1.0 与 OpenThoughts-TB-dev）；TBLite = OpenThoughts-TBLite（为小模型校准的 100 个 terminal-bench 风格任务，是最难的 OOD slice）；<strong>TB2 = TerminalBench-2.0</strong>（89 个公开任务，用第三方 Terminus-2 harness、32k context 跑）。</li>
+      <li><strong>指标方向：</strong>pass@k（越高越好）；以及 environment-token cross-entropy（越低越好，衡量「world model 预测得多准」）；外加 timeout 率 / turn 数 / token 数等推理效率指标（越低越好）。内部评测 8 rollouts/task、温度 0.6；TB2 用 5 rollouts、温度 0.6、seed 42。</li>
+    </ul>
+
+    <h3>主要结果（原文 Table 1，本文方法加粗）</h3>
+    <table>
+      <thead><tr><th>起始 policy / 设定</th><th>val100</th><th>ITD</th><th>TBLite</th><th>TB2 p@1</th><th>TB2 p@3</th><th>TB2 p@5</th></tr></thead>
+      <tbody>
+        <tr><td>Qwen3-8B · Base</td><td>34.2</td><td>7.0</td><td>4.9</td><td>1.57</td><td>3.71</td><td>4.49</td></tr>
+        <tr><td>Qwen3-8B · GRPO</td><td>54.9</td><td>16.2</td><td>9.5</td><td>2.70</td><td>6.74</td><td>8.99</td></tr>
+        <tr><td><strong>Qwen3-8B · ECHO</strong></td><td><strong>63.7</strong></td><td><strong>18.9</strong></td><td><strong>11.4</strong></td><td><strong>5.17</strong></td><td><strong>10.45</strong></td><td><strong>13.48</strong></td></tr>
+        <tr><td>OT-SFT · SFT</td><td>38.5</td><td>10.7</td><td>6.0</td><td>5.62</td><td>10.45</td><td>12.36</td></tr>
+        <tr><td>OT-SFT · GRPO</td><td>63.5</td><td>18.8</td><td>11.6</td><td>7.64</td><td><strong>14.38</strong></td><td>17.98</td></tr>
+        <tr><td><strong>OT-SFT · ECHO</strong></td><td><strong>73.1</strong></td><td><strong>22.7</strong></td><td><strong>12.9</strong></td><td><strong>7.87</strong></td><td>13.82</td><td>17.98</td></tr>
+        <tr><td>Qwen3-14B · Base</td><td>35.3</td><td>12.1</td><td>5.7</td><td>4.27</td><td>8.99</td><td>12.36</td></tr>
+        <tr><td>Qwen3-14B · GRPO</td><td>60.3</td><td>17.9</td><td>9.8</td><td>5.17</td><td>10.67</td><td>13.48</td></tr>
+        <tr><td><strong>Qwen3-14B · ECHO</strong></td><td><strong>65.0</strong></td><td><strong>19.8</strong></td><td><strong>15.1</strong></td><td><strong>10.79</strong></td><td><strong>16.52</strong></td><td><strong>19.10</strong></td></tr>
+      </tbody>
+    </table>
+    <p><strong>诚实解读：</strong>ECHO 在三个起始 policy、几乎每个评测 slice 上都优于匹配的 GRPO。最醒目的是 TB2 pass@1 近乎翻倍：8B 上 2.70→5.17（×1.9）、14B 上 5.17→10.79（×2.1）。<strong>哪里没赢：</strong>OT-SFT 上 TB2 的 p@3（13.82 vs GRPO 的 14.38）、p@5（持平 17.98）ECHO 并未占优——也就是说在已经被专家示范 prime 过的强起点上、且看 pass@k(k&gt;1) 时，增益变小甚至持平。一个有意思的现象是 <strong>14B 的「内部增益更小、但 TB2 增益更大」</strong>：作者推测大模型容量更足、能从 observation 流里内化更可泛化的 terminal dynamics，而小模型的 policy 目标与 environment-prediction 目标更直接地争夺有限容量。</p>
+
+    <h3>关键证据 1：ECHO 真的学到了 terminal dynamics（§5.2）</h3>
+    <figure>
+      <img src="figures/env_ce.png" alt="terminal-output token 上的 cross-entropy">
+      <figcaption>图 2：在更强的 Qwen3-32B 生成的 held-out、off-policy 轨迹（共 2168 条）上测 environment-token cross-entropy（越低越好）。每组三根柱依次为 Base/SFT、GRPO、ECHO。GRPO（青）相对起始 policy 几乎不动，而 ECHO（粉）在所有 model family 与所有评测分布上都大幅降低预测误差。这是一个刻意设计的 off-policy 测试——被评模型并没有生成这些轨迹，因此低 CE 要求它真能「预测另一个更强 agent 动作的后果」而非背诵自己的 rollout 分布。（出处：原文 Figure 3）</figcaption>
+    </figure>
+    <p>这是支撑 world-model 主张的核心实验。具体数字：14B 上 val100 的 CE 从 0.24→0.07、ITD 0.39→0.31、TBLite 0.30→0.23；8B 上对应 0.29→0.07、0.46→0.32、0.35→0.25。val100 降得最多（与训练同分布），ITD/TBLite 是 OOD 所以幅度小些但方向一致。关键对照是：<strong>GRPO 提升了任务成功率，却几乎没改变 env-token CE</strong>——说明「会做对任务」和「会预测环境」是两件不同的事，而只有 ECHO 同时拿到了后者。</p>
+
+    <h3>关键证据 2：少用专家示范也能追平（§5.3）</h3>
+    <figure>
+      <img src="figures/sft_gap.png" alt="ECHO 补回 expert-SFT gap 的比例">
+      <figcaption>图 3：定义 expert-SFT gap = (OT-SFT+GRPO − Qwen3-8B+GRPO) 的增益，ECHO lift = (ECHO − Qwen3-8B+GRPO)。ECHO 在内部评测上几乎补满 gap——val100 101.6%、ITD 103.9%、TBLite 88.9%；在 TB2 上补回约一半——p@1 50.0%、p@3 48.6%、p@5 50.0%。（出处：原文 Figure 4）</figcaption>
+    </figure>
+    <p>解读：专家 SFT 给 terminal agent 的价值里，有相当一部分其实是一个「<strong>interaction prior</strong>」——怎么查看文件、跑测试、遇到报错、跟 traceback、暴露有用状态。ECHO 不去模仿专家的<em>动作选择</em>，而是从 base 模型<em>自己动作</em>的 terminal 后果里学这套交互模式，于是不靠 behavior cloning 就能把这部分捞回来。但 TB2 只补回一半，作者认为 TB2 还需要更高层的「<strong>strategy prior</strong>」（先试哪条命令、怎么拆任务、何时该看何时该改、何时该停），这部分专家示范仍有帮助——所以 ECHO 并没让专家示范过时，只是说明它价值的一部分（对 terminal 反馈与状态演化的熟悉度）可以直接从交互里学到。</p>
+
+    <h3>效率：训得更快、推理更省（§5.4）</h3>
+    <p>因为 ECHO 训练的是每条 rollout 里本来就有的 observation token，它能从固定样本预算里榨出更多学习。在 8B 上，ECHO 用 <strong>1.5–2.3× 更少的训练步</strong>就达到 GRPO-only 的峰值（聚合分上 1.54–1.92×，TBLite 上 Qwen3-8B 达 2.27×；唯一例外是 OT-SFT 的 TBLite，GRPO 反而更早达峰 0.73×）；14B 两者同步达峰，但 ECHO 全程更高、表现为「更高的 plateau」。推理侧（TB2）：Qwen3-8B 的 timeout 率从 19.8%→9.0%（−55%）、completion token −30%；OT-SFT timeout 45.2%→24.7%、turn 数 −43%；14B 是 timeout/turn 上唯一例外（+6%/+7%），但仍少用 13% token 且拿到最大的 TB2 pass@1 增益。总体上 ECHO 产出的 policy「解更多任务，且用更少交互解出来」。</p>
+
+    <h3>消融 / 分析：verifier-free 适应（§5.5）</h3>
+    <p>最反直觉的实验：从最强的 8B ECHO checkpoint 出发，<strong>把 GRPO 项整个 mask 掉</strong>，关掉 verifier，只用 $\mathcal{L}_{\text{Env}}$（只预测 terminal 输出 token）继续训 100 步。模型照样在环境里动作、观察响应，但只通过「预测后果」更新——没有任何「这条轨迹对不对」的标签。结果：val100（同分布）+3.8pp；OOD 上经「clean tool-call 过滤」后，PyTerm +10.0pp、ITD +5.2pp，同时 val100 维持在 ±1pp 内。但 <strong>TBLite 在同一 recipe 下反而退化 −3.9pp</strong>。作者归因于 observation 结构差异：PyTerm 提供密集、与动作直接挂钩的反馈（代码产出 traceback、打印值、文件内容，往往直接指向下一步该改什么），而 TBLite 更需要对不可见的文件系统/配置/进程状态做广义 shell 编排，观察到的 token 与「能解题的动作选择」联系更松。结论：verifier-free 的 env-only 适应，<strong>只在「干净探索能暴露出可预测、与动作挂钩的反馈」时才奏效</strong>——否则 env loss 会变成一个「失败模式的模型」而非有用的任务 dynamics。</p>
+  </section>
+
+  <!-- ============================ ⑤ 洞见 ============================ -->
+  <section id="insight">
+    <h2><span class="n">⑤</span>洞见 Insights</h2>
+    <div class="callout insight">
+      <span class="label">Insight</span>
+      <strong>1）介于「专家示范」与「稀疏 outcome reward」之间，还藏着一份密集的训练信号——agent 自己动作的可观测后果。</strong>它早就在每条 rollout 里、早就进了 forward pass，只是被 loss mask 挡在外面；换个 mask 就能把失败轨迹也变成学习信号。<br><br>
+      <strong>2）「会预测 = 会理解」对 LM agent 同样成立，而且可以零成本地验证。</strong>用 off-policy（别人生成的）轨迹上的 env-token cross-entropy 当探针，能把「真学到了 terminal dynamics」和「只是任务做对了」干净地区分开——GRPO 提升了成功率却几乎不降这个 CE，ECHO 两者兼得。<br><br>
+      <strong>3）专家 SFT 的价值可以拆解。</strong>它至少含两部分：interaction prior（怎么和 terminal 打交道）与 strategy prior（高层怎么决策）。前者能纯靠「从自己交互的后果里学」补回来，后者目前还得靠示范——这给「该花钱标什么数据」提供了一个清晰的切分。
+    </div>
+    <h3>局限与未来</h3>
+    <p>① <strong>增益依赖反馈结构。</strong>当 terminal 反馈与「能解题的动作」联系松散时（如 TBLite 的广义 shell 编排），预测 observation 带来的收益有限，verifier-free 模式甚至会退化——ECHO 不是万灵药，吃的是「action-linked 的密集反馈」。② <strong>需要过滤。</strong>OOD 的 verifier-free 适应必须先过滤掉 malformed tool call / parse error / 死循环，否则 env loss 会去建模失败模式。③ <strong>$\lambda$ 有上限。</strong>权重过大（≥0.1）会和 policy 更新争容量、甚至塌缩成「易预测但无用」的退化 rollout，需要落在 0.01–0.05。④ <strong>strategy prior 仍缺。</strong>TB2 上只补回一半 expert-SFT gap，说明高层策略这块本方法没解决。⑤ 实验集中在 terminal/Docker 这一类设定与 Qwen3 系列，跨到其它 agent 环境/模型族是否成立有待验证。未来方向（含本人判断）：把同样的「预测 observation」auxiliary loss 推广到 browser/GUI/工具调用等其它 agent 环境；或把它与显式规划/搜索结合，让「白嫖来的 world model」真正被用来 imagine/plan，而不只是 reshape 表示。</p>
+    <h3>与相关工作的关系</h3>
+    <p>从本文自身的定位看：ECHO 接续了经典 world-model（Schmidhuber、World Models、Dreamer、MuZero 等）与 model-free RL 里的 auxiliary-prediction（UNREAL、curiosity、SPR 等预测像素/reward/forward dynamics 以改善表示）这两条线，但搬到了 <strong>multi-turn LM-agent</strong> 设定，且预测目标就是 transcript 里现成的、已被当作后续动作 context 的<strong>文本 terminal observation</strong>。与最接近的 CWM（在 Python/Docker 的 observation–action 轨迹上训一个大模型）相比，ECHO <strong>不需要单独语料、单独的 world-modeling 阶段、feedback generator、dynamics model 或推理时 simulation</strong>，而是把 observation 预测直接注入 on-policy GRPO。与同样指出「next-state 信号被丢弃」的工作也不同：RLTF 预测 judge 生成的 critique、OpenClaw-RL 用 judge 把 next-state 变成 process reward 或蒸馏目标——ECHO <strong>没有 judge、没有 critique、没有蒸馏，直接预测 environment 的字面响应 token</strong>。它与 SkyRL、SimpleTIR、DAPO、ArCHer 等 multi-turn agent RL 系统正交互补：那些方法稳定 policy-gradient 更新，ECHO 在 observation token 上并联一项监督 loss。</p>
+  </section>
+
+  <footer class="foot">
+    本页为 <code>paper-reading</code> skill 生成的阅读笔记，仅作辅助，细节以
+    <a href="https://arxiv.org/abs/2605.24517" target="_blank" rel="noopener">原文</a> 为准 · 解读日期 2026-06-01
+  </footer>
+
+</article>
+</body>
+</html>

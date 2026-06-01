@@ -156,6 +156,26 @@
     "path": "papers/2026-06-01-agentic-sft-masking-multiturn/index.html"
   },
   {
+    "slug": "2605.24517-echo-terminal-agents-world-models",
+    "title": "ECHO: Terminal Agents Learn World Models for Free",
+    "authors": "Vaishnavi Shrivastava, Piero Kauffmann, Ahmed Awadallah, Dimitris Papailiopoulos",
+    "team": "Microsoft Research",
+    "arxiv": "https://arxiv.org/abs/2605.24517",
+    "code": "https://github.com/microsoft/echo-rl",
+    "date": "2026-06-01",
+    "published": "arXiv 2026",
+    "tldr": "在 GRPO 的 action-token loss 之外加一项预测 terminal 输出 token 的 auxiliary cross-entropy，让 terminal agent 复用同一次 forward pass 顺带学到 world model；TerminalBench-2.0 pass@1 几乎翻倍，且能少用专家示范。",
+    "tags": [
+      "terminal-agent",
+      "world-model",
+      "RL",
+      "auxiliary-loss",
+      "GRPO",
+      "TerminalBench"
+    ],
+    "path": "papers/2605.24517-echo-terminal-agents-world-models/index.html"
+  },
+  {
     "slug": "2605.17933-atlasva-visual-skill-memory",
     "title": "AtlasVA: Self-Evolving Visual Skill Memory for Teacher-Free VLM Agents",
     "authors": "Pan Wang, Yihao Hu, Xiujin Liu, Jingchu Yang, Hang Wang, Zhihao Wen",
