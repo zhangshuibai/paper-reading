@@ -58,6 +58,46 @@
     "path": "papers/2505.20633-test-time-learning-llm/index.html"
   },
   {
+    "slug": "2601.19897-self-distillation-continual-learning",
+    "title": "Self-Distillation Enables Continual Learning",
+    "authors": "Idan Shenfeld, Mehul Damani, Jonas Hübotter, Pulkit Agrawal",
+    "team": "MIT; Improbable AI Lab; ETH Zurich",
+    "arxiv": "https://arxiv.org/abs/2601.19897",
+    "code": "https://github.com/idanshen/Self-Distillation",
+    "date": "2026-06-01",
+    "published": "arXiv 2026",
+    "tldr": "SDFT 用 demonstration-conditioned 的自身作 teacher、在 on-policy 轨迹上做 reverse-KL 自蒸馏，无需显式 reward 即可从专家示范学习，大幅减少 catastrophic forgetting，实现从示范中持续学习。",
+    "tags": [
+      "continual-learning",
+      "catastrophic-forgetting",
+      "on-policy-distillation",
+      "self-distillation",
+      "in-context-learning",
+      "SFT"
+    ],
+    "path": "papers/2601.19897-self-distillation-continual-learning/index.html"
+  },
+  {
+    "slug": "2604.01193-self-distillation-code-generation",
+    "title": "Embarrassingly Simple Self-Distillation Improves Code Generation",
+    "authors": "Ruixiang Zhang, Richard He Bai, Huangjie Zheng, Navdeep Jaitly, Ronan Collobert, Yizhe Zhang",
+    "team": "Apple",
+    "arxiv": "https://arxiv.org/abs/2604.01193",
+    "code": "https://github.com/apple/ml-ssd",
+    "date": "2026-06-01",
+    "published": "arXiv 2026",
+    "tldr": "SSD 用某个 temperature/truncation 配置从 base model 采样代码、再对这些未验证样本做标准 SFT（无 verifier/teacher/RL），把 Qwen3-30B-Instruct 在 LiveCodeBench v6 上 pass@1 从 42.4% 提到 55.3%，增益集中在 hard 题，机制是缓解 decoding 的 precision-exploration conflict。",
+    "tags": [
+      "code-generation",
+      "self-distillation",
+      "LiveCodeBench",
+      "post-training",
+      "decoding-temperature",
+      "no-verifier"
+    ],
+    "path": "papers/2604.01193-self-distillation-code-generation/index.html"
+  },
+  {
     "slug": "2605.17933-atlasva-visual-skill-memory",
     "title": "AtlasVA: Self-Evolving Visual Skill Memory for Teacher-Free VLM Agents",
     "authors": "Pan Wang, Yihao Hu, Xiujin Liu, Jingchu Yang, Hang Wang, Zhihao Wen",

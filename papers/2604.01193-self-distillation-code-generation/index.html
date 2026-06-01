@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>极简自蒸馏提升代码生成（SSD） · 论文解读</title>
+
+<script>
+  window.MathJax = {
+    tex:{inlineMath:[['$','$'],['\\(','\\)']], displayMath:[['$$','$$'],['\\[','\\]']]},
+    svg:{fontCache:'global'}
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;
+  }
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:880px; margin:0 auto; padding:18px 22px 90px}
+
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:27px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)}
+  .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .meta-grid a:hover{text-decoration:underline}
+
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap}
+  nav.toc a:hover{color:var(--accent)}
+
+  section{margin:38px 0}
+  h2{font-size:21px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:17px; margin:24px 0 8px}
+  p{margin:12px 0}
+  ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.9em}
+  strong{color:var(--text)}
+
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:14px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:10px 12px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  .yes{color:var(--ok); font-weight:600}
+  .no{color:var(--muted)}
+
+  figure{margin:24px 0; text-align:center}
+  figure img{max-width:100%; height:auto; border:1px solid var(--line); border-radius:10px; background:#fff}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+
+  blockquote{border-left:3px solid var(--line); margin:14px 0; padding:2px 16px; color:var(--muted)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+  .mjx-container{overflow-x:auto; overflow-y:hidden}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">code generation</span>
+      <span class="chip">self-distillation</span>
+      <span class="chip">LiveCodeBench</span>
+      <span class="chip">post-training</span>
+      <span class="chip">decoding temperature</span>
+      <span class="chip">no verifier / no RL</span>
+    </div>
+    <h1>极简自蒸馏提升代码生成（SSD）</h1>
+    <p class="orig-title">Embarrassingly Simple Self-Distillation Improves Code Generation</p>
+    <dl class="meta-grid">
+      <dt>作者</dt><dd>Ruixiang Zhang*, Richard He Bai*, Huangjie Zheng*, Navdeep Jaitly, Ronan Collobert, Yizhe Zhang*（*同等贡献）</dd>
+      <dt>团队 / 机构</dt><dd>Apple</dd>
+      <dt>原文链接</dt><dd><a href="https://arxiv.org/abs/2604.01193" target="_blank" rel="noopener">https://arxiv.org/abs/2604.01193</a></dd>
+      <dt>发表 / 年份</dt><dd>arXiv 2026（v1, 2026-04-01）</dd>
+      <dt>解读日期</dt><dd>2026-06-01</dd>
+    </dl>
+  </header>
+
+  <div class="tldr">
+    <b>TL;DR</b> — 一个 LLM 能不能只用<b>自己的原始输出</b>（无 verifier、无 teacher、无 RL、无代码执行）就在代码生成上变强？本文给出肯定答案：<b>Simple Self-Distillation (SSD)</b> 极其简单——用某个特定 temperature/truncation 配置从 base model 采样解法，然后直接对这些<b>未经任何正确性筛选</b>的样本做标准 SFT。它把 Qwen3-30B-Instruct 在 LiveCodeBench v6 上的 pass@1 从 42.4% 提到 <b>55.3%</b>，增益集中在 hard 题，并在 Qwen/Llama 的 4B/8B/30B、instruct/thinking 五个模型上普遍成立。作者把机制归因于 decoding 里的 <b>precision-exploration conflict</b>：SSD 以 context-dependent 的方式重塑 token 分布——在 lock 位压掉 distractor 尾巴、在 fork 位保留有用多样性。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#opensource">① 开源贡献</a>
+    <a href="#motivation">② 动机与贡献</a>
+    <a href="#method">③ 方法</a>
+    <a href="#evaluation">④ 实验评估</a>
+    <a href="#insight">⑤ 洞见</a>
+  </nav>
+
+  <!-- ① 开源贡献 -->
+  <section id="opensource">
+    <h2><span class="n">①</span>开源贡献 Open-source Artifacts</h2>
+    <p>论文首页直接给出代码仓库 <code>github.com/apple/ml-ssd</code>。解读日核实：<strong>代码仓库与三个 SSD 微调后的模型权重都已在 Hugging Face 真实发布</strong>。仓库含数据合成与评测 pipeline，README 标语「No rewards · No verifier · No teacher · No RL」。许可证为 Apple 自家 license（非标准 OSS 协议，使用前需读条款）。训练数据本身不直接打包发布，而是让用户用脚本基于公开的 rSTARcoder seed prompts 自己合成。</p>
+    <table>
+      <thead><tr><th>类型</th><th>是否开源</th><th>内容 / 链接</th></tr></thead>
+      <tbody>
+        <tr><td>代码 Code</td><td class="yes">✔</td><td><a href="https://github.com/apple/ml-ssd" target="_blank" rel="noopener">github.com/apple/ml-ssd</a> — 数据合成（<code>data_generation/generate.py</code>）+ 评测（<code>evaluation/eval.py</code>）+ 配置/prompt 模板。Apple license。</td></tr>
+        <tr><td>模型权重 Weights</td><td class="yes">✔</td><td>HF：<a href="https://huggingface.co/apple/SimpleSD-4B-instruct" target="_blank" rel="noopener">apple/SimpleSD-4B-instruct</a>、<a href="https://huggingface.co/apple/SimpleSD-4B-thinking" target="_blank" rel="noopener">SimpleSD-4B-thinking</a>、<a href="https://huggingface.co/apple/SimpleSD-30B-instruct" target="_blank" rel="noopener">SimpleSD-30B-instruct</a>（31B，MoE）。</td></tr>
+        <tr><td>数据集 Dataset</td><td class="no">✘（不直接发布）</td><td>不打包发布合成数据；用仓库脚本从 rSTARcoder（Liu et al., 2025）seed 子集（去重 ~10K 竞赛编程题）自行生成。</td></tr>
+        <tr><td>环境 / Benchmark</td><td class="no">—</td><td>评测用公开 LiveCodeBench（v5/v6）；仓库提供评测脚本，未新建 benchmark。</td></tr>
+        <tr><td>项目主页 / Demo</td><td class="no">—</td><td>未见独立项目页或在线 demo（仓库即主入口）。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ② 动机与贡献 -->
+  <section id="motivation">
+    <h2><span class="n">②</span>研究动机与贡献 Motivation &amp; Contribution</h2>
+    <h3>背景与问题</h3>
+    <p>随着 LLM 被推向越来越难的编程任务，<strong>高质量监督信号成了瓶颈</strong>：人写的参考解法昂贵；合成数据流水线要么需要一个更强的 teacher model（蒸馏天花板被 teacher 框死），要么需要对每道题做基于执行的验证（execution-based verification）。RL with verifiable reward（如 GRPO 这类）操作复杂、训练可能不稳。用 intrinsic reward（majority voting、entropy minimization）的无监督路线则面临 reward hacking 与长训坍缩。于是一个自然的问题浮现：<strong>模型能不能完全不借助任何外部标注或验证，就自我提升？</strong></p>
+    <h3>本文的切入点</h3>
+    <p>作者从代码生成的结构里看出了机会。代码序列交织着两类位置：<strong>fork</strong>（分叉位——多个续写都合理，对应不同解法路径，需要 exploration）与 <strong>lock</strong>（锁定位——语法语义几乎无歧义，正确 token 明确，但仍残留一条低概率的 distractor 尾巴，需要 precision）。这两类位置对 decoding temperature $T_\text{eval}$ 提出<strong>互相矛盾的需求</strong>：调低 $T_\text{eval}$ 锁住 lock 但饿死 fork；调高 $T_\text{eval}$ 救活 fork 但让 distractor 在 lock 处卷土重来。任何<strong>全局固定</strong>的 decoding 设置都只能折中——作者称之为 <strong>precision-exploration conflict</strong>。关键洞察是：在 temperature-shifted、truncated 的样本上做 SFT，会以 context-dependent 的方式重塑分布，从而<strong>缓解</strong>这个 conflict（lock 处更狠地压尾、fork 处保留多样性），而这是单纯改 decoding 设置做不到的。换句话说，现有代码模型在固定 decoding 下藏着没被释放的能力。</p>
+    <h3>核心贡献</h3>
+    <ol>
+      <li>提出 <strong>SSD</strong>：仅用模型自身未经验证的输出 + 标准 cross-entropy，就能显著提升代码生成——无外部 teacher / verifier / reward model / 标注解法 / 执行环境 / RL。Qwen3-30B-Instruct 在 LCB v6 上 pass@1 42.4%→<strong>55.3%</strong>（相对 +30%），hard 题 pass@5 从 31.1%→54.1%。</li>
+      <li>证明这不是个例：在 <strong>两个家族（Qwen/Llama）、三种规模（4B/8B/30B）、两种风格（instruct/thinking）共五个模型</strong>上全部提升，增益集中在 medium/hard 题。</li>
+      <li>提出并论证 <strong>precision-exploration conflict</strong> 是 SSD 起作用的核心机制，并用「受控 toy 仿真 + 真实模型分析 + 理论分解」三路对齐的证据支撑；同时解释了为什么<strong>只调 decoding 无法复现</strong>这些增益。</li>
+      <li>给出一个目标函数分解（式 4），把 SSD loss 拆成 support compression（压尾）+ within-support reshaping（重塑头部）+ 对齐 base，说明 SSD 不只是 imitation。</li>
+    </ol>
+  </section>
+
+  <!-- ③ 方法 -->
+  <section id="method">
+    <h2><span class="n">③</span>方法 Method</h2>
+    <p>方法只有三步，简单到「令人尴尬」：(1) <strong>Sample</strong>——用某个训练期 temperature $T_\text{train}\neq 1$ 与 truncation $\rho_\text{train}$（top-k/top-p）从冻结的 base model 采样解法；(2) <strong>Fine-tune</strong>——对这些原始输出做标准 SFT；(3) <strong>Decode</strong>——部署后用评测期配置 $(T_\text{eval},\rho_\text{eval})$ 解码。整个过程只需要「一批题目 prompt + 模型本身」。</p>
+
+    <figure>
+      <img src="figures/fig1_teaser.png" alt="SSD 流程与主结果总览">
+      <figcaption>图 1：左为 SSD 三步流程（Sample with $T_\text{train}\neq1$ → SFT on own outputs → Decode at $T_\text{eval}$），明确「No RL / No Verifier / No Teacher / No Execution」；右为 LCB v6 pass@1，五模型全升，Qwen3-30B-Instruct 相对 +30%，hard 题增益最大。（出处：原文 Figure 1）</figcaption>
+    </figure>
+
+    <h3>三步公式化</h3>
+    <p><strong>数据合成</strong>：对每道题 $x$ 采 $N$ 个候选解（实践中 $N=1$ 即足够）：</p>
+    $$y \sim \mathrm{Decode}_{T_\text{train},\,\rho_\text{train}}\big(p_\theta(\cdot\mid x)\big)$$
+    <p>这些输出<strong>完全不验证</strong>——无执行、无测试用例、无正确性筛选，仅做极少量语法清洗（去掉空响应和单行 stub）。它们组成 $\mathcal{D}_\text{SSD}$。<strong>训练</strong>就是普通的 next-token 交叉熵：</p>
+    $$\mathcal{L}(\theta) = -\mathbb{E}_{(x,y)\sim\mathcal{D}_\text{SSD}}\sum_{t=1}^{|y|}\log p_\theta(y_t\mid x, y_{<t})$$
+    <p><strong>推理</strong>：用 $\hat y\sim\mathrm{Decode}_{T_\text{eval},\,\rho_\text{eval}}(p_{\theta^*}(\cdot\mid x))$。这里 $p_\theta$ 是待优化模型，$p_{\theta^*}$ 是微调后的模型；$T$ 是 temperature，$\rho$ 是 top-k/top-p 截断。</p>
+
+    <h3>为什么有效：precision-exploration conflict</h3>
+    <figure>
+      <img src="figures/fig4_conflict.png" alt="fork 与 lock 对 temperature 的矛盾需求">
+      <figcaption>图 2：以排序代码为例。算法选择处是 <strong>fork</strong>（橙，多种合理算法），后续 <code>mid</code> 的复用是 <strong>lock</strong>（蓝）。低 $T_\text{eval}$ 保住 lock 却让 fork 失去多样性；高 $T_\text{eval}$ 救活 fork 却让 lock 的 distractor 尾巴复活——单一全局温度无法两全。（出处：原文 Figure 4）</figcaption>
+    </figure>
+    <p>温度按 $p_T(v)\propto p(v)^{1/T}$ 整体拉平/锐化，是「全局」操作，无法区分 fork 与 lock。SSD 的作用是<strong>改变分布本身</strong>，让 lock 更安全、fork 更可探索，从而把可用的 decoding 区间整体拓宽，使得<strong>更高的温度变得新可用且有益</strong>。</p>
+
+    <h3>理论分解（式 4）</h3>
+    <p>SSD 拟合的是「base model 在 $(T_\text{train},\rho_\text{train})$ 下采样所诱导的分布」。设在某 context 下经温度缩放与截断后存活的 token 集合为 $S$、其上重整化分布为 $q$，$\mathrm{KeptMass}_\theta$ 为模型分配给 $S$ 的概率质量，$T\equiv T_\text{train}$，则诱导损失可写成：</p>
+    $$\mathcal{L}(\theta)=\underbrace{-\log \mathrm{KeptMass}_\theta}_{\text{support compression (via }\rho_\text{train})}+\underbrace{(1-T)\,H_{1/T}\big(p_\theta(\cdot\mid S)\big)}_{\text{within-support reshaping (via }T_\text{train})}+\underbrace{T\cdot \mathrm{KL}\big(q\,\|\,p_{\theta,T}(\cdot\mid S)\big)}_{\text{对齐 base model}}+\text{const}$$
+    <p>$H_{1/T}$ 是 1/T 阶 Rényi entropy，$p_{\theta,T}(\cdot\mid S)$ 是模型在 $S$ 上的 tempered 分布。三项分工清晰：第一项<strong>压缩 support</strong>（把弥散的尾部质量挤掉、集中到少数可行 token）；第二项<strong>重塑头部</strong>；第三项让重塑结果在 $S$ 上对齐 base。<strong>lock/fork 的非对称由「哪些 token 进入 $S$」自然导出</strong>：lock 处只有少数 token 存活，support compression 主导，头部对 $T_\text{eval}$ 变得不敏感（更稳）；fork 处多个续写存活，within-support reshaping 有空间去拉平头部而不重开已丢弃的尾巴。这也是为什么 SSD 在<strong>降低总熵</strong>的同时还能<strong>保留头部 exploration</strong>——全词表熵被拆成 gate/head/tail 三部分，SSD 压低 gate+tail，head 在 fork 处仍可保持宽广。</p>
+
+    <div class="callout note">
+      <span class="label">实现要点</span>
+      <ul>
+        <li><strong>$N=1$ 单样本即可</strong>：每题只采一个解法就够，不需要大规模采样+筛选。</li>
+        <li><strong>$T_\text{train}\neq1$ 是关键</strong>：$T_\text{train}$ 控制 SSD 重塑分布的强度，$T_\text{eval}$ 控制解码时利用这种重塑的程度。无截断时二者通过 effective temperature $T_\text{eff}=T_\text{train}\cdot T_\text{eval}$ 组合，$T_\text{eff}\approx1.2$ 附近达峰（拟合 $R^2=0.75$）。</li>
+        <li><strong>训练期 truncation 抬高天花板</strong>：在数据合成时加 $\rho_\text{train}$（如 top-k=10）能在温度组合之外再开一条增益通道。30B-Instruct 的最佳无截断配置约 49.7% pass@1，最佳设置 $T_\text{train}=2.0$、$T_\text{eval}=1.1$、训练期 top-k=10。</li>
+        <li><strong>训练配置</strong>：Megatron-LM，8×B200（MoE 用 EP=8），AdamW + cosine decay，peak LR $5\times10^{-6}$，global batch 32，序列长 65,536；instruct 模型 2500 iter、thinking 模型 300 iter。采样用 vLLM，最长 128K。</li>
+        <li><strong>数据来源</strong>：rSTARcoder seed 子集去重得 ~10K 竞赛编程题；只去空响应/单行 stub，<strong>绝无正确性信号</strong>。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ④ 实验评估 -->
+  <section id="evaluation">
+    <h2><span class="n">④</span>实验评估 Evaluation</h2>
+    <h3>评测设置</h3>
+    <ul>
+      <li><strong>Benchmark：</strong>主基准 LiveCodeBench v6（2025-02～05，按 easy/medium/hard 分层），辅以 LCB v5（2024-08～2025-02）确认。考察真实竞赛编程题的代码生成能力。</li>
+      <li><strong>模型：</strong>Llama-3.1-8B-Instruct、Qwen3-4B-Instruct、Qwen3-4B-Thinking、Qwen3-30B-A3B-Instruct（MoE 30B/3B active）、Qwen3-30B-A3B-Thinking。</li>
+      <li><strong>对比基线：</strong>各模型自身的 base（用官方推荐采样参数）；并与「只调 base 的 decoding（温度/截断 sweep）」对比，以证明增益不能靠改 decoding 复现。训练范式层面对照 SFT-on-external-data、GRPO、on-policy distillation 等（SSD 是其中唯一同时满足「dense signal + 无 teacher + 无 verifier + 无 privileged info」的）。</li>
+      <li><strong>指标方向（均越高越好）：</strong>pass@1（主）、pass@5（覆盖度/exploration 的代理），并按 easy/medium/hard 分别报告。</li>
+    </ul>
+
+    <h3>主要结果</h3>
+    <p>下表为 LCB v6 上 pass@1 的代表性结果（每对中第一行 base、第二行 +SSD，<strong>本文方法加粗</strong>）：</p>
+    <table>
+      <thead><tr><th>模型</th><th>ALL</th><th>EASY</th><th>MED</th><th>HARD</th><th>pass@5 ALL</th></tr></thead>
+      <tbody>
+        <tr><td>Qwen3-4B-Instruct</td><td>34.0</td><td>79.7</td><td>34.4</td><td>10.5</td><td>41.0</td></tr>
+        <tr><td><strong>+ SSD</strong></td><td><strong>41.5</strong> (+7.5)</td><td><strong>86.5</strong></td><td><strong>45.1</strong> (+10.7)</td><td><strong>16.2</strong> (+5.7)</td><td><strong>56.8</strong> (+15.8)</td></tr>
+        <tr><td>Qwen3-30B-Instruct</td><td>42.4</td><td>—</td><td>—</td><td>—</td><td>53.5</td></tr>
+        <tr><td><strong>+ SSD</strong></td><td><strong>55.3</strong> (+12.9)</td><td><strong>+6.5</strong></td><td><strong>+14.2</strong></td><td><strong>+15.3</strong></td><td><strong>—</strong></td></tr>
+        <tr><td>Llama-3.1-8B-Instruct</td><td>12.7</td><td>46.8</td><td>5.4</td><td>0.0</td><td>23.0</td></tr>
+        <tr><td><strong>+ SSD</strong></td><td><strong>16.2</strong> (+3.5)</td><td><strong>52.6</strong></td><td><strong>10.0</strong></td><td><strong>1.6</strong></td><td><strong>24.0</strong></td></tr>
+        <tr><td>Qwen3-4B-Thinking</td><td>54.5</td><td>97.4</td><td>59.2</td><td>29.7</td><td>67.5</td></tr>
+        <tr><td><strong>+ SSD</strong></td><td><strong>57.8</strong> (+3.3)</td><td><strong>98.7</strong></td><td><strong>62.8</strong></td><td><strong>33.8</strong></td><td><strong>71.4</strong></td></tr>
+        <tr><td>Qwen3-30B-Thinking</td><td>66.1</td><td>99.8</td><td>73.0</td><td>41.5</td><td>76.7</td></tr>
+        <tr><td><strong>+ SSD</strong></td><td><strong>68.2</strong> (+2.1)</td><td><strong>100.0</strong></td><td><strong>76.4</strong></td><td><strong>46.7</strong></td><td><strong>80.2</strong></td></tr>
+      </tbody>
+    </table>
+    <p>解读：五模型<strong>全部提升</strong>，instruct 模型增益更大（30B-Instruct +12.9pp 最亮眼），thinking 模型本身已强、空间小（+2~3pp）。增益<strong>集中在 medium/hard</strong>（30B-Instruct hard +15.3pp），且 <strong>pass@5 的提升普遍大于 pass@1</strong>（30B-Instruct hard pass@5 31.1%→54.1%）——说明 SSD 不是只锐化一个主导 mode，而是<strong>保住了跨解法分支的有用 exploration</strong>。LCB v5 上同样成立，排除过拟合特定时间窗的担忧。</p>
+
+    <h3>消融 / 分析</h3>
+    <p><strong>只调 decoding 无法复现</strong>（原文 Figure 2）：对 base 做大范围温度 sweep，曲线极其平坦——30B-Instruct 的 pass@1 仅在 41.3%~43.5% 间波动（2.2pp）。SSD 相对「最佳调参 base」仍领先（30B-Instruct +11.8pp all / hard +13.3pp pass@1、+19.4pp pass@5）。证明 SSD 改的是模型本身，非任何 decoding 配置可替代。</p>
+
+    <figure>
+      <img src="figures/fig6_realmodel.png" alt="真实模型证据：压尾 + 头部更可探索">
+      <figcaption>图 3：真实模型证据（橙=base，蓝=SSD）。(a) 按概率排序时 SSD 累积质量上升更快——头部更干净、尾巴更弱。(b)(c) 随 $T_\text{eval}$ 升高，SSD 的「存活 token 数」与「截断后熵」涨得快得多。(d) 即便两者 top-20 概率质量相近，SSD 截断后熵仍高数倍——给评测期 exploration 留出更多可用空间。（出处：原文 Figure 6）</figcaption>
+    </figure>
+
+    <p><strong>三路对齐机制验证</strong>：toy 仿真（一个 fork + 三个 lock 的可闭式计算环境）复现了同样的折中困境，并显示 SSD 在 lock 处剥离尾巴、在 fork 处保留并拉平头部，使最佳解码温度大幅右移、成功率上升；真实模型（图 3）出现同样两个 signature；理论分解（式 4）给出解释。三者一致指向「training 让 lock 更安全、decoding 再去 fork 探索」的<strong>互补</strong>关系。</p>
+    <p><strong>「坏数据，好结果」压力测试</strong>（原文 Figure 7）：把 $T_\text{train}$ 拉到 2.0 且<strong>关闭截断</strong>，合成数据约 62% 没有可提取代码、常中途退化成多语言乱码；按常规标准是不可用的 SFT 数据。但 SSD 仍把模型提到 48.1% pass@1 / 64.0% pass@5（+5.7 / +10.5pp），hard 题 pass@1 +7.3pp。这强烈暗示：<strong>增益主要不来自「在正确代码上训练」，而来自高温采样如何重塑 token 概率</strong>（此时需评测期截断 $\rho_\text{eval}$ 来补回精度，故增益小于带训练期截断的 headline 设置）。</p>
+  </section>
+
+  <!-- ⑤ 洞见 -->
+  <section id="insight">
+    <h2><span class="n">⑤</span>洞见 Insights</h2>
+    <div class="callout insight">
+      <span class="label">Insight</span>
+      <ul>
+        <li><strong>提升可以来自「分布重塑」而非「正确性监督」。</strong>SSD 不验证任何样本，甚至在近乎乱码的数据上仍提升——核心信号是「高温采样 + 截断」对 token 分布的 context-dependent 重塑，而不是模仿正确解法。这把「self-improve 必须靠 verifier/reward」的直觉撕开一道口子。</li>
+        <li><strong>固定 decoding 下，模型藏着没释放的能力。</strong>precision-exploration conflict 意味着任何单一全局温度都是折中；训练能改变分布、解开这个折中，让更高温度变得新可用——而这正是只调 decoding 永远做不到的。training 与 decoding 是互补的两个阶段。</li>
+        <li><strong>降低总熵 ≠ 失去 exploration。</strong>关键是「在哪儿降熵」：lock 处压尾（降熵、提精度），fork 处保留宽头部（保多样性）。pass@5 的提升大于 pass@1 正是这种非对称重塑的指纹。</li>
+      </ul>
+    </div>
+    <h3>局限与未来</h3>
+    <p>(1) <strong>增益依赖模型起点</strong>：thinking 模型本就很强，SSD 空间有限（仅 +2~3pp）；增益主要落在 instruct 模型与 medium/hard 题。(2) <strong>仅在代码生成上验证</strong>——作者选代码是因为 fork/lock 结构特别可见，是否能直接迁移到数学/通用推理等领域尚待检验。(3) <strong>超参敏感</strong>：$T_\text{train}$、$T_\text{eval}$、truncation 需要搜索，存在一个有界的可行操作区间（温度过高仍会崩）。(4) 论文定位 SSD 为「互补」的 post-training 方向，而非替代 RLVR；二者关系（能否叠加、谁先谁后）留待后续。</p>
+    <h3>与相关工作的关系</h3>
+    <p>与经典 <strong>self-training / 知识蒸馏 / 序列级蒸馏</strong>：SSD 只用 base model 的 temperature-shifted 样本 + 标准交叉熵，<strong>不</strong>引入 privileged context、feedback-conditioned teacher 或辅助监督。与 <strong>STaR / ReST<sup>EM</sup></strong> 等自训练：它们靠正确性筛选或外部反馈把自生成输出转成监督，SSD 则直接在<strong>未验证的原始输出</strong>上训。与 <strong>RLVR / GRPO</strong>：不需 reward、不需 verifier，操作简单且无 RL 的不稳定性；论文用一张训练范式对照表（Table 1）把 SSD 定位为唯一同时满足「dense signal + 无 teacher + 无 verifier + 无 privileged info」的方法。与 <strong>decoding/truncation 研究</strong>（top-k、nucleus、truncation-as-desmoothing）：SSD 不是新解码规则，而是说明「在 shifted decoding 下采样得到的样本上训练，能改变模型本身，让一个简单固定的解码策略在测试时显著更有效」。</p>
+  </section>
+
+  <footer class="foot">
+    本页为 <code>paper-reading</code> skill 生成的阅读笔记，仅作辅助，细节以
+    <a href="https://arxiv.org/abs/2604.01193" target="_blank" rel="noopener">原文</a> 为准 · 解读日期 2026-06-01
+  </footer>
+
+</article>
+</body>
+</html>
