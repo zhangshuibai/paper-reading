@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RL for Test-Time Scaling（@sheriyuo 博客）· 中文解读</title>
+
+<script>
+  window.MathJax = {
+    tex:{inlineMath:[['$','$'],['\\(','\\)']], displayMath:[['$$','$$'],['\\[','\\]']]},
+    svg:{fontCache:'global'}
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;}
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:880px; margin:0 auto; padding:18px 22px 90px}
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:26px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)} .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .meta-grid a:hover{text-decoration:underline}
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap; line-height:2}
+  nav.toc a:hover{color:var(--accent)}
+  section{margin:38px 0}
+  h2{font-size:21px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:17px; margin:24px 0 8px}
+  p{margin:12px 0} ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.9em}
+  strong{color:var(--text)}
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:13.5px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:9px 11px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  figure{margin:24px 0; text-align:center}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+  blockquote{border-left:3px solid var(--line); margin:14px 0; padding:2px 16px; color:var(--muted)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+  .mjx-container{overflow-x:auto; overflow-y:hidden}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">Test-Time Scaling</span>
+      <span class="chip">RL for Reasoning</span>
+      <span class="chip">Training-Free vs RL</span>
+      <span class="chip">综述 / 博客解读</span>
+      <span class="chip">On-Policy Distillation</span>
+    </div>
+    <h1>把 Test-Time Scaling 写进训练目标：从「怎么花推理算力」到「训练模型学会花算力」</h1>
+    <p class="orig-title">解读自 Xiuyu Li (@sheriyuo) 博客系列《浅谈 Test-Time Scaling 与 Training-Free RL（三）：RL for Test-Time Scaling》</p>
+    <dl class="meta-grid">
+      <dt>原作者</dt><dd>Xiuyu Li（@sheriyuo，RUC 本科，方向 RL / Optimization / dLLM）</dd>
+      <dt>体裁</dt><dd>X（Twitter）长文 / 系列博客第三篇 · 非论文，本页是对该博客的<strong>中文转述与梳理</strong></dd>
+      <dt>原文链接</dt><dd><a href="https://x.com/sheriyuo/status/2061382777623519284" target="_blank" rel="noopener">x.com/sheriyuo/status/2061382777623519284</a>（另有知乎中文版）</dd>
+      <dt>解读日期</dt><dd>2026-06-01</dd>
+    </dl>
+  </header>
+
+  <div class="tldr">
+    <b>TL;DR</b> — 这篇博客的主线是一句话：<strong>想让 test-time compute 真正换成 accuracy，verifier / reward 信号必须回流到训练里——纯 training-free 的 TTS 在渐近意义上是次优的。</strong> 它以 Aviral Kumar 组 2025–2026 的工作为骨架，串起一条清晰的演进：① 先证明 training-free 撞墙（$\Omega(\sqrt{H})$ 的差距、以及无监督 RLVR 必然「先涨后崩」）；② 把 TTS 写进训练目标（<strong>MRT</strong> 的 progress reward）；③ 从「想更多」升级到「探索对」（<strong>e3</strong> 让 in-context exploration 成为可训练技能、实现算力外推）；④ 啃难题（<strong>Privileged On-Policy Exploration</strong> 用 oracle 前缀把 on-policy rollout 拉进高 reward 区）；⑤ 给 long-CoT 做内部 credit assignment（<strong>InT</strong> 自提单步干预）；⑥ agent 设定里改成 scale「交互次数」而非「思考长度」（<strong>TTI</strong>）。最后落到一个判断：不必执着 training-free，工业界也不需要；真正的蓝海是把 TTS 与 On-Policy Distillation / Continual Learning 接起来。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#map">全景路线图</a>
+    <a href="#s1">① 起点：training-free 为何 scale 不动</a>
+    <a href="#s2">② MRT：把 TTS 写进目标</a>
+    <a href="#s3">③ e3：从「想更多」到「探索对」</a>
+    <a href="#s4">④ 难题：Privileged On-Policy Exploration</a>
+    <a href="#s5">⑤ InT：long-CoT 的 credit assignment</a>
+    <a href="#s6">⑥ Agent：interaction-scaling</a>
+    <a href="#s7">⑦ Takeaway 与争议</a>
+    <a href="#papers">涉及论文清单</a>
+  </nav>
+
+  <!-- 路线图 -->
+  <section id="map">
+    <h2>全景路线图</h2>
+    <p>整篇文章可以读成一条「<strong>把 test-time 这件事，一步步搬进训练目标</strong>」的主线。下图把六个环节串起来：</p>
+    <figure>
+      <div style="background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 8px">
+      <svg viewBox="0 0 720 540" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif">
+        <defs>
+          <marker id="rt-ah" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L7,3 L0,6 Z" fill="#666"/>
+          </marker>
+        </defs>
+        <g stroke="#666" stroke-width="1.6" fill="none" marker-end="url(#rt-ah)">
+          <path d="M360,74 L360,96"/>
+          <path d="M360,156 L360,178"/>
+          <path d="M360,238 L360,260"/>
+          <path d="M360,320 L360,342"/>
+          <path d="M360,402 L360,424"/>
+        </g>
+        <g text-anchor="middle" fill="#1a1f33" font-size="13">
+          <rect x="170" y="22" width="380" height="52" rx="10" fill="#f3f4f8" stroke="#b9c2e0"/>
+          <text x="360" y="44" font-weight="600">起点：training-free TTS 撞墙</text>
+          <text x="360" y="63" font-size="11.5" fill="#5a627a">VB 比 VF 有 Ω(√H) 优势 · 无监督 RLVR「先涨后崩」</text>
+
+          <rect x="150" y="96" width="420" height="60" rx="10" fill="#e8eefc" stroke="#7aa2ff"/>
+          <text x="360" y="120" font-weight="600">① MRT：把 TTS 写进训练目标</text>
+          <text x="360" y="140" font-size="11.5" fill="#5a627a">progress reward ΔP(success)，cumulative regret，2–3× 算力效率</text>
+
+          <rect x="150" y="178" width="420" height="60" rx="10" fill="#e8eefc" stroke="#7aa2ff"/>
+          <text x="360" y="202" font-weight="600">② e3：从「想更多」到「探索对」</text>
+          <text x="360" y="222" font-size="11.5" fill="#5a627a">in-context exploration 可训练 · 算力外推 16k→32k＋（≈2×）</text>
+
+          <rect x="150" y="260" width="420" height="60" rx="10" fill="#e8eefc" stroke="#7aa2ff"/>
+          <text x="360" y="284" font-weight="600">③ Privileged On-Policy Exploration</text>
+          <text x="360" y="304" font-size="11.5" fill="#5a627a">oracle 前缀把 on-policy rollout 拉进高 reward 区 · 啃难题</text>
+
+          <rect x="150" y="342" width="420" height="60" rx="10" fill="#e8eefc" stroke="#7aa2ff"/>
+          <text x="360" y="366" font-weight="600">④ InT：long-CoT 内部 credit assignment</text>
+          <text x="360" y="386" font-size="11.5" fill="#5a627a">自提单步 intervention，只验一步 · 作 RL 初始化 ＋≈10 分</text>
+
+          <rect x="150" y="424" width="420" height="62" rx="10" fill="#efe9f7" stroke="#9b8cff"/>
+          <text x="360" y="448" font-weight="600" fill="#3a2b52">⑤ Agent 设定：interaction-scaling</text>
+          <text x="360" y="468" font-size="11.5" fill="#5a627a">TTI：scale 交互次数而非思考长度（NeurIPS’25 Best Paper）</text>
+
+          <text x="360" y="512" font-size="11" fill="#888">主线：verifier / reward 信号回流训练，纯 training-free 渐近次优</text>
+        </g>
+      </svg>
+      </div>
+      <figcaption>路线图：本解读据博客论述重绘（非原文插图）。从「training-free 撞墙」出发，依次把 test-time 的不同侧面写进训练。</figcaption>
+    </figure>
+  </section>
+
+  <!-- ① -->
+  <section id="s1">
+    <h2><span class="n">①</span>起点：training-free 为什么 scale 不动</h2>
+    <p>前两篇博客覆盖了两条 <strong>training-free</strong> 路线：采样侧（best-of-N、verifier reranking、search）与 in-context 侧（self-refine、self-evolve）。它们的共同点是<strong>权重永远不动</strong>——拿一个冻结的 base model，往里灌推理时算力去把 accuracy 曲线顶上去。博客的判断是：这条路<em>能 work，直到 work 不动为止</em>，而这堵墙是有名字的。</p>
+    <p><strong>《Scaling Test-Time Compute Without Verification or RL is Suboptimal》（ICML’25 Spotlight，Kumar 组）</strong>给出一个很锋利的结论：在 verifier-based（VB）与 verifier-free（VF）的二分下，<em>存在</em>一族 base policy，使 VB 在算力 scaling 上对 VF 有 <strong>$\Omega(\sqrt{H})$</strong> 的渐近优势（$H$ 是算力预算）。直觉上，VF 路线（典型如把 reasoning trace 蒸回 SFT）只是在<strong>围着 policy 的均值做 imitation</strong>，无法主动放大「稀有但正确」的尾巴；而 VB 把 verifier 信号回流到训练，等价于一次 <strong>importance-weighted update</strong>，天然能利用 reward 的 anti-concentration 把那条尾巴「钓」上来。一句话：<strong>要让 test-time compute 真换成 accuracy，verifier / reward 必须流回训练。</strong></p>
+    <p>一个自然的反驳是：verifier 信号能不能「免费」自举出来？比如 TTRL 那条线——多数投票伪标签、entropy minimization，本质是拿模型自身的一致性当 reward，不要外部 verifier。这能不能补上 $\Omega(\sqrt{H})$ 的差距？<strong>《How Far Can Unsupervised RLVR Scale LLM Training?》（ICLR’26）</strong>把这条退路也堵死了：在一个统一框架下，作者指出所有「intrinsic reward」做的其实是同一件事——<strong>distribution sharpening</strong>，把 policy 指数级地塌缩到一个由模型 prior 决定的不动点。经验上的指纹是一条普适的「<strong>先涨后崩</strong>」曲线：先有增益，然后在 <strong>Model Collapse Step</strong> 处掉头向下，而这个拐点的位置由模型自身的 confidence-correctness 对齐程度决定、<em>与你喂多少数据无关</em>。论文的实务结论是：intrinsic reward 只在小集合（&lt;128 样本）上安全——拿来做 test-time training 没问题，但<strong>不能替代真正的 verifier 去做大规模 post-training</strong>。</p>
+    <div class="callout note">
+      <span class="label">这一节的立论</span>
+      training-free 与「无监督自奖励」都受同一条规律约束：它们只能<strong>锐化</strong>模型已有的分布，不能注入新的、被外部信号验证过的能力。所以下文所有方法的共同动作，都是<strong>把某种被验证的信号塞进训练目标</strong>。
+    </div>
+  </section>
+
+  <!-- ② -->
+  <section id="s2">
+    <h2><span class="n">②</span>把 TTS 写进训练目标：MRT</h2>
+    <p><strong>《Optimizing Test-Time Compute via Meta Reinforcement Fine-Tuning》（MRT，ICML’25 Spotlight）</strong>从一个观察出发：标准的 outcome-reward RL 只在一条 trace 的<em>最末尾</em>发一个 0/1，于是模型分不清「我在第 500 个 token 就做对了」和「我到第 5000 个 token 才上道」。结果是一条<strong>抖动的 scaling 曲线</strong>——加预算并不可靠地有用。</p>
+    <p>MRT 把目标改写成 meta-RL 式的<strong>累积 regret（cumulative regret）</strong>：把一条 reasoning trace 切成若干 chunk，给每个 chunk 一个 <strong>progress reward</strong> $\Delta P(\text{success})$——即「经过这个 chunk 之后，success 概率的边际增量」。于是模型同时被两件事推着走：<em>结尾要对</em>，并且<em>沿途要单调地越来越对</em>。论文报告了 <strong>2–3 倍</strong>的相对算力效率提升。</p>
+    <p>博客在这里点了题：一旦你接受「<strong>训练目标里必须含 test-time</strong>」这个前提，后面所有工作都可以读成在这根主干上、朝不同方向打的补丁。</p>
+  </section>
+
+  <!-- ③ -->
+  <section id="s3">
+    <h2><span class="n">③</span>从「想更多」到「探索对」：e3</h2>
+    <p>MRT 把目标和 test-time 曲线对齐了，但还有一个正交的失败模式：<strong>长 CoT ≠ 真正的 exploration</strong>。模型可以再多吐五千个 token 的 CoT，而 accuracy 指针纹丝不动。<strong>《e3: Learning to Explore Enables Extrapolation of Test-Time Compute》（ICLR’26）</strong>把「in-context exploration」提升为一项<strong>头等的、可训练的技能</strong>。e3 的配方有三味药：</p>
+    <ul>
+      <li><strong>Asymmetries（非对称性）。</strong> base model 通常<em>验证</em>比<em>生成</em>更强，于是鼓励 trace 内部的操作：self-verification、self-refutation、局部 backtracking。</li>
+      <li><strong>Negative-gradient reinforcement（负梯度强化）。</strong> 在失败的 trace 上主动放大 exploration 分支，让模型<em>敢于</em>分叉。</li>
+      <li><strong>结构化探索 + 耦合 curriculum。</strong> 沿着由浅入深的结构化 exploration 模式来训练。</li>
+    </ul>
+    <p>结果是<strong>第一次可靠地实现了 test-time compute 的外推</strong>：训练时只见过 16k token 的模型，在测试时 32k＋ token 仍能持续涨 accuracy，外推因子约 <strong>2×</strong>。</p>
+  </section>
+
+  <!-- ④ -->
+  <section id="s4">
+    <h2><span class="n">④</span>探索难题：Privileged On-Policy Exploration</h2>
+    <p>e3 解决的是「<em>愿意</em>探索」。难题还有一个「你<em>够不够得到</em> reward」的问题：难题上的 on-policy reward 基本全是 0，梯度立不起来；而在 easy/hard 混合集上做 RL 又会撞上「<strong>ray interference</strong>」——优化方向被 easy 题劫持，hard 题永远学不会。</p>
+    <p><strong>《Learning to Reason on Hard Problems with Privileged On-Policy Exploration》（arXiv 2601.18779）</strong>玩了个巧妙的把戏：把一段 oracle solution 作为<strong>privileged prefix（特权前缀）</strong>拼在难题前面，让模型在它的条件下做 on-policy rollout。注意这<strong>不是 off-policy distillation</strong>——rollout 仍然是 on-policy 的，只是 conditioning 分布被 oracle 拉进了高 reward 区域。论文报告：约 <strong>10%</strong> 此前无解的难题变得可解，pass@1 / pass@k 跳到 <strong>58% / 83%</strong>。</p>
+  </section>
+
+  <!-- ⑤ -->
+  <section id="s5">
+    <h2><span class="n">⑤</span>long-CoT 的内部 credit assignment：InT</h2>
+    <p>训练里一大批失败的 trace 只贡献一个 0 信号，极其浪费。<strong>《InT: Self-Proposed Interventions Enable Credit Assignment in LLM Reasoning》（ICLR’26）</strong>让模型读自己失败的 trace，定位<strong>第一个出错的 step</strong>，并提出一个<strong>单步 intervention</strong>（最小的反事实编辑）。参考解只用来验证<em>那一步</em>——验一个编辑很便宜，从头生成一条完整正确 trace 很贵：又一处可套利的 asymmetry。</p>
+    <p>被验证通过的 intervention 在 likelihood 上被<strong>上调</strong>，这就自动产出了一个<strong>稠密的 step-level credit-assignment 信号</strong>。把它当作下游 RL 的 initializer，比纯 RL 大约高 <strong>10 分</strong>。博客的类比很到位：可以把 InT 读成 MRT progress reward 的<strong>离散表亲</strong>——MRT 给连续的 $\Delta P$，InT 给单步的「这个 token 本该是那个 token」的证据。</p>
+  </section>
+
+  <!-- ⑥ -->
+  <section id="s6">
+    <h2><span class="n">⑥</span>Agent 设定不同：用「交互」scaling 取代「思考」scaling</h2>
+    <p><strong>《Thinking vs. Doing: Agents that Reason by Scaling Test-Time Interactions》（TTI，NeurIPS’25 Best Paper）</strong>抛出一个让 agent 社区有点扎心的论点：在 agentic 任务里，<strong>想更多没用，做更多才有用</strong>。一旦环境本身会返回信息，再往里堆内心独白 token 的边际收益就快速衰减。test-time scaling 该选的轴是<strong>交互次数（number of interactions）</strong>，而不是思考长度。</p>
+    <p>TTI 用一套 <strong>curriculum-online RL</strong>：逐步增大 rollout horizon $h$，让模型学会自适应地决定「再探一步，还是收尾」。博客顺势呼应了它此前在《Agentic RL: Decoupling Reasoning and Tool-use》里的主张——<strong>reasoning 的 token 预算</strong>与 <strong>tool-use 的 step 预算</strong>是两件不同的事，必须分开 scale、分开训练。</p>
+  </section>
+
+  <!-- ⑦ -->
+  <section id="s7">
+    <h2><span class="n">⑦</span>Takeaway 与尚未定论的争议</h2>
+    <p><strong>RL 到底有没有教给模型新东西，仍有争议。</strong>一种偏学术的观点认为 RL 本质上是拿 pass@k 换 pass@1，只是让模型锐化自己的分布（<strong>Power Sampling</strong>，ICLR’26 / <strong>Scalable Power Sampling</strong>，ICML’26）。而 entropy、logits、self-certainty 这些 intrinsic 指标，是否真和模型能力或 RL 有效性相关，也远未定论——既不能说强相关，也不能说不相关。</p>
+    <p><strong>一种工业视角</strong>则认为：学术界研究的 RL 模型（Qwen3）太弱了，只有换到 gpt-oss-120b 这种工业真正在用的模型上，问题才会有结论。博客认为 gpt-oss-120b 是个货真价实的好 RL 模型、堪称典范的 post-RL 模型，是「弱模型 / 强模型」的分界线：它的 generation length、entropy、self-certainty 都表现得合理得多——一个标定良好的模型，output length 与 accuracy 之间应当呈<strong>干净的单调递减</strong>关系，而学术规模的 Qwen3 实验永远到不了那里。</p>
+    <div class="callout insight">
+      <span class="label">博客的落点</span>
+      Test-time scaling 本质就是<strong>用推理时的 exploration 抬升模型表现</strong>；而无监督 TTS——哪怕它能套进 RLHF 目标（<strong>ETS</strong>，ICML’26）——仍逃不出那条 suboptimality。结论是务实的：<strong>我们不必执着于完全 training-free，工业界也不需要 training-free。</strong>如何从学术角度把 TTS 更好地对齐工业需求，是来年一个又长又蓝海的方向。再叠加当下 <strong>On-Policy Distillation（OPD）</strong>的爆发——SDFT、SDPO 这类工作正在用 OPD 改写旧的 RL 范式，大家都在朝 <strong>Continual Learning</strong> 漂移——没人知道今天这套 RL 还能走几年。
+    </div>
+    <h3>作者列出的未来方向</h3>
+    <ul>
+      <li><strong>Continual Learning &amp; Self-Evolving</strong>：面向 long-horizon 的 LLM / VLM / Agent reasoning。</li>
+      <li><strong>新的 RL 前沿：On-Policy Distillation（OPD）</strong>——SDPO、SDFT。</li>
+      <li><strong>大小模型协作</strong>：Speculative Decoding、MTP。</li>
+    </ul>
+  </section>
+
+  <!-- 论文清单 -->
+  <section id="papers">
+    <h2>涉及论文清单（据博客整理）</h2>
+    <p>以下条目与一句话定位均来自博客的论述，便于按图索骥；具体数字以各原论文为准。</p>
+    <table>
+      <thead><tr><th>论文 / 方法</th><th>会议</th><th>一句话贡献（博客口径）</th></tr></thead>
+      <tbody>
+        <tr><td>Scaling TTS Without Verification or RL is Suboptimal（Kumar 组）</td><td>ICML’25 Spotlight</td><td>VB 比 VF 有 $\Omega(\sqrt{H})$ 渐近优势；training-free 次优</td></tr>
+        <tr><td>How Far Can Unsupervised RLVR Scale?</td><td>ICLR’26</td><td>intrinsic reward = distribution sharpening，「先涨后崩」，只在 &lt;128 样本安全</td></tr>
+        <tr><td><strong>MRT</strong>（Meta Reinforcement Fine-Tuning）</td><td>ICML’25 Spotlight</td><td>progress reward $\Delta P$、cumulative regret，2–3× 算力效率</td></tr>
+        <tr><td><strong>e3</strong>（Learning to Explore…）</td><td>ICLR’26</td><td>in-context exploration 可训练；算力外推 16k→32k＋（≈2×）</td></tr>
+        <tr><td>Privileged On-Policy Exploration（2601.18779）</td><td>arXiv</td><td>oracle 特权前缀＋on-policy rollout；~10% 难题转可解，pass@1/k 58%/83%</td></tr>
+        <tr><td><strong>InT</strong>（Self-Proposed Interventions）</td><td>ICLR’26</td><td>自提单步 intervention、只验一步；作 RL 初始化 ＋≈10 分</td></tr>
+        <tr><td><strong>TTI</strong>（Thinking vs. Doing）</td><td>NeurIPS’25 Best Paper</td><td>agent 该 scale 交互次数而非思考长度；curriculum-online RL 增大 horizon $h$</td></tr>
+        <tr><td>Power Sampling / Scalable Power Sampling</td><td>ICLR’26 / ICML’26</td><td>RL ≈ 拿 pass@k 换 pass@1，分布锐化</td></tr>
+        <tr><td>ETS</td><td>ICML’26</td><td>无监督 TTS 即便套进 RLHF 目标仍逃不出 suboptimality</td></tr>
+        <tr><td>SDFT / SDPO</td><td>—</td><td>用 On-Policy Distillation 改写旧 RL 范式，导向 Continual Learning</td></tr>
+      </tbody>
+    </table>
+    <div class="callout warn">
+      <span class="label">阅读提醒</span>
+      本页是对一篇<strong>个人博客 / 观点文章</strong>的中文转述与梳理，不是同行评审论文。其中的会议归属、数字（如 $\Omega(\sqrt{H})$、2–3×、58%/83%、＋10 分等）与「工业 vs 学术」判断均为<strong>博客作者的陈述与观点</strong>，引用前建议回到各原论文核对。
+    </div>
+  </section>
+
+  <footer class="foot">
+    本页为对 <a href="https://x.com/sheriyuo/status/2061382777623519284" target="_blank" rel="noopener">@sheriyuo 博客</a>的中文解读笔记，仅作辅助梳理，观点与数字以原文及各被引论文为准 · 解读日期 2026-06-01
+  </footer>
+
+</article>
+</body>
+</html>

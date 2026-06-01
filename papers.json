@@ -117,6 +117,25 @@
     "path": "papers/2605.21850-acc-agent-context-compilation/index.html"
   },
   {
+    "slug": "2026-06-01-rl-for-test-time-scaling",
+    "title": "RL for Test-Time Scaling（@sheriyuo 博客解读）",
+    "authors": "Xiuyu Li (@sheriyuo)",
+    "team": "个人博客 / X thread · 系列第三篇",
+    "arxiv": "https://x.com/sheriyuo/status/2061382777623519284",
+    "code": "",
+    "date": "2026-06-01",
+    "published": "Blog/X 2026",
+    "tldr": "把 TTS 写进训练目标的演进梳理：training-free 渐近次优(Ω√H)→MRT→e3→privileged on-policy exploration→InT→TTI，落到 OPD 与 Continual Learning。",
+    "tags": [
+      "test-time-scaling",
+      "RL",
+      "survey",
+      "blog",
+      "on-policy-distillation"
+    ],
+    "path": "papers/2026-06-01-rl-for-test-time-scaling/index.html"
+  },
+  {
     "slug": "2605.17933-atlasva-visual-skill-memory",
     "title": "AtlasVA: Self-Evolving Visual Skill Memory for Teacher-Free VLM Agents",
     "authors": "Pan Wang, Yihao Hu, Xiujin Liu, Jingchu Yang, Hang Wang, Zhihao Wen",
