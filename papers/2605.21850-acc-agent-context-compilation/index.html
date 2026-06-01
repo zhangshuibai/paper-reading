@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ACC：把 agent 轨迹编译成 long-context 训练数据 · 论文解读</title>
+
+<script>
+  window.MathJax = {
+    tex:{inlineMath:[['$','$'],['\\(','\\)']], displayMath:[['$$','$$'],['\\[','\\]']]},
+    svg:{fontCache:'global'}
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;
+  }
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:880px; margin:0 auto; padding:18px 22px 90px}
+
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:27px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)}
+  .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .meta-grid a:hover{text-decoration:underline}
+
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap}
+  nav.toc a:hover{color:var(--accent)}
+
+  section{margin:38px 0}
+  h2{font-size:21px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:17px; margin:24px 0 8px}
+  p{margin:12px 0}
+  ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.9em}
+  strong{color:var(--text)}
+
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:14px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:10px 12px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  .yes{color:var(--ok); font-weight:600}
+  .no{color:var(--muted)}
+  .num{text-align:right; font-variant-numeric:tabular-nums}
+
+  figure{margin:24px 0; text-align:center}
+  figure img{max-width:100%; height:auto; border:1px solid var(--line); border-radius:10px; background:#fff}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+
+  blockquote{border-left:3px solid var(--line); margin:14px 0; padding:2px 16px; color:var(--muted)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+  .mjx-container{overflow-x:auto; overflow-y:hidden}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <!-- ============================ 抬头 / 元信息 ============================ -->
+  <header class="head">
+    <div class="chips">
+      <span class="chip">long-context</span>
+      <span class="chip">agent</span>
+      <span class="chip">tool-use</span>
+      <span class="chip">training-data</span>
+      <span class="chip">SFT</span>
+      <span class="chip">distillation</span>
+    </div>
+    <h1>ACC：把 agent 轨迹「编译」成 long-context 训练数据</h1>
+    <p class="orig-title">ACC: Compiling Agent Trajectories for Long-Context Training</p>
+    <dl class="meta-grid">
+      <dt>作者</dt><dd>Qisheng Su, Zhen Fang, Shiting Huang, Yu Zeng, Yiming Zhao, Kou Shi, Ziao Zhang, Lin Chen, Zehui Chen, Lijun Wu, Feng Zhao</dd>
+      <dt>团队 / 机构</dt><dd>USTC（MoE Key Lab of BIPC, University of Science and Technology of China）· Shanghai Innovation Institute · Shanghai AI Laboratory</dd>
+      <dt>原文链接</dt><dd><a href="https://arxiv.org/abs/2605.21850" target="_blank" rel="noopener">https://arxiv.org/abs/2605.21850</a></dd>
+      <dt>发表 / 年份</dt><dd>arXiv preprint，2026（arXiv:2605.21850v1）</dd>
+      <dt>解读日期</dt><dd>2026-06-01</dd>
+    </dl>
+  </header>
+
+  <div class="tldr">
+    <b>TL;DR</b> — agent 在解题时会调用工具、跨多个 turn 收到大量 tool response，但标准 agent SFT 会把这些 tool response <b>mask 掉</b>，只监督 turn-level 的 tool selection，造成「监督盲区（supervision blind spot）」——散落在各 turn 的证据信号被白白浪费。ACC（Agent Context Compilation）的做法是把一条 trajectory「编译」成一个 long-context QA 对：把原始 question 和各 turn 的 tool response/observation 拼成一段长 context，让模型<b>不调用工具、直接在长上下文里推理出答案</b>。用 ACC 训练 Qwen3-30B-A3B，在 MRCR 上从 50.2 升到 68.3（+18.1）、GraphWalks 从 69.9 升到 77.5（+7.6），逼近大 8 倍 active 参数的 Qwen3-235B-A22B，且通用能力（GPQA/MMLU-Pro/AIME/IFEval）不退化。Dataset 与 checkpoint 已在 Hugging Face 开源（Apache 2.0）。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#opensource">① 开源贡献</a>
+    <a href="#motivation">② 动机与贡献</a>
+    <a href="#method">③ 方法</a>
+    <a href="#evaluation">④ 实验评估</a>
+    <a href="#insight">⑤ 洞见</a>
+  </nav>
+
+  <!-- ============================ ① 开源贡献 ============================ -->
+  <section id="opensource">
+    <h2><span class="n">①</span>开源贡献 Open-source Artifacts</h2>
+    <p>本文在 Hugging Face 上同时开源了<strong>训练数据集</strong>与<strong>训练后的 checkpoint</strong>，二者均为 Apache 2.0，截至解读日（2026-06-01）页面可访问、可下载。论文首页与 abstract 中<strong>未给出 GitHub 代码仓库链接</strong>，arXiv abs 页也未见，因此训练/数据构造的脚本目前视为未公开。</p>
+    <table>
+      <thead><tr><th>类型</th><th>是否开源</th><th>内容 / 链接</th></tr></thead>
+      <tbody>
+        <tr><td>代码 Code</td><td class="no">✘</td><td>论文首页/脚注/abstract 与 arXiv abs 页均未见 GitHub 仓库链接；数据构造与训练脚本截至解读日未公开。</td></tr>
+        <tr><td>模型权重 Weights</td><td class="yes">✔</td><td><a href="https://huggingface.co/groundhogLLM/ACC-Qwen3-30B-A3B" target="_blank" rel="noopener">groundhogLLM/ACC-Qwen3-30B-A3B</a> · 基座 Qwen3-30B-A3B-Thinking（MoE，约 31B 总参 / 3B active）· BF16 · Apache 2.0</td></tr>
+        <tr><td>数据集 Dataset</td><td class="yes">✔</td><td><a href="https://huggingface.co/datasets/groundhogLLM/ACC-dataset" target="_blank" rel="noopener">groundhogLLM/ACC-dataset</a> · 共 10,802 条编译后的 long-context QA（search 3,369 / SWE 4,368 / SQL 3,065）· 两轮 user–assistant 对话格式 · 约 2.69 GB · Apache 2.0</td></tr>
+        <tr><td>环境 / Benchmark</td><td class="no">✘</td><td>评测沿用既有公开 benchmark（MRCR、GraphWalks 等），本文未自带新的 benchmark/harness 发布。</td></tr>
+        <tr><td>项目主页 / Demo</td><td class="no">✘</td><td>未见独立项目主页或 demo。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============================ ② 动机与贡献 ============================ -->
+  <section id="motivation">
+    <h2><span class="n">②</span>研究动机与贡献 Motivation &amp; Contribution</h2>
+
+    <h3>背景与问题</h3>
+    <p>agent 的兴起重新点燃了对 LLM <strong>long-context reasoning</strong> 能力的需求：agent 要跨很多 turn 调用工具，输入会越来越长，模型必须能在很长的 context 里把分散的信息整合起来。但传统上要训练这种能力，靠的是两条都很贵的路：（1）<strong>curate 长文档</strong>——需要精确标注证据位置、做大量质量过滤；（2）<strong>启发式合成长 context</strong>——把短文档拼接/插入干扰，但这种拼法缺少真实解题时才会产生的复杂依赖关系。两者都难以规模化，也难以贴近真实的「跨段整合」需求。</p>
+    <p>作者抓住的关键观察是：<strong>agent 解题本身就在源源不断地产出含有真实长程依赖的 trajectory</strong>。一条 trajectory 里，回答原始 question 所需的证据天然散落在不同 turn 的 tool response 里，需要把相距很远的 context 片段整合起来——这正是 long-context reasoning 想要的监督信号。可惜<strong>标准 agent SFT 把 tool response 全部 mask 掉</strong>，只监督每个 turn 的 reasoning + action（即 turn-level 的 tool selection）。于是这些散落的证据信号根本没进入 loss，作者称之为 <strong>supervision blind spot（监督盲区）</strong>。</p>
+
+    <h3>本文的切入点</h3>
+    <p>既然证据已经在 trajectory 里、答案也已被验证为正确，那就不必再额外标注，只要换一种「打包」方式即可。ACC 把一条 trajectory <strong>编译（compile）</strong>成一个 long-context QA 对：把原 question 与各 turn 收集到的 tool response/observation 拼成一整段 context $C$，训练模型<strong>不再调用工具，直接从 $(q, C)$ 推理出最终答案</strong>。这样一来，最终答案的监督信号会<strong>直接</strong>触达每一个证据 token，而不再被中间一连串 turn-level 的 tool selection「过滤」掉，从而把 question 与散落证据之间的依赖显式暴露给模型学习。</p>
+
+    <h3>核心贡献</h3>
+    <ol>
+      <li>提出 <strong>Agent Context Compilation (ACC)</strong>：一个把多轮 agent trajectory 转成 long-context 训练 QA 的方法，<strong>无需额外人工标注</strong>，答案直接取自 trajectory 最终输出；可与任意现有 long-context 扩展/训练方法叠加，提供可规模化的 SFT 数据。</li>
+      <li>用 ACC 训练的 Qwen3-30B-A3B 在 long-range dependency 建模 benchmark 上<strong>逼近大约 8 倍 active 参数的 Qwen3-235B-A22B</strong>：MRCR 68.3、GraphWalks 77.5，同时通用能力（GPQA、MMLU-Pro、AIME、IFEval）基本不退化。</li>
+      <li>通过 mechanism analysis 观察到 ACC 训练后出现 <strong>task-adaptive attention restructuring</strong>（按任务重新分配注意力距离）与 <strong>expert specialization</strong>（MoE 专家按任务分工），说明学到的长程能力是灵活、任务自适应的，而非固定模式。</li>
+    </ol>
+  </section>
+
+  <!-- ============================ ③ 方法 ============================ -->
+  <section id="method">
+    <h2><span class="n">③</span>方法 Method</h2>
+    <p>ACC 的 pipeline 高层上分三步：（1）从 search / SWE / SQL 三类 agent 收集<strong>答案已验证</strong>的 trajectory；（2）把每条 trajectory 的 tool response / 环境观测抽成结构化证据片段，shuffle 后拼成一段长 context；（3）用一个强 teacher 生成 reasoning trace（只保留能推出正确答案的），得到 $(q, C, r, y)$ 形式的训练样本，再做标准 SFT。下图是论文 Figure 1 的总览。</p>
+
+    <figure>
+      <img src="figures/overview.png" alt="ACC 方法总览">
+      <figcaption>图 1：ACC 总览。Search / SWE / SQL 三类 agent 的多轮 trajectory 被「编译」为 long-context QA 对——把各 turn 的 tool response / 环境 context 与原 question 拼到一起，训练 LLM 直接作答、不再调用工具。（出处：原文 Figure 1）</figcaption>
+    </figure>
+
+    <h3>3.1 问题刻画：agent SFT 的监督盲区</h3>
+    <p>一条 agent trajectory 写成 $k-1$ 个交互 turn 加一个最终作答 turn：</p>
+    $$\tau = \big(q,\ (r_1,a_1,o_1),\ \dots,\ (r_{k-1},a_{k-1},o_{k-1}),\ (r_k,y)\big),$$
+    <p>其中 $q$ 是原始 question；$r_t$ 是该 turn 的 reasoning；$a_t$ 是 action（即一次 tool call）；$o_t$ 是 tool response / 环境 observation；$(r_k,y)$ 是最终的 reasoning–answer 对。turn $t$ 之前的历史记作 $H_{<t}=(r_1,a_1,o_1,\dots,r_{t-1},a_{t-1},o_{t-1})$。标准做法里，<strong>tool response $o_t$ 被从 loss 中 mask 掉，只监督模型自己生成的 token</strong>。标准目标是：</p>
+    $$\mathcal{L}_{\text{agent}} = -\sum_{t=1}^{k}\sum_{j\in I_t}\log P(\text{token}_j \mid H_{<t},\ \text{token}_{<j}),$$
+    <p>其中可监督的 token 集合 $I_t = r_t\cup a_t$（$t<k$），$I_k = r_k\cup y$。按 turn 把它拆开就看出结构：前 $k-1$ 项是「local next-tool selection」（每个 turn 只学局部 reasoning + 选哪个工具），最后一项才是「final answer prediction」。</p>
+    <p>关键论证：考虑某个 $t<k$ 的 tool response $o_t$ 里的一个 token。它被排除在 loss 之外，只能<strong>间接</strong>地通过后续未被 mask 的 token 拿到梯度。而主导的梯度沿着「到下一个 action $a_{t+1}$」这条<strong>短路径</strong>流动（此时 $o_t$ 就在紧邻上文里）；任何与最终答案 $y$ 相关的梯度，都得反传穿过一长串中间 turn 才能到达 $o_t$，会被严重削弱。于是这些中间 turn 像一个 <strong>supervision filter</strong>：$o_t$ 主要为了支撑「局部选工具」而更新，与最终答案相关的特征除非恰好也对局部有用、否则被忽略。这就是<strong>监督盲区</strong>。</p>
+
+    <h3>3.2 ACC 的训练目标</h3>
+    <p>ACC 把所有证据收进一段长 context $C$，训练模型直接从 $q$ 与 $C$ 写出 reasoning trace $r$ 和最终答案 $y$：</p>
+    $$\mathcal{L}_{\text{ACC}} = -\sum_{j\in r\cup y}\log P(\text{token}_j \mid q,\ C,\ \text{token}_{<j}).$$
+    <p>与标准目标相比，这里<strong>没有任何中间 action 项</strong>，最终答案的监督信号不再被 turn-level 的 tool selection 过滤，可以<strong>直接</strong>到达每一个证据 token。模型因此被迫学会「把散落证据整合成全局答案」，而不是只优化局部选工具。形式上，给定一组答案已验证的 trajectory $T=\{\tau_1,\dots,\tau_N\}$，ACC 把每条映射为训练样本 $\tau_i\mapsto(x_i,y_i,r_i)$，其中 $x_i=(q_i,C_i)$ 是原 query 加编译 context，$y_i$ 是 trajectory 的最终答案，$r_i$ 是其 reasoning trace。</p>
+
+    <h3>3.3 Context 构造：抽证据、加干扰、再 shuffle</h3>
+    <p>对每条 trajectory 抽取结构化证据片段 $\mathrm{Evi}(\tau)=[e_1,\dots,e_m]$，要求「单凭聚合后的 context 就能在不调工具的前提下回答 $q$」。三类 agent 的抽法不同：</p>
+    <ul>
+      <li><strong>Search：</strong>抽出被访问页面的全文，并把<strong>未访问的候选结果</strong>作为 distractor 一并放入。</li>
+      <li><strong>SWE：</strong>抽出正确 patch 所涉及的文件，并把 debug 过程中查看过的<strong>额外 context 文件</strong>作为 distractor 放入。</li>
+      <li><strong>SQL：</strong>抽出 trajectory 中查询过的全部表的<strong>完整内容</strong>。</li>
+    </ul>
+    <p>为了加难度，对 $\{1,\dots,m\}$ 施加一个随机置换 $\pi$，再把片段拼接成编译 context：</p>
+    $$C_i = \mathrm{Concat}\big(e_{\pi(1)}, e_{\pi(2)}, \dots, e_{\pi(m)}\big),\qquad |C_i|\le B,$$
+    <p>其中 $B$ 是 token 预算。因为证据片段本身是 self-contained 的，shuffle 之后模型不能再靠「顺序/位置」找答案，<strong>只能靠语义关联去定位相关信息</strong>——这正是想训练的能力。</p>
+    <p><strong>reasoning trace 怎么来：</strong>答案已验证的 trajectory 有正确答案但没有显式 reasoning。作者用 <strong>DeepSeek-V3.2-Thinking</strong> 生成候选 rationale，<strong>只保留能推出正确答案 $y_i$ 的那些</strong>（reject sampling）。不同 agent 类型的 pass rate 差异很大：Search 接近 100%，SQL 约 50%，SWE 约 10%。最终训练样本是三元组 $(x_i,y_i,r_i)$。</p>
+
+    <div class="callout note">
+      <span class="label">实现要点（复现关键）</span>
+      <ul style="margin:6px 0">
+        <li><strong>数据规模：</strong>共 10,802 条编译样本（Search 3,369 / SWE 4,368 / SQL 3,065）；token 长度跨度大，从约 2K 到 128K，分布因 agent 类型而异。</li>
+        <li><strong>训练超参（Table 1）：</strong>sequence length 131,072 tokens；global batch size 16；learning rate $1\times10^{-5}$（最低 $1\times10^{-6}$）；cosine schedule + 5% warmup；AdamW（$\beta_1{=}0.9,\beta_2{=}0.999$，weight decay 0.1）；cross-entropy（chunk size 1024）；sequence parallelism 8、expert parallelism 1；训练 4 个 epoch。</li>
+        <li><strong>不需要额外人工标注：</strong>答案直接取自 trajectory 最终输出；distractor 来自「候选但未访问 / 未打开」的真实素材，而非凭空插入无关文档。</li>
+        <li><strong>正交性：</strong>ACC 只是「换一种打包监督信号的数据」，可叠加到任意 long-context 扩展（改 position embedding / attention）或 post-training 方案之上。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============================ ④ 实验评估 ============================ -->
+  <section id="evaluation">
+    <h2><span class="n">④</span>实验评估 Evaluation</h2>
+
+    <h3>评测设置</h3>
+    <ul>
+      <li><strong>主 benchmark（考察长程依赖建模）：</strong>
+        <ul>
+          <li><strong>MRCR</strong>（Multi-Round Coreference Resolution，OpenAI 发布）——跨 turn 的指代消解；报告 overall 与 2-needle / 4-needle 子任务（沿用 QwenLong-L1.5 的评测设定）。</li>
+          <li><strong>GraphWalks</strong>（OpenAI 发布）——在超长 context 上做图遍历；报告 overall 与 Parents / BFS 子任务的 precision（沿用 LongCat-Flash-Omni 的设定）。</li>
+        </ul>
+        二者都需要跨段整合，远难于早期的 NIAH / RULER / LongBench 这类单轮检索任务。
+      </li>
+      <li><strong>通用能力（查负迁移）：</strong>GPQA-Diamond、MMLU-Pro、AIME’24/’25、IFEval。</li>
+      <li><strong>对比基线：</strong>基座 Qwen3-30B-A3B-Thinking；强基线 Qwen3-235B-A22B-Thinking、GPT-OSS-120B、DeepSeek-V3.2-Thinking、GPT-5.1-Thinking、GLM-4.6-Thinking、Kimi-K2-Thinking；以及 long-context post-training 方法 QwenLong-L1.5、LongPO、LongRLVR。</li>
+      <li><strong>指标方向：</strong>MRCR / GraphWalks 分数<strong>越高越好</strong>；均报告 avg@3（默认推理配置，不手动调 reasoning effort）。</li>
+    </ul>
+
+    <h3>主要结果（原文 Table 2，越高越好；本文方法加粗）</h3>
+    <table>
+      <thead><tr><th>方法</th><th class="num">MRCR Overall</th><th class="num">GraphWalks Overall</th></tr></thead>
+      <tbody>
+        <tr><td>Qwen3-30B-A3B-Thinking（基座）</td><td class="num">50.19</td><td class="num">69.92</td></tr>
+        <tr><td><strong>+ ACC（本文）</strong></td><td class="num"><strong>68.28 (+18.09)</strong></td><td class="num"><strong>77.51 (+7.59)</strong></td></tr>
+        <tr><td>Qwen3-235B-A22B-Thinking</td><td class="num">67.51</td><td class="num">76.63</td></tr>
+        <tr><td>GPT-OSS-120B</td><td class="num">38.00</td><td class="num">69.34</td></tr>
+        <tr><td>DeepSeek-V3.2-Thinking</td><td class="num">71.01</td><td class="num">85.39</td></tr>
+        <tr><td>GPT-5.1-Thinking</td><td class="num">60.91</td><td class="num">57.14</td></tr>
+        <tr><td>GLM-4.6-Thinking</td><td class="num">64.53</td><td class="num">78.95</td></tr>
+        <tr><td>Kimi-K2-Thinking</td><td class="num">58.05</td><td class="num">80.04</td></tr>
+      </tbody>
+    </table>
+    <p>诚实解读：在 MRCR 上 ACC 把基座从 50.2 拉到 <strong>68.3（+18.1）</strong>，2-needle / 4-needle 子项分别 +15.06 / +21.16——可见越难（needle 越多）提升越大；GraphWalks 从 69.9 升到 <strong>77.5（+7.6）</strong>。两项都<strong>超过了 active 参数大约 8 倍的 Qwen3-235B-A22B</strong>（67.51 / 76.63），这是本文最亮眼的卖点。不过也要看清上限：DeepSeek-V3.2-Thinking（71.0 / 85.4）等更强的闭/开源大模型仍领先，ACC 没有把 30B 推到 SOTA，而是把它推到「同梯队大模型」的水平。</p>
+
+    <h3>通用能力不退化（原文 Table 3）</h3>
+    <p>long-context 训练常被担心引发负迁移。结果是 GPQA-Diamond +2.49、MMLU-Pro +1.50、AIME’25 +3.33，AIME’24 持平、IFEval 仅 −0.55——<strong>没有明显退化甚至略有提升</strong>。为排除测试集泄漏，作者把训练 query 与 benchmark 题目都只保留「问题文本」做 embedding 比对（all-MiniLM-L6-v2 + UMAP）：平均最近邻 cosine 相似度 < 0.36，线性分类器区分二者的 AUC 高达 <strong>0.9986</strong>，说明只是 domain-level 的话题重叠（Search 子集与知识类 benchmark 因都来自 Wikipedia 而话题相近），而非实例级重复。</p>
+
+    <figure>
+      <img src="figures/umap.png" alt="训练数据与 benchmark 的 UMAP 投影">
+      <figcaption>图 2：训练 query（Search/SWE/SQL，仅用问题文本）与各评测 benchmark 题目的 UMAP 二维投影。SWE、SQL 各自成簇，与通用 benchmark 分离；Search 与知识类 benchmark 有话题级重叠但无实例重复。（出处：原文 Figure 4）</figcaption>
+    </figure>
+
+    <h3>与 long-context post-training 方法比较（原文 Table 5）</h3>
+    <p>QwenLong-L1.5-30B 在 MRCR 上以多阶段 pipeline（文档清洗 + 知识图谱 + RL）领先（92.30），但 ACC <strong>仅用标准 SFT</strong> 就在 GraphWalks 上反超它（77.51 vs 73.85）。基于 Qwen2.5 的 LongPO / LongRLVR 在这两个新 benchmark 上得分都很低（多在 10–30 区间），仅作参考。LoongRL 未放出 checkpoint 故未比。</p>
+
+    <h3>消融：哪个设计真起作用（原文 Table 6）</h3>
+    <ul>
+      <li><strong>验证盲区假说：</strong>把原始 search trajectory 用标准 <strong>Agent SFT（mask 掉 observation）</strong>训练，MRCR −8.03、GraphWalks −12.05，<strong>反而比基座更差</strong>——直接印证 3.1 的监督盲区。</li>
+      <li><strong>单 agent 类型：</strong>单独训 Search / SWE / SQL，在 MRCR 上都涨（+8.14 / +4.63 / +6.25），说明「把散落证据编进一段 context」本身就有助于跨 turn 指代消解；但在 GraphWalks 上<strong>只有 SQL 涨（+5.58）</strong>，Search / SWE 都掉。作者解释：SQL 表天然是关系型、契合图遍历，而网页/源码是长连续段落，难以学到离散的 node-level 推理。</li>
+      <li><strong>distractor：</strong>从 Search / SWE 去掉 distractor，MRCR 分别降 3.34 / 3.81——干扰项帮助模型学会「在噪声中定位关键证据」。但 GraphWalks 上单 agent 设定却相反（去掉 distractor 反而 +13.71 / +2.22），因为 Search/SWE 的 distractor 与 query 语义无关，对图遍历帮不上忙。</li>
+      <li><strong>全混合最优：</strong>三类混合（即完整 ACC）在两个 benchmark 上都超过任何单一变体（MRCR 68.28 / GraphWalks 77.51），说明不同 trajectory 类型<strong>互补</strong>：SQL 的关系型数据保住了 graph-walking 能力，Search/SWE 的 distractor 提供了定位与去噪训练。</li>
+    </ul>
+
+    <h3>机制分析（原文 Figure 5）</h3>
+    <figure>
+      <img src="figures/mechanism.png" alt="ACC 训练前后的注意力距离与专家路由变化">
+      <figcaption>图 3：ACC 训练后（SFT − Baseline）的注意力距离分布（上）与 MoE 专家路由频率（下）变化。GraphWalks 在近距与远距 bin 都增加注意力质量、并把远程 token 的激活分散到多个 expert；MRCR 主要增强近距注意力、并把激活集中到极少数 expert。两任务上变化最大的层完全不同。（出处：原文 Figure 5）</figcaption>
+    </figure>
+    <p>作者对 baseline 与 ACC checkpoint 做 attention 距离分箱（32 个 bin）与 MoE router top-k 频率统计：<strong>GraphWalks</strong> 训练后在「近邻」与「远跳」两端都增加注意力质量（对应图遍历既要查邻居又要跳远节点），并把远程 token 的处理分散到若干 expert；<strong>MRCR</strong> 则主要增强近距注意力（对应扫描时逐段核对候选）、并把激活高度集中到一个 expert。两个任务上「变化最大的三层」index 完全不同——这说明 ACC 训练后模型是<strong>按任务灵活重排</strong>注意力与专家分工，而非固定模式。</p>
+  </section>
+
+  <!-- ============================ ⑤ 洞见 ============================ -->
+  <section id="insight">
+    <h2><span class="n">⑤</span>洞见 Insights</h2>
+    <div class="callout insight">
+      <span class="label">Insight</span>
+      <ol style="margin:6px 0">
+        <li><strong>masking 是一种被忽视的「监督浪费」。</strong>标准 agent SFT 为了只学 tool selection 而 mask 掉 tool response，等于把一座免费的长程监督金矿丢掉。ACC 的核心不是造数据，而是<strong>改变同一批 trajectory 的监督打包方式</strong>——把目标从「下一步选哪个工具」换成「直接从全部证据答题」，让答案梯度无障碍地触达每个证据 token。</li>
+        <li><strong>真实解题轨迹自带「长程依赖」，比启发式拼接更可信。</strong>合成 long-context 的老办法是拼短文档/插无关段，缺少真实依赖；而 agent 解题时证据天然散落、彼此关联，再加 shuffle + 真实 distractor，逼模型靠语义而非位置定位——这是更贴近真实需求的监督。</li>
+        <li><strong>多类 agent 互补，不是越多越好而是越「异构」越好。</strong>SQL（关系型）独力扛起 graph traversal，Search/SWE（长段落）负责指代消解与去噪，三者混合才同时拿下 MRCR 与 GraphWalks——提示「数据多样性的结构」比单纯数据量更关键。</li>
+      </ol>
+    </div>
+
+    <h3>局限与未来</h3>
+    <p>作者自陈：只在三类 agent、一个模型（Qwen3-30B-A3B）上验证，更广的泛化与<strong>百万 token 级</strong>的 scaling 尚待研究；reasoning trace 依赖强 teacher（DeepSeek-V3.2-Thinking）生成，有 <strong>bias 传播</strong>风险；从我的角度看，SWE 的 reject sampling pass rate 仅约 10%，意味着这条数据获取链对「答案已验证的高质量 trajectory」高度依赖，难度大的领域产量很低。社会影响层面，原始 trajectory 可能<strong>泄漏隐私</strong>、编译 context 可能含<strong>受版权/专有材料</strong>，需谨慎过滤与对齐。未来方向是扩展到更多 agent 类型、并 scale 到更长 context。</p>
+
+    <h3>与相关工作的关系</h3>
+    <p>按本文自己的归类，提升 long-context 能力大致有四条路线：（1）改架构（position embedding / sparse·linear attention，如 MrRoPe、ROPE++、Native Sparse Attention、Mamba-3）；（2）构造高质量长文档做<strong>预训练</strong>数据（Longwanjuan、LiteLong、Quest）；（3）<strong>post-training</strong> 用合成数据 + RL（longRLVR、LongPO、LoongRL）；（4）推理期用 agent 框架管理长上下文记忆（QwenLong-L1.5、MemAgent）。ACC 与它们的根本区别在于：<strong>既不改架构、也不合成预训练文档、也不依赖复杂的 post-training RL，而是把真实 agent trajectory 当作 long-context reasoning 训练的直接数据源</strong>，且只用标准 SFT，因此能与上述任意路线叠加。</p>
+  </section>
+
+  <footer class="foot">
+    本页为 <code>paper-reading</code> skill 生成的阅读笔记，仅作辅助，细节以
+    <a href="https://arxiv.org/abs/2605.21850" target="_blank" rel="noopener">原文</a> 为准 · 解读日期 2026-06-01
+  </footer>
+
+</article>
+</body>
+</html>

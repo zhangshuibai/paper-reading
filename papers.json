@@ -98,6 +98,25 @@
     "path": "papers/2604.01193-self-distillation-code-generation/index.html"
   },
   {
+    "slug": "2605.21850-acc-agent-context-compilation",
+    "title": "ACC: Compiling Agent Trajectories for Long-Context Training",
+    "authors": "Qisheng Su, Zhen Fang, Shiting Huang, et al.",
+    "team": "USTC · Shanghai Innovation Institute · Shanghai AI Laboratory",
+    "arxiv": "https://arxiv.org/abs/2605.21850",
+    "code": "",
+    "date": "2026-06-01",
+    "published": "arXiv 2026",
+    "tldr": "把多轮 agent 轨迹编译成 long-context QA 对来做 SFT：拼接各 turn 的 tool response、不 mask、让模型直接在长上下文里推理作答，修复 agent SFT 的监督盲区。训练 Qwen3-30B-A3B 在 MRCR/GraphWalks 上逼近 Qwen3-235B-A22B。",
+    "tags": [
+      "long-context",
+      "agent",
+      "tool-use",
+      "training-data",
+      "distillation"
+    ],
+    "path": "papers/2605.21850-acc-agent-context-compilation/index.html"
+  },
+  {
     "slug": "2605.17933-atlasva-visual-skill-memory",
     "title": "AtlasVA: Self-Evolving Visual Skill Memory for Teacher-Free VLM Agents",
     "authors": "Pan Wang, Yihao Hu, Xiujin Liu, Jingchu Yang, Hang Wang, Zhihao Wen",
