@@ -1,5 +1,24 @@
 [
   {
+    "slug": "2605.27276-sia-self-improving-ai",
+    "title": "SIA: Self Improving AI with Harness & Weight Updates",
+    "authors": "Prannay Hebbar, Yogendra Manawat, Samuel Verboomen, Alesia Ivanova, Selvam Palanimalai, Kunal Bhatia, Vignesh Baskaran",
+    "team": "Hexo Labs · University of Oxford",
+    "arxiv": "https://arxiv.org/abs/2605.27276",
+    "code": "https://github.com/hexo-ai/sia",
+    "date": "2026-06-01",
+    "published": "arXiv 2026",
+    "tldr": "用一个 Feedback-Agent 在同一闭环里同时更新 agent 的 harness 与 LoRA 权重，在法律分类、GPU kernel、单细胞 RNA 去噪三任务上双杠杆均超只改 harness 与此前 SOTA。",
+    "tags": [
+      "self-improving-agents",
+      "test-time-training",
+      "RL",
+      "LoRA",
+      "harness"
+    ],
+    "path": "papers/2605.27276-sia-self-improving-ai/index.html"
+  },
+  {
     "slug": "2605.17933-atlasva-visual-skill-memory",
     "title": "AtlasVA: Self-Evolving Visual Skill Memory for Teacher-Free VLM Agents",
     "authors": "Pan Wang, Yihao Hu, Xiujin Liu, Jingchu Yang, Hang Wang, Zhihao Wen",

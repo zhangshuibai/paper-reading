@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SIA：同时更新 harness 与权重的自我改进 AI · 论文解读</title>
+
+<!-- 数学公式渲染（在线查看时生效；无网络时正文仍可读） -->
+<script>
+  window.MathJax = {
+    tex:{inlineMath:[['$','$'],['\\(','\\)']], displayMath:[['$$','$$'],['\\[','\\]']]},
+    svg:{fontCache:'global'}
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;
+  }
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:880px; margin:0 auto; padding:18px 22px 90px}
+
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:27px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)}
+  .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .meta-grid a:hover{text-decoration:underline}
+
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap}
+  nav.toc a:hover{color:var(--accent)}
+
+  section{margin:38px 0}
+  h2{font-size:21px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:17px; margin:24px 0 8px}
+  p{margin:12px 0}
+  ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.9em}
+  strong{color:var(--text)}
+
+  /* 开源贡献表 */
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:14px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:10px 12px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  .yes{color:var(--ok); font-weight:600}
+  .no{color:var(--muted)}
+
+  /* 图 */
+  figure{margin:24px 0; text-align:center}
+  figure img{max-width:100%; height:auto; border:1px solid var(--line); border-radius:10px; background:#fff}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+
+  /* 提示框 */
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+
+  blockquote{border-left:3px solid var(--line); margin:14px 0; padding:2px 16px; color:var(--muted)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+  .mjx-container{overflow-x:auto; overflow-y:hidden}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <!-- ============================ 抬头 / 元信息 ============================ -->
+  <header class="head">
+    <div class="chips">
+      <span class="chip">Self-Improving Agents</span>
+      <span class="chip">Test-Time Training</span>
+      <span class="chip">Harness / Scaffold</span>
+      <span class="chip">RL · LoRA</span>
+      <span class="chip">Feedback-Agent</span>
+    </div>
+    <h1>SIA：让一个 Feedback-Agent 同时更新 harness 与模型权重的自我改进闭环</h1>
+    <p class="orig-title">SIA: Self Improving AI with Harness &amp; Weight Updates</p>
+    <dl class="meta-grid">
+      <dt>作者</dt><dd>Prannay Hebbar*, Yogendra Manawat*, Samuel Verboomen, Alesia Ivanova, Selvam Palanimalai, Kunal Bhatia, Vignesh Baskaran（*共同一作）</dd>
+      <dt>团队 / 机构</dt><dd>Hexo Labs（Palo Alto / Brussels / Toronto）· University of Oxford</dd>
+      <dt>原文链接</dt><dd><a href="https://arxiv.org/abs/2605.27276" target="_blank" rel="noopener">arXiv:2605.27276</a></dd>
+      <dt>发表 / 年份</dt><dd>arXiv preprint, 2026（v2, 28 May 2026）</dd>
+      <dt>解读日期</dt><dd>2026-06-01</dd>
+    </dl>
+  </header>
+
+  <div class="tldr">
+    <b>TL;DR</b> — 自我改进 AI 长期分裂成两条互不来往的路线：一条只改 <strong>harness/scaffold</strong>（prompt、工具、retry、解析逻辑），把模型权重冻死；另一条只做 <strong>test-time 权重训练</strong>，把 harness 钉死成单一模板。SIA 用一个 <strong>Feedback-Agent</strong> 把两根杠杆收进同一个闭环——它读完整执行轨迹后，<em>每一步自主决定</em>是「改 harness」还是「用一套自选的 RL 方法更新 LoRA 权重」。在法律分类（LawBench）、GPU kernel 优化（TriMul）、单细胞 RNA 去噪（MAGIC）三个差异极大的任务上，<strong>双杠杆（SIA-W+H）在三项上都严格优于只改 harness（SIA-H）</strong>，并全面超过此前 SOTA。核心论点：harness 决定 agent <em>怎么搜索、怎么行动</em>，而权重更新灌进的是<em>任何 prompt 都装不进去的领域直觉</em>。代码已 MIT 开源（<code>hexo-ai/sia</code>）。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#opensource">① 开源贡献</a>
+    <a href="#motivation">② 动机与贡献</a>
+    <a href="#method">③ 方法</a>
+    <a href="#evaluation">④ 实验评估</a>
+    <a href="#insight">⑤ 洞见</a>
+  </nav>
+
+  <!-- ============================ ① 开源贡献 ============================ -->
+  <section id="opensource">
+    <h2><span class="n">①</span>开源贡献 Open-source Artifacts</h2>
+    <p>SIA 主要以<strong>一个开源框架</strong>的形式释出（MIT 协议），核实于 <code>github.com/hexo-ai/sia</code>：装好后用一行 <code>sia --task ... --max_gen ...</code> 就能在自带的 benchmark 上跑「Meta-Agent 初始化 → Task-Agent 执行 → Feedback-Agent 改 harness 或权重」的完整循环。注意 SIA 的产物是<em>每个任务在 test-time 现训出来的 LoRA + 演化后的 scaffold</em>，因此<strong>没有发布通用的预训练权重或新数据集</strong>——权重是跑 SIA 时按任务现场产生的，而非可下载的成品。</p>
+    <table>
+      <thead><tr><th>类型</th><th>是否开源</th><th>内容 / 链接</th></tr></thead>
+      <tbody>
+        <tr><td>代码 Code</td><td class="yes">✔</td><td><a href="https://github.com/hexo-ai/sia" target="_blank" rel="noopener">github.com/hexo-ai/sia</a> · MIT 协议 · <code>pip install 'sia-agent[claude]'</code> 或 <code>[openhands]</code>。含 Meta/Target/Feedback 三类 agent、harness 系统（public/private 数据切分）、参考 agent 模板，以及两套后端（Claude Agent SDK、OpenHands 多供应商）。</td></tr>
+        <tr><td>模型权重 Weights</td><td class="no">✘</td><td>不发布成品权重。基座为 <code>openai/gpt-oss-120b</code>，SIA 在 test-time 用 LoRA（rank 32）现场适配；产出的 adapter 落在 <code>runs/run_{id}/gen_{n}/</code>，随任务生成。</td></tr>
+        <tr><td>数据集 Dataset</td><td class="no">✘</td><td>未发布新数据集；复用已有公开 benchmark（LawBench、AlphaEvolve TriMul、MAGIC / Baron pancreas scRNA-seq）。仓库内置 <code>gpqa</code>、<code>lawbench</code>、<code>longcot-chess</code>、<code>spaceship-titanic</code> 等任务，并接入 MLE-Bench。</td></tr>
+        <tr><td>环境 / Benchmark</td><td class="yes">✔</td><td>task harness（含 grader / verifier、public/private split）随仓库开源；可按文档自行 prepare 新任务。</td></tr>
+        <tr><td>项目主页 / Demo</td><td class="no">✘</td><td>无独立 demo 站点，以 GitHub README 为准。仓库与多家媒体宣称 SIA「在 OpenAI MLE-Bench Hard 上排名 #1」——此为仓库/通稿口径，<em>不在本论文报告范围内</em>。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============================ ② 动机与贡献 ============================ -->
+  <section id="motivation">
+    <h2><span class="n">②</span>研究动机与贡献 Motivation &amp; Contribution</h2>
+    <h3>背景与问题：人，是 AI 自我改进的瓶颈</h3>
+    <p>作者的开场判断很直接：<strong>今天 AI 的进步速率被人卡住了</strong>。模型由研究者设计与后训练，模型外面那层 agent 又是工程师手写 prompt、调 scaffold、debug 出来的。「能自己想办法改进自己的 AI」这个长程目标仍然敞着。而现有的自动化自我改进研究，恰恰<strong>裂成了两个互不往来的筒仓（silo）</strong>：</p>
+    <ul>
+      <li><strong>Silo 1 — Harness / scaffold 自改进。</strong>一个 meta-agent 跨「代」重写 task-specific agent 的 scaffold：system prompt、工具分发逻辑、retry policy、答案抽取代码……但<em>底层模型权重一直冻着</em>。代表作有 Darwin Gödel Machine、Meta-Harness、Hyperagents 以及更广义的 automated agentic system design。这一筒仓反复观察到的经验现象是：<strong>scaffold 的修改大多集中在「软件工程卫生」</strong>——解析、重试、分发——很少能带来「换个 prompt 也得不到」的领域推理能力。</li>
+      <li><strong>Silo 2 — Test-time 后训练。</strong>一套手写的 RL pipeline 在 test-time 用任务反馈更新模型自己的权重，但 harness 通常被钉死成单一的 prompt+grader 模板。代表作有 TTRL、Discover 系的 test-time training、以及「TTT 出奇有效」那篇。<em>增益来自内部 policy 的改变，但交付它的 pipeline 是人写死的</em>，不会去适配 scaffold 暴露出来的任务结构。</li>
+    </ul>
+    <p><strong>缺口（the gap）</strong>就此清晰：harness 那派把模型冻住，test-time 那派把 harness 冻住。两根杠杆从没在<em>同一个</em>自改进循环里一起转过。</p>
+
+    <h3>本文的切入点</h3>
+    <p>SIA 的假设朴素却关键：<strong>这两根杠杆改的是不同的空间，因此谁也不能把对方的增益吃满。</strong>harness 是模型<em>外部</em>的基础设施（agent 怎么搜索、怎么把模型接到环境上）；权重是模型<em>内部</em>对解的先验（模型到底「知道」什么领域知识）。于是只要让一个 agent 同时握住两根杠杆、按任务反馈动态切换，就该能突破「只改 scaffold」的天花板。SIA 把这个握杠杆的角色实例化成 <strong>Feedback-Agent</strong>。</p>
+
+    <h3>核心贡献</h3>
+    <ol>
+      <li>提出并评测一个 <strong>Feedback-Agent</strong>：除了改 scaffold，它还能训练 task-specific agent 自己的权重，两者结合去改进任意下游任务。系统是<strong>任务无关</strong>的——只要给定一份任务规格 $U$ 和一个 verifier $V$，它就能产出「演化后的 scaffold + 一组 RL 适配过的 LoRA 权重」。</li>
+      <li>在三个反差极大的领域做了实证：<strong>法律</strong>（191 类中文罪名分类）、<strong>系统</strong>（H100 上的 Triton/CUDA kernel 优化）、<strong>生物</strong>（单细胞 RNA 去噪），并一致地超过此前 SOTA——LawBench top-1 acc 70.1% vs 45.0%（+25.1pp）；GPU kernel 1,017µs vs 1,161µs（快 12.4%）；去噪 mse norm 0.289 vs 0.240（+20.4%）。</li>
+      <li>做了<strong>杠杆拆解消融</strong>：把「只改 harness（SIA-H）」与「harness+权重（SIA-W+H）」对照，证明权重更新带来的增益<em>超出</em> harness 单独所能达到的天花板。</li>
+    </ol>
+  </section>
+
+  <!-- ============================ ③ 方法 ============================ -->
+  <section id="method">
+    <h2><span class="n">③</span>方法 Method</h2>
+    <p>SIA 是一个由<strong>三个 LLM 组件</strong>驱动的可配置循环：Meta-Agent 负责初始化 scaffold；Task-Specific Agent 负责执行任务；Feedback-Agent 在每次执行后读轨迹、读指标，然后<strong>动态二选一</strong>：要么做一次 <strong>harness update</strong>（scaffold 演化、权重冻结），要么做一次 <strong>weight update</strong>（用它自选的 RL 方法更新 LoRA、scaffold 冻结）。论文强调：「Harness 阶段」和「Weight 阶段」只是<em>软标签</em>，不是写死的先后阶段——两根杠杆是自由交错的。实现上，Meta-Agent 与 Feedback-Agent 用 <strong>Claude Sonnet 4.6</strong>，task-specific agent 用 <strong>gpt-oss-120b</strong>（或其 RL 适配后的 checkpoint）。</p>
+
+    <figure>
+      <img src="figures/fig2_concept.png" alt="SIA 的两根杠杆与交错步序">
+      <figcaption>图 1：SIA 的概念图（原文 Figure 2）。(a) 两根互补杠杆——文本 scaffold（teal）与 LoRA adapter（amber）——由 Feedback-Agent（mauve）在每步执行后选择下一步动作；(b) 一个 7 步示例：<code>A₁→A₂→A₃→θ₁→A₄→θ₂→θ₃</code>，每个 FB:H / FB:W 徽标是一次决策，harness 与 weight 两类步各自贡献不同的增益。</figcaption>
+    </figure>
+
+    <h3>词汇与角色：Agent 的拆解</h3>
+    <p>一个 <strong>task-specific agent</strong> 就是「吃进一个任务实例、吐出一个答案」的程序。SIA 把它拆成：<strong>LLM</strong>（权重 $\theta$，全程用 gpt-oss-120b）、<strong>system prompt</strong>、<strong>工具分发逻辑</strong>（解析模型的 tool-call 并路由到文件 IO / 代码执行 / 数据查找 / grader 调用）、<strong>答案抽取</strong>、以及 <strong>grader</strong>（确定性 verifier，算每个实例的 reward）。其中<em>除权重以外、所有固定的代码部分</em>统称为 <strong>scaffold（= harness）</strong>。</p>
+    <p>循环里有两个 <strong>meta-agent</strong>（输出本身就是一个 agent 的 LLM 调用）：</p>
+    <p>$$A_1 = M(U,\,R) \qquad\qquad A_{g+1} = F(A_g,\,\tau_g,\,E_g,\,U)$$</p>
+    <p>其中 $M$ 是 <strong>Meta-Agent</strong>，从任务规格 $U$ 和可选的参考实现 $R$ 生成初始 scaffold $A_1$；$F$ 是 <strong>Feedback-Agent</strong>，读上一代 scaffold $A_g$、它的执行轨迹 $\tau_g$、性能指标 $E_g$，合成出改进后的 $A_{g+1}$。关键区别在于：$F$ 拿到的是<strong>完整轨迹 $\tau_g$</strong>——每个实例的每一次 prompt、模型回复、tool call、tool 结果、抽取出的答案——而不是只看汇总统计。这让它能<em>诊断具体失败模式</em>，而不是对着平均分瞎调。</p>
+
+    <figure>
+      <img src="figures/fig3_architecture.png" alt="SIA 系统架构">
+      <figcaption>图 2：SIA 系统架构（原文 Figure 3）。Meta-Agent 从任务规格 $U$ 与 verifier $V$ 初始化 scaffold；Task-Specific Agent 在 Environment 里执行、产出轨迹；Feedback-Agent 分析轨迹后选择下一步动作——合成更好的 scaffold（harness update）或触发一次权重更新——再喂回给 Task-Specific Agent，直到步数预算耗尽。</figcaption>
+    </figure>
+
+    <h3>每一代的三段式协议</h3>
+    <p>每一代 $g$ 都走「执行 → 分析 → 改进」三步：</p>
+    <ol>
+      <li><strong>Execution.</strong> $A_g$ 在 sandbox 里跑评测集 $D$：对数据目录只读、对工作目录可读写，捕获轨迹 $\tau_g$。</li>
+      <li><strong>Analysis.</strong> $F$ 拿到 $A_g$ 的源码、$\tau_g$、指标 $E_g$，外加（可选的）若干样例任务描述，用来抑制对单个实例的过拟合。</li>
+      <li><strong>Improvement.</strong> $F$ 产出两件东西：一份<em>改进报告</em>（散文式分析 + 提议的改动），和下一代 agent $A_{g+1}$。</li>
+    </ol>
+    <p>当选的是 harness update 时，递推就是 $A_{g+1}=F(A_g,\,\tau_g(\pi_\theta),\,E_g,\,U)$，其中 $\tau_g(\pi_\theta)$ 表示用<em>当前模型</em> $\pi_\theta$（基座或已 RL 适配的）跑 $A_g$ 收集到的轨迹——这一步只动 scaffold，$\theta$ 冻结。Meta-Agent 在生成初始 scaffold 时被喂一组<strong>多样的任务规格</strong>（sample-task regularisation），以免初始 scaffold 过拟合到单一 benchmark 实例。</p>
+
+    <h3>Feedback-Agent 怎么挑 RL 算法：不是固定 pipeline，而是一个「算法选择器」</h3>
+    <p>SIA 最有意思的设计是：<strong>Feedback-Agent 不跑一套写死的 RL，而是根据 reward 的分布形态在多种 RL 方法间挑</strong>。论文报告的三任务里观察到 PPO+GAE（LawBench）、entropic advantage weighting（TriMul）、GRPO（去噪）；并给出了一份「什么情况下用哪种」的经验地图：</p>
+    <ul>
+      <li><strong>PPO + GAE</strong>——当 step 级 reward 稠密、且<em>训练稳定性</em>是瓶颈时（长代码生成 / 多步 tool-use，一次灾难性更新就会让 policy 崩）。学一个 value head $V_\phi$ 给出逐 token 优势 $\hat{A}_t=\sum_l(\gamma\lambda)^l\delta_{t+l}$，再用裁剪目标 $\min(r_t\hat{A}_t,\ \mathrm{clip}(r_t,1\pm\varepsilon)\hat{A}_t)$ 把 policy 关在 trust region 里。actor-critic 双优化贵，但梯度方差最低。</li>
+      <li><strong>GRPO</strong>——当 rollout 便宜、verifier 在 episode 末尾才打分时（分类 / 短答 / 单测）。在大小为 $G$ 的 rollout 组内做归一化 $\hat{A}_i=(r_i-\bar r)/\sigma_r$，<em>彻底干掉 value 网络</em>，省一半显存、支持大并行 batch。</li>
+      <li><strong>Entropic advantage weighting</strong>——当 reward 直方图严重右偏（正确解稀有但单条信号很强，如难证明 / 低通过率代码合成）。不把低于均值的 rollout 直接归零，而是用带<em>自适应温度</em> $\beta$ 的 softmax 重新分配梯度质量：$w_i\propto\exp(r_i/\beta)$；$\beta$ 在线调，使有效样本量不跌破下限，防止塌缩到单条轨迹（来自 Yuksekgonul et al., 2026）。</li>
+      <li><strong>REINFORCE + KL-to-base</strong>——当 reward 稠密、主要风险是<em>能力回退</em>而非梯度方差时。直接用 Monte Carlo 回报 $R_t=\sum_{t'\ge t}\gamma^{t'-t}r_{t'}$ 当优势，再加一项 $\alpha\,\mathrm{KL}(\pi_\theta\,\|\,\pi_{\theta_0})$ 锚住冻结的参考 policy。无 critic、无分组，最简循环。</li>
+      <li><strong>Best-of-N 行为克隆</strong>——当 reward 稀疏到 $\mathbb{E}[r]\approx0$、policy gradient 数值为零时，当作 <em>phase-zero 冷启动</em>：把 verifier 打分最高的 top-k rollout 用交叉熵蒸馏进模型，把通过率抬到后续 PPO / GRPO 能跑起来的水平。</li>
+      <li><strong>DPO</strong>——当 verifier 能<em>排序</em>但给不出绝对分时（软质量标准、序信号可靠而基数 reward 不可靠）。给定胜出 $y^+$ 与落败 $y^-$，直接最小化 $-\log\sigma\big(\beta\log\frac{\pi_\theta(y^+)}{\pi_{\theta_0}(y^+)}-\beta\log\frac{\pi_\theta(y^-)}{\pi_{\theta_0}(y^-)}\big)$，无需 reward model。</li>
+    </ul>
+
+    <div class="callout note">
+      <span class="label">实现要点</span>
+      基座统一是 <code>gpt-oss-120b</code> + <strong>LoRA rank $r=32$</strong>、学习率 $4\times10^{-5}$。权重更新跑在 H100 上，经 Hexo 自家的 RL 平台 <strong>Modal</strong> 托管，rollout 生成 / reward 赋值 / 梯度更新都在单条管线里。Feedback-Agent 把权重更新当成「与 scaffold 改写并列的两个可选动作之一」，动作选择与（选权重时）算法选择都<em>以当前两组件状态下产出的轨迹为条件</em>。论文明确：跨任务报告里这三种算法是「观察到的」，更系统的算法选择留待后续版本。
+    </div>
+  </section>
+
+  <!-- ============================ ④ 实验评估 ============================ -->
+  <section id="evaluation">
+    <h2><span class="n">④</span>实验评估 Evaluation</h2>
+    <h3>评测设置</h3>
+    <p>三个任务<em>故意选得反差极大</em>，且都是其他自改进系统常用的 benchmark，以便直接对比。所有权重更新都用 LoRA(r=32, lr=4e-5) 适配 gpt-oss-120b。</p>
+    <ul>
+      <li><strong>LawBench（191 类中文罪名分类）</strong>：给一段真实中文刑事案情，从 191 个法定罪名里选对的那个（盗窃/职务侵占、各级故意伤害、各种诈骗变体……法律要件极细）。5,332 训练 / 913 测试，<strong>top-1 accuracy</strong>（越高越好），随机猜 &lt;1%，verifier 是 held-out 测试集 grader。</li>
+      <li><strong>AlphaEvolve TriMul（CUDA kernel 优化）</strong>：为 AlphaFold2 Evoformer 里的 triangular multiplicative update 在 H100 上手写 CUDA kernel。该算子<em>受内存带宽限制</em>、三角稀疏导致 warp divergence 与 cache miss，cuBLAS/cuSPARSE 都不适用。<strong>score = 1500/runtime</strong>（越高越快），verifier 是 H100 实测计时。</li>
+      <li><strong>MAGIC scRNA-seq 去噪</strong>：单细胞测序的 count 矩阵高度稀疏（technical dropout 把真非零读成零）。任务是在 pancreas 数据（Baron et al., 2016）上调 MAGIC 的耦合超参（近邻数 $k$、扩散步数 $t$、核带宽 $\alpha$、预处理）。<strong>mse norm</strong>（$\in[0,1]$，越高越好，1.0 为完美 imputation），verifier 对 ground truth 比。</li>
+    </ul>
+    <p><strong>基线结构：</strong>「Initial」= gpt-oss-120b 过一遍 Meta-Agent 的初始 scaffold $A_1$（一次性生成的 system prompt + 单工具分发 + 输出解析，<em>尚未经任何 Feedback-Agent 迭代</em>）。harness 轨迹刻画「scaffold 迭代在此之上加了多少」，权重轨迹刻画「权重更新在 harness-only 最优之上又加了多少」。各任务都是先 scaffold 迭代、待 harness 进展停滞后切到权重更新。</p>
+
+    <h3>主要结果（原文 Table 3 消融）</h3>
+    <figure>
+      <img src="figures/fig1_chart.png" alt="SIA 三任务主结果">
+      <figcaption>图 3：三任务主结果（原文 Figure 1）。每幅图比 Baseline、SIA-H（只改 harness）、SIA-W+H（harness+权重），并额外列了 Codex(5.5)、Claude Code(Opus 4.7) 两个 agent 基线；虚线为此前 SOTA。<strong>SIA-W+H 在三项上都严格高于 SIA-H</strong>。</figcaption>
+    </figure>
+    <table>
+      <thead><tr><th>任务（指标 / 方向）</th><th>Initial</th><th>Prev. SOTA</th><th>SIA-H（只 harness）</th><th>SIA-W+H（harness+权重）</th></tr></thead>
+      <tbody>
+        <tr><td>LawBench（top-1 acc ↑）</td><td>13.5%</td><td>45.0%</td><td>50.0%</td><td><strong>70.1%</strong></td></tr>
+        <tr><td>AlphaEvolve TriMul（reward ↑）</td><td>0.105</td><td>1.292</td><td>0.120</td><td><strong>1.475</strong></td></tr>
+        <tr><td>Denoising（mse norm ↑）</td><td>0.048</td><td>0.240</td><td>0.241</td><td><strong>0.289</strong></td></tr>
+      </tbody>
+    </table>
+    <p><strong>怎么读这些数字：</strong>SIA-W+H 在每个任务上都严格优于 SIA-H，这是 RQ1 的正面回答。但更值得注意的是<strong>两根杠杆贡献的极度不对称</strong>：</p>
+    <ul>
+      <li><strong>LawBench：</strong>harness 把 13.5%→50.0%（+36.5pp，主要靠把流程重构成 TF-IDF + LinearSVC 管线、调 char n-gram 与正则 $C$），权重更新（PPO+GAE）再 +20.1pp 到 <strong>70.1%</strong>。harness 已经吃了大头，但权重仍越过其天花板。</li>
+      <li><strong>TriMul：</strong>harness 几乎使不上劲——只从 0.105→0.120（runtime 14,254µs→12,483µs，仅 1.14×）；权重更新（entropic advantage weighting）才是主力，runtime 砸到 <strong>1,017µs</strong>（reward 1.475，总加速 14.02×，相对 harness-only 峰值<strong>再减 91.9% 运行时</strong>）。模型学进了 H100 专属的 shared-memory tiling、fp32 寄存器累加、block-size 选择——<em>这些没有任何 scaffold 改动写得出来</em>。</li>
+      <li><strong>Denoising：</strong>harness 把超参扫到 0.241 就彻底停滞；权重更新（GRPO）到 <strong>0.289</strong>（+20%）。增益来源是个绝佳的定性例子（见洞见）。</li>
+    </ul>
+    <p>作者的总结很到位：两根杠杆占据<em>不同的改动空间</em>（外部 scaffold vs 内部参数），所以谁也吃不满对方的增益——这正是「合起来 &gt; 任一单独」的根因。</p>
+
+    <h3>消融 / 分析：每根杠杆到底改了什么（RQ2）</h3>
+    <p><strong>harness 改的是「外部化」的东西。</strong>跨三任务，Feedback-Agent 都在搭越来越专用的脚手架：LawBench 上做了结构化答案抽取层 + 在模型 top 候选之上的 SVC 重排器；TriMul 上做了把 CUDA 编译错误结构化喂回的 parser + 返回中位运行时的计时 harness；去噪上做了批量配置驱动器 + 把 (参数集, 分数) 组织好的结果解析工具。<em>无一例外都是软件工程改进，模型 checkpoint 全程没变</em>。</p>
+    <p><strong>权重改的是「内部化」的领域知识。</strong>LawBench 上梯度压力让模型在 191 类罪名间把相邻类别（盗窃子类、伤害分级、诈骗变体）的辨析变锐——没有任何 prompt 提示；TriMul 上权重收敛到 H100 专属 kernel 设计模式；去噪上第一个权重 checkpoint 就引入了一个 scaffold 整轮迭代都没产生过的<strong>结构性变换</strong>。一句话：<em>harness 塑造 agent「怎么搜」，权重更新改变模型「知道什么」</em>。</p>
+  </section>
+
+  <!-- ============================ ⑤ 洞见 ============================ -->
+  <section id="insight">
+    <h2><span class="n">⑤</span>洞见 Insights</h2>
+    <div class="callout insight">
+      <span class="label">Insight</span>
+      <strong>① 两根杠杆是正交的，所以「+」是真的「+」。</strong>prompt/scaffold 再怎么进化，也只是在改模型<em>外面</em>那层基础设施；只有梯度才能改模型<em>内部</em>对解的先验。SIA 的全部价值都压在这条正交性上——这也解释了为什么 TriMul 这种「需要 H100 底层直觉」的任务上 harness 几乎无效、权重才是命门，而 LawBench 这种「主要是把流程搭对」的任务上 harness 就能吃大头。<br><br>
+      <strong>② 那个去噪的「两行代码」是全文最锋利的证据。</strong>在 MAGIC 去噪上，第一个权重 checkpoint 自己冒出了一段 scaffold 整轮搜索从没写过的后处理：<code>np.clip + np.rint</code>——把 imputed counts 四舍五入成<em>非负整数</em>，强制了一个「计数本就是非负整数」的生物学不变量。它平凡到正确、却是任何 prompt 都没提过的；<em>它是被梯度压力「逼」出来、再由 verifier 对齐筛出来的，而非人写的指令</em>。这把「权重更新能 surface 出 scaffold 永远够不到的领域知识」从口号变成了可检验的样本。<br><br>
+      <strong>③ 把「选哪根杠杆 / 选哪种 RL」本身当成可学的 policy。</strong>SIA 现在的选择器是个冻结的 LLM 先验；作者指出真正递归的版本是把选择器也用外层 MDP 训起来——这是「连改进机制本身都在自我改进」的雏形。
+    </div>
+    <h3>局限与未来</h3>
+    <p><strong>耦合式协同 Goodhart（作者自己点的核心风险）。</strong>harness 搜索和 RL 权重更新优化的是<em>同一个固定 verifier</em> $V$，且彼此塑造对方看到的分布：harness 会找「当前 policy 容易刷分」的 scaffold，而权重又在「一个马上要变的 scaffold」收集来的数据上训。这套耦合系统的联合不动点是<strong>两个互相看不见对方更新历史的优化器之间的 Nash 均衡</strong>，而不是真正最大化 $V$ 的点——它可能在训练 verifier 上很强，却对任一组件的扰动极其脆弱。标准 Goodhart 分析假设单一优化器，双杠杆设定下需要新的分析。</p>
+    <p><strong>两个未来方向：</strong>(i) <em>对动作选择 policy 做 meta-RL</em>：跨任务分布跑 SIA，把每个 (轨迹, 动作, 结果) 三元组当外层 MDP 的 transition，用 RL 训选择器，让它从经验里学「何时该改 harness、何时该动权重」，而非靠固定启发式——这也带来嵌套循环稳定性的新问题；(ii) <em>更细粒度的交错</em>：当前在「harness 搜索」与「权重更新」之间是粗粒度切换，若能在 harness 搜索中途就触发一次权重更新、或梯度一步后立刻回到 harness 探索，可能缩短「看到 plateau」到「动手」的滞后，解锁粗切换错过的轨迹。</p>
+    <h3>与相关工作的关系</h3>
+    <p>用论文自己的两轴表（是否改 harness × 是否改权重）来定位：<strong>SIA 是已知唯一在单个自改进循环里同时改 scaffold 和权重的条目</strong>。和最接近的并发工作 <strong>Hyperagents</strong> 比，后者让「meta 机制本身」可编辑、给 scaffold 改写加表达力，但<em>权重仍冻结</em>；SIA 的区别正是加了第二根基于权重的杠杆。和 <strong>Meta-Harness</strong> 比，SIA 在 harness 收敛后接的是<em>权重更新</em>而非继续变异 harness。和 test-time 那派（TTRL / Discover-TTT / TTT 出奇有效）比，它们都把 harness 钉死、reward 多为单 prompt / 多数投票伪标签；SIA 的 reward 是确定性任务 verifier、rollout 是<em>带 scaffold</em> 的。和 <strong>EUREKA</strong> 比，EUREKA 用 LLM 生成 reward 函数（scaffold 侧）再训 policy（权重侧），但 reward 生成器不被训练出来的 policy 回更新，是单向而非协同进化；SIA 的 Feedback-Agent 则在闭环里动态二选一，且两类更新都以当前双组件状态下的轨迹为条件。它训练用的 entropic-utility 目标与 LoRA 训练栈直接复用自 Discover 系（Yuksekgonul et al., 2026）。</p>
+  </section>
+
+  <footer class="foot">
+    本页为 <code>paper-reading</code> skill 生成的阅读笔记，仅作辅助，细节以
+    <a href="https://arxiv.org/abs/2605.27276" target="_blank" rel="noopener">原文</a> 为准 · 解读日期 2026-06-01
+  </footer>
+
+</article>
+</body>
+</html>
