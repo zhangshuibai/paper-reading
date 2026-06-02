@@ -1,5 +1,25 @@
 [
   {
+    "slug": "2026-06-01-nvidia-rtx-spark",
+    "title": "NVIDIA RTX Spark 是什么（小白向调研）",
+    "authors": "—",
+    "team": "调研笔记",
+    "arxiv": "https://www.nvidia.com/en-us/products/rtx-spark/",
+    "code": "",
+    "date": "2026-06-02",
+    "published": "调研 2026",
+    "tldr": "RTX Spark 是 NVIDIA 的 CPU+GPU 融合芯片笔记本/小台式，最高 128GB 统一内存让本地能跑/微调大模型；区别于 DGX Spark(开发者版/Linux)。含与普通电脑对比、亮点、配套软件、选购建议。",
+    "tags": [
+      "hardware",
+      "NVIDIA",
+      "RTX-Spark",
+      "local-AI",
+      "unified-memory",
+      "科普"
+    ],
+    "path": "papers/2026-06-01-nvidia-rtx-spark/index.html"
+  },
+  {
     "slug": "2605.27276-sia-self-improving-ai",
     "title": "SIA: Self Improving AI with Harness & Weight Updates",
     "authors": "Prannay Hebbar, Yogendra Manawat, Samuel Verboomen, Alesia Ivanova, Selvam Palanimalai, Kunal Bhatia, Vignesh Baskaran",
