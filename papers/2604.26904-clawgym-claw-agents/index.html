@@ -128,6 +128,7 @@
     <a href="#evaluation">④ 实验评估</a>
     <a href="#insight">⑤ 洞见</a>
     <a href="#codebase">⑥ 代码库深挖</a>
+    <a href="#generalization">⑦ 泛化 · 训练/评测集</a>
   </nav>
 
   <!-- ① 开源贡献 -->
@@ -382,6 +383,103 @@ bash ClawGym-Agents/SFT/launch_scripts/example.sh</pre>
     <p>作者自陈：① 评估只看 final-state 正确性，动作的安全/效率/纠错能力等 trajectory-level 性质尚未纳入（因开放环境下不同有效路径难一致判定）；② reward 阈值仍是经验选择，未来想研究对连续 verifier 分更有原则的筛选方法；③ SFT 超过 3 epoch 会在合成分布上轻微过拟合，提示「最优训练规模」需谨慎；④ RL 仅作轻量探索（仅 code verifier 评分、2000 题），尚非完整主结果。我的补充判断：合成数据高度依赖 GPT-5 / GPT-5.4 / MiniMax / GLM 等强 teacher，蒸馏天花板与其相关；且训练后的开源小模型与闭源 frontier 仍有可观差距，框架价值更多在「可规模化、可验证、低成本地把小模型推到可用」。</p>
     <h3>与相关工作的关系</h3>
     <p>按本文自身论述：相比 AIME 这类静态文本推理与 SWE-Bench-Verified / BrowseComp 这类结构化、可观测的 agent-loop benchmark，Claw 式任务的独特在于 grounding 在本地 workspace、且运行在不透明的封装系统里。已有针对个人 agent 的工作多是单点——要么专门训练算法 / online learning（如从用户交互抽信号），要么单独造评测 benchmark（多个 Claw/OpenClaw 评测）；ClawGym 的差异是把<b>任务合成 + 训练 + 评测</b>统一进一个 data-centric 全生命周期框架，并以「可规模化生成可验证数据」为核心抓手。</p>
+  </section>
+
+  <!-- ⑦ 泛化 · 训练集与评测集 -->
+  <section id="generalization">
+    <h2><span class="n">⑦</span>泛化 · 训练集与评测集</h2>
+    <p>这一节专门把「训练用什么数据、评测用什么数据、两者是不是同源、泛化证据从哪来」拆清楚。一句话先说结论：<b>ClawGym-Bench 与训练数据<u>同源合成</u>（都从 ClawGym-SynData 的合成池来），靠「排除训练集」做防泄漏，本质是 in-distribution 的 held-out；真正能说明<u>跨分布泛化</u>的是外部第三方的 PinchBench——ClawGym-Agents 完全没在 PinchBench 上训练，却在其上大涨。</b></p>
+
+    <h3>训练集 / 评测集对照</h3>
+    <table>
+      <thead><tr><th>数据集</th><th>规模</th><th>来源 / 怎么造</th><th>用途</th><th>与训练同源？</th><th>是否 held-out / OOD</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><b>ClawGym-SynData</b>（任务池）</td>
+          <td>13.5K 任务（过滤后）</td>
+          <td>双路合成：persona-driven top-down（GPT-5，9 类/43 子类场景 × 7 类/26 原子操作 × 十亿级 persona）+ skill-grounded bottom-up（从 ≈30K 原始 OpenClaw skill 过滤出 16K/16,837 可合成 skill，1 primary + ≤3 supporting 组合）。+ mock 资源 + hybrid verifier。</td>
+          <td>训练任务池（SFT 轨迹的来源、RL 采样的来源）</td>
+          <td>—（本体）</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td><b>ClawGym-Trajectory</b>（SFT 数据）</td>
+          <td>24.5K 轨迹</td>
+          <td>在 OpenClaw harness 上对合成任务做 black-box rollout，teacher 用 <b>MiniMax-M2.5 + GLM-5.1</b> 混合蒸馏；按 reward 阈值（最佳 0.5）过滤。平均 13.00 轮 / 18.67K token / 15.82 次 tool 调用。</td>
+          <td>多轮 SFT（掩码环境反馈 token）</td>
+          <td class="yes">✔ 同源（rollout 自 13.5K 合成任务）</td>
+          <td>—（训练用）</td>
+        </tr>
+        <tr>
+          <td><b>RL 子集</b></td>
+          <td>2,000 任务</td>
+          <td>从 ClawGym-SynData 采样并按 tool 多样性平衡；GRPO + outcome-reward-only（仅 code verifier）。</td>
+          <td>轻量 sandbox-parallel RL</td>
+          <td class="yes">✔ 同源（即 ClawGym-SynData 子集）</td>
+          <td>—（训练用）</td>
+        </tr>
+        <tr>
+          <td><b>ClawGym-Bench</b>（自建评测）</td>
+          <td>200 题，6 类（156 纯 code / 44 hybrid）</td>
+          <td>从同一合成池里、<b>排除训练集后</b>再严筛：difficulty-aware 过滤（强/小 agent 各 4 次 rollout，$\bar s_{\text{strong}}\ge0.2$、$\bar s_{\text{small}}\le0.6$、$\bar s_{\text{strong}}>\bar s_{\text{small}}$）+ GPT-5.4 辅助人工复审。</td>
+          <td>主评测</td>
+          <td class="yes">✔ <b>同源</b>（同一合成分布）</td>
+          <td><b>in-distribution held-out</b>（同分布、非训练子集；非有意 OOD）</td>
+        </tr>
+        <tr>
+          <td><b>PinchBench</b>（外部评测）</td>
+          <td>30 题（去多模态后；用 2026-04-10 释出任务集）</td>
+          <td><b>第三方独立 benchmark</b>（github.com/pinchbench/skill），用其原生 verifier。</td>
+          <td>跨 benchmark 泛化测试</td>
+          <td class="no">✘ <b>不同源</b>（外部、与 ClawGym 无关）</td>
+          <td><b>OOD / unseen</b>（模型只被 ClawGym-SynData 监督，未训过 PinchBench）</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>训练 ≠ 评测：同源性与防泄漏（leakage）</h3>
+    <p>论文明确写道：ClawGym-Bench 是「从 ClawGym-SynData 里<b>选出有区分度的任务（excluding those used in the training set）</b>」构建的。因此可以确证两点：</p>
+    <ul>
+      <li><b>防泄漏措施 = 排除训练集（确证）。</b>benchmark 题目从候选池里挑、且显式排除已用于训练的样本，保证<b>没有逐题重叠</b>（no instance-level overlap）。这是论文交代的唯一防泄漏手段。</li>
+      <li><b>但本质是同源 / 同分布（确证）。</b>ClawGym-Bench 与训练数据走的是<b>同一套双路合成 pipeline、同一批 persona/skill/场景 taxonomy、同一类 mock 资源与 verifier 生成器</b>。它是 in-distribution 的 held-out（同分布留出），<b>不是有意构造的 OOD</b>。换句话说，ClawGym-Bench 上的高分含「同分布」红利，泛化强度不应只看它。</li>
+      <li><b>合成池层面的去重（确证、但针对训练池）。</b>Stage 4 的 novelty 过滤用 task embedding 的 cosine 相似度剔除与已留任务过相似者——这降低了池内冗余，间接降低 benchmark 与训练题「近义但不同字面」的相似度风险，但论文<b>未报告</b> benchmark 与训练集之间专门的 embedding 去重阈值或近邻泄漏（near-duplicate leakage）检查数字。</li>
+    </ul>
+
+    <h3>泛化证据：PinchBench（unseen）上的跨分布迁移</h3>
+    <p>这是论文用来证明「不是过拟合合成模式」的关键。ClawGym-Agents <b>只被 ClawGym-SynData 监督、从未训练 PinchBench</b>，却在这个外部 benchmark 上大幅提升（数字均取自原文 Table 6，相对提升为对各自 Qwen3 baseline）：</p>
+    <table>
+      <thead><tr><th>模型</th><th>PinchBench（OOD/unseen）</th><th>ClawGym-Bench（in-dist held-out）</th></tr></thead>
+      <tbody>
+        <tr><td>Qwen3-8B（base）</td><td>54.50</td><td>35.02</td></tr>
+        <tr><td><b>ClawGym-8B</b></td><td><b>75.70</b>（<b>+38.90%</b>）</td><td><b>50.24</b>（+43.46%）</td></tr>
+        <tr><td>Qwen3-30B-A3B（base）</td><td>55.60</td><td>45.11</td></tr>
+        <tr><td><b>ClawGym-30A3B</b></td><td><b>86.00</b>（<b>+54.68%</b>）</td><td><b>56.82</b>（+25.96%）</td></tr>
+        <tr><td>ClawGym-4B</td><td>76.40</td><td>47.73</td></tr>
+      </tbody>
+    </table>
+    <p>要点：① <b>PinchBench 上的相对提升甚至更大</b>（30A3B +54.68% &gt; ClawGym-Bench 的 +25.96%），说明增益不是「记住了同源题」——若纯靠泄漏，理应是同源的 ClawGym-Bench 涨得更猛、外部 PinchBench 涨得少，实际相反。② <b>ClawGym-30A3B 在 PinchBench 拿 86.00</b>，可与若干闭源 frontier 掰手腕（如高于 GPT-5.4 的 68.30、Claude-4.6-Opus 的 75.30，接近 Gemini-3-Flash 的 88.70）。论文据此论断：模型内化的是「可迁移的 agentic 原则 / functional logic」，而非过拟合 ClawGym-SynData 的具体 pattern。</p>
+
+    <h3>泛化的来源与消融</h3>
+    <ul>
+      <li><b>双路合成的多样性 → 泛化（确证，Table 7）。</b>Mixed Synthesis 在两个 benchmark 上都优于任一单路；在 <b>外部 PinchBench</b> 上差距尤其明显：Qwen3-8B 75.68（mixed） vs 73.51（persona） vs 68.23（skill）；30A3B 86.00 vs 84.92 vs 80.05。论文明说「二者结合让模型学会在抽象用户需求与具体 tool 执行之间架桥，带来<b>更好的跨任务泛化</b>」——即泛化主要来自<b>场景多样性（persona）× 操作 grounding（skill）的协同</b>。</li>
+      <li><b>训练规模 → 过拟合拐点（确证，图 4）。</b>跑 5 epoch（每 epoch 103 步），<b>第 3 epoch（step 309）见顶</b>，之后两个 benchmark 都轻微但持续下滑——「过多迭代会在合成分布上轻微过拟合」，提示泛化对训练规模敏感、需早停。</li>
+      <li><b>reward 阈值 → 多样性 vs 完成度（确证，图 5）。</b>阈值 0.5 最优；作者明确把它表述为「在<b>完成保真度</b>与<b>稳健 agentic 泛化所需的多样性</b>之间的平衡」——太高的阈值会剪掉有价值的纠错/部分策略，反而损泛化。</li>
+      <li><b>persona 数 / skill 覆盖的细粒度 scaling（论文未明确）。</b>论文给了「persona 来自十亿级池、skill 16,837 个、场景 9 类/43 子类」等覆盖面数字，但<b>没有专门做「persona 数量↑ / skill 覆盖↑ → OOD 泛化↑」的逐档 scaling 消融</b>；最接近的是上面的双路协同（Table 7）与训练规模（图 4）。</li>
+      <li><b>通用能力是否退化（论文未明确）。</b>论文<b>没有报告</b>任何 general-purpose benchmark（如 MMLU/数学/代码通用题）来检验 SFT/RL 后通用能力是否退化；评测只覆盖 ClawGym-Bench 与 PinchBench 两个 Claw 式 agent benchmark。因此「以小博大」的代价是否包含通用能力下降，<b>无法从本文判断</b>。</li>
+    </ul>
+
+    <div class="callout insight">
+      <span class="label">Insight</span>
+      ClawGym 的泛化主要不来自「题目本身」，而来自<b>合成数据的多样性结构</b>——persona-driven 的场景广度 × skill-grounded 的操作可落地性，两者协同让模型学到「把抽象用户意图翻译成可靠 tool 执行流水线」这一可迁移能力；外部 PinchBench 上比同源 ClawGym-Bench <b>更大</b>的相对提升，正是「学到原则而非记住模式」的最强证据。
+    </div>
+
+    <div class="callout warn">
+      <span class="label">诚实标注 · 同源 / 潜在 leakage / 未交代</span>
+      <b>① 主评测 ClawGym-Bench 与训练数据同源（同一合成 pipeline、同分布）</b>，防泄漏仅靠「排除训练集」保证逐题不重叠，属 in-distribution held-out 而非 OOD；其高分含同分布红利，跨分布泛化应主要参考 PinchBench。
+      <b>② 未报告 benchmark↔训练集之间的专门去重 / 近邻泄漏（near-duplicate leakage）数字</b>：novelty 过滤是针对训练池内部冗余的，论文没给「benchmark 与训练题的 embedding 相似度上限/近邻检查」。
+      <b>③ PinchBench 样本量小</b>（去多模态后仅 30 题），且部分 baseline 分数标注 ∗（取自官方网站、未必同口径），跨 benchmark 数字对比需留意可比性。
+      <b>④ 缺少 persona/skill 的逐档 scaling 消融</b>与<b>通用能力退化检验</b>（无 general benchmark），「数据多样性→泛化」的因果更多是 Table 7 协同实验的间接支持，而非直接的 scaling 曲线。
+    </div>
   </section>
 
   <footer class="foot">
