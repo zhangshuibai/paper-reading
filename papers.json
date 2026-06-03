@@ -1,5 +1,25 @@
 [
   {
+    "slug": "2026-06-01-agentic-sft-algorithms-survey",
+    "title": "Agentic SFT 的算法研究现状（文献综述）",
+    "authors": "—",
+    "team": "调研综述",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-03",
+    "published": "综述 2026",
+    "tldr": "Agentic SFT 算法按 6 方向梳理：监督/掩码设计、多轮组样本与效率、轨迹数据合成、turn/step 级 credit、拒绝采样/自蒸馏、SFT 病理与 SFT↔RL 融合；含代表工作表与脉络判断。",
+    "tags": [
+      "agentic-sft",
+      "survey",
+      "tool-use",
+      "trajectory",
+      "credit-assignment",
+      "self-distillation"
+    ],
+    "path": "papers/2026-06-01-agentic-sft-algorithms-survey/index.html"
+  },
+  {
     "slug": "2026-06-01-nvidia-rtx-spark",
     "title": "NVIDIA RTX Spark 是什么（小白向调研）",
     "authors": "—",

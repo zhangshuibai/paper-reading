@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agentic SFT 的算法研究现状 · 文献综述</title>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;}
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:900px; margin:0 auto; padding:18px 22px 90px}
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:25px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)} .meta-grid dd{margin:0}
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap; line-height:2}
+  nav.toc a:hover{color:var(--accent)}
+  section{margin:38px 0}
+  h2{font-size:20px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:16.5px; margin:22px 0 8px}
+  p{margin:12px 0} ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)} strong{color:var(--text)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.88em}
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:13px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:8px 10px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  figure{margin:24px 0; text-align:center}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+  .svgwrap{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 8px}
+  .tag{font-size:11px;padding:1px 7px;border-radius:999px;white-space:nowrap}
+  .t-sft{background:#cdeae6;color:#13433b}.t-mix{background:#f3e2cf;color:#7a4f12}.t-data{background:#dfeaff;color:#234}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">Agentic SFT</span>
+      <span class="chip">Tool Use</span>
+      <span class="chip">Trajectory Training</span>
+      <span class="chip">文献综述</span>
+      <span class="chip">2024–2026</span>
+    </div>
+    <h1>Agentic SFT 的算法研究现状：从「朴素模仿」到「精细监督 + 聪明数据 + 与 RL 融合」</h1>
+    <p class="orig-title">面向 agent / 工具调用的监督微调（SFT）算法文献梳理（按研究方向分桶 + 代表工作表）</p>
+    <dl class="meta-grid">
+      <dt>整理</dt><dd>对话调研综述，非系统性 survey；论文与数字来自公开检索</dd>
+      <dt>日期</dt><dd>2026-06-01</dd>
+      <dt>范围</dt><dd>以 SFT 侧算法为主，含 SFT↔RL 边界（cold-start / 自蒸馏 / 拒绝采样）</dd>
+    </dl>
+  </header>
+
+  <div class="tldr">
+    <b>一句话脉络</b> — 最朴素的 agentic SFT = 「<strong>整段 trajectory ＋ 均匀 cross-entropy ＋ mask 掉环境输出</strong>」的行为克隆。最近两年的算法研究都在攻它的三个软肋：① <strong>监督信号太糙</strong>（该 mask 谁、该重点学哪一步）；② <strong>数据从哪来、质量如何</strong>（合成、拒绝采样、自蒸馏、失败挖掘）；③ <strong>纯模仿的病理</strong>（mode collapse、只学到「接口捷径」而非真本事，泛化差），并因此越来越往「<strong>与 RL 融合 / cold-start</strong>」走。下面按 <strong>6 个方向</strong>归类代表工作。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#map">研究版图</a>
+    <a href="#a">① 监督信号设计（mask/掩码）</a>
+    <a href="#b">② 多轮组样本与效率</a>
+    <a href="#c">③ 轨迹数据合成</a>
+    <a href="#d">④ turn/step 级 credit</a>
+    <a href="#e">⑤ 拒绝采样 / 自蒸馏 / 迭代</a>
+    <a href="#f">⑥ SFT 病理与 SFT↔RL</a>
+    <a href="#take">脉络与判断</a>
+  </nav>
+
+  <!-- 版图 -->
+  <section id="map">
+    <h2>研究版图</h2>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 720 300" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12.5">
+        <g text-anchor="middle">
+          <rect x="250" y="14" width="220" height="40" rx="9" fill="#eef1fb" stroke="#b9c2e0"/>
+          <text x="360" y="33" fill="#1a1f33" font-weight="600">朴素 Agentic SFT（行为克隆）</text>
+          <text x="360" y="48" fill="#8a93ad" font-size="10.5">整段轨迹 ＋ 均匀 CE ＋ mask 环境输出</text>
+
+          <rect x="14" y="96" width="222" height="58" rx="8" fill="#cdeae6" stroke="#2c8a7d"/>
+          <text x="125" y="116" fill="#13433b" font-weight="600">① 监督信号 / 掩码</text>
+          <text x="125" y="133" fill="#13433b" font-size="10.5">该 mask 谁、让证据进 loss</text>
+          <text x="125" y="147" fill="#13433b" font-size="10.5">ACC · 接口 vs 语义</text>
+
+          <rect x="249" y="96" width="222" height="58" rx="8" fill="#cdeae6" stroke="#2c8a7d"/>
+          <text x="360" y="116" fill="#13433b" font-weight="600">② 多轮组样本 / 效率</text>
+          <text x="360" y="133" fill="#13433b" font-size="10.5">拆 N 条 vs 单次 forward</text>
+          <text x="360" y="147" fill="#13433b" font-size="10.5">One-Pass to Reason</text>
+
+          <rect x="484" y="96" width="222" height="58" rx="8" fill="#dfeaff" stroke="#7aa2ff"/>
+          <text x="595" y="116" fill="#1a3060" font-weight="600">③ 轨迹数据合成</text>
+          <text x="595" y="133" fill="#33518a" font-size="10.5">APIGen-MT · xLAM · ToolACE</text>
+          <text x="595" y="147" fill="#33518a" font-size="10.5">AgentTuning · ASTRA</text>
+
+          <rect x="14" y="172" width="222" height="58" rx="8" fill="#f3e2cf" stroke="#c08a3e"/>
+          <text x="125" y="192" fill="#7a4f12" font-weight="600">④ turn/step 级 credit</text>
+          <text x="125" y="209" fill="#7a4f12" font-size="10.5">非均匀加权</text>
+          <text x="125" y="223" fill="#7a4f12" font-size="10.5">SALT · CriticSearch · InT</text>
+
+          <rect x="249" y="172" width="222" height="58" rx="8" fill="#f3e2cf" stroke="#c08a3e"/>
+          <text x="360" y="192" fill="#7a4f12" font-weight="600">⑤ 拒绝采样 / 自蒸馏</text>
+          <text x="360" y="209" fill="#7a4f12" font-size="10.5">用自己的轨迹做 SFT</text>
+          <text x="360" y="223" fill="#7a4f12" font-size="10.5">RFT · SDFT · SSD · 失败挖掘</text>
+
+          <rect x="484" y="172" width="222" height="58" rx="8" fill="#efe9f7" stroke="#9b8cff"/>
+          <text x="595" y="192" fill="#3a2b52" font-weight="600">⑥ SFT 病理 / SFT↔RL</text>
+          <text x="595" y="209" fill="#3a2b52" font-size="10.5">mode collapse · 熵 · 泛化</text>
+          <text x="595" y="223" fill="#3a2b52" font-size="10.5">SRFT · 熵保持 · SFT vs RL</text>
+
+          <text x="360" y="268" fill="#5a627a" font-size="11.5">共同方向：监督更精细、数据更聪明、模仿与探索（RL）融合</text>
+        </g>
+      </svg>
+      </div>
+      <figcaption>Agentic SFT 算法研究的 6 个方向（本综述归纳，配色：绿=训练机制 / 蓝=数据 / 橙=信号与自举 / 紫=与 RL 边界）。</figcaption>
+    </figure>
+  </section>
+
+  <!-- ① -->
+  <section id="a">
+    <h2><span class="n">①</span>监督信号设计：mask 谁、让什么进 loss</h2>
+    <p>最基础的算法问题：一条轨迹里哪些 token 算 loss。<strong>共识是只监督 assistant 生成的部分（reasoning＋tool_call＋答案），mask 掉 system/user/tool-response</strong>（否则模型会学着编造环境返回）。近期工作开始质疑这套默认掩码是否最优：</p>
+    <table>
+      <thead><tr><th>工作</th><th>类型</th><th>算法点（一句话）</th></tr></thead>
+      <tbody>
+        <tr><td><a href="https://arxiv.org/abs/2307.16789" target="_blank" rel="noopener">ToolLLM / ToolBench</a></td><td><span class="tag t-sft">SFT</span></td><td>ReAct 轨迹 SFT 的范式奠基：loss 只在 Thought＋Action，Observation 被 mask</td></tr>
+        <tr><td>Chat-template assistant mask（HF / TRL <code>assistant_only_loss</code>、LLaMA-Factory）</td><td><span class="tag t-sft">SFT</span></td><td>机制层：<code>{% generation %}</code> 标记 assistant token；<code>gpt/function</code> 学、<code>observation</code> mask</td></tr>
+        <tr><td><a href="https://arxiv.org/abs/2605.21850" target="_blank" rel="noopener">ACC（Agent Context Compilation）</a></td><td><span class="tag t-sft">SFT</span></td><td>反向操作：把轨迹「编译」成 long-context QA，让答案梯度<strong>绕过 mask、触达证据 token</strong>，补上长程监督盲区</td></tr>
+        <tr><td><a href="https://arxiv.org/abs/2602.01611" target="_blank" rel="noopener">What Do Agents Learn from Trajectory-SFT: Semantics or Interfaces?</a></td><td><span class="tag t-sft">SFT</span></td><td>警示：trajectory-SFT 会放大「<strong>接口捷径（interface shortcutting）</strong>」——接口一改就崩，说明学到的是表面格式而非任务语义</td></tr>
+      </tbody>
+    </table>
+    <p class="callout note" style="margin-top:6px"><span class="label">相关</span>ECHO（terminal agent）则把「<em>预测</em>环境输出」当作 auxiliary loss（与 mask 相反），用作 world-model 式的稠密自监督——见同库 ECHO 解读。</p>
+  </section>
+
+  <!-- ② -->
+  <section id="b">
+    <h2><span class="n">②</span>多轮组样本与训练效率</h2>
+    <p>一条 K 轮会话怎么变成训练样本？普通多轮可整段一条（mask 同时学所有轮）；<strong>带 thinking 的多轮</strong>因历史思考要从后续 context 删掉，被迫按轮拆成 N 条、跑 N 次 forward（$O(N^3)$）。算法创新主要在「不拆也等价」：</p>
+    <table>
+      <thead><tr><th>工作</th><th>类型</th><th>算法点</th></tr></thead>
+      <tbody>
+        <tr><td><a href="https://arxiv.org/abs/2504.18246" target="_blank" rel="noopener">One-Pass to Reason</a></td><td><span class="tag t-sft">SFT</span></td><td>token 复制 ＋ block-sparse attention mask，在<strong>单次 forward</strong> 得到与 N-pass <em>完全相同</em>的 loss，$O(N^3)\to O(N^2)$</td></tr>
+        <tr><td>Qwen3 官方多轮建议</td><td><span class="tag t-sft">SFT</span></td><td>带 reasoning 的多轮按轮拆、删历史 <code>&lt;think&gt;</code>（「except for multi-step tool calls」）</td></tr>
+      </tbody>
+    </table>
+    <p class="callout note" style="margin-top:6px"><span class="label">详见</span>同库笔记《Agentic SFT 的 tool-response mask 与多轮组样本》。</p>
+  </section>
+
+  <!-- ③ -->
+  <section id="c">
+    <h2><span class="n">③</span>轨迹数据合成（数据引擎）</h2>
+    <p>agentic SFT 的成败很大程度是<strong>数据问题</strong>——高质量多轮工具轨迹稀缺。这一线的算法是「怎么自动造出可验证、可规模化的轨迹」：</p>
+    <table>
+      <thead><tr><th>工作</th><th>类型</th><th>算法点</th></tr></thead>
+      <tbody>
+        <tr><td><a href="https://arxiv.org/abs/2310.12823" target="_blank" rel="noopener">AgentTuning</a></td><td><span class="tag t-data">数据</span></td><td>多任务 agent 指令微调，混合 6 类 agent 轨迹 ＋ 通用指令，保住通用能力</td></tr>
+        <tr><td><a href="https://arxiv.org/abs/2403.12881" target="_blank" rel="noopener">Agent-FLAN</a></td><td><span class="tag t-data">数据</span></td><td>把 agent 数据按「能力」拆解重组、识别并抑制 hallucination，提升 agent tuning 效率</td></tr>
+        <tr><td><a href="https://arxiv.org/abs/2409.03215" target="_blank" rel="noopener">xLAM</a> / <a href="https://arxiv.org/abs/2504.03601" target="_blank" rel="noopener">APIGen-MT</a></td><td><span class="tag t-data">数据</span></td><td>可验证的多轮数据合成：先生成并校验「任务 blueprint」，再模拟 agent-human 交互铺成轨迹；xLAM-2 在 τ-bench/BFCL 超 GPT-4o</td></tr>
+        <tr><td><a href="https://arxiv.org/abs/2409.00920" target="_blank" rel="noopener">ToolACE</a></td><td><span class="tag t-data">数据</span></td><td>自进化的 API 池 ＋ 多 agent 对话生成 ＋ 双层校验，造高准确度 function-calling 数据</td></tr>
+        <tr><td><a href="https://arxiv.org/abs/2601.21558" target="_blank" rel="noopener">ASTRA</a> · <a href="https://arxiv.org/abs/2506.11045" target="_blank" rel="noopener">Procedural Env Generation</a></td><td><span class="tag t-mix">数据+RL</span></td><td>自动合成 agentic 轨迹与「强化 arena / 程序化环境」，把数据合成与可训练环境打通</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ④ -->
+  <section id="d">
+    <h2><span class="n">④</span>超越均匀 CE：turn / step 级 credit</h2>
+    <p>朴素 SFT 对每个 token 一视同仁，但一条长轨迹里各步贡献天差地别。这一线把「哪一步更该学/更该奖」做细——很多源自 RL 的 credit assignment，但思想正回流到 SFT/cold-start 的样本加权里：</p>
+    <table>
+      <thead><tr><th>工作</th><th>类型</th><th>算法点</th></tr></thead>
+      <tbody>
+        <tr><td><a href="https://arxiv.org/abs/2510.20022" target="_blank" rel="noopener">SALT</a></td><td><span class="tag t-mix">credit</span></td><td>用 trajectory graph 给 step 级 advantage——同任务不同轨迹「共享的步」与「分叉的步」区别对待</td></tr>
+        <tr><td><a href="https://arxiv.org/abs/2511.12159" target="_blank" rel="noopener">CriticSearch</a></td><td><span class="tag t-mix">credit</span></td><td>retrospective critic 用全轨迹的「上帝视角」给每个 turn 稠密反馈</td></tr>
+        <tr><td><a href="https://arxiv.org/abs/2605.29697" target="_blank" rel="noopener">Beyond Trajectory Rewards（agentic search）</a></td><td><span class="tag t-mix">SFT+RL</span></td><td>graph 建模做 step 级 credit，SFT cold-start ＋ RL 结合</td></tr>
+        <tr><td><a href="https://arxiv.org/abs/2601.14209" target="_blank" rel="noopener">InT（Self-Proposed Interventions）</a></td><td><span class="tag t-mix">SFT 信号</span></td><td>定位失败轨迹的首个错误步、自提单步 intervention、只验一步 → 稠密 step 级监督，作 RL 初始化 ＋≈10 分</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ⑤ -->
+  <section id="e">
+    <h2><span class="n">⑤</span>拒绝采样 / 自蒸馏 / 迭代 SFT（用模型自己的轨迹）</h2>
+    <p>不靠外部专家，让模型<strong>自己生成轨迹 → 筛选 → 拿来 SFT</strong>，迭代自举。这是当下最活跃的一线，也在模糊 SFT 与 RL 的界限：</p>
+    <table>
+      <thead><tr><th>工作</th><th>类型</th><th>算法点</th></tr></thead>
+      <tbody>
+        <tr><td>RFT（Rejection-sampling Fine-Tuning）/ Hint-RFT</td><td><span class="tag t-mix">迭代SFT</span></td><td>只留「通过 verifier / 用了工具且答对」的自生成轨迹做 SFT，多轮迭代；工具场景只收「含验证过工具调用」的样本</td></tr>
+        <tr><td><a href="https://arxiv.org/abs/2504.13145" target="_blank" rel="noopener">Exploring Expert Failures</a></td><td><span class="tag t-mix">迭代SFT</span></td><td>不只学专家成功轨迹，还<strong>挖掘专家失败里的有用片段</strong>；WebShop 胜率 35.6%→62%、可超过示范者</td></tr>
+        <tr><td><a href="https://arxiv.org/abs/2601.19897" target="_blank" rel="noopener">SDFT</a></td><td><span class="tag t-mix">自蒸馏</span></td><td>demonstration-conditioned 的自己当 teacher、on-policy reverse-KL 自蒸馏；teacher 离 base 近 → 抗 catastrophic forgetting</td></tr>
+        <tr><td><a href="https://arxiv.org/abs/2604.01193" target="_blank" rel="noopener">SSD（Simple Self-Distillation）</a></td><td><span class="tag t-mix">自蒸馏</span></td><td>按特定 temperature 采自身解、对未验证样本做 SFT，靠「分布重塑」提升 coding</td></tr>
+        <tr><td><a href="https://arxiv.org/abs/2604.12002" target="_blank" rel="noopener">Self-Distillation Zero</a></td><td><span class="tag t-mix">自蒸馏</span></td><td>self-revision 把二值 reward 变成稠密监督</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ⑥ -->
+  <section id="f">
+    <h2><span class="n">⑥</span>SFT 的病理 与 SFT↔RL 边界</h2>
+    <p>越来越多工作指出：纯 cross-entropy 的 SFT 有结构性毛病——<strong>mode collapse、熵塌缩、只记忆不泛化</strong>，做后续 RL 的底子也差。于是算法往「保熵 / 用负样本 / 单阶段融合 RL」走：</p>
+    <table>
+      <thead><tr><th>工作</th><th>类型</th><th>算法点</th></tr></thead>
+      <tbody>
+        <tr><td><a href="https://arxiv.org/abs/2603.13985" target="_blank" rel="noopener">SFT vs RL（post-training 研究）</a> · <a href="https://arxiv.org/abs/2510.00237" target="_blank" rel="noopener">Debunk SFT Generalization</a></td><td><span class="tag t-mix">分析</span></td><td>系统对比 SFT 与 RL 的泛化/记忆差异，澄清「SFT 只会记忆」的误读边界</td></tr>
+        <tr><td><a href="https://arxiv.org/abs/2602.07464" target="_blank" rel="noopener">SED-SFT</a> · <a href="https://arxiv.org/abs/2602.02244" target="_blank" rel="noopener">Entropy-Preserving SFT</a></td><td><span class="tag t-sft">SFT</span></td><td>对抗 mode collapse：选择性鼓励多样性 / 自适应自蒸馏保熵，给后续 RL 留探索空间</td></tr>
+        <tr><td><a href="https://arxiv.org/abs/2506.19767" target="_blank" rel="noopener">SRFT</a></td><td><span class="tag t-mix">SFT+RL</span></td><td>单阶段把 SFT 与 RL 用熵感知加权融合，+4.8 over SFT、+3.4 over SFT→RL</td></tr>
+        <tr><td><a href="https://arxiv.org/abs/2601.04992" target="_blank" rel="noopener">Learning from Mistakes（负样本）</a> · GLOW</td><td><span class="tag t-mix">负样本</span></td><td>把失败/负轨迹纳入训练提升 OOD 泛化（GLOW 报 +5.51% OOD、作 RL init 抬 MMLU）</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 脉络 -->
+  <section id="take">
+    <h2>脉络与判断</h2>
+    <div class="callout insight">
+      <span class="label">三条主线</span>
+      <strong>① 监督越来越「不均匀」。</strong> 从「整段轨迹均匀 CE」走向「选择性掩码（ACC）＋ turn/step 级 credit（SALT/CriticSearch/InT）」——把梯度精准送到该学的那一步、该看的那段证据。<br><br>
+      <strong>② 数据越来越「自给」。</strong> 从依赖人标/蒸馏大模型（AgentTuning/xLAM/ToolACE/APIGen-MT），转向用模型自己的轨迹做拒绝采样与自蒸馏（RFT/SDFT/SSD），并开始<strong>用失败样本</strong>（Exploring Expert Failures / 负样本）。<br><br>
+      <strong>③ SFT 与 RL 在收敛。</strong> 纯 SFT 的 mode collapse / 接口捷径 / 弱泛化被反复确认，于是「保熵 SFT」「单阶段 SFT+RL（SRFT）」「SFT 作 cold-start + step-credit RL」成为主流姿势——agentic SFT 越来越不是终点，而是 RL 的起点。
+    </div>
+    <h3>对「MCP / 工具调用」从业者的实操含义</h3>
+    <ul>
+      <li><strong>数据：</strong>优先 APIGen-MT/ToolACE 式「可验证合成 + 双层校验」，并保留失败轨迹备用（拒绝采样 + 失败挖掘）。</li>
+      <li><strong>掩码：</strong>tool-response 默认 mask；但若长程证据重要，考虑 ACC 式把证据编进可学 target。</li>
+      <li><strong>多轮：</strong>带 thinking 用 One-Pass 思路省算力；纯工具多轮可整段一条。</li>
+      <li><strong>别止于 SFT：</strong>用保熵 SFT 做 cold-start，再接 step/turn 级 credit 的 RL，避免接口捷径与 mode collapse。</li>
+    </ul>
+    <div class="callout warn">
+      <span class="label">使用提醒</span>
+      本页是对话式快速综述，<strong>非系统性 survey</strong>。论文归类、arXiv 编号与数字（如 35.6%→62%、+5.51%、+4.8 等）均来自公开检索的二手转述，<strong>正式引用前请回到各原论文核对</strong>；2026 年的新条目尤其建议复核。
+    </div>
+  </section>
+
+  <footer class="foot">
+    对话调研综述，仅作脉络梳理；论文与数字以各原始来源为准 · 整理日期 2026-06-01
+  </footer>
+
+</article>
+</body>
+</html>
