@@ -127,6 +127,7 @@
     <a href="#method">③ 方法</a>
     <a href="#evaluation">④ 实验评估</a>
     <a href="#insight">⑤ 洞见</a>
+    <a href="#codebase">⑥ 代码库深挖</a>
   </nav>
 
   <!-- ① 开源贡献 -->
@@ -249,6 +250,123 @@
       <li><b>reward 阈值（图 5）。</b>在 0.4–0.9 扫，<b>阈值 0.5 在两个 benchmark 上都最好</b>：太低引入完成度不足的轨迹污染监督，太高则剪掉有价值的纠错/部分策略行为。作者承认这仍是经验性选择。</li>
       <li><b>行为分析（图 6/7/8，对比 GPT-5.4 vs Qwen3-30A3B）。</b>三类典型差异：① <b>tool-use appropriateness</b>——强模型把 tool 组成「发现→检查→计算→验证」流水线，弱模型能从 wildcard 报错里恢复却建不起可靠聚合流程；② <b>long-horizon robustness</b>——强模型把报错当可恢复反馈（重置 state、重跑、验证幂等），弱模型在 approval 死锁里失败级联；③ <b>fine-grained instruction following</b>——弱模型产出「看起来合理但违反 <code>Quantity ≤ ReorderPoint</code> 过滤规则」的 artifact，错误还会传播到下游供应商汇总。</li>
     </ul>
+  </section>
+
+  <!-- ⑥ 代码库深挖 -->
+  <section id="codebase">
+    <h2><span class="n">⑥</span>代码库深挖：实现了什么 / 怎么用</h2>
+    <p>解读日（2026-06-03）逐仓库抓 README 与关键源码后，可以给一句话结论：<b>「评测」与「RL 训练」是完整可跑代码、「SFT」给了数据预处理 + 启动脚本（依赖外部框架）、「数据合成 pipeline」尚未释出（README 明写 “will be released soon”）。</b>也就是说，拿到模型权重 + benchmark 后能端到端复现「评测」，能基于已开源的 13.5K 任务跑「RL」，但<b>无法从零复现「造数据」那一步</b>。下面分仓库 + 8 个问题逐条核实。</p>
+
+    <h3>仓库 → 提供内容 → 能否端到端复现</h3>
+    <table>
+      <thead><tr><th>仓库</th><th>提供了什么（代码确证）</th><th>缺什么 / 端到端？</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><a href="https://github.com/ClawGym/ClawGym-Bench" target="_blank" rel="noopener">ClawGym-Bench</a></td>
+          <td>完整评测 harness <code>internalbench</code>（<code>runner.py</code>/<code>openclaw_local.py</code>/<code>workspace.py</code>/<code>reward.py</code>/<code>judge.py</code>/<code>cli.py</code>）+ 200 题数据 <code>data/benchmark_data.jsonl</code> + <code>scripts/eval.sh</code>。</td>
+          <td class="yes">✔ 可端到端跑评测（需自备被测模型 + rubric judge 的 API）。</td>
+        </tr>
+        <tr>
+          <td><a href="https://github.com/ClawGym/ClawGym-Agents" target="_blank" rel="noopener">ClawGym-Agents</a> / RL</td>
+          <td>自研轻量 RL pipeline：<code>clawgym_rl_rollout.py</code>（sandbox 并行 rollout）、<code>clawgym_rl_api_server.py</code>、<code>build_rootfs.sh</code>、<code>run_qwen3_4b.sh</code>，内嵌 <code>slime</code> + <code>Megatron-LM</code>。<b>Apache-2.0（版权署名 Gen-Verse）</b>，README 自承借鉴 slime 与 OpenClaw-RL。</td>
+          <td class="yes">✔ 有 sandbox + GRPO 训练全套；需 OpenClaw 镜像 + 被测模型服务 + W&amp;B key。</td>
+        </tr>
+        <tr>
+          <td>ClawGym-Agents / SFT</td>
+          <td>数据预 tokenize + loss-mask 脚本 <code>sft_data_pre_tokenize_toolcall_for_openclaw.py</code>、<code>sft_dataset.py</code>、<code>launch_scripts/example.sh</code>。dense 模型用 <b>OpenRLHF</b>、MoE 用「内部 Megatron 框架」。</td>
+          <td class="no">△ 依赖外部 OpenRLHF（脚本需手动塞进 OpenRLHF 目录）；MoE 训练框架未开源。</td>
+        </tr>
+        <tr>
+          <td><a href="https://github.com/ClawGym/ClawGym-SynData" target="_blank" rel="noopener">ClawGym-SynData</a></td>
+          <td>仅 README + 指向 HF 数据集的链接（1 个 commit）。</td>
+          <td class="no">✘ <b>合成 pipeline 代码未释出</b>（“will be released soon”）。只有产物数据，没有造数据的代码。</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>sandbox / 并发 / 外部依赖（直接回答）</h3>
+    <table>
+      <thead><tr><th>维度</th><th>评测（ClawGym-Bench）</th><th>RL 训练（ClawGym-Agents/RL）</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>是否 sandbox</td>
+          <td class="no">否 Docker。直接 <code>subprocess</code> 调本机 <code>openclaw</code> 二进制（<code>OPENCLAW_PATH</code>），每题用一个<b>真实文件系统目录</b>当 workspace，跑前 <code>reset_dir()</code>（<code>shutil.rmtree</code>）清空、再 <code>stage_payload_files()</code> 预置文件，靠 <code>safe_relpath()</code> 防目录穿越。<b>非临时目录、非容器隔离</b>。</td>
+          <td class="yes">是。<b>每题一个 sandbox</b>：默认 <b>Docker</b>（<code>docker run -d --network host -v {cfg}:/root/.openclaw</code>，per-task 一容器，<code>_stop_container()</code> 清理）；可选 <b>chroot（Docker-free，需 root）</b>，用 <code>build_rootfs.sh</code> 造 rootfs + <code>unshare --user --map-root-user -- chroot</code> + <code>cp -al</code> 硬链分层。</td>
+        </tr>
+        <tr>
+          <td>并发方式</td>
+          <td class="no"><b>串行</b>。<code>runner.py</code> 无 async/线程/多进程，逐题 <code>run_local_attempt()</code>，靠 <code>--start/--end</code> 切片手动分片并行。CLI 无并发参数。</td>
+          <td class="yes"><b>ThreadPoolExecutor 并行</b>。并发度环境变量 <code>OPENCLAW_TRAIN_NUM_WORKERS</code>（默认 128）/ <code>OPENCLAW_EVAL_NUM_WORKERS</code>（默认 32），<code>worker_count = min(requested, n_total)</code>。这正对应论文说的「sandbox-parallel rollout」。</td>
+        </tr>
+        <tr>
+          <td>需外部 API？</td>
+          <td>视模式。被测模型可纯本地（README 给 <code>sglang</code>/<code>vllm</code>，CLI 默认 <code>sglang/openclaw-qwen</code>）。<b>但 hybrid/rubric 题必须调 LLM judge</b>：<code>judge.py</code> 的 <code>call_openai_compatible_judge()</code> 需 <code>--judge-base-url / --judge-api-key / --judge-model</code>（默认 <code>MiniMaxAI/MiniMax-M2.5</code>）。纯 code 题（156/200）可无 judge。<code>eval.sh</code> 还 <code>env -u OPENROUTER_API_KEY</code> 显式清掉该 key。</td>
+          <td>agent 经 OpenClaw gateway 的 <code>/v1/chat/completions</code> 打到本地起的被测模型，<b>原则上可纯本地</b>；reward 在 sandbox 内跑 <code>reward.sh</code>（code verifier，weight 1.0，无 rubric），<b>RL 训练不需要外部 LLM judge</b>。</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>支持什么任务 / task schema</h3>
+    <p>任务都是 <b>OpenClaw 式个人 agent</b> 的 workspace-grounded 工作流，benchmark 分 6 大类（Productivity &amp; Collaboration、Systems &amp; Automation、Analysis &amp; Reasoning、Content &amp; Domain Support、Planning &amp; Knowledge、Software Development）；HF 任务集覆盖 9 类/43 子类、26 个原子操作、16,837 个可合成 skill。<code>benchmark_data.jsonl</code> 每条记录字段（代码确证）大致为：<code>prompt</code>（用户指令）、<code>input_files</code>[{<code>file_path</code>, <code>file_format</code>(csv/json/html/py/yml/md/txt), <code>content</code>(内联全文)}]、<code>hook_code</code>（如 <code>python3 reward/test.py /root/.openclaw/workspace</code>）+ <code>hook_lang</code>、<code>rules</code>（rubric：每条含 <code>name</code>/<code>file_path</code>/<code>scores</code>{0,0.25,0.5,0.75,1}，无则为 null）、<code>macro_category</code>。注意 HF 上 <code>ClawGym-Task</code> 的 viewer 因 <code>meta_data</code> 嵌套类型报 <code>DatasetGenerationError</code> 无法预览，但文件存在（≈406MB）。</p>
+
+    <h3>如何模拟环境</h3>
+    <p>mock workspace 完全由数据驱动、无需真实用户文件：评测时 <code>workspace.py</code> 的 <code>stage_payload_files()</code> 把每题内联的 <code>input_files</code> 物化到目录，跑前 <code>snapshot_files()</code> 记 SHA256 + size，跑后 <code>read_target_files()</code> 用 <code>_is_unchanged_initial()</code> 把没改过的初始文件剔掉，只把 agent <b>新建/改写</b>的产物交给 verifier——这与论文「主要产出是最终 workspace 状态 $s_H$」一致。所谓「proxy 拦截」在评测仓里其实是<b>读 OpenClaw 写出的 transcript</b>（<code>.jsonl/.ndjson</code>）解析 toolCall，而非真有一层网络代理；RL 仓则通过 OpenClaw gateway 的 HTTP chat 接口与 <code>get_conversation_log</code> 抓轨迹。<b>工具是真实的 OpenClaw 工具</b>（真在目录里读写、执行），不是 mock 工具——被「mock」的只是 workspace 里的文件内容。</p>
+
+    <h3>如何评测</h3>
+    <p>入口 <code>internalbench</code>（<code>python3 -m internalbench</code>）。每题流程：<code>reset_dir</code> → <code>stage_payload_files</code> → <code>run_agent_once()</code>（<code>recreate_agent()</code> 调 <code>openclaw agents add</code> 起 agent、跑完 <code>_delete_agent()</code>/<code>_purge_agent_store()</code> 清场）→ <code>copy_trajectory()</code> 存 <code>trajectory.jsonl</code> → 打分。<b>hybrid verifier</b> 在代码里：<code>reward.py</code> 的 <code>run_reward_script()</code> 用 <code>subprocess.run([sys.executable, "reward/test.py", workspace], cwd=workspace)</code> 跑 per-task checker，从 stdout 解析分数（<code>_parse_reward_output</code>）；<code>judge.py</code> 调 LLM 给 rubric 分（按 <code>scores</code> 锚点归一化）；<code>combine_scores()</code> 按 <code>--code-weight/--rubric-weight</code> 加权（<code>eval.sh</code> 给 0.7/0.3，CLI 默认 0.5/0.5）。判分粒度是 final-state、连续 $[0,1]$；纯 code 题<b>全自动无需人工</b>，rubric 题靠 LLM judge（构建时才有人机协审）。</p>
+
+    <h3>上手实例</h3>
+    <p>评测（纯 code 题可无 judge；hybrid 题需填 judge 三件套）：</p>
+    <pre style="background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:12px;overflow:auto;font-size:12.5px"># 1) 装 OpenClaw + 本地起被测模型（sglang/vllm 暴露 OpenAI 兼容端点）
+curl -fsSL https://openclaw.ai/install.sh | bash
+# 2) 跑评测（来自 scripts/eval.sh）
+cd ClawGym-Bench/evaluation/localclawbench
+python3 -m internalbench \
+  --dataset "$DATASET" --output-folder "$OUTPUT_FOLDER" \
+  --model 'sglang/openclaw-qwen' \
+  --score-mode hybrid --code-weight 0.7 --rubric-weight 0.3 \
+  --judge-model 'MiniMaxAI/MiniMax-M2.5' \
+  --judge-base-url '<judge_endpoint>' --judge-api-key '<key>' \
+  --timeout-sec 3000 --start 0 --end 200
+# 串行执行；如需并行就用 --start/--end 切片，开多进程各跑一段</pre>
+    <p>RL 训练（sandbox 并行；可选 chroot 免 Docker）：</p>
+    <pre style="background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:12px;overflow:auto;font-size:12.5px"># Docker 后端（默认）：每题一个容器
+WANDB_KEY=your_wandb_key bash run_qwen3_4b.sh
+# Docker-free（chroot，需 root）：先造 rootfs
+skopeo copy docker://$OPENCLAW_IMAGE oci:/tmp/openclaw-oci:latest
+umoci unpack --image /tmp/openclaw-oci:latest /tmp/openclaw-bundle
+bash build_rootfs.sh /tmp/openclaw-bundle/rootfs
+OPENCLAW_ROOTFS=/tmp/openclaw-bundle/rootfs \
+  OPENCLAW_TRAIN_NUM_WORKERS=128 WANDB_KEY=... bash run_qwen3_4b.sh</pre>
+    <p>SFT（依赖外部 OpenRLHF）：</p>
+    <pre style="background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:12px;overflow:auto;font-size:12.5px"># 先做多轮 pre-tokenize + 算 loss mask（屏蔽环境反馈 token）
+python ClawGym-Agents/SFT/process_scripts/sft_data_pre_tokenize_toolcall_for_openclaw.py
+# 把 sft_dataset.py 放进 OpenRLHF 目录后启动
+bash ClawGym-Agents/SFT/launch_scripts/example.sh</pre>
+    <p>一个 task + verifier 实例（取自 <code>benchmark_data.jsonl</code> 字段形态，缩写）：</p>
+    <pre style="background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:12px;overflow:auto;font-size:12.5px">{
+  "prompt": "I'm coordinating a small volunteer remediation ... rewrite the announcement ...",
+  "macro_category": "Messaging and Collaboration",
+  "input_files": [
+    {"file_path": "data/tasks.csv", "file_format": "csv", "content": "task_id,description,assignee,status\n..."}
+  ],
+  "hook_lang": "bash",
+  "hook_code": "python3 reward/test.py /root/.openclaw/workspace",   // code checker：核对产物文件 / 字段 / 规则
+  "rules": [                                                         // rubric（仅 hybrid 题有，否则 null）
+    {"name": "Constructive and collaborative tone fit",
+     "file_path": "build/announcement_rewrite.txt",
+     "scores": {"0": "...", "0.25": "...", "0.5": "...", "0.75": "...", "1": "..."}}
+  ]
+}</pre>
+
+    <div class="callout warn">
+      <span class="label">复现门槛 / 存疑</span>
+      <b>① 数据合成 pipeline 代码未释出</b>（SynData README 明写 “will be released soon”），论文 ③ 描述的 persona/skill 双路、mock 资源生成、verifier 生成均<b>无对应代码</b>，目前只能用产物数据，无法从零造数据。
+      <b>② License 不齐：</b>仅 ClawGym-Agents/RL 有 Apache-2.0（且版权署名 <b>Gen-Verse</b>，疑似 fork 自 OpenClaw-RL）；ClawGym-Bench、SynData、三个 HF 权重与数据集页<b>均未标注 license</b>，HF <code>ClawGym-Task</code> viewer 因 <code>meta_data</code> 类型还报错无法预览。
+      <b>③ MoE（30B-A3B）SFT</b> 用「内部 Megatron 框架」，未开源；dense 模型 SFT 依赖外部 OpenRLHF 且需手动搬文件。
+      <b>④ 评测无内置并发</b>，串行 + <code>--start/--end</code> 手动分片；200 题、单题 <code>--timeout-sec</code> 高达 3000s，全跑成本不低。
+      <b>⑤ 评测「proxy 拦截」</b>在 Bench 仓实为解析 OpenClaw transcript 文件（非真网络代理），论文叙述与代码实现需对照理解。
+    </div>
   </section>
 
   <!-- ⑤ 洞见 -->
