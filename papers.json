@@ -20,6 +20,26 @@
     "path": "papers/2026-06-01-agentic-sft-algorithms-survey/index.html"
   },
   {
+    "slug": "2604.26904-clawgym-claw-agents",
+    "title": "ClawGym: A Scalable Framework for Building Effective Claw Agents",
+    "authors": "Fei Bai, Huatong Song, Shuang Sun, et al.",
+    "team": "RUC GSAI; IQuest Research; Beihang University",
+    "arxiv": "https://arxiv.org/abs/2604.26904",
+    "code": "https://github.com/ClawGym",
+    "date": "2026-06-03",
+    "published": "arXiv 2026",
+    "tldr": "为 Claw 式个人 agent 打造数据合成+训练+评测一体化框架：双路合成 13.5K 可验证任务，黑盒 rollout+SFT+轻量 RL 训出 ClawGym-Agents，并建 200 题 ClawGym-Bench；合成数据让 Qwen3-8B 在 PinchBench/ClawGym-Bench 相对提升 38.90%/43.46%。",
+    "tags": [
+      "agent",
+      "agentic-sft",
+      "data-synthesis",
+      "tool-use",
+      "benchmark",
+      "RL"
+    ],
+    "path": "papers/2604.26904-clawgym-claw-agents/index.html"
+  },
+  {
     "slug": "2026-06-01-nvidia-rtx-spark",
     "title": "NVIDIA RTX Spark 是什么（小白向调研）",
     "authors": "—",
