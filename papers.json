@@ -1,5 +1,25 @@
 [
   {
+    "slug": "2026-06-02-mai-thinking-1",
+    "title": "MAI-Thinking-1: Building a Hill-Climbing Machine",
+    "authors": "The Microsoft AI (MAI) Team",
+    "team": "Microsoft AI",
+    "arxiv": "https://microsoft.ai/wp-content/uploads/2026/06/main_20260602_2.pdf",
+    "code": "",
+    "date": "2026-06-04",
+    "published": "Microsoft AI Tech Report 2026",
+    "tldr": "Microsoft AI 首个从零自研、不蒸馏第三方的 reasoning 模型（35B active / 1T total MoE）；把模型研发当成系统级优化的「爬山机」，靠 scaling 中心的 pre-training 与稳健 RL 配方实现数千步 log-linear 持续爬坡，AIME 2025 97.0%、SWE-Bench Pro 52.8%。纯技术报告，未开源。",
+    "tags": [
+      "MoE",
+      "reasoning",
+      "pretraining-scaling",
+      "RL",
+      "from-scratch",
+      "Microsoft"
+    ],
+    "path": "papers/2026-06-02-mai-thinking-1/index.html"
+  },
+  {
     "slug": "2026-06-01-agentic-sft-algorithms-survey",
     "title": "Agentic SFT 的算法研究现状（文献综述）",
     "authors": "—",
