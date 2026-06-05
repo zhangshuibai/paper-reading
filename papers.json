@@ -1,5 +1,25 @@
 [
   {
+    "slug": "2026-06-02-airllm-survey",
+    "title": "AirLLM 调研：小显存跑大模型 + 竞品对照",
+    "authors": "—",
+    "team": "工具调研",
+    "arxiv": "https://github.com/lyogavin/airllm",
+    "code": "https://github.com/lyogavin/airllm",
+    "date": "2026-06-05",
+    "published": "调研 2026",
+    "tldr": "AirLLM 用逐层 disk-offload 在 4GB 显卡跑 70B(不量化、保精度,但很慢);对照 Accelerate/ZeRO-Inference/FlexGen/llama.cpp/ktransformers/PowerInfer/Petals 等竞品与选型建议。",
+    "tags": [
+      "inference",
+      "offloading",
+      "local-LLM",
+      "quantization",
+      "hardware",
+      "工具调研"
+    ],
+    "path": "papers/2026-06-02-airllm-survey/index.html"
+  },
+  {
     "slug": "2026-06-02-mai-thinking-1",
     "title": "MAI-Thinking-1: Building a Hill-Climbing Machine",
     "authors": "The Microsoft AI (MAI) Team",

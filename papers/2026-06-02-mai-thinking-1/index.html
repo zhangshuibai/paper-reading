@@ -127,6 +127,7 @@
     <a href="#motivation">② 动机与贡献</a>
     <a href="#method">③ 方法</a>
     <a href="#evaluation">④ 实验评估</a>
+    <a href="#toolsynth">★ Tool-Use 合成专题</a>
     <a href="#insight">⑤ 洞见</a>
   </nav>
 
@@ -255,6 +256,109 @@
 
     <h3>消融 / 分析</h3>
     <p>报告的「消融」更多体现在方法论本身：(1) <strong>稀疏度 ablation</strong> 显示 interleaved 布局在 EG_Time 上优于「每层 MoE」，且架构随 expert 数 256→1024 持续有 EG 收益（验证可扩展性）；(2) <strong>data mix 的 rank 非不变性</strong>（Figure 6）直接推翻了「小规模选型可外推」的常用假设，促使他们改用 ladder 做 data 决策；(3) <strong>attention 零初始化</strong> 把初始 routing 不均衡压下去并转化为 EG 收益；(4) self-distillation 的系列 ablation 给出「~1M trace 足够、错误 trace 也行、后期 checkpoint 更重要、prompt 多样性优先」等可操作结论；(5) agentic 训练里加入 STEM 任务能稳定 climb 并正迁移到 SWE/tool-use，反之 agentic 对 STEM 单步性能不正不负。安全侧，红队迭代后 top 优先类别的 attack success 整体降约 22%（越狱降 ~44%、hate&amp;fairness ~43%、child safety ~30%、mental health ~20%），并把外部红队发现的 TAP 攻击与低资源语言绕过闭环成训练数据。</p>
+  </section>
+
+  <!-- ============================ ★ 专题：Tool-Use 数据合成 ============================ -->
+  <section id="toolsynth">
+    <h2><span class="n">★</span>专题：General Tool-Use 数据合成怎么做（对照原文细解）</h2>
+    <p>这一节单独把报告 <strong>§3.3 Agentic Climb → §3.3.2 General Tool Use</strong> 的「如何合成 tool-use 数据来训练模型」拆开讲，并对照原文。先定位：MAI 的 agentic 训练分两条线——<strong>软件工程（SWE）</strong>从真实 GitHub PR <em>自然采集</em>成可执行环境；<strong>general tool use</strong> 则几乎<em>纯合成</em>一个个「闭世界（closed-world）」服务环境。后者正是「怎么造 tool-use 训练数据」的范本。</p>
+
+    <h3>0. 先想清楚「一个 tool-use 环境」= 哪四件套</h3>
+    <p>MAI 不把数据当成「一条条对话」，而是当成「一个个<strong>有状态的交互环境</strong>」。每个环境背后是 <strong>mocked backend</strong>（假后端），模拟真实 API 或 <strong>MCP</strong> 的行为——<em>不接真服务</em>。</p>
+    <blockquote>原文：“Each tool-use RL problem is instantiated as an interactive, stateful environment backed by <strong>mocked backends that simulate realistic API or MCP</strong> (Model Context Protocol) behavior. … each problem consists of a <strong>query, a set of available tools with schema, an initial environment state, and a grader</strong>. … emulate rich real-world service interactions with substantially larger tool sets, <strong>often exceeding 50 tools</strong> within a single environment.”（工具 schema 用 OpenAI function-calling 格式）</blockquote>
+    <p>四件套 = <strong>query（用户请求）+ 带 schema 的工具集 + 初始环境状态 + grader（判分器）</strong>。和 SWE 只有寥寥几个工具不同，tool-use 环境刻意堆到 <strong>单环境 &gt;50 个工具</strong>，逼模型学会「在一堆工具里选对的那个」。</p>
+
+    <h3>1. 三阶段合成 pipeline（核心方法）</h3>
+    <p>最关键的一句：这套 pipeline <strong>只需要一段 plain-English 的环境描述</strong>，就端到端生成「工具定义 + 函数实现 + 数据库 + 可验证任务」整套东西（思路源自 <em>FunReason-MT</em> 等工作）。</p>
+    <blockquote>原文：“we synthetically generate <strong>self-contained closed-world environments with seeded databases, tool definitions, and verifiable tasks</strong>. Our pipeline <strong>requires only plain-English descriptions</strong> of the desired environments to generate complete tool-use environments end-to-end.”</blockquote>
+    <figure>
+      <div style="background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 8px">
+      <svg viewBox="0 0 720 250" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12.5">
+        <defs><marker id="ts-ah" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#666"/></marker></defs>
+        <g stroke="#666" stroke-width="1.6" fill="none" marker-end="url(#ts-ah)">
+          <path d="M150,52 L150,74"/>
+          <path d="M260,103 L300,103"/>
+          <path d="M520,103 L560,103"/>
+          <path d="M150,196 L150,150 L150,150"/>
+        </g>
+        <g text-anchor="middle">
+          <rect x="40" y="16" width="220" height="36" rx="8" fill="#eef1fb" stroke="#b9c2e0"/>
+          <text x="150" y="38" fill="#1a1f33" font-weight="600">一段英文环境描述（输入）</text>
+
+          <rect x="20" y="74" width="240" height="58" rx="9" fill="#cdeae6" stroke="#2c8a7d"/>
+          <text x="140" y="96" fill="#13433b" font-weight="600">① Environment bootstrapping</text>
+          <text x="140" y="113" fill="#13433b" font-size="11">生成工具描述 · 实现函数体</text>
+          <text x="140" y="126" fill="#13433b" font-size="11">给数据库 seed 实体</text>
+
+          <rect x="300" y="74" width="220" height="58" rx="9" fill="#dfeaff" stroke="#7aa2ff"/>
+          <text x="410" y="96" fill="#1a3060" font-weight="600">② Task creation</text>
+          <text x="410" y="113" fill="#33518a" font-size="11">先采样合理 tool-call 轨迹</text>
+          <text x="410" y="126" fill="#33518a" font-size="11">造相关实体 → 倒推 user request</text>
+
+          <rect x="560" y="74" width="150" height="58" rx="9" fill="#f3e2cf" stroke="#c08a3e"/>
+          <text x="635" y="96" fill="#7a4f12" font-weight="600">③ Verify &amp; refine</text>
+          <text x="635" y="113" fill="#7a4f12" font-size="11">执行动作验证</text>
+          <text x="635" y="126" fill="#7a4f12" font-size="11">删过于相似的任务</text>
+
+          <rect x="470" y="160" width="240" height="48" rx="9" fill="#efe9f7" stroke="#9b8cff"/>
+          <text x="590" y="181" fill="#3a2b52" font-weight="600">150+ 环境 · 130,000 任务</text>
+          <text x="590" y="197" fill="#3a2b52" font-size="11">＋ personas 多样化 ＋ no-tool 负样本</text>
+          <path d="M560,184 L470,184" stroke="#666" stroke-width="1.6" fill="none" marker-end="url(#ts-ah)"/>
+          <path d="M635,132 L635,160" stroke="#666" stroke-width="1.6" fill="none" marker-end="url(#ts-ah)"/>
+
+          <text x="150" y="232" fill="#5a627a" font-size="11">每阶段多次 LLM 调用 ＋ iterative critique-and-refinement 循环</text>
+        </g>
+      </svg>
+      </div>
+      <figcaption>General Tool-Use 三阶段合成 pipeline（本解读据原文 §3.3.2 重绘）。</figcaption>
+    </figure>
+    <blockquote>原文（三阶段）：“(i) <strong>environment bootstrapping</strong>, which generates tool descriptions, implements functions, and seeds databases with relevant entities; (ii) <strong>task creation</strong>, which <strong>samples likely tool-call trajectories</strong>, creates entities relevant to the interaction chain, and <strong>formulates user requests</strong>; and (iii) <strong>verification and refinement</strong>, which <strong>executes the actions</strong> generated in the previous phase, and <strong>removes tasks that are overly similar</strong>. Each phase involves multiple LLM calls … We additionally employ <strong>iterative critique-and-refinement loops</strong> to improve the outputs at each phase.”</blockquote>
+    <table>
+      <thead><tr><th>阶段</th><th>干什么</th><th>关键直觉 / 为什么这么设计</th></tr></thead>
+      <tbody>
+        <tr><td><strong>① Bootstrapping<br>搭环境</strong></td><td>由英文描述生成工具描述、<strong>实现函数体</strong>（可执行的 mock）、并往数据库 <strong>seed 实体</strong>填数据</td><td>先把一个「自洽的闭世界」搭起来：有工具、有能跑的后端、有数据，后续任务才有可执行、可验证的土壤</td></tr>
+        <tr><td><strong>② Task creation<br>造任务</strong></td><td><strong>先采样一条合理的 tool-call 轨迹</strong> → 围绕它造相关实体 → <strong>再倒推出用户请求</strong></td><td>反向构造是精髓：从「已知可解的工具链」倒推题面，<strong>天然保证任务可解、可验</strong>，避免「出了道没法完成的题」</td></tr>
+        <tr><td><strong>③ Verify &amp; refine<br>验证精炼</strong></td><td><strong>真的执行</strong>第②步动作做可行性校验；<strong>删掉彼此过于相似</strong>的任务</td><td>执行校验筛掉跑不通的；去重保住多样性（多样性正是富工具泛化的关键）</td></tr>
+      </tbody>
+    </table>
+
+    <h3>2. 两个提质 trick：persona 多样化 + 「不该调工具」的负样本</h3>
+    <blockquote>原文：“We generate <strong>environment-specific personas</strong> … To <strong>mitigate over-eager tool-calling</strong> behavior, we additionally <strong>augment our data with tasks that include tool descriptions but do not require tool usage</strong>. Overall, our pipeline synthesizes <strong>more than 150 environments and 130,000 tasks</strong>.”</blockquote>
+    <ul>
+      <li><strong>Persona 多样化</strong>：给每个环境生成专属用户画像，让同一套工具下的请求风格/意图更丰富。</li>
+      <li><strong>No-tool 负样本</strong>：故意掺入「<em>给了工具、但其实不需要调用</em>」的任务——专治模型「一看到工具就乱调」（over-eager tool-calling）。这点很多公开数据集都漏了。</li>
+    </ul>
+
+    <h3>3. Reward 设计：final-state ＋ 子任务分解 ＋ 跨环境「效率」分</h3>
+    <blockquote>原文：“we use a mixture of <strong>environment-specific and cross-environment graders</strong>. Environment-specific graders assign rewards based on the <strong>final environment state, tool usage patterns, and final answers</strong>. For synthetic environments, we use an <strong>LLM judge to decompose tasks into multiple sub-tasks and grade each independently</strong>. We additionally employ <strong>cross-environment graders that encourage efficient tool usage</strong>, including <strong>parallel tool calls</strong> when possible, <strong>avoidance of duplicate calls</strong>, and <strong>correct tool invocation with valid parameter types and arguments</strong>.”</blockquote>
+    <ul>
+      <li><strong>环境内 grader</strong>：看<strong>最终环境状态</strong>（不是只看文字答案）、工具使用模式、最终答案。合成环境再用 <strong>LLM judge 把任务拆成多个 sub-task、逐个独立打分</strong> → reward 更稠密，缓解 outcome-only 的稀疏问题。</li>
+      <li><strong>跨环境 grader</strong>：通用地奖励「<strong>高效用工具</strong>」——能并行就并行、别重复调、参数类型/取值要合法。把「调得对」和「调得省」分开优化。</li>
+    </ul>
+
+    <h3>4. 执行与判分：SEE 沙箱 + agentic loop</h3>
+    <p>合成出的环境跑在和 SWE 共用的 <strong>Sandbox Execution Environment (SEE)</strong> 里：</p>
+    <blockquote>原文：“SEE … provisions a <strong>fresh container for each agentic task and destroys it upon task completion</strong>. … Containers are <strong>network-isolated by default</strong> …” ｜ agentic loop：“the tool outputs returned as <strong>observations</strong> for the next model action. The loop terminates when the model <strong>emits no tool calls</strong>, or when the rollout exceeds the <strong>step, context-length, or time budget</strong>; the rollout … sent to graders … combine <strong>format checks, rule-based checks, executable tests, verifiable state comparisons, and AI judges</strong>.”</blockquote>
+    <p>即：每个任务一个全新、网络隔离、跑完即销毁的容器；模型发 tool call → 拿 observation → 继续，直到不再调工具或超预算；最后多种 grader 组合判分。</p>
+
+    <div class="callout note">
+      <span class="label">抽成可复用配方（给想自己合成 tool-use 数据的你）</span>
+      ① <strong>以「环境」为单位</strong>，不以「对话」为单位：一段英文描述 → 工具集(schema)＋可执行 mock 后端＋seeded DB＋grader。<br>
+      ② <strong>倒推式造任务</strong>：先采样合理的 tool-call 轨迹，再倒推 user request——保证可解可验。<br>
+      ③ <strong>富工具</strong>（单环境几十个工具）训「选对工具」+ 泛化。<br>
+      ④ <strong>掺 no-tool 负样本</strong>抑制 over-eager 调用；<strong>persona</strong> 提多样性。<br>
+      ⑤ <strong>判分要稠密</strong>：final-state ＋ LLM judge 子任务分解；另设<strong>跨环境效率 grader</strong>（并行/去重/参数合法）。<br>
+      ⑥ <strong>执行校验 + 相似去重</strong>把不可跑/同质任务筛掉；全程隔离沙箱保确定性。<br>
+      ⑦ <strong>mock 而非真 API</strong>：闭世界可复现、可控、无速率限制与副作用。
+    </div>
+    <div class="callout insight">
+      <span class="label">和你关注的其它点对照</span>
+      这套和 <strong>ClawGym</strong>（persona 合成 closed-world + verifier + 倒推任务）几乎同源，差别是 MAI 强调 <strong>&gt;50 工具的富工具环境</strong> 与 <strong>跨环境效率 grader</strong>，且明确 mock <strong>MCP</strong>。它对「<em>tool-response 该 mask 还是该学</em>」的回答是：<strong>把环境反馈用作 reward 信号（final-state 判分）而非模仿目标</strong>；对「<em>outcome reward 太稀疏</em>」的回答是 <strong>LLM judge 子任务分解</strong> 把单一 0/1 拆成多段稠密信号。
+    </div>
+    <div class="callout warn">
+      <span class="label">诚实边界</span>
+      报告<strong>未开源</strong>该合成 pipeline 的代码与 prompt 细节；也<strong>没有给 tool-use 单独的消融/数字</strong>（tool-use 能力只体现在整体 agentic 评测里）。以上为对 §3.3.2 文字描述的转述与拆解，照搬落地仍需自行补齐工程细节。
+    </div>
   </section>
 
   <!-- ============================ ⑤ 洞见 ============================ -->
