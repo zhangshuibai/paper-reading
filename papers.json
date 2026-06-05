@@ -20,6 +20,26 @@
     "path": "papers/2026-06-02-airllm-survey/index.html"
   },
   {
+    "slug": "2510.24645-funreason-mt",
+    "title": "FunReason-MT: Advanced Data Synthesis for Real-world Multi-Turn Tool-use",
+    "authors": "Zengzhuang Xu, Bingguang Hao, et al.",
+    "team": "AWorld Team, Inclusion AI (Ant Group); Zhejiang University; City University of Hong Kong",
+    "arxiv": "https://arxiv.org/abs/2510.24645",
+    "code": "https://github.com/inclusionAI/AWorld-RL",
+    "date": "2026-06-05",
+    "published": "arXiv 2025",
+    "tldr": "用 API graph 定向采样 + advanced-tool 反推 hard query + ground-truth 校验的迭代 CoT，合成高质量多轮 tool-use 数据；训出的 4B 模型在 BFCLv3 Multi-Turn 达 57.75，同尺寸 SOTA 并反超 Claude-Sonnet-4 等大模型。",
+    "tags": [
+      "tool-use",
+      "data-synthesis",
+      "multi-turn",
+      "function-calling",
+      "BFCL",
+      "agent"
+    ],
+    "path": "papers/2510.24645-funreason-mt/index.html"
+  },
+  {
     "slug": "2026-06-02-mai-thinking-1",
     "title": "MAI-Thinking-1: Building a Hill-Climbing Machine",
     "authors": "The Microsoft AI (MAI) Team",

@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FunReason-MT：多轮 tool-use 数据合成 · 论文解读</title>
+
+<script>
+  window.MathJax = {
+    tex:{inlineMath:[['$','$'],['\\(','\\)']], displayMath:[['$$','$$'],['\\[','\\]']]},
+    svg:{fontCache:'global'}
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;
+  }
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:880px; margin:0 auto; padding:18px 22px 90px}
+
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:27px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)}
+  .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .meta-grid a:hover{text-decoration:underline}
+
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap}
+  nav.toc a:hover{color:var(--accent)}
+
+  section{margin:38px 0}
+  h2{font-size:21px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:17px; margin:24px 0 8px}
+  h4{font-size:15px; margin:18px 0 6px; color:var(--accent2)}
+  p{margin:12px 0}
+  ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.9em}
+  strong{color:var(--text)}
+
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:13.5px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:9px 11px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  .yes{color:var(--ok); font-weight:600}
+  .no{color:var(--muted)}
+  .num{text-align:right; font-variant-numeric:tabular-nums}
+
+  figure{margin:24px 0; text-align:center}
+  figure img{max-width:100%; height:auto; border:1px solid var(--line); border-radius:10px; background:#fff}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+
+  blockquote{border-left:3px solid var(--line); margin:14px 0; padding:2px 16px; color:var(--muted)}
+  pre{background:var(--panel2); border:1px solid var(--line); border-radius:10px; padding:12px 14px;
+      overflow-x:auto; font-size:12.5px; line-height:1.55}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+  .mjx-container{overflow-x:auto; overflow-y:hidden}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <!-- ============================ 抬头 / 元信息 ============================ -->
+  <header class="head">
+    <div class="chips">
+      <span class="chip">tool-use</span>
+      <span class="chip">data synthesis</span>
+      <span class="chip">multi-turn</span>
+      <span class="chip">function calling</span>
+      <span class="chip">BFCL</span>
+      <span class="chip">agent</span>
+    </div>
+    <h1>FunReason-MT：面向真实多轮 tool-use 的高级数据合成框架</h1>
+    <p class="orig-title">FunReason-MT Technical Report: Advanced Data Synthesis Solution for Real-world Multi-Turn Tool-use</p>
+    <dl class="meta-grid">
+      <dt>作者</dt><dd>Zengzhuang Xu, Bingguang Hao（共同一作）, Zechuan Wang, Yuntao Wen, Xinyi Xu, Yang Liu, … Jinjie Gu, Chenyi Zhuang, Shi Gu 等</dd>
+      <dt>团队 / 机构</dt><dd>AWorld Team, Inclusion AI（蚂蚁集团 Ant Group）；Zhejiang University；City University of Hong Kong</dd>
+      <dt>原文链接</dt><dd><a href="https://arxiv.org/abs/2510.24645" target="_blank" rel="noopener">https://arxiv.org/abs/2510.24645</a></dd>
+      <dt>发表 / 年份</dt><dd>arXiv 2025（v2，2025-11-16）· Technical Report</dd>
+      <dt>解读日期</dt><dd>2026-06-05</dd>
+    </dl>
+  </header>
+
+  <div class="tldr">
+    <b>TL;DR</b> — 真实场景里训练 multi-turn function calling，最大的瓶颈不是数据量，而是「没有可控、高复杂度、带逻辑依赖」的轨迹数据。FunReason-MT 提出一套<strong>「自顶向下」</strong>的合成范式，用三步解决三大痛点：① <strong>Environment-API Graph Interactions</strong>——把工具间依赖建成 API 图，用带优先级的 directed sampler 朝「目标复杂工具」采样出可执行且有依赖的多步轨迹；② <strong>Advanced Tool-Query Synthesis</strong>——把整条轨迹反向「抽象」成一个 advanced tool，再由它反推出隐藏了前置步骤的 hard query（带逻辑跳跃）；③ <strong>Guided Iterative Chain</strong>——用 reasoning + critiquing 两个 agent，对照 ground truth 迭代纠错地生成 CoT，直到 function call 校验通过。基于该数据，一个 <strong>4B 模型（Qwen3-4B-Instruct-2507）</strong>在 BFCLv3 Multi-Turn 上从 15.75 经 SFT 升到 46.90、再经 RL 升到 <strong>57.75</strong>，超过 Claude-Sonnet-4、GPT-5、DeepSeek-R1 等大模型，在同尺寸里 SOTA。数据与权重已开源。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#opensource">① 开源贡献</a>
+    <a href="#motivation">② 动机与贡献</a>
+    <a href="#method">③ 方法</a>
+    <a href="#evaluation">④ 实验评估</a>
+    <a href="#insight">⑤ 洞见</a>
+  </nav>
+
+  <!-- ============================ ① 开源贡献 ============================ -->
+  <section id="opensource">
+    <h2><span class="n">①</span>开源贡献 Open-source Artifacts</h2>
+    <p>本文是 Inclusion AI（蚂蚁）开源项目 <strong>AWorld</strong> 的一部分，<strong>训练数据与模型权重均已在 Hugging Face 公开释放</strong>（Apache-2.0）。需要留意两点：(1) HF 数据集页自述其为 <em>HardGen</em>（FunReason-MT 的扩展/对应实现），并标注「当前公开的是在 BFCL 环境里直接部署采样得到的 demonstration 版本，并非论文中直接使用的那一份，论文录用后会再放最新版」；(2) 截至解读日，GitHub 的 <code>AWorld-RL/FunReason-MT</code> 子目录主要是 README + pipeline 流程图，<strong>未见可直接运行的合成 pipeline 脚本</strong>（论文也未承诺逐脚本开源合成器）。下表区分「确认可下载」与「框架级/将开源」。</p>
+    <table>
+      <thead><tr><th>类型</th><th>是否开源</th><th>内容 / 链接</th></tr></thead>
+      <tbody>
+        <tr><td>模型权重 Weights</td><td class="yes">✔</td><td><a href="https://huggingface.co/Bingguang/FunReason-MT" target="_blank" rel="noopener">huggingface.co/Bingguang/FunReason-MT</a> — FunReason-MT-4B，base = Qwen3-4B-Instruct-2507，Apache-2.0。</td></tr>
+        <tr><td>数据集 Dataset</td><td class="yes">✔</td><td><a href="https://huggingface.co/datasets/Bingguang/FunReason-MT" target="_blank" rel="noopener">huggingface.co/datasets/Bingguang/FunReason-MT</a> — 多轮 tool-use 轨迹（HF 页自述 ~16,978 行 / 16k 高质量样本；含刻意构造的 erroneous environmental response）。<strong>注</strong>：HF 标注为 demonstration 版本，非论文原始训练集。</td></tr>
+        <tr><td>代码 / 框架 Code</td><td>◐</td><td><a href="https://github.com/inclusionAI/AWorld-RL" target="_blank" rel="noopener">github.com/inclusionAI/AWorld-RL</a>（MIT）收录 FunReason-MT 项目入口；底层 agent 框架 <a href="https://github.com/inclusionAI/AWorld" target="_blank" rel="noopener">AWorld</a>（MIT）开源。<strong>合成 pipeline 的可运行脚本截至解读日未见</strong>，目录主要为 README + 流程图。</td></tr>
+        <tr><td>环境 / Benchmark</td><td class="no">外部</td><td>评测用 Berkeley Function-Calling Leaderboard（BFCLv3 / BFCLv4），为第三方公开 benchmark，非本文产出。训练/采样环境基于 BFCL 提供的可执行 tool 环境。</td></tr>
+        <tr><td>项目主页</td><td class="yes">✔</td><td>Project FunReason-MT / AWorld（见上 GitHub 与 HF 链接）。</td></tr>
+      </tbody>
+    </table>
+    <p style="color:var(--muted);font-size:13px">说明：✔ 已确认可下载；◐ 框架级开源但合成脚本未单独释放；「外部」= 用到但非本文产出。链接均于解读日核实存在。</p>
+  </section>
+
+  <!-- ============================ ② 动机与贡献 ============================ -->
+  <section id="motivation">
+    <h2><span class="n">②</span>研究动机与贡献 Motivation &amp; Contribution</h2>
+
+    <h3>背景与问题</h3>
+    <p>Function calling（FC）是让 LLM / agent 调用外部 tool 的核心能力；而要把 <strong>multi-turn</strong>（多轮、含跨轮状态依赖）的 FC 能力训好，关键是高质量轨迹数据。现有合成路线主要两类，都有结构性短板：</p>
+    <ul>
+      <li><strong>环境内随机采样（random sampling）</strong>：在工具/环境里随机走，无法可控地命中「需要某个目标复杂工具与其它工具协同」的稀有、长尾、复杂事件 → 复杂度只能「碰运气涌现」，controllability 与 reliability 都差。</li>
+      <li><strong>多 agent 角色扮演（MAS role-playing）</strong>：如 user-agent 与 assistant-agent 互演，容易退化成简单的「happy-path」对话，缺乏真正的多样性与高复杂度。</li>
+    </ul>
+    <p>作者把痛点凝练为三个相互关联的挑战（原文 Figure 2，下面用「代码仓库维护」任务举例）：</p>
+    <figure>
+      <img src="figures/intro.png" alt="多轮 FC 数据生成的三大挑战">
+      <figcaption>图 1：multi-turn FC 数据合成的三大挑战——以「清理仓库未用分支/文件」为例。右侧三个气泡分别对应 Targeted Data Synthesis（缺乏目标对齐的工具调用数据）、Hard Query Construction（无法体现隐式逻辑跳跃）、Multi-Turn Logical Dependency（跨轮引用解析失败导致错误调用）。（出处：原文 Figure 2）</figcaption>
+    </figure>
+    <ol>
+      <li><strong>Targeted Data Synthesis（有目标的数据合成）</strong>：随机采样无法「定向」造出「某个目标复杂工具 + 其它工具协同」的轨迹。</li>
+      <li><strong>Hard Query Construction（难 query 构造）</strong>：因为单个 tool 输入是模块化的，直接采样/角色扮演只会生成把步骤说得明明白白的「简单 query」，造不出需要<strong>逻辑跳跃（logical jump）</strong>的难 query（例：用户只说「买两城之间的机票」，但工具其实需要先查 zip code）。</li>
+      <li><strong>Multi-Turn Logical Dependency（多轮逻辑依赖）</strong>：复杂多轮里，每一步 CoT 都要校验并重建对前面逻辑的依赖；现有 reasoning 模型在「没探索过」的环境里生成 CoT 时容易出错，拿不到完整且正确的多轮轨迹。</li>
+    </ol>
+
+    <h3>本文的切入点</h3>
+    <p>核心洞见：所谓「performance ceiling」<strong>不是数据「量」的问题，而是现有「自底向上（bottom-up）」生成范式的本质缺陷</strong>——它们「指望复杂度从简单交互里自发涌现」，可控性与可靠性都不够。作者因此转向<strong>「自顶向下（top-down）」</strong>的构造范式，逐条对症：</p>
+    <ul>
+      <li>不再「指望」命中目标复杂工具，而是<strong>显式建模环境结构依赖（API graph）并定向采样</strong>去工程化地造出来；</li>
+      <li>不再采简单工具组合，而是<strong>「反向生成」</strong>——先有一整条执行轨迹，再倒推出隐藏前置步骤的 hard query，从而保证逻辑跳跃；</li>
+      <li>不再接受有缺陷的推理，而是用<strong>带 ground truth 校验的迭代反馈环</strong>强制 CoT 正确。</li>
+    </ul>
+
+    <h3>核心贡献</h3>
+    <ol>
+      <li>提出 <strong>FunReason-MT</strong>（Function Call Reasoning Multi-Turn）数据合成框架，三大组件分别对症三大挑战：Environment-API Graph Interactions / Advanced Tool-Query Synthesis / Guided Iterative Chain。</li>
+      <li>给出可形式化、可复现的算法定义：tool legality 约束（公式 1）、带优先级的 directed sampler（公式 2）、advanced tool 抽象与 hard query 反向构造（公式 3–4）、reasoning–critiquing 迭代纠错环（$\mathrm{Prompt}^{(k+1)}=\mathrm{Concat}(\mathrm{Prompt}^{(k)},\mathrm{Error}^{(k)})$）。</li>
+      <li>用合成数据训出 <strong>FunReason-MT-4B</strong>：在 BFCLv3 Multi-Turn 上 SFT 后 46.90、RL 后 <strong>57.75</strong>（base Qwen3-4B 仅 15.75），<strong>同尺寸 SOTA 并反超 Claude-Sonnet-4 / GPT-5 / DeepSeek-R1 等大模型</strong>；在 OOD 的 BFCLv4（Web Search / Memory）上也有提升，证明范式带来的是可迁移的 agentic 能力，而非过拟合 benchmark。</li>
+    </ol>
+  </section>
+
+  <!-- ============================ ③ 方法 ============================ -->
+  <section id="method">
+    <h2><span class="n">③</span>方法 Method（重点）</h2>
+    <p>FunReason-MT 整条流水线把「生成一条单轮 trace → 抽象成 advanced tool → 反推 hard query → 迭代生成并校验 CoT」串起来，再重复 $N$ 次拼成完整多轮 trajectory。先看符号表，再逐相展开。</p>
+
+    <table>
+      <thead><tr><th>符号</th><th>含义</th></tr></thead>
+      <tbody>
+        <tr><td>$S$</td><td>多环境仿真空间 Multi-Environment Simulation Space</td></tr>
+        <tr><td>$T$</td><td>工具集 Tool Set</td></tr>
+        <tr><td>$G=(T,R,P)$</td><td>API 关系图：节点 = 工具 $T$、边 = 依赖关系 $R$、参数 $P$</td></tr>
+        <tr><td>$A_T,A_Q,A_R,A_C$</td><td>四个 LLM agent：Tooling / Querying / Reasoning / Critiquing</td></tr>
+        <tr><td>$T_a\in T$</td><td>目标工具 Target Tool（要让模型掌握的那个复杂工具）</td></tr>
+        <tr><td>$M$ / $N$</td><td>每轮的 tool 调用数 / trajectory 的轮数</td></tr>
+        <tr><td>$K_{\max}$</td><td>最大自我纠错次数</td></tr>
+        <tr><td>$\mathrm{Traj}$ / $\mathrm{Turn}_i$</td><td>多轮 trajectory / 第 $i$ 个单轮内容</td></tr>
+      </tbody>
+    </table>
+
+    <figure>
+      <img src="figures/pipeline.png" alt="FunReason-MT 三相流水线总览">
+      <figcaption>图 2：FunReason-MT 三相流水线。Phase 1 在 Environment-API graph 上采样出合法执行的 tool trace；Phase 2 由 Tooling Agent 把 trace 封装成 advanced tool，再由 Query Agent 反向设计 hard query；Phase 3 由 Reasoning Agent 生成 CoT + function call，FC Evaluation 对照 ground truth，失败则 Critiquing Agent 给出纠错 hint 反馈、迭代直至通过；整套重复 N 次。（出处：原文 Figure 3）</figcaption>
+    </figure>
+
+    <h3>Phase I — Environment-API Graph Interactions（建图 + 定向采样）</h3>
+    <p>目标：造出一条<strong>既可执行（满足工具依赖）又有目标导向（朝 $T_a$ 走）</strong>的单轮执行 trace。两个关键约束：</p>
+
+    <h4>① Tool Call Legality（合法性约束）</h4>
+    <p>工具 $T_i$ 只有在它的<strong>所有前置条件</strong> $\mathrm{Prerequisite}(T_i)$ 都被「已执行工具集」$T_{called}$ 覆盖时才可调用。用指示函数形式化：</p>
+    $$I(T_i, T_{called}) = \mathbf{1}\{\mathrm{Prerequisite}(T_i)\subseteq T_{called}\}$$
+    <p>$\mathbf{1}\{\cdot\}$ 为指示函数（条件成立取 1，否则 0）。直觉：这是在 API graph 上做一种「拓扑可达性」检查——例如 <code>buy_tickets</code> 必须先有 <code>get_zipcode</code> 的输出，否则非法。所有满足 $I=1$ 的工具构成<strong>合法工具集</strong> $T_{legal}$。</p>
+
+    <h4>② Tool Sampling with Priority（带优先级的定向采样）</h4>
+    <p>仅靠随机采样虽然合法但难以高效抵达 $T_a$。作者引入一个 <strong>Directed Sampler</strong>，用贪心启发式把采样偏向目标：在合法工具集上优先选「到 $T_a$ 的图距离 $\mathrm{dist}(\cdot,\cdot)$ 最小」的工具：</p>
+    $$T_s = \mathrm{Sampler}(T_a, T_{called}) = \begin{cases} \mathrm{rand}(T_{legal}), & \text{若 } T_a \in T_{called}\ (\text{目标已达，随机扩展)}\\[2pt] T_a, & \text{若 } I(T_a,T_{called})=1 \wedge T_a\notin T_{called}\ (\text{可直接调目标)}\\[2pt] \arg\min_{T_k}\{\mathrm{dist}(T_k, T_a)\}, & \text{否则（朝目标贪心逼近)} \end{cases}$$
+    <p>逐分支读：(a) 若目标工具已经调用过，就随机在合法集里继续扩展，增加轨迹丰富度；(b) 若目标工具此刻已合法但还没调，就直接调它；(c) 否则在合法集里选离目标最近的工具——相当于在依赖图上一步步「补齐 $T_a$ 的前置链」。</p>
+    <p>选中的 $T_s$ 用采样参数 $P_s$ 组成调用 $C_s=(T_s,P_s)$ 在仿真环境里执行，产生环境反馈 $E_i$、更新系统状态 $S_j$，并相应更新 $G$、$T_{legal}$、$T_{called}$。一轮采样下来记成执行 trace：</p>
+    $$\mathrm{Turn}_i = (C_1, E_1, C_2, E_2, \dots, C_M, E_M)$$
+    <div class="callout note">
+      <span class="label">可复现要点 / Phase I</span>
+      把每个 tool 的「前置依赖、参数 schema」先抽成 API graph（节点 = tool、边 = 依赖 $R$、参数 = $P$）；采样循环 =「算 $T_{legal}$ → 跑 directed sampler 选 $T_s$ → 采样参数并在环境执行 → 拿 $E_i$ 更新状态」直到目标工具被覆盖且攒够 $M$ 步。<strong>「图距离贪心」是把随机采样改成定向采样的那把钥匙</strong>——它保证目标复杂工具一定出现且其前置链被完整走过。
+    </div>
+
+    <h3>Phase II — Advanced Tool-Query Synthesis（反向造难 query）</h3>
+    <p>Phase I 的 trace 只保证「执行正确」，却没有体现操作背后的<strong>抽象意图</strong>。Phase II 的巧思是：把整条 trace「反向」压成一个高层抽象工具，再用它倒推出一个隐藏了中间步骤的 hard query。</p>
+
+    <h4>① Advanced Tool Generation（轨迹 → 高级工具）</h4>
+    <p>Tooling Agent $A_T$ 把整条 trace 抽象成单个复合工具 $T_{adv}$：</p>
+    $$T_{adv} = A_T(\mathrm{Turn}_i)$$
+    <p>$T_{adv}$ 把 $\mathrm{Turn}_i$ 里所有 sub-tool 的功能与相互依赖「封装」成一个统一的高层操作。直觉：原本是 <code>get_zipcode → get_zipcode → buy_tickets</code> 三步，抽象成一个 <code>buy_tickets_adv(cityA, cityB) → ticket_id</code>「按城市名直接买票」的高级工具——前置的查 zip code 被<strong>隐式</strong>吞进去了。</p>
+
+    <h4>② Hard Query Construction（高级工具 → 难 query）</h4>
+    <p>Querying Agent $A_Q$ 以 $T_{adv}$ 为条件，反推一个<strong>必须用到 $T_{adv}$ 才能解</strong>的 hard query：</p>
+    $$Q_{hard} = A_Q(T_{adv}, \epsilon)$$
+    <p>$\epsilon$ 是<strong>合成噪声</strong>，用于提升任务难度、鼓励泛化。关键在于：query 是「站在高级工具视角」写的，所以它<strong>只说最终目标、不提前置步骤</strong>，于是模型必须自己「逻辑跳跃」补齐——而真正可用的工具其实只有那些 sub-tool $T_{sub}$。对照原文 case（附录 A）：</p>
+    <pre>Trace:        get_zipcode("Rivermist")→83214; get_zipcode("Stonebrook")→74532;
+              buy_tickets(83214, 74532)→ticket_id 14589
+Advanced Tool: buy_tickets_adv(cityA, cityB) -> ticket_id  （按城市名直接买票）
+Easy Query:   先查两城 zip code，再用 zip code 买两城之间的机票   ← 步骤全说明，无难度
+Hard Query:   请购买 "Rivermist" 与 "Stonebrook" 之间的机票       ← 隐藏前置，需逻辑跳跃</pre>
+    <div class="callout note">
+      <span class="label">可复现要点 / Phase II</span>
+      「反向生成」是造 hard query 的核心方法论：<strong>先有保证可解的执行轨迹（含 ground truth），再倒推 query</strong>，天然保证「query 难但一定有解」，避免了正向写难 query 时常见的「无解 / 自相矛盾」。advanced tool 起的是「把多步依赖打包成一个隐式黑盒」的作用，逼模型在只有 sub-tool 的情况下自行还原依赖链。
+    </div>
+
+    <h3>Phase III — Guided Iterative Chain（迭代纠错地造 CoT）</h3>
+    <p>hard query 提升了推理层级，但也提高了 CoT 逻辑不一致/不完整的风险。Phase III 用 reasoning + critiquing 两个 agent，对照 ground truth 迭代纠错，直到收敛。</p>
+    <p><strong>初次推理</strong>：Reasoning Agent $A_R$ 拿到 hard query $Q_{hard}$、原始 sub-tool 集 $T_{sub}$、以及 advanced tool 描述 $\mathrm{Des}(T_{adv})$（首次记为 $\mathrm{Prompt}^{(1)}$），第 $k$ 次尝试产出 CoT 与 function call：</p>
+    $$\{FC^{(k)}, CoT^{(k)}\} = A_R(Q_{hard}, T_{sub}, \mathrm{Prompt}^{(k)})$$
+    <p>用校验函数对照 ground truth $G=(C_1,\dots,C_M)$（即 Phase I 真实执行出的调用序列）：$\mathrm{Validate}: FC^{(k)}\times G \to \{\mathrm{Pass},\mathrm{Fail}\}$。</p>
+    <ol>
+      <li><strong>Error Analysis（失败时）</strong>：Critiquing Agent $A_C$ 分析错误的 $FC^{(k)}$ 相对 ground truth $G$ 的具体偏差，生成<strong>定向纠错 hint</strong>：$\mathrm{Error}^{(k)} = A_C(FC^{(k)}, G)$。</li>
+      <li><strong>Self-Correction</strong>：把纠错 hint 拼进上下文形成增强 prompt，再让 $A_R$ 重试：
+        $$\mathrm{Prompt}^{(k+1)} = \mathrm{Concat}(\mathrm{Prompt}^{(k)}, \mathrm{Error}^{(k)}),\quad \{FC^{(k+1)},CoT^{(k+1)}\}=A_R(Q_{hard},T_{sub},\mathrm{Prompt}^{(k+1)})$$
+      </li>
+    </ol>
+    <p>该「错误分析 + 自我纠正」构成迭代反馈环，最多 $K_{\max}$ 次。<strong>只有当 $\mathrm{Validate}(FC^{(k)},G)=\mathrm{Pass}$（在到达上限前）该样本才被保留</strong>，否则丢弃。这等于给每条 CoT 上了一道「必须能复现 ground truth 调用」的硬验收。</p>
+    <div class="callout note">
+      <span class="label">可复现要点 / Phase III</span>
+      与「一把过」的 CoT 蒸馏不同，这里把 ground truth（Phase I 真跑出来的调用序列）当成<strong>可执行 verifier</strong>：失败不是直接丢，而是把「错在哪」作为 hint 注入下一次 prompt，是一种<strong>带引导的拒绝采样（guided rejection sampling）</strong>。$K_{\max}$ 控制成本，Validate 把关质量。最终落库的每条样本都满足「hard query + 正确 sub-tool 调用 + 逻辑自洽的 CoT」。
+    </div>
+
+    <h3>从单轮 trace 拼成多轮 trajectory</h3>
+    <p>把上面三相当作一个「单轮生成器」，初始化 $\mathrm{Traj}=\varnothing$，对所需的 $N$ 轮依次执行：</p>
+    <ol>
+      <li><strong>Step 1</strong>（Phase I）：从原始工具集 $T$ 选目标工具 $T_a$，在仿真环境里生成完整执行 trace $\mathrm{Turn}_1$；</li>
+      <li><strong>Step 2</strong>（Phase II）：把成功 trace 交给 $A_T,A_Q$ 协同合成 advanced tool $T_{adv}$ 与 hard query $Q_{hard}$，构成新样本核心；</li>
+      <li><strong>Step 3</strong>（Phase III）：由 $A_R,A_C$ 解 hard query 并对照 ground truth $G$ 校验通过后保留。</li>
+    </ol>
+    <p>整套重复 $N$ 次，得到可靠且复杂的多轮 trajectory $\mathrm{Traj}$。附录 A 给出了完整的两轮文件系统操作 trajectory 实例（<code>pwd</code> → <code>find</code> → 跨轮 <code>cd</code>/<code>cat</code>/<code>tail</code>），可见每轮 assistant 都带 <code>&lt;think&gt;</code> CoT 再发 <code>&lt;tool_call&gt;</code>。</p>
+
+    <h3>训练设置</h3>
+    <ul>
+      <li><strong>Base 模型</strong>：Qwen3-4B-Instruct-2507（256K 长上下文，应对多轮对话 + 长 CoT）。</li>
+      <li><strong>切分与监督</strong>：把多轮轨迹在每个 assistant response 处切开，<strong>只在「当前轮的 CoT + answer」上算 loss</strong>（不训历史 tool 反馈）。</li>
+      <li><strong>数据规模</strong>：收集 <strong>17,000 条多轮样本</strong>；为增多样性，再联合 <strong>APIGen</strong> 的 function-calling 数据一起训。</li>
+      <li><strong>两阶段</strong>：先 <strong>SFT</strong>，后 <strong>RL</strong>。训练框架用 <strong>Llama-Factory</strong>（SFT）与 <strong>Verl / HybridFlow</strong>（RL），实现沿用作者前作 FunReason（arXiv:2505.20192）与「Superior Function Calls via RL」（arXiv:2508.05118）。</li>
+    </ul>
+    <p style="color:var(--muted);font-size:13px">数字口径提示：论文正文写「17,000 条」，HF 数据集页写「~16,978 行 / 16k 高质量样本」且声明为 demonstration 版本，二者略有出入，以原文与官方页面为准。</p>
+  </section>
+
+  <!-- ============================ ④ 实验评估 ============================ -->
+  <section id="evaluation">
+    <h2><span class="n">④</span>实验评估 Evaluation</h2>
+    <h3>评测设置</h3>
+    <ul>
+      <li><strong>Benchmark</strong>：
+        <ul>
+          <li><strong>BFCLv3</strong>（主评测）：Berkeley Function-Calling Leaderboard 第 3 版，含 <em>Single-Turn</em>（Non-Live / Live）与 <em>Multi-Turn</em>（Base / Miss Func / Miss Param / Long Context 四个子项）。考察模型在真实工具上的调用正确性与多轮状态保持。</li>
+          <li><strong>BFCLv4</strong>（OOD / held-out）：考察 agentic 能力的 <em>Web Search</em> 与 <em>Memory</em> 子集。本文训练数据与这两类任务无关，用来检验「能力是否可迁移」。</li>
+        </ul>
+      </li>
+      <li><strong>对比基线</strong>：闭源（GPT-5、GPT-4o、Claude-Sonnet-4、Gemini-2.5-Pro、o3、Grok-4）；开源大模型（Kimi-K2、DeepSeek-R1-0528、Qwen3-235B-A22B-Inst）；以及同类 tool-use 专用小模型（ToolACE-2-8B、BitAgent-8B、watt-tool-8B、xLAM-2-3b-fc-r、ToolACE-MT）。base = Qwen3-4B-Inst-2507。</li>
+      <li><strong>指标</strong>：accuracy（%），越高越好。</li>
+    </ul>
+
+    <h3>主要结果（BFCLv3）</h3>
+    <p>本文方法行加粗。$\Delta$ 为相对 base（Qwen3-4B-Inst-2507）的提升。MT = Multi-Turn，ST = Single-Turn。</p>
+    <table>
+      <thead>
+        <tr><th>Model</th><th class="num">MT&nbsp;Overall</th><th class="num">MT&nbsp;Base</th><th class="num">MT&nbsp;MissFunc</th><th class="num">MT&nbsp;MissParam</th><th class="num">MT&nbsp;LongCtx</th><th class="num">ST&nbsp;Overall</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Claude-Sonnet-4</td><td class="num">54.75</td><td class="num">64.00</td><td class="num">54.00</td><td class="num">47.50</td><td class="num">53.50</td><td class="num">84.72</td></tr>
+        <tr><td>GPT-5-2025-08-07</td><td class="num">28.50</td><td class="num">33.50</td><td class="num">29.50</td><td class="num">23.00</td><td class="num">28.00</td><td class="num">65.59</td></tr>
+        <tr><td>DeepSeek-R1-0528</td><td class="num">44.50</td><td class="num">54.50</td><td class="num">41.00</td><td class="num">36.50</td><td class="num">46.00</td><td class="num">78.22</td></tr>
+        <tr><td>Qwen3-235B-A22B-Inst</td><td class="num">39.62</td><td class="num">53.50</td><td class="num">34.50</td><td class="num">27.50</td><td class="num">43.00</td><td class="num">83.37</td></tr>
+        <tr><td>xLAM-2-3b-fc-r</td><td class="num">57.12</td><td class="num">73.50</td><td class="num">55.00</td><td class="num">54.50</td><td class="num">45.50</td><td class="num">73.82</td></tr>
+        <tr><td>ToolACE-2-8B</td><td class="num">37.00</td><td class="num">47.00</td><td class="num">31.00</td><td class="num">28.00</td><td class="num">42.00</td><td class="num">82.54</td></tr>
+        <tr><td>Qwen3-4B-Inst-2507（base）</td><td class="num">15.75</td><td class="num">19.00</td><td class="num">15.50</td><td class="num">12.50</td><td class="num">16.00</td><td class="num">78.19</td></tr>
+        <tr><td><strong>+FunReason-MT (SFT)</strong></td><td class="num"><strong>46.90</strong></td><td class="num"><strong>53.20</strong></td><td class="num"><strong>47.10</strong></td><td class="num"><strong>40.40</strong></td><td class="num"><strong>46.90</strong></td><td class="num"><strong>81.97</strong></td></tr>
+        <tr><td><strong>+FunReason-MT (RL)</strong></td><td class="num"><strong>57.75</strong></td><td class="num"><strong>62.50</strong></td><td class="num"><strong>60.50</strong></td><td class="num"><strong>48.50</strong></td><td class="num"><strong>59.50</strong></td><td class="num"><strong>85.47</strong></td></tr>
+      </tbody>
+    </table>
+    <p>怎么读这些数字：</p>
+    <ul>
+      <li><strong>巨大增益</strong>：base Qwen3-4B 的 Multi-Turn Overall 仅 15.75；SFT 后 46.90（<strong>+31.15</strong>），RL 再到 <strong>57.75（+42.00）</strong>。Single-Turn Overall 也从 78.19 升到 85.47。</li>
+      <li><strong>4B 反超大模型</strong>：57.75 的 Multi-Turn Overall 超过 Claude-Sonnet-4（54.75）、DeepSeek-R1（44.50）、GPT-5（28.50）、Qwen3-235B（39.62）。Single-Turn Overall 85.47 同样领先这批闭源/大开源模型，<strong>在同尺寸（comparable-sized）里取得 SOTA</strong>。</li>
+      <li><strong>均衡</strong>：在 MissFunc（60.50）、MissParam（48.50）、LongContext（59.50）等各子项普遍领先，说明提升不是偏科。</li>
+      <li><strong>诚实地看局限</strong>：唯一在 Multi-Turn Overall 上更高的是 <strong>xLAM-2-3b-fc-r（57.12，与本文 57.75 极接近）</strong>，但它 Single-Turn 只有 73.82 且其 LongContext（45.50）弱于本文（59.50）；而 SFT 阶段在 Single-Turn Non-Live 子项上相对 base 有小幅回落（$\Delta=-2.99$，需靠 RL 找回）。</li>
+    </ul>
+
+    <h3>OOD agentic 结果（BFCLv4）</h3>
+    <p>训练数据与 Web Search / Memory <strong>无关</strong>，但仍有迁移增益：Overall 从 base 8.85 → SFT 9.99（+1.14）→ RL <strong>15.10（+6.25）</strong>；其中 Web Search Overall 从 5.00 → <strong>16.00（+11.00）</strong>，Memory Overall 12.69 → 14.19。RL 版在 BFCLv4 主 Overall 上<strong>超过所有对比的专用小模型</strong>（ToolACE-2-8B 14.83、BitAgent-8B 8.24、xLAM-2-3b-fc-r 7.42 等）。这支持「该范式打的是底层 agentic 基础，可迁移到未见任务」的论断。</p>
+
+    <h3>消融 / 关键分析</h3>
+    <p>本文最具说服力的对照是 <strong>SFT → RL 的两段对比</strong>：同一份 FunReason-MT 数据，SFT 已把 Multi-Turn 从 15.75 拉到 46.90，RL 再加到 57.75——说明高质量合成数据先把能力「打底」，RL 再压榨出额外约 11 个点；二者叠加才完整。横向上，相对同样定位的 ToolACE-MT（Multi-Turn 40.25）、ToolACE-2-8B（37.00）等「MAS role-playing / 非定向采样」路线，本文数据训出的模型显著更高，间接印证「自顶向下定向构造 + 反向 hard query + 校验式 CoT」这套组合相对现有合成范式的优势。（注：论文为 technical report，未给出逐组件的细粒度 leave-one-out 消融表，组件价值主要通过与既有合成方法的横向对比体现。）</p>
+    <figure>
+      <img src="figures/multi.png" alt="BFCL Multi-Turn 对比">
+      <figcaption>图 3：BFCLv3 Multi-Turn 对比——FunReason-MT-4B（57.8）领先 Claude-Sonnet-4、DeepSeek-R1、GPT-4o、Qwen3-235B 等。（出处：原文 Figure 1 右侧子图；数值与 Table 2 一致）</figcaption>
+    </figure>
+  </section>
+
+  <!-- ============================ ⑤ 洞见 ============================ -->
+  <section id="insight">
+    <h2><span class="n">⑤</span>洞见 Insights</h2>
+    <div class="callout insight">
+      <span class="label">Insight 1 · 反向生成是造 hard query 的正解</span>
+      想造「难且一定有解」的 query，不要正向硬写，而要<strong>先跑出一条带 ground truth 的可执行轨迹，再把它抽象成 advanced tool、倒推出隐藏前置步骤的 query</strong>。这一步把「逻辑跳跃」的难度结构化地注入数据，且天然规避正向构造常见的「无解/自相矛盾」。
+    </div>
+    <div class="callout insight">
+      <span class="label">Insight 2 · multi-turn 依赖要靠「图 + 定向采样」工程化造，而非指望涌现</span>
+      把工具依赖建成 API graph，用「图距离贪心」的 directed sampler 朝目标工具采样，就能<strong>可控地</strong>生成「必须协同多个工具、且前置链完整」的轨迹。这把「碰运气涌现复杂度」变成了「定向工程化复杂度」——是 random sampling / MAS role-playing 给不了的可控性。
+    </div>
+    <div class="callout insight">
+      <span class="label">Insight 3 · 用可执行 ground truth 当 verifier，把 CoT 蒸馏变成「带引导的拒绝采样」</span>
+      Phase I 真实跑出的调用序列就是天然 verifier：CoT 生成失败时不是丢弃，而是把「错在哪」作为 hint 注入下一轮 prompt 迭代纠错（$\mathrm{Prompt}^{(k+1)}=\mathrm{Concat}(\mathrm{Prompt}^{(k)},\mathrm{Error}^{(k)})$），通过校验才入库。这让蒸馏出的多轮 CoT 既忠于 ground truth 又逻辑自洽。
+    </div>
+
+    <h3>局限与未来</h3>
+    <ul>
+      <li><strong>合成器依赖强 teacher 与可执行环境</strong>：$A_T/A_Q/A_R/A_C$ 都是 LLM agent，且 Phase I/III 依赖可执行的仿真环境与 BFCL 风格的 tool 实现；迁到没有现成可执行环境的领域时，建图与 ground truth 校验成本不低。</li>
+      <li><strong>组件级消融偏弱</strong>：作为 technical report，未给出逐组件 leave-one-out 的细粒度消融，单个组件各自的边际贡献只能从横向对比间接推断。</li>
+      <li><strong>数字口径与开源粒度</strong>：论文 17k vs HF ~16,978 行略有出入；HF 数据为 demonstration 版、合成 pipeline 脚本截至解读日未单独释放，复现完整合成器仍需自行实现公式 1–4 的逻辑。</li>
+      <li><strong>规模验证有限</strong>：主体仅在 4B base 上验证；范式在更大模型上的收益曲线、以及 RL 阶段的具体算法/reward 细节，本报告着墨不多。</li>
+    </ul>
+
+    <h3>与相关工作的关系</h3>
+    <p>本文把自己定位为对「random environment sampling」与「MAS role-playing」两条主流合成路线的<strong>结构性替代</strong>。文中点名的相关线索包括：<strong>APIGen</strong>（Liu et al., 2024，可验证的 FC 数据自动化管线，本文还把它的 FC 数据联合训练以增多样性）、<strong>APIGen-MT</strong>（Prabhakar et al., 2025，模拟 agent-human 交互的多轮生成）、<strong>ToolACE-MT</strong>（Zeng et al., 2025，非自回归的 agentic 多轮交互）。与它们相比，FunReason-MT 的差异点是：(1) 用 <strong>API graph + 定向采样</strong>把「目标复杂工具」显式做进轨迹（targeted）；(2) 用 <strong>advanced tool 反推</strong>保证 hard query 的逻辑跳跃；(3) 用 <strong>ground-truth 校验的迭代 CoT</strong>保证多轮逻辑依赖正确。此外它延续了作者团队的 FunReason（self-refinement 多尺度 loss + 自动化数据精炼）与「Superior Function Calls via RL」两项前作的训练实现。</p>
+    <p style="color:var(--muted);font-size:13px">以上关系均依据本文自身论述与参考文献，未参考本仓库其它解读。</p>
+  </section>
+
+  <footer class="foot">
+    本页为 <code>paper-reading</code> skill 生成的阅读笔记，仅作辅助，细节以
+    <a href="https://arxiv.org/abs/2510.24645" target="_blank" rel="noopener">原文</a> 为准 · 解读日期 2026-06-05
+  </footer>
+
+</article>
+</body>
+</html>
