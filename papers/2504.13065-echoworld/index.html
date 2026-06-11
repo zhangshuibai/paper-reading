@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EchoWorld：超声探头导航的 motion-aware world model · 论文解读</title>
+
+<script>
+  window.MathJax = {
+    tex:{inlineMath:[['$','$'],['\\(','\\)']], displayMath:[['$$','$$'],['\\[','\\]']]},
+    svg:{fontCache:'global'}
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;
+  }
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:880px; margin:0 auto; padding:18px 22px 90px}
+
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:27px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)}
+  .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .meta-grid a:hover{text-decoration:underline}
+
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap}
+  nav.toc a:hover{color:var(--accent)}
+
+  section{margin:38px 0}
+  h2{font-size:21px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:17px; margin:24px 0 8px}
+  p{margin:12px 0}
+  ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.9em}
+  strong{color:var(--text)}
+
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:14px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:10px 12px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  .yes{color:var(--ok); font-weight:600}
+  .no{color:var(--muted)}
+  .num{font-variant-numeric:tabular-nums; text-align:right}
+
+  figure{margin:24px 0; text-align:center}
+  figure img{max-width:100%; height:auto; border:1px solid var(--line); border-radius:10px; background:#fff}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+
+  blockquote{border-left:3px solid var(--line); margin:14px 0; padding:2px 16px; color:var(--muted)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+  .mjx-container{overflow-x:auto; overflow-y:hidden}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">world model</span>
+      <span class="chip">echocardiography</span>
+      <span class="chip">probe guidance</span>
+      <span class="chip">motion-aware</span>
+      <span class="chip">JEPA</span>
+      <span class="chip">representation learning</span>
+      <span class="chip">CVPR 2025</span>
+    </div>
+    <h1>EchoWorld：为超声探头导航学习 motion-aware 的 world model</h1>
+    <p class="orig-title">EchoWorld: Learning Motion-Aware World Models for Echocardiography Probe Guidance</p>
+    <dl class="meta-grid">
+      <dt>作者</dt><dd>Yang Yue, Yulin Wang, Haojun Jiang, Pan Liu, Shiji Song, Gao Huang（Yang Yue 与 Yulin Wang 同等贡献）</dd>
+      <dt>团队 / 机构</dt><dd>Tsinghua University（LeapLabTHU）· PLA General Hospital</dd>
+      <dt>原文链接</dt><dd><a href="https://arxiv.org/abs/2504.13065" target="_blank" rel="noopener">https://arxiv.org/abs/2504.13065</a></dd>
+      <dt>发表 / 年份</dt><dd>CVPR 2025（arXiv v1, 2025-04-17）</dd>
+      <dt>解读日期</dt><dd>2026-06-11</dd>
+    </dl>
+  </header>
+
+  <div class="tldr">
+    <b>TL;DR</b> — Echocardiography（心脏超声）的 <b>probe guidance</b> 任务，是要给定当前超声图像与历史操作，预测探头还要怎么移动/旋转才能到达某个 standard plane（标准切面）。它难在既要懂心脏解剖、又要懂探头一动画面怎么变。EchoWorld 用 <b>world model</b> 的思路做两阶段：先用 JEPA 式的 <b>masked region prediction</b>（空间）和 <b>visual outcome simulation</b>（运动）做 pre-training，让 ViT 编码器同时学会「解剖长什么样」和「探头一动画面怎么变」；再在 fine-tuning 阶段引入 <b>motion-aware attention</b>，把帧与帧之间的 6-DoF 相对位姿直接嵌进 attention 的 key/value，从而更准地聚合历史 visual-motion 信息。在约 100 万帧、356 例真实临床扫查上，EchoWorld 在 single-frame 与 sequential 两种协议下都把 guidance error 压到最低，平均误差优于 EchoCLIP、Sequence-aware 等所有 baseline。代码开源，数据因隐私不公开。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#opensource">① 开源贡献</a>
+    <a href="#motivation">② 动机与贡献</a>
+    <a href="#method">③ 方法</a>
+    <a href="#evaluation">④ 实验评估</a>
+    <a href="#insight">⑤ 洞见</a>
+  </nav>
+
+  <!-- ============================ ① 开源贡献 ============================ -->
+  <section id="opensource">
+    <h2><span class="n">①</span>开源贡献 Open-source Artifacts</h2>
+    <p>EchoWorld <strong>开源了完整的 PyTorch 训练代码</strong>（含 world-model pre-training 与 probe guidance fine-tuning 两个阶段），代码声明基于 MAE 与 I-JEPA 改造。但<strong>预训练权重未发布</strong>，<strong>数据集因病人隐私与机构限制无法公开</strong>——这点作者在 README 与正文里都明确说明，符合医学影像领域的常态。下表为解读日（2026-06-11）核实结果。</p>
+    <table>
+      <thead><tr><th>类型</th><th>是否开源</th><th>内容 / 链接</th></tr></thead>
+      <tbody>
+        <tr><td>代码 Code</td><td class="yes">✔</td><td><a href="https://github.com/LeapLabTHU/EchoWorld" target="_blank" rel="noopener">github.com/LeapLabTHU/EchoWorld</a>，含 <code>pretrain/</code> 与 <code>finetune/</code> 两套脚本（99.8% Python）；自述「developed on top of MAE and I-JEPA」。仓库 README 未给出明确 license。</td></tr>
+        <tr><td>模型权重 Weights</td><td class="no">✘</td><td>README 未提供可下载的 pre-trained checkpoint。</td></tr>
+        <tr><td>数据集 Dataset</td><td class="no">✘</td><td>作者明确表示「Due to data privacy and institutional restrictions, the dataset cannot be publicly released」——356 例临床扫查、约 100 万帧超声图 + 探头位姿，受隐私与伦理限制不公开。</td></tr>
+        <tr><td>环境 / Benchmark</td><td class="no">✘</td><td>评测在私有临床数据上进行，无公开 benchmark；评测协议（single-frame / sequential）在论文中描述，但因数据不公开无法复现到原始数字。</td></tr>
+        <tr><td>项目主页 / Demo</td><td class="no">✘</td><td>未见独立项目主页或在线 demo。</td></tr>
+      </tbody>
+    </table>
+    <p class="no" style="font-size:13.5px">说明：代码可复现「方法本身」，但要复现论文里的具体数字需要私有数据，外部用户只能在自有超声数据上套用该框架。</p>
+  </section>
+
+  <!-- ============================ ② 动机与贡献 ============================ -->
+  <section id="motivation">
+    <h2><span class="n">②</span>研究动机与贡献 Motivation &amp; Contribution</h2>
+    <h3>背景与问题</h3>
+    <p>Echocardiography（心脏超声）是检查心血管疾病最常用的无创、低成本手段，但高度依赖有经验的 sonographer（超声医师）：医师要在病人胸口反复挪动、旋转、按压探头，靠实时画面反馈把心脏「切」到一系列预定义的 <b>standard plane</b>（标准切面，如 PLAX、PSAX-AV、A4C 等）。这套技能门槛高、合格医师全球短缺，尤其欠发达地区更稀缺。于是出现了 <b>probe guidance system</b>（探头导航系统）：给医师实时的「探头该往哪挪」指令，甚至最终走向全自动超声扫查机器人。</p>
+    <p>如 Figure 1(c) 所示，probe guidance 可以形式化为一个<strong>基于视觉的序列预测问题</strong>：模型根据历史 visual-motion 数据，预测要到达目标切面所需的探头运动向量。但它和一般医学影像任务不同，独特难点在于<strong>必须把 motion 数据与动态视觉观测耦合起来</strong>：系统不仅要理解心脏的复杂解剖（心腔、瓣膜、血管），还要理解「探头一动，这些结构在超声图里如何随之变化」。早期 probe guidance 工作（如产科超声的 US-GuideNet、心脏 PLAX 的搜索式方法）有进展，但少有人正面回答一个根本问题：<em>怎样设计一套有原则的方法，既学到必要的医学知识，又能无缝融合视觉与运动信号，做到精准导航？</em></p>
+    <h3>本文的切入点</h3>
+    <p>作者的关键观察是：一个有经验的 sonographer，脑中有一套关于心脏结构与探头操作的 <b>mental model</b>——能预判「探头这样转，画面会变成那样」，就像老司机心里有一张城市地图。这恰好对应 AI 里的 <b>world model</b> 概念。于是本文把 world modeling 当作 representation learning 的 pretext task，让模型在 pre-training 阶段同时学两件事：<strong>(1) 解剖结构在超声图里长什么样（空间维度）</strong>，<strong>(2) 探头运动会引起怎样的视觉变化（运动维度）</strong>。再在 fine-tuning 阶段，用一个把 3D 相对位姿直接嵌进 attention 的 <b>motion-aware attention</b>，替代以往「图像-动作交错序列 + RNN」的笨拙编码方式。</p>
+    <h3>核心贡献</h3>
+    <ol>
+      <li><strong>把 world model 引入医学探头导航</strong>：提出 EchoWorld，一个 motion-aware 的 world modeling 框架，用于 echocardiography probe guidance，统一编码解剖知识与运动诱发的视觉动态。</li>
+      <li><strong>两个互补的 world-model pre-training 目标</strong>：spatial world modeling（masked region prediction，恢复被遮盖的解剖区域）+ motion world modeling（visual outcome simulation，根据探头运动预测视觉变化），二者联合训练出强表征。</li>
+      <li><strong>motion-aware attention 机制</strong>：把帧对之间的 6-DoF 相对位姿差编码进 attention 的 key/value，使 attention 与探头的 3D 空间变换对齐，比传统交错序列 + RNN 的范式更充分地利用 motion 信息。</li>
+      <li><strong>在真实临床数据上验证</strong>：在约 100 万帧、356 例 routine 扫查上训练；定性上 EchoWorld 经接 diffusion 后能当超声「模拟器」用，定量上在 single-frame 与 sequential 两套协议下都取得最低 guidance error，10 个标准切面平均误差均优于一众 pre-trained backbone 与 guidance framework。</li>
+    </ol>
+  </section>
+
+  <!-- ============================ ③ 方法 ============================ -->
+  <section id="method">
+    <h2><span class="n">③</span>方法 Method</h2>
+    <p>EchoWorld 是<strong>两阶段</strong>框架：<strong>Step 1</strong> 用 world modeling 把一个 ViT 编码器预训练成「心脏 world model」，让它同时掌握解剖外观与运动-视觉动态；<strong>Step 2</strong> 在此基础上接一个带 motion-aware attention 的 guidance predictor，吃历史 visual-motion 序列，回归出到目标切面的探头运动。下图是整体框架。</p>
+
+    <figure>
+      <img src="figures/fig2_framework_overview.png" alt="EchoWorld 两阶段框架总览">
+      <figcaption>图 1：EchoWorld 整体框架（出处：原文 Figure 2）。左：world model pre-training，用 spatial masking 与 probe motion 两类任务学表征；右：fine-tune for probe guidance，用 motion-aware attention 融合历史 visual-motion 特征，输出到标准切面的 Rot/Trans 运动。</figcaption>
+    </figure>
+
+    <h3>问题设定与符号</h3>
+    <p>探头位姿 $p \in \mathbb{R}^6$ 用 <b>6-DoF</b> 表示：前三维是平移 $(x,y,z)$（毫米），后三维是旋转 $(\text{yaw, pitch, roll})$（欧拉角，度）。每个位姿属于刚体变换群，于是从 $p_j$ 到 $p_i$ 的相对运动写成 $p_{j\to i} = p_i \cdot p_j^{-1}$，其中「$\cdot$」是变换的复合。绝对位姿在不同扫查间差异很大，但<strong>相对运动</strong>呈现一致的模式，正好刻画医师的操作手法。给定当前时刻 $t_0$、目标切面到达时的位姿 $p^*$，则 ground-truth 运动为 $a_{t_0} = p^* \cdot p_{t_0}^{-1}$；模型用历史 $\{(I_t, p_t)\}_{t \le t_0}$ 预测 $\hat{a}_{t_0}$。本文聚焦临床上最重要的 <strong>10 个 standard plane</strong>（PLAX、PSAX-AV/PV/MV/PAP/APEX、A4C/A5C/A3C/A2C）。</p>
+
+    <h3>3.1 阶段一：Pre-training Cardiac World Models</h3>
+    <p>底座是 <b>JEPA</b>（joint-embedding predictive architecture）。其思想是：在<strong>特征空间</strong>里，用 context $x$ 去预测一个未观测的 target $y$，并以一个 latent variable $z$ 编码二者关系。具体由 context encoder $f_\theta$ 与 target encoder $f'_{\theta'}$ 得到 $h_x = f_\theta(x)$、$h_y = f'_{\theta'}(y)$，再用 predictor $g_\phi$ 预测目标特征：</p>
+    $$\hat{h}(y) = g_\phi(h_x, z) = g_\phi(f_\theta(x), z).$$
+    <p>训练目标是最小化预测误差 $D\big(h_y, \hat h_y\big) = D\big(f'_{\theta'}(y),\, g_\phi(f_\theta(x); z)\big)$，其中 $D$ 是误差函数。为防止特征坍塌（feature collapse），<strong>target encoder $f'_{\theta'}$ 取 context encoder 的 EMA（指数滑动平均）</strong>，不回传梯度。下图是两个具体任务的图示。</p>
+
+    <figure>
+      <img src="figures/fig4_world_modeling_tasks.png" alt="两个 world modeling 任务">
+      <figcaption>图 2：world modeling 任务（出处：原文 Figure 4）。(a) JEPA 基本框架，从 context $x$ 预测 target $y$，latent $z$ 编码二者关系；(b) spatial world modeling，恢复被 mask 的解剖区域；(c) motion world modeling，按探头运动 $z_{x\to y}$ 预测视觉变化。</figcaption>
+    </figure>
+
+    <p><strong>① Spatial world modeling（空间，masked region prediction）。</strong>用 mask-and-reconstruct 任务灌输解剖知识：把图像里若干连续的矩形 patch 块遮掉，让模型预测这些区域的特征，从而学到局部纹理与解剖结构间的空间关系。context encoder 只看可见 patch，target encoder 看完整图像：</p>
+    $$h_x = f_\theta(\text{Mask}(I)), \qquad h_y = f'_{\theta'}(I).$$
+    <p>predictor 里，mask token $m$ 携带被遮位置的编码，充当 latent $z$。记 $M$ 为被 mask 的 patch 位置集合，$c \in M$ 是 2D patch 坐标，$\mathrm{PE}(\cdot)$ 为正弦位置编码，$p_x$ 为 context token 的位置嵌入，$\oplus$ 为拼接：</p>
+    $$\hat h_y = g_\phi\Big( (h_x + p_x) \oplus \{\, m + \mathrm{PE}(c)\,\}_{c\in M}\Big).$$
+    <p>loss 只在被 mask 的位置上算 $\ell_1$：$\displaystyle \mathcal{L}_{\text{spatial}} = \sum_{c\in M} \big\| g_\phi(f_\theta(x); M)_c - f'_{\theta'}(y)_c\big\|_1.$ 直觉：模型必须靠周边可见解剖「脑补」出遮挡处该有的结构特征，于是被迫学会解剖布局。</p>
+
+    <p><strong>② Motion world modeling（运动，visual outcome simulation）。</strong>这一项专门学「探头一动、画面怎么变」。给同一次扫查里的两张图 $I_a, I_b$（分别作 context 与 target）及其相对运动 $p_{a\to b}$，用 motion encoder $A_\psi$ 把运动编码成 motion feature $z_{a\to b} = A_\psi(p_{a\to b})$。一个 mask token 携带这份 motion feature，连同 context 特征喂给 predictor，去预测<strong>平均池化后</strong>的 target 特征：</p>
+    $$\hat h_y = g_\phi\big(f_\theta(I_a);\, m + z_{a\to b}\big), \qquad h_y = \text{AvgPool}\big(f'_{\theta'}(I_b)\big).$$
+    <p>为提升对运动的敏感度，这里用 <b>contrastive</b> 目标（InfoNCE）而非回归：$\hat h_y$ 与对应 $h_y$ 是正样本对（先过两层 MLP projector），其余为负样本，$\tau$ 为温度，$B$ 为 batch size：</p>
+    $$\mathcal{L}_{\text{motion}} = -\frac{1}{B}\sum_{i=1}^{B} \log \frac{\exp(\hat h_{y_i}^\top h_{y_i}/\tau)}{\sum_j \exp(\hat h_{y_i}^\top h_{y_j}/\tau)}.$$
+    <p>直觉：模型给定「这张图 + 这样运动」必须预测出「会变成哪张图」的特征，且要在一个 batch 里把它和别的图区分开——于是学会了运动与视觉变化的映射。</p>
+
+    <p><strong>③ 联合训练。</strong>同一扫查的两张图 $I_a, I_b$ 上各自独立做 spatial modeling，再用 $p_{a\to b}$ 学二者过渡，总 loss 为</p>
+    $$\mathcal{L}_{\text{total}} = \mathcal{L}_{\text{spatial}} + \lambda\, \mathcal{L}_{\text{motion}}, \qquad \lambda = 0.1.$$
+    <p>$\lambda=0.1$ 用来平衡两项尺度。这样每张图既被放进「解剖语境」理解，又被当作「动态过程的一环」理解。</p>
+
+    <h3>3.2 阶段二：Motion-Aware Probe Guidance</h3>
+    <p>有了预训练 world model（已同时编码解剖与运动-视觉动态），就接一个 guidance predictor。它处理一段历史序列 $\{I_{t_i}, p_{t_i}\}_{i=1}^N$（$t_1 \le \cdots \le t_N$，$t_N$ 为最新时刻；因原视频上千帧，会采样子集）。</p>
+
+    <figure>
+      <img src="figures/fig5_guidance_pipeline.png" alt="probe guidance pipeline">
+      <figcaption>图 3：probe guidance pipeline（出处：原文 Figure 5）。历史 visual-motion 对先经预训练的视觉编码器与 motion encoder $A_\psi$ 抽特征，再由 motion-aware attention 聚合，最后过 prediction head 回归出到目标切面的运动。</figcaption>
+    </figure>
+
+    <p>以往方法把历史排成<strong>图像-动作交错序列</strong> $\{I_{t_1}, p_{t_1\to t_2}, I_{t_2}, \dots, I_{t_N}\}$ 再用 RNN 编码，作者认为这样没充分利用 motion 数据。EchoWorld 改为把 motion 信号<strong>直接注入所有帧 token 之间的交互</strong>，让 attention 与探头的 3D 空间变换对齐。先用预训练 world model 抽特征：</p>
+    $$h_i = \text{AvgPool}(f_\theta(I_{t_i})), \qquad z_{i\to j} = A_\psi(p_{t_i \to t_j}).$$
+    <p>标准 scaled dot-product attention 是 $\displaystyle O_i = \sum_j \frac{\exp(Q_i^\top K_j)}{\sum_l \exp(Q_i^\top K_l)} V_j$，它对排列不变，必须靠位置编码注入空间关系。这里的关键改造是：<strong>把帧对之间的相对位姿差编码进 key/value</strong>——对每个 query token $i$，它看到的 key/value 都依赖 $i$ 与 $j$ 的相对运动 $z_{i\to j}$：</p>
+    $$K_j^{(i)} = \text{MLP}(h_j, z_{i\to j}), \qquad V_j^{(i)} = \text{MLP}(h_j, z_{i\to j}),$$
+    $$O_i = \sum_j \frac{\exp\!\big(Q_i^\top K_j^{(i)}\big)}{\sum_l \exp\!\big(Q_i^\top K_l^{(i)}\big)} V_j^{(i)}.$$
+    <p>于是每个 query token 都有一套<strong>专属的、带相对位姿信息的</strong> key-value 对，attention 因此能感知探头运动引起的空间变化（见下图对比）。最后聚合特征过 prediction head 回归运动，guidance loss 为 $\mathcal{L}_{\text{guide}} = \|a_t - \hat a_t\|_1$。</p>
+
+    <figure>
+      <img src="figures/fig6_motion_aware_attention.png" alt="标准 attention 与 motion-aware attention 对比">
+      <figcaption>图 4：标准 attention（左）vs. motion-aware attention（右）（出处：原文 Figure 6）。右侧把帧对位姿差 $p_{i\to j}$ 编码成 motion feature $z_{i\to j}$ 注入 key/value，于是 $K_j^{(i)}, V_j^{(i)}$ 多了一个维度 $N\times N\times D$。</figcaption>
+    </figure>
+
+    <div class="callout note">
+      <span class="label">实现要点（复现关注）</span>
+      <ul style="margin:6px 0">
+        <li><strong>数据规模</strong>：356 例 routine 心脏超声扫查、约 100 万帧；用 M5S 探头 + GE Vivid E7 机器，探头装在 Franka Panda 机械臂上，同步录 30fps 视频与探头位姿；受试者均为健康成年男性，经伦理审批。284 例训练 / 72 例测试，病人无重叠。</li>
+        <li><strong>backbone</strong>：context encoder = ViT-S/16；predictor = 6 层 transformer；target encoder 为 EMA（起始 decay 0.996）。</li>
+        <li><strong>pre-training</strong>：batch 1024、300 epoch、4×A100，from scratch。</li>
+        <li><strong>fine-tuning</strong>：motion-aware attention 用 4 个 head、hidden dim 384；最后接 <strong>10 个独立 MLP</strong> 分别预测到 10 个标准切面的运动；AdamW，lr $1\times10^{-4}$，15000 iter，single-frame batch 256 / sequential batch 64，weight decay 0.05、drop path 0.1、layer-wise lr decay 0.65。</li>
+        <li><strong>sequential 采样</strong>：从历史按 decayed density 采样 $N=8$ 帧（$\alpha=0.4$），时间步 $t_i = \text{Round}\big(t + \tfrac{t}{\alpha N}\log\tfrac{i}{N}\big)$，优先保留近期帧又留住长程上下文；不足 8 帧允许重复采样。</li>
+        <li><strong>world-model 当模拟器</strong>：把 predictor 输出 $\hat h_y$ 经 RCDM 接 diffusion 解回像素（128×128，30 万 iter），可定性可视化恢复的解剖区域与运动诱发的视觉变化。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============================ ④ 实验评估 ============================ -->
+  <section id="evaluation">
+    <h2><span class="n">④</span>实验评估 Evaluation</h2>
+    <h3>评测设置</h3>
+    <ul>
+      <li><strong>数据 / 任务：</strong>私有临床数据（约 100 万帧，10 个标准切面）。指标为 <strong>mean absolute error</strong>，分平移 <b>Trans.</b>（$x,y,z$，毫米）与旋转 <b>Rot.</b>（yaw/pitch/roll，度），<strong>越低越好</strong>。</li>
+      <li><strong>single-frame 协议：</strong>只用一张图预测到 10 个切面的运动，考察 pre-trained backbone 的表征质量；backbone 接两层 MLP 全量 fine-tune。baseline 含通用视觉模型 DeiT、DINOv2，医学模型 BioMedCLIP、LVM-Med，超声专用 USFM、EchoCLIP，以及在本数据上自训的 US-MoCo、US-MAE。</li>
+      <li><strong>sequential 协议：</strong>模拟在线部署——按当前时刻前的历史预测尚未访问切面的运动，前向/反向双向评测、对所有时刻取平均。为公平，<strong>所有 baseline 都用本文预训练的同一视觉 backbone</strong>，只比 guidance framework；baseline 含 US-GuideNet、Decision Transformer、Sequence-aware Pre-training。</li>
+    </ul>
+
+    <h3>主要结果</h3>
+    <p>下表为 10 切面平均（原文 Table 1 的 Avg 列；完整逐切面数据见原文）。</p>
+    <table>
+      <thead><tr><th>方法</th><th class="num">Trans. ↓</th><th class="num">Rot. ↓</th></tr></thead>
+      <tbody>
+        <tr><td colspan="3" style="color:var(--muted)"><em>single-frame，未在超声数据上预训练</em></td></tr>
+        <tr><td>Scratch (ViT)</td><td class="num">9.09</td><td class="num">11.97</td></tr>
+        <tr><td>DeiT</td><td class="num">8.52</td><td class="num">11.28</td></tr>
+        <tr><td>DINOv2</td><td class="num">8.62</td><td class="num">11.27</td></tr>
+        <tr><td colspan="3" style="color:var(--muted)"><em>single-frame，在超声数据上预训练</em></td></tr>
+        <tr><td>US-MAE</td><td class="num">8.45</td><td class="num">11.05</td></tr>
+        <tr><td>USFM</td><td class="num">8.39</td><td class="num">11.14</td></tr>
+        <tr><td>EchoCLIP（次优）</td><td class="num">8.35</td><td class="num">10.97</td></tr>
+        <tr><td><strong>EchoWorld</strong></td><td class="num"><strong>8.22</strong></td><td class="num"><strong>10.99</strong></td></tr>
+        <tr><td colspan="3" style="color:var(--muted)"><em>sequential，所有方法共用本文 backbone</em></td></tr>
+        <tr><td>US-GuideNet</td><td class="num">8.10</td><td class="num">10.87</td></tr>
+        <tr><td>Decision Transformer</td><td class="num">7.78</td><td class="num">11.22</td></tr>
+        <tr><td>Seq-aware Pre-training</td><td class="num">7.70</td><td class="num">10.59</td></tr>
+        <tr><td><strong>EchoWorld</strong></td><td class="num"><strong>7.23</strong></td><td class="num"><strong>10.47</strong></td></tr>
+      </tbody>
+    </table>
+    <p>注：原文 Table 1 用 <strong>Avg = (Trans.+Rot.)/2</strong> 这个综合标量做横向比较。single-frame 下 EchoWorld 的 Avg 为 <strong>8.15</strong>，在 20 个 Trans./Rot. 子项里 <strong>16 项取得最低误差</strong>，综合 Avg 比次优的 EchoCLIP（8.37）低 <strong>0.22</strong>。一个趋势是：超声专用预训练模型（USFM、EchoCLIP、US-MAE）普遍优于通用模型，印证了 in-domain 迁移的重要性。sequential 下 EchoWorld 的 Avg 为 <strong>7.05</strong>，明显超过同样用本文 backbone 的 US-GuideNet（7.72）、Decision Transformer（7.44）、Sequence-aware（7.42）——说明在 backbone 相同的前提下，<strong>motion-aware attention 这个 guidance 模块本身</strong>就比「交错序列 + RNN/causal transformer」范式更会用 visual-motion 数据。</p>
+
+    <h3>消融 / 分析</h3>
+    <ul>
+      <li><strong>两个 world-modeling 任务都有用（Table 2，single-frame，Avg）：</strong>都不用 = 9.07；只 motion = 8.62；只 spatial = 8.38；两者都用 = <strong>8.15</strong>。spatial 单独贡献更大，但二者联合最好，表明空间与运动建模互补。</li>
+      <li><strong>motion-awareness 是关键（Table 3，sequential，Avg）：</strong>是否给模型提供位姿信息差异巨大——DeiT backbone 从 8.62（无 motion）降到 7.53（有 motion）；EchoWorld backbone 从 7.98 降到 <strong>7.05</strong>。即「用上 motion 信号」与「用本文预训练 backbone」两个因素叠加，效果一致且互相增强。</li>
+      <li><strong>定性分析：</strong>(a) 接 diffusion 后，EchoWorld 能把被 mask 的解剖区域补回、也能按探头运动模拟出画面变化，说明它确实学到了解剖外观与运动-视觉动态（原文 Figure 7）；(b) attention 可视化显示不同 head 关注不同帧，模型倾向关注高质量帧、忽略噪声帧（Figure 8）；(c) t-SNE 显示同类标准切面的特征聚成簇、相似切面更近（Figure 9）。</li>
+    </ul>
+  </section>
+
+  <!-- ============================ ⑤ 洞见 ============================ -->
+  <section id="insight">
+    <h2><span class="n">⑤</span>洞见 Insights</h2>
+    <div class="callout insight">
+      <span class="label">Insight</span>
+      <ul style="margin:6px 0">
+        <li><strong>把 world model 的「预测未观测部分」思想搬进医学探头导航。</strong>导航的本质难点是「动作⇄视觉」的映射，而 world model 的 motion-conditioned prediction 恰好直接为这个映射建模——这是一个可迁移到其他「具身医学」场景（如内镜、介入超声）的范式：先用 JEPA 式自监督学一个懂「动作如何改变观测」的表征，再做下游控制。</li>
+        <li><strong>空间 + 运动两类自监督互补。</strong>masked region prediction 灌「解剖长什么样」，motion prediction 灌「探头一动画面怎么变」，缺一不可——医学影像的表征学习不该只看静态外观，还要把成像过程的动力学一起学进去。</li>
+        <li><strong>位姿应当进 attention，而非排进序列。</strong>与其把「图像-动作」交错成序列丢给 RNN，不如把 6-DoF 相对位姿差直接编码进每对 token 的 key/value，让 attention 与探头的 3D 空间变换对齐。这种「把几何/物理量注入 attention」的做法在 backbone 固定时仍带来明显增益，对一切「带相对几何关系的序列聚合」问题都有借鉴意义。</li>
+      </ul>
+    </div>
+    <h3>局限与未来</h3>
+    <p>几点边界值得注意：<strong>(1) 数据特殊且不公开</strong>——受试者全是健康成年男性、单一设备（GE Vivid E7 + M5S）、机械臂采集，向真实病患、女性、不同机型、徒手扫查的泛化性未验证；数据因隐私无法公开，外部难以复现具体数字。<strong>(2) 误差仍偏大</strong>——平移误差约 7–8 mm、旋转约 10° 量级，离「闭环自动扫查到诊断级画面」尚有距离，论文也定位为辅助/迈向自动化的一步。<strong>(3) 权重未放出</strong>，只能拿代码在自有数据上重训。<strong>(4)「模拟器」能力</strong>是接 diffusion 的定性展示，未量化其作为规划环境（如做 model-based planning）的可用性，这是一个自然的后续方向。</p>
+    <h3>与相关工作的关系</h3>
+    <p>按本文自身论述：world model 概念源自心理学，后用于 model-predictive control 与 RL（Ha &amp; Schmidhuber、Dreamer 系列），近年又延伸到视频生成做物理/驾驶/游戏模拟器，并被证明是强大的 representation learning 工具；EchoWorld 把它当 pretext task 用，底座是 LeCun 提出、Assran 等实现的 <b>JEPA</b>（context/target/predictor + EMA 防坍塌），spatial 任务承袭 MAE 系的 mask-and-reconstruct，motion 任务用 InfoNCE 式 contrastive。在超声 AI 这一侧，已有 USFM（自监督超声 foundation model）、EchoCLIP（多模态超声理解）等基础模型，但它们关注分割/诊断；probe guidance 这条线（US-GuideNet 做产科旋转引导、Shida 等搜索式取 PLAX、以及 imitation/RL 路线）此前少有人专门研究「适配超声运动数据的表征学习与网络结构」。EchoWorld 采用 imitation learning（从专家示范直接学，区别于依赖 CT 仿真的 RL 路线），正是补上「为超声运动数据量身设计 motion-aware world modeling」这一空白。</p>
+  </section>
+
+  <footer class="foot">
+    本页为 <code>paper-reading</code> skill 生成的阅读笔记，仅作辅助，细节以
+    <a href="https://arxiv.org/abs/2504.13065" target="_blank" rel="noopener">原文</a> 为准 · 解读日期 2026-06-11
+  </footer>
+
+</article>
+</body>
+</html>

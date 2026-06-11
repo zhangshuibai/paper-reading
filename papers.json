@@ -1,5 +1,24 @@
 [
   {
+    "slug": "2504.13065-echoworld",
+    "title": "EchoWorld: Learning Motion-Aware World Models for Echocardiography Probe Guidance",
+    "authors": "Yang Yue, Yulin Wang, Haojun Jiang, Pan Liu, Shiji Song, Gao Huang",
+    "team": "Tsinghua University (LeapLabTHU)",
+    "arxiv": "https://arxiv.org/abs/2504.13065",
+    "code": "https://github.com/LeapLabTHU/EchoWorld",
+    "date": "2026-06-11",
+    "published": "CVPR 2025",
+    "tldr": "用 world model 思路做心脏超声探头导航：JEPA 式 spatial(masked region) + motion(visual outcome) 双任务 pre-training，再用把 6-DoF 相对位姿嵌进 attention 的 motion-aware attention 融合历史，single-frame 与 sequential 协议下 guidance error 均最低。",
+    "tags": [
+      "world-model",
+      "medical-imaging",
+      "echocardiography",
+      "probe-guidance",
+      "representation-learning"
+    ],
+    "path": "papers/2504.13065-echoworld/index.html"
+  },
+  {
     "slug": "2026-06-02-airllm-survey",
     "title": "AirLLM 调研：小显存跑大模型 + 竞品对照",
     "authors": "—",
