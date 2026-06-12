@@ -135,6 +135,7 @@
     <a href="#evaluation">④ 实验评估</a>
     <a href="#insight">⑤ 洞见</a>
     <a href="#repo">⑥ 代码库调研</a>
+    <a href="#vs-opencli">⑦ 对比 OpenCLI</a>
   </nav>
 
   <!-- ============================ ① 开源贡献 ============================ -->
@@ -356,6 +357,40 @@ cli-hub list / cli-hub search &lt;q&gt; / cli-hub install &lt;name&gt;</code></p
     <div class="callout warn">
       <span class="label">口径提醒</span>
       论文快照（catalog 65+18=83 条）与 repo README（48+ 应用、2,461 测试）口径不同，本节均如实保留，不做合并。
+    </div>
+  </section>
+
+  <!-- ============================ ⑦ 对比 OpenCLI ============================ -->
+  <section id="vs-opencli">
+    <h2><span class="n">⑦</span>横向对比：OpenCLI（jackwener）</h2>
+    <p>把 CLI-Anything 放到当下生态里看，<a href="https://github.com/jackwener/opencli" target="_blank" rel="noopener">OpenCLI</a>（jackwener，Apache-2.0，抓取时约 <strong>24.1k stars</strong>）是它最直接的「正面同类」：两者都拒绝「让 agent 截图 + 模拟鼠标去扮人操作 GUI」这条路，都主张<strong>把世界变成 agent 的 CLI——给 agent 一个 agent-native 接口，而不是一个拟人的视觉操作面</strong>。差别在「对象」与「机制」：CLI-Anything 把重型<strong>专业桌面软件</strong>（Blender / FreeCAD / GIMP …）lift 成有状态 harness；OpenCLI 把<strong>网站 + 登录态浏览器 + 本地工具</strong>变成 CLI，口号是「Convert any website into a CLI &amp; run Browser Use on your logged-in Chrome」。</p>
+
+    <h3>逐维对比</h3>
+    <table>
+      <thead><tr><th>维度</th><th>CLI-Anything（HKUDS，本文）</th><th>OpenCLI（jackwener）</th></tr></thead>
+      <tbody>
+        <tr><td>定位 / 口号</td><td>「迈向 agent-native 的 computer use」——把专业软件 lift 成 agent-facing contract</td><td>「Convert any website into a CLI &amp; run Browser Use on your logged-in Chrome」</td></tr>
+        <tr><td>对象</td><td>重型<strong>专业桌面软件</strong>（3D / CAD / 视频 / 音频 / 绘图 / office），靠真实后端二进制</td><td><strong>网站 + 登录态浏览器 + 本地工具</strong>（B站 / 知乎 / 小红书 / Reddit / HN / Twitter/X / Amazon / LinkedIn 等 100+ 站点；外加 gh / docker / notion 等 passthrough）</td></tr>
+        <tr><td>核心机制</td><td>harness lift（7 步 pipeline）+ 形式化六元组 $H=(S,C,I,R,V,D)$ + 6 条不变量；渲染落到真实后端</td><td>① 100+ 站点 <strong>adapter</strong>（network 抓包 / DOM 解析 / API 拦截）；② <strong>browser primitives</strong>（<code>opencli browser</code>：本地 Chrome 扩展 Browser Bridge + 自启 daemon，端口 <code>19825</code>，控制登录态浏览器跑 Browser Use）；③ <strong>adapter 编写 skill</strong>（<code>opencli-adapter-author</code>）</td></tr>
+        <tr><td>agent 集成</td><td>CLI-Hub 包管理器（<code>pip install cli-anything-hub</code>，list / search / install）+ SKILL.md；全命令 <code>--json</code>；Claude Code 插件市场</td><td><strong>skills 体系</strong>：<code>npx skills add jackwener/opencli</code> 直接进 <strong>Claude Code / Cursor</strong>；skills 在内部代发 <code>opencli browser</code> 命令，用户用自然语言描述任务</td></tr>
+        <tr><td>输出格式</td><td>deterministic JSON（status / list / info / schema / history）；preview bundle</td><td>Table（默认）/ JSON / YAML / CSV / Markdown</td></tr>
+        <tr><td>是否接 MCP</td><td>不内置通用 loop；一处 ArcGIS live bridge 经 MCP；定位与 MCP 互补</td><td>README <strong>未提及 MCP</strong></td></tr>
+        <tr><td>气质</td><td>学术平台：论文 + 形式化契约 + 生产<strong>遥测</strong>（129,916 调用、agent 占 87.8%）</td><td>实用工具：开箱即用、社区插件（<code>opencli plugin install</code>）、下载支持（yt-dlp 等）</td></tr>
+        <tr><td>License</td><td>Apache-2.0</td><td>Apache-2.0</td></tr>
+      </tbody>
+    </table>
+
+    <h3>互补性</h3>
+    <p>两者覆盖面几乎不重叠，恰好互补。OpenCLI 的<strong>登录态浏览器桥接 + web 抓取</strong>，正补上 CLI-Anything 较少触及、且其论文自己承认仍需 GUI / 浏览器原生才是真实环境的 <strong>web 场景</strong>（WebArena / OSWorld 那一类带认证、动态、SPA 的网页交互）。反过来，CLI-Anything 的<strong>形式化 harness + 平台化</strong>（六元组的严格状态契约、backend-truth 校验、CLI-Hub 分发 + 遥测）则补上 OpenCLI 在<strong>「重型专业软件、严格状态契约」</strong>上的不足——OpenCLI 的 adapter 偏「读取 / 抓数据 / 驱动浏览器动作」，并不为「有 undo/redo、session replay、真实渲染产物校验的有状态创作工作流」而设计。一句话：OpenCLI 强在 <em>web 的广度与登录态</em>，CLI-Anything 强在 <em>专业软件的深度与状态契约</em>。</p>
+
+    <div class="callout insight">
+      <span class="label">Insight</span>
+      共同的方法论 takeaway：<strong>agent-native 接口 &gt; 视觉 GUI 模拟</strong>。两个独立项目（一个学术、一个社区，对象一个是桌面软件、一个是网站）不约而同地得出同一结论——与其造更强的 screen reader / click simulator 去逼 agent 模仿人眼人手，不如把底层后端 / API / 状态<strong>显式暴露成稳定命令 + 结构化输出</strong>，让 agent 用它擅长的 programmatic control。「把 X 变成 agent 的 CLI」正在从单篇论文的主张，长成一个跨项目的接口范式。
+    </div>
+
+    <div class="callout warn">
+      <span class="label">口径 / 未核实提醒</span>
+      本节关于 OpenCLI 的描述<strong>主要来自其 GitHub README 自述</strong>（<code>raw.githubusercontent.com/jackwener/opencli</code>）与仓库页，未独立复现验证：① 「100+ 站点」「24.1k stars」均为抓取当时 README / 仓库页数值，星数随时间漂移、且与本文 CLI-Anything 的星数（解读正文记约 42.8k）口径来源不同，不宜直接比大小；② 「100+」是 README 声称的 supported sites 数（「see all 100+ supported sites」），未逐一核对可用性；③ adapter 三种机制（抓包 / DOM / API 拦截）、daemon 端口 19825、skills 列表均依 README 文本，未本地安装跑通；④ 「未提及 MCP」指 README 抓取范围内未见，不等于全仓库无任何 MCP 相关代码。CLI-Anything 一侧数字以本解读前文与原文为准。
     </div>
   </section>
 
