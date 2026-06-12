@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CLI-Anything：迈向 agent-native 的 computer use · 论文解读</title>
+
+<!-- 数学公式渲染（在线查看时生效；无网络时正文仍可读） -->
+<script>
+  window.MathJax = {
+    tex:{inlineMath:[['$','$'],['\\(','\\)']], displayMath:[['$$','$$'],['\\[','\\]']]},
+    svg:{fontCache:'global'}
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;
+  }
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:880px; margin:0 auto; padding:18px 22px 90px}
+
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:27px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)}
+  .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .meta-grid a:hover{text-decoration:underline}
+
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap}
+  nav.toc a:hover{color:var(--accent)}
+
+  section{margin:38px 0}
+  h2{font-size:21px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:17px; margin:24px 0 8px}
+  p{margin:12px 0}
+  ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.9em}
+  pre{background:var(--panel2); border:1px solid var(--line); border-radius:10px; padding:14px 16px; overflow-x:auto; font-size:13.5px; line-height:1.6}
+  pre code{background:none; padding:0}
+  strong{color:var(--text)}
+
+  /* 开源贡献表 */
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:14px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:10px 12px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  .yes{color:var(--ok); font-weight:600}
+  .no{color:var(--muted)}
+
+  /* 图 */
+  figure{margin:24px 0; text-align:center}
+  figure img{max-width:100%; height:auto; border:1px solid var(--line); border-radius:10px; background:#fff}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+
+  /* 提示框 */
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+
+  blockquote{border-left:3px solid var(--line); margin:14px 0; padding:2px 16px; color:var(--muted)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+  .mjx-container{overflow-x:auto; overflow-y:hidden}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <!-- ============================ 抬头 / 元信息 ============================ -->
+  <header class="head">
+    <div class="chips">
+      <span class="chip">agent</span>
+      <span class="chip">computer-use</span>
+      <span class="chip">CLI</span>
+      <span class="chip">agent-native</span>
+      <span class="chip">tool-use</span>
+      <span class="chip">GUI</span>
+    </div>
+    <h1>CLI-Anything：迈向 agent-native 的 computer use</h1>
+    <p class="orig-title">CLI-Anything: Towards Agent-Native Computer Use</p>
+    <dl class="meta-grid">
+      <dt>作者</dt><dd>Yuhao Yang, Tianyu Fan, Chao Huang</dd>
+      <dt>团队 / 机构</dt><dd>HKUDS（The University of Hong Kong）— Data Intelligence Lab</dd>
+      <dt>原文链接</dt><dd><a href="https://arxiv.org/abs/2606.03854" target="_blank" rel="noopener">https://arxiv.org/abs/2606.03854</a></dd>
+      <dt>发表 / 年份</dt><dd>arXiv 2026（cs.HC, 2026-06-02）</dd>
+      <dt>解读日期</dt><dd>2026-06-12</dd>
+    </dl>
+  </header>
+
+  <div class="tldr">
+    <b>TL;DR</b> — 主流 computer use 走 GUI agent 路线——截图、定位 UI 元素、模拟鼠标点击去“扮人”操作软件；本文主张这条路与 agent 的能力根本错配（pixel 级脆弱、坐标/时序依赖、把 LLM 强行降级成人眼）。CLI-Anything 提出 agent-native 的接口设计：把已有专业软件“lift”成有状态的 command-line harness，用 structured commands、explicit state、deterministic feedback 取代视觉操作，并交付 CLI-Hub 平台来生成、分发、发现这些 harness。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#opensource">① 开源贡献</a>
+    <a href="#motivation">② 动机与贡献</a>
+    <a href="#method">③ 方法</a>
+    <a href="#evaluation">④ 实验评估</a>
+    <a href="#insight">⑤ 洞见</a>
+    <a href="#repo">⑥ 代码库调研</a>
+  </nav>
+
+  <!-- ============================ ① 开源贡献 ============================ -->
+  <section id="opensource">
+    <h2><span class="n">①</span>开源贡献 Open-source Artifacts</h2>
+    <p>官方在 <a href="https://github.com/HKUDS/CLI-Anything" target="_blank" rel="noopener">https://github.com/HKUDS/CLI-Anything</a> 完整开源了 CLI-Anything 生成器、CLI-Hub 包管理器以及数十个已生成的 harness（Apache-2.0），是“可跑代码”而非仅 demo；但未发布模型权重，也没有独立的 benchmark 数据集或 HuggingFace 资源。</p>
+    <table>
+      <thead><tr><th>类型</th><th>是否开源</th><th>内容 / 链接</th></tr></thead>
+      <tbody>
+        <tr><td>代码 Code</td><td class="yes">✔ 开源</td><td><a href="https://github.com/HKUDS/CLI-Anything" target="_blank" rel="noopener">https://github.com/HKUDS/CLI-Anything</a><br>含 CLI-Anything 生成器（7-phase pipeline，以 Claude Code plugin / 各 agent skill 形式提供）、<code>cli-hub/</code> 包管理器（<code>pip install cli-anything-hub</code>）、每个被 lift 应用的 <code>&lt;software&gt;/agent-harness/</code> 独立 Python 包、<code>skills/</code> 下的 SKILL.md。Apache-2.0。</td></tr>
+        <tr><td>模型权重 Weights</td><td class="no">✘ 无</td><td>本文不训练模型，是接口 / 系统工作。</td></tr>
+        <tr><td>数据集 Dataset</td><td class="no">✘ 无</td><td>未发布独立数据集；测试靠真实软件后端产物校验。</td></tr>
+        <tr><td>环境 / Benchmark</td><td class="warn">△ 部分</td><td>repo 自带 2,461 个测试（1,732 unit + 579 E2E + 19 Node.js，README 数字）用真实软件后端校验；但论文把“benchmarkable artifact construction”列为未来工作，目前没有正式 benchmark suite。</td></tr>
+        <tr><td>项目主页 / Demo</td><td class="yes">✔ 有</td><td>CLI-Hub 站点 <a href="https://clianything.cc" target="_blank" rel="noopener">https://clianything.cc</a>；Claude Code 插件市场 <code>/plugin marketplace add HKUDS/CLI-Anything</code>。</td></tr>
+        <tr><td>HuggingFace</td><td class="no">✘ 无</td><td>未见相关资源。</td></tr>
+      </tbody>
+    </table>
+    <div class="callout warn">
+      <span class="label">口径差异提醒</span>
+      论文正文报告 <strong>65 个 harness catalog 条目</strong>（registry.json，29 类）+ <strong>18 个第三方 CLI</strong>（public_registry.json，11 类）= 合计 <strong>83 条 / 32 类</strong>；而 repo README 写 “48+ supported applications” 与 “2,461 passing tests”。两者口径不同（catalog 条目 vs 应用数 / 论文快照 vs 仓库当前），此处如实并列，不做硬凑。
+    </div>
+  </section>
+
+  <!-- ============================ ② 动机与贡献 ============================ -->
+  <section id="motivation">
+    <h2><span class="n">②</span>研究动机与贡献 Motivation &amp; Contribution</h2>
+    <h3>背景与问题</h3>
+    <p>随着 LLM 的推理与 tool use 能力进步，主流 computer use 做的是 GUI agent——解读 screenshot、定位 UI 元素、执行鼠标点击去模仿人类交互。作者指出这套 GUI-centric 范式与 agent 的能力根本错配：pixel 级交互脆弱、依赖坐标与时序、界面一变就崩；它逼着 agent 去模拟人类的感知局限，而非发挥其在 structured data processing 与 programmatic control 上的算力优势。论文援引 Shneiderman 的 direct manipulation 来点破——GUI 本就是为人设计的：把状态压进 pixels、靠 pointing 与 focus、隐藏底层 project graph、假设连续感知；而 agent 真正需要的是 stable verbs、explicit state、JSON 输出、durable history、programmatic validation、可安装的 tool，以及在 task 当下发现接口的能力。</p>
+    <h3>本文的切入点</h3>
+    <p>作者把它当成一个基础的“软件接口”问题：一旦“点击应用”成了错误的抽象，真实软件究竟应当对 agent 暴露什么接口？核心主张是——只要后端、文件格式、命令模型、renderer 或 API 能被 lift，软件 artifact 就应通过同一个 explicit boundary 去 create / inspect / render / verify / replay；GUI 则退居人类显示面与 fallback。一个 stateful CLI harness 充当 agent-facing contract，把“最终真值”尽量委托给真实应用。</p>
+    <h3>核心贡献</h3>
+    <ol>
+      <li>提出 <strong>interface thesis</strong>：专业应用需要一个架在其真实后端之上的 agent-facing contract（而非 pixel）。形式化为 harness 六元组 $H=(S,C,I,R,V,D)$ 与 6 条 agent-native 不变量（见方法）。</li>
+      <li>用已实现的系统证据支撑：harness generation（7 步 lift pipeline / HARNESS.md SOP）、preview protocol、skill generation、CLI-Hub 分发。</li>
+      <li>把工作放进 verifiable environments 与 tool-use training 的脉络里（ReAct / Toolformer / ToolLLM / Gorilla / API-Bank / SWE-agent / MCP / AppWorld / τ-bench / OSWorld / VisualWebArena / AndroidWorld / AppAgent 等）。</li>
+      <li>指出边界与未来：更广的 preview 覆盖、agent-first 的 CLI-Hub API、实验性的 scenario-level “CLI Matrix”、可 benchmark 的 artifact 任务。</li>
+    </ol>
+  </section>
+
+  <!-- ============================ ③ 方法 ============================ -->
+  <section id="method">
+    <h2><span class="n">③</span>方法 Method</h2>
+    <p>核心方法是 “Harness Lift” SOP（HARNESS.md）：把一个 GUI 应用 lift 成 stateful CLI。生命周期按因果顺序展开——discover 应用的后端 contract → 围绕它建 stateful harness → 用真实后端发布 truthful preview → 生成 agent-readable skill → 经 CLI-Hub 分发。</p>
+
+    <figure>
+      <img src="figures/fig2_harness_pipeline.png" alt="Harness Lift Pipeline 总览">
+      <figcaption>图 1：Harness Lift Pipeline——从 interface archaeology 到可复用 agent skill 的 7 步流程（出处：原文 Figure 2）</figcaption>
+    </figure>
+
+    <h3>7 步 Lift Pipeline</h3>
+    <p>整个 lift 被拆成 7 个阶段（Figure 2），每步都强调“以 evidence 而非 click 为准”：</p>
+    <ol>
+      <li><strong>01 Locate</strong>：追踪文件、找 backend calls、识别 rendered output——以证据而非点击为准。</li>
+      <li><strong>02 Model</strong>：命名 domain nouns、映射 operations、记录约束。</li>
+      <li><strong>03 Design</strong>：设计 command grammar、JSON responses、可恢复 errors——确立 machine contract。</li>
+      <li><strong>04 Implement</strong>：project state、session replay、undo/redo——实现 durable behavior。</li>
+      <li><strong>05 Render</strong>：调真实后端、export artifacts、build previews——确立 truth boundary。</li>
+      <li><strong>06 Verify</strong>：unit/E2E tests、文件与 pixel 探针——形成 proof loop。</li>
+      <li><strong>07 Publish</strong>：生成 SKILL.md、注册 metadata、暴露 install path。</li>
+    </ol>
+    <p>贯穿全程的质量标准是：<strong>验证用户真正会打开的 artifact，而不只是命令返回 0</strong>。</p>
+
+    <h3>关键设计要点</h3>
+    <p><strong>双模 CLI。</strong>每个 harness 既是 stateful REPL 又是 one-shot subcommand 工具。标准实现是一个 Click group，<code>invoke_without_command=True</code>，带 project path、dry-run、<code>--json</code>；不带 subcommand 时进入 REPL。命令围绕软件领域模型组织成 command groups（projects / layers / pages / tracks / clips / filters / parts / scenes / exports…）。</p>
+    <p><strong>真实后端是硬依赖。</strong>渲染 / 导出必须调真实软件，例如 <code>libreoffice --headless</code>、<code>blender --background</code>、<code>melt</code>、<code>ffmpeg</code>、<code>inkscape</code>、<code>sox</code> 或原生脚本 API，避免用 Python 假冒应用。论文给出 GIMP 的 backend guard 例子：用 <code>shutil.which</code> 找真实 <code>gimp</code>，批处理跑 Script-Fu，若输出文件不存在则直接 raise。</p>
+
+    <h3>契约形式化：harness 六元组</h3>
+    <p>论文把一个 harness 形式化为：</p>
+    $$H = (S,\ C,\ I,\ R,\ V,\ D)$$
+    <ul>
+      <li>$S$ = persistent state space（project / session 文件、undo history、live preview、native artifacts）；</li>
+      <li>$C$ = command vocabulary（领域 mutation 与 probe，经 Click subcommands 与 REPL 暴露）；</li>
+      <li>$I$ = inspection surface（JSON 的 status / list / info / schema / history / preview-summary）；</li>
+      <li>$R$ = rendering / export relation（委托真实软件或其原生后端工具）；</li>
+      <li>$V$ = verification layer（unit/E2E/subprocess 测试、文件格式校验、pixel/media 校验、backend-gated 断言）；</li>
+      <li>$D$ = discovery layer（SKILL.md、registry metadata、install 策略、entry point、CLI-Hub 记录）。</li>
+    </ul>
+
+    <h3>6 条 agent-native 不变量</h3>
+    <ol>
+      <li><strong>Explicit state</strong>：workspace 必须被命名 / 保存 / 可 inspect，不能让 GUI focus 当唯一真值。</li>
+      <li><strong>Typed actions</strong>：命令映射到领域操作，鼠标手势仅作 fallback，失败要给 actionable error。</li>
+      <li><strong>Cheap inspection</strong>：提交下一步前能先问“改了什么”。</li>
+      <li><strong>Backend truth</strong>：最终 render / export 走真实软件或诚实的原生后端。</li>
+      <li><strong>Programmatic verification</strong>：校验用户会打开的 artifact，return code / 中间文件仅作旁证。</li>
+      <li><strong>Discoverability</strong>：agent 能从结构化 metadata 发现 / 安装 / 读取 / 调用接口。</li>
+    </ol>
+    <p>论文也明说契约何时不成立——若 $S$ 不透明、$C$ 无法映射到原生操作、$R$ 在 headless 下不可用、$V$ 只能靠 pixel 观测，则仍需 accessibility / GUI scripting。CLI-Anything 的精确 scope 是：当 backend / 文件格式 / 命令模型 / renderer / API 可被 lift 时，agent 应优先用这个 lifted contract。</p>
+
+    <h3>State = agent workspace</h3>
+    <p>方法让 state 成为一等公民：JSON project 文件作可 inspect 的 workspace、session 文件记录当前 project 路径与修改态、undo/redo 栈让探索可恢复、dry-run 让 agent 先验证再 mutate、deterministic JSON 让 diff 有用、文件锁防并发损坏。论文给了 FreeCAD 的 session 例子——保存 undo 快照、维护 redo、追踪 modified、加锁后持久化 JSON。要点是：截图让 agent 只能“推断”操作是否成功，而 harness 让它能 <code>session status --json</code>、列 history、undo、渲染 preview bundle——CLI 本身变成了一个有 memory / recovery / feedback 的 agent workspace。</p>
+
+    <h3>Preview 作为 display protocol</h3>
+    <p>agent 仍需视觉反馈，但本文把 preview 与 GUI streaming 解耦，定义磁盘上稳定的 bundle：<code>manifest.json</code> + <code>summary.json</code> + <code>artifacts/</code>（图像 / clip / JSON dump / 模型）；live 工作流再加 <code>session.json</code>（可变的当前 head）与 <code>trajectory.json</code>（append-only 的 command→preview 历史）。producer / consumer 分离：harness 用 <code>cli-anything-&lt;software&gt; preview ...</code> 发布（拥有真实后端、source fingerprint、truthful artifact）；CLI-Hub 用 <code>cli-hub previews inspect/html/watch/open</code> 只读消费。真值约束上，明确拒绝 toy renderer 与 GUI 截图抓取作为 preview 真值；若为可视化插了临时相机 / 灯，bundle 要做标注。当前有 5 个 preview-capable 集成：Shotcut、Openscreen、Blender、FreeCAD、RenderDoc。</p>
+
+    <h3>Discovery / 分发 / CLI-Hub</h3>
+    <p>SKILL.md 与 CLI-Hub 是接口基础设施。SKILL（当前 61 个）给 agent 在 task 当下的能力描述（命令组、示例、JSON 用法、前置软件、约束）。CLI-Hub 则是 package + registry 层：local registry 65 条 / 29 类，public registry 18 条 / 11 类；installer 跨 pip / npm / uv / bundled / command 分发；list / search 支持 JSON。作者明说当前 CLI-Hub 仍偏人类向，下一版应做 agent-first（结构化 capability search、install plan、status 诊断、直接 skill fetch、preview metadata、可查询 schema），并把它与 <strong>MCP</strong> 摆在一起对照：MCP 是 model-provider 的 tool / context 协议，CLI-Hub 是 CLI harness 的 package / skill / capability 层（互补而非替代）。</p>
+
+    <figure>
+      <img src="figures/fig1_interface_boundary.png" alt="interface boundary 对比图">
+      <figcaption>图 2：interface boundary——GUI 控制让 agent 模仿人类操作员；lifted harness 把控制点移向 native state / 命令系统 / renderer / API / 项目格式，同时让真实软件留在回路里（出处：原文 Figure 1）</figcaption>
+    </figure>
+
+    <div class="callout note">
+      <span class="label">实现要点</span>
+      Click group + <code>invoke_without_command=True</code> + <code>--json</code> + dry-run 是标准骨架；渲染必须落到真实后端二进制（<code>blender --background</code> 等）；测试即接口设计的一部分——弱 harness 只说“返回 0”，强 harness 说“命令生成了 project、后端渲染了它、且输出有预期结构 / 可见内容”。
+    </div>
+  </section>
+
+  <!-- ============================ ④ 实验评估 ============================ -->
+  <section id="evaluation">
+    <h2><span class="n">④</span>实验评估 Evaluation</h2>
+    <h3>评测口径</h3>
+    <p>本文把 CLI-Anything 当“接口系统”来评，关注 surface area / 生产使用 / 生态成熟度，而非传统“我方 vs baseline 的 benchmark 准确率表”。<strong>没有与 GUI agent 直接打分对比的数字表</strong>（这点要如实写）。证据有三类。</p>
+
+    <h3>(1) 真实 manipulation artifact</h3>
+    <p>第一类证据是三段录制 demo 的 midpoint 帧（Figure 10）——Slay the Spire II 游戏控制、Blender orbital relay drone preview、FreeCAD Curiosity rover preview。强调这些是真实运行切片而非 mock 截图，命令面 / 状态轨迹 / 渲染态同步移动。</p>
+    <figure>
+      <img src="figures/fig10_demos.png" alt="三个 midpoint demo">
+      <figcaption>图 3：三个真实运行 demo 的 midpoint 帧——Slay the Spire II / Blender / FreeCAD（出处：原文 Figure 10）</figcaption>
+    </figure>
+
+    <h3>(2) Catalog 覆盖</h3>
+    <table>
+      <thead><tr><th>Registry surface</th><th>条目 / 类别</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr><td>Generated/curated harness CLIs</td><td><strong>65 条 / 29 类</strong></td><td>registry.json</td></tr>
+        <tr><td>Public third-party CLIs</td><td><strong>18 条 / 11 类</strong></td><td>public_registry.json</td></tr>
+        <tr><td>Combined catalog</td><td><strong>83 条 / 32 类</strong></td><td>合计</td></tr>
+      </tbody>
+    </table>
+    <p>顶部类别（combined）：ai 9、devops 7、web 7、graphics 5、video 5、communication 4、office 4、gamedev 3、image 3、knowledge 3、3d 2、audio 2。</p>
+
+    <h3>(3) CLI-Hub 生产遥测</h3>
+    <table>
+      <thead><tr><th>指标</th><th>数值</th></tr></thead>
+      <tbody>
+        <tr><td>总调用</td><td><strong>129,916</strong></td></tr>
+        <tr><td>agent 占比</td><td><strong>87.8%</strong>（114,057 agent calls）</td></tr>
+        <tr><td>human 占比</td><td>12.2%（15,859）</td></tr>
+        <tr><td>agent / human 比</td><td><strong>7.19×</strong></td></tr>
+        <tr><td>观测窗口增长</td><td><strong>+694.1%</strong>（16,361 → 129,916）</td></tr>
+      </tbody>
+    </table>
+    <p>这些数字的解读不在单个绝对计数，而在于：<strong>agent 已经把 CLI-Hub 当作运行时依赖来调用</strong>，同时 human 仍在浏览 / 安装 / inspect。其它仓库信号：61 个 companion skills；5 个 preview-bundle 集成；public registry 安装策略多样（npm 8、pip 3、brew 2、bundled 2、command 1、script 1、uv 1）。</p>
+
+    <h3>两个 case study（质性评测）</h3>
+    <p><strong>Blender（成熟后端 lift 模式）。</strong>Click 树有 12 个 group、54 个命令函数（53 public + 1 hidden monitor）；agent-facing 的 <code>.blend-cli.json</code> 作工作态，<code>.blend</code> 与渲染图作后端产物。四阶段映射：命令 mutate JSON scene contract → domain 模块校验 Blender 概念 → scene-contract lowering pass 把 JSON 图降成完整 <code>bpy</code> 脚本 → backend wrapper 跑真实 blender 二进制（headless）并核验产物存在；EEVEE 脚本对版本容错（新版选 <code>BLENDER_EEVEE_NEXT</code>，4.0 选 <code>BLENDER_EEVEE</code>）。共 228 个测试。</p>
+    <p><strong>Slay the Spire II（先在应用内造后端边界的模式）。</strong>Python 侧 28 个 Click 命令；in-game C# bridge（STS2_Bridge）把游戏归一成 15 个 decision states 与 24 个 single-player action verbs，经 loopback HTTP（localhost:15526）+ JSON 暴露；bridge 跑在 Godot 主循环里，用 <code>ConcurrentQueue&lt;Action&gt;</code> 在 <code>ProcessFrame</code> 上排空 frame-owned 工作。关键对照：Blender 是“找到已存在的后端边界”，STS2 是“先在应用内部造一个后端边界”。这把数据采集从“模仿 pixel / 输入轨迹”变成“在确认过的语义算子上做组合”。</p>
+
+    <h3>消融 / 分析（cross-harness 失败模式）</h3>
+    <ol>
+      <li>后端进程成功退出却没产出 → 修复 = artifact 校验优先于 exit-code。</li>
+      <li>仅改 project 却在 export 时丢失（render 路径缺某 filter / effect 映射）→ 修复 = 记录 project-only 特性或补真实 render 映射。</li>
+      <li>无状态命令跨回合丢上下文 → 修复 = 显式 session state + autosave + status 探针。</li>
+      <li>preview 截图变装饰、失真 → 修复 = 绑定真实 project state 与后端产物的 bundle protocol。</li>
+      <li>可安装性是可用性的一部分 → 修复 = registry + 安装策略 + skills + 清晰后端报错。</li>
+    </ol>
+  </section>
+
+  <!-- ============================ ⑤ 洞见 ============================ -->
+  <section id="insight">
+    <h2><span class="n">⑤</span>洞见 Insights</h2>
+    <div class="callout insight">
+      <span class="label">Insight</span>
+      <ol>
+        <li><strong>agent-native 接口 vs 拟人 GUI 是方法论分水岭。</strong>与其造更强的 screen reader / click simulator 去逼 agent 模拟人类感知，不如重设交互范式，围绕 agent 的强项（精确 programmatic control + deterministic execution）来设计接口——keyboard-and-mouse 是低层运动接口而非语义动作接口，同一意图（“对某怪打某张牌”）有无数像素 / 时序 / 坐标轨迹，CLI 把这一等价类塌缩成一条带显式参数的稳定命令。</li>
+        <li><strong>“如果 artifact 能被代码 check，它往往就能被代码 build。”</strong>coding agent 之所以好用，是因为环境可执行（命令跑、测试挂、文件 diff、成功可验证）；把同一类可执行 / 可校验 / 有真值显示路径的接口层给到专业软件，就把许多 GUI computer-use 任务变回 executable environment 任务。</li>
+        <li><strong>harness 有两种生长模式。</strong>成熟后端→直接 lift（Blender）；后端结构残缺→先在应用内造 adapter 再 lift（STS2）。两者共享同一 agent-facing 契约（explicit state / typed actions / backend truth / testable），差别只在“接口边界该放哪”。</li>
+      </ol>
+    </div>
+    <h3>局限与未来</h3>
+    <p>有些软件只暴露编译后的二进制 / 不透明状态 / 难 lift 的交互，仍需 accessibility 或 GUI 自动化；部分创作决策仍需丰富的视觉判断；部分 preview 集成尚早、覆盖不全。Web / 手机 / 桌面 agent 工作（WebArena、OSWorld、AndroidWorld、AppAgent 等）在“视觉 / 浏览器原生才是真实环境”的场景里仍直接相关。下一步是 benchmarkable artifact construction：让 task suite 要求 agent 产出图 / 报告 / CAD 模型 / 视频剪辑 / GPU capture 分析 / office 文档，再用程序化方式评估。</p>
+    <h3>与相关工作的关系</h3>
+    <p>CLI-Anything 自我定位在“environment 层”。它把 coding agent 的可执行环境（repo + shell + 测试 + 包管理，见 SWE-bench / SWE-agent）推广到非代码软件；与 tool-use / API 工作（ReAct、Toolformer、ToolLLM、Gorilla、API-Bank）共享“命令 / API 即可调用动作”的契约；与 verifiable-reward / tool-use training（Qwen3-Coder-Next、DeepSeek-V3.2、Kimi K2.5）共享“agent 需要可执行、可校验反馈”的前提；与 MCP 互补（MCP 是 model-provider 协议，CLI-Hub 是 CLI harness 的包 / 技能 / 能力层）；并呼应 SWE-agent 的洞见——agent-computer interface 的接口设计本身实质影响 agent 在交互式软件任务上的表现。</p>
+  </section>
+
+  <!-- ============================ ⑥ 代码库调研 ============================ -->
+  <section id="repo">
+    <h2><span class="n">⑥</span>官方代码库 CLI-Hub / CLI-Anything 调研</h2>
+    <p>实测 <a href="https://github.com/HKUDS/CLI-Anything" target="_blank" rel="noopener">https://github.com/HKUDS/CLI-Anything</a> 是“可跑的平台 + 工具集”，不是只放 demo——Apache-2.0，约 <strong>42.8k stars</strong>（WebFetch 抓取时），含生成器、CLI-Hub 包管理器、数十个已生成 harness 与 SKILL.md。</p>
+
+    <h3>仓库做了什么</h3>
+    <ul>
+      <li><strong>CLI-Anything 生成器</strong>：一条自动化的 7-phase pipeline，把源码 / 应用 lift 成生产级 Python CLI harness；以 Claude Code plugin 与多 agent 平台 skill（Codex / Hermes / Reasonix 等）的形式提供，入口如 <code>/cli-anything &lt;path-or-repo&gt;</code>、<code>/cli-anything:refine &lt;path&gt; [focus]</code>。</li>
+      <li><strong>CLI-Hub 包管理器</strong>：<code>pip install cli-anything-hub</code>；命令 <code>cli-hub list</code> / <code>cli-hub search &lt;query&gt;</code> / <code>cli-hub install &lt;name&gt;</code>；跨 pip / npm / uv / bundled / command 安装策略；registry.json + public_registry.json 作分发 metadata。</li>
+      <li><strong>已生成 harness</strong>：每个应用一个 <code>&lt;software&gt;/agent-harness/</code> 独立 Python 包，README 列 48+ 应用（GIMP、Blender、Inkscape、Audacity、Krita、Kdenlive、Shotcut、OBS、Draw.io、LibreOffice、Zotero、Obsidian、n8n、QGIS、FreeCAD、Godot、LLDB、Nsight Graphics、Unreal Insights、ComfyUI、Ollama 等）。</li>
+      <li><strong>Agent 集成 / 发现</strong>：<code>skills/</code> 下的 SKILL.md；<code>cli-hub-meta-skill</code> 让 agent 自主发现并安装 CLI；SKILL 兼容 Claude Code / Codex / OpenClaw / Nanobot / Reasonix / Antigravity 等。</li>
+    </ul>
+
+    <h3>安装与用法</h3>
+    <pre><code>pip install cli-anything-hub
+/plugin marketplace add HKUDS/CLI-Anything
+/plugin install cli-anything
+cli-hub list / cli-hub search &lt;q&gt; / cli-hub install &lt;name&gt;</code></pre>
+
+    <h3>可跑程度</h3>
+    <p>属于“可跑代码”。dual modes（stateful REPL + subcommand），全命令带 <code>--json</code>；README 称 <strong>2,461 个测试通过</strong>（1,732 unit + 579 E2E + 19 Node.js），100% 通过率，用真实软件后端校验。</p>
+
+    <h3>MCP / agent loop</h3>
+    <p>仓库未内置通用 agent loop（task-automation 指标是隐含而非形式化的）；有一处 live bridge（ArcGIS Pro）演示经 MCP 的 live session 控制；CLI-Hub 自身定位为 CLI harness 的包 / 技能层，与 MCP 互补。</p>
+
+    <h3>benchmark / HF / license</h3>
+    <p>无独立 benchmark 数据集，无 HuggingFace 资源；测试即“真实软件调用 + 产物校验”。许可证 Apache-2.0。版本里程碑上 README 提到 v0.2.0（HARNESS.md 渐进式披露重构、<code>guides/</code> 按需加载）。</p>
+
+    <h3>开源产物小表</h3>
+    <table>
+      <thead><tr><th>类型</th><th>可跑?</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td>CLI-Anything 生成器（7-phase）</td><td class="yes">✔ 可跑</td><td>plugin / skill 形式，<code>/cli-anything</code> 入口</td></tr>
+        <tr><td>CLI-Hub 包管理器</td><td class="yes">✔ 可跑</td><td><code>pip install cli-anything-hub</code>；list / search / install</td></tr>
+        <tr><td>已生成 harness（48+ 应用）</td><td class="yes">✔ 可跑</td><td><code>&lt;software&gt;/agent-harness/</code> 独立包，<code>--json</code> + REPL</td></tr>
+        <tr><td>SKILL.md / meta-skill</td><td class="yes">✔</td><td>agent 发现 / 安装入口</td></tr>
+        <tr><td>通用 agent loop</td><td class="no">✘</td><td>未形式化；仅 ArcGIS live bridge demo（MCP）</td></tr>
+        <tr><td>benchmark / 数据集 / 权重 / HF</td><td class="no">✘</td><td>未发布</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout warn">
+      <span class="label">口径提醒</span>
+      论文快照（catalog 65+18=83 条）与 repo README（48+ 应用、2,461 测试）口径不同，本节均如实保留，不做合并。
+    </div>
+  </section>
+
+  <footer class="foot">
+    本页为 <code>paper-reading</code> skill 生成的阅读笔记，仅作辅助，细节以
+    <a href="https://arxiv.org/abs/2606.03854" target="_blank" rel="noopener">原文</a> 为准 · 解读日期 2026-06-12
+  </footer>
+
+</article>
+</body>
+</html>

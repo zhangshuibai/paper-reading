@@ -1,22 +1,23 @@
 [
   {
-    "slug": "2504.13065-echoworld",
-    "title": "EchoWorld: Learning Motion-Aware World Models for Echocardiography Probe Guidance",
-    "authors": "Yang Yue, Yulin Wang, Haojun Jiang, Pan Liu, Shiji Song, Gao Huang",
-    "team": "Tsinghua University (LeapLabTHU)",
-    "arxiv": "https://arxiv.org/abs/2504.13065",
-    "code": "https://github.com/LeapLabTHU/EchoWorld",
-    "date": "2026-06-11",
-    "published": "CVPR 2025",
-    "tldr": "用 world model 思路做心脏超声探头导航：JEPA 式 spatial(masked region) + motion(visual outcome) 双任务 pre-training，再用把 6-DoF 相对位姿嵌进 attention 的 motion-aware attention 融合历史，single-frame 与 sequential 协议下 guidance error 均最低。",
+    "slug": "2606.03854-cli-anything",
+    "title": "CLI-Anything: Towards Agent-Native Computer Use",
+    "authors": "Yuhao Yang, Tianyu Fan, Chao Huang",
+    "team": "HKUDS (The University of Hong Kong)",
+    "arxiv": "https://arxiv.org/abs/2606.03854",
+    "code": "https://github.com/HKUDS/CLI-Anything",
+    "date": "2026-06-12",
+    "published": "arXiv 2026",
+    "tldr": "把专业 GUI 软件 lift 成有状态的 command-line harness，用结构化命令/显式状态/确定反馈实现 agent-native computer use，并交付 CLI-Hub 平台生成与分发这些接口。",
     "tags": [
-      "world-model",
-      "medical-imaging",
-      "echocardiography",
-      "probe-guidance",
-      "representation-learning"
+      "agent",
+      "computer-use",
+      "CLI",
+      "agent-native",
+      "tool-use",
+      "GUI"
     ],
-    "path": "papers/2504.13065-echoworld/index.html"
+    "path": "papers/2606.03854-cli-anything/index.html"
   },
   {
     "slug": "2026-06-02-airllm-survey",
@@ -37,26 +38,6 @@
       "工具调研"
     ],
     "path": "papers/2026-06-02-airllm-survey/index.html"
-  },
-  {
-    "slug": "2510.24645-funreason-mt",
-    "title": "FunReason-MT: Advanced Data Synthesis for Real-world Multi-Turn Tool-use",
-    "authors": "Zengzhuang Xu, Bingguang Hao, et al.",
-    "team": "AWorld Team, Inclusion AI (Ant Group); Zhejiang University; City University of Hong Kong",
-    "arxiv": "https://arxiv.org/abs/2510.24645",
-    "code": "https://github.com/inclusionAI/AWorld-RL",
-    "date": "2026-06-05",
-    "published": "arXiv 2025",
-    "tldr": "用 API graph 定向采样 + advanced-tool 反推 hard query + ground-truth 校验的迭代 CoT，合成高质量多轮 tool-use 数据；训出的 4B 模型在 BFCLv3 Multi-Turn 达 57.75，同尺寸 SOTA 并反超 Claude-Sonnet-4 等大模型。",
-    "tags": [
-      "tool-use",
-      "data-synthesis",
-      "multi-turn",
-      "function-calling",
-      "BFCL",
-      "agent"
-    ],
-    "path": "papers/2510.24645-funreason-mt/index.html"
   },
   {
     "slug": "2026-06-02-mai-thinking-1",
@@ -906,5 +887,44 @@
       "mcp",
       "agent"
     ]
+  },
+  {
+    "slug": "2504.13065-echoworld",
+    "title": "EchoWorld: Learning Motion-Aware World Models for Echocardiography Probe Guidance",
+    "authors": "Yang Yue, Yulin Wang, Haojun Jiang, Pan Liu, Shiji Song, Gao Huang",
+    "team": "Tsinghua University (LeapLabTHU)",
+    "arxiv": "https://arxiv.org/abs/2504.13065",
+    "code": "https://github.com/LeapLabTHU/EchoWorld",
+    "date": "2026-06-11",
+    "published": "CVPR 2025",
+    "tldr": "用 world model 思路做心脏超声探头导航：JEPA 式 spatial(masked region) + motion(visual outcome) 双任务 pre-training，再用把 6-DoF 相对位姿嵌进 attention 的 motion-aware attention 融合历史，single-frame 与 sequential 协议下 guidance error 均最低。",
+    "tags": [
+      "world-model",
+      "medical-imaging",
+      "echocardiography",
+      "probe-guidance",
+      "representation-learning"
+    ],
+    "path": "papers/2504.13065-echoworld/index.html"
+  },
+  {
+    "slug": "2510.24645-funreason-mt",
+    "title": "FunReason-MT: Advanced Data Synthesis for Real-world Multi-Turn Tool-use",
+    "authors": "Zengzhuang Xu, Bingguang Hao, et al.",
+    "team": "AWorld Team, Inclusion AI (Ant Group); Zhejiang University; City University of Hong Kong",
+    "arxiv": "https://arxiv.org/abs/2510.24645",
+    "code": "https://github.com/inclusionAI/AWorld-RL",
+    "date": "2026-06-05",
+    "published": "arXiv 2025",
+    "tldr": "用 API graph 定向采样 + advanced-tool 反推 hard query + ground-truth 校验的迭代 CoT，合成高质量多轮 tool-use 数据；训出的 4B 模型在 BFCLv3 Multi-Turn 达 57.75，同尺寸 SOTA 并反超 Claude-Sonnet-4 等大模型。",
+    "tags": [
+      "tool-use",
+      "data-synthesis",
+      "multi-turn",
+      "function-calling",
+      "BFCL",
+      "agent"
+    ],
+    "path": "papers/2510.24645-funreason-mt/index.html"
   }
 ]
