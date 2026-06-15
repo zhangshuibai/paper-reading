@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Exa Labs (Exa) · 竞争格局与赛道早期度调研</title>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --bad:#ff6b81; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --bad:#d23651; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;}
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:920px; margin:0 auto; padding:18px 22px 90px}
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:25px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)} .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap; line-height:2}
+  nav.toc a:hover{color:var(--accent)}
+  section{margin:38px 0}
+  h2{font-size:20px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:16.5px; margin:22px 0 8px}
+  p{margin:12px 0} ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)} strong{color:var(--text)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.88em}
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:13px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:9px 10px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  figure{margin:24px 0; text-align:center}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+  .svgwrap{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 8px}
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+  /* 来源等级 badge */
+  .src{font-size:10.5px; padding:0 6px; border-radius:999px; white-space:nowrap; vertical-align:middle}
+  .src-a{background:rgba(67,197,158,.18); color:var(--ok)}      /* 🟢 一手 */
+  .src-b{background:rgba(255,180,84,.18); color:var(--warn)}    /* 🟡 二手 */
+  .src-c{background:rgba(255,107,129,.18); color:var(--bad)}    /* 🔴 自述/未证实 */
+  .legend{font-size:12px; color:var(--muted); margin:6px 0 0}
+  /* 早期度 verdict */
+  .verdict{display:inline-block; font-weight:700; padding:3px 12px; border-radius:999px; font-size:14px}
+  .v-nascent{background:rgba(122,162,255,.18); color:var(--accent)}
+  .v-emerging{background:rgba(67,197,158,.18); color:var(--ok)}
+  .v-crowded{background:rgba(255,180,84,.18); color:var(--warn)}
+  .v-mature{background:rgba(255,107,129,.18); color:var(--bad)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">AI Infra</span>
+      <span class="chip">Search / Retrieval API</span>
+      <span class="chip">Agent 基建</span>
+      <span class="chip">竞争格局</span>
+      <span class="chip">赛道早期度</span>
+      <span class="chip">创业 idea</span>
+    </div>
+    <h1>Exa Labs (Exa)：竞争格局与赛道早期度调研</h1>
+    <p class="orig-title">exa.ai（前身 Metaphor Systems）— 「给 AI agent 用的神经网络网页搜索 API」 / 赛道 emerging→crowded / 有哪些 whitespace 可借鉴</p>
+    <dl class="meta-grid">
+      <dt>对象</dt><dd><a href="https://exa.ai" target="_blank" rel="noopener">https://exa.ai</a></dd>
+      <dt>赛道</dt><dd>AI-native Web Search / Retrieval API（给 LLM 与 AI agent 用的网页检索基建）</dd>
+      <dt>整理</dt><dd>对话调研笔记；信息来自公开检索，按来源分级标注，产品能力未必经独立验证</dd>
+      <dt>日期</dt><dd>2026-06-15</dd>
+    </dl>
+    <p class="legend">来源等级：<span class="src src-a">🟢 一手</span> 官网/SEC/官方 ·
+      <span class="src src-b">🟡 二手</span> 媒体/数据库 ·
+      <span class="src src-c">🔴 自述/未证实</span> 营销口径或未独立验证</p>
+  </header>
+
+  <div class="tldr">
+    <b>一句话</b> — Exa 是一家做「<strong>给 AI 用的网页搜索引擎 / Search API</strong>」的应用型 AI lab：用 embedding/神经检索按语义（而非关键词）从全网取回内容，专门喂给 LLM、agent 与 deep-research 应用。
+    赛道介于 <strong>emerging→crowded</strong> 之间——2024–2025 一年内冒出 Tavily、Linkup、Firecrawl、Brave/Perplexity Search API 等一大批玩家，但「自建 web-scale 索引 + 自研 embedding 模型」这条最重的路线门槛很高，真正的同类只有少数几家。
+    最值得借鉴的 whitespace：<strong>垂直/专业语料的语义检索 API</strong>（如学术 / 专利 / 临床 / 材料数据，正对 AI4S）——通用 web search 已拥挤，但「为科研 agent 取回结构化领域知识」几乎没人占。
+    融资节奏极陡：seed→C 五年走完，<strong>2026/05 a16z 领投 $250M、估值 $2.2B</strong>。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#market">① 赛道地图 + 早期度</a>
+    <a href="#matrix">② 竞品对照矩阵</a>
+    <a href="#map">③ 定位图</a>
+    <a href="#funding">④ 融资 timeline</a>
+    <a href="#snapshot">⑤ 公司速览</a>
+    <a href="#idea">⑥ 创业 idea 借鉴</a>
+    <a href="#take">⑦ 现实判断</a>
+    <a href="#src">出处</a>
+  </nav>
+
+  <!-- ① 赛道与早期度 -->
+  <section id="market">
+    <h2><span class="n">①</span>赛道地图 + 早期度判断</h2>
+    <p>Exa 属于 <strong>「AI-native Web Search / Retrieval API」</strong> 赛道：把「从全网实时取回最相关内容」做成一个 developer API，专门优化给 LLM/agent 消费（返回干净正文、highlights、token-efficient 片段，而非给人看的蓝色链接列表）。
+    需求来自一个结构性变化——<strong>调用搜索的主体从「人」变成了「AI agent」</strong>：传统 Google/Bing 的关键词 + 链接图为人类点击设计，而 agent 需要语义召回、结构化正文、低延迟、可编程。Exa 的差异化路线是 <strong>embeddings-first 神经检索</strong>（自建 web 索引 + 自研 embedding/排序模型），把「按意思找」做成默认能力 <span class="src src-c">🔴 路线为官方自述</span>。</p>
+    <h3>玩家分群（四象限别漏）</h3>
+    <ul>
+      <li><strong>现有巨头 / 上游入口：</strong>Google Custom Search / Programmable Search、Bing Web Search API（注：微软已宣布 Bing Search API 2025 年起逐步退役，转向 Grounding with Bing/Azure）、Brave Search API（独立索引）。它们握有 web-scale 索引这一最重资产。<span class="src src-b">🟡</span></li>
+      <li><strong>垂直创业公司（直接竞品）：</strong><strong>Tavily</strong>（agent 搜索层，2026/02 被 Nebius 收购）、<strong>Linkup</strong>、<strong>Serper</strong>（廉价 Google SERP 代理）、<strong>Firecrawl</strong>（抓取/转 markdown，向 search 延伸）、<strong>Jina</strong>（Reader/Embeddings）。<span class="src src-b">🟡</span></li>
+      <li><strong>大厂顺手做 / 平台内置：</strong>OpenAI 内置 web search（Responses API 的 <code>web_search</code> 工具）、Anthropic web search tool、Google Gemini grounding、Perplexity 于 2025/09 推出独立 <strong>Search API</strong>——消费级搜索玩家直接把底座 API 化下来抢这层。<span class="src src-b">🟡</span></li>
+      <li><strong>开源 / 免费替代（最易被忽视的威胁）：</strong>自建 <code>SearXNG</code>（聚合多引擎）+ 开源 embedding（bge/e5/Jina）+ 向量库（自托管 RAG 检索）；或 GPT-Researcher 这类开源 research agent 直接拼 SERP+抓取。对成本敏感、数据要私有的团队，这是真实的「零 API 费」路线。<span class="src src-b">🟡</span></li>
+    </ul>
+    <div class="callout insight">
+      <span class="label">早期度判断</span>
+      <span class="verdict v-crowded">emerging → crowded（偏拥挤）</span>
+      （nascent 萌芽 / emerging 新兴 / crowded 拥挤 / mature 成熟）<br><br>
+      <strong>判断信号：</strong>
+      ① <strong>玩家数与新增速度：高。</strong>2024–2025 一年内涌现 Tavily / Linkup / Firecrawl / Serper / Perplexity Search API 等十余家，"Tavily alternatives"、"best web search API for AI 2026" 已成高频对比词 <span class="src src-b">🟡</span>；
+      ② <strong>融资热度：高且密。</strong>Exa 一年内连跳 B、C（$85M→$250M），Tavily $25M 后被 Nebius 收购，Firecrawl $14.5M A 轮 <span class="src src-b">🟡</span>；
+      ③ <strong>巨头是否进场：已进。</strong>OpenAI/Anthropic/Google 都把 web search 做进 API；Perplexity 直接开 Search API；微软反向退役 Bing API <span class="src src-b">🟡</span>；
+      ④ <strong>开源替代：存在。</strong>SearXNG + 开源 embedding 自建可零费用替代 <span class="src src-b">🟡</span>；
+      ⑤ <strong>benchmark/标准：未成型。</strong>各家口径不一（延迟、召回、价格樱桃挑选），尚无公认权威评测——这点仍偏 emerging。<br>
+      综合：<strong>「通用 web search API」这一格已经拥挤</strong>；但 Exa 选的「自建索引 + 自研模型」最重路线，真正同体量的对手很少，且赛道整体仍在快速扩张（量起得快、标准没定），故判 <strong>emerging→crowded 之间</strong>。
+    </div>
+  </section>
+
+  <!-- ② 竞品矩阵 -->
+  <section id="matrix">
+    <h2><span class="n">②</span>竞品对照矩阵</h2>
+    <p>选 6 个对这条赛道最决定性的维度：<strong>技术路线</strong>（决定差异化与 moat）、<strong>索引来源</strong>（自建 vs 代理别人）、<strong>定价</strong>（API 单价是核心战场）、<strong>目标客户</strong>、<strong>融资/估值</strong>（弹药厚度）、<strong>开源</strong>。价格口径来自各家公开页/报道，时间不同、含义不同（每千次请求 vs 每千次抓取），<strong>仅供量级对比，勿直接比绝对值</strong>。</p>
+    <table>
+      <thead><tr>
+        <th>玩家</th>
+        <th>技术路线</th><th>索引来源</th><th>定价（量级）</th>
+        <th>目标客户</th><th>融资 / 状态</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Exa（本篇）</strong></td>
+          <td><strong>embeddings-first 神经检索 + 自研模型</strong> <span class="src src-c">🔴自述</span></td>
+          <td><strong>自建 web 索引</strong> <span class="src src-c">🔴</span></td>
+          <td>Search $7/千次（≤10 结果）；Deep $12–15/千；免费 2 万次/月 <span class="src src-a">🟢官网</span></td>
+          <td>开发者 / agent / deep-research / 企业 <span class="src src-a">🟢</span></td>
+          <td>$250M C @ $2.2B（2026/05）<span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Tavily</td>
+          <td>agent 搜索/答案层（聚合+优化）<span class="src src-b">🟡</span></td>
+          <td>代理/聚合第三方 <span class="src src-b">🟡</span></td>
+          <td>约 $8/千次（100k≈$800）<span class="src src-b">🟡报道</span></td>
+          <td>企业 agent / GPT-Researcher 生态 <span class="src src-b">🟡</span></td>
+          <td>$25M A（2025/08）→ 2026/02 被 Nebius 收购 <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Linkup</td>
+          <td>面向 agent 的搜索+答案 <span class="src src-b">🟡</span></td>
+          <td>代理/聚合 <span class="src src-b">🟡</span></td>
+          <td>约 $0.007/次起 <span class="src src-b">🟡</span></td>
+          <td>deep-research agent <span class="src src-b">🟡</span></td>
+          <td>早期（欧洲，种子级）<span class="src src-c">🔴未核实细节</span></td>
+        </tr>
+        <tr>
+          <td>Serper</td>
+          <td>Google SERP 代理（关键词，非语义）<span class="src src-b">🟡</span></td>
+          <td>代理 Google <span class="src src-b">🟡</span></td>
+          <td>极廉价 SERP <span class="src src-b">🟡</span></td>
+          <td>成本敏感 / 拼装管线 <span class="src src-b">🟡</span></td>
+          <td>bootstrap / 小团队 <span class="src src-c">🔴</span></td>
+        </tr>
+        <tr>
+          <td>Firecrawl</td>
+          <td>抓取→clean markdown，向 search 延伸 <span class="src src-b">🟡</span></td>
+          <td>实时抓取（非索引）<span class="src src-b">🟡</span></td>
+          <td>约 $1.66/千搜、$0.83/千抓取 <span class="src src-b">🟡</span></td>
+          <td>开发者 / RAG / extract 层 <span class="src src-b">🟡</span></td>
+          <td>$14.5M A（2025/08，总 $16.2M）；开源 43k★ <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Perplexity Search API</td>
+          <td>消费搜索同源索引下放 API <span class="src src-c">🔴自述同源</span></td>
+          <td>自建实时索引（数千亿页声明）<span class="src src-c">🔴</span></td>
+          <td>$5/千次，无 token 费 <span class="src src-b">🟡</span></td>
+          <td>开发者 / agent（与自家消费品并行）<span class="src src-b">🟡</span></td>
+          <td>独立公司，估值百亿级（2025/09 推 API）<span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>OpenAI / Anthropic / Gemini 内置 search</td>
+          <td>平台内置 web_search 工具 / grounding <span class="src src-b">🟡</span></td>
+          <td>背后接 Bing/自有/第三方 <span class="src src-b">🟡</span></td>
+          <td>按工具调用计费，捆绑在模型 API <span class="src src-b">🟡</span></td>
+          <td>已用其模型的所有开发者（默认便利）<span class="src src-b">🟡</span></td>
+          <td>巨头自带分发 <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>SearXNG + 开源 embedding（自建）</td>
+          <td>聚合元搜索 + 自托管语义检索 <span class="src src-b">🟡</span></td>
+          <td>聚合公开引擎 <span class="src src-b">🟡</span></td>
+          <td>$0 API 费（自担算力/运维）<span class="src src-b">🟡</span></td>
+          <td>数据私有 / 成本极敏感 / 合规 <span class="src src-b">🟡</span></td>
+          <td>开源社区 <span class="src src-b">🟡</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>读矩阵：</strong>真正与 Exa 同形态（自建 web-scale 索引 + 自研检索模型）的只有 <strong>Perplexity</strong> 与传统巨头；大多数「竞品」其实是 <strong>代理别人索引 + 做优化层</strong>（Tavily/Linkup/Serper）或 <strong>只做抓取/extract</strong>（Firecrawl/Jina）。Exa 的差异化 = 「<strong>自有索引 + embedding 语义召回</strong>」带来的深度与可控性，软肋是 <strong>这条路又重又贵</strong>（要持续烧算力训模型、维护索引），而轻量代理路线在很多场景"够用且更便宜"。最大的同质化压力来自 <strong>巨头把 search 做进模型 API</strong>——对已经在用 OpenAI/Anthropic 的开发者，内置 search 是零额外集成的默认选项。</p>
+  </section>
+
+  <!-- ③ 定位图 -->
+  <section id="map">
+    <h2><span class="n">③</span>定位图（whitespace 在哪）</h2>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 640 400" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12">
+        <!-- 象限背景 -->
+        <rect x="40" y="20" width="560" height="340" fill="#f7f9ff" stroke="none"/>
+        <line x1="40" y1="190" x2="600" y2="190" stroke="#b9c2e0" stroke-width="1.5"/>
+        <line x1="320" y1="20" x2="320" y2="360" stroke="#b9c2e0" stroke-width="1.5"/>
+        <!-- 轴标签 -->
+        <text x="598" y="206" text-anchor="end" fill="#5a627a">自建索引 / 自研模型（重）→</text>
+        <text x="42" y="206" fill="#5a627a">← 代理/聚合·抓取（轻）</text>
+        <text x="326" y="32" fill="#5a627a">↑ 通用 web 全网</text>
+        <text x="326" y="352" fill="#5a627a">↓ 垂直 / 专业语料</text>
+        <!-- whitespace 高亮：右下（重路线 × 垂直语料）几乎空 -->
+        <rect x="322" y="192" width="276" height="166" fill="rgba(67,197,158,.10)" stroke="rgba(67,197,158,.5)" stroke-dasharray="5 4"/>
+        <text x="460" y="300" text-anchor="middle" fill="#138a6e" font-size="12.5" font-weight="700">whitespace</text>
+        <text x="460" y="318" text-anchor="middle" fill="#138a6e" font-size="11">垂直/专业语料的</text>
+        <text x="460" y="332" text-anchor="middle" fill="#138a6e" font-size="11">语义检索 API（AI4S 机会）</text>
+        <!-- 玩家：右上 重×通用 -->
+        <circle cx="470" cy="95" r="7" fill="#3a66ff"/><text x="482" y="99" fill="#1a1f33" font-weight="700">Exa</text>
+        <circle cx="510" cy="130" r="6" fill="#9b8cff"/><text x="522" y="134" fill="#36406b">Perplexity API</text>
+        <circle cx="430" cy="70" r="6" fill="#8a93ad"/><text x="360" y="62" fill="#36406b">Google/Bing/Brave</text>
+        <!-- 左上 轻×通用 -->
+        <circle cx="150" cy="100" r="6" fill="#b3701a"/><text x="162" y="104" fill="#36406b">Tavily</text>
+        <circle cx="120" cy="140" r="6" fill="#b3701a"/><text x="132" y="144" fill="#36406b">Linkup</text>
+        <circle cx="90" cy="78" r="6" fill="#b3701a"/><text x="102" y="82" fill="#36406b">Serper</text>
+        <circle cx="200" cy="160" r="6" fill="#b3701a"/><text x="212" y="164" fill="#36406b">Firecrawl / Jina</text>
+        <!-- 左上偏中 内置 -->
+        <circle cx="250" cy="55" r="6" fill="#8a93ad"/><text x="160" y="48" fill="#36406b">OpenAI/Anthropic 内置</text>
+        <!-- 左下 轻×垂直（少量）-->
+        <circle cx="150" cy="280" r="6" fill="#8a93ad"/><text x="162" y="284" fill="#36406b">自建 SearXNG+emb</text>
+      </svg>
+      </div>
+      <figcaption>定位图（本调研重绘）。X 轴：技术路线轻↔重（代理聚合 ↔ 自建索引+自研模型）；Y 轴：语料通用↔垂直。
+      <strong>右下角（重路线 × 垂直专业语料）几乎无人占据</strong>——这正是 AI4S/科研 agent 想要却拿不到的「为领域知识做的语义检索」空位。</figcaption>
+    </figure>
+  </section>
+
+  <!-- ④ 融资 timeline -->
+  <section id="funding">
+    <h2><span class="n">④</span>融资 timeline</h2>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 760 170" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12">
+        <line x1="50" y1="80" x2="710" y2="80" stroke="#b9c2e0" stroke-width="2"/>
+        <!-- 成立/Metaphor -->
+        <circle cx="80" cy="80" r="6" fill="#8a93ad"/>
+        <text x="80" y="50" text-anchor="middle" fill="#5a627a">2021</text>
+        <text x="80" y="108" text-anchor="middle" fill="#36406b">成立 Metaphor</text>
+        <text x="80" y="122" text-anchor="middle" fill="#9aa3bd">YC（W22）</text>
+        <!-- 2022 launch -->
+        <circle cx="200" cy="80" r="6" fill="#8a93ad"/>
+        <text x="200" y="50" text-anchor="middle" fill="#5a627a">2022/11</text>
+        <text x="200" y="108" text-anchor="middle" fill="#36406b">首版搜索上线</text>
+        <text x="200" y="122" text-anchor="middle" fill="#9aa3bd">(ChatGPT 前两周)</text>
+        <!-- seed -->
+        <circle cx="320" cy="80" r="6" fill="#3a66ff"/>
+        <text x="320" y="50" text-anchor="middle" fill="#5a627a">~Seed</text>
+        <text x="320" y="108" text-anchor="middle" fill="#36406b">$5M 种子</text>
+        <!-- A -->
+        <circle cx="440" cy="80" r="7" fill="#3a66ff"/>
+        <text x="440" y="50" text-anchor="middle" fill="#5a627a">2024/07</text>
+        <text x="440" y="108" text-anchor="middle" fill="#36406b">Series A</text>
+        <text x="440" y="122" text-anchor="middle" fill="#9aa3bd">$17M（累计$22M）</text>
+        <!-- B -->
+        <circle cx="570" cy="80" r="8" fill="#6b4cff"/>
+        <text x="570" y="50" text-anchor="middle" fill="#5a627a">2025/09</text>
+        <text x="570" y="108" text-anchor="middle" fill="#36406b">Series B $85M</text>
+        <text x="570" y="122" text-anchor="middle" fill="#9aa3bd">@ $700M</text>
+        <!-- C -->
+        <circle cx="690" cy="80" r="9" fill="#138a6e"/>
+        <text x="690" y="50" text-anchor="middle" fill="#5a627a">2026/05</text>
+        <text x="690" y="108" text-anchor="middle" fill="#36406b">Series C $250M</text>
+        <text x="690" y="122" text-anchor="middle" fill="#9aa3bd">@ $2.2B</text>
+      </svg>
+      </div>
+      <figcaption>Exa 融资时间线（据公开报道整理）。注：A 轮金额各源口径有出入（见下表）。</figcaption>
+    </figure>
+    <table>
+      <thead><tr><th>时间</th><th>事件 / 轮次</th><th>金额</th><th>投资方</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr><td>2021</td><td>成立（Metaphor Systems，YC W22）</td><td>—</td><td>Y Combinator</td><td><span class="src src-b">🟡</span> YC/媒体</td></tr>
+        <tr><td>2022/11</td><td>首版搜索引擎上线（ChatGPT 发布前两周）</td><td>—</td><td>—</td><td><span class="src src-b">🟡</span> 媒体</td></tr>
+        <tr><td>~2023</td><td>Seed 种子</td><td>$5M</td><td>（含 YC 等）</td><td><span class="src src-b">🟡</span> TechCrunch</td></tr>
+        <tr><td>2024/01</td><td>Metaphor → 更名 <strong>Exa</strong></td><td>—</td><td>—</td><td><span class="src src-b">🟡</span> 媒体</td></tr>
+        <tr><td>2024/07</td><td>Series A</td><td><strong>$17M</strong>（TechCrunch；累计 $22M 含种子。官方 blog 标 $22M 口径）</td><td>领投 Lightspeed（Guru Chahal）；NVentures(NVIDIA)、Y Combinator</td><td><span class="src src-b">🟡</span> 数额打架，并列</td></tr>
+        <tr><td>2025/09</td><td>Series B</td><td><strong>$85M @ $700M</strong></td><td>领投 Benchmark（Peter Fenton 入董事会）；Lightspeed、NVentures、YC</td><td><span class="src src-a">🟢</span> 官方 blog +<span class="src src-b">🟡</span></td></tr>
+        <tr><td>2026/05</td><td>Series C</td><td><strong>$250M @ $2.2B</strong></td><td>领投 a16z；Benchmark、Lightspeed、YC，及 Scott Wu / Igor Babuschkin / Tal Broda 等个人</td><td><span class="src src-b">🟡</span> Bloomberg/媒体</td></tr>
+      </tbody>
+    </table>
+    <p><strong>节奏佐证阶段：</strong>seed→C 五年走完、估值一年内从 $700M 跳到 $2.2B（×3），并拉到 a16z/Benchmark/Lightspeed 三家顶级 VC + NVIDIA 战投——这是典型「<strong>赛道被资本认定为 AI 基建关键层、头部公司被高速催熟</strong>」的信号，也反向印证了赛道的拥挤度与卡位竞赛之激烈。注：A 轮金额 $17M（TechCrunch）与官方 blog 的 $22M 口径不一致，<strong>$22M 应是含 $5M 种子的累计数</strong>，此处并列不擅自取一。</p>
+  </section>
+
+  <!-- ⑤ 公司速览 -->
+  <section id="snapshot">
+    <h2><span class="n">⑤</span>公司速览</h2>
+    <table>
+      <tbody>
+        <tr><td>是什么 / 定位</td><td>「applied AI lab，做一个前所未有的完美搜索引擎」；使命「让每个 AI 都拿到最高质量信息，进而每个人也是」<span class="src src-a">🟢官网</span>。本质是 <strong>给 AI/agent 用的 web search & retrieval API</strong>。</td></tr>
+        <tr><td>产品</td><td><strong>Search API</strong>（神经/关键词混合搜索，号称 sub-450ms）、<strong>Contents API</strong>（取干净正文/highlights）、<strong>Deep Search</strong>、<strong>Agent API</strong>（按 effort 计费的研究 agent）、<strong>Monitors API</strong>（持续监测全网新事件）、<strong>Websets</strong>（结构化实体集）<span class="src src-a">🟢官网</span>。</td></tr>
+        <tr><td>团队</td><td>创始人 <strong>Will Bryk</strong>（CEO，Harvard CS+物理，早期在 Cresta 做实时 AI）与 <strong>Jeff Wang</strong>（Harvard CS+哲学，Plaid 做数据/web 基建 3 年；曾在宿舍跑 GPU 集群）；两人哈佛室友，看 GPT-3 发布后切入。团队含来自 Google/Apple/MIT/CMU 的工程师 <span class="src src-a">🟢官网</span>+<span class="src src-b">🟡</span>。</td></tr>
+        <tr><td>商业模式</td><td><strong>API 调用量计费</strong>（usage-based）：Search $7/千次起、Deep $12–15/千、Contents $1/千页、Agent 按 effort($0.025–$1/次)；<strong>免费 2 万次/月</strong>；企业自定义合同。属典型「AI 基建 API」按量+企业大单 <span class="src src-a">🟢官网</span>。</td></tr>
+        <tr><td>状态</td><td>成长期 / 已过 Series C；2026/05 估值 <strong>$2.2B</strong>，自称服务 Cursor、Cognition、HubSpot、OpenRouter、Monday.com 等及 <strong>40 万+ 开发者</strong><span class="src src-c">🔴自述客户/用户数</span>。总部旧金山。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ⑥ 创业 idea 借鉴 -->
+  <section id="idea">
+    <h2><span class="n">⑥</span>创业 idea 借鉴</h2>
+    <div class="callout insight">
+      <span class="label">Whitespace / 机会（对齐你的 AI4S 找 idea）</span>
+      定位图右下角几乎是空的：<strong>「自建/自研路线 × 垂直专业语料」的语义检索 API</strong>。
+      通用 web search 已被 Exa/Perplexity/巨头卡满，但 <strong>科研 agent 真正需要的是「为领域知识做的检索」</strong>——例如对
+      <strong>学术全文 + 引用图谱、专利、化学反应/材料数据库、临床试验/EHR、蛋白与基因组注释</strong> 做 embedding 召回并返回结构化、可溯源的片段。
+      这块要么散在各自孤岛（PubMed/arXiv/Materials Project/PDB 各管各的、接口陈旧），要么没有「给 agent 用」的统一语义 API。
+      <strong>「AI4S 版的 Exa」=「给科研 agent 的 Search/Retrieval API」</strong>，是最贴合你目标的可借鉴空位。
+    </div>
+    <h3>现有玩家共同短板（unmet needs）</h3>
+    <p>① <strong>领域召回弱</strong>：通用 web 索引对专业语料（论文方法细节、负结果、专利权利要求、实验参数）召回与排序都不行，且很难溯源到权威出处；
+    ② <strong>结构化缺失</strong>：科研 agent 要的是「实体+关系+数值+单位」，而非整页 markdown；
+    ③ <strong>许可与合规</strong>：付费墙文献、临床数据有版权/隐私约束，通用 search 直接绕不过；
+    ④ <strong>可复现/可引用</strong>：科研对「同一 query 稳定可引用结果」要求远高于消费搜索，现有 API 不保证。</p>
+    <h3>Why now（为什么现在值得做）</h3>
+    <p>① <strong>agent 成为搜索主体</strong>，「为 AI 取数」从功能变成独立基建层（Exa/Tavily 一年内被资本快速催熟即证）；
+    ② <strong>开源 embedding/rerank 成熟且便宜</strong>（bge/e5/Jina、Cohere Rerank），自建语义检索的技术门槛大降；
+    ③ <strong>deep-research / scientific agent 爆发</strong>（OpenAI/Google 的 Deep Research、各家 science agent）直接拉动「高质量领域检索」需求；
+    ④ <strong>数据可得性提升</strong>：大量科研语料已开放或可授权，缺的是「语义化 + agent 友好接口」这一层加工。</p>
+    <h3>可借鉴的打法 + 相邻机会</h3>
+    <ul>
+      <li><strong>borrowable：</strong>(a) <strong>"为 AI 而非为人"重做检索</strong>——返回 token-efficient 片段、highlights、可编程接口，而非蓝色链接；(b) <strong>usage-based API + 慷慨免费额度</strong>（2 万次/月）做开发者增长飞轮；(c) <strong>把自己定位成 lab 而非纯工具</strong>，自研模型讲深科技故事拿顶级 VC + NVIDIA 战投；(d) <strong>用知名 AI 产品当 logo 背书</strong>（Cursor/Cognition）建立信任。</li>
+      <li><strong>adjacent：</strong>(a) <strong>垂直 retrieval API</strong>（学术/专利/材料/临床，正文已述）；(b) <strong>检索 + 监测</strong>（仿 Exa Monitors，做「领域新文献/新专利的实时语义订阅」给科研团队）；(c) <strong>retrieval 评测/benchmark 标准</strong>——赛道还没公认 benchmark，做"裁判"本身是卡位机会；(d) <strong>私有化/合规版</strong>检索（自建 SearXNG+emb 的托管版，卖给数据不能出域的医院/药企/实验室）。</li>
+    </ul>
+    <div class="callout warn">
+      <span class="label">风险（诚实给）</span>
+      ① <strong>巨头碾压</strong>：OpenAI/Anthropic/Google 把 search 做进模型 API，通用层被默认选项蚕食；
+      ② <strong>拥挤+同质</strong>：通用 web search API 已是红海，价格战明显（Serper/Firecrawl 把单价压得很低）；
+      ③ <strong>开源免费替代</strong>：SearXNG+开源 embedding 能把 API 费打到 $0，价格敏感客户会自建；
+      ④ <strong>路线又重又贵</strong>：自建 web-scale 索引 + 自研模型需要持续烧算力，资本一旦降温很难维持；
+      ⑤ <strong>垂直语料的护城河也是枷锁</strong>：版权/许可/隐私谈判慢，数据获取本身可能比技术更难。
+    </div>
+  </section>
+
+  <!-- ⑦ 现实判断 -->
+  <section id="take">
+    <h2><span class="n">⑦</span>现实判断</h2>
+    <p>Exa 在「AI search API」格局里的位置是<strong>头部、但非垄断</strong>：它选了最重、最有 moat 潜力的路线（自建索引 + 自研 embedding），拿到 a16z/Benchmark/Lightspeed/NVIDIA 的弹药，客户与开发者声量也确实在 <span class="src src-c">🔴 自述 40 万开发者待独立验证</span>。
+    胜算来自「<strong>当 agent 真的需要深度语义召回而非廉价 SERP 时，轻量代理路线不够用</strong>」——若这个判断成立，Exa 的重投入会变成壁垒。
+    软肋有三：<strong>上方被巨头内置 search 压</strong>（便利性 + 捆绑分发），<strong>下方被 Serper/Firecrawl/开源自建用低价挖</strong>，<strong>中间和 Perplexity 正面撞车</strong>（同样自建索引、同样下放 API）。对你而言，直接做"另一个通用 Exa"几乎没机会；<strong>真正可借鉴的是把 Exa 的范式搬到垂直/科研语料</strong>——那里既有真实未满足需求，又恰好绕开了通用赛道的拥挤与巨头。</p>
+    <div class="callout warn">
+      <span class="label">使用提醒</span>
+      本页为对话式调研，信息主要来自公开来源并按等级标注；融资数额（尤其 A 轮 $17M/$22M 口径）、客户、"40 万开发者"等能力/规模声明等以官方一手为准，
+      <strong>产品能力未必经独立验证</strong>，引用前请核对最新信息。
+    </div>
+  </section>
+
+  <!-- 出处 -->
+  <section id="src">
+    <h2>出处</h2>
+    <ul style="font-size:13.5px">
+      <li><a href="https://exa.ai" target="_blank" rel="noopener">官网 exa.ai</a> · <a href="https://exa.ai/about" target="_blank" rel="noopener">/about</a> · <a href="https://exa.ai/pricing" target="_blank" rel="noopener">/pricing</a> <span class="src src-a">🟢一手</span>（使命/产品/团队/定价/免费额度/客户 logo）</li>
+      <li><a href="https://exa.ai/blog/announcing-series-b" target="_blank" rel="noopener">Exa blog — 宣布 Series B</a> <span class="src src-a">🟢</span>（$85M、$700M、Benchmark/Peter Fenton、sub-450ms 自述）</li>
+      <li><a href="https://techcrunch.com/2024/07/16/exa-raises-17m-lightspeed-nvidia-ycombinator-google-ai-models/" target="_blank" rel="noopener">TechCrunch — Exa raises $17M（A 轮）</a> <span class="src src-b">🟡</span>（$17M/累计$22M、$5M 种子、Lightspeed/NVentures/YC）</li>
+      <li><a href="https://www.bloomberg.com/news/articles/2026-05-20/andreessen-backed-ai-search-startup-exa-valued-at-2-2-billion" target="_blank" rel="noopener">Bloomberg — Exa valued at $2.2B（C 轮）</a> · <a href="https://www.finsmes.com/2026/05/exa-labs-raises-250m-in-series-c-funding-at-2-2-billion-valuation.html" target="_blank" rel="noopener">FinSMEs</a> <span class="src src-b">🟡</span>（$250M、$2.2B、a16z 领投、跟投名单）</li>
+      <li><a href="https://cerebralvalley.ai/blog/exa-aims-to-reshape-web-search-4AOjbOWK9sxxXCKdjQG1EK" target="_blank" rel="noopener">Cerebral Valley — Exa (prev. Metaphor) 访谈</a> <span class="src src-b">🟡</span>（Metaphor→Exa、神经检索理念）</li>
+      <li>团队/历史：<a href="https://aiwiki.ai/wiki/exa_ai" target="_blank" rel="noopener">AI Wiki — Exa</a> <span class="src src-b">🟡</span>（2021 成立、YC、Will Bryk/Jeff Wang 哈佛背景）</li>
+      <li>竞品 Tavily：<a href="https://www.tavily.com/blog/big-news-from-tavily-announcing-25m-series-a-to-power-the-internet-of-agents" target="_blank" rel="noopener">Tavily blog $25M A</a> <span class="src src-b">🟡</span>；被 Nebius 收购（2026/02，二手报道）</li>
+      <li>竞品 Firecrawl：<a href="https://www.globenewswire.com/news-release/2025/08/19/3135573/0/en/Firecrawl-Announces-14-5-Million-in-Series-A-Funding-to-Put-Web-Data-on-Tap-for-AI-Agents.html" target="_blank" rel="noopener">Firecrawl $14.5M A</a> <span class="src src-b">🟡</span>（Mendable 团队、43k★）</li>
+      <li>竞品 Perplexity：<a href="https://www.perplexity.ai/hub/blog/introducing-the-perplexity-search-api" target="_blank" rel="noopener">Perplexity Search API（2025/09，$5/千次）</a> <span class="src src-b">🟡</span></li>
+      <li>赛道对比：<a href="https://www.firecrawl.dev/blog/best-web-search-apis" target="_blank" rel="noopener">Firecrawl — Best Web Search APIs 2026</a> · <a href="https://awesomeagents.ai/pricing/search-api-pricing/" target="_blank" rel="noopener">Search API Pricing 2026</a> <span class="src src-b">🟡</span>（价格量级、各家定位，口径不一仅供量级）</li>
+    </ul>
+  </section>
+
+  <footer class="foot">
+    公司竞争格局 / 赛道早期度调研笔记，仅作梳理；信息按来源分级、产品能力未必经独立验证，以官方一手信息为准 · 整理日期 2026-06-15
+  </footer>
+
+</article>
+</body>
+</html>
