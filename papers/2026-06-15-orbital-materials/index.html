@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Orbital Materials / Orbital Industries · 竞争格局与赛道早期度调研</title>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --bad:#ff6b81; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --bad:#d23651; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;}
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:920px; margin:0 auto; padding:18px 22px 90px}
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:25px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)} .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap; line-height:2}
+  nav.toc a:hover{color:var(--accent)}
+  section{margin:38px 0}
+  h2{font-size:20px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:16.5px; margin:22px 0 8px}
+  p{margin:12px 0} ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)} strong{color:var(--text)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.88em}
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:13px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:9px 10px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  figure{margin:24px 0; text-align:center}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+  .svgwrap{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 8px}
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+  .src{font-size:10.5px; padding:0 6px; border-radius:999px; white-space:nowrap; vertical-align:middle}
+  .src-a{background:rgba(67,197,158,.18); color:var(--ok)}
+  .src-b{background:rgba(255,180,84,.18); color:var(--warn)}
+  .src-c{background:rgba(255,107,129,.18); color:var(--bad)}
+  .legend{font-size:12px; color:var(--muted); margin:6px 0 0}
+  .verdict{display:inline-block; font-weight:700; padding:3px 12px; border-radius:999px; font-size:14px}
+  .v-nascent{background:rgba(122,162,255,.18); color:var(--accent)}
+  .v-emerging{background:rgba(67,197,158,.18); color:var(--ok)}
+  .v-crowded{background:rgba(255,180,84,.18); color:var(--warn)}
+  .v-mature{background:rgba(255,107,129,.18); color:var(--bad)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">AI4S 材料</span>
+      <span class="chip">数据中心脱碳</span>
+      <span class="chip">液冷剂 coolant</span>
+      <span class="chip">垂直整合制造</span>
+      <span class="chip">竞争格局</span>
+      <span class="chip">赛道早期度</span>
+      <span class="chip">创业 idea</span>
+    </div>
+    <h1>Orbital Materials / Orbital Industries：竞争格局与赛道早期度调研</h1>
+    <p class="orig-title">orbitalindustries.com — AI 设计材料 + 垂直制造，攻数据中心冷却 / 碳捕集 / 清洁燃料；赛道 emerging，有可借鉴的「类型2 垂直整合卖产品」打法</p>
+    <dl class="meta-grid">
+      <dt>对象</dt><dd><a href="https://www.orbitalindustries.com/" target="_blank" rel="noopener">https://www.orbitalindustries.com/</a>（原 orbitalmaterials.com，已 301 跳转）</dd>
+      <dt>赛道</dt><dd>AI-for-Science 材料发现（AI4S materials）→ 垂直整合到数据中心冷却 / 碳捕集材料</dd>
+      <dt>整理</dt><dd>对话调研笔记；信息来自公开检索，按来源分级标注，产品能力未必经独立验证</dd>
+      <dt>日期</dt><dd>2026-06-15</dd>
+    </dl>
+    <p class="legend">来源等级：<span class="src src-a">🟢 一手</span> 官网/SEC/官方 ·
+      <span class="src src-b">🟡 二手</span> 媒体/数据库 ·
+      <span class="src src-c">🔴 自述/未证实</span> 营销口径或未独立验证</p>
+
+    <div class="callout note" style="margin-top:18px">
+      <span class="label">命名核实（重要）</span>
+      用户原文写「<strong>Orbital Industries（液冷剂）</strong>」。核实结果：这其实<strong>恰好对上了公司当前的最新名字</strong>——公司在 2026 年 5 月 Series B 前后<strong>从 <em>Orbital Materials</em> 改名为 <em>Orbital Industries</em></strong>（官网 orbitalmaterials.com 现 301 跳转到 orbitalindustries.com）<span class="src src-a">🟢</span><span class="src src-b">🟡</span>。
+      但 2023–2025 年绝大多数媒体、融资数据库、AWS 合作公告用的都是历史名 <strong>Orbital Materials</strong>。本调研两个名字并用，标题保留两者以便检索；用户的「Orbital Industries」是新名、不是笔误。液冷剂 coolant 确为其当前主打产品之一。
+    </div>
+  </header>
+
+  <div class="tldr">
+    <b>一句话</b> — Orbital（Materials→Industries）是 ex-DeepMind 研究员 <strong>Jonathan Godwin</strong> 2023 年在伦敦创立的 AI4S 材料公司：用自研「原子基础模型」（开源模型 <code>Orb</code>）设计新材料，并<strong>自己建湿实验室、自己造、自己卖产品</strong>——不卖 IP、不卖 SaaS，走「类型2：垂直整合卖产品」。当前两款产品都瞄准<strong>数据中心</strong>：① 给高密度 GPU 用的<strong>无 PFAS 介电液冷剂 / 制冷系统</strong>，② 工厂预制的<strong>模块化数据中心</strong>；早期还讲<strong>碳捕集材料</strong>（与 AWS 合作试点）。赛道判断：<strong>emerging（新兴）</strong>——AI4S 材料这一层 2024–2026 资本极热（CuspAI、Periodic Labs 等十亿美元估值涌现）但同质化在加剧；而 Orbital 选择往下游<strong>「卖实物产品」</strong>这一格相对空。可借鉴 idea：在「AI 模型层」已拥挤时，<strong>抓一个被强政策/供给冲击逼出来的刚需材料缺口（如 3M 退出 PFAS coolant），用 AI 加速研发 + 自建制造端到端交付</strong>，把 moat 从「算法」换成「供应链 + 认证 + 客户合同」。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#bg">0 领域背景速补</a>
+    <a href="#market">① 赛道地图 + 早期度</a>
+    <a href="#matrix">② 竞品对照矩阵</a>
+    <a href="#map">③ 定位图</a>
+    <a href="#funding">④ 融资 timeline</a>
+    <a href="#snapshot">⑤ 公司速览</a>
+    <a href="#idea">⑥ 创业 idea 借鉴</a>
+    <a href="#take">⑦ 现实判断</a>
+    <a href="#src">出处</a>
+  </nav>
+
+  <!-- 领域背景速补：读者只有 LLM 基础 -->
+  <section id="bg">
+    <h2><span class="n">0</span>领域背景速补（只懂 LLM 也能跟上）</h2>
+    <p>这家公司横跨「AI」和「材料/化工/数据中心」两个世界。下面把非 LLM 领域的关键词先讲清，假设你只懂大模型、不懂材料化工。</p>
+    <ul>
+      <li><strong>AI4S / AI-for-materials（AI 做材料发现）：</strong>类比「AlphaFold 之于蛋白质」。传统找新材料靠科学家试错，几年才出一个；现在用<strong>图神经网络 / 生成模型</strong>在「原子排布 → 性质」之间建一个可微的预测器，几小时筛上百万候选。<strong>为什么难</strong>：模型说「这个晶体稳定」不等于实验室真能合成出来、真能量产、真能拿到认证——「<strong>从屏幕里的分子到货架上的产品</strong>」这条鸿沟（sim-to-real）才是真正的瓶颈。Orbital 的差异化正是<em>自己跨这条鸿沟</em>。</li>
+      <li><strong>原子基础模型 / interatomic potential（如 Orbital 的 <code>Orb</code>）：</strong>把「给定一堆原子的坐标，算出它们之间的力和能量」这件本来要解薛定谔方程（DFT，极慢）的事，用神经网络逼近，速度快几个数量级。它相当于材料界的「foundation model」，谷歌的 <strong>GNoME</strong>、微软的 <strong>MatterGen</strong> 是同类标杆。Orbital 把 <code>Orb</code> 开源并上架 AWS。</li>
+      <li><strong>数据中心液冷 & 介电冷却液（dielectric coolant）：</strong>AI 训练用的 GPU 功率密度暴涨，风扇吹不动了，改用<strong>液冷</strong>。其中「<strong>浸没式</strong>」直接把服务器泡进一种<strong>不导电（介电）、不易燃、热传导好</strong>的液体里。过去主力是 3M 的 <strong>Novec / Fluorinert</strong> 这类含氟液体。</li>
+      <li><strong>PFAS（全氟/多氟化合物，「永久化学品」）：</strong>这类含氟分子极稳定、在环境里几乎不降解，被各国监管盯上。<strong>3M 已宣布 2025 年底前退出全部 PFAS 制造、停产 Novec</strong>——这等于把整个两相浸没冷却赖以生存的冷却液<strong>从供给侧抽掉</strong>，留下一个「谁能造出无 PFAS 又同样好用的 coolant」的巨大缺口。这就是 Orbital coolant 产品的「why now」。</li>
+      <li><strong>碳捕集 / DAC（direct air capture）材料：</strong>用一种「分子海绵」（多孔材料，如 MOF / 沸石）选择性吸附空气或尾气里的 CO₂。Orbital 把数据中心余热 + 自家吸附材料结合，做「数据中心一体化碳移除」。<strong>难点</strong>：吸附剂的容量、选择性、再生能耗、成本，要同时达标极难，传统迭代慢——正是 AI 想加速的地方。</li>
+      <li><strong>Scope 3 / 数据中心脱碳：</strong>云厂商（AWS、Microsoft）有碳中和承诺，但数据中心建设和运营的隐含碳很难降。把碳捕集 + 高效冷却塞进数据中心，是它们愿意买单的方向——这解释了 AWS 为何和 Orbital 战略合作。</li>
+      <li><strong>「垂直整合卖产品」（用户归类的类型2）：</strong>对比「类型1：卖 AI 模型/平台/IP 授权」（轻资产、像软件），<strong>类型2 是自己掌控供应链、承担制造/认证/库存/资本开支风险，最终交付的是实物产品</strong>。Orbital 明确选了类型2——它说要「直接卖 AI 发现的材料，而不是授权 IP」。</li>
+    </ul>
+  </section>
+
+  <!-- ① 赛道与早期度 -->
+  <section id="market">
+    <h2><span class="n">①</span>赛道地图 + 早期度判断</h2>
+    <p>Orbital 处在<strong>两个赛道的交叉口</strong>：上层是「<strong>AI4S 材料发现</strong>」（和 CuspAI、Periodic Labs、Altrove、谷歌 GNoME、微软 MatterGen 同层），下层是它<strong>主动选择落地的应用市场</strong>——「<strong>数据中心冷却液 / 碳捕集材料</strong>」（和 3M、Solvay、Shell、Submer、LiquidStack 等化工/冷却厂商同层）。它的独特性在于<strong>把这两层用「自建制造」串起来</strong>，所以判早期度要分两层看。</p>
+
+    <h3>玩家分群（四象限别漏）</h3>
+    <ul>
+      <li><strong>现有巨头：</strong>（材料 AI）谷歌 DeepMind <strong>GNoME</strong>、微软 <strong>MatterGen</strong>、Meta（OMat 数据集）——都做模型但不亲自卖材料 <span class="src src-b">🟡</span>。（冷却液/化工）<strong>3M</strong>（Novec/Fluorinert，正退出 PFAS）、<strong>Solvay</strong>（Galden）、<strong>Chemours、Honeywell</strong>——传统供给方，正因监管被动收缩 <span class="src src-b">🟡</span>。</li>
+      <li><strong>垂直创业公司：</strong><strong>CuspAI</strong>（剑桥，Max Welling，材料「搜索引擎」，2025 Series A 100M+ 美元）、<strong>Periodic Labs</strong>（ex-OpenAI/DeepMind，2025 种子 300M 美元 @1.3B 估值，做 AI 科学家 + 自动实验室，目标含芯片散热/超导）、<strong>Altrove</strong>（巴黎，AI 做稀土替代材料，2025 种子约 10–14M 美元）、<strong>Orbital 自己</strong> <span class="src src-b">🟡</span>。</li>
+      <li><strong>大厂顺手做：</strong>AWS / NVIDIA 自己<strong>没下场造材料</strong>，而是<strong>当客户 + 投资人</strong>（AWS 与 Orbital 战略合作并上架 Orb；NVIDIA NVentures 投了 Orbital、CuspAI、Periodic Labs）——大厂用「资本 + 渠道」卡位而非自研，这是这个赛道的特殊生态 <span class="src src-b">🟡</span>。</li>
+      <li><strong>开源 / 免费替代：</strong>材料 AI 模型层<strong>大量开源</strong>——谷歌 GNoME 数据、微软 MatterGen 已开源、Meta 的 OMat、Orbital 自家 <code>Orb</code> 也开源上架 AWS <span class="src src-b">🟡</span>。这意味着「光有一个 AI 模型」几乎没有壁垒，模型本身在迅速商品化——这恰恰把 Orbital 往「卖实物产品」逼。</li>
+    </ul>
+
+    <div class="callout insight">
+      <span class="label">早期度判断</span>
+      <span class="verdict v-emerging">emerging（新兴）</span>
+      （nascent 萌芽 / emerging 新兴 / crowded 拥挤 / mature 成熟）<br><br>
+      <strong>判断信号：</strong>
+      <strong>① 玩家数量与速度：</strong>AI4S 材料层 2024–2026 集中冒出一批公司（CuspAI、Periodic Labs、Altrove、Orbital……），新增很快但绝对数量还不算「拥挤」。
+      <strong>② 融资热度/轮次：</strong>极热——Periodic 种子就 300M 美元、CuspAI Series A 100M+ 美元并传 200M 估超 10 亿、a16z/NEA/Temasek/NVIDIA/三星/现代/丰田都在投；轮次还集中在 seed–Series A/B，说明<strong>资本已到、产品验证未到</strong>。
+      <strong>③ 巨头是否进场：</strong>谷歌/微软/Meta 在<strong>模型层</strong>已进场（但只发模型不卖货）；AWS/NVIDIA 以<strong>客户+投资人</strong>身份进场。<strong>巨头没下场卖材料/冷却液产品</strong>——下游产品层仍是空的。
+      <strong>④ 开源替代：</strong>模型层开源泛滥（GNoME/MatterGen/Orb），<strong>这一层壁垒正在消失</strong>。
+      <strong>⑤ 客户认知/标准：</strong>「AI 设计材料能不能真量产并通过认证」客户尚存疑，<strong>没有公认 benchmark 能证明谁的材料在真实数据中心里更好</strong>——实效未验证是全行业通病。<br>
+      <strong>结论：</strong>模型层<strong>正从 emerging 滑向 crowded</strong>（且开源在抽干壁垒）；而 Orbital 选的「<strong>AI + 自建制造 + 卖数据中心实物产品</strong>」这一格<strong>仍属 nascent～emerging</strong>，玩家寥寥、巨头未下场——这正是它的赌注所在。
+    </div>
+  </section>
+
+  <!-- ② 竞品矩阵 -->
+  <section id="matrix">
+    <h2><span class="n">②</span>竞品对照矩阵</h2>
+    <p>选 7 个对这个赛道最有区分度的维度：<strong>技术路线 · 商业模式（关键：卖模型 vs 卖实物）· 是否自建制造/湿实验室 · 目标应用 · 开源 · 规模&融资 · 关键硬指标</strong>。商业模式与「是否自建制造」是把 Orbital 和纯模型派拉开差距的核心轴。硬指标在这个赛道普遍<strong>自述、无第三方 benchmark</strong>，故多标 🔴。</p>
+    <table>
+      <thead><tr>
+        <th>玩家</th>
+        <th>技术路线</th>
+        <th>商业模式</th>
+        <th>自建制造/湿实验室</th>
+        <th>目标应用</th>
+        <th>开源</th>
+        <th>规模 & 融资</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Orbital Materials / Industries（本篇）</strong></td>
+          <td>原子基础模型 <code>Orb</code> + agents + 机器人实验室 <span class="src src-a">🟢</span></td>
+          <td><strong>类型2：垂直整合卖实物产品</strong>（不授权 IP）<span class="src src-b">🟡</span></td>
+          <td><strong>是</strong>：自建湿实验室 + 物理工程站点 <span class="src src-a">🟢</span></td>
+          <td>数据中心：无-PFAS 介电冷却液、模块化数据中心、碳捕集 <span class="src src-a">🟢</span></td>
+          <td><code>Orb</code> 开源、上架 AWS <span class="src src-a">🟢</span></td>
+          <td>~50 人；累计约 70M+ 美元（见融资节）<span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>CuspAI</td>
+          <td>生成 AI + 分子/物理仿真，「材料搜索引擎」<span class="src src-b">🟡</span></td>
+          <td>偏平台/按需设计材料（多客户）<span class="src src-b">🟡</span></td>
+          <td>有实验/验证能力，制造定位较轻 <span class="src src-c">🔴</span></td>
+          <td>碳捕集等环境材料起步，较通用 <span class="src src-b">🟡</span></td>
+          <td>未明确开源核心模型 <span class="src src-c">🔴</span></td>
+          <td>2024 种子 30M、2025 Series A 100M+ 美元（NEA/Temasek/NVIDIA），传估值约 5.2 亿→冲 10 亿 <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Periodic Labs</td>
+          <td>「AI 科学家」+ 自动实验室（GNoME/MatterGen 团队血统）<span class="src src-b">🟡</span></td>
+          <td>早期、未定型；先做 proprietary data + R&D 压缩 <span class="src src-c">🔴</span></td>
+          <td><strong>是</strong>：自动化物理实验室 <span class="src src-b">🟡</span></td>
+          <td>超导、芯片散热等物理科学 <span class="src src-b">🟡</span></td>
+          <td>未明确开源 <span class="src src-c">🔴</span></td>
+          <td>2025 种子 <strong>300M 美元</strong> @约 13 亿估值（a16z 领投，Bezos/Schmidt/Dean 跟）<span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Altrove</td>
+          <td>AI + 自动合成 + 表征，一体化平台 <span class="src src-b">🟡</span></td>
+          <td>卖 AI 设计的材料（稀土替代品）<span class="src src-b">🟡</span></td>
+          <td><strong>是</strong>：自建实验室，目标 2 年内从克到工业级 <span class="src src-b">🟡</span></td>
+          <td>关键/稀土材料替代 <span class="src src-b">🟡</span></td>
+          <td>未明确 <span class="src src-c">🔴</span></td>
+          <td>2025 种子约 10M 美元（€7.7M），累计约 14M 美元（Alven 领投）<span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Google GNoME / 微软 MatterGen</td>
+          <td>SOTA 材料发现/生成模型 <span class="src src-b">🟡</span></td>
+          <td>不卖材料；发模型/数据、绑生态 <span class="src src-b">🟡</span></td>
+          <td>否（不亲自量产）<span class="src src-b">🟡</span></td>
+          <td>通用材料发现（科研/平台）<span class="src src-b">🟡</span></td>
+          <td><strong>是</strong>（GNoME 数据、MatterGen 已开源）<span class="src src-b">🟡</span></td>
+          <td>巨头自研，非独立公司 <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>3M / Solvay 等化工巨头</td>
+          <td>传统配方化学，无 AI 设计平台 <span class="src src-b">🟡</span></td>
+          <td>类型2 卖冷却液实物（成熟）<span class="src src-b">🟡</span></td>
+          <td><strong>是</strong>（大规模量产）<span class="src src-b">🟡</span></td>
+          <td>数据中心冷却液（Novec/Fluorinert/Galden）<span class="src src-b">🟡</span></td>
+          <td>闭源配方 <span class="src src-b">🟡</span></td>
+          <td>巨头；<strong>3M 正退出 PFAS、2025 底停产 Novec</strong> <span class="src src-b">🟡</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>读矩阵：</strong>(1) 纯模型派（GNoME/MatterGen/CuspAI 偏向）<strong>不碰制造</strong>，且模型层开源在抽干壁垒；(2) 化工巨头（3M/Solvay）<strong>会造但不会用 AI、且正被 PFAS 监管逼退</strong>；(3) Orbital、Altrove、Periodic 这批「<strong>AI + 自建实验室 + 自己造</strong>」的玩家正卡在中间空位——其中 <strong>Orbital 是唯一把矛头明确对准「数据中心冷却液 + 碳捕集」这一被巨头退出的刚需缺口</strong>的。同质化主要在「模型层叙事」，差异化主要在「下游做哪个具体产品 + 敢不敢扛制造」。</p>
+  </section>
+
+  <!-- ③ 定位图 -->
+  <section id="map">
+    <h2><span class="n">③</span>定位图（whitespace 在哪）</h2>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 640 400" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12">
+        <!-- 轴：X = 卖模型/IP(左) ↔ 卖实物产品(右)；Y = 通用材料(下) ↔ 垂直到数据中心(上) -->
+        <line x1="40" y1="200" x2="600" y2="200" stroke="#b9c2e0" stroke-width="1.5"/>
+        <line x1="320" y1="24" x2="320" y2="372" stroke="#b9c2e0" stroke-width="1.5"/>
+        <text x="600" y="216" text-anchor="end" fill="#5a627a">卖实物产品（类型2）→</text>
+        <text x="40" y="216" fill="#5a627a">← 卖模型/IP（类型1）</text>
+        <text x="326" y="34" fill="#5a627a">↑ 垂直到数据中心冷却/碳捕集</text>
+        <text x="326" y="366" fill="#5a627a">↓ 通用 / 多场景材料发现</text>
+
+        <!-- whitespace 高亮：右上象限（卖数据中心实物 + 用 AI） -->
+        <rect x="322" y="26" width="276" height="172" fill="#43c59e" opacity="0.07"/>
+        <text x="586" y="52" text-anchor="end" fill="#138a6e" font-size="11">whitespace：AI+自造+数据中心刚需产品</text>
+
+        <!-- 玩家 -->
+        <!-- Orbital：右上，强调色 -->
+        <circle cx="500" cy="80" r="9" fill="#3a66ff"/>
+        <text x="500" y="68" text-anchor="middle" fill="#1a1f33" font-weight="700">Orbital</text>
+        <text x="500" y="98" text-anchor="middle" fill="#5a627a" font-size="10">AI+自造·冷却液/碳捕集</text>
+
+        <!-- 3M/Solvay：右上偏右，卖实物+数据中心，但无AI -->
+        <circle cx="560" cy="150" r="8" fill="#b3701a"/>
+        <text x="560" y="138" text-anchor="middle" fill="#1a1f33">3M/Solvay</text>
+        <text x="560" y="168" text-anchor="middle" fill="#5a627a" font-size="10">造冷却液·无AI·退PFAS</text>
+
+        <!-- Altrove：右下，卖实物但通用(稀土替代) -->
+        <circle cx="470" cy="280" r="8" fill="#6b4cff"/>
+        <text x="470" y="268" text-anchor="middle" fill="#1a1f33">Altrove</text>
+        <text x="470" y="298" text-anchor="middle" fill="#5a627a" font-size="10">卖材料·稀土替代</text>
+
+        <!-- Periodic Labs：中下偏左，AI科学家+自动实验室，未定商业/通用 -->
+        <circle cx="250" cy="250" r="8" fill="#6b4cff"/>
+        <text x="250" y="238" text-anchor="middle" fill="#1a1f33">Periodic</text>
+        <text x="250" y="268" text-anchor="middle" fill="#5a627a" font-size="10">AI科学家·超导/散热</text>
+
+        <!-- CuspAI：左下偏中，平台/搜索引擎，通用 -->
+        <circle cx="180" cy="300" r="8" fill="#6b4cff"/>
+        <text x="180" y="288" text-anchor="middle" fill="#1a1f33">CuspAI</text>
+        <text x="180" y="318" text-anchor="middle" fill="#5a627a" font-size="10">材料搜索引擎·平台</text>
+
+        <!-- GNoME/MatterGen：左下，纯模型，通用 -->
+        <circle cx="110" cy="330" r="8" fill="#9aa3bd"/>
+        <text x="110" y="318" text-anchor="middle" fill="#1a1f33">GNoME/MatterGen</text>
+        <text x="110" y="348" text-anchor="middle" fill="#5a627a" font-size="10">巨头·开源模型</text>
+      </svg>
+      </div>
+      <figcaption>定位图（本调研重绘）。X 轴 = 卖模型/IP ↔ 卖实物产品；Y 轴 = 通用材料 ↔ 垂直到数据中心。<strong>右上「AI 设计 + 自建制造 + 数据中心刚需产品」象限几乎只有 Orbital；3M/Solvay 占着右侧但没有 AI 且正退场——这就是 whitespace。</strong></figcaption>
+    </figure>
+  </section>
+
+  <!-- ④ 融资 timeline -->
+  <section id="funding">
+    <h2><span class="n">④</span>融资 timeline</h2>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 720 170" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12.5">
+        <line x1="60" y1="78" x2="680" y2="78" stroke="#b9c2e0" stroke-width="2"/>
+
+        <!-- 成立 2023 -->
+        <circle cx="100" cy="78" r="6" fill="#3a66ff"/>
+        <text x="100" y="58" text-anchor="middle" fill="#1a1f33" font-weight="700">2023</text>
+        <text x="100" y="100" text-anchor="middle" fill="#5a627a" font-size="11">伦敦成立</text>
+
+        <!-- 种子 2023-07 -->
+        <circle cx="250" cy="78" r="6" fill="#3a66ff"/>
+        <text x="250" y="58" text-anchor="middle" fill="#1a1f33" font-weight="700">2023.07 种子</text>
+        <text x="250" y="100" text-anchor="middle" fill="#5a627a" font-size="11">$4.8M · Fly/Compound</text>
+
+        <!-- Series A 2024-02 -->
+        <circle cx="420" cy="78" r="6" fill="#3a66ff"/>
+        <text x="420" y="58" text-anchor="middle" fill="#1a1f33" font-weight="700">2024.02 Series A</text>
+        <text x="420" y="100" text-anchor="middle" fill="#5a627a" font-size="11">$16M · Radical/Compound</text>
+
+        <!-- AWS 2024-12 -->
+        <circle cx="540" cy="78" r="6" fill="#138a6e"/>
+        <text x="540" y="124" text-anchor="middle" fill="#138a6e" font-size="11">2024.12 AWS 战略合作</text>
+
+        <!-- Series B 2026-05 -->
+        <circle cx="650" cy="78" r="7" fill="#6b4cff"/>
+        <text x="650" y="58" text-anchor="middle" fill="#1a1f33" font-weight="700">2026.05 Series B</text>
+        <text x="650" y="100" text-anchor="middle" fill="#5a627a" font-size="11">$50M · Plural（口径有分歧）</text>
+      </svg>
+      </div>
+      <figcaption>Orbital Materials / Industries 融资时间线（据公开报道整理）。</figcaption>
+    </figure>
+    <table>
+      <thead><tr><th>时间</th><th>事件 / 轮次</th><th>金额</th><th>投资方</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr><td>2023</td><td>公司成立（伦敦）</td><td>—</td><td>创始人 Jonathan Godwin（ex-DeepMind）</td><td><span class="src src-b">🟡</span> Radical / 媒体</td></tr>
+        <tr><td>2023-07</td><td>Seed</td><td>$4.8M</td><td>Fly Ventures、Compound、Flying Fish、Character、Mustard Seed Maze</td><td><span class="src src-b">🟡</span> Nordic9/数据库</td></tr>
+        <tr><td>2024-02</td><td>Series A</td><td>$16M（累计约 $21M）</td><td>领投 Radical Ventures + Compound；Toyota Ventures、Fly 跟投</td><td><span class="src src-b">🟡</span> TechCrunch/Crunchbase/Radical</td></tr>
+        <tr><td>2024-12</td><td>AWS 多年战略合作（非融资）</td><td>—</td><td>AWS；<code>Orb</code> 上架 SageMaker JumpStart / AWS Marketplace</td><td><span class="src src-a">🟢</span> Amazon newsroom</td></tr>
+        <tr><td>2026-05</td><td>Series B（伴随改名 Orbital Industries）</td><td><strong>$50M（约 £37M）</strong></td><td>领投 Plural；NVentures(NVIDIA)、Radical、Compound、Fly 跟投</td><td><span class="src src-b">🟡</span> Fortune（独家）/Vestbee</td></tr>
+        <tr><td>—</td><td><em>口径分歧标注</em></td><td colspan="3"><span class="src src-c">🔴</span> 另有 salestools.io 博客 / Tracxn 提「$200M Series B @ $1.2B 估值，Radical 领投」——<strong>与 Fortune 独家的 $50M/Plural 领投相互矛盾，未能在一手或权威二手处交叉确认，存疑，倾向以 Fortune 2026-05 口径为准</strong></td></tr>
+      </tbody>
+    </table>
+    <p><strong>读融资节奏：</strong>种子→A→B 三轮、累计约 70M+ 美元（按 $50M Series B 口径），节奏稳健但<strong>体量远小于同侪</strong>（Periodic 种子就 300M、CuspAI Series A 100M+）。这反差本身是个信号：Orbital 走的是「<strong>资本相对克制、靠产品落地证明</strong>」的路，而非纯模型公司「一次性巨额押注叙事」的路。<strong>赛道整体融资热度：极高</strong>——2025–2026 AI4S 材料是热钱涌入的明星赛道（a16z/NEA/Temasek/NVIDIA/三星/现代/丰田齐入场），但绝大多数仍停在 seed–Series A/B、产品实效未验证。</p>
+  </section>
+
+  <!-- ⑤ 公司速览 -->
+  <section id="snapshot">
+    <h2><span class="n">⑤</span>公司速览</h2>
+    <table>
+      <tbody>
+        <tr><td>是什么 / 定位</td><td>自称「<strong>AI Industrial</strong>」——一种新型硬件公司：用前沿 AI 研究 + 小型跨学科团队 + 专用 agents + 机器人实验室 + 物理工程站点，「更快、以 R&D 成本零头造出更好的产品」<span class="src src-a">🟢</span>（官网原话，🔴 成本主张未独立验证）。原名 <strong>Orbital Materials</strong>，2026 改名 <strong>Orbital Industries</strong>。</td></tr>
+        <tr><td>产品</td><td>① 高密度 GPU 用的<strong>无 PFAS 介电冷却液 / 制冷系统</strong>（子品牌 Orbital IT）；② 工厂预制的<strong>模块化数据中心</strong>；③ 早期主打的<strong>数据中心一体化碳捕集材料</strong>（与 AWS 试点，称材料性能经 AI 平台提升 10×<span class="src src-c">🔴</span>）；底层 AI 为开源原子模型 <code>Orb</code> <span class="src src-a">🟢</span>。</td></tr>
+        <tr><td>团队</td><td>创始人/CEO <strong>Jonathan ("Jonny") Godwin</strong>，前 Google DeepMind 资深研究员，开创了 DeepMind 在 AI-for-materials 方向的研究（强 research 血统）；伦敦起家、多学科团队，约 <strong>50 人</strong> <span class="src src-b">🟡</span>。</td></tr>
+        <tr><td>商业模式</td><td><strong>类型2：垂直整合卖实物产品</strong>——明确「直接卖 AI 发现的材料，而非授权 IP」，并用 AI 优化合成/制造；自己扛供应链、制造、认证、库存与资本开支风险 <span class="src src-b">🟡</span>。客户/渠道：与 AWS 战略合作（<code>Orb</code> 上架），瞄准云厂商/数据中心运营方 <span class="src src-a">🟢</span>。</td></tr>
+        <tr><td>状态</td><td>Series B 后（2026-05，约 $50M），累计约 70M+ 美元；从「碳捕集材料」叙事转向以「<strong>数据中心冷却液 + 模块化数据中心</strong>」为商业化先锋，并计划把 AI 平台外扩到数据中心之外的工业应用 <span class="src src-b">🟡</span>。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ⑥ 创业 idea 借鉴 -->
+  <section id="idea">
+    <h2><span class="n">⑥</span>创业 idea 借鉴</h2>
+    <div class="callout insight">
+      <span class="label">Whitespace / 机会</span>
+      定位图右上象限——「<strong>用 AI 设计 + 自建制造 + 直接交付数据中心刚需实物产品</strong>」——目前几乎只有 Orbital 一家认真占。纯模型派（CuspAI/GNoME/MatterGen）不碰制造、化工巨头（3M/Solvay）不会用 AI 且正被监管逼退。<strong>「AI 加速研发」+「类型2 自建供应链」的组合，在每一个被政策/供给冲击撕开缺口的特种材料品类里，都可能复制一遍。</strong>
+    </div>
+
+    <h3>现有玩家共同短板（unmet needs）</h3>
+    <ul>
+      <li><strong>sim-to-real 鸿沟没人真正闭环：</strong>模型派能「发现」却造不出、量不了、过不了认证；这一断点是全行业最大软肋，谁能端到端交付谁赢。</li>
+      <li><strong>模型层壁垒在消失：</strong>GNoME/MatterGen/Orb 都开源，「有个好模型」不再是 moat——纯模型公司估值与壁垒错配。</li>
+      <li><strong>缺第三方 benchmark：</strong>没有公认指标证明谁的材料在真实场景更好，客户难比较、采购决策慢——谁能建立可信的「真实环境验证 + 认证」谁占信任高地。</li>
+      <li><strong>特种材料供给被监管/地缘抽空：</strong>PFAS 退出（3M）、稀土卡脖子——大量「明天就缺货」的刚需品类没有现成替代。</li>
+    </ul>
+
+    <h3>Why now（为什么现在值得做）</h3>
+    <ul>
+      <li><strong>技术拐点：</strong>原子基础模型（Orb/GNoME/MatterGen）+ 机器人/自动化湿实验室成熟，AI 把材料研发周期压缩了一个数量级（Orbital 自述碳捕集材料 10× 提速，🔴 未独立验证但方向可信）。</li>
+      <li><strong>需求拐点：</strong>AI 数据中心爆发 → GPU 功率密度暴涨 → 液冷成刚需；同时 <strong>3M 2025 底停产 Novec/退出 PFAS</strong>，把整个浸没冷却液的供给侧抽掉——「无 PFAS 又好用的 coolant」是个被政策硬造出来、有明确买家（云厂商）的缺口。</li>
+      <li><strong>资本拐点：</strong>2025–2026 AI4S 材料是热钱明星赛道，融资窗口大开（但也意味着估值泡沫与同质化风险并存）。</li>
+    </ul>
+
+    <h3>可借鉴的打法 + 相邻机会</h3>
+    <ul>
+      <li><strong>borrowable：</strong>(1) <strong>从「卖模型」升级到「卖实物产品」</strong>——当模型开源化、壁垒蒸发时，把 moat 换成供应链/认证/客户合同。(2) <strong>把开源模型当获客与生态入口</strong>（Orb 开源 + 上架 AWS Marketplace），用免费模型换战略合作与渠道，再靠实物产品赚钱。(3) <strong>锁定一个由外部冲击（监管/供给）逼出的刚需单品切入</strong>（PFAS-free coolant），而非泛泛「AI 发现万物」。(4) <strong>资本克制、用大客户（AWS）合作背书</strong>替代纯叙事融资。</li>
+      <li><strong>adjacent：</strong>把同一套「AI 设计 + 自建制造 + 卖刚需实物」复制到其它被供给/监管撕开缺口的特种材料：<strong>稀土永磁替代</strong>（Altrove 已在做）、<strong>电池电解液/固态电解质、半导体光刻胶与 CMP 浆料、PFAS-free 防水/涂层、低 GWP 制冷剂、催化剂/电解槽膜材料</strong>。下游也可向「卖整套子系统」延伸（Orbital 已从卖冷却液扩到卖<strong>模块化数据中心</strong>——材料→部件→系统的价值链上移）。</li>
+    </ul>
+
+    <div class="callout warn">
+      <span class="label">风险（诚实给）</span>
+      <strong>① 资本密集 + 慢：</strong>类型2 要建厂、扛库存、过认证，烧钱久、回报慢，且 Orbital 融资体量（~70M）远小于纯模型对手（Periodic 300M、CuspAI 100M+），扩产能力存疑。
+      <strong>② 巨头/在位者反扑：</strong>3M/Solvay 一旦推出自家 PFAS-free 替代，凭量产与渠道可碾压初创；云厂商也可能转向自研或扶持多供应商。
+      <strong>③ 产品实效未验证：</strong>「10× 提速」「$0.2/GPU-hour 碳负」「分子级海绵」多为自述（🔴），真实数据中心长期可靠性、认证、规模化良率都还没公开数据。
+      <strong>④ 模型层壁垒薄：</strong>核心 <code>Orb</code> 已开源，技术护城河主要落在「能不能真造出来并卖出去」，执行风险高。
+      <strong>⑤ 赛道叙事拥挤 + 估值泡沫：</strong>热钱可能在产品兑现前退潮。
+    </div>
+  </section>
+
+  <!-- ⑦ 现实判断 -->
+  <section id="take">
+    <h2><span class="n">⑦</span>现实判断</h2>
+    <p>Orbital 的聪明之处在于<strong>看清了模型层会被开源商品化</strong>，提前把赌注押到「<strong>谁能把 AI 发现的材料真造出来、卖进数据中心</strong>」这一相对空旷的下游格子，并精准咬住一个由 3M 退出 PFAS 制造出来的、有明确买家的刚需缺口（无 PFAS 冷却液）。这让它在一众「AI 发现万物」的同质化叙事里有了具体抓手，AWS 战略合作也给了它别人没有的渠道背书。<strong>软肋同样明确</strong>：它选了最重、最慢、最吃资本的「类型2」路线，融资体量却只有纯模型对手的零头；产品实效几乎全是自述、缺第三方验证；而一旦 3M/Solvay 推出自家 PFAS-free 替代或云厂商转向，初创的制造与渠道劣势会被迅速放大。综合看，<strong>赛道（下游 AI+自造+数据中心产品）尚属 nascent～emerging，给了它挤进去的窗口；但能不能赢取决于「制造与认证的执行」，而非「模型有多强」</strong>——这恰恰是它把命运押在自己最不像传统 AI 公司的那一面。对想借鉴的创业者，最干净的一条 take-away：<strong>在 AI 模型已经开源、壁垒蒸发的赛道里，别再做第 N 个模型；去找一个被监管/供给冲击逼出来的刚需实物缺口，用 AI 加速 + 自建制造端到端吃下它。</strong></p>
+    <div class="callout warn">
+      <span class="label">使用提醒</span>
+      本页为对话式调研，信息主要来自公开来源并按等级标注；融资数额（尤其 Series B 存在 $50M/Plural 与 $200M/Radical 两种相互矛盾的口径）、客户、能力声明（10× 提速、$0.2/GPU-hour、分子级海绵等多为公司自述🔴）以官方一手为准，
+      <strong>产品能力未必经独立验证</strong>，引用前请核对最新信息。命名以官网当前 <strong>Orbital Industries</strong> 为准，历史名 Orbital Materials 仍广见于早期报道。
+    </div>
+  </section>
+
+  <!-- 出处 -->
+  <section id="src">
+    <h2>出处</h2>
+    <ul style="font-size:13.5px">
+      <li><span class="src src-a">🟢</span> <a href="https://www.orbitalindustries.com/" target="_blank" rel="noopener">官网 orbitalindustries.com</a>（原 orbitalmaterials.com 301 跳转）— 定位「AI Industrial」、GPU 冷却产品、AI 平台</li>
+      <li><span class="src src-a">🟢</span> <a href="https://press.aboutamazon.com/2024/12/orbital-materials-and-aws-enter-strategic-partnership-to-develop-and-pilot-technologies-for-data-center-decarbonization-and-efficiency" target="_blank" rel="noopener">Amazon Newsroom：AWS × Orbital 战略合作（2024-12）</a> — 碳捕集/冷却、Orb 上架 SageMaker/Marketplace、10× 提速</li>
+      <li><span class="src src-b">🟡</span> <a href="https://fortune.com/2026/05/28/exclusive-orbital-industries-raises-50-million-series-b-funding-round-ai-to-discover-exotic-new-materials/" target="_blank" rel="noopener">Fortune（独家）：Orbital Industries 融 $50M Series B（2026-05）</a> — 改名、Plural 领投、50 人、冷却液 + 模块化数据中心</li>
+      <li><span class="src src-b">🟡</span> <a href="https://techcrunch.com/2024/02/21/this-startup-is-using-ai-to-discover-new-materials/" target="_blank" rel="noopener">TechCrunch：$16M Series A（2024-02）</a> · <a href="https://www.crunchbase.com/funding_round/orbital-materials-series-a--518405aa" target="_blank" rel="noopener">Crunchbase Series A</a> · <a href="https://radical.vc/revolutionizing-materials-discovery-with-ai-why-we-invested-in-orbital-materials/" target="_blank" rel="noopener">Radical Ventures 投资理由（创始人背景）</a></li>
+      <li><span class="src src-b">🟡</span> <a href="https://nordic9.com/news/orbital-materials-raised-a-48m-seed-round-from-fly-ventures-compound-flying-fish-partners-character-and-mustard-seed-maze/" target="_blank" rel="noopener">Nordic9：$4.8M 种子（2023-07）</a></li>
+      <li><span class="src src-b">🟡</span> <a href="https://www.vestbee.com/insights/articles/uk-s-firm-orbital-industries-raises-50-m-to-scale-ai-driven-industrial-hardware-and-data-centre-infrastructure" target="_blank" rel="noopener">Vestbee：£37M/$50M Series B、PFAS-free 冷却液 + 模块化数据中心、垂直整合卖材料不授权 IP</a></li>
+      <li><span class="src src-c">🔴</span> <a href="https://salestools.io/en/blog/orbital-materials-raises-200m-series-b" target="_blank" rel="noopener">salestools.io 博客：称 $200M Series B @ $1.2B（与 Fortune 口径矛盾，未证实，存疑）</a></li>
+      <li><span class="src src-b">🟡</span> 竞品：<a href="https://medium.com/@CuspAI/securing-our-100m-series-a-to-revolutionise-materials-discovery-with-ai-e6705e8c8fd3" target="_blank" rel="noopener">CuspAI Series A 100M+</a> · <a href="https://siliconangle.com/2025/10/01/periodic-labs-raises-300m-accelerate-scientific-research-ai/" target="_blank" rel="noopener">Periodic Labs $300M 种子 @ ~$1.3B</a> · <a href="https://tech.eu/2025/10/31/paris-based-altrove-raises-10-million-to-accelerate-ai-designed-alternatives-to-critical-materials/" target="_blank" rel="noopener">Altrove $10M 种子</a></li>
+      <li><span class="src src-b">🟡</span> 赛道背景：<a href="https://www.datacenterdynamics.com/en/news/two-phase-cooling-will-be-hit-by-epa-rules-and-3ms-exit-from-pfas-forever-chemicals/" target="_blank" rel="noopener">DCD：3M 退出 PFAS / Novec 停产冲击两相浸没冷却</a> · <a href="https://blog.se.com/datacenter/2026/05/22/pfas-phase-out-liquid-cooling-us-data-center-operators-must-do/" target="_blank" rel="noopener">Schneider：PFAS 退出与液冷</a> · <a href="https://hyper.ai/en/news/37442" target="_blank" rel="noopener">微软 MatterGen 开源</a></li>
+    </ul>
+  </section>
+
+  <footer class="foot">
+    公司竞争格局 / 赛道早期度调研笔记，仅作梳理；信息按来源分级、产品能力未必经独立验证，以官方一手信息为准 · 整理日期 2026-06-15
+  </footer>
+
+</article>
+</body>
+</html>
