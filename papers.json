@@ -95,6 +95,26 @@
     "path": "papers/2602.00169-agentic-materials-science/index.html"
   },
   {
+    "slug": "2304.05376-chemcrow",
+    "title": "ChemCrow: Augmenting large-language models with chemistry tools",
+    "authors": "Andres M. Bran, Sam Cox, Oliver Schilter, Carlo Baldassari, Andrew D. White, Philippe Schwaller",
+    "team": "EPFL · University of Rochester · IBM Research",
+    "arxiv": "https://arxiv.org/abs/2304.05376",
+    "code": "https://github.com/ur-whitelab/chemcrow-public",
+    "date": "2026-06-15",
+    "published": "Nature Machine Intelligence 2024",
+    "tldr": "GPT-4 + 18 个专家化学工具，用 ReAct 式 Thought-Action-Observation 循环编排，自主规划并在 RoboRXN 上合成 DEET、三个 organocatalyst、发现新 chromophore；并揭示 GPT-4 当裁判会偏爱流畅但错误的答案。",
+    "tags": [
+      "LLM-agent",
+      "chemistry",
+      "tool-use",
+      "ReAct",
+      "scientific-discovery",
+      "retrosynthesis"
+    ],
+    "path": "papers/2304.05376-chemcrow/index.html"
+  },
+  {
     "slug": "2606.03854-cli-anything",
     "title": "CLI-Anything: Towards Agent-Native Computer Use",
     "authors": "Yuhao Yang, Tianyu Fan, Chao Huang",

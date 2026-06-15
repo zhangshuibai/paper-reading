@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ChemCrow：给 LLM 装上化学工具的 agent · 论文解读</title>
+
+<script>
+  window.MathJax = {
+    tex:{inlineMath:[['$','$'],['\\(','\\)']], displayMath:[['$$','$$'],['\\[','\\]']]},
+    svg:{fontCache:'global'}
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;
+  }
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:880px; margin:0 auto; padding:18px 22px 90px}
+
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:27px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)}
+  .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .meta-grid a:hover{text-decoration:underline}
+
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap}
+  nav.toc a:hover{color:var(--accent)}
+
+  section{margin:38px 0}
+  h2{font-size:21px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:17px; margin:24px 0 8px}
+  p{margin:12px 0}
+  ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.9em}
+  strong{color:var(--text)}
+
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:14px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:10px 12px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  .yes{color:var(--ok); font-weight:600}
+  .no{color:var(--muted)}
+
+  figure{margin:24px 0; text-align:center}
+  figure img{max-width:100%; height:auto; border:1px solid var(--line); border-radius:10px; background:#fff}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+
+  blockquote{border-left:3px solid var(--line); margin:14px 0; padding:2px 16px; color:var(--muted)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+  .mjx-container{overflow-x:auto; overflow-y:hidden}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <!-- ============================ 抬头 / 元信息 ============================ -->
+  <header class="head">
+    <div class="chips">
+      <span class="chip">LLM-agent</span>
+      <span class="chip">chemistry</span>
+      <span class="chip">tool-use</span>
+      <span class="chip">ReAct</span>
+      <span class="chip">retrosynthesis</span>
+      <span class="chip">scientific-discovery</span>
+    </div>
+    <h1>ChemCrow：给 LLM 装上化学工具的 agent</h1>
+    <p class="orig-title">ChemCrow: Augmenting large-language models with chemistry tools</p>
+    <dl class="meta-grid">
+      <dt>作者</dt><dd>Andres M. Bran, Sam Cox, Oliver Schilter, Carlo Baldassari, Andrew D. White, Philippe Schwaller（Bran 与 Cox 共同一作）</dd>
+      <dt>团队 / 机构</dt><dd>EPFL（LIAC / NCCR Catalysis） · University of Rochester · IBM Research – Europe</dd>
+      <dt>原文链接</dt><dd><a href="https://arxiv.org/abs/2304.05376" target="_blank" rel="noopener">https://arxiv.org/abs/2304.05376</a></dd>
+      <dt>发表 / 年份</dt><dd>arXiv 2023（v5, 2023-10）；正式发表于 <em>Nature Machine Intelligence</em> 2024</dd>
+      <dt>解读日期</dt><dd>2026-06-15</dd>
+    </dl>
+  </header>
+
+  <div class="tldr">
+    <b>TL;DR</b> — 通用 LLM（哪怕 GPT-4）在化学上「会说不会做」：算错分子量、瞎编反应、说不准 IUPAC 名对应的结构，还看不到最新数据。ChemCrow 把 GPT-4 与 <strong>18 个专家设计的化学工具</strong>（retrosynthesis、reaction prediction、SMILES↔name、价格/专利查询、safety 检查等）用 <strong>ReAct/MRKL 式 Thought–Action–Observation</strong> 循环编排起来，让 LLM 从「自信但常错的知识源」变成「会查工具、会反思的 reasoning engine」。它自主规划并在 IBM RoboRXN 机器人平台上合成了驱蚊剂 DEET、三个 thiourea organocatalyst，还在人机协作下发现并合成了一个新的 chromophore。一个反直觉发现：用 GPT-4 当裁判（EvaluatorGPT）反而偏爱「流畅但错」的纯 GPT-4 答案——一旦自己都不懂，它也评不准。
+  </div>
+
+  <div class="callout note">
+    <span class="label">领域背景速补（只懂 LLM 也能读）</span>
+    这篇横跨「LLM agent」和「化学/有机合成」两个领域。下面把化学侧的关键术语用大白话讲清，后文再出现就不重复解释了：
+    <ul>
+      <li><strong>SMILES</strong>：用一串字符表示分子结构的「文本编码」，比如水是 <code>O</code>、乙醇是 <code>CCO</code>。它是分子的「机读字符串」，几乎所有化学工具的输入输出都用它。<strong>IUPAC name</strong> 则是分子的标准化学名（如「2-乙酰氧基苯甲酸」=阿司匹林）；名字 ↔ 结构的互转本身就不平凡，论文里 GPT-4 都做不准。</li>
+      <li><strong>retrosynthesis（逆合成）</strong>：从「我想要的目标分子」倒推「该用哪些更简单的原料、经哪几步反应做出来」，是有机合成的核心规划问题，像「下棋倒推开局」。<strong>reaction prediction（正向反应预测）</strong>：给定反应物，预测会生成什么产物。两者都有专门的 AI 模型（如本文用的 IBM Molecular Transformer / RXN4Chemistry）。</li>
+      <li><strong>organocatalyst（有机催化剂）</strong>：一类不含金属、用纯有机小分子去加速反应的催化剂；论文合成的 <strong>thiourea（硫脲）organocatalyst</strong> 是其中经典一族，能加速 Diels–Alder、Michael 等反应。Schreiner's / Ricci's / Takemoto's 是三位化学家命名的具体催化剂分子。</li>
+      <li><strong>chromophore（发色团）</strong>：分子里负责吸收特定波长光、决定颜色的结构单元；「吸收峰波长（absorption max wavelength，单位 nm）」是它的关键属性，材料/染料设计时要把这个数值调到目标值。</li>
+      <li><strong>DEET</strong>：最常见的驱蚊剂活性成分，结构简单、合成路线公开——所以连纯 GPT-4 靠记忆都能答对，是论文里的「简单任务」代表。<strong>RoboRXN</strong>：IBM 的云端机器人化学合成平台，能按机读的合成步骤自动跑实验，是 ChemCrow「动手做」的物理出口。</li>
+      <li><strong>分子量 / RDKit / 官能团 / 指纹相似度</strong>：分子量是把原子量加起来（确定性计算，但 LLM 会算错）；RDKit 是开源化学计算库；官能团（functional group）是决定分子反应性的特征结构片段；「指纹相似度（Tanimoto/ECFP）」把分子编码成 0/1 向量再比相似度，用于找类似分子。</li>
+    </ul>
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#opensource">① 开源贡献</a>
+    <a href="#motivation">② 动机与贡献</a>
+    <a href="#method">③ 方法</a>
+    <a href="#evaluation">④ 实验评估</a>
+    <a href="#insight">⑤ 洞见</a>
+  </nav>
+
+  <!-- ============================ ① 开源贡献 ============================ -->
+  <section id="opensource">
+    <h2><span class="n">①</span>开源贡献 Open-source Artifacts</h2>
+    <p>ChemCrow 开源了 <strong>agent 主体框架 + 一个工具子集</strong>，但<strong>并非论文中的全部 18 个工具</strong>。论文明确说明：公开版 <code>chemcrow-public</code> 只包含原始实现里 <strong>12 个工具</strong>的子集——因为 RXN4Chemistry、RoboRXN、NameRxn 等依赖受限 API 或专有软件、自动化机器人平台，无法直接打包发布。README 也直言「本包不包含论文里所有工具，结果不会与论文完全一致」。本文没有训练任何新模型，因此<strong>无模型权重</strong>；推理直接调用 OpenAI GPT-4。所有论文实验的完整运行轨迹（Thought–Action–Observation 全过程）单独开源在 <code>chemcrow-runs</code> 仓库。</p>
+    <table>
+      <thead><tr><th>类型</th><th>是否开源</th><th>内容 / 链接</th></tr></thead>
+      <tbody>
+        <tr><td>代码 Code</td><td class="yes">✔</td><td><a href="https://github.com/ur-whitelab/chemcrow-public" target="_blank" rel="noopener">github.com/ur-whitelab/chemcrow-public</a> — MIT 许可证，pip 包 <code>chemcrow</code>；含 agent 编排 + 12 个工具子集，基于 LangChain。</td></tr>
+        <tr><td>实验轨迹 Runs</td><td class="yes">✔</td><td><a href="https://github.com/ur-whitelab/chemcrow-runs" target="_blank" rel="noopener">github.com/ur-whitelab/chemcrow-runs</a> — 论文中各评测任务的完整 ChemCrow / GPT-4 输出。</td></tr>
+        <tr><td>模型权重 Weights</td><td class="no">✘（无）</td><td>不训练新模型，直接用 OpenAI GPT-4（论文用 <code>gpt-4</code>，temperature=0.1；README 示例用 <code>gpt-4-0613</code>）。需自备 OpenAI API key。</td></tr>
+        <tr><td>数据集 Dataset</td><td class="no">✘（无新数据集）</td><td>评测任务由专家手工设计（14 个 use case），工具数据源为 PubChem / ChemSpace / ZINC20 等外部库。</td></tr>
+        <tr><td>环境 / Benchmark</td><td class="no">部分</td><td>无标准化 benchmark；评测任务 + EvaluatorGPT prompt 思路见论文 Appendix，运行记录在 <code>chemcrow-runs</code>。部分工具（RXN 预测/逆合成）可用 Docker 自托管。</td></tr>
+        <tr><td>项目主页 / Demo</td><td class="yes">✔</td><td>提供 HuggingFace Space 在线 demo；可 <code>pip install chemcrow</code> 后本地使用。</td></tr>
+      </tbody>
+    </table>
+    <div class="callout warn">
+      <span class="label">复现注意</span>
+      论文中最亮眼的「在 RoboRXN 上真实合成」依赖 IBM 受限授权的机器人平台与 RXN4Chemistry API，<strong>公开版无法复现物理合成</strong>；ReactionPlanner/Execute、NameRXN（NextMove 专有）等也不在开源子集内。
+    </div>
+  </section>
+
+  <!-- ============================ ② 动机与贡献 ============================ -->
+  <section id="motivation">
+    <h2><span class="n">②</span>研究动机与贡献 Motivation &amp; Contribution</h2>
+    <h3>背景与问题</h3>
+    <p>过去几十年，化学界积累了大量优秀的计算工具：reaction prediction、retrosynthesis planning、分子性质预测、de-novo 分子生成、贝叶斯优化……但它们散落在各自孤立的环境里（RXN for Chemistry、AIZynthFinder 等），学习曲线陡峭、互操作性差。实验化学家通常缺乏计算技能，难以把这些工具串起来用，导致化学领域的自动化水平相比其他领域明显偏低。</p>
+    <p>另一边，LLM 在跨领域任务上表现强劲，却在化学上反复翻车：论文点名 GPT-4 / GPT-3.5 连 <code>12345*98765</code> 这种乘法都算不稳，也无法可靠地把 IUPAC 名转成分子图（molecular graph）。根源在于 LLM 的核心设计是「预测下一个词」——它<strong>自信、流畅，却常常事实错误（hallucination）</strong>，而且没有访问外部知识源、看不到最新数据。在需要精确数值与可执行实验约束的化学场景里，这种「会说不会做」是致命的。</p>
+    <h3>本文的切入点</h3>
+    <p>作者的关键观察是：LLM 不该亲自去做它不擅长的精确计算，而应该<strong>当 reasoning engine 去编排专家工具</strong>。受 Toolformer、MM-REACT、HuggingGPT 等「LLM + 工具」工作启发，把「计算器之于数学」的思路搬到化学——用 OPSIN 做名称转结构、用 RDKit 算分子量、用 RXN4Chemistry 做逆合成。LLM 负责的是「该用哪个工具、喂什么输入、如何串联观测结果」，精确答案交给工具。这样既补上 LLM 的事实短板，又能在工具里嵌入 safety 护栏。</p>
+    <h3>核心贡献</h3>
+    <ol>
+      <li>提出 <strong>ChemCrow</strong>：GPT-4 + 18 个专家设计化学工具，用 ReAct/MRKL 式 Thought–Action–Observation 循环编排，覆盖有机合成、药物发现、材料设计三大方向，并能直接连接物理实验室。</li>
+      <li><strong>首次展示化学 LLM agent 与物理世界交互</strong>：自主规划并在 IBM RoboRXN 机器人平台上真实合成了 insect repellent（DEET）、三个 thiourea organocatalyst（Schreiner's、Ricci's、Takemoto's），并在人机协作下发现+合成一个新 chromophore。</li>
+      <li>设计 <strong>EvaluatorGPT + 专家人评</strong>的双轨评测，在 GPT-4 基线上系统对比；并揭示一个重要负面结论：<strong>当 LLM 自身不懂该领域时，用它当裁判不可靠</strong>，会偏爱流畅但错误的答案。</li>
+      <li>系统讨论 <strong>风险缓解</strong>：内置 controlled-substance / explosive / safety 检查与硬编码安全准则，降低 dual-use 与实验事故风险。</li>
+    </ol>
+  </section>
+
+  <!-- ============================ ③ 方法 ============================ -->
+  <section id="method">
+    <h2><span class="n">③</span>方法 Method</h2>
+    <p>ChemCrow 的整体流程见图 1：用户给一个自然语言任务（如「规划并执行一个驱蚊剂的合成」），系统把<strong>工具清单（名字 + 用途描述 + 期望输入/输出格式）</strong>连同用户 prompt 一起喂给 GPT-4。LLM 随后进入一个自动的、迭代的 chain-of-thought 循环，自己决定走哪条路、调哪个工具、喂什么输入，直到得出最终答案。</p>
+
+    <figure>
+      <img src="figures/fig1_overview_toolset.png" alt="ChemCrow 总览与工具集">
+      <figcaption>图 1：总览与工具集。a) 任务求解流程——围绕 ChemCrow 的 Chain-of-thought 推理循环：1. Thought（reason/plan）→ 2. Action（选工具）→ 3. Action Input（喂输入）→ 4. Observation（看工具返回）→ 回到 Thought，循环直到最终答案；图中示例为合成 DEET。b) 五类工具集：Molecule tools、Reaction tools、Safety tools、General tools、以及标准工具。（出处：原文 Figure 1）</figcaption>
+    </figure>
+
+    <h3>ReAct / MRKL 式的 Thought–Action–Observation 循环</h3>
+    <p>编排范式直接沿用 <strong>ReAct</strong> 与 <strong>MRKL</strong>：LLM 被引导按固定格式生成 <code>Thought</code>（先对当前状态推理、判断与最终目标的关系、规划下一步）→ <code>Action</code>（关键字后跟要调用的工具名）→ <code>Action Input</code>（工具输入）。此时文本生成<strong>暂停</strong>，程序去真正执行该工具，把结果以 <code>Observation</code> 关键字回灌给 LLM，LLM 再进入下一轮 Thought。如此反复，直到产出 Final Answer。这把 chain-of-thought 推理与外部工具调用结合起来，让 LLM「反思任务 → 用合适工具取信息 → 观察返回 → 再循环」。实现上基于 <strong>LangChain</strong> 框架接入工具，底层 LLM 为 GPT-4（temperature=0.1）。</p>
+
+    <h3>18 个工具：分三大类</h3>
+    <p>论文把工具分为 General / Molecule / Reaction 三类（外加 Safety 子类）。工具集并非穷尽，且<strong>用自然语言加描述就能轻松扩展</strong>新工具——这是该框架的核心可扩展性。代表工具如下：</p>
+
+    <table>
+      <thead><tr><th>类别</th><th>工具</th><th>作用 / 后端</th></tr></thead>
+      <tbody>
+        <tr><td rowspan="4"><strong>General<br>通用工具</strong></td><td>WebSearch</td><td>SerpAPI 抓 Google 首页结果，作为兜底信息源。</td></tr>
+        <tr><td>LitSearch</td><td>基于 <code>paper-qa</code> + OpenAI Embeddings + FAISS，从 PDF/文献里检索并生成有引用的答案（默认优先于 WebSearch）。</td></tr>
+        <tr><td>Python REPL</td><td>LangChain 标准工具，给 agent 一个真 Python shell（可做数值计算、训练 ML 模型、数据分析）。</td></tr>
+        <tr><td>Human</td><td>直接向用户提问的接口，遇到不确定或需授权（如启动机器人合成）时调用。</td></tr>
+        <tr><td rowspan="8"><strong>Molecule<br>分子工具</strong></td><td>Name2SMILES</td><td>名称/CAS → SMILES，主查 ChemSpace，失败回退 PubChem 与 OPSIN（IUPAC→结构）。</td></tr>
+        <tr><td>Name2CAS</td><td>名称/SMILES → CAS 号（查 PubChem）。</td></tr>
+        <tr><td>SMILES2Weight</td><td>用 RDKit 精确算分子量（补 LLM 算不准的短板）。</td></tr>
+        <tr><td>SMILES2Price</td><td>用 molbloom 判断是否可购（ZINC20），再用 ChemSpace API 返回最便宜价格。</td></tr>
+        <tr><td>Similarity</td><td>基于 ECFP2 指纹的 Tanimoto 相似度，比较两个分子。</td></tr>
+        <tr><td>ModifyMol</td><td>用 SynSpace + 50 个 robust medchem 反应在分子周围生成局部化学空间，做小幅修饰/类似物探索。</td></tr>
+        <tr><td>FuncGroups</td><td>用命名 SMARTS 模式识别分子中的官能团。</td></tr>
+        <tr><td>PatentCheck</td><td>用 molbloom bloom filter 高效判断分子是否已被专利覆盖 / 是否新颖。</td></tr>
+        <tr><td rowspan="3"><strong>Safety<br>安全工具</strong></td><td>ControlledChemicalCheck</td><td>用 CAS 比对 OPCW 化学武器附表 1–3 与 Australia Group 前体清单；命中即<strong>立即停止执行</strong>（请求合成时自动触发）。</td></tr>
+        <tr><td>ExplosiveCheck</td><td>查 PubChem 的 GHS 评级，识别爆炸性分子（请求合成时自动触发，给警告/报错）。</td></tr>
+        <tr><td>SafetySummary</td><td>从 PubChem 汇总四方面安全信息：操作安全、GHS、环境风险、社会影响（是否受控）；缺数据时允许 LLM 补全但须显式声明。</td></tr>
+        <tr><td rowspan="4"><strong>Reaction<br>反应工具</strong></td><td>NameRXN</td><td>NextMove 专有 NameRxn，按命名反应数据库给反应分类（输出分类码 + 反应名）。</td></tr>
+        <tr><td>ReactionPredict</td><td>RXN4Chemistry API（Molecular Transformer），给反应物预测产物。</td></tr>
+        <tr><td>ReactionPlanner</td><td>RXN4Chemistry 多步逆合成 + 动作预测，把反应序列转成可执行步骤（条件/添加剂/溶剂），再用 LLM 转成自然语言。</td></tr>
+        <tr><td>ReactionExecute</td><td>连 RoboRXN 机器人平台：内部调 Planner 拿动作序列，用 LLM 循环（ActionCleaner）自动修正「溶剂不足/无效纯化」等报错，最后请用户授权后启动合成。</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Safety 护栏：硬编码决策树</h3>
+    <p>安全不是事后提示，而是嵌进流程的硬规则（图 2）。当任务涉及「合成/执行/找类似分子/修饰分子」时，先查是否为受控化学品——<strong>是则直接停止执行</strong>；否则继续，并视情况查爆炸性、给出警告，把安全信息复用进最终答案（含处理建议）。</p>
+
+    <figure>
+      <img src="figures/fig_safety_flowchart.png" alt="ChemCrow 安全决策流程">
+      <figcaption>图 2：ChemCrow 的硬编码 safety 决策树（原文 Appendix D）。是否涉及合成/修饰 → 是否受控化学品 → 受控则 <em>stop execution</em>；含分子的问题则进一步查受控/爆炸性并对用户 <em>give warning</em>，否则 <em>continue</em>。（出处：原文 Appendix D 流程图）</figcaption>
+    </figure>
+
+    <div class="callout note">
+      <span class="label">实现要点</span>
+      ① LLM 只看「工具名 + 描述 + I/O 格式」，因此<strong>加新工具 = 写一段自然语言描述</strong>，无需改 agent 核心；② 精确数值/查询全部外包给工具（RDKit 算分子量、OPSIN 转结构），LLM 只负责编排与推理；③ ReactionExecute 内置 ActionCleaner，能自主从机器人平台拉验证数据并迭代修正合成动作（如加溶剂量）直到 valid，<strong>无需人工干预</strong>；④ LitSearch 默认优先于 WebSearch，保证答案锚定文献并带引用。
+    </div>
+  </section>
+
+  <!-- ============================ ④ 实验评估 ============================ -->
+  <section id="evaluation">
+    <h2><span class="n">④</span>实验评估 Evaluation</h2>
+
+    <h3>A. 自主合成与人机协作（真实物理验证）</h3>
+    <p>从极简指令出发——如「规划并执行一个 insect repellent 的合成」「找一个能加速 Diels–Alder 反应的 thiourea organocatalyst 并合成它」——ChemCrow 依次调用 LitSearch/WebSearch → Name2SMILES → ReactionPlanner → ReactionExecute，在 IBM RoboRXN 上<strong>真实合成</strong>了 DEET 与三个已知 thiourea organocatalyst（Schreiner's、Ricci's、Takemoto's），四个目标产物全部成功得到（图 3）。</p>
+    <p>在<strong>人机协作</strong>的 chromophore 案例里，ChemCrow 被要求训练一个 ML 模型来筛选候选 chromophore 库：它自主完成加载/清洗/预处理数据、算 Morgan 指纹、划分训练测试、训练并评估 Random Forest，最终从选择池里挑出预测吸收峰最接近目标 369&nbsp;nm 的分子（模型 RMSE≈37&nbsp;nm），并给出两步合成方案。人类随后真实合成该分子，用 MS(ESI)、NMR 确认结构，并测 UV-Vis——实测吸收峰约 <strong>336&nbsp;nm</strong>，确认发现了一个新 chromophore（属性接近目标）。</p>
+
+    <figure>
+      <img src="figures/fig_experimental.png" alt="实验验证">
+      <figcaption>图 3：实验验证。a) 启动 ChemCrow 的用户脚本；b) 查询并合成 thiourea organocatalyst 的轨迹（WebSearch→Name2SMILES→SynthesisPlanner→SynthesisExecuter）；c) IBM Research RoboRXN 合成平台；d) 经实验验证的化合物（DEET、Schreiner's / Ricci's / Takemoto's 三个 organocatalyst、新 chromophore 的两步合成）。（出处：原文 Figure 2）</figcaption>
+    </figure>
+
+    <h3>B. 跨任务评测设置</h3>
+    <ul>
+      <li><strong>任务 / 数据集：</strong>与专家合作设计的一组化学任务（分析了 14 个 use case，评测图中按 12 个任务呈现），分三类——organic synthesis、molecular design、chemical logic &amp; knowledge，每类内按难度排序。涵盖药物合成规划、设计相似性质/作用模式的新化合物、解释反应机理等。</li>
+      <li><strong>对比基线：</strong>纯 GPT-4（被 prompt 扮演专家化学家），无工具。</li>
+      <li><strong>评价指标：</strong>双轨——<strong>EvaluatorGPT</strong>（GPT-4 扮演老师评学生，只看任务是否被解决、整体思路是否正确，并给出优劣点）+ <strong>专家人评</strong>，人评从三维度打分：① 化学正确性 ② 推理质量 ③ 任务完成度；另有「每任务偏好」（评估者更满意哪一方）。</li>
+    </ul>
+
+    <h3>C. 主要结果</h3>
+    <p>结论很清晰：<strong>专家人评下 ChemCrow 全面优于纯 GPT-4，尤其在更难、更需要扎实化学推理的任务上</strong>；GPT-4 只在最简单、答案完全在其训练数据里的任务（如 DEET、paracetamol/aspirin 的合成，靠记忆即可）上略胜。下表是专家给出的聚合分数（满分约 10）：</p>
+    <table>
+      <thead><tr><th>评价者 / 维度</th><th>GPT-4（无工具）</th><th><strong>ChemCrow</strong></th></tr></thead>
+      <tbody>
+        <tr><td>LLM Evaluator（EvaluatorGPT）</td><td>≈ 8</td><td><strong>≈ 8</strong>（持平，EvaluatorGPT 区分不开）</td></tr>
+        <tr><td>专家人评 · 化学正确性 Accuracy</td><td>≈ 5</td><td><strong>≈ 9</strong></td></tr>
+        <tr><td>专家人评 · 任务完成度 Completion</td><td>≈ 7</td><td><strong>≈ 9</strong></td></tr>
+      </tbody>
+    </table>
+    <p>（上表数值为图 4c 柱状图的近似读数，非论文报告的精确表格。）此外在「化学正确性 vs 合成可及性（SCScore）」一图中，随着目标分子合成难度增加，纯 GPT-4 的事实准确性显著下滑（如 Takemoto's organocatalyst 处掉到很低），而 ChemCrow 保持高位且稳定——这正体现工具把 hallucination 压住了。</p>
+
+    <figure>
+      <img src="figures/fig3_human_eval.png" alt="评测结果">
+      <figcaption>图 4：评测结果（原文 Figure 4）。a) 每任务偏好：评估者更满意哪一方，任务按三类分组、类内按难度递增——越难，专家越偏向 ChemCrow（紫）。b) 有机合成任务的化学正确性 vs 目标合成可及性（SCScore），GPT-4 随难度下滑、ChemCrow 稳定。c) 各指标的人评聚合分（化学正确/推理质量/任务完成）对比 EvaluatorGPT 分数，误差棒为 95% 置信区间。（出处：原文 Figure 4）</figcaption>
+    </figure>
+
+    <figure>
+      <img src="figures/fig4_score_agg.png" alt="逐任务评分">
+      <figcaption>图 5：逐任务评分细化（原文附录）。左上/右上：专家对 12 个任务的「响应准确性」与「任务完成度」打分，ChemCrow（紫）在多数任务上高于 GPT-4（红）。左下：LLM Evaluator 逐任务打分两者难分高下。右下：跨任务平均——LLM Evaluator 下两者持平，但专家评（准确性/完成度）下 ChemCrow 明显领先。（出处：原文 Appendix 评分聚合图）</figcaption>
+    </figure>
+
+    <h3>D. 关键分析：GPT-4 当裁判失灵</h3>
+    <p>最值得记住的发现：<strong>EvaluatorGPT 平均反而认为纯 GPT-4 更好</strong>，因为它被 GPT-4 答案的流畅、看似完整所迷惑——而那些 hallucination 只有在仔细核查时才暴露。这说明：当 LLM 自身缺乏理解某领域所需的知识时，它<strong>同样缺乏评判该领域答案的能力</strong>，从而无法给出可信评估。论文据此提醒：在「事实性」起关键作用的评测里，用 GPT-4 自评/互评是不可靠的。复现性方面，作者也指出闭源 API 模型控制力有限、个别结果难以严格复现（Appendix E）。</p>
+  </section>
+
+  <!-- ============================ ⑤ 洞见 ============================ -->
+  <section id="insight">
+    <h2><span class="n">⑤</span>洞见 Insights</h2>
+    <div class="callout insight">
+      <span class="label">Insight</span>
+      <strong>① 工具是治 hallucination 的「锚」。</strong>把精确计算与查询外包给专家工具，LLM 退居为编排者，事实错误被大幅压住——尤其在难任务上，纯 GPT-4 准确性随合成难度断崖下滑，ChemCrow 却稳。<br>
+      <strong>② LLM 不懂的领域就别让它当裁判。</strong>EvaluatorGPT 偏爱「流畅但错」的答案，揭示「自评」在事实性评测上的系统性失效——这是一个可迁移到所有 LLM-as-judge 场景的警示。<br>
+      <strong>③ 自然语言即接口。</strong>「写段工具描述就能加工具」让该 agent 框架天然可扩展，不限于化学，也不限于文本工具（可接图像处理等）。
+    </div>
+    <h3>局限与未来</h3>
+    <p>① <strong>强依赖工具质量</strong>：agent 的有效性同时受工具质量与推理质量牵制——推理错会喂垃圾输入给工具，工具输出错会把 agent 带偏；逆合成等能力的天花板由底层引擎决定。② <strong>评测主观且有限</strong>：任务选择存在隐性偏置，大规模检验「化学逻辑」本身就难，标准化 benchmark 尚未建立。③ <strong>复现性</strong>：闭源 API LLM 控制力有限，个别结果难严格复现；开源模型是潜在出路但可能损失推理力。④ <strong>dual-use 安全</strong>：尽管有受控物质/爆炸性检查与硬编码安全准则，降低非专家滥用与实验事故风险仍需人类审查、专家把关与持续监管；论文专门用一节讨论风险缓解与知识产权问题。⑤ 我个人判断：物理合成部分的「自动化」很大程度仍依赖人工修正与受限平台，离真正端到端自驱实验室尚有距离。</p>
+    <h3>与相关工作的关系</h3>
+    <p>方法骨架直接站在 <strong>ReAct</strong>（推理+行动交织）与 <strong>MRKL</strong>（模块化神经-符号架构）之上，并用 <strong>LangChain</strong> 落地；「LLM+工具」的更广脉络包括 Toolformer、MM-REACT、HuggingGPT。论文特别提到与其<strong>同期</strong>的 Boiko 等「Emergent autonomous scientific research」工作思路相似（也是给 LLM 装化学工具去做 GPT-4 单独够不着的任务），但对方聚焦 cloud lab，而 ChemCrow 覆盖更广的任务与工具集，并连到云端机器人合成平台。评测上则借鉴了用 LLM 当 evaluator 的做法（GPTEval、Sparks of AGI 等），但反过来给出了「这种自评在事实性任务上不可信」的反例。</p>
+  </section>
+
+  <footer class="foot">
+    本页为 <code>paper-reading</code> skill 生成的阅读笔记，仅作辅助，细节以
+    <a href="https://arxiv.org/abs/2304.05376" target="_blank" rel="noopener">原文</a> 为准 · 解读日期 2026-06-15
+  </footer>
+
+</article>
+</body>
+</html>
