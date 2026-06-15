@@ -118,6 +118,7 @@
     <a href="#snapshot">⑤ 公司速览</a>
     <a href="#idea">⑥ 创业 idea 借鉴</a>
     <a href="#take">⑦ 现实判断</a>
+    <a href="#cn">★ 中国对标</a>
     <a href="#src">出处</a>
   </nav>
 
@@ -385,6 +386,87 @@
     </div>
   </section>
 
+  <!-- ★ 中国对标 -->
+  <section id="cn">
+    <h2><span class="n">★</span>中国对标 / 在中国能不能借鉴</h2>
+    <p>把 Exa 放进中国语境，关键是先把两件事分开：<strong>「面向 C 端用户的 AI 搜索产品」</strong>（你打开网页/App，AI 帮你搜+总结，如秘塔、天工、夸克、豆包）和 <strong>「面向开发者/agent 的 search API」</strong>（按调用收费，把全网检索做成接口喂给大模型/agent，这才是 Exa 的形态）。中国的 C 端 AI 搜索<strong>极其拥挤</strong>，但真正对标 Exa 的「<strong>给 agent 用的 search API</strong>」这一格<strong>玩家很少、相对早期</strong>——目前几乎是<strong>博查 Bocha 一家独大</strong>。</p>
+
+    <h3>① 中国对标小表（C 端产品 vs 开发者/agent API）</h3>
+    <table>
+      <thead><tr>
+        <th>玩家</th><th>类型</th><th>形态 / 对标关系</th><th>规模 / 状态</th><th>来源</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>博查 Bocha</strong>（杭州博查搜索科技）</td>
+          <td><strong>开发者 / agent search API</strong></td>
+          <td><strong>最直接对标 Exa</strong>：Web Search API + Semantic Reranker API，结果格式专为大模型优化，支持 Function Call / MCP；强调「给 AI 用、内容合规、可平替 Bing/Exa」</td>
+          <td>API 2024/07 上线；自称 DeepSeek 官方联网搜索供应方、阿里/腾讯/字节官方推荐；3000+ 企业 + 2 万+ 开发者；日均调用约 3000 万次、承担国内 AI 应用约 60% 联网搜索请求 <span class="src src-c">🔴自述规模</span></td>
+          <td><span class="src src-a">🟢</span>官网 +<span class="src src-b">🟡</span>媒体</td>
+        </tr>
+        <tr>
+          <td><strong>秘塔 Metaso</strong>（秘塔科技）</td>
+          <td>C 端 AI 搜索（兼有 API）</td>
+          <td>主打 C 端：自研 MetaLLM，无广告、学术搜索、研究模式、生成报告/脑图；也开放搜索/问答/知识库 API（约 ¥0.03/次）</td>
+          <td>2024/03 上线；自称约 6500 万 MAU、国内 AI 搜索第二；主用户为学生/研究者 <span class="src src-c">🔴自述MAU</span></td>
+          <td><span class="src src-b">🟡</span>媒体</td>
+        </tr>
+        <tr>
+          <td><strong>天工 AI 搜索</strong>（昆仑万维，上市）</td>
+          <td>C 端 AI 搜索</td>
+          <td>2023/08「国内第一款大模型搜索引擎」，主打金融/学术高级搜索；后整体转向办公场景 AI Agent</td>
+          <td>上市公司业务线；DAU 曾报约 34 万（2024 初）<span class="src src-b">🟡</span></td>
+          <td><span class="src src-b">🟡</span>媒体</td>
+        </tr>
+        <tr>
+          <td><strong>夸克</strong>（阿里）/ <strong>百度</strong> / <strong>豆包</strong>（字节）/ <strong>知乎直答</strong></td>
+          <td>大厂 C 端 / 内置</td>
+          <td>大厂自带流量与索引，把 AI 搜索做进自家超级 App；多为内置能力，<strong>对外开放的 agent search API 弱或没有</strong></td>
+          <td>豆包 C 端认知度居前；知乎直答以社区高质量问答为语料 <span class="src src-b">🟡</span></td>
+          <td><span class="src src-b">🟡</span>媒体</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>读表：</strong>对标 Exa 的不是秘塔/天工这些「能搜会答的产品」，而是<strong>博查这种「按调用收费的检索接口」</strong>。秘塔虽也开 API，但重心和叙事都在 C 端；博查从第一天就把自己定位成「<strong>给 AI 用的 search API</strong>」，是国内最像 Exa/Tavily 的那一家——且这一格<strong>几乎没有第二个量级相当的纯做 API 的创业公司</strong>。</p>
+
+    <h3>② 赛道成熟度：C 端很卷，agent API 相对早期</h3>
+    <div class="callout insight">
+      <span class="label">中国赛道早期度判断</span>
+      <span class="verdict v-crowded">C 端 AI 搜索：crowded（很卷）</span>
+      &nbsp;
+      <span class="verdict v-emerging">给 agent 用的 search API：emerging（相对早期）</span><br><br>
+      <strong>C 端 AI 搜索</strong>：秘塔、天工、夸克、豆包、百度、360、知乎直答……外加所有大厂超级 App 内置，已是<strong>红海级拥挤</strong>，且大厂凭流量+自有索引占绝对优势，纯创业公司在 C 端几乎无空间。<br>
+      <strong>给 agent 用的 search API</strong>（按调用收费、专为大模型优化的检索接口）：玩家<strong>屈指可数</strong>，博查几乎一家独占早期红利；多数对比文章直言「<strong>国内专为 AI 使用的 Web Search API，长期只有博查；国外对应物是 Exa</strong>」<span class="src src-b">🟡</span>。这一层<strong>需求被 DeepSeek/agent 爆发突然拉起、供给却很薄</strong>，故判 emerging。注意博查的「3000 万次/天、60% 份额」等为<strong>自述口径，未独立验证</strong> <span class="src src-c">🔴</span>。
+    </div>
+
+    <h3>③ Why now（为什么国内现在这个窗口）</h3>
+    <ul>
+      <li><strong>国产大模型 / agent 爆发</strong>：DeepSeek 等带动一大批上层应用，每个想「联网」的 agent/RAG 都需要一个<strong>按量计费、给 AI 用的检索接口</strong>——这正是博查 2024/07 之后迅速起量的根本原因。</li>
+      <li><strong>需要中文优质检索源</strong>：国内 agent 要的是高质量<strong>中文</strong>语料与<strong>合规</strong>结果，通用海外索引对中文长尾、政务/百科/垂直内容召回弱，本土 API 在中文与合规上天然占优。</li>
+      <li><strong>海外 Exa / Tavily 在国内可用性受限</strong>：Tavily 国内直连额度有限、Exa 可用但<strong>稳定性/合规/付款</strong>都有摩擦；且<strong>中国大陆部署联网搜索功能本身受限</strong>，海外 search API 难直接落地生产——给本土合规版留出真实空位 <span class="src src-b">🟡</span>。</li>
+    </ul>
+
+    <h3>④ 借鉴 + 本土化：做「中文版/合规版 Exa」</h3>
+    <div class="callout note">
+      <span class="label">可借鉴的本土化打法</span>
+      把 Exa 的范式（<strong>为 AI 而非为人重做检索、usage-based API、慷慨免费额度、语义召回</strong>）搬到中国，核心差异化在<strong>「中文独有语料 + 合规」</strong>：
+      <ul>
+        <li><strong>接入中文独有语料</strong>：微信公众号 / 小红书 / B 站 / 知乎 / 抖音 等<strong>墙内优质内容</strong>——这些是海外 Exa 拿不到、通用搜索引擎也覆盖不全的语义检索源，是最硬的本土护城河；</li>
+        <li><strong>合规优先</strong>：内容审核、来源可溯、数据出域控制做进 API（博查已把「合规」当卖点），这是卖给国产大模型/政企客户的入场券；</li>
+        <li><strong>面向国产大模型与 agent 的语义检索 API</strong>：原生支持 Function Call / MCP、返回 token-efficient 片段而非整页，对接 DeepSeek/通义/豆包/Kimi 等生态；</li>
+        <li><strong>相邻空位</strong>：① 国内<strong>垂直语义检索 API</strong>（学术/专利/政策法规/医疗/材料的中文语料，对标本篇⑥的 AI4S 机会，国内更空）；② 领域<strong>新内容实时语义订阅</strong>（仿 Exa Monitors）；③ 检索<strong>评测/benchmark 标准</strong>，国内同样未成型。</li>
+      </ul>
+    </div>
+
+    <div class="callout warn">
+      <span class="label">如实标注</span>
+      ① 本节中博查的「日均 3000 万次 / 60% 份额 / DeepSeek 官方供应方 / 大厂官方推荐」、秘塔「6500 万 MAU」等<strong>多为公司自述或媒体转述，未经独立验证</strong> <span class="src src-c">🔴</span>；
+      ② 各家「国内唯一 / 首个 search API」的说法是<strong>营销口径</strong>，仅说明该格玩家稀少，不宜当严格事实；
+      ③ 海外 Exa/Tavily 国内可用性、内地部署联网搜索受限等为<strong>一般性观察</strong>，具体以最新政策与各家条款为准；
+      ④ C 端 MAU / DAU 排名各数据源口径差异大，仅供量级参考。
+    </div>
+  </section>
+
   <!-- 出处 -->
   <section id="src">
     <h2>出处</h2>
@@ -399,6 +481,9 @@
       <li>竞品 Firecrawl：<a href="https://www.globenewswire.com/news-release/2025/08/19/3135573/0/en/Firecrawl-Announces-14-5-Million-in-Series-A-Funding-to-Put-Web-Data-on-Tap-for-AI-Agents.html" target="_blank" rel="noopener">Firecrawl $14.5M A</a> <span class="src src-b">🟡</span>（Mendable 团队、43k★）</li>
       <li>竞品 Perplexity：<a href="https://www.perplexity.ai/hub/blog/introducing-the-perplexity-search-api" target="_blank" rel="noopener">Perplexity Search API（2025/09，$5/千次）</a> <span class="src src-b">🟡</span></li>
       <li>赛道对比：<a href="https://www.firecrawl.dev/blog/best-web-search-apis" target="_blank" rel="noopener">Firecrawl — Best Web Search APIs 2026</a> · <a href="https://awesomeagents.ai/pricing/search-api-pricing/" target="_blank" rel="noopener">Search API Pricing 2026</a> <span class="src src-b">🟡</span>（价格量级、各家定位，口径不一仅供量级）</li>
+      <li>中国对标 — 博查：<a href="https://open.bochaai.com/" target="_blank" rel="noopener">博查 AI 开放平台（Search API / Reranker API）</a> <span class="src src-a">🟢</span>；<a href="https://finance.sina.com.cn/wm/2025-09-18/doc-infqwutm8962819.shtml" target="_blank" rel="noopener">新浪财经 — 押注 AI 搜索赛道，博查会成为下一个谷歌吗</a> · <a href="https://cloud.tencent.com/developer/article/2504073" target="_blank" rel="noopener">腾讯云 — 中国 AI 搜索黑马「博查」</a> <span class="src src-b">🟡</span>（API 上线时间、企业/开发者数、日均调用、DeepSeek 供应方、合规卖点 — 均含自述口径）</li>
+      <li>中国对标 — 国内可用 Search API 盘点 / 博查 vs Exa：<a href="https://zhuanlan.zhihu.com/p/712692839" target="_blank" rel="noopener">知乎 — 盘点国内可用的 Web Search API（博查 AI vs Exa.ai）</a> <span class="src src-b">🟡</span>（「国内专为 AI 用的 Search API 仅博查、国外对应 Exa」之说法）</li>
+      <li>中国对标 — C 端 AI 搜索：<a href="https://metaso.cn/about-us" target="_blank" rel="noopener">秘塔 Metaso 关于我们</a> <span class="src src-a">🟢</span>；<a href="https://www.qbitai.com/2024/11/215422.html" target="_blank" rel="noopener">量子位 — 昆仑万维天工 AI 高级搜索</a> <span class="src src-b">🟡</span>（秘塔自研 MetaLLM/学术搜索、天工定位与转型）</li>
     </ul>
   </section>
 
