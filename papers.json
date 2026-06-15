@@ -19,6 +19,25 @@
     "path": "papers/2026-06-15-agents-for-scientific-discovery/index.html"
   },
   {
+    "slug": "2023-11-29-a-lab-autonomous-materials",
+    "title": "An autonomous laboratory for the accelerated synthesis of novel materials (A-Lab)",
+    "authors": "Nathan J. Szymanski, et al. (G. Ceder group)",
+    "team": "UC Berkeley · Lawrence Berkeley National Laboratory",
+    "arxiv": "https://www.nature.com/articles/s41586-023-06734-w",
+    "code": "",
+    "date": "2026-06-15",
+    "published": "Nature 2023",
+    "tldr": "A-Lab 把计算预测→文献挖掘提配方→机器人合成→自动 XRD/Rietveld→ARROWS 主动学习串成无人闭环，17 天对 57 个目标成功合成 36 个(63%)；自驱实验室从有机液相走向固态无机粉末的代表作，含 post-publication 关于表征质量与 novelty 的争议与 Nature 更正。",
+    "tags": [
+      "self-driving-lab",
+      "materials-science",
+      "autonomous-synthesis",
+      "active-learning",
+      "scientific-discovery"
+    ],
+    "path": "papers/2023-11-29-a-lab-autonomous-materials/index.html"
+  },
+  {
     "slug": "2606.03854-cli-anything",
     "title": "CLI-Anything: Towards Agent-Native Computer Use",
     "authors": "Yuhao Yang, Tianyu Fan, Chao Huang",
