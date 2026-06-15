@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ScienceAgentBench：数据驱动科学发现 agent 的严格评测基准 · 论文解读</title>
+
+<script>
+  window.MathJax = {
+    tex:{inlineMath:[['$','$'],['\\(','\\)']], displayMath:[['$$','$$'],['\\[','\\]']]},
+    svg:{fontCache:'global'}
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;
+  }
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:880px; margin:0 auto; padding:18px 22px 90px}
+
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:27px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)}
+  .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .meta-grid a:hover{text-decoration:underline}
+
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap}
+  nav.toc a:hover{color:var(--accent)}
+
+  section{margin:38px 0}
+  h2{font-size:21px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:17px; margin:24px 0 8px}
+  p{margin:12px 0}
+  ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.9em}
+  strong{color:var(--text)}
+
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:14px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:10px 12px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  .yes{color:var(--ok); font-weight:600}
+  .no{color:var(--muted)}
+  .num{text-align:right; font-variant-numeric:tabular-nums}
+
+  figure{margin:24px 0; text-align:center}
+  figure img{max-width:100%; height:auto; border:1px solid var(--line); border-radius:10px; background:#fff}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+
+  blockquote{border-left:3px solid var(--line); margin:14px 0; padding:2px 16px; color:var(--muted)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+  .mjx-container{overflow-x:auto; overflow-y:hidden}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">benchmark</span>
+      <span class="chip">scientific discovery</span>
+      <span class="chip">language agent</span>
+      <span class="chip">code generation</span>
+      <span class="chip">evaluation</span>
+    </div>
+    <h1>ScienceAgentBench：数据驱动科学发现 agent 的严格评测基准</h1>
+    <p class="orig-title">ScienceAgentBench: Toward Rigorous Assessment of Language Agents for Data-Driven Scientific Discovery</p>
+    <dl class="meta-grid">
+      <dt>作者</dt><dd>Ziru Chen*, Shijie Chen*, Yuting Ning, Qianheng Zhang, Boshi Wang, Botao Yu, ... Song Gao, Yu Su, Huan Sun*（*通讯）</dd>
+      <dt>团队 / 机构</dt><dd>The Ohio State University（OSU NLP）为主，联合 University of Wisconsin–Madison（地理系、化学系）</dd>
+      <dt>原文链接</dt><dd><a href="https://arxiv.org/abs/2410.05080" target="_blank" rel="noopener">https://arxiv.org/abs/2410.05080</a></dd>
+      <dt>发表 / 年份</dt><dd>ICLR 2025（arXiv v3，2025-03）</dd>
+      <dt>解读日期</dt><dd>2026-06-15</dd>
+    </dl>
+  </header>
+
+  <div class="tldr">
+    <b>TL;DR</b> — 与其急着用「AI 自动写论文」式的端到端评测吹捧 AI 自动科研，本文主张<strong>先严格评测 agent 在科研工作流中每一项 essential task 上的真实能力</strong>。为此作者从 <strong>44 篇同行评审论文</strong>及其开源代码仓中抽取 <strong>102 个 data-driven discovery 任务</strong>，覆盖 bioinformatics、computational chemistry、GIS、心理与认知神经科学四个学科，把每个任务统一成「写一个可独立运行的 Python program」，配上可执行的 success criteria、专家校验过的 rubric，并设计两条策略防 data contamination 与 agent shortcut。在五个开源/闭源 LLM × 三种 agent 框架（direct prompting / OpenHands CodeAct / self-debug）的评测下，<strong>最好的 agent（Claude-3.5-Sonnet + self-debug）三次尝试也只能解出 32.4% 的任务，加专家知识 34.3%</strong>；o1-preview 靠更多推理算力能到 42.2%，但成本贵 10 倍以上。结论很冷静：当前 language agent 远没到能自动完成数据驱动科研、更别说端到端科研流水线的地步。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#opensource">① 开源贡献</a>
+    <a href="#motivation">② 动机与贡献</a>
+    <a href="#method">③ 基准构建</a>
+    <a href="#evaluation">④ 实验评估</a>
+    <a href="#insight">⑤ 洞见</a>
+  </nav>
+
+  <!-- ① 开源 -->
+  <section id="opensource">
+    <h2><span class="n">①</span>开源贡献 Open-source Artifacts</h2>
+    <p>ScienceAgentBench 是一个<strong>完整开源的 benchmark + 评测 harness</strong>：任务标注表与输入挂在 Hugging Face，benchmark 全量素材（数据集、参考程序、rubric、评测脚本）随仓库与官方下载发布，代码以 MIT 许可证开放，绝大多数任务采用 CC BY 4.0。这意味着别人可以真正<strong>跑通整条评测流水线</strong>而不只是看论文报数字。</p>
+    <table>
+      <thead><tr><th>类型</th><th>是否开源</th><th>内容 / 链接</th></tr></thead>
+      <tbody>
+        <tr><td>代码 Code</td><td class="yes">✔</td><td><a href="https://github.com/OSU-NLP-Group/ScienceAgentBench" target="_blank" rel="noopener">github.com/OSU-NLP-Group/ScienceAgentBench</a>（MIT）：agent 推理脚本 <code>run_infer.py</code>、评测流水线（支持 docker 化并行评测）、指标计算 <code>calculate_metrics.py</code>、从 agent 日志恢复代码的 <code>recover_pred_from_log.py</code>，并集成 OpenHands CodeAct。</td></tr>
+        <tr><td>模型权重 Weights</td><td class="no">—</td><td>本文不训练模型，只评测现成 LLM（Llama-3.1、Mistral-Large-2、GPT-4o、Claude-3.5-Sonnet、OpenAI o1），无权重发布。</td></tr>
+        <tr><td>数据集 Dataset</td><td class="yes">✔</td><td>Hugging Face <code>osunlp/ScienceAgentBench</code>（任务标注表与输入）；benchmark 完整素材（含数据集、参考 program、rubric）经官方下载提供。102 个任务取自 44 篇同行评审论文。</td></tr>
+        <tr><td>环境 / Benchmark</td><td class="yes">✔</td><td>评测 harness 会用 <code>pipreqs</code>+<code>pip-tools</code> 为每个生成程序灵活搭建 conda 环境并执行，可复现 VER / SR / CBS / Cost 指标。</td></tr>
+        <tr><td>项目主页</td><td class="yes">✔</td><td><a href="https://osu-nlp-group.github.io/ScienceAgentBench/" target="_blank" rel="noopener">osu-nlp-group.github.io/ScienceAgentBench</a></td></tr>
+      </tbody>
+    </table>
+    <p class="num" style="text-align:left;color:var(--muted);font-size:13px">许可证说明：任务多为 CC BY 4.0、代码为 MIT；其中两个任务实例沿用其源仓库（rasterio、matminer）的原始许可证，论文在 Ethics Statement 与附录 J 中逐条列出了来源、仓库与许可证。</p>
+  </section>
+
+  <!-- ② 动机 -->
+  <section id="motivation">
+    <h2><span class="n">②</span>研究动机与贡献 Motivation &amp; Contribution</h2>
+    <h3>背景与问题</h3>
+    <p>LLM 在 reasoning、tool learning、code generation 上的进步，点燃了「用 language agent 端到端自动化科研」的热情。代表性的乐观主张是 <em>The AI Scientist</em>（Lu et al., 2024）——号称能从「想 idea → 跑实验 → 写论文」全流程自动化。这类工作往往用「让一个 LLM reviewer 给生成的论文打分」来证明 agent 行，但这种 end-to-end、靠「像不像一篇论文」的评估既不严谨、也难以告诉我们 agent 到底强在哪、弱在哪。</p>
+    <p>作者指出，data-driven discovery（用已有数据集导出新发现）是许多学科里越来越重要的工作流。要让 agent 真能自动化它，必须先能完成其中一项项 essential task：数据处理、特征工程、建模、数据分析、信息可视化等。而现有 benchmark 要么不涉及真正的代码生成（TaskBench 只生成 JSON API 调用、DiscoveryBench 只给抽象的自然语言 workflow），要么只是函数级/行级补全（SWE-Bench、BioCoder、ML-Bench、SciCode、BLADE），要么数据单一、不防 shortcut/contamination——缺一个<strong>面向真实科研任务、严格可验证、且防数据污染</strong>的基准。</p>
+    <h3>本文的切入点</h3>
+    <p>核心主张：<strong>在断言「能端到端自动科研」之前，先把工作流拆成单个任务，逐任务做严格、可执行验证的评测。</strong>由此设计 ScienceAgentBench，遵循三条原则：(1) 与学科专家共建以保证<strong>科学真实性</strong>——任务直接从同行评审论文及其开源代码仓抽取，再由 9 位专家校验；(2) <strong>严格的分级评测</strong>——把输出统一成可独立运行的 Python program，配多种自动指标 + 专家 rubric；(3) <strong>多阶段质量控制</strong>——多轮人工/专家校验，并主动防 data contamination 与 agent shortcut。</p>
+    <h3>核心贡献</h3>
+    <ol>
+      <li>提出 ScienceAgentBench：<strong>102 个</strong>来自 <strong>44 篇</strong>同行评审论文的真实任务，覆盖 bioinformatics、computational chemistry、GIS、心理与认知神经科学四学科；每个任务=自然语言 instruction + 异构数据集 + （可选）专家知识 + 标注参考 program，并附可执行 success criteria 与五阶段 rubric。</li>
+      <li>设计严格、可复现的评测协议：把目标输出统一为 self-contained Python 程序，用 VER / SR / CodeBERTScore / API Cost 四指标 + GPT-4o 作图评判 + 专家 rubric 人工评分；并提出两条简单有效的策略缓解 data contamination 与 shortcut（删测试样本、重切分并把测试标签换成 dummy 值）。</li>
+      <li>系统评测 5 个 LLM × 3 个框架（外加 o1 参考），给出冷静结论：<strong>最好的 agent 三次尝试也只解出 32.4%（加专家知识 34.3%）</strong>，o1-preview 靠堆推理算力到 42.2% 但成本高 10 倍以上；当前 agent 远不能自动化数据驱动科研，更谈不上端到端科研流水线。</li>
+    </ol>
+  </section>
+
+  <!-- ③ 方法 / 基准构建 -->
+  <section id="method">
+    <h2><span class="n">③</span>方法：基准构建与评测协议 Method</h2>
+    <p>ScienceAgentBench 把 data-driven discovery 中的每个任务都形式化成一个 <strong>code generation 问题</strong>：给定一段自然语言 instruction、一个数据集、以及可选的专家知识，agent 要生成一个能独立执行的 Python 程序文件来完成任务。作者把 agent 定位为「科学副驾（science co-pilot）」——帮懂代码但想省时间的科学家把数据处理/分析/可视化的活儿写出来，输出要既好验证、又能被科学家直接拿去用。</p>
+
+    <figure>
+      <img src="figures/fig1_subtask_datasets.png" alt="ScienceAgentBench 子任务分布与异构数据集">
+      <figcaption>图 1：上半部分为 benchmark 的 sub-task 分布——四大类（Data Processing 23、Model Development 23、Data Analysis 59、Info Visualization 65）下细分到 Feature Engineering、Deep Learning、Geospatial Analysis、Map Visualization 等；每个任务由一个或多个 sub-task 组成。下半部分展示四学科的异构数据：(a) bioinformatics 的细胞图像、(b) computational chemistry 的分子活性可视化、(c) GIS 的洪水风险地图、(d) 心理与认知神经科学的 EEG 时序。（出处：原文 Figure 1）</figcaption>
+    </figure>
+
+    <h3>任务的四个组成部分</h3>
+    <p>每个实例由四块构成（图 2）：</p>
+    <ul>
+      <li><strong>(a) Task Instruction</strong>：用简洁、不啰嗦的自然语言描述任务目标与输出要求。刻意保持简短、保留 open-endedness，逼 agent 自己想步骤，而非靠科学家给出处方式指引。</li>
+      <li><strong>(b) Dataset Information</strong>：数据集目录结构 + 内容预览，方便没有文件浏览 tool 的 agent 正确用数据，也能帮有文件系统的 agent 省几轮交互。</li>
+      <li><strong>(c) Expert-Provided Knowledge（可选）</strong>：专家给的术语解释、分析公式、编程工具用法示例，用来弥补 agent 的学科知识缺口——后文会看到 agent 即便拿到知识也未必用得好。</li>
+      <li><strong>(d) Annotated Program</strong>：从论文配套的开源代码仓改写而来的参考程序，self-contained（含 import、函数/类、main 流程）。agent 不必用相同的 tool，但要产出能独立跑起来的等效程序。</li>
+    </ul>
+
+    <figure>
+      <img src="figures/fig2_task_components.png" alt="一个计算化学任务的四个组成部分">
+      <figcaption>图 2：一个 computational chemistry 任务示例。(a) 指令：在 ClinTox 数据集上训练 multitask 模型预测药物毒性与 FDA 审批状态，把测试集预测存成指定 csv；(b) 数据集目录与预览；(c) 专家知识（关于 ClinTox、关于用 ECFP 特征化）；(d) 标注参考程序（用 deepchem）。（出处：原文 Figure 2）</figcaption>
+    </figure>
+
+    <h3>数据收集：五步标注 + 三轮校验</h3>
+    <p>9 名研究生标注者在四学科里找<strong>以宽松许可证开源了代码与数据</strong>的同行评审论文，按五步把代码改造成任务：(1) 选一个文档合理、self-contained 的代码示例并转成任务；(2) 收集并预处理代码用到的数据集；(3) 改写源代码、让它分析 benchmark 里的数据，作为参考程序；(4) 把 task-specific 的 success criteria 实现成<strong>可执行的检验脚本</strong>，并用 GPT-4o 起草细粒度 rubric；(5) 写指令与数据集信息。初始 110 个任务，删掉 4 个（执行太久或环境太难搭），余 106 个进入校验。</p>
+    <p>随后是三道质控关：</p>
+    <ul>
+      <li><strong>Expert Validation</strong>：9 位学科专家（含资深博士生与教授）逐任务核：这是不是真实的科研任务？指令是否准确、用词是否专业？再为每个任务补最多三条知识，并修订 rubric。据反馈改了 41 条指令、删 3 个不够有代表性的任务，剩 103 个。</li>
+      <li><strong>Annotator Verification</strong>：让标注者交叉核验别人标的任务，并实际执行程序复现结果，期间 refine 了 29 个标注、再删 1 个因随机性难复现的任务。</li>
+      <li>最终定稿 <strong>102 个高质量任务</strong>。论文也强调：训练有素的标注者改写一个程序平均要 <strong>2.5–3 小时</strong>，学科科学家从零写更久；而 agent 通常 10 分钟内能给出一份有意义的程序草稿——这正是 agent 的价值所在。</li>
+    </ul>
+
+    <h3>防 data contamination 与 agent shortcut</h3>
+    <p>因为数据集与程序都是开源的，存在被 LLM 预训练「背过」的污染风险；而像 OpenHands 这类 agent 还可能<strong>抄近道作弊</strong>——例如被要求训模型时，直接读出测试集的 ground-truth 标签报上去，得到「完美」却毫无意义的结果。作者用两条简单策略堵住：</p>
+    <div class="callout note">
+      <span class="label">两条缓解策略</span>
+      <strong>① 删测试样本：</strong>对每个数据集，从测试集里随机删 5 个数据点。若生成程序用了训练语料里见过的自动 data loader，它跑出的结果就会与本基准的设定错位、过不了 success criteria（若删点会破坏数据完整性，比如把地理地图切坏，则跳过此步）。<br>
+      <strong>② 重切分 + dummy 标签：</strong>对涉及建模的任务重新划分数据集，只把测试标签留作评测用，并在给 agent 的数据里把测试标签换成 dummy 值（如分类任务填 −1）。这样「背代码」或「直接报测试标签」的 agent 都会失败，恢复评测有效性。
+    </div>
+
+    <h3>评测协议：四指标 + 作图评判 + 五阶段 rubric</h3>
+    <p>评测的难点是<strong>任务 open-ended，不同 agent 生成程序的环境需求各异</strong>。harness 先用七个基础包（numpy、pandas、matplotlib、pytorch、tensorflow、rdkit、tf_keras）初始化 conda 环境，再用 <code>pipreqs</code> 解析程序依赖、用 <code>pip-tools</code> + 手写规则补齐配置，最后在定制环境里执行程序并算指标。四个 Program Evaluation 指标：</p>
+    <ul>
+      <li><strong>VER（Valid Execution Rate）</strong>：程序能否无错执行，并以正确文件名保存输出（二值）。</li>
+      <li><strong>SR（Success Rate）</strong>：程序输出是否满足任务的 success criteria（测试集性能、预测-答案匹配、可视化质量等），二值，且<strong>以有效执行为前提</strong>——执行报错或没正确存输出，SR 直接为 0。这是最关键的指标。</li>
+      <li><strong>CBS（CodeBERTScore）</strong>：用上下文 embedding 衡量生成程序与参考程序的相似度（匹配 token 的 F1）；若 SR=1 则把 CBS 置 1.0。</li>
+      <li><strong>Cost（API Cost）</strong>：完成一个任务的平均 API 花费（美元）——强调 agent 的实用性要把成本算进去。</li>
+    </ul>
+    <p><strong>Figure Evaluation：</strong>若任务输出是图，沿用已有工作用 <strong>GPT-4o 作为 judge</strong>，把程序生成的图与 ground-truth 图比较打分；采样 3 次取均值以求稳定。<strong>Rubric-Based Evaluation：</strong>纯 outcome 指标有时过严（步骤全对但输出格式错就被判 0），于是引入 rubric，把任务拆成五个阶段——<em>Data Loading、Data Processing、Modeling/Visualization、Output Formatting、Output Saving</em>——先用 GPT-4o 起草里程碑式评分点、再由专家精修，用于人工分级评分（给部分分）。表 1 给了几个 success criteria 的例子，比如「训练好的模型在测试集上 ROC-AUC ≥ 0.77」「top-5 重定位药物匹配 gold top-5」「地图可视化由 GPT-4o Judge 打分 ≥ 60」。</p>
+  </section>
+
+  <!-- ④ 实验 -->
+  <section id="evaluation">
+    <h2><span class="n">④</span>实验评估 Evaluation</h2>
+    <h3>评测设置</h3>
+    <ul>
+      <li><strong>被测 LLM：</strong>三个开源——Llama-3.1-Instruct-70B / 405B、Mistral-Large-2（123B）；两个闭源——GPT-4o（2024-05-13）、Claude-3.5-Sonnet（2024-06-20）。统一 temperature=0.2、top_p=0.95、0-shot。另评测 OpenAI o1-preview 作<strong>参考</strong>（推理 token 多、超参不同，不与其他模型直接比）。</li>
+      <li><strong>三种 agent 框架：</strong>（1）<strong>Direct Prompting</strong>——不和环境交互，一次性生成程序，测纯代码生成能力；（2）<strong>OpenHands CodeAct</strong>——通用 agent 框架，提供 Python 解释器、bash、web 浏览器三类 tool，用最强的 CodeActAgent v1.9；（3）<strong>Self-Debug</strong>——让 LLM 执行自己的程序、看结果、迭代改代码（本文做了三处改动：不强制先写反思、连续两轮生成相同程序就提前退出、用 pipreqs+pip-tools 搭环境且不喂评测用的基础包/规则以保证公平）。</li>
+      <li><strong>评测稳定性：</strong>每个任务跑 3 次独立 run，按 max SR → max VER → max CBS → min Cost 的顺序选最优 run，再对所选 run 求平均。</li>
+    </ul>
+
+    <h3>主要结果</h3>
+    <p>下表汇总 Table 3 中各模型的 SR（%）。同一框架内、是否带专家知识分两栏；o1-preview 仅作参考（带 ‡）。</p>
+    <table>
+      <thead><tr><th>框架 / 模型</th><th class="num">SR（无知识）</th><th class="num">SR（带知识）</th><th class="num">VER（带知识）</th><th class="num">Cost↓（带知识，$）</th></tr></thead>
+      <tbody>
+        <tr><td colspan="5" style="background:var(--panel2);color:var(--muted)">Direct Prompting</td></tr>
+        <tr><td>Llama-3.1-70B</td><td class="num">5.9</td><td class="num">4.9</td><td class="num">27.5</td><td class="num">0.001</td></tr>
+        <tr><td>Mistral-Large-2</td><td class="num">13.7</td><td class="num">16.7</td><td class="num">39.2</td><td class="num">0.009</td></tr>
+        <tr><td>GPT-4o</td><td class="num">11.8</td><td class="num">10.8</td><td class="num">41.2</td><td class="num">0.012</td></tr>
+        <tr><td>Claude-3.5-Sonnet</td><td class="num">17.7</td><td class="num">21.6</td><td class="num">41.2</td><td class="num">0.017</td></tr>
+        <tr><td>o1-preview ‡</td><td class="num">34.3</td><td class="num">31.4</td><td class="num">63.7</td><td class="num">0.236</td></tr>
+        <tr><td colspan="5" style="background:var(--panel2);color:var(--muted)">OpenHands CodeAct</td></tr>
+        <tr><td>GPT-4o</td><td class="num">19.6</td><td class="num">27.5</td><td class="num">73.5</td><td class="num">1.094</td></tr>
+        <tr><td>Claude-3.5-Sonnet</td><td class="num">21.6</td><td class="num">24.5</td><td class="num">88.2</td><td class="num">0.900</td></tr>
+        <tr><td colspan="5" style="background:var(--panel2);color:var(--muted)">Self-Debug</td></tr>
+        <tr><td>Mistral-Large-2</td><td class="num">23.5</td><td class="num">27.5</td><td class="num">78.4</td><td class="num">0.036</td></tr>
+        <tr><td>GPT-4o</td><td class="num">22.6</td><td class="num">23.5</td><td class="num">71.6</td><td class="num">0.046</td></tr>
+        <tr><td><strong>Claude-3.5-Sonnet</strong></td><td class="num"><strong>32.4</strong></td><td class="num"><strong>34.3</strong></td><td class="num"><strong>86.3</strong></td><td class="num"><strong>0.038</strong></td></tr>
+      </tbody>
+    </table>
+    <p class="num" style="text-align:left;color:var(--muted);font-size:13px">注：Self-Debug 行 Claude 的 VER（无/带知识）为 92.2 / 86.3；Cost 这里取带知识列附近的量级，self-debug 的 API 成本普遍比 OpenHands 低一个数量级以上。o1-preview 未与 OpenHands 联调，仅有 direct prompting / self-debug 两种框架的结果。</p>
+
+    <p>怎么读这些数字：</p>
+    <ul>
+      <li><strong>SR 整体很低，最好也才三成出头。</strong>给三次尝试，最强组合 <strong>Claude-3.5-Sonnet + self-debug</strong> 无知识 32.4%、带专家知识 34.3%——这是全表（除 o1 外）的 SOTA。o1-preview 用 direct prompting 就能到 34.3%、self-debug 到 <strong>42.2%</strong>，体现「加推理算力有效」，但 Cost 是其他模型的 10 倍以上（如 0.22–0.24 美元/任务 vs. 0.001–0.05）。</li>
+      <li><strong>Execution feedback 是刚需。</strong>不让模型跑代码（direct prompting）时，连最强的 Claude 也只解 16.7%（无知识）/ 20.6%（带知识）——典型失败是「高层结构对、实现细节错」（缺步骤、API 用错）。换成 self-debug 让它执行并迭代修，Claude 的 SR <strong>几乎翻倍</strong>（16.7→32.4，1.94×）；带知识时 SR 20.6→34.3（1.67×），VER 41.2→86.3（2.09×）。</li>
+      <li><strong>Agent 设计要把成本和模型能力一起考虑。</strong>反直觉的发现：在 5 个模型里有 4 个，简单的 self-debug 比重型的 OpenHands CodeAct 更好。Claude-3.5-Sonnet 用 self-debug 比用 OpenHands CodeAct <strong>多解 10.8% 的任务，API 费用却便宜 17 倍</strong>。越复杂的 agent 框架不等于越划算。</li>
+      <li><strong>专家知识有用但 agent 不会用。</strong>带知识后 SR/CBS 普遍小升，但 VER 反而常降——因为知识促使 agent 写更具体的建模/分析代码，这些代码更容易出错、且难靠执行反馈修好。从科学家视角看，带知识的程序更「有用」（SR/CBS 反映），但 agent 利用知识的能力仍有明显短板。</li>
+    </ul>
+
+    <h3>失败分析：复杂任务与学科专用工具是硬骨头</h3>
+    <p>对最好的 agent（Claude-3.5-Sonnet + self-debug + 知识）做进一步分析：</p>
+    <ul>
+      <li><strong>越复杂越解不动。</strong>把任务按其 gold program 行数衡量复杂度，超过 75% 的成功任务集中在较简单的一侧（gold program < 58.6 行，即全基准平均长度）；gold program 越长，agent 越容易失败。</li>
+      <li><strong>失败模式分学科。</strong>bioinformatics 与 computational chemistry 主要栽在 data processing 与 model development——这两科数据高度异构（细胞图像、分子、基因）难处理，数据没处理对就训不出能用的模型（更别说为 CNN/GNN 选对配置）。GIS 与心理/认知神经科学的任务则常需学科专用 tool（如 Geopandas、Biopsykit），而现有 LLM 不会用、会写出错误或幻觉的 API 调用。</li>
+    </ul>
+
+    <figure>
+      <img src="figures/fig3_error_by_domain_subtask.png" alt="各学科各子任务的错误率">
+      <figcaption>图 3：最好 agent 在四学科（Bio / Chem / Geo / Psy）× 四类 sub-task 上的 task error rate。Bio、Chem 在 Data Processing 与 Model Development 上错得最多；Geo、Psy 则在 Data Analysis 上更吃力（需学科专用工具）。（出处：原文 Figure 3 右）</figcaption>
+    </figure>
+
+    <h3>Rubric 人工评估：成功与失败的分水岭在「数据加载/处理」</h3>
+    <p>作者对 Claude-3.5-Sonnet + self-debug + 知识生成的全部 102 个程序做了五阶段 rubric 人工评分（每个程序由两位参与过数据收集的评测者打分，且不给执行结果、隐藏成败以鼓励仔细看代码并给部分分）。结论：<strong>Data Loading 与 Data Processing 两个早期阶段最能区分成功与失败</strong>——几乎所有成功程序在 data loading 上拿满分，而约 25% 的失败程序该阶段评分低于 50；data processing 上成功程序偏满分、失败程序集中在 20–50。到了 Output Formatting / Saving 阶段两组没差别，说明 Claude 这类模型在「按格式输出」上已经做得不错。直觉很清楚：数据没读对/处理对，后面写得再好也白搭。rubric 评分整体与 SR 一致，同时揭示「有些程序已接近成功，只卡在数据加载/处理的瓶颈上」。</p>
+  </section>
+
+  <!-- ⑤ 洞见 -->
+  <section id="insight">
+    <h2><span class="n">⑤</span>洞见 Insights</h2>
+    <div class="callout insight">
+      <span class="label">Insight</span>
+      <strong>1. 先严格评测单任务，再谈端到端自动科研。</strong>与其用「LLM 给生成论文打分」式的端到端评测吹「AI Scientist」，不如把工作流拆成可执行验证的单个任务逐一量化——这才能真正看清 agent 的强弱边界。结论也很直白：当前 agent 离自动化数据驱动科研都还很远（SR 最高三成出头），更别说端到端科研流水线。<br><br>
+      <strong>2. 评测的有效性需要主动维护。</strong>开源数据 + 强 agent 会带来 data contamination 与 shortcut（直接报测试标签）的「假成功」。两条极简策略——删测试样本、重切分并用 dummy 标签——就能让「背代码/抄答案」的 agent 露馅。这是把「benchmark 可信度」当一等公民来设计。<br><br>
+      <strong>3. 成本必须进入 agent 设计的目标函数。</strong>简单的 self-debug 在 5 个模型里有 4 个胜过重型 OpenHands CodeAct，且在 Claude 上多解 10.8% 任务、便宜 17 倍。o1 靠堆推理算力能把 SR 推到 42.2% 但贵 10 倍以上。「更复杂/更多算力」不等于「更划算」。
+    </div>
+    <h3>局限与未来</h3>
+    <p>作者自己点明的边界：(1) 规模中等（102 个任务），比合成或更简单的 benchmark 小，但考虑到标注难度与评测成本，这个量级足以评测 agent；(2) rubric 评估目前靠人工，作者把「做一个 LLM-based rubric judge 来自动化分级评测」列为有价值的未来方向；(3) 即便有专家知识，agent 仍不会有效利用，提升 agent 对学科知识/专用 tool 的运用是后续重点；(4) 失败集中在数据处理与学科专用工具，改进 agent 处理异构科学数据的能力是明确的攻坚点。安全方面，本基准任务限于属性预测、特征分析与分子可视化，不涉及合成，且 agent 不连实验室硬件，风险有限。</p>
+    <h3>与相关工作的关系</h3>
+    <p>相对 DiscoveryBench（只评自然语言假设、间接评程序）、SciCode/BLADE（函数级，不防污染或数据单一）、ML-Bench（行级补全）、SWE-Bench（文件级编辑）等，ScienceAgentBench 的独特组合是：<strong>要求从零生成整个程序文件（File-Level Gen）、取材最多的 44 篇论文、覆盖 4 个学科的异构数据、且同时防 shortcut 与 contamination</strong>。它对端到端「AI Scientist」叙事是一种冷静的方法论纠偏——把宏大主张拆回可验证的单任务，用诚实的数字（最好 32.4–34.3% SR）提醒社区：language agent 现阶段更适合做科学家的副驾，帮着省下 2.5–3 小时的编程苦工，而非替代科研本身。</p>
+  </section>
+
+  <footer class="foot">
+    本页为 <code>paper-reading</code> skill 生成的阅读笔记，仅作辅助，细节以
+    <a href="https://arxiv.org/abs/2410.05080" target="_blank" rel="noopener">原文</a> 为准 · 解读日期 2026-06-15
+  </footer>
+
+</article>
+</body>
+</html>

@@ -964,5 +964,24 @@
       "mcp",
       "agent"
     ]
+  },
+  {
+    "slug": "2410.05080-scienceagentbench",
+    "title": "ScienceAgentBench: Toward Rigorous Assessment of Language Agents for Data-Driven Scientific Discovery",
+    "authors": "Ziru Chen, Shijie Chen, ... Yu Su, Huan Sun, et al.",
+    "team": "The Ohio State University (OSU NLP)",
+    "arxiv": "https://arxiv.org/abs/2410.05080",
+    "code": "https://github.com/OSU-NLP-Group/ScienceAgentBench",
+    "date": "2026-06-15",
+    "published": "ICLR 2025",
+    "tldr": "从 44 篇同行评审论文抽取 102 个数据驱动科学发现任务（bioinformatics/计算化学/GIS/认知神经科学），统一成可执行验证的 Python program 生成问题，配 rubric 与防数据污染策略；评测 5 个 LLM × 3 个框架，最好的 agent（Claude-3.5-Sonnet+self-debug）三次尝试也只解 32.4%（带专家知识 34.3%），说明 language agent 离自动化科研还很远。",
+    "tags": [
+      "benchmark",
+      "scientific-discovery",
+      "language-agent",
+      "code-generation",
+      "evaluation"
+    ],
+    "path": "papers/2410.05080-scienceagentbench/index.html"
   }
 ]
