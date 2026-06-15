@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Altrove · 竞争格局与赛道早期度调研</title>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --bad:#ff6b81; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --bad:#d23651; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;}
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:920px; margin:0 auto; padding:18px 22px 90px}
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:25px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)} .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap; line-height:2}
+  nav.toc a:hover{color:var(--accent)}
+  section{margin:38px 0}
+  h2{font-size:20px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:16.5px; margin:22px 0 8px}
+  p{margin:12px 0} ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)} strong{color:var(--text)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.88em}
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:13px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:9px 10px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  figure{margin:24px 0; text-align:center}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+  .svgwrap{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 8px}
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+  .src{font-size:10.5px; padding:0 6px; border-radius:999px; white-space:nowrap; vertical-align:middle}
+  .src-a{background:rgba(67,197,158,.18); color:var(--ok)}
+  .src-b{background:rgba(255,180,84,.18); color:var(--warn)}
+  .src-c{background:rgba(255,107,129,.18); color:var(--bad)}
+  .legend{font-size:12px; color:var(--muted); margin:6px 0 0}
+  .verdict{display:inline-block; font-weight:700; padding:3px 12px; border-radius:999px; font-size:14px}
+  .v-nascent{background:rgba(122,162,255,.18); color:var(--accent)}
+  .v-emerging{background:rgba(67,197,158,.18); color:var(--ok)}
+  .v-crowded{background:rgba(255,180,84,.18); color:var(--warn)}
+  .v-mature{background:rgba(255,107,129,.18); color:var(--bad)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">AI4S 材料</span>
+      <span class="chip">无稀土磁体</span>
+      <span class="chip">自驱实验室</span>
+      <span class="chip">关键材料替代</span>
+      <span class="chip">竞争格局</span>
+      <span class="chip">赛道早期度</span>
+      <span class="chip">创业 idea</span>
+    </div>
+    <h1>Altrove：竞争格局与赛道早期度调研</h1>
+    <p class="orig-title">altrove.ai — 法国巴黎 deeptech，用「physics-based AI + 自驱实验室」端到端替代关键无机材料，主打无稀土 / 无钴永磁体；这个赛道有多早、谁在抢、有什么 idea 可借鉴</p>
+    <dl class="meta-grid">
+      <dt>对象</dt><dd><a href="https://www.altrove.ai/" target="_blank" rel="noopener">https://www.altrove.ai/</a></dd>
+      <dt>赛道</dt><dd>AI4S 材料发现（AI-for-materials） × 关键材料替代（critical-material substitution），主战场为 rare-earth-free 永磁体；商业模式偏「垂直整合卖产品（卖材料）」</dd>
+      <dt>整理</dt><dd>对话调研笔记；信息来自公开检索，按来源分级标注，产品能力未必经独立验证</dd>
+      <dt>日期</dt><dd>2026-06-15</dd>
+    </dl>
+    <p class="legend">来源等级：<span class="src src-a">🟢 一手</span> 官网/SEC/官方 ·
+      <span class="src src-b">🟡 二手</span> 媒体/数据库 ·
+      <span class="src src-c">🔴 自述/未证实</span> 营销口径或未独立验证</p>
+  </header>
+
+  <div class="tldr">
+    <b>一句话</b> — Altrove 是巴黎的 deeptech，把「AI 预测候选材料 + 自家自驱实验室合成与表征」拼成端到端流水线，去替代被中国卡脖子的关键无机材料，第一个产品是<strong>无稀土 / 无钴永磁体</strong>，号称比传统 R&D 快 10×、目标「2028 年量产替代」。<b>赛道判断</b>：AI 材料发现整体已 <span class="verdict v-emerging">emerging→crowded</span>（两年烧掉 $1.3B+，CuspAI / Periodic / Orbital 都是 $100M–$600M 级巨弹）；但「<strong>AI + 自有产线、垂直整合直接卖磁体</strong>」这个细分仍是 <span class="verdict v-nascent">nascent</span>，全球数得过来的就 Altrove、Materials Nexus（UK）等寥寥几家，且地缘（欧洲关键材料自主）给了强 why-now。<b>可借鉴 idea</b>：别去和大模型公司比「谁的材料 foundation model 大」，而是<strong>挑一个被卡脖子、有 spec、有买家的单一材料品类（磁体 / 固态电解质 / 压电陶瓷），自建小型自驱产线，把 AI 当"配方搜索引擎"，卖通过验证的实物 + IP</strong>——拼的是「能不能造出来并通过客户认证」，不是 benchmark。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#market">① 赛道地图 + 早期度</a>
+    <a href="#matrix">② 竞品对照矩阵</a>
+    <a href="#map">③ 定位图</a>
+    <a href="#funding">④ 融资 timeline</a>
+    <a href="#snapshot">⑤ 公司速览</a>
+    <a href="#idea">⑥ 创业 idea 借鉴</a>
+    <a href="#take">⑦ 现实判断</a>
+    <a href="#src">出处</a>
+  </nav>
+
+  <!-- ① 赛道与早期度 -->
+  <section id="market">
+    <h2><span class="n">①</span>赛道地图 + 早期度判断</h2>
+    <p>Altrove 同时站在两个相互嵌套的赛道上。外层是 <strong>AI4S 材料发现（AI-for-materials discovery）</strong>：用机器学习 + 物理仿真在元素周期表里搜出有目标性质的新化合物，把「凭经验试错几十年」压成「几个月」。内层、也是 Altrove 真正下注的，是 <strong>关键材料替代（critical-material substitution）</strong>——尤其 <strong>rare-earth-free / cobalt-free 永磁体</strong>：电动车驱动电机、风机、机器人、国防制导都离不开钕铁硼（NdFeB）永磁，而稀土的开采与磁体制造高度集中在中国，价格波动、出口管制让车厂和工业巨头如坐针毡 <span class="src src-b">🟡</span>。这个需求不是「锦上添花」，是<strong>供应链安全与合规</strong>，买家有真实的付费动机。</p>
+    <p>关键分水岭：大多数 AI 材料公司停在「<strong>预测 / 软件层</strong>」（卖模型、卖筛选、卖云平台），而 Altrove 明确要走到「<strong>预测 → 合成 → 放大 → 制造</strong>」全链，自己建实验室、自己造样品、最后卖实物磁体或 IP。创始人 Thibaud Martin 的原话：「纯预测只能带你走到能工业化使用材料的 30%，剩下 70% 要在真实世界里迭代」<span class="src src-b">🟡</span>。这把它从"软件赛道"推进了"垂直整合制造"赛道——更重、更慢，但护城河也更实。</p>
+    <h3>玩家分群（四象限别漏）</h3>
+    <ul>
+      <li><strong>现有巨头 / 在位者：</strong>传统磁体与材料大厂（如日本 <strong>Shin-Etsu</strong>、<strong>TDK</strong>、<strong>Proterial</strong>/原日立金属，及中国稀土磁体产能）——它们掌握量产与认证，但本质仍是稀土路线、研发靠经验试错 <span class="src src-b">🟡</span>。在"无稀土"上的另一极是 <strong>Niron Magnetics</strong>（美国，铁氮 Fe<sub>16</sub>N<sub>2</sub> 路线，已获 GM / Stellantis / Volvo / Samsung 等战投并破土建厂）——它不靠 AI，靠特定材料体系 + 重资本建产线 <span class="src src-b">🟡</span>。</li>
+      <li><strong>垂直创业公司（与 Altrove 同形态）：</strong><strong>Materials Nexus</strong>（UK，AI 设计出无稀土磁体 MagNex，号称比人工快 200×、成本仅传统 20%、碳排低 70%）是最贴脸的对手 <span class="src src-b">🟡</span>；广义上 <strong>Phoenix Tailings</strong>（从尾矿回收稀土，解决同一"稀土自主"问题但走回收路线）也算替代品 <span class="src src-b">🟡</span>。</li>
+      <li><strong>大厂顺手做 / 平台型创业公司：</strong>下注「材料 foundation model + 自驱实验室」的明星：<strong>Periodic Labs</strong>（Liam Fedus 等 ex-OpenAI/DeepMind，种子 $300M、估值 ~$1.5B）、<strong>CuspAI</strong>（UK，Series A $100M+、估值 ~$520M，正洽 $200M 冲独角兽）、<strong>Orbital Materials</strong>（英美，多轮融资、2026 年 Series B $50M）。它们目前更偏通用平台 / catalyst / 碳捕集 / 半导体材料，但完全可能"顺手"切入磁体 <span class="src src-b">🟡</span>。还有 <strong>DeepMind GNoME / Microsoft MatterGen / Meta</strong> 等大厂的开放材料模型在持续放数据 <span class="src src-b">🟡</span>。</li>
+      <li><strong>开源 / 免费替代（最易被忽视的威胁）：</strong>预测层正在快速商品化——<strong>Materials Project</strong>（公开数据库）、<strong>GNoME</strong> 放出 ~38 万稳定晶体、<strong>MatterGen / MACE / CHGNet</strong> 等开源生成与势能模型，让"能预测出候选材料"几乎变成公共品。这意味着<strong>纯预测不再是护城河</strong>，价值正快速向"谁能真造出来 + 通过客户认证 + 量产"那一端转移——这恰好是 Altrove 自驱实验室押注的地方。</li>
+    </ul>
+    <div class="callout insight">
+      <span class="label">早期度判断</span>
+      外层 AI 材料发现：<span class="verdict v-crowded">crowded</span>　·　内层「AI×自有产线垂直卖无稀土磁体」：<span class="verdict v-nascent">nascent</span><br><br>
+      <strong>判断信号：</strong>
+      ① <strong>融资极热但极分层</strong>——AI 材料公司两年吸金 $1.3B+，头部单轮就 $100M–$600M，资本拥挤说明"软件层"已 crowded；
+      ② <strong>巨头已进场</strong>——DeepMind/Microsoft/Meta 都在做材料模型、NVIDIA/Samsung/Hyundai 在投，预测层巨头化；
+      ③ <strong>但"垂直造磁体"玩家极少</strong>——真正"AI + 自驱实验室 + 直接卖磁体实物"的，全球数得出的就 Altrove、Materials Nexus 等几家，无公认 benchmark、无标准产品形态，客户认知刚成型 → 这一格 nascent；
+      ④ <strong>开源/免费替代正在吃掉预测层</strong>（GNoME/MatterGen/Materials Project），把价值挤向"合成—放大—认证"的脏活累活，这对自建产线的 Altrove 反而是利好。
+    </div>
+  </section>
+
+  <!-- ② 竞品矩阵 -->
+  <section id="matrix">
+    <h2><span class="n">②</span>竞品对照矩阵</h2>
+    <p>选了 6 个对这个赛道最具决定性的维度：<strong>商业模式</strong>（卖软件还是卖实物——决定护城河形态）、<strong>是否自建产线 / 是否走到合成放大</strong>（区分"预测公司"与"制造公司"）、<strong>技术路线</strong>、<strong>主打材料</strong>（是否真聚焦磁体）、<strong>融资规模 &amp; 阶段</strong>（资本厚度）、<strong>地缘 / 总部</strong>（关键材料自主是国别叙事）。数字口径不一，已逐格标来源；闭源未披露处如实写。</p>
+    <table>
+      <thead><tr>
+        <th>玩家</th>
+        <th>商业模式</th>
+        <th>自建产线 / 走到合成？</th>
+        <th>技术路线</th>
+        <th>主打材料</th>
+        <th>融资 &amp; 阶段</th>
+        <th>总部 / 地缘</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Altrove（本篇）</strong></td>
+          <td><strong>垂直整合：卖材料实物 / IP + 与第三方代工</strong> <span class="src src-b">🟡</span></td>
+          <td><strong>是</strong>，自有自驱实验室 + 自研 X 射线衍射表征，目标从克级放大到工业量 <span class="src src-b">🟡</span></td>
+          <td>physics-based AI 预测候选 + AI 生成合成配方 + 闭环实验迭代 <span class="src src-c">🔴</span></td>
+          <td>无稀土/无钴永磁体（首发）；另有压电(PZT 替代)、热电、介电 <span class="src src-a">🟢</span></td>
+          <td>种子 $10M（2025-10，Alven 领投），累计 ~$14M <span class="src src-b">🟡</span></td>
+          <td>France / Paris（欧洲关键材料自主）<span class="src src-a">🟢</span></td>
+        </tr>
+        <tr>
+          <td>Materials Nexus（UK）</td>
+          <td>材料发现平台，已产出 MagNex 磁体（路线介于卖发现与卖材料之间）<span class="src src-b">🟡</span></td>
+          <td>设计+合成+测试均做（MagNex 3 个月完成），自有产线规模未充分披露 <span class="src src-b">🟡</span></td>
+          <td>量子力学计算生成数据 → ML 建模优化，跨周期表搜组合 <span class="src src-b">🟡</span></td>
+          <td>无稀土磁体 MagNex（成本 ~传统 20%、碳排低 70%，自述）<span class="src src-c">🔴</span>；也做半导体/催化/涂层 <span class="src src-b">🟡</span></td>
+          <td>种子 ~£2M + 风投 ~$4M + InnovateUK 资助 <span class="src src-b">🟡</span></td>
+          <td>UK <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Niron Magnetics（US）</td>
+          <td><strong>垂直整合卖磁体</strong>，重资本自建工厂量产 <span class="src src-b">🟡</span></td>
+          <td>是，正建 ~19 万平方英尺工厂（Minnesota），2027 投产 <span class="src src-b">🟡</span></td>
+          <td>非 AI：铁氮化物 Fe<sub>16</sub>N<sub>2</sub>「Clean Earth Magnet」特定材料体系 <span class="src src-b">🟡</span></td>
+          <td>无稀土永磁体（专攻）<span class="src src-b">🟡</span></td>
+          <td>多轮战投（GM/Stellantis/Volvo/Samsung/Magna 等），规模大于 Altrove <span class="src src-b">🟡</span></td>
+          <td>US <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Periodic Labs（US）</td>
+          <td>AI 科学家 / 自驱实验室平台（自动假设—实验—发现），尚未公开"卖某种实物材料" <span class="src src-b">🟡</span></td>
+          <td>是，强调自动化实验室闭环 <span class="src src-b">🟡</span></td>
+          <td>LLM/AI 驱动的端到端科学发现（材料/化学/生物）<span class="src src-b">🟡</span></td>
+          <td>通用，未聚焦磁体 <span class="src src-b">🟡</span></td>
+          <td>种子 $300M、估值 ~$1.5B（2025-09）<span class="src src-b">🟡</span></td>
+          <td>US（ex-OpenAI/DeepMind 班底）<span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>CuspAI（UK）</td>
+          <td>AI 材料"搜索引擎"，偏 platform / 按需设计材料 <span class="src src-b">🟡</span></td>
+          <td>预测层为主，合成产线未充分披露 <span class="src src-b">🟡</span></td>
+          <td>生成式 AI + 仿真做按需材料设计 <span class="src src-b">🟡</span></td>
+          <td>碳捕集/MOF 等起步，通用 <span class="src src-b">🟡</span></td>
+          <td>Series A $100M+，估值 ~$520M，洽 $200M 冲独角兽 <span class="src src-b">🟡</span></td>
+          <td>UK <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Orbital Materials（UK/US）</td>
+          <td>AI 设计材料（碳捕集/半导体/数据中心相关），平台+应用 <span class="src src-b">🟡</span></td>
+          <td>有实验验证，重在新材料应用落地 <span class="src src-b">🟡</span></td>
+          <td>AI 材料生成模型 <span class="src src-b">🟡</span></td>
+          <td>通用，未聚焦磁体 <span class="src src-b">🟡</span></td>
+          <td>早期 + Series B $50M（2026-05）<span class="src src-b">🟡</span></td>
+          <td>UK/US <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>开源 / 公共品</td>
+          <td>免费（数据库 / 开源模型）<span class="src src-a">🟢</span></td>
+          <td>否（只到预测/数据层）<span class="src src-a">🟢</span></td>
+          <td>GNoME、MatterGen、MACE/CHGNet、Materials Project <span class="src src-b">🟡</span></td>
+          <td>全谱候选晶体（不含放大/认证）<span class="src src-b">🟡</span></td>
+          <td>免费 <span class="src src-a">🟢</span></td>
+          <td>全球（大厂/学界）<span class="src src-b">🟡</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>读矩阵：</strong>把玩家投到两个轴上立刻清晰——「<strong>聚焦磁体 vs 通用平台</strong>」和「<strong>卖软件预测 vs 卖实物/自建产线</strong>」。资本最厚的 Periodic / CuspAI / Orbital 全挤在「通用平台 + 偏软件」象限；专攻磁体的 Niron 资本厚但<strong>不用 AI</strong>；而<strong>「聚焦磁体 + AI + 自建产线 + 卖实物」这一格几乎只有 Altrove 和 Materials Nexus</strong>。Altrove 的差异化不在"AI 多强"（预测正被开源商品化），而在<strong>把 AI 嵌进自有合成—表征—放大闭环、直接交付能过认证的磁体</strong>，并吃欧洲关键材料自主的地缘红利。软肋是：它资本最薄（种子 $10M vs 对手数亿），而"造磁体并量产"是 Niron 那种重资本游戏。</p>
+  </section>
+
+  <!-- ③ 定位图 -->
+  <section id="map">
+    <h2><span class="n">③</span>定位图（whitespace 在哪）</h2>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 660 400" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12">
+        <!-- 轴 -->
+        <line x1="40" y1="200" x2="620" y2="200" stroke="#b9c2e0" stroke-width="1.5"/>
+        <line x1="330" y1="24" x2="330" y2="372" stroke="#b9c2e0" stroke-width="1.5"/>
+        <!-- 轴标签 -->
+        <text x="618" y="218" text-anchor="end" fill="#5a627a">卖实物 / 自建产线（垂直整合）→</text>
+        <text x="42" y="218" fill="#5a627a">← 卖软件 / 只到预测</text>
+        <text x="338" y="34" fill="#5a627a">↑ 通用平台（多材料）</text>
+        <text x="338" y="366" fill="#5a627a">↓ 聚焦磁体（单品类）</text>
+        <!-- whitespace 高亮：右下象限附近 -->
+        <rect x="335" y="205" width="280" height="160" fill="#7aa2ff" opacity="0.07"/>
+        <text x="475" y="352" text-anchor="middle" fill="#3a66ff" opacity="0.8" font-size="11">whitespace：AI×自有产线×单材料品类×认证交付</text>
+        <!-- 玩家点 -->
+        <circle cx="300" cy="90" r="7" fill="#9b8cff"/>
+        <text x="312" y="86" fill="#1a1f33">Periodic Labs</text>
+        <text x="312" y="100" fill="#5a627a" font-size="10">通用·$300M 种子</text>
+        <circle cx="180" cy="120" r="7" fill="#9b8cff"/>
+        <text x="192" y="116" fill="#1a1f33">CuspAI</text>
+        <text x="192" y="130" fill="#5a627a" font-size="10">通用·偏软件</text>
+        <circle cx="260" cy="150" r="7" fill="#9b8cff"/>
+        <text x="272" y="146" fill="#1a1f33">Orbital Materials</text>
+        <circle cx="80" cy="70" r="7" fill="#9aa3bd"/>
+        <text x="92" y="66" fill="#1a1f33">开源(GNoME/MatterGen)</text>
+        <text x="92" y="80" fill="#5a627a" font-size="10">免费·只到预测</text>
+        <circle cx="560" cy="300" r="8" fill="#43c59e"/>
+        <text x="548" y="296" text-anchor="end" fill="#1a1f33">Niron Magnetics</text>
+        <text x="548" y="310" text-anchor="end" fill="#5a627a" font-size="10">聚焦磁体·重资本·非AI</text>
+        <circle cx="600" cy="340" r="7" fill="#ffb454"/>
+        <text x="590" y="338" text-anchor="end" fill="#1a1f33">Shin-Etsu/TDK 等</text>
+        <text x="590" y="352" text-anchor="end" fill="#5a627a" font-size="10">在位巨头·稀土路线</text>
+        <circle cx="430" cy="255" r="7" fill="#7aa2ff"/>
+        <text x="442" y="251" fill="#1a1f33">Materials Nexus</text>
+        <text x="442" y="265" fill="#5a627a" font-size="10">AI·MagNex 磁体</text>
+        <circle cx="490" cy="285" r="10" fill="#3a66ff" stroke="#fff" stroke-width="2"/>
+        <text x="490" y="289" text-anchor="middle" fill="#fff" font-size="10" font-weight="bold">A</text>
+        <text x="478" y="312" text-anchor="end" fill="#3a66ff" font-weight="bold">Altrove</text>
+        <text x="478" y="326" text-anchor="end" fill="#5a627a" font-size="10">AI×自驱实验室×卖磁体</text>
+      </svg>
+      </div>
+      <figcaption>定位图（本调研重绘）。右下象限「聚焦单一卡脖子材料品类 + AI + 自有产线 + 交付通过认证的实物」是最稀疏的 whitespace——Altrove 与 Materials Nexus 在抢，Niron 占住了"卖磁体"但不用 AI、传统巨头占住量产但仍是稀土路线；资本最厚的平台公司全挤在左上"通用×偏软件"。</figcaption>
+    </figure>
+  </section>
+
+  <!-- ④ 融资 timeline -->
+  <section id="funding">
+    <h2><span class="n">④</span>融资 timeline</h2>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 720 170" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12.5">
+        <line x1="70" y1="80" x2="650" y2="80" stroke="#b9c2e0" stroke-width="2"/>
+        <circle cx="110" cy="80" r="7" fill="#7aa2ff"/>
+        <text x="110" y="55" text-anchor="middle" fill="#1a1f33">2024 初</text>
+        <text x="110" y="108" text-anchor="middle" fill="#5a627a" font-size="11">成立</text>
+        <text x="110" y="122" text-anchor="middle" fill="#5a627a" font-size="10">Entrepreneur First</text>
+        <circle cx="320" cy="80" r="8" fill="#43c59e"/>
+        <text x="320" y="55" text-anchor="middle" fill="#1a1f33">2024-07</text>
+        <text x="320" y="108" text-anchor="middle" fill="#5a627a" font-size="11">Pre-seed €3.7M (~$4M)</text>
+        <text x="320" y="122" text-anchor="middle" fill="#5a627a" font-size="10">领投 Contrarian Ventures</text>
+        <circle cx="560" cy="80" r="9" fill="#3a66ff"/>
+        <text x="560" y="55" text-anchor="middle" fill="#1a1f33">2025-10</text>
+        <text x="560" y="108" text-anchor="middle" fill="#3a66ff" font-size="11" font-weight="bold">Seed $10M（累计 ~$14M）</text>
+        <text x="560" y="122" text-anchor="middle" fill="#5a627a" font-size="10">领投 Alven</text>
+        <text x="650" y="84" fill="#5a627a" font-size="11">→ 目标 2028 量产替代</text>
+      </svg>
+      </div>
+      <figcaption>Altrove 融资时间线（据公开报道整理 <span class="src src-b">🟡</span>）。注意 €3.7M 与 $10M 口径混用、部分报道写 €9.2M，均为不同币种/累计口径的换算，下表逐条标注。</figcaption>
+    </figure>
+    <table>
+      <thead><tr><th>时间</th><th>事件 / 轮次</th><th>金额</th><th>投资方</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr><td>2024 初</td><td>成立 / 孵化</td><td>—</td><td>由 Entrepreneur First（EF）孵化 spin-out</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2024-07</td><td>Pre-seed</td><td>€3.7M（报道亦写 ~$4M）</td><td>领投 Contrarian Ventures；Emblem 及天使（Thomas Clozel/Owkin、Julien Chaumond/Hugging Face、Nikolaj Deichmann/3Shape 等）参与</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2025-10</td><td>Seed</td><td>$10M（累计总融资 ~$14M；部分媒体以 €9.2M 计本轮）</td><td>领投 Alven；Bpifrance Digital Venture、Contrarian Ventures、Emblem 跟投；天使含 Thomas Plantenga（Vinted）、Michal Valko（ex-Meta）等</td><td><span class="src src-b">🟡</span></td></tr>
+      </tbody>
+    </table>
+    <p>融资节奏佐证「早期 + 重 deeptech」定位：成立约一年半、仍处种子阶段、累计 ~$14M——<strong>资本厚度远低于同赛道平台公司</strong>（Periodic $300M / CuspAI $100M+ / Orbital 数亿）。这既符合"垂直造磁体"需要时间打磨产线、不能纯靠烧钱的现实，也暴露其在"放大到工业量"这一重资本环节的资金短板。<strong>赛道整体融资热度</strong>：AI 材料公司近两年吸金 $1.3B+，但钱高度集中在头部通用平台，"垂直材料制造"这格反而相对清冷——对想进场者既是窗口、也是警示。</p>
+  </section>
+
+  <!-- ⑤ 公司速览 -->
+  <section id="snapshot">
+    <h2><span class="n">⑤</span>公司速览</h2>
+    <table>
+      <tbody>
+        <tr><td>是什么 / 定位</td><td>巴黎 deeptech，「关键无机材料的端到端替代」（"End-to-end substitution of critical inorganic materials"，"Partner now. Substitute in 2028."）<span class="src src-a">🟢</span></td></tr>
+        <tr><td>产品</td><td>首发：<strong>低稀土依赖 / 无钴的高性能永磁体</strong>（面向电机），及 cost-optimized 大众应用磁体；在研：PZT（压电）替代（验证中）、热电、介电、绝缘材料 <span class="src src-a">🟢</span>。流程四阶段：Screen → Synthesize → Scale → Manufacture <span class="src src-a">🟢</span>。</td></tr>
+        <tr><td>团队</td><td>联合创始人 <strong>Thibaud Martin</strong>（CEO，连续创业者，前一家软件公司已成功退出）；<strong>Dr. Joonatan Laulainen</strong>（CTO，Cambridge 物理/材料 PhD，专长 AI 用于材料表征与仿真，曾在 CERN，持核心 IP）<span class="src src-b">🟡</span>。EF 孵化出身。<em>注：未核实到创始人直接参与 DeepMind/GNoME；"DeepMind 等做材料模型"是行业背景而非其履历。</em></td></tr>
+        <tr><td>商业模式</td><td><strong>类型2：垂直整合卖产品（卖材料）</strong>。计划「出售新材料的 license 或与第三方合作直接制造」，早期目标 18 个月内完成首笔 asset sale；自述为「hardware-enabled AI company」<span class="src src-b">🟡</span>。客户：已签 12+ 行业伙伴（汽车 / 能源 / 重工），首批产品约 2 年内落地 <span class="src src-c">🔴</span>（合作方与产能均为公司口径，未独立验证）。</td></tr>
+        <tr><td>状态</td><td>种子阶段、累计 ~$14M、巴黎设实验室、获 Île-de-France 大区资助；产品仍在从克级走向量产，<strong>实物量产与客户认证尚未公开验证</strong> <span class="src src-a">🟢</span>。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ⑥ 创业 idea 借鉴 -->
+  <section id="idea">
+    <h2><span class="n">⑥</span>创业 idea 借鉴</h2>
+    <div class="callout insight">
+      <span class="label">Whitespace / 机会</span>
+      定位图右下角那一格——<strong>「锁定单一被卡脖子的材料品类 × AI 当配方搜索引擎 × 自建小型自驱产线 × 交付能过客户认证的实物 + IP」</strong>——目前只有 Altrove、Materials Nexus 寥寥几家在抢，而资本最厚的玩家全挤在"通用平台 + 卖软件"。换言之：<strong>别和大模型公司比"材料 foundation model 谁大"，去比"谁能把一种关键材料真造出来、过认证、上车"。</strong>可复制到磁体之外的同构品类：<strong>固态电解质、无钴正极、压电陶瓷（无铅 PZT 替代，Altrove 自己也在做）、高温超导体、催化剂、稀土荧光粉替代</strong>——每一个都有"被中国/单一来源卡脖子 + 有明确 spec + 有焦虑买家"的特征。</div>
+    <h3>现有玩家共同短板（unmet needs）</h3>
+    <p>① <strong>预测≠可用</strong>：开源模型能吐一堆候选晶体，但"能不能合成、能不能放大、能不能过认证"是 70% 的真问题，绝大多数平台公司没碰这块脏活——这是付费意愿真正所在。② <strong>通用平台不解决具体采购</strong>：车厂要的不是"材料搜索引擎订阅"，是"明年能稳定供货、参数达标、通过 PPAP 认证的磁体"。③ <strong>重资本量产是断层</strong>：从克级样品到吨级量产之间，AI 创业公司普遍缺钱缺产线（Altrove 种子才 $10M），而 Niron 靠数亿战投建厂——中间地带（中试 / 代工 / 与在位厂合资）是机会也是死亡谷。</p>
+    <h3>Why now（为什么现在值得做）</h3>
+    <p>① <strong>地缘拐点（最硬的 why-now）</strong>：稀土开采与磁体制造高度集中于中国，出口管制与价格波动让欧美工业链把"关键材料自主"提到国家安全高度——欧盟 Critical Raw Materials Act、各国补贴与战投（Niron 拿一众车厂的钱、Altrove 拿 Bpifrance 与大区资助）都是政策顺风。<strong>Altrove 在巴黎做这件事，本身就是吃"欧洲要自己的无稀土磁体供应链"这条叙事。</strong>② <strong>技术拐点</strong>：GNoME/MatterGen/MACE 等让候选预测近乎免费，创业的稀缺资源从"算法"转向"合成—表征—放大"的自动化闭环，自驱实验室（self-driving lab）成本与成熟度刚到可创业的临界点。③ <strong>需求拐点</strong>：EV、机器人、风电对永磁需求爆炸式增长，放大了"去稀土"的紧迫性。</p>
+    <h3>可借鉴的打法 + 相邻机会</h3>
+    <ul>
+      <li><strong>borrowable：</strong>（a）<strong>把 AI 定位成"流水线里的搜索引擎"而非产品本身</strong>——Martin 的"30/70"叙事很会卖：承认预测只占 30%，把价值锚在自有产线的 70%，天然区隔于估值虚高的平台公司。（b）<strong>用单一旗舰材料（磁体）切入，再横向复制到压电/热电</strong>——先证明端到端能跑通，再讲平台故事。（c）<strong>"Partner now, substitute in 2028"——先签产业伙伴 LOI / 联合开发锁定买家</strong>，把订单前置当背书，降低后续量产风险。（d）<strong>吃地缘红利拿政府/战略资本</strong>（Bpifrance、大区资助、车厂战投），deeptech 早期靠这类非稀释/战略钱续命。</li>
+      <li><strong>adjacent：</strong>（a）<strong>"自驱实验室即服务"</strong>——不自己卖材料，而把合成—表征—放大的自动化产线开放给磁体/电池公司按项目收费（卖铲子，避开重资本量产）。（b）<strong>认证 / 中试代工层</strong>——专做"把 AI 预测的候选材料做到可量产、可过车规认证"的中间环节，服务一众只会预测的平台公司。（c）<strong>稀土回收 + AI 配方优化结合</strong>（Phoenix Tailings 思路 × Altrove 的 AI），从供给侧和替代侧两头夹击同一焦虑。（d）换品类复制：<strong>无铅压电陶瓷、固态电解质、无钴正极</strong>各自都能开一家"小 Altrove"。</li>
+    </ul>
+    <div class="callout warn">
+      <span class="label">风险（诚实给）</span>
+      ① <strong>重资本死亡谷</strong>：造磁体并量产是 Niron 那种数亿美元、建厂、过车规的游戏，Altrove 种子仅 $10M，"从克到吨"这一跳极烧钱、极慢。② <strong>巨头/通用平台顺手碾压</strong>：Periodic/CuspAI/Orbital 资金厚数十倍，若磁体被验证是大市场，它们可"顺手"切入。③ <strong>在位者反扑</strong>：Shin-Etsu/TDK 掌握量产与客户认证，新材料即便性能达标也要数年上车周期。④ <strong>性能/成本声明未验证</strong>：MagNex"成本20%/碳排70%"、Altrove"快10×""12+伙伴"多为公司口径 <span class="src src-c">🔴</span>，无第三方 benchmark。⑤ <strong>稀土价格反向风险</strong>：若稀土价格回落或中国放松管制，"替代"经济性叙事会被削弱。⑥ <strong>预测层商品化</strong>：护城河必须建在产线与认证上，否则被开源吃掉。</div>
+  </section>
+
+  <!-- ⑦ 现实判断 -->
+  <section id="take">
+    <h2><span class="n">⑦</span>现实判断</h2>
+    <p>Altrove 站位是聪明的：它没去和钱多得多的平台公司比"材料 foundation model"，而是钻进一个 <strong>nascent 的垂直格子（AI×自有产线×卖无稀土磁体）</strong>，并把护城河押在最难被开源吃掉的"合成—放大—认证"端，再叠上欧洲关键材料自主的强 why-now。这套逻辑自洽、差异化清晰、买家动机真实。但它的<strong>胜算高度取决于能否跨过重资本量产的死亡谷</strong>——这正是它最薄弱处：种子 $10M 对"建产线、过车规、吨级量产"杯水车薪，而对照组 Niron 拿着一众车厂的数亿战投在建厂。最现实的路径可能不是"自己建大厂"，而是"做到中试 + 与在位磁体厂合资/代工"——但那又会稀释垂直整合的护城河。<strong>软肋还有：性能、成本、"12+伙伴"等关键声明全是公司口径，无独立验证；产品尚未上车。</strong>结论：方向与切入点值得创业者借鉴（尤其"单材料垂直 + AI 当搜索引擎 + 地缘叙事拿战略钱"这套组合拳），但作为投资标的，它仍处"能核实的只有团队 + 方向 + 早期融资，产品实效未验证"的阶段。</p>
+    <div class="callout warn">
+      <span class="label">使用提醒</span>
+      本页为对话式调研，信息主要来自公开来源并按等级标注；融资数额（€3.7M / $10M / €9.2M / 累计 $14M 口径混用，已逐条标注）、客户与产能、性能/成本声明等以官方一手为准，
+      <strong>产品能力未必经独立验证</strong>，引用前请核对最新信息。
+    </div>
+  </section>
+
+  <!-- 出处 -->
+  <section id="src">
+    <h2>出处</h2>
+    <ul style="font-size:13.5px">
+      <li><span class="src src-a">🟢</span> <a href="https://www.altrove.ai/" target="_blank" rel="noopener">Altrove 官网</a>（定位、产品、流程、Île-de-France 资助）</li>
+      <li><span class="src src-b">🟡</span> <a href="https://tech.eu/2025/10/31/paris-based-altrove-raises-10-million-to-accelerate-ai-designed-alternatives-to-critical-materials/" target="_blank" rel="noopener">Tech.eu：Altrove $10M 种子</a>（轮次/投资方/团队/用途）</li>
+      <li><span class="src src-b">🟡</span> <a href="https://techcrunch.com/2024/07/03/altrove-uses-ai-models-and-lab-automation-to-create-new-materials/" target="_blank" rel="noopener">TechCrunch：Altrove AI + lab automation</a>（30/70 叙事、商业模式、X 射线表征、pre-seed）</li>
+      <li><span class="src src-b">🟡</span> <a href="https://techfundingnews.com/altrove-raises-e3-7m-to-design-and-build-alternatives-to-rare-earth-materials-using-ai/" target="_blank" rel="noopener">TFN：Altrove €3.7M pre-seed</a></li>
+      <li><span class="src src-b">🟡</span> <a href="https://www.eu-startups.com/2024/07/paris-based-altrove-closes-e3-7-million-to-develop-sustainable-alternatives-to-critical-materials/" target="_blank" rel="noopener">EU-Startups：€3.7M 详情 / EF spin-out</a></li>
+      <li><span class="src src-b">🟡</span> <a href="https://alven.co/news/altrove-raises-10-million-to-turn-ai-predicted-materials-into-industrial-reality" target="_blank" rel="noopener">Alven（领投方）公告</a></li>
+      <li><span class="src src-b">🟡</span> <a href="https://www.crunchbase.com/organization/altrove-ai" target="_blank" rel="noopener">Crunchbase：altrove AI</a></li>
+      <li><span class="src src-b">🟡</span> <a href="https://thenextweb.com/news/uk-startup-ai-to-discover-new-materials-rare-earth-free-magnet" target="_blank" rel="noopener">Materials Nexus / MagNex（竞品）</a></li>
+      <li><span class="src src-b">🟡</span> <a href="https://nironmagnetics.com/" target="_blank" rel="noopener">Niron Magnetics 官网</a> · <a href="https://globalventuring.com/corporate/energy-and-natural-resources/the-big-deal-niron-magnetics/" target="_blank" rel="noopener">Niron 战投报道</a></li>
+      <li><span class="src src-b">🟡</span> <a href="https://medium.com/@CuspAI/securing-our-100m-series-a-to-revolutionise-materials-discovery-with-ai-e6705e8c8fd3" target="_blank" rel="noopener">CuspAI Series A $100M+</a> · <a href="https://techfundingnews.com/cuspai-200m-unicorn-valuation-materials-ai/" target="_blank" rel="noopener">CuspAI 洽 $200M</a></li>
+      <li><span class="src src-b">🟡</span> <a href="https://www.startuphub.ai/startups/periodic-labs" target="_blank" rel="noopener">Periodic Labs（$300M 种子 / ~$1.5B）</a></li>
+      <li><span class="src src-b">🟡</span> <a href="https://fortune.com/2026/05/28/exclusive-orbital-industries-raises-50-million-series-b-funding-round-ai-to-discover-exotic-new-materials/" target="_blank" rel="noopener">Orbital Materials Series B $50M</a></li>
+      <li><span class="src src-b">🟡</span> <a href="https://pitchbook.com/news/articles/discovering-new-materials-with-ai-has-a-winding-road-to-vc-returns" target="_blank" rel="noopener">PitchBook：AI 材料赛道 $1.3B+ 融资与回报路径</a></li>
+    </ul>
+  </section>
+
+  <footer class="foot">
+    公司竞争格局 / 赛道早期度调研笔记，仅作梳理；信息按来源分级、产品能力未必经独立验证，以官方一手信息为准 · 整理日期 2026-06-15
+  </footer>
+
+</article>
+</body>
+</html>
