@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QuantumBond AI · 竞争格局与赛道早期度调研</title>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --bad:#ff6b81; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --bad:#d23651; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;}
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:920px; margin:0 auto; padding:18px 22px 90px}
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:25px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)} .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap; line-height:2}
+  nav.toc a:hover{color:var(--accent)}
+  section{margin:38px 0}
+  h2{font-size:20px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:16.5px; margin:22px 0 8px}
+  p{margin:12px 0} ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)} strong{color:var(--text)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.88em}
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:13px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:9px 10px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  figure{margin:24px 0; text-align:center}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+  .svgwrap{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 8px}
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+  .src{font-size:10.5px; padding:0 6px; border-radius:999px; white-space:nowrap; vertical-align:middle}
+  .src-a{background:rgba(67,197,158,.18); color:var(--ok)}
+  .src-b{background:rgba(255,180,84,.18); color:var(--warn)}
+  .src-c{background:rgba(255,107,129,.18); color:var(--bad)}
+  .legend{font-size:12px; color:var(--muted); margin:6px 0 0}
+  .verdict{display:inline-block; font-weight:700; padding:3px 12px; border-radius:999px; font-size:14px}
+  .v-nascent{background:rgba(122,162,255,.18); color:var(--accent)}
+  .v-emerging{background:rgba(67,197,158,.18); color:var(--ok)}
+  .v-crowded{background:rgba(255,180,84,.18); color:var(--warn)}
+  .v-mature{background:rgba(255,107,129,.18); color:var(--bad)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">AI4S 材料</span>
+      <span class="chip">分子模拟</span>
+      <span class="chip">电解质 / 催化剂</span>
+      <span class="chip">IP 授权</span>
+      <span class="chip">竞争格局</span>
+      <span class="chip">赛道早期度</span>
+      <span class="chip">创业 idea</span>
+    </div>
+    <h1>QuantumBond AI：竞争格局与赛道早期度调研</h1>
+    <p class="orig-title">界面 / 分子模拟专家，输出电解质 / 催化剂配方做 IP 授权 — 赛道是否早期 / 谁是真竞品 / 有没有可借鉴 idea</p>
+    <dl class="meta-grid">
+      <dt>对象</dt><dd><span style="color:var(--bad)">未能确证存在的公司</span>（候选域名 <a href="https://quantumbond.bond/" target="_blank" rel="noopener">quantumbond.bond</a>，经核实为无关停放/模板页，非该公司官网）</dd>
+      <dt>赛道</dt><dd>AI for Science（AI4S）材料发现 → 电池电解质 / 电催化剂 / 电化学界面模拟，商业模式偏「IP 授权（里程碑 / royalty / JV）」</dd>
+      <dt>整理</dt><dd>对话调研笔记；目标公司本身信息近乎为零，本篇据公开检索重建其「所在赛道」的格局，按来源分级标注，产品能力未必经独立验证</dd>
+      <dt>日期</dt><dd>2026-06-15</dd>
+    </dl>
+    <p class="legend">来源等级：<span class="src src-a">🟢 一手</span> 官网/SEC/官方 ·
+      <span class="src src-b">🟡 二手</span> 媒体/数据库 ·
+      <span class="src src-c">🔴 自述/未证实</span> 营销口径或未独立验证</p>
+  </header>
+
+  <div class="tldr">
+    <b>一句话</b> — 「QuantumBond AI」<strong>目前无法核实其真实存在</strong>：穷尽检索（公司名 / 域名 / 融资库 / 媒体）未找到任何官网、创始团队或融资记录，候选域名 <code>quantumbond.bond</code> 实为无关的停放页。<span class="src src-c">🔴</span>
+    因此本篇按 skill 的「stealth / 极早期」fallback 处理，<strong>不编造任何数字</strong>，转而把笔墨放在它<em>声称</em>所处的赛道——
+    「用 AI + 分子/界面模拟产出电解质·催化剂配方，再以 IP 授权变现」。这条赛道整体判 <strong>emerging（新兴）</strong>：
+    已有 Aionics、Chemix、Mattiq、Citrine、Orbital Materials 等一批拿到融资的玩家，但单论「<strong>界面级（interface）物理模拟 + 纯 IP 授权、不碰产线</strong>」这个细分组合仍是稀疏 whitespace。
+    一个可借鉴 idea：<strong>做电化学界面（SEI / 固液界面）的「配方 IP 工坊」</strong>——只卖经实验闭环验证的配方与专利，把资本密集的产线 / 量产留给被授权方。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#verify">⓪ 真实性核查</a>
+    <a href="#market">① 赛道地图 + 早期度</a>
+    <a href="#matrix">② 竞品对照矩阵</a>
+    <a href="#map">③ 定位图</a>
+    <a href="#funding">④ 融资 timeline</a>
+    <a href="#snapshot">⑤ 公司速览</a>
+    <a href="#idea">⑥ 创业 idea 借鉴</a>
+    <a href="#take">⑦ 现实判断</a>
+    <a href="#src">出处</a>
+  </nav>
+
+  <!-- ⓪ 真实性核查 -->
+  <section id="verify">
+    <h2><span class="n">⓪</span>真实性核查（先把丑话说前面）</h2>
+    <p>按 skill「Verify, don't fabricate」与「诚实于阶段」的硬规则，先报告核查结果：</p>
+    <ul>
+      <li><strong>公司名检索</strong>：以 <code>"QuantumBond"</code> / <code>"QuantumBond AI"</code> 直查，未命中任何企业实体；返回的多为同形近义噪声（QuantumScape 固态电池、Quantum Machines 量子计算、VALBOND 化学方法等），与「分子模拟 + 电解质/催化剂 IP 授权」描述均不符。<span class="src src-b">🟡</span></li>
+      <li><strong>官网/域名</strong>：唯一接近的 <code>quantumbond.bond</code> 抓取后是一个无关的停放/模板页（标题指向 "IntelliPlans"），<strong>不是</strong>一家分子模拟公司的官网。<span class="src src-a">🟢（实测抓取）</span></li>
+      <li><strong>融资 / 团队</strong>：Crunchbase / PitchBook / 媒体口径均无「QuantumBond AI」的轮次、创始人或员工记录。<span class="src src-b">🟡</span></li>
+    </ul>
+    <div class="callout warn">
+      <span class="label">结论</span>
+      在 2026-06-15 这个时点，<strong>「QuantumBond AI」未能被证实为一家真实、可公开检索到的公司</strong>。可能性有三：(a) 深度 stealth、尚未留下任何公开足迹；(b) 名称/拼写与真实主体不同（hint 也许是化名）；(c) 该公司尚不存在 / 系拟设想的标的。
+      本篇据此<strong>不臆造其官网、团队、融资任何数字</strong>，并把它当作「极早期、信息受限」标的，转而扎实交付它<em>所声称赛道</em>的竞争格局与可借鉴 idea——这部分用真实、可核实的同赛道公司支撑。
+    </div>
+  </section>
+
+  <!-- ① 赛道与早期度 -->
+  <section id="market">
+    <h2><span class="n">①</span>赛道地图 + 早期度判断</h2>
+    <p>把 hint 拆开看，QuantumBond 自我定位落在三个交叠的圈里：<strong>(1) AI4S 材料发现</strong>（用 ML / 生成模型 + 物理模拟搜配方）、<strong>(2) 电化学专域</strong>（电池电解质、电催化剂、固液界面）、<strong>(3) 轻资产 IP 授权商业模式</strong>（不自建产线，靠里程碑 / royalty / JV 把配方专利变现）。这三圈各自的拥挤度不同，叠在一起才是它真正的赛道。</p>
+
+    <h3>领域背景速补（读者只有 LLM 基础也能跟上）</h3>
+    <ul>
+      <li><strong>分子动力学 / MD 模拟</strong>：把成千上万个原子按物理力场逐时间步推演，看分子怎么运动、怎么排布。它是材料领域的「世界模型」，对电解质能算出离子怎么跑（离子电导率）、溶剂化结构长什么样。慢、贵，所以「用 AI 加速 / 替代 MD」本身就是一门生意。</li>
+      <li><strong>电解质（electrolyte）</strong>：电池里负责在正负极之间搬运离子的液体/凝胶。配方=溶剂+锂盐+添加剂的组合，组合爆炸（上亿种），靠人手试错极慢——典型「AI 搜配方」场景。</li>
+      <li><strong>电化学界面 / SEI</strong>：电极与电解液接触的那层薄膜（solid-electrolyte interphase）。电池寿命、安全、快充几乎都卡在这层界面上，但它<strong>最难模拟</strong>——既要量子级精度算化学反应，又要大尺度算扩散，是公认的硬骨头。谁能把「界面」算准，谁就有别人没有的护城河。这正是 QuantumBond 自称的专长（"界面专家"）。</li>
+      <li><strong>电催化剂（electrocatalyst）</strong>：加速电化学反应（如绿氢电解水、CO₂ 还原）的材料，常含铱/铂等贵金属。"少铱/无贵金属"是当前最热的降本方向。</li>
+      <li><strong>IP 授权（类型1）</strong>：公司只产出"配方+专利"，把它授权给电池厂/化工厂，靠<strong>预付款 + 里程碑付款 + 销售 royalty</strong>（或合资 JV）赚钱，不自己买设备建厂。优点是轻资产、毛利高；难点是要先证明配方真能落地、且专利能拦住别人。</li>
+    </ul>
+
+    <h3>玩家分群（四象限别漏）</h3>
+    <ul>
+      <li><strong>现有巨头 / 平台型：</strong><strong>Citrine Informatics</strong>（材料信息学 SaaS，累计融资约 $75M，已从咨询转 SaaS 授权；产品含 Citrine Catalyst）<span class="src src-b">🟡</span>；传统 MD/量子化学软件商（Schrödinger、Materials Studio 等）也在这层。</li>
+      <li><strong>垂直创业公司：</strong><strong>Aionics</strong>（Stanford 系，AI+物理模拟设计电解质配方，2025 推 AMI 平台；与 CMU 有 ARPA-E IP 授权协议）<span class="src src-b">🟡</span>；<strong>Chemix</strong>（MIX™ 生成式平台，AI 设计电芯/电解质，偏交付电芯）<span class="src src-b">🟡</span>；<strong>Mattiq</strong>（lab-on-a-chip 高通量合成电催化剂，与 Heraeus 合作低铱催化剂）<span class="src src-b">🟡</span>；<strong>Mitra Chem</strong>（AI + 湿实验做正极材料，Will Chueh 等参与）<span class="src src-b">🟡</span>；<strong>Orbital Materials</strong>（材料基础模型 LINUS / 开源 Orb，做催化剂与碳捕集吸附剂）<span class="src src-b">🟡</span>。</li>
+      <li><strong>大厂顺手做：</strong><strong>Microsoft Research</strong>（MatterGen 生成式材料模型，MIT 许可开源）<span class="src src-a">🟢</span>；Google DeepMind（GNoME 材料预测）；各大电池/化工巨头（LG、宁德、BASF）内部 AI 团队——它们随时可能把「界面模拟」收编进内部 R&D。</li>
+      <li><strong>开源 / 免费替代：</strong><strong>MatterGen（MIT 许可，含训练数据）</strong>、<strong>Orb（Orbital 开源的材料模拟模型）</strong>、机器学习力场（MACE、CHGNet 等）、以及大量 arXiv 上的 MD+ML 电解质/界面方法论。<span class="src src-a">🟢</span> 这意味着「基础模拟能力」正在快速商品化——纯卖「能算」会越来越难，护城河必须落在<strong>界面级精度 + 实验闭环验证 + 专利</strong>。</li>
+    </ul>
+
+    <div class="callout insight">
+      <span class="label">早期度判断</span>
+      <span class="verdict v-emerging">emerging（新兴）</span>
+      （nascent 萌芽 / emerging 新兴 / crowded 拥挤 / mature 成熟）<br><br>
+      <strong>判断信号：</strong>
+      ① <strong>玩家数量</strong>——大盘（AI4S 材料）已有十数家拿到融资的创业公司，不算空白，但聚焦「电解质/催化剂配方」的专域玩家仍是个位数到十几家级别，远未到同质化拥挤。
+      ② <strong>融资热度</strong>——轮次普遍偏早（seed～Series A，单笔 $7M～$100M 不等：Aionics 累计约 $7.8M、Mattiq pre-A $20M、Mitra Chem Series B $15.6M、CuspAI Series A $100M）<span class="src src-b">🟡</span>，说明资本在进场但尚无明确赢家。
+      ③ <strong>巨头进场</strong>——Microsoft / DeepMind 已用开源模型「占生态位」，但<strong>尚未</strong>下场做垂直的电解质/界面 IP 授权，留了空档。
+      ④ <strong>开源替代</strong>——MatterGen/Orb/MLFF 已让「基础模拟」商品化，抬高了「纯算力」玩家的门槛，逼大家往垂直 + 实验闭环走。
+      ⑤ <strong>客户认知 / 标准</strong>——电池厂开始设「AI 材料发现 pipeline」与平台公司合作，认知正在成型，但<strong>尚无公认 benchmark</strong>评判谁的配方更优，对新进入者反而是机会。
+      综合：<strong>大盘 emerging 偏向 crowding 的早期，但「界面级模拟 + 纯 IP 授权」这个具体格子仍稀疏</strong>，是可切入的 whitespace。
+    </div>
+  </section>
+
+  <!-- ② 竞品矩阵 -->
+  <section id="matrix">
+    <h2><span class="n">②</span>竞品对照矩阵</h2>
+    <p>选 6 个对这条赛道最具区分度的维度：<strong>技术路线</strong>（区分纯模拟 vs 模拟+湿实验闭环）、<strong>专域聚焦</strong>（电解质 / 催化剂 / 界面）、<strong>商业模式</strong>（IP 授权 vs SaaS vs 自产）、<strong>是否碰实验/产线</strong>（资本密集度的代理变量）、<strong>开源/闭源</strong>、<strong>融资规模</strong>。QuantumBond 一行仅据其 hint 自述列出，全部标 <span class="src src-c">🔴 未证实</span>。</p>
+    <table>
+      <thead><tr>
+        <th>玩家</th>
+        <th>技术路线</th><th>专域聚焦</th><th>商业模式</th>
+        <th>碰实验/产线?</th><th>开源/闭源</th><th>融资规模</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>QuantumBond AI（本篇）</strong></td>
+          <td>界面 / 分子模拟为核心 <span class="src src-c">🔴</span></td>
+          <td>电解质 + 催化剂 + <strong>界面</strong> <span class="src src-c">🔴</span></td>
+          <td>纯 IP 授权（里程碑/royalty/JV）<span class="src src-c">🔴</span></td>
+          <td>自述不碰产线（待证）<span class="src src-c">🔴</span></td>
+          <td>未知（极可能闭源）<span class="src src-c">🔴</span></td>
+          <td><strong>未能核实</strong> <span class="src src-c">🔴</span></td>
+        </tr>
+        <tr>
+          <td>Aionics</td>
+          <td>物理模拟 + AI 配方筛选（AMI 平台）<span class="src src-b">🟡</span></td>
+          <td>电池电解质配方为主 <span class="src src-b">🟡</span></td>
+          <td>与 OEM 合作设计 + 含 IP 授权（CMU/ARPA-E）<span class="src src-b">🟡</span></td>
+          <td>偏算法/平台，联合 OEM 落地 <span class="src src-b">🟡</span></td>
+          <td>闭源平台 <span class="src src-b">🟡</span></td>
+          <td>累计约 $7.8M（2 轮）<span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Chemix</td>
+          <td>MIX™ 生成式 AI（实验数据训练）<span class="src src-b">🟡</span></td>
+          <td>电芯 + 电解质化学 <span class="src src-b">🟡</span></td>
+          <td>交付电芯/配方（偏产品）<span class="src src-b">🟡</span></td>
+          <td>是，做到电芯级 <span class="src src-b">🟡</span></td>
+          <td>闭源 <span class="src src-b">🟡</span></td>
+          <td>已融资（具体未统一）<span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Mattiq</td>
+          <td>lab-on-a-chip 高通量合成 + AI <span class="src src-b">🟡</span></td>
+          <td>电催化剂（绿氢/化学品）<span class="src src-b">🟡</span></td>
+          <td>合作开发 + 商业化（Heraeus JV 式）<span class="src src-b">🟡</span></td>
+          <td>是，重实验/合成 <span class="src src-b">🟡</span></td>
+          <td>闭源 <span class="src src-b">🟡</span></td>
+          <td>pre-Series A $20M <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Citrine Informatics</td>
+          <td>材料信息学 + ML（数据平台）<span class="src src-b">🟡</span></td>
+          <td>通用材料/化学（含催化剂）<span class="src src-b">🟡</span></td>
+          <td><strong>企业 SaaS 软件授权</strong> <span class="src src-b">🟡</span></td>
+          <td>否（纯软件）<span class="src src-b">🟡</span></td>
+          <td>闭源 SaaS <span class="src src-b">🟡</span></td>
+          <td>累计约 $75M <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Orbital Materials</td>
+          <td>材料基础模型 LINUS / 开源 Orb <span class="src src-b">🟡</span></td>
+          <td>催化剂 + 碳捕集吸附剂 <span class="src src-b">🟡</span></td>
+          <td>自研材料 + 部分开源引流 <span class="src src-b">🟡</span></td>
+          <td>是，自建 Princeton R&D <span class="src src-b">🟡</span></td>
+          <td><strong>部分开源（Orb）</strong> <span class="src src-a">🟢</span></td>
+          <td>VC 支持（Toyota Ventures 等）<span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Microsoft (MatterGen)</td>
+          <td>扩散生成式材料模型 <span class="src src-a">🟢</span></td>
+          <td>通用无机材料（含能源/催化）<span class="src src-a">🟢</span></td>
+          <td><strong>开源</strong>（MIT 许可，研究引领）<span class="src src-a">🟢</span></td>
+          <td>否（模型/研究）<span class="src src-a">🟢</span></td>
+          <td><strong>开源 + 数据</strong> <span class="src src-a">🟢</span></td>
+          <td>大厂内部预算 <span class="src src-a">🟢</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>读矩阵：</strong>① 真正与 QuantumBond「界面 + 电解质 + 催化剂全包 + 纯 IP 授权」高度重合的对手<strong>几乎没有</strong>——Aionics 最近（电解质 + 含 IP 授权）但不强调「界面级」也不专做催化剂；Mattiq 专催化剂但重实验；Citrine 卖软件不卖配方 IP；Orbital/Microsoft 走开源生态。② 大多数玩家都「碰实验/产线」，QuantumBond 若真做到<strong>纯软件/纯 IP、不碰产线</strong>，是差异化点，但也意味着「证明配方能落地」更难（没有自己的湿实验闭环背书）。③ 开源（MatterGen/Orb）正在掏空「基础模拟」的价值，逼所有人往垂直 + 专利 + 实验验证走——这也是判断「纯算力护城河不成立」的关键信号。</p>
+  </section>
+
+  <!-- ③ 定位图 -->
+  <section id="map">
+    <h2><span class="n">③</span>定位图（whitespace 在哪）</h2>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 640 400" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12">
+        <!-- 轴 X: 轻资产(纯软件/IP) ↔ 重资产(自建实验/产线)；Y: 通用平台 ↔ 垂直专域(界面/电化学) -->
+        <line x1="40" y1="200" x2="600" y2="200" stroke="#b9c2e0" stroke-width="1.5"/>
+        <line x1="320" y1="24" x2="320" y2="372" stroke="#b9c2e0" stroke-width="1.5"/>
+        <text x="600" y="218" text-anchor="end" fill="#5a627a">重资产（自建实验/产线）→</text>
+        <text x="40" y="218" fill="#5a627a">← 轻资产（纯软件/IP）</text>
+        <text x="326" y="32" fill="#5a627a">↑ 垂直专域（界面/电化学）</text>
+        <text x="326" y="366" fill="#5a627a">↓ 通用材料平台</text>
+
+        <!-- whitespace 高亮：左上象限（轻资产 + 垂直界面） -->
+        <rect x="44" y="40" width="272" height="156" fill="#7aa2ff" opacity="0.10"/>
+        <text x="60" y="62" fill="#3a66ff" font-weight="700">whitespace</text>
+        <text x="60" y="80" fill="#5a627a" font-size="11">界面级模拟 + 纯 IP 授权</text>
+
+        <!-- 玩家点 -->
+        <circle cx="170" cy="290" r="7" fill="#9b8cff"/><text x="182" y="294" fill="#36406b">Citrine (SaaS)</text>
+        <circle cx="150" cy="255" r="7" fill="#43c59e"/><text x="162" y="259" fill="#36406b">MatterGen (开源)</text>
+        <circle cx="230" cy="240" r="7" fill="#43c59e"/><text x="242" y="244" fill="#36406b">Orbital/Orb</text>
+        <circle cx="285" cy="170" r="7" fill="#ffb454"/><text x="200" y="150" fill="#36406b">Aionics (电解质+IP)</text>
+        <circle cx="430" cy="150" r="7" fill="#ffb454"/><text x="442" y="154" fill="#36406b">Chemix (电芯)</text>
+        <circle cx="500" cy="120" r="7" fill="#ffb454"/><text x="425" y="108" fill="#36406b">Mattiq (催化/实验)</text>
+        <circle cx="470" cy="245" r="7" fill="#ffb454"/><text x="482" y="249" fill="#36406b">Mitra Chem (正极)</text>
+        <circle cx="150" cy="110" r="9" fill="#ff6b81" stroke="#fff" stroke-width="2"/>
+        <text x="118" y="98" fill="#d23651" font-weight="700">QuantumBond?</text>
+        <text x="100" y="132" fill="#5a627a" font-size="10.5">（自述定位，未证实）</text>
+      </svg>
+      </div>
+      <figcaption>定位图（本调研重绘）。横轴=资产轻重，纵轴=垂直度。左上「界面级模拟 + 纯 IP 授权」是稀疏 whitespace；QuantumBond 自称落在此处但<strong>未经证实</strong>，多数真实玩家偏右（碰实验/产线）或偏下（通用/开源）。</figcaption>
+    </figure>
+  </section>
+
+  <!-- ④ 融资 timeline -->
+  <section id="funding">
+    <h2><span class="n">④</span>融资 timeline</h2>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 720 170" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12.5">
+        <line x1="60" y1="80" x2="660" y2="80" stroke="#b9c2e0" stroke-width="2"/>
+        <circle cx="120" cy="80" r="8" fill="#ff6b81" stroke="#fff" stroke-width="2"/>
+        <text x="120" y="55" text-anchor="middle" fill="#d23651" font-weight="700">QuantumBond AI</text>
+        <text x="120" y="105" text-anchor="middle" fill="#5a627a">无任何可核实融资记录</text>
+        <text x="120" y="122" text-anchor="middle" fill="#5a627a" font-size="11">（不臆造）</text>
+
+        <text x="420" y="30" text-anchor="middle" fill="#5a627a" font-size="11.5">— 赛道整体融资节奏参照（不同公司）—</text>
+        <circle cx="320" cy="80" r="6" fill="#ffb454"/><text x="320" y="105" text-anchor="middle" fill="#5a627a">Aionics</text><text x="320" y="120" text-anchor="middle" fill="#5a627a" font-size="11">累计~$7.8M</text>
+        <circle cx="430" cy="80" r="6" fill="#ffb454"/><text x="430" y="105" text-anchor="middle" fill="#5a627a">Mattiq</text><text x="430" y="120" text-anchor="middle" fill="#5a627a" font-size="11">pre-A $20M</text>
+        <circle cx="540" cy="80" r="6" fill="#ffb454"/><text x="540" y="105" text-anchor="middle" fill="#5a627a">CuspAI</text><text x="540" y="120" text-anchor="middle" fill="#5a627a" font-size="11">A轮 $100M</text>
+        <circle cx="630" cy="80" r="6" fill="#9b8cff"/><text x="630" y="105" text-anchor="middle" fill="#5a627a">Citrine</text><text x="630" y="120" text-anchor="middle" fill="#5a627a" font-size="11">累计~$75M</text>
+      </svg>
+      </div>
+      <figcaption>融资时间线。<strong>QuantumBond AI 本身无可核实轮次</strong>（红点为占位，绝不臆造金额）；右侧为同赛道公司的「融资节奏参照」，说明资本在进、但仍以 seed～A 为主、无统一估值锚。</figcaption>
+    </figure>
+    <table>
+      <thead><tr><th>时间</th><th>事件 / 轮次</th><th>金额</th><th>投资方</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr><td>—</td><td><strong>QuantumBond AI：无任何可核实融资 / 成立记录</strong></td><td>未披露 / 未找到</td><td>未披露 / 未找到</td><td><span class="src src-c">🔴 未证实</span></td></tr>
+        <tr><td colspan="5" style="color:var(--muted)">— 以下为<strong>同赛道其它公司</strong>的参照（非 QuantumBond），用于判断赛道融资热度 —</td></tr>
+        <tr><td>2024–25</td><td>Aionics（电解质 AI）累计 2 轮</td><td>约 $7.8M</td><td>Trousdale Ventures、UP.Partners、MINTS、Avila VC</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2025</td><td>Mattiq（电催化剂）pre-Series A</td><td>$20M</td><td>未逐一统一</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2025-03</td><td>Mitra Chem（正极材料）Series B</td><td>$15.6M</td><td>早期由 Social Capital 领投</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2025-09</td><td>CuspAI（AI 材料发现）Series A</td><td>$100M</td><td>未逐一统一</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>历史累计</td><td>Citrine Informatics（材料信息学 SaaS）</td><td>约 $75M</td><td>多轮</td><td><span class="src src-b">🟡</span></td></tr>
+      </tbody>
+    </table>
+    <p><strong>赛道整体融资热度：</strong>资本明确在进场（2025–26 自驾实验室 / AI 材料平台拿到数亿美元级 VC），但轮次集中在 seed～Series A、单笔从几百万到 $100M 跨度极大、<strong>无公认估值锚</strong>——这正是 emerging（新兴）阶段的典型财务画像，也说明窗口还开着。</p>
+  </section>
+
+  <!-- ⑤ 公司速览 -->
+  <section id="snapshot">
+    <h2><span class="n">⑤</span>公司速览（QuantumBond AI · 信息受限）</h2>
+    <table>
+      <tbody>
+        <tr><td>是什么 / 定位</td><td>自述为「界面 / 分子模拟专家」，用 AI + 物理模拟产出电解质 / 催化剂配方做 IP 授权。<strong>无法独立证实其存在。</strong> <span class="src src-c">🔴</span></td></tr>
+        <tr><td>产品</td><td>未找到任何公开产品、平台名或 demo。 <span class="src src-c">🔴 未证实</span></td></tr>
+        <tr><td>团队</td><td>未找到创始人 / 任何 LinkedIn / 论文血统。深科技公司若无 research 血统披露，是较弱信号。 <span class="src src-c">🔴 未证实</span></td></tr>
+        <tr><td>商业模式</td><td>自述「类型1：IP（里程碑 / royalty / JV）」——轻资产、不碰产线。模式本身合理（Aionics×CMU、Mattiq×Heraeus 等同赛道有先例），但 QuantumBond 是否真这么做<strong>未证实</strong>。 <span class="src src-c">🔴</span></td></tr>
+        <tr><td>状态</td><td>极早期 / stealth 或尚不存在；<strong>能核实的为零</strong>。早期度对其自身判 <span class="verdict v-nascent" style="font-size:12px">nascent（就公司而言）</span>。 <span class="src src-c">🔴</span></td></tr>
+      </tbody>
+    </table>
+    <div class="callout note">
+      <span class="label">诚实标注</span>
+      本节<strong>没有任何一手或二手来源支撑 QuantumBond AI 的具体事实</strong>，全部标 🔴。上面只是把 hint 转述为「自述」并明确未证实，绝不补全成看似可信的细节。若后续拿到真实官网/团队，请以官方一手信息覆盖本节。
+    </div>
+  </section>
+
+  <!-- ⑥ 创业 idea 借鉴 -->
+  <section id="idea">
+    <h2><span class="n">⑥</span>创业 idea 借鉴</h2>
+    <div class="callout insight">
+      <span class="label">Whitespace / 机会</span>
+      定位图左上角「<strong>界面级（SEI / 固液界面）物理模拟 + 纯 IP 授权、不碰产线</strong>」是稀疏格子：电解质方向有 Aionics 但不主打界面；催化剂方向有 Mattiq 但重实验；软件方向有 Citrine 但卖订阅不卖配方 IP。
+      <strong>「界面专精 + 轻资产配方 IP 工坊」</strong>同时占据「最难模拟的环节（高壁垒）」和「最轻的资产模式（高毛利）」，是一个真实空白。
+    </div>
+    <h3>现有玩家共同短板（unmet needs）</h3>
+    <p>① <strong>界面模拟普遍是弱项</strong>——多数玩家强在「分子/配方筛选」，但 SEI / 固液界面的反应+扩散跨尺度建模公认最难，谁能把它做准、做快，就有别人复制不了的配方。② <strong>「能算」和「能落地」之间有鸿沟</strong>——开源模型让 in-silico 预测变便宜，但客户真正缺的是「<strong>经实验闭环验证、且专利能保护</strong>」的配方；纯软件玩家给不了实验背书，重资产玩家又被产线拖慢。③ <strong>缺公认 benchmark</strong>——没有统一标尺评配方优劣，客户决策靠信任，新进入者只要能拿出一两个可复现的硬数据就能撕开口子。</p>
+    <h3>Why now（为什么现在值得做）</h3>
+    <p>① <strong>技术拐点</strong>：MLFF（MACE/CHGNet）+ 生成式材料模型（MatterGen/Orb）让「分子级模拟」成本断崖式下降，使「轻资产配方工坊」第一次在算力上可行。② <strong>需求拉动</strong>：电池（固态/快充/钠离子）、绿氢（低铱催化剂）正处量产前夜，对「更好配方」的付费意愿强、付费方（电池/化工巨头）明确。③ <strong>商业模式验证</strong>：Aionics×CMU/ARPA-E、Mattiq×Heraeus 已跑通「IP 授权 / 合作开发」路径，证明类型1 模式能收到钱。④ <strong>巨头尚未垂直化</strong>：Microsoft/DeepMind 只做开源通用模型，没下场做电化学界面的 IP 生意，窗口还在。</p>
+    <h3>可借鉴的打法 + 相邻机会</h3>
+    <ul>
+      <li><strong>borrowable：</strong>(1) <strong>「最难的环节 + 最轻的模式」组合切入</strong>——挑公认最硬的子问题（界面）做深，用轻资产 IP 模式避开重资本；(2) <strong>开源引流 + 闭源变现</strong>（学 Orbital：开源一个模拟模型攒生态与信任，把真正值钱的配方/界面模型闭源授权）；(3) <strong>绑定一个旗舰客户做 JV / 里程碑</strong>（学 Mattiq×Heraeus）先把一个垂直证明做实，再复制。</li>
+      <li><strong>adjacent：</strong>(1) 把同一套界面模拟能力迁到<strong>绿氢电解槽 / CO₂ 还原催化剂</strong>（同样卡在界面与贵金属降本）；(2) 做<strong>「配方 IP 的验证/审计层」</strong>——给买配方的电池厂提供独立的实验复现与专利尽调（卖铲子）；(3) 半导体 / 制氢 / 储能长时电池等相邻电化学场景，复用界面 know-how。</li>
+    </ul>
+    <div class="callout warn">
+      <span class="label">风险（诚实给）</span>
+      ① <strong>开源碾压</strong>：MatterGen/Orb 等持续抬高免费基线，「纯模拟」价值被掏空，护城河必须是界面精度 + 实验验证 + 专利，缺一不可。② <strong>验证鸿沟</strong>：不碰实验 → 难自证配方能落地，可能被「有湿实验闭环」的对手以可信度击败。③ <strong>巨头/电池厂内化</strong>：宁德、LG、BASF 随时可把界面 AI 收进内部 R&D，授权方变竞争者。④ <strong>IP 授权回款慢</strong>：里程碑 / royalty 现金流滞后、依赖被授权方量产成功，早期烧钱压力大。⑤ <strong>标的本身风险</strong>：QuantumBond AI 连存在性都未证实，若作为投资/合作标的，须先做实地尽调。
+    </div>
+  </section>
+
+  <!-- ⑦ 现实判断 -->
+  <section id="take">
+    <h2><span class="n">⑦</span>现实判断</h2>
+    <p>对 <strong>QuantumBond AI 本身</strong>：在能查到的公开信息层面，它<strong>等于不存在</strong>——没有官网、团队、产品、融资任何一手/二手锚点。若它真为深度 stealth，则唯一「卖点」（界面级模拟 + 纯 IP 授权）确实落在一个真实 whitespace 上，方向不错；但深科技的胜负取决于 research 血统与可复现的硬数据，而这些<strong>目前一概无法核实</strong>，所以现阶段它更像「一个值得验证的赛道假设」，而非「一家可评估的公司」。</p>
+    <p>对 <strong>赛道</strong>：emerging（新兴）、窗口仍开。真正的护城河不在「能不能算」（开源已商品化），而在「<strong>界面级精度 × 实验闭环验证 × 专利保护</strong>」三件套，以及绑定一个能量产的旗舰客户把 IP 授权模式跑实。谁先在「最难的界面 + 最轻的资产」这个角落拿出可复现成果，谁就最可能把这块 whitespace 占住。</p>
+    <div class="callout warn">
+      <span class="label">使用提醒</span>
+      本页为对话式调研，信息主要来自公开来源并按等级标注；<strong>QuantumBond AI 的全部「事实」均为未证实（🔴）</strong>，竞品融资数额、客户、能力声明等以官方一手为准，
+      <strong>产品能力未必经独立验证</strong>，引用前请核对最新信息，并对 QuantumBond AI 的真实存在性做独立尽调。
+    </div>
+  </section>
+
+  <!-- 出处 -->
+  <section id="src">
+    <h2>出处</h2>
+    <ul style="font-size:13.5px">
+      <li><span class="src src-a">🟢</span> 实测抓取 <a href="https://quantumbond.bond/" target="_blank" rel="noopener">quantumbond.bond</a> — 无关停放/模板页，非该公司官网。</li>
+      <li><span class="src src-b">🟡</span> Aionics 官网与报道：<a href="https://aionics.io/aionics-inc-and-carnegie-mellon-university-announce-licensing-agreement-for-breakthrough-battery-electrolyte-design-software/" target="_blank" rel="noopener">Aionics × CMU 授权协议</a>、<a href="https://www.globenewswire.com/news-release/2025/06/12/3098375/0/en/Aionics-Unveils-Artificial-Molecular-Intelligence-Platform-to-Accelerate-Formulation-Design-for-Battery-Electrolytes-and-Beyond.html" target="_blank" rel="noopener">AMI 平台发布</a>、<a href="https://www.automotiveworld.com/articles/aionics-ai-to-revolutionise-ev-battery-development/" target="_blank" rel="noopener">Automotive World</a>。</li>
+      <li><span class="src src-b">🟡</span> Chemix：<a href="https://www.fastcompany.com/90892687/this-startup-uses-ai-to-design-better-ev-batteries" target="_blank" rel="noopener">Fast Company</a>。</li>
+      <li><span class="src src-b">🟡</span> Mattiq：<a href="https://cen.acs.org/materials/Mattiq-quest-make-billions-nanomaterials/103/web/2025/11" target="_blank" rel="noopener">C&amp;EN（pre-A $20M）</a>、<a href="https://www.businesswire.com/news/home/20250130835715/en/Mattiq-and-Heraeus-Partner-to-Advance-Electrocatalyst-Innovation" target="_blank" rel="noopener">Mattiq × Heraeus 合作</a>。</li>
+      <li><span class="src src-b">🟡</span> Citrine Informatics：<a href="https://citrine.io/" target="_blank" rel="noopener">官网</a>、<a href="https://www.cbinsights.com/company/citrine-informatics" target="_blank" rel="noopener">CB Insights（约 $75M、SaaS 转型）</a>。</li>
+      <li><span class="src src-b">🟡</span> Orbital Materials：<a href="https://carbonherald.com/orbital-materials-launches-worlds-leading-ai-model-for-advanced-materials/" target="_blank" rel="noopener">Orb / LINUS 报道</a>、<a href="https://medium.com/toyota-ventures/foundation-models-for-materials-discovery-our-investment-in-orbital-materials-ce5d93847f61" target="_blank" rel="noopener">Toyota Ventures 投资</a>。</li>
+      <li><span class="src src-a">🟢</span> Microsoft MatterGen（MIT 开源）：<a href="https://www.microsoft.com/en-us/research/blog/mattergen-a-new-paradigm-of-materials-design-with-generative-ai/" target="_blank" rel="noopener">MSR Blog</a>、<a href="https://huggingface.co/microsoft/mattergen" target="_blank" rel="noopener">Hugging Face</a>。</li>
+      <li><span class="src src-b">🟡</span> 赛道融资 / 商业模式：<a href="https://www.technologyreview.com/2025/12/15/1129210/ai-materials-science-discovery-startups-investment/" target="_blank" rel="noopener">MIT Technology Review（AI 材料需落地）</a>、<a href="https://www.startus-insights.com/innovators-guide/materials-informatics-companies/" target="_blank" rel="noopener">StartUs Insights 名录</a>、<a href="https://www.latitudemedia.com/news/how-to-monetize-ai-in-the-battery-sector" target="_blank" rel="noopener">Latitude Media（电池 AI 变现）</a>。</li>
+      <li><span class="src src-c">🔴</span> <strong>QuantumBond AI 的存在性、团队、产品、融资</strong>：穷尽公司名 / 域名 / 融资库检索<strong>均未找到任何可核实记录</strong>，故全部按未证实处理。</li>
+    </ul>
+  </section>
+
+  <footer class="foot">
+    公司竞争格局 / 赛道早期度调研笔记，仅作梳理；信息按来源分级、产品能力未必经独立验证，以官方一手信息为准。QuantumBond AI 本身未能确证存在 · 整理日期 2026-06-15
+  </footer>
+
+</article>
+</body>
+</html>
