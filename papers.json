@@ -76,6 +76,25 @@
     "path": "papers/2026-02-23-virtual-biotech/index.html"
   },
   {
+    "slug": "2602.00169-agentic-materials-science",
+    "title": "Towards Agentic Intelligence for Materials Science",
+    "authors": "Huan Zhang, Yizhan Li, Wenhao Huang, ..., Heng Ji, Bang Liu",
+    "team": "Université de Montréal & Mila; UIUC; U. Waterloo; U. Tokyo IIS; CUHK-Shenzhen; Alibaba DAMO 等",
+    "arxiv": "https://arxiv.org/abs/2602.00169",
+    "code": "",
+    "date": "2026-06-15",
+    "published": "arXiv 2026",
+    "tldr": "以 pipeline-centric 端到端视角综述材料科学的 agentic intelligence：把语料/预训练/领域适配/微调/goal-conditioned agent 视为可联合优化系统，用真实发现奖励而非 proxy benchmark 驱动，梳理 reactive 能力维度与 agentic 系统、Scientist AI、自驱实验室及其挑战。",
+    "tags": [
+      "agentic-AI",
+      "materials-science",
+      "self-driving-lab",
+      "survey",
+      "scientific-discovery"
+    ],
+    "path": "papers/2602.00169-agentic-materials-science/index.html"
+  },
+  {
     "slug": "2606.03854-cli-anything",
     "title": "CLI-Anything: Towards Agent-Native Computer Use",
     "authors": "Yuhao Yang, Tianyu Fan, Chao Huang",

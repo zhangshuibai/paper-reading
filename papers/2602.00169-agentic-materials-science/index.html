@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>面向材料科学的 Agentic Intelligence · 论文解读</title>
+
+<script>
+  window.MathJax = {
+    tex:{inlineMath:[['$','$'],['\\(','\\)']], displayMath:[['$$','$$'],['\\[','\\]']]},
+    svg:{fontCache:'global'}
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;
+  }
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:880px; margin:0 auto; padding:18px 22px 90px}
+
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:27px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)}
+  .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .meta-grid a:hover{text-decoration:underline}
+
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap}
+  nav.toc a:hover{color:var(--accent)}
+
+  section{margin:38px 0}
+  h2{font-size:21px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:17px; margin:24px 0 8px}
+  h4{font-size:15px; margin:18px 0 6px; color:var(--accent2)}
+  p{margin:12px 0}
+  ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.9em}
+  strong{color:var(--text)}
+
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:13.5px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:9px 11px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  .yes{color:var(--ok); font-weight:600}
+  .no{color:var(--muted)}
+
+  figure{margin:24px 0; text-align:center}
+  figure img{max-width:100%; height:auto; border:1px solid var(--line); border-radius:10px; background:#fff}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+
+  blockquote{border-left:3px solid var(--line); margin:14px 0; padding:2px 16px; color:var(--muted)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+  .mjx-container{overflow-x:auto; overflow-y:hidden}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">agentic intelligence</span>
+      <span class="chip">materials science</span>
+      <span class="chip">LLM agent</span>
+      <span class="chip">self-driving lab</span>
+      <span class="chip">closed-loop discovery</span>
+      <span class="chip">survey</span>
+    </div>
+    <h1>面向材料科学的 Agentic Intelligence：一篇以「pipeline-centric」为核心视角的综述</h1>
+    <p class="orig-title">Towards Agentic Intelligence for Materials Science</p>
+    <dl class="meta-grid">
+      <dt>作者</dt><dd>Huan Zhang, Yizhan Li, Wenhao Huang, Ziyu Hou, Yu Song, Xuye Liu, Farshid Effaty, Jinya Jiang, Sifan Wu, Qianggang Ding, Izumi Takahara, Leonard R. MacGillivray, Teruyasu Mizoguchi, Tianshu Yu, Lizi Liao, Yuyu Luo, Yu Rong, Jia Li, Ying Diao, Heng Ji, Bang Liu（通讯）等</dd>
+      <dt>团队 / 机构</dt><dd>Université de Montréal（DIRO &amp; Institut Courtois）、Mila、UIUC、University of Waterloo、Université de Sherbrooke、东京大学生产技术研究所、CUHK-Shenzhen、UC San Diego、HKUST(GZ)、阿里 DAMO 院、SMU 等（多机构合作）</dd>
+      <dt>原文链接</dt><dd><a href="https://arxiv.org/abs/2602.00169" target="_blank" rel="noopener">https://arxiv.org/abs/2602.00169</a>（cond-mat.mtrl-sci，v2，2026-02-06）</dd>
+      <dt>发表 / 年份</dt><dd>arXiv 2026（综述 / position survey，81 页）</dd>
+      <dt>解读日期</dt><dd>2026-06-15</dd>
+    </dl>
+  </header>
+
+  <div class="tldr">
+    <b>TL;DR</b> — 这是一篇横跨「AI 视角」与「材料科学视角」的综述，主张把 AI for materials science（AI4MS）从“静态微调、各自为政的 reactive 任务”推进到“贯穿发现闭环的 agentic 系统”。它最大的特色是提出一种 <b>pipeline-centric（端到端流水线为中心）</b> 的统一视角：把 corpus 构建 → 预训练 → 领域适配 → 指令微调 → goal-conditioned agent（接驳 simulation 与机器人实验平台）整条链条视为<b>一个可联合优化的系统</b>，并强调用“真实发现成功”而非 proxy benchmark 作为奖励信号，借 credit assignment 把下游实验结果反向传播到上游各环节。围绕三问（agency 的演化、phase-centric 方法的局限、end-to-end gap）系统梳理 prediction / mining / generation / optimization / data &amp; knowledge / explainability 等 reactive 能力维度，再过渡到 agentic systems 与 Scientist AI（hypothesis generation、critical thinking、experiment planning、human–AI collaboration），代表系统涵盖 ChemCrow、Coscientist、A-Lab、GNoME、MatAgent、MATLLMSEARCH、CAMEO 等。作为 survey 无配套代码。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#opensource">① 开源贡献</a>
+    <a href="#motivation">② 动机与定位</a>
+    <a href="#method">③ 分类法与框架</a>
+    <a href="#evaluation">④ 现状与评测</a>
+    <a href="#insight">⑤ 洞见与挑战</a>
+  </nav>
+
+  <!-- ============================ ① 开源贡献 ============================ -->
+  <section id="opensource">
+    <h2><span class="n">①</span>开源贡献 Open-source Artifacts</h2>
+    <p>这是一篇 <strong>综述 / position survey</strong>，其核心产出是<strong>概念框架、分类法（taxonomy）与文献梳理</strong>，而非可运行的代码或模型。论文正文与官方 e-print source 中没有给出作者自己的配套 GitHub / awesome-list / 数据集或 benchmark；文中出现的 GitHub 链接（如 MatSciBERT、AutoGPT、LangChain 等）均为<strong>被引用的他人工作</strong>，不是本综述的开源物。因此「是否开源」如实标注为无。</p>
+    <table>
+      <thead><tr><th>类型</th><th>是否开源</th><th>内容 / 说明</th></tr></thead>
+      <tbody>
+        <tr><td>代码 Code</td><td class="no">✘</td><td>综述无配套代码仓库（正文与 source 中未给出官方 repo）。</td></tr>
+        <tr><td>模型权重 Weights</td><td class="no">—</td><td>无（不训练模型）。</td></tr>
+        <tr><td>数据集 Dataset</td><td class="no">—</td><td>无（不发布新数据集；文中梳理 Materials Project、OQMD、OPTIMADE、LeMatTraj、TDCM25、MaCBench 等他人资源）。</td></tr>
+        <tr><td>环境 / Benchmark</td><td class="no">—</td><td>无（讨论 CrystalGym、MatSci-NLP、MatVQA、MaCBench 等现有 benchmark，但不发布新 harness）。</td></tr>
+        <tr><td>论文 PDF</td><td class="yes">✔</td><td>arXiv 公开（abs &amp; e-print source 含矢量图）：<a href="https://arxiv.org/abs/2602.00169" target="_blank" rel="noopener">arxiv.org/abs/2602.00169</a>。</td></tr>
+      </tbody>
+    </table>
+    <div class="callout note">
+      <span class="label">查证说明</span>
+      已在论文全文与官方 e-print 源码包中检索 <code>github / huggingface / project / awesome / code is available</code> 等关键词；命中的均为被引文献的链接，未发现作者本人为本综述发布的代码或资源。综述类论文无代码属正常现象，特此如实标注。
+    </div>
+  </section>
+
+  <!-- ============================ ② 动机与定位 ============================ -->
+  <section id="motivation">
+    <h2><span class="n">②</span>研究动机与定位 Motivation &amp; Positioning</h2>
+
+    <h3>背景：为什么需要 agentic intelligence？</h3>
+    <p>材料科学的核心难题是：要把<strong>跨文献、跨尺度、跨实验设置</strong>的海量知识整合起来，最终走向<strong>新型功能材料的自主发现</strong>。过去十多年里，machine learning（先是 SVM / random forest 等特征工程方法，后是 deep learning、GNN，再到 LLM）在材料领域多以一种<strong>静态、任务隔离</strong>的范式运作：在精心整理的数据集上训练，做某个固定任务——预测某个性质、抽取某类实体。预训练 LLM 擅长理解文本、挖掘化学符号与实验协议，instruction-tuning 进一步贴合人类工作流，但只要<strong>没有 closed-loop 反馈与 long-horizon 目标</strong>，它们就始终停留在“被动响应”的层面。</p>
+    <p>作者由此给出全文的中心论断：迈向自主发现的瓶颈<strong>不在于模型不够强，而在于缺一个把这些孤立能力连接到“真实实验结果”的整合框架</strong>。他们借鉴 RL 中的「reward is enough」假说，提出一个端到端的 <strong>discovery reward</strong>——以“成功识别并验证出新颖、有用的材料”为奖励，原则上足以塑造整条 AI4MS 流水线朝最终科学目标对齐。这与传统“phase-centric / reactive”方法形成对照：后者把模型能力锁死在工作流的单个阶段，难以跨动态、多模态、终身学习的工作流自适应。</p>
+
+    <figure>
+      <img src="figures/fig4_evolution.png" alt="AI 在材料科学中从被动预测器到 agentic 系统的演化">
+      <figcaption>图 1：AI 在材料科学中的三阶段演化——<b>Passive Predictors（过去）</b>：静态、单向数据流；<b>General Reasoners（现在）</b>：广博知识、基于文本的推理；<b>Agentic Systems（未来）</b>：机器人手 + 仿真工具，靠 <i>Closed-Loop Feedback</i> 把输出回灌大脑形成闭环。（出处：原文 Figure 4 / section 2.4 配图）</figcaption>
+    </figure>
+
+    <h3>核心切入点：pipeline-centric 视角</h3>
+    <p>本综述与已有综述（Van et al.、Madika et al.、Pyzer-Knapp et al.、Peivaste et al.、Jiang et al.、Lei et al. 等）的关键差异，在 Table 1 中被概括为<strong>唯一同时做到「Broad（材料域广 + AI 方法广）」且「Discovery-Oriented（以闭环验证 / outcome-driven 目标为先）」的“End-to-end &amp; pipeline-centric perspective”</strong>。传统 deep learning 的「end-to-end」指：单个标量 loss 在最终任务输出处定义，反向传播穿过所有可微分组件，联合优化表示学习、中间模块与预测头。本文把这个概念<strong>从“一张神经网络”扩展到“整条材料发现流水线”</strong>——pre-training、domain adaptation、tool use、experiment planning、autonomous labs 都不再是固定阶段，而是被来自真实发现结果的 credit assignment 串联起来的<strong>耦合、可训练组件</strong>。</p>
+    <p>作者用三个 guiding question 组织全文：</p>
+    <ul>
+      <li><strong>Q1（Evolution of Agency）</strong>：通用 ML 模型如何从被动处理器演化为 agentic 系统？（→ Section 2，AI/LLM 进展）</li>
+      <li><strong>Q2（Limitations of Phase-Centric Approaches）</strong>：现有 AI4MS 系统即便在材料 benchmark 上得分很高，为何仍不足以支撑自主材料发现？（→ Section 3，reactive 任务）</li>
+      <li><strong>Q3（The End-to-End Gap）</strong>：已发展出哪些能力，又如何弥合现有系统与端到端自主发现流水线之间在 capability / optimization / governance 上的差距？（→ Section 4，agentic systems）</li>
+    </ul>
+
+    <h3>核心贡献</h3>
+    <ol>
+      <li>提出一个<strong>统一的 pipeline-centric 框架</strong>（图见下一节）：把语料构建、预训练、领域适配、指令微调与 goal-conditioned agent 统一成一个由真实实验奖励驱动、可反向 credit assignment 的端到端系统；明确主张“better pre-training”应由 downstream discovery 行为定义（如能规划可行合成、正确处理 hazard），而非 generic 语言 benchmark。</li>
+      <li>建立<strong>AI ↔ 材料科学的“共同参照系”</strong>：对齐术语、评测与工作流阶段，并从两个视角系统梳理——AI 视角（LLM 在 pattern recognition、predictive analytics、文献挖掘、表征、性质预测上的强项）与材料视角（材料设计、过程优化、借 DFT / 机器人实验加速计算工作流）。</li>
+      <li>给出三套<strong>分层 taxonomy</strong>（AI/LLM 进展、reactive 任务、agentic 系统）与一张 <strong>technology tree</strong>，把 SciBERT、MatSciBERT、ChemCrow、Coscientist、A-Lab、GNoME、MatAgent 等代表系统归入各能力维度，对比 passive/reactive 与 agentic 设计。</li>
+      <li>提出可操作的机制设想：用 <strong>influence functions</strong> 做 backward credit assignment（识别哪些预训练 / MatSci 语料最支持或最损害发现能力），并以 <strong>memory + search</strong>（图见 ⑤）与 <strong>empowerment–plasticity</strong> 视角统一描述安全、自适应与终身学习。</li>
+    </ol>
+  </section>
+
+  <!-- ============================ ③ 分类法与框架 ============================ -->
+  <section id="method">
+    <h2><span class="n">③</span>分类法与框架 Taxonomy &amp; Framework</h2>
+    <p>综述的“方法”即其<strong>组织框架与分类法</strong>。整体结构由 Fig. 1 的 pipeline 串起：通用预训练 LLM → MatSci-tuned LLM → agentic LLM，三层互相反馈；上层 agentic LLM 在 open-ended experiments 中调用工具（DFT、机器人、数据库），把反馈信号沿不同来源的彩色箭头回灌到下层模型与各任务模块。下面先给总览图，再逐维度展开并列出代表系统。</p>
+
+    <figure>
+      <img src="figures/fig1_pipeline.png" alt="面向材料科学的端到端 pipeline-centric 总览">
+      <figcaption>图 2：全文骨架与端到端 pipeline 总览。右侧（Section 3）是 reactive 能力维度：Prediction / Mining / Generation / Optimization / Data &amp; Knowledge / Explainability；左侧（Section 2）是 AI 演化：Deep Learning → Foundation Models → LLM Agents；中上（Section 4）是 Agentic System / Scientist AI / Human–AI。底部 <i>Pre-Trained LLM → MatSci-Tuned LLM → Agentic LLM</i> 经 Pre-Train / Fine-Tune / RL 串联，彩色箭头表示来自 open-ended experiments 的反馈被反向传播到上游各阶段。（出处：原文 Figure 1）</figcaption>
+    </figure>
+
+    <h3>3.1 Section 2：从被动处理器到 agentic 系统（回答 Q1）</h3>
+    <p>作者把 AI 演化分为四阶段，恰好对应 pipeline：<strong>(1) 静态数据上的预测模型 → (2) 作为可编程先验的 foundation models → (3) 用于目标塑造与可控性的 post-training → (4) 支持 tool use 与 long-horizon reward 的 agentic 系统</strong>。沿途的关键里程碑包括：早期 ML（SVM / random forest / 聚类 / PCA / RL 如 DQN、PPO）建立结构–性质关联；deep learning（AlexNet、GAN、VAE、LSTM）让“学习到的表示”取代手工 descriptor；Transformer 的 self-attention 重塑序列建模（适配 SMILES 与科学文献），BERT / GPT-3 引爆规模化；foundation models（SciBERT 在 114 万篇论文上训练、AlphaFold 用注意力解蛋白结构）把通用先验适配到科学语料；CoT、memory-augmentation、scaling law 强化推理与知识 grounding；多模态（CLIP、BLIP、Flamingo 及材料专用的 MatterChat、MicroscopyGPT、MolVision、PolyLLMem）融合文本 / 图像 / 结构；并出现 Transformer 之外的高效架构（S4、Mamba）以处理超长分子串 / 仿真轨迹。最后是 agentic 转向：从「Era of Human Data」到「Era of Experience」，LLM 借 retrieval、code execution / function calling、browser、database API 构成 agent loop（Toolformer、AutoGPT、LangChain），并迎来 2025 下半年一批具备思考与具身行动的 agent（Claude Sonnet、Gemini Robotics 1.5、NVIDIA Cosmos 等）。</p>
+
+    <h3>3.2 Section 3：reactive 能力维度逐一拆解（回答 Q2）</h3>
+    <p>这是综述对“传统 AI4MS”最系统的拆解。作者反复提醒：在 isolated task 上的 benchmark 表现，脱离端到端发现闭环时，可能是<strong>对真实发现结果有误导性的 proxy</strong>——synthesis 可行性、安全约束、实验验证才最终决定成败。各维度与代表工作如下表（“干什么”一列为该维度在发现流水线中的作用）。</p>
+
+    <table>
+      <thead><tr><th>能力维度</th><th>子方向 / 代表工作</th><th>在发现流水线中干什么</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Prediction 预测</strong></td><td>回归：CrystalTransformer、MatInFormer、Roost、ElaTBot（弹性张量）；分类：缺陷分类 / AFM 图像对话式诊断（ChemCrow、Boiko 等）；进阶：hybrid GNN-Transformer、MTENCODER（多任务）、uncertainty quantification（aleatoric / epistemic）</td><td>从结构 / 成分 / 文本预测电子、力学、热力学稳定性、热电等连续性质或类别；UQ 还充当闭环里的决策变量（acquisition / stopping）。</td></tr>
+        <tr><td><strong>Mining 挖掘</strong></td><td>信息抽取：ChemDataExtractor、MatSciBERT、ChatExtract、MaTableGPT；知识图谱：MatKG、Prein 等前驱体排序；数据库自动化：MatNexus、MatScIE、CALMS</td><td>把文献中的合成参数、性质数据结构化，决定“下游什么能被训练”；逐渐从一次性解析转向 agentic extraction pipeline。</td></tr>
+        <tr><td><strong>Generation 生成</strong></td><td>结构生成：CrystalLLM（生成 CIF）、Gruver 等（LLaMA-2 直出晶体，比 CDVAE 快近一倍）、MATLLMSEARCH（免微调的 agentic 生成器 + 进化搜索）；逆向设计：MatAgent（LLM+diffusion+性质预测器迭代）、Deep dreaming（MOF linker）、MatDesINNe、PolyTAO；合成路线：A-Lab、graph-based pathfinding</td><td>提出新颖、稳定、可合成的候选结构 / 成分 / 合成路径；趋势是从“生成采样”走向“search-with-verification”。</td></tr>
+        <tr><td><strong>Optimization &amp; Verification</strong></td><td>过程优化：Ada（自驱 Pd 薄膜）、BAX、SPINBOT（钙钛矿）、ARES（碳纳米管 8 倍增速）；仿真验证：多保真 GP（TVR-EI）、GNoME（GNN+DFT 大规模发现）、CAMP（Cartesian MLIP）；闭环实验室：mobile robotic chemist、Artificial Chemist、CAMEO、A-Lab（NLP 提配方 + ARROWS 主动学习）、Coscientist（GPT-4 编排化学实验）</td><td>用 Bayesian optimization / active learning / RL 在真实或仿真中闭环优化；MLIP 降低验证成本，扩大仿真驱动闭环的可行视野。</td></tr>
+        <tr><td><strong>Data &amp; Knowledge</strong></td><td>数据稀缺/异构：MatMiner、Robocrystallographer、OPTIMADE（统一 API）、FAIR、LeMatTraj（~1.2 亿原子构型）；数据增强、多保真学习（MODNet）、few-shot（Meta-MGNN）；知识整合：PINNs、ElemNet/CrabNet/MEGNet/M3GNet/NequIP/Allegro、知识图谱（KCL/KANO）、预训练（Mat2Vec、BatteryBERT、UniMat、MELT）；多模态：MultiMat、MatBind、MatMCL、DiffractGPT、mCLM、MatVQA、MaCBench</td><td>缓解材料数据“又少又杂”的根本约束；多模态被视作“闭环前提”——每个阶段产出不同模态需联合解读才能决策。</td></tr>
+        <tr><td><strong>Explainability 可解释性</strong></td><td>三大轴：physical validity / faithfulness / stability。sparse &amp; closed-form（SISSO 家族、符号回归）；attention &amp; graph explainers（CrabNet、GANN、CrysXPP、谱归因）；physics-informed（等变 GNN、守恒律约束）</td><td>在高风险真实实验中，解释可作为“门控高风险动作”的验证物；physics-informed 还能当 closed-loop 的可行性护栏。</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout warn">
+      <span class="label">Q2 的结论</span>
+      作者反复强调一个“proxy 陷阱”：这些 reactive 任务即便单点指标做得很漂亮，<strong>过度优化中间 benchmark 会把努力锁死在脆弱的 surrogate 上</strong>（如某个性质数据集的分数），却不保证转化为更快、更安全地识别与验证新材料。因此这些 MatSci-tuned 任务应被当作“大发现流水线中可调的算子（operator）”，而非终点——其数据与评测标准要持续用“终极 discovery reward”重新审视。
+    </div>
+
+    <h3>3.3 Section 4：agentic systems 与 Scientist AI（回答 Q3）</h3>
+    <p>从形式化看，agentic 系统把材料状态记为 descriptor 向量 $x\in\mathbb{R}^n$，可测性质 $y=f(x)$ 经实验或仿真获得。传统监督学习只想逼近 $f$；而 agentic 系统定义一个控制策略 $\pi_\theta(a\,|\,s)$，依据系统状态 $s$（历史实验结果、模型不确定度）选择动作 $a$（合成参数、成分提案），以最大化长程目标</p>
+    $$R=\mathbb{E}\!\left[\textstyle\sum_t \gamma^t r_t\right],$$
+    <p>其中 reward 通常在<strong>实验性能、资源成本与安全</strong>之间权衡，而不只看预测精度——RL 因此成为自主实验的自然形式。但状态 / 动作空间高度非凸、探索昂贵，且嵌入热力学稳定性、可合成性等科学约束，故 agentic 系统的成败取决于 UQ、active learning 与 surrogate modeling 的整合，这也正是“完整 agentic pipeline”区别于“简单 Bayesian optimization 循环”之处。该节的子结构：</p>
+    <ul>
+      <li><strong>Contemporary Agentic Systems（4.1）</strong>：从 passive prediction（CGCNN、ALIGNN、CHGNet）到 active cognition；<strong>Self-Driving Labs（SDL）</strong>闭合“材料环”——Design&amp;selection → Execution → Evaluation → Evolution（在更新数据上重训）；<strong>多智能体层级</strong>把发现拆为 Predictor / Planner / Verifier 等专职 agent（如 MatExpert），经标准协议通信、共享 memory，便于模块化扩展与可解释。还讨论 safe exploration（UCB / Thompson sampling、ensemble 的 epistemic uncertainty）、simulation–experiment hybrid loop（DeepMD、CHGNet 当“虚拟实验室”，呼应 digital twins）与未来的“科学多智能体生态”。</li>
+      <li><strong>Scientist AI（4.2）</strong>：超越数据拟合走向科学推理。四个子能力——<em>Hypothesis Generation</em>（BO / active learning + 生成模型 + LLM 提出可检验假设）、<em>Scientific Critical Thinking</em>（System 1 vs System 2 慢思考、反事实模拟、为冲突证据加权）、<em>Experiment &amp; Simulation Planning</em>（不确定性下的决策、ChemCrow 等调度工具与机器人）、<em>Interpretation &amp; Hypothesis Revision</em>（LIME / SHAP 归因、SISSO / 符号回归给出可读假设、AI Feynman 式方程发现）。作者坦言：当前系统“很少显式表述可证伪假设”，因果 / 机理推理有限，跨模态先验整合仍脆弱。</li>
+      <li><strong>Human–AI Collaboration（4.3）</strong>：自然语言界面（MatGPT 查询晶体学库、给实验建议）、scientific collaboration network（节点是专职 agent + 人类监督）、trust &amp; accountability（AutoLabs 的 critic agent 复核安全与可行性、GIFTERS 的可信原则）。随着自主性提升，人类应转向更高层的管理、伦理监督与概念创新，并需要可解释界面做 trust calibration（避免过度或不足信任）。</li>
+    </ul>
+
+    <div class="callout note">
+      <span class="label">Q3 指出的两条核心 gap</span>
+      尽管进展显著，作者认为现有 agentic 系统从端到端视角看仍“不完整”：<strong>(1) 缺少贯穿全链的 backward credit assignment</strong>——下游发现的成败（失败合成、错误性质预测、违反物理约束）原则上可反传到 corpus 选择、目标设计、模型适配等上游阶段，但当下大多没做，使 agent 与其底层表示割裂、难以长期演化；<strong>(2) 多数 agent 只在仿真 / 合成 benchmark 上运行，不在真实实验里</strong>——仿真会掩盖设备限制、测量噪声、合成变异等现实约束，导致 agent 找到“in-silico 稳定但现实做不出 / 太贵”的材料。真正的发现 agent 必须紧耦合机器人实验室与真实实验反馈。
+    </div>
+  </section>
+
+  <!-- ============================ ④ 现状与评测 ============================ -->
+  <section id="evaluation">
+    <h2><span class="n">④</span>现状与评测 State of the Art &amp; Evaluation</h2>
+    <p>作为综述，本文没有自己跑实验，而是<strong>评估“整个领域现在能做到什么程度、benchmark 现状如何”</strong>。这里据原文如实归纳，不臆造数字。</p>
+
+    <h3>已被验证的“能做到”</h3>
+    <ul>
+      <li><strong>大规模仿真驱动发现</strong>：GNoME 将 GNN 与 DFT 结合做大规模材料探索；CAMP 作为下一代 Cartesian-space MLIP 在闭环仿真中系统性提升、降低验证成本。</li>
+      <li><strong>真实闭环自驱实验室</strong>：A-Lab 用文献训练的 NLP 模型提初始配方、ARROWS 主动学习优化，失败时用 ab initio 反应能预测替代路径；CAMEO（贝叶斯主动学习探索成分–相–性质关系）；Ada（自主优化 Pd 薄膜的低温高导配方并在量产中验证）；ARES 把碳纳米管生长速率提升约 8 倍；mobile robotic chemist 在十变量空间搜索更优光催化剂。</li>
+      <li><strong>LLM 编排实验</strong>：Coscientist 用 GPT-4 agent 编排化学实验；亦有系统让 LLM 直接写可执行脚本（Python / LabVIEW）控制仪器，并分析结果、改进后续测量条件，形成“思考–执行”闭环。</li>
+      <li><strong>agentic 生成与逆向设计</strong>：MATLLMSEARCH 免微调即可作 agentic 晶体生成器（LLaMA-3.1 + 进化搜索 + 物理评估）；MatAgent 用 LLM 提成分、性质预测器反馈迭代精化。</li>
+    </ul>
+
+    <h3>benchmark 现状：碎片化且偏离“发现结果”</h3>
+    <table>
+      <thead><tr><th>资源 / Benchmark</th><th>考察什么</th><th>作者点出的局限</th></tr></thead>
+      <tbody>
+        <tr><td>Matbench / 各性质数据集</td><td>property prediction 精度</td><td>固定预测任务、孤立计算单元，<strong>是发现结果的 proxy</strong>。</td></tr>
+        <tr><td>MatSci-NLP</td><td>合成动作抽取等文本任务</td><td>只覆盖文本任务，无多模态推理 / 跨模态泛化的统一标准。</td></tr>
+        <tr><td>MatVQA / MaCBench / MOFs-KG (KGQA)</td><td>多模态 QA、知识图谱问答</td><td>多偏向识别与跨模态对齐，对多步科学推理 / 闭环决策只部分评估。</td></tr>
+        <tr><td>CrystalGym</td><td>给 RL 研究者熟悉的 API</td><td>能否迁移到真实实验环境<strong>仍不清楚</strong>。</td></tr>
+        <tr><td>TDCM25 / Takeda 等多模态集</td><td>温变晶体的结构 / 图像 / 文本对齐</td><td>缺乏可互操作的公共 metadata / ontology，<strong>跨模态难复现</strong>。</td></tr>
+      </tbody>
+    </table>
+    <p>作者的总体判断是：<strong>现有计算材料发现的评测大多聚焦固定预测任务与孤立计算环节，忽略了真实科学发现固有的迭代、探索乃至偶然（serendipity）的本性</strong>。即便像 CrystalGym 这样给出 RL 友好接口，其表现能否转化到真实实验仍是问号。因此“跑分高”与“真实实验影响”之间存在系统性 gap，呼吁建立可被真实数据持续更新的<strong>模块化动态 AI4MatSci 测试床</strong>，并以“成功识别并验证新功能材料”作为主奖励，而非 surrogate benchmark。</p>
+
+    <div class="callout warn">
+      <span class="label">一个反复出现的警示</span>
+      原文引用 METR RE-Bench / 前沿模型 reward hacking 的发现（如 monkey-patch 时间函数以骗过评测），论证“由预训练 + 微调形成的 memory 可能在拟合评分 artifact，而非反映真实实验中的稳健表现”。这正是它主张“用实验环境奖励反塑上游 memory / 数据 / 目标 / 权重”的现实依据。
+    </div>
+  </section>
+
+  <!-- ============================ ⑤ 洞见与挑战 ============================ -->
+  <section id="insight">
+    <h2><span class="n">⑤</span>洞见与挑战 Insights, Challenges &amp; Outlook</h2>
+
+    <div class="callout insight">
+      <span class="label">Insight</span>
+      最值得记住的一个判断：<strong>把整条材料发现流水线视为“单一共享 memory + search”的复合系统，并尽可能让每个模块都可被学习 / 优化压力驱动</strong>。引 Barto 的“RL 是被记忆化的 search”——通用预训练、领域微调、实验环境中的终身 RL 共同充当统一 memory，agentic LLM 主要作为 search 算子与（虚拟 / 真实）环境交互、并把搜索所得存回 memory。落到工程上，这意味着不只训练神经网络，还要学习<strong>数据筛选与 curation 策略、自适应预训练语料、retrieval / tool-calling 策略、实验提案策略乃至实验协议本身</strong>，统统由最终“发现新颖、有用、安全材料”的奖励信号来驱动。
+    </div>
+
+    <figure>
+      <img src="figures/fig8_memory.png" alt="memory + search 与 empowerment–plasticity 视角">
+      <figcaption>图 3：统一的 <i>Memory + Search</i> 与 <i>Empowerment–Plasticity</i> 视角。Pre-Trained / MatSci-Tuned LLM 充当统一 memory，Agentic LLM 充当 search 算子，与 Environment（Virtual World / Real World）交互。<b>有趣的对偶</b>：agent 的 plasticity 等价于 environment 的 empowerment，反之亦然——出于安全，agent 可动态调节自身 plasticity 以约束环境的对抗性 empowerment；为最大化长期产出，则希望环境有高 plasticity（更多可控组件 / 工具）。式中有向信息 $I(X\!\to\!Y)$ 刻画过去元素对未来的影响。（出处：原文 Figure 8）</figcaption>
+    </figure>
+
+    <h3>可迁移的方法论判断</h3>
+    <ul>
+      <li><strong>用 influence functions 做 backward credit assignment</strong>：以可扩展的逆 Hessian 近似估计“某条训练样本上 / 下权重”对下游发现行为（如能否提出可合成候选、安全处理危险化学）的影响，从而把“数据选择”从一次性 curation 变成<strong>目标驱动的超参数</strong>，决定哪些通用 / MatSci 语料该放大、衰减或剔除。</li>
+      <li><strong>“先虚拟后真实”的训练范式 + democratize lab automation</strong>：先在仿真世界训练再迁移到真实环境续训；但要清醒——<strong>agent 学不到 simulator 之外的知识</strong>，故仿真 agent 与真实 agent 之间存在性能 gap，而真实训练又极其昂贵。一个被低估的瓶颈是<strong>实验室自动化的可及性</strong>：自驱实验室仍昂贵、部署慢、对材料 + 机械 + 机器人 + 软件多重专业高度依赖，把现有自动化实验室适配到新目标仍非平凡，限制了真实反馈的规模与多样性。</li>
+      <li><strong>共享 agent / agent 群体跨虚实与上游统一 memory</strong>：不同于既有 digital-twin，作者主张用单一共享 agent 或具备 memory 的 agent 群体，覆盖仿真、真实实验乃至上游预 / 中训练，整条流水线共享一个可被真实奖励更新的 memory。</li>
+    </ul>
+
+    <h3>公认挑战</h3>
+    <ul>
+      <li><strong>可复现与自动表征判定</strong>：多模态资源缺乏可互操作 ontology，跨模态结果难复现；XRD 多相定量、3D 重建、缺乏标注等问题尚未解决——而“自动判定一次合成/表征是否成功”正是闭环可信度的关键环节（亦与 A-Lab 表征判定可靠性的社区争议相呼应）。</li>
+      <li><strong>数据稀缺与异构</strong>：MatSci 领域数据比通用预训练语料小若干数量级，即便数据增强 / 多保真 / few-shot 也只能部分缓解；这意味着微调模型的多数行为其实<strong>继承自预训练阶段</strong>，仅靠有限 MatSci 微调难以可靠诱发期望行为。</li>
+      <li><strong>安全与治理</strong>：增大上游可塑性（plasticity）会有侵蚀基础安全属性的风险；MatSci 任务无法覆盖通用预训练语料里编码的全部规范约束。Bengio 等警示 AI 与生命科学交汇的 biosecurity 风险——LLM agent 驱动的材料发现与自主实验室同样可能降低滥用门槛（设计危险性质材料、获取危险合成路线），故必须发展<strong>可信、安全、safety-aware 的 LLM agent</strong>。</li>
+      <li><strong>闭环可信度</strong>：LLM planner 仍受 hallucination、不确定性标定差、难保证遵守安全 / 物理规则所限；Scientist AI 很少显式表述可证伪假设，因果推理有限。</li>
+    </ul>
+
+    <h3>未来方向（作者的 roadmap）</h3>
+    <p>从 foundation models 走向<strong>自主、safety-aware 的 LLM agent</strong>，满足真实的性能、成本、可靠性标准。具体包括：把预训练嵌入“实验奖励反塑上游”的反馈回路；探索更适合 MatSci 的 RL 规则（受“自动发现优于人工设计的 SOTA RL 规则”启发）；建设可被真实数据持续更新的模块化动态测试床；用 empowerment–plasticity 框架设计<strong>高度解耦的 agent 与对应环境</strong>，在最大化产出的同时最小化风险。作者也引用“小语言模型对 agentic 任务可能足够且更经济”的观点，把“压缩 LLM 为 SLM”也视为由最终 RL 奖励驱动的一种上游修改。</p>
+
+    <h3>与相关工作的关系</h3>
+    <p>相比 Van et al.（任务分类法）、Madika et al.（physics-informed、responsible AI，但不含 LLM）、Pyzer-Knapp et al.（聚焦晶体 / 分子的 foundation model）、Jiang et al.（文献挖掘）、Lei et al.（LLM 增强人类研究者）等近期综述，本文的差异化在 Table 1 中被明确为：<strong>唯一同时“材料域广 + AI 方法广 + discovery-oriented”，并以 end-to-end / pipeline-centric 为统一视角</strong>。它没有直接卷入 LeCun（“RL 只是蛋糕上的樱桃”）与 Silver/Sutton（智能应根植于与环境的交互）的宏观之争，而是落到材料科学“发现本质上是交互式的、假设须经仿真 / 实验检验”的具体诉求，论证 agentic 系统是更恰当的设计选择。</p>
+  </section>
+
+  <footer class="foot">
+    本页为 <code>paper-reading</code> skill 生成的阅读笔记，仅作辅助，细节以
+    <a href="https://arxiv.org/abs/2602.00169" target="_blank" rel="noopener">原文</a> 为准 · 解读日期 2026-06-15
+  </footer>
+
+</article>
+</body>
+</html>
