@@ -123,12 +123,37 @@
 
   <nav class="toc">
     <b>目录</b>
+    <a href="#bg">★ 领域背景</a>
     <a href="#opensource">① 开源贡献</a>
     <a href="#motivation">② 动机与定位</a>
     <a href="#method">③ 分类法与框架</a>
     <a href="#evaluation">④ 现状与评测</a>
     <a href="#insight">⑤ 洞见与挑战</a>
   </nav>
+
+  <!-- ============================ ★ 领域背景速补 ============================ -->
+  <section id="bg">
+    <h2><span class="n">★</span>领域背景速补（给只懂 LLM 的读者）</h2>
+    <p>如果你熟悉 LLM、但对材料科学（materials science）几乎是空白，这一节先把读懂全文所需的背景一次补齐。核心只有一句话：<strong>材料发现本质上是「要真的去做实验」的科学</strong>，这跟 LLM 圈「在数据集上跑一跑就能验证」的世界很不一样——也正是为什么 agent（能调工具、能控机器人、能跑长程闭环）在这里特别有价值。</p>
+
+    <h3>材料发现的链条，以及为什么它慢</h3>
+    <p>找到一种有用的新材料，通常要走完一条长链条：<strong>计算预测（computational prediction，先在电脑里算出哪些候选可能稳定 / 有想要的性质）→ 合成（synthesis，真的把它在实验室里做出来）→ 表征（characterization，用各种仪器测它到底是什么结构、有什么性质）→ 优化（optimization，调配方 / 工艺参数让性能更好）</strong>。每一环都很费时间，而且<strong>大部分环节必须真做物理实验</strong>——合成一炉可能要几小时到几天，表征要排队上仪器，优化又要把上面这套重复几十上百轮。类比 LLM：这就像你每改一次 prompt 都得等三天才能看到一次 eval 结果，且每次 eval 还要花真金白银的试剂和机时。这是材料界一切「加速」诉求的根源。</p>
+
+    <h3>DFT：从量子力学第一性原理算性质</h3>
+    <p><strong>DFT（density functional theory，密度泛函理论）</strong>是材料 / 化学界算性质的「标准答案级」工具：它从量子力学的<strong>第一性原理（first-principles，即只靠基本物理定律、不靠经验拟合）</strong>出发，算出一个材料的能量、稳定性、电子结构等性质。它的特点是<strong>准，但贵</strong>——算一个稍大的体系可能要在超算上跑很久。类比 LLM：DFT 像一个又准又慢又烧钱的「reference 模型」，你信它的答案，但没法对每个候选都跑一遍。</p>
+
+    <h3>MLIP：材料界的「基础模型」之一</h3>
+    <p>既然 DFT 太贵，自然的想法是<strong>用机器学习去拟合 DFT</strong>：这就是 <strong>MLIP（machine-learning interatomic potential，机器学习原子间势）/ interatomic potential（势函数，描述原子之间作用力的函数）</strong>。它学会了 DFT 的输入输出关系后，能把分子动力学模拟（molecular dynamics，模拟原子随时间怎么运动）加速<strong>几个数量级</strong>，同时精度接近 DFT。类比 LLM：MLIP 之于 DFT，很像<strong>「蒸馏出来的快模型」之于又慢又贵的教师模型</strong>；而像 GNoME、M3GNet、NequIP、CHGNet 这类在海量材料数据上预训练、能泛化到没见过的成分的模型，就是材料界自己的「<strong>foundation model（基础模型）</strong>」之一。</p>
+
+    <h3>self-driving lab：AI 当大脑，机器人当手</h3>
+    <p><strong>self-driving lab（自驱实验室，简称 SDL）</strong>是这篇综述的核心场景：让 <strong>LLM / AI 当大脑</strong>负责决策（设计配方、规划实验、读结果决定下一步），让<strong>机器人当手</strong>负责实操（移液、加热、上仪器表征），自动跑完「设计 → 合成 → 表征 → 优化」的整个闭环（closed loop），人几乎不用插手。文中反复出现的 <strong>A-Lab</strong> 就是代表：机器人 17 天连轴转合成材料。类比 LLM：这相当于把 agent loop 从「调用 API、跑代码」延伸到了「<strong>真实世界里动手做物理实验</strong>」，反馈信号不再是 eval 分数，而是「这炉到底有没有合成出来」。</p>
+
+    <h3>从「单点预测模型」到「会跑科研闭环的 agent」</h3>
+    <p>这正是全文的主线。过去十年材料 AI 多是<strong>单点预测模型（point-prediction model）</strong>：给一个结构、预测一个性质，做完就完了，彼此孤立、不闭环。这篇综述主张往 <strong>foundation model / agentic（智能体化）</strong>方向走——让一个 agent 能<strong>调用模拟器（如 DFT、MLIP）、操控机器人、查数据库</strong>，并把下游「实验到底成没成功」的结果反向用来改进上游的每一环，自己把科研闭环跑起来。类比 LLM：就是从「一个个专用的 fine-tuned 分类 / 回归头」，升级到「一个会用工具、能长程规划、按最终目标自我迭代的 agent」。</p>
+
+    <h3>会反复出现的几个数据库</h3>
+    <p>材料界有几个公共大数据库，是 agent 取数据 / 找候选的「弹药库」，文中会频繁提到：<strong>Materials Project</strong>（伯克利主导，收录海量用 DFT 算过的材料及其性质）、<strong>OQMD</strong>（Open Quantum Materials Database，开放量子材料数据库，同样以 DFT 计算性质为主）、<strong>ICSD</strong>（Inorganic Crystal Structure Database，无机晶体结构数据库，收录实验上已确认的晶体结构）。一句话：它们是<strong>「已知 + 预测材料」的大型结构化知识库</strong>，类比 LLM 世界的大规模预训练 / 检索语料。</p>
+  </section>
 
   <!-- ============================ ① 开源贡献 ============================ -->
   <section id="opensource">

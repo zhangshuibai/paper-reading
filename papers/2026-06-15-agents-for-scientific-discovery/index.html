@@ -91,6 +91,7 @@
 
   <nav class="toc">
     <b>目录</b>
+    <a href="#bg">★ 领域背景</a>
     <a href="#map">全景：发现闭环</a>
     <a href="#e2e">① 端到端研究 agent</a>
     <a href="#hypo">② 假设生成</a>
@@ -100,6 +101,37 @@
     <a href="#take">⑥ 现状与挑战</a>
     <a href="#src">出处</a>
   </nav>
+
+  <!-- ★ 领域背景速补 -->
+  <section id="bg">
+    <h2><span class="n">★</span>领域背景速补（给只懂 LLM 的读者）</h2>
+    <p>这篇综述跨了化学、材料、生物医药等多个学科，名词密度很高。如果你只熟 LLM、不熟这些领域，先看这份<strong>「通用术语速查」</strong>——读完它，本文乃至本库其它科学方向的解读都会顺很多。</p>
+
+    <h3>dry-lab vs wet-lab：实验在哪做？</h3>
+    <p>这是贯穿全文的最基本二分。<strong>dry-lab（干实验）</strong>指<strong>纯计算 / 写作的闭环</strong>——写代码、跑模拟、分析数据、写论文，全程只在电脑里，不碰任何真实仪器；计算型学科（机器学习、数据科学）天然是 dry-lab。<strong>wet-lab（湿实验）</strong>指<strong>真的接上物理仪器、动手做实验</strong>（配试剂、合成、上显微镜 / 光谱仪表征）。类比 LLM：dry-lab 像「在沙箱里跑代码就能验证」，wet-lab 像「每验证一次假设都得去现实世界真做一遍、要花时间和耗材」。难点天差地别——这也是为什么 agent 在 dry-lab 学科跑得远比 wet-lab 顺。</p>
+
+    <h3>self-driving lab / closed-loop / active learning：自动跑实验的三件套</h3>
+    <ul>
+      <li><strong>self-driving lab（自驱实验室，SDL）</strong>：<strong>AI 当大脑、机器人当手</strong>，自动跑完「设计实验 → 执行 → 表征 → 据结果决定下一步」的整套流程，人几乎不插手。</li>
+      <li><strong>closed-loop（闭环）</strong>：上一轮实验的结果会<strong>自动反馈回来、影响下一轮做什么</strong>，循环往复，而不是人跑一轮停下来手动想下一步。类比 LLM 的 agent loop，只是这里的「一步」可能是一次真实合成。</li>
+      <li><strong>active learning（主动学习）</strong>：闭环里的「决策大脑」常用它——<strong>用上一轮（尤其是失败 / 信息量大）的结果，主动挑「下一轮最该试哪个」</strong>，而不是盲目穷举，从而用最少的实验次数逼近目标。类比 LLM：很像「让模型自己挑最该标注 / 最该探索的样本」。</li>
+    </ul>
+
+    <h3>hypothesis generation：科研最值钱的一步</h3>
+    <p><strong>hypothesis generation（假设生成）</strong>指<strong>提出新颖、可验证的科学猜想</strong>——「我猜 X 会导致 Y」「这个老药也许能治那个病」。这是整个科研里最难自动化、也最「值钱」的一环：执行和分析相对机械，但<strong>提出一个既新颖又真能被实验证伪的好假设</strong>，是创造力所在。本文里 Google AI co-scientist 这类系统主攻的就是这一步（让人来拍板验证）。</p>
+
+    <h3>常见学科名词一句话速记</h3>
+    <ul>
+      <li><strong>DFT</strong>（density functional theory，密度泛函理论）：从量子力学第一性原理算材料 / 分子性质（能量、稳定性等）的标准方法，<strong>准但贵</strong>。</li>
+      <li><strong>XRD</strong>（X-ray diffraction，X 射线衍射）：用 X 射线照晶体、看衍射花样来<strong>测它的晶体结构</strong>——材料表征里判断「到底合成出了什么」的常用手段。</li>
+      <li><strong>GWAS</strong>（genome-wide association study，全基因组关联分析）：在大量人群里<strong>统计找「某疾病 / 性状」和「哪些基因位点」相关联</strong>，生物医学里发现致病基因的常用范式。</li>
+      <li><strong>retrosynthesis</strong>（逆合成 / 逆合成分析）：<strong>从目标分子反推合成路线</strong>——「想做出这个分子，该从哪些原料、经哪几步反应拼出来」，化学合成规划的核心。</li>
+      <li><strong>in-silico</strong>（在硅之中，即「在计算机里做的实验」）：和 in-vitro（试管里）/ in-vivo（活体里）相对，指<strong>完全在电脑模拟中完成的「实验」</strong>；快、便宜，但和真实世界存在 gap。</li>
+    </ul>
+
+    <h3>为什么 agent 这套范式特别适合科学？</h3>
+    <p>因为<strong>科研本身就长得像一个 agent 任务</strong>：它本来就是「<strong>提假设 → 设计实验 → 执行 → 分析结果 → 据此迭代</strong>」的<strong>多步、要调用工具、长程（long-horizon）</strong>的过程——要查文献、调模拟器 / 跑代码、操控仪器、记住前面试过什么再决定下一步。这恰好对上了 LLM agent 的强项（规划、工具调用、记忆、闭环迭代）。类比一句：把科学家的工作流写成 agent 的「think → act → observe」循环，几乎是天然对齐——这也是本文把研究范式从「AI for Science（当工具）」推向「Agentic Science（当科研主体）」的底层理由。</p>
+  </section>
 
   <!-- 全景 -->
   <section id="map">
