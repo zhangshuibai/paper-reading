@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 填写: 页面标题 = 公司名 · 竞争格局调研 -->
+<title>{{COMPANY}} · 竞争格局与赛道早期度调研</title>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --bad:#ff6b81; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --bad:#d23651; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;}
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:920px; margin:0 auto; padding:18px 22px 90px}
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:25px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)} .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap; line-height:2}
+  nav.toc a:hover{color:var(--accent)}
+  section{margin:38px 0}
+  h2{font-size:20px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:16.5px; margin:22px 0 8px}
+  p{margin:12px 0} ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)} strong{color:var(--text)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.88em}
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:13px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:9px 10px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  figure{margin:24px 0; text-align:center}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+  .svgwrap{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 8px}
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+  /* 来源等级 badge */
+  .src{font-size:10.5px; padding:0 6px; border-radius:999px; white-space:nowrap; vertical-align:middle}
+  .src-a{background:rgba(67,197,158,.18); color:var(--ok)}      /* 🟢 一手 */
+  .src-b{background:rgba(255,180,84,.18); color:var(--warn)}    /* 🟡 二手 */
+  .src-c{background:rgba(255,107,129,.18); color:var(--bad)}    /* 🔴 自述/未证实 */
+  .legend{font-size:12px; color:var(--muted); margin:6px 0 0}
+  /* 早期度 verdict */
+  .verdict{display:inline-block; font-weight:700; padding:3px 12px; border-radius:999px; font-size:14px}
+  .v-nascent{background:rgba(122,162,255,.18); color:var(--accent)}
+  .v-emerging{background:rgba(67,197,158,.18); color:var(--ok)}
+  .v-crowded{background:rgba(255,180,84,.18); color:var(--warn)}
+  .v-mature{background:rgba(255,107,129,.18); color:var(--bad)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <!-- 填写: 主题标签，如 <span class="chip">AI Infra</span> -->
+      {{TAG_CHIPS}}
+      <span class="chip">竞争格局</span>
+      <span class="chip">赛道早期度</span>
+      <span class="chip">创业 idea</span>
+    </div>
+    <h1>{{COMPANY}}：竞争格局与赛道早期度调研</h1>
+    <p class="orig-title"><!-- 填写: 副标题，如 域名 — 赛道 / 是否早期 / 可借鉴 idea -->{{SUBTITLE}}</p>
+    <dl class="meta-grid">
+      <dt>对象</dt><dd><a href="{{HOMEPAGE}}" target="_blank" rel="noopener">{{HOMEPAGE}}</a></dd>
+      <dt>赛道</dt><dd>{{MARKET}}</dd>
+      <dt>整理</dt><dd>对话调研笔记；信息来自公开检索，按来源分级标注，产品能力未必经独立验证</dd>
+      <dt>日期</dt><dd>{{DATE}}</dd>
+    </dl>
+    <p class="legend">来源等级：<span class="src src-a">🟢 一手</span> 官网/SEC/官方 ·
+      <span class="src src-b">🟡 二手</span> 媒体/数据库 ·
+      <span class="src src-c">🔴 自述/未证实</span> 营销口径或未独立验证</p>
+  </header>
+
+  <div class="tldr">
+    <!-- 填写: 3~5 句：它干嘛 + 赛道是什么 + 早期度判断 + 1 个可借鉴 idea / whitespace -->
+    <b>一句话</b> — {{TLDR}}
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#market">① 赛道地图 + 早期度</a>
+    <a href="#matrix">② 竞品对照矩阵</a>
+    <a href="#map">③ 定位图</a>
+    <a href="#funding">④ 融资 timeline</a>
+    <a href="#snapshot">⑤ 公司速览</a>
+    <a href="#idea">⑥ 创业 idea 借鉴</a>
+    <a href="#take">⑦ 现实判断</a>
+    <a href="#src">出处</a>
+  </nav>
+
+  <!-- ① 赛道与早期度 -->
+  <section id="market">
+    <h2><span class="n">①</span>赛道地图 + 早期度判断</h2>
+    <p><!-- 填写: 它属于哪个 category；这个赛道在解决什么需求 --></p>
+    <h3>玩家分群（四象限别漏）</h3>
+    <ul>
+      <li><strong>现有巨头：</strong><!-- 填写 --></li>
+      <li><strong>垂直创业公司：</strong><!-- 填写 --></li>
+      <li><strong>大厂顺手做：</strong><!-- 填写 --></li>
+      <li><strong>开源 / 免费替代：</strong><!-- 填写（最易被忽视的威胁） --></li>
+    </ul>
+    <div class="callout insight">
+      <span class="label">早期度判断</span>
+      <!-- 填写: 选一个并说理由 -->
+      <span class="verdict v-emerging">{{EARLINESS}}</span>
+      （nascent 萌芽 / emerging 新兴 / crowded 拥挤 / mature 成熟）<br><br>
+      <strong>判断信号：</strong><!-- 填写: 玩家数与新增速度 · 融资热度/轮次分布 · 巨头是否进场 · 开源/免费替代是否存在 · 客户认知是否成型 · 是否有公认 benchmark/标准 -->
+    </div>
+  </section>
+
+  <!-- ② 竞品矩阵 -->
+  <section id="matrix">
+    <h2><span class="n">②</span>竞品对照矩阵</h2>
+    <p><!-- 填写: 一句话说明选了哪几个对比维度、为什么对这个赛道决定性。每格尽量带来源等级。 --></p>
+    <table>
+      <thead><tr>
+        <th>玩家</th>
+        <th><!-- 维度1 --></th><th><!-- 维度2 --></th><th><!-- 维度3 --></th>
+        <th><!-- 维度4 --></th><th><!-- 维度5 --></th>
+      </tr></thead>
+      <tbody>
+        <tr><td><strong>{{COMPANY}}（本篇）</strong></td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+        <tr><td>竞品 A</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+        <tr><td>竞品 B</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+        <!-- 按需加行；闭源未披露的格子标「闭源未披露」而非留空 -->
+      </tbody>
+    </table>
+    <p><!-- 填写: 读矩阵——谁强在哪、目标公司差异化在哪、同质化严重吗 --></p>
+  </section>
+
+  <!-- ③ 定位图 -->
+  <section id="map">
+    <h2><span class="n">③</span>定位图（whitespace 在哪）</h2>
+    <figure>
+      <div class="svgwrap">
+      <!-- 填写: 内联 SVG 2 轴象限图，把玩家投到两个最有区分度的轴上；标出没人占的 whitespace 空位。
+           轴从预设里选：开源↔闭源 / 通用↔垂直 / 自建↔集成 / 低价↔高端 / 工具↔平台 等。 -->
+      <svg viewBox="0 0 640 380" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12">
+        <line x1="40" y1="190" x2="600" y2="190" stroke="#b9c2e0" stroke-width="1.5"/>
+        <line x1="320" y1="20" x2="320" y2="360" stroke="#b9c2e0" stroke-width="1.5"/>
+        <text x="600" y="206" text-anchor="end" fill="#5a627a"><!-- X 右轴标签 --></text>
+        <text x="40" y="206" fill="#5a627a"><!-- X 左轴标签 --></text>
+        <text x="326" y="28" fill="#5a627a"><!-- Y 上轴标签 --></text>
+        <text x="326" y="356" fill="#5a627a"><!-- Y 下轴标签 --></text>
+        <!-- 各玩家用 <circle>+<text> 摆位；目标公司用强调色 -->
+      </svg>
+      </div>
+      <figcaption>定位图（本调研重绘）。<!-- 一句话点出 whitespace --></figcaption>
+    </figure>
+  </section>
+
+  <!-- ④ 融资 timeline -->
+  <section id="funding">
+    <h2><span class="n">④</span>融资 timeline</h2>
+    <figure>
+      <div class="svgwrap">
+      <!-- 填写: 内联 SVG 横向时间线，逐轮标节点（成立/种子/A/B...）。早期公司可能只有一两个节点。 -->
+      <svg viewBox="0 0 720 150" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12.5">
+        <line x1="60" y1="62" x2="660" y2="62" stroke="#b9c2e0" stroke-width="2"/>
+        <!-- 节点：<circle>+日期+轮次金额+投资方 -->
+      </svg>
+      </div>
+      <figcaption>{{COMPANY}} 融资时间线（据公开报道整理）。</figcaption>
+    </figure>
+    <table>
+      <thead><tr><th>时间</th><th>事件 / 轮次</th><th>金额</th><th>投资方</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr><td>—</td><td>—</td><td>—</td><td>—</td><td><span class="src src-b">🟡</span></td></tr>
+      </tbody>
+    </table>
+    <p><!-- 填写: 用融资节奏佐证阶段判断；可附一句「赛道整体融资热度」 --></p>
+  </section>
+
+  <!-- ⑤ 公司速览 -->
+  <section id="snapshot">
+    <h2><span class="n">⑤</span>公司速览</h2>
+    <table>
+      <tbody>
+        <tr><td>是什么 / 定位</td><td><!-- 填写 --></td></tr>
+        <tr><td>产品</td><td><!-- 填写: 产品名 + 一句话 --></td></tr>
+        <tr><td>团队</td><td><!-- 填写: 创始人背景（深科技注明 research 血统） --></td></tr>
+        <tr><td>商业模式</td><td><!-- 填写: 怎么赚钱 / 客户 --></td></tr>
+        <tr><td>状态</td><td><!-- 填写: stealth / 种子 / 已上市 / 规模 --></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ⑥ 创业 idea 借鉴 -->
+  <section id="idea">
+    <h2><span class="n">⑥</span>创业 idea 借鉴</h2>
+    <div class="callout insight">
+      <span class="label">Whitespace / 机会</span>
+      <!-- 填写: 矩阵里没人占的格子、被忽视的客户细分或场景 -->
+    </div>
+    <h3>现有玩家共同短板（unmet needs）</h3>
+    <p><!-- 填写: 从缺失功能、差评、价格痛点找 --></p>
+    <h3>Why now（为什么现在值得做）</h3>
+    <p><!-- 填写: 技术拐点 / 成本下降 / 政策 / 新需求 --></p>
+    <h3>可借鉴的打法 + 相邻机会</h3>
+    <ul>
+      <li><strong>borrowable：</strong><!-- 目标公司哪些切入点/打法可迁移 --></li>
+      <li><strong>adjacent：</strong><!-- 相邻赛道 / 上下游 / 垂直化 / 换商业模式的衍生 idea --></li>
+    </ul>
+    <div class="callout warn">
+      <span class="label">风险（诚实给）</span>
+      <!-- 填写: 拥挤度 / 巨头碾压 / 开源免费 / 监管 / 资本密集等 -->
+    </div>
+  </section>
+
+  <!-- ⑦ 现实判断 -->
+  <section id="take">
+    <h2><span class="n">⑦</span>现实判断</h2>
+    <p><!-- 填写: 目标公司在格局里的胜算与软肋；早期度对「能不能挤进去」意味着什么 --></p>
+    <div class="callout warn">
+      <span class="label">使用提醒</span>
+      本页为对话式调研，信息主要来自公开来源并按等级标注；融资数额、客户、能力声明等以官方一手为准，
+      <strong>产品能力未必经独立验证</strong>，引用前请核对最新信息。
+    </div>
+  </section>
+
+  <!-- 出处 -->
+  <section id="src">
+    <h2>出处</h2>
+    <ul style="font-size:13.5px">
+      <li><a href="{{HOMEPAGE}}" target="_blank" rel="noopener">官网</a></li>
+      <!-- 填写: 融资报道 / 竞品来源 / 团队背景 / 行业 landscape 等，按🟢🟡🔴注明 -->
+    </ul>
+  </section>
+
+  <footer class="foot">
+    公司竞争格局 / 赛道早期度调研笔记，仅作梳理；信息按来源分级、产品能力未必经独立验证，以官方一手信息为准 · 整理日期 {{DATE}}
+  </footer>
+
+</article>
+</body>
+</html>
