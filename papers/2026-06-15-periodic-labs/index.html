@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Periodic Labs · 竞争格局与赛道早期度调研</title>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --bad:#ff6b81; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --bad:#d23651; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;}
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:920px; margin:0 auto; padding:18px 22px 90px}
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:25px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)} .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap; line-height:2}
+  nav.toc a:hover{color:var(--accent)}
+  section{margin:38px 0}
+  h2{font-size:20px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:16.5px; margin:22px 0 8px}
+  p{margin:12px 0} ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)} strong{color:var(--text)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.88em}
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:13px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:9px 10px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  figure{margin:24px 0; text-align:center}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+  .svgwrap{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 8px}
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+  .src{font-size:10.5px; padding:0 6px; border-radius:999px; white-space:nowrap; vertical-align:middle}
+  .src-a{background:rgba(67,197,158,.18); color:var(--ok)}
+  .src-b{background:rgba(255,180,84,.18); color:var(--warn)}
+  .src-c{background:rgba(255,107,129,.18); color:var(--bad)}
+  .legend{font-size:12px; color:var(--muted); margin:6px 0 0}
+  .verdict{display:inline-block; font-weight:700; padding:3px 12px; border-radius:999px; font-size:14px}
+  .v-nascent{background:rgba(122,162,255,.18); color:var(--accent)}
+  .v-emerging{background:rgba(67,197,158,.18); color:var(--ok)}
+  .v-crowded{background:rgba(255,180,84,.18); color:var(--warn)}
+  .v-mature{background:rgba(255,107,129,.18); color:var(--bad)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">AI4S</span>
+      <span class="chip">材料发现</span>
+      <span class="chip">自主实验室</span>
+      <span class="chip">竞争格局</span>
+      <span class="chip">赛道早期度</span>
+      <span class="chip">创业 idea</span>
+    </div>
+    <h1>Periodic Labs：竞争格局与赛道早期度调研</h1>
+    <p class="orig-title">periodic.com — AI scientist + 自主物理/材料实验室 / 赛道有多早 / 有什么 idea 可借鉴</p>
+    <dl class="meta-grid">
+      <dt>对象</dt><dd><a href="https://periodic.com" target="_blank" rel="noopener">https://periodic.com</a></dd>
+      <dt>赛道</dt><dd>AI for Science（AI4S）— 自主实验室驱动的物理 / 材料发现</dd>
+      <dt>整理</dt><dd>对话调研笔记；信息来自公开检索，按来源分级标注，产品能力未必经独立验证</dd>
+      <dt>日期</dt><dd>2026-06-15</dd>
+    </dl>
+    <p class="legend">来源等级：<span class="src src-a">🟢 一手</span> 官网/SEC/官方 ·
+      <span class="src src-b">🟡 二手</span> 媒体/数据库 ·
+      <span class="src src-c">🔴 自述/未证实</span> 营销口径或未独立验证</p>
+  </header>
+
+  <div class="tldr">
+    <b>一句话</b> — Periodic Labs 由 <strong>Liam Fedus</strong>（ex-OpenAI，ChatGPT 共创、post-training 负责人）与 <strong>Ekin Dogus Cubuk</strong>（ex-Google DeepMind，GNoME 主导者）创立，目标是把「AI scientist + 机器人自主实验室」做成一个闭环：让模型读文献、跑量子模拟、在真实粉末合成实验室里动手做实验、再用结果（含负样本）反哺训练——切口是<strong>高温超导、磁体、芯片散热材料</strong>。2025 年 9 月出 stealth，<strong>a16z 领投 $300M「种子」轮</strong>（Bezos、Schmidt、Jeff Dean、NVentures 等跟投），2026 年 3 月传约 <strong>$70 亿估值</strong>再融资 <span class="src src-b">🟡</span>。赛道判断：<strong>emerging（新兴）偏 crowded</strong>——一年内 Periodic、Lila、CuspAI、Radical AI 等扎堆巨额融资，巨头（Google/Microsoft）已在算法层进场，但「真正闭环跑通、产出可商业化突破配方」尚无一家被验证。可借鉴 idea：<strong>商业模式上把「卖软件 SaaS」升级成「IP（里程碑 / royalty / JV）+ 突破性配方 / 专利」，用自主实验室生成的专有实验数据（尤其负样本）建数据 moat</strong>。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#market">① 赛道地图 + 早期度</a>
+    <a href="#matrix">② 竞品对照矩阵</a>
+    <a href="#map">③ 定位图</a>
+    <a href="#funding">④ 融资 timeline</a>
+    <a href="#snapshot">⑤ 公司速览</a>
+    <a href="#idea">⑥ 创业 idea 借鉴</a>
+    <a href="#take">⑦ 现实判断</a>
+    <a href="#src">出处</a>
+  </nav>
+
+  <!-- ① 赛道与早期度 -->
+  <section id="market">
+    <h2><span class="n">①</span>赛道地图 + 早期度判断</h2>
+    <p>Periodic Labs 属于 <strong>AI for Science（AI4S）</strong> 中最「重」的一支：<strong>自主实验室（self-driving / autonomous lab）驱动的物理 / 材料发现</strong>。这个赛道要解决的核心需求是——传统材料 R&D 一个新配方从想法到验证常以「年」计，且实验数据稀缺、零散、不公开；这群公司想用「<strong>AI 出假设 → 量子模拟筛选 → 机器人自主合成与表征 → 实验结果反哺模型</strong>」的闭环，把发现周期从「十年」压到「月」，同时生成别人没有的专有实验数据 <span class="src src-a">🟢 官网</span> <span class="src src-b">🟡 a16z/TechCrunch</span>。</p>
+    <p>它和「纯算法 AI4S」（只做预测模型、不碰真实实验台）是两条不同的路：Periodic 这类强调 <strong>「bits → atoms」</strong>，把真实世界当成 RL 的 environment，认为没有真实实验反馈，模型就会困在「文本/模拟」的天花板里 <span class="src src-b">🟡 a16z</span>。</p>
+    <h3>玩家分群（四象限别漏）</h3>
+    <ul>
+      <li><strong>现有巨头（算法层已进场）：</strong>Google DeepMind（GNoME，220 万晶体结构、38 万热力学稳定相）、Microsoft（MatterGen 扩散生成 + MatterSim 验证）。它们目前更偏「开放模型 / 论文 / 数据集」，未自建商业自主实验室与 Periodic 直接卡位，但随时可下沉。<span class="src src-b">🟡</span></li>
+      <li><strong>垂直创业公司（直接竞品）：</strong><strong>Lila Sciences</strong>（Flagship 孵化，"scientific superintelligence"，生命+化学+材料，累计融资约 $550M）、<strong>CuspAI</strong>（Cambridge，Max Welling + Chad Edwards，材料「搜索引擎」，偏碳捕集/水处理，Series A $100M）、<strong>Radical AI</strong>（NYC，合金自主实验室，Seed+/A 累计 $115M 上下）、<strong>Orbital Materials</strong>（伦敦/NJ，绿色材料/碳捕集，LINUS 模型，Amazon 合作）。<span class="src src-b">🟡</span></li>
+      <li><strong>大厂顺手做 / 国家实验室：</strong>Berkeley Lab 的 <strong>A-Lab</strong>（2023 起，17 天自主合成 41/58 个目标化合物）+ Materials Project 开放数据库——学术界的「公共自主实验室」，是免费且权威的对照基线。<span class="src src-b">🟡</span></li>
+      <li><strong>开源 / 免费替代（最易被忽视）：</strong>GNoME 数据集、MatterGen 权重、Materials Project / OQMD 等公开材料数据库、A-Lab 论文方法——「预测 + 候选筛选」这层正被开源迅速商品化，护城河只能往「<strong>真实实验数据 + 可商业化的具体配方/专利</strong>」退。<span class="src src-b">🟡</span></li>
+    </ul>
+    <div class="callout insight">
+      <span class="label">早期度判断</span>
+      <span class="verdict v-emerging">emerging（新兴，偏 crowded 边缘）</span>
+      （nascent 萌芽 / emerging 新兴 / crowded 拥挤 / mature 成熟）<br><br>
+      <strong>判断信号：</strong>
+      ① <strong>玩家数与新增速度</strong>——「自主实验室 + 生成式材料」一年内涌出 Periodic / Lila / CuspAI / Radical AI 等至少 4–5 家有规模融资的新公司，密度明显升高；
+      ② <strong>融资热度</strong>——单笔从 $30M 跳到 $100M–$300M，Periodic 的「$300M 种子 + 半年后传 $7B 估值」是典型泡沫级信号；
+      ③ <strong>巨头是否进场</strong>——Google/Microsoft 已在算法层（GNoME / MatterGen）站稳，尚未自建商业实验室，属「悬顶」状态；
+      ④ <strong>开源/免费替代</strong>——预测层（GNoME 数据、MatterGen 权重、Materials Project、A-Lab 方法）已被开源大幅商品化；
+      ⑤ <strong>客户认知与 benchmark</strong>——尚<strong>无公认成功案例</strong>（没有任何一家被独立证明产出了「商业化的突破配方」），客户认知未成型、无统一 benchmark。
+      <br><br>综合：<strong>资本与人才已经「拥挤」，但成果与商业模式仍「萌芽」</strong>——典型的 hype 领先于 traction 的新兴赛道。
+    </div>
+  </section>
+
+  <!-- ② 竞品矩阵 -->
+  <section id="matrix">
+    <h2><span class="n">②</span>竞品对照矩阵</h2>
+    <p>选了对这个赛道最具决定性的 6 个维度：<strong>是否自建真实实验室（闭环深度）、技术路线、目标领域、商业模式、融资规模、开源/数据壁垒</strong>。其中「是否真有机器人实验台」最能区分「真闭环」与「纯算法包装」；「商业模式」最能区分「卖软件」与「赌 IP/配方」。数字口径不一，已尽量标时间与来源。</p>
+    <table>
+      <thead><tr>
+        <th>玩家</th>
+        <th>自建实验室 / 闭环</th>
+        <th>技术路线</th>
+        <th>目标领域</th>
+        <th>商业模式</th>
+        <th>融资（累计 / 估值）</th>
+        <th>开源 / 数据壁垒</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Periodic Labs（本篇）</strong></td>
+          <td>✅ 自建粉末合成机器人实验室；机器人「尚未完全跑起来」<span class="src src-b">🟡</span></td>
+          <td>AI scientist：LLM+量子模拟+机器人合成，真实世界当 RL env <span class="src src-b">🟡</span></td>
+          <td>超导体 / 磁体 / 芯片散热 / 半导体（含 space、defense）<span class="src src-a">🟢</span></td>
+          <td>偏 IP+突破配方/专利 + 产业合作；长期或走 licensing <span class="src src-b">🟡</span> <span class="src src-c">🔴</span></td>
+          <td>$300M 种子（2025-09）；传 ~$7B 估值（2026-03）<span class="src src-b">🟡</span></td>
+          <td>闭源；押专有实验数据（含负样本）moat <span class="src src-c">🔴</span></td>
+        </tr>
+        <tr>
+          <td>Lila Sciences</td>
+          <td>✅ 自主「AI science factories」实验室 <span class="src src-c">🔴</span></td>
+          <td>"scientific superintelligence" 通用科学 agent <span class="src src-c">🔴</span></td>
+          <td>生命科学 + 化学 + 材料（横跨）<span class="src src-b">🟡</span></td>
+          <td>平台 / 与产业合作（披露少）<span class="src src-b">🟡</span></td>
+          <td>累计 ~$550M；估值 &gt;$1.3B（2025-10）<span class="src src-b">🟡</span></td>
+          <td>闭源 <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>CuspAI</td>
+          <td>部分（自有实验 + 公开数据/模拟）<span class="src src-b">🟡</span></td>
+          <td>生成式基础模型 + 材料「搜索引擎」（按属性反向出候选）<span class="src src-c">🔴</span></td>
+          <td>碳捕集 / 水处理 / PFAS / 工业化学 <span class="src src-b">🟡</span></td>
+          <td>面向产业客户的设计平台（Meta/Hyundai/Kemira 合作）<span class="src src-b">🟡</span></td>
+          <td>$130M（种子 $30M + A $100M，2025-09，~$520M 估值）<span class="src src-b">🟡</span></td>
+          <td>闭源 <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Radical AI</td>
+          <td>✅ NYC 自主合金实验室（号称 ~100 实验/天）<span class="src src-c">🔴</span></td>
+          <td>预测引擎筛十亿级组分 → 合成表征 → 闭环 <span class="src src-c">🔴</span></td>
+          <td>合金 / 材料（含国防、能源）<span class="src src-b">🟡</span></td>
+          <td>平台 + 国防/产业合作（RTX 领投）<span class="src src-b">🟡</span></td>
+          <td>~$115M（Seed+ $55M 2025-07 + 传 A $60M）<span class="src src-b">🟡</span></td>
+          <td>闭源 <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Orbital Materials</td>
+          <td>✅ 自有实验室 + LINUS 模型 <span class="src src-b">🟡</span></td>
+          <td>生成式预测材料属性，从公开数据+模拟+实验训练 <span class="src src-b">🟡</span></td>
+          <td>绿色材料 / 碳捕集吸附剂 / 数据中心降温 <span class="src src-b">🟡</span></td>
+          <td>自研材料 + 产业试点（Amazon 碳移除试点）<span class="src src-b">🟡</span></td>
+          <td>~$21M A 起（2024）+ $50M B（2026-05，已更名 Orbital Industries）<span class="src src-b">🟡</span></td>
+          <td>闭源；与 NVentures 合作 <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Google DeepMind — GNoME</td>
+          <td>❌ 纯算法（合成交给外部 A-Lab）<span class="src src-b">🟡</span></td>
+          <td>GNN 大规模筛选 → 预测稳定晶体 <span class="src src-b">🟡</span></td>
+          <td>无机晶体材料（通用）<span class="src src-b">🟡</span></td>
+          <td>研究项目（非商业产品）<span class="src src-b">🟡</span></td>
+          <td>巨头内部，无独立融资</td>
+          <td><strong>开放数据集</strong>（38 万稳定结构）<span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Microsoft — MatterGen</td>
+          <td>❌ 纯算法（MatterSim 计算验证）<span class="src src-b">🟡</span></td>
+          <td>扩散生成模型，按目标属性生成晶格 <span class="src src-b">🟡</span></td>
+          <td>无机材料（磁/电子等极端属性）<span class="src src-b">🟡</span></td>
+          <td>研究 + Azure 生态绑定 <span class="src src-b">🟡</span></td>
+          <td>巨头内部</td>
+          <td><strong>权重/工具开放</strong> <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Berkeley A-Lab + Materials Project</td>
+          <td>✅ 公共自主实验室（17 天合成 41/58）<span class="src src-b">🟡</span></td>
+          <td>主动学习 + 机器人合成，对接 MP 数据库 <span class="src src-b">🟡</span></td>
+          <td>无机化合物（学术）<span class="src src-b">🟡</span></td>
+          <td>国家实验室 / 非商业 <span class="src src-b">🟡</span></td>
+          <td>政府/学术经费</td>
+          <td><strong>开源 + 公开数据库</strong>（免费基线）<span class="src src-b">🟡</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>读矩阵：</strong>横向看，绝大多数玩家都讲同一个故事（AI 出候选 + 自主实验闭环 + 专有数据 moat），<strong>同质化已经相当明显</strong>。真正的差异在三处——(1) <strong>领域选择</strong>：Periodic 选了「超导/散热」这种「赢一把就改变世界、但极难」的硬科学；CuspAI/Orbital 选「碳捕集/降温」这种「更接近产业付费、技术风险更低」的方向；Lila 横跨生命+材料更像「全平台」。(2) <strong>闭环是否真跑通</strong>：多数公司都说有自主实验室，但 Periodic 自己承认机器人「还没完全跑起来」，A-Lab 反而是<strong>唯一公开发表过完整自主合成结果</strong>的——这暴露出「故事 ≫ 已验证 traction」。(3) <strong>商业模式</strong>：Periodic 最激进地押「IP/突破配方」，多数对手仍是「平台/产业合作」更稳的卖法。Periodic 的差异化是<strong>团队血统（ChatGPT + GNoME + Operator + MatterGen 作者都在）+ 最大弹药 + 最硬的赌注</strong>，但也是风险最集中的一注。</p>
+  </section>
+
+  <!-- ③ 定位图 -->
+  <section id="map">
+    <h2><span class="n">③</span>定位图（whitespace 在哪）</h2>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 640 400" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12">
+        <!-- 轴 -->
+        <line x1="40" y1="200" x2="600" y2="200" stroke="#b9c2e0" stroke-width="1.5"/>
+        <line x1="320" y1="24" x2="320" y2="372" stroke="#b9c2e0" stroke-width="1.5"/>
+        <!-- 轴标签 -->
+        <text x="598" y="218" text-anchor="end" fill="#5a627a">商业模式：押 IP / 突破配方 / 专利 →</text>
+        <text x="42" y="218" fill="#5a627a">← 卖软件 / 平台 / 设计服务</text>
+        <text x="326" y="34" fill="#5a627a">↑ 真实自建实验室（重 · 闭环深）</text>
+        <text x="326" y="366" fill="#5a627a">↓ 纯算法 / 预测（轻）</text>
+        <!-- whitespace 区块 -->
+        <rect x="44" y="40" width="252" height="120" fill="rgba(122,162,255,0.10)" stroke="rgba(122,162,255,0.5)" stroke-dasharray="5 4" rx="8"/>
+        <text x="56" y="60" fill="#7aa2ff" font-size="11.5">whitespace：自主实验室 as-a-service</text>
+        <text x="56" y="76" fill="#7aa2ff" font-size="11.5">（重资产闭环但平台化卖，不赌单一 IP）</text>
+        <!-- 玩家点 -->
+        <circle cx="470" cy="78" r="8" fill="#7aa2ff"/>
+        <text x="482" y="82" fill="#1a1f33" font-weight="700">Periodic Labs</text>
+        <circle cx="378" cy="100" r="6.5" fill="#9b8cff"/>
+        <text x="390" y="104" fill="#5a627a">Lila</text>
+        <circle cx="300" cy="120" r="6.5" fill="#9b8cff"/>
+        <text x="206" y="124" fill="#5a627a">Radical AI</text>
+        <circle cx="430" cy="252" r="6.5" fill="#9b8cff"/>
+        <text x="442" y="256" fill="#5a627a">CuspAI</text>
+        <circle cx="418" cy="165" r="6.5" fill="#9b8cff"/>
+        <text x="430" y="169" fill="#5a627a">Orbital</text>
+        <circle cx="152" cy="92" r="6.5" fill="#43c59e"/>
+        <text x="164" y="96" fill="#5a627a">A-Lab（开放）</text>
+        <circle cx="140" cy="300" r="6.5" fill="#43c59e"/>
+        <text x="152" y="304" fill="#5a627a">GNoME（开源）</text>
+        <circle cx="205" cy="330" r="6.5" fill="#43c59e"/>
+        <text x="217" y="334" fill="#5a627a">MatterGen（开放）</text>
+      </svg>
+      </div>
+      <figcaption>定位图（本调研重绘）。两轴：X=商业模式（卖软件/平台 ↔ 押 IP/突破配方），Y=闭环深度（纯算法 ↔ 自建真实实验室）。Periodic 独占「右上」最重、最赌 IP 的角；而<strong>「重实验室但平台化、不赌单一 IP」的左上格相对空</strong>（A-Lab 占着但非商业）——这是潜在 whitespace。</figcaption>
+    </figure>
+  </section>
+
+  <!-- ④ 融资 timeline -->
+  <section id="funding">
+    <h2><span class="n">④</span>融资 timeline</h2>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 720 170" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12.5">
+        <line x1="70" y1="80" x2="650" y2="80" stroke="#b9c2e0" stroke-width="2"/>
+        <circle cx="130" cy="80" r="7" fill="#9b8cff"/>
+        <text x="130" y="50" text-anchor="middle" fill="#5a627a">~2025-03</text>
+        <text x="130" y="108" text-anchor="middle" fill="#1a1f33" font-weight="600">创立 / stealth</text>
+        <text x="130" y="124" text-anchor="middle" fill="#5a627a" font-size="11">Fedus 离开 OpenAI</text>
+        <circle cx="390" cy="80" r="9" fill="#7aa2ff"/>
+        <text x="390" y="50" text-anchor="middle" fill="#5a627a">2025-09 / 10</text>
+        <text x="390" y="108" text-anchor="middle" fill="#1a1f33" font-weight="700">$300M「种子」轮</text>
+        <text x="390" y="124" text-anchor="middle" fill="#5a627a" font-size="11">a16z 领投 · Bezos/Schmidt/Dean 跟投</text>
+        <circle cx="610" cy="80" r="8" fill="#43c59e"/>
+        <text x="610" y="50" text-anchor="middle" fill="#5a627a">2026-03</text>
+        <text x="610" y="108" text-anchor="middle" fill="#1a1f33" font-weight="600">传新融资</text>
+        <text x="610" y="124" text-anchor="middle" fill="#5a627a" font-size="11">~$7B 估值谈判中</text>
+      </svg>
+      </div>
+      <figcaption>Periodic Labs 融资时间线（据公开报道整理；🟡 二手为主）。</figcaption>
+    </figure>
+    <table>
+      <thead><tr><th>时间</th><th>事件 / 轮次</th><th>金额</th><th>投资方</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr><td>~2025-03</td><td>创立 / stealth（Fedus 离开 OpenAI）</td><td>—</td><td>—</td><td><span class="src src-b">🟡</span> TechCrunch</td></tr>
+        <tr><td>2025-09（10 月公开）</td><td>出 stealth + 「种子」轮</td><td><strong>$300M</strong></td><td><strong>a16z 领投</strong>；Felicis（首张支票，Peter Deng）、DST、NVentures（NVIDIA）、Accel；天使：Jeff Bezos、Eric Schmidt、Jeff Dean、Elad Gil</td><td><span class="src src-b">🟡</span> a16z / TechCrunch / SiliconANGLE</td></tr>
+        <tr><td>2026-03</td><td>新一轮融资谈判（报道）</td><td>数亿（未定）</td><td>未披露</td><td><span class="src src-b">🟡</span> Bloomberg / PitchBook（~$7B 估值）</td></tr>
+      </tbody>
+    </table>
+    <p><strong>融资节奏佐证阶段：</strong>「$300M 种子 + 半年后传 7B 估值」远超正常种子轮节奏，是<strong>团队溢价 + 赛道 hype</strong>共同推高的结果，而非 traction 兑现——典型「emerging 赛道里被资本提前定价的明星项目」。赛道整体看，过去一两年「AI 造新材料」类公司合计融资已超 <strong>$13 亿</strong> <span class="src src-b">🟡 PitchBook</span>，Lila（~$550M）、CuspAI（$130M）、Radical AI（~$115M）都在密集加注，资本热度处于高位。</p>
+  </section>
+
+  <!-- ⑤ 公司速览 -->
+  <section id="snapshot">
+    <h2><span class="n">⑤</span>公司速览</h2>
+    <table>
+      <tbody>
+        <tr><td>是什么 / 定位</td><td>构建「AI scientist + 机器人自主实验室」的物理/材料发现公司；口号「from bits to atoms」，把真实世界实验当成 AI 的反馈环 <span class="src src-a">🟢 官网</span></td></tr>
+        <tr><td>产品</td><td>三件套闭环：AI 模拟/LLM 出候选 → 机器人粉末合成与表征 → 实验结果（含负样本）反哺训练；当前已产出实验数据与模拟，机器人系统「还在训练、未完全跑起来」 <span class="src src-b">🟡 TechCrunch</span></td></tr>
+        <tr><td>团队</td><td>共同创始人 <strong>Liam Fedus</strong>（ex-OpenAI，ChatGPT 共创、post-training 负责人）+ <strong>Ekin Dogus Cubuk</strong>（ex-Google DeepMind，GNoME 主导）；招募 Alexandre Passos（o1/o3）、Eric Toberer（材料学家）、Matt Horton（MatterGen 作者）等；两打多名 AI/物理/材料专家；顾问含 Stanford/Northwestern 教授 <span class="src src-a">🟢 官网</span> <span class="src src-b">🟡 媒体</span></td></tr>
+        <tr><td>商业模式</td><td><strong>核心赌注 = IP/突破配方/专利</strong>（若做出室温/高温超导或散热材料，专利价值远超软件收入，是支撑高估值的「blue sky」）；过渡期与 space/defense/半导体客户做实验数据分析与产业合作；并设学术 grant 计划 <span class="src src-b">🟡 a16z</span> <span class="src src-c">🔴 自述</span></td></tr>
+        <tr><td>状态</td><td>2025-09 出 stealth；「种子」$300M（a16z 领投）；2026-03 传按 ~$7B 估值再融资；闭环尚未被独立验证产出商业化突破 <span class="src src-b">🟡</span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ⑥ 创业 idea 借鉴 -->
+  <section id="idea">
+    <h2><span class="n">⑥</span>创业 idea 借鉴</h2>
+    <div class="callout insight">
+      <span class="label">Whitespace / 机会</span>
+      定位图右上「重实验室 + 押 IP」已被 Periodic 重金占住、风险也最高；相对空的格子是：<strong>(a) 自主实验室 as-a-service / 数据 as-a-service</strong>——把昂贵的「机器人合成+表征」做成给材料公司、学术界、其他 AI4S 创业者按次/订阅调用的<strong>共享实验设施</strong>（A-Lab 证明可行但非商业），卖「闭环能力」而非赌单一配方，现金流更稳、不押在一次发现上；<strong>(b) 负样本数据市场</strong>——这些公司都在囤「失败实验」当 moat，但<strong>跨主体的负样本/失败配方交易/联营数据池</strong>无人做；<strong>(c) 垂直纵深</strong>——绕开「超导」这种全行业争抢的圣杯，专攻一个有明确产业付费方的细分（如电池电解质、热界面材料、催化剂、PFAS 替代），用更小弹药打更近的钱。
+    </div>
+    <h3>现有玩家共同短板（unmet needs）</h3>
+    <p>① <strong>故事远超已验证 traction</strong>——几乎人人宣称「自主闭环 + 数据 moat」，但能拿出公开完整自主合成结果的反而是非商业的 A-Lab；客户对「谁真能跑通」高度不确定。② <strong>从「发现候选」到「可量产配方」的鸿沟</strong>无人填好——预测层正被开源商品化，真正缺的是「合成可行性、放大、表征标准化」这段脏活。③ <strong>实验数据的标准化与互通缺失</strong>——每家各囤各的，没有通用格式/可信第三方，导致重复造轮子。④ <strong>资本密集 + 长回报周期</strong>——押 IP 的玩法需要超长耐心和持续输血，多数团队没有 Periodic 那种弹药，需要更轻的现金流模式。</p>
+    <h3>Why now（为什么现在值得做）</h3>
+    <p>① <strong>技术拐点</strong>：GNoME / MatterGen 证明生成式模型能大规模产出稳定候选，A-Lab 证明机器人能自主合成验证——「AI 出题 + 机器人答题」第一次同时成立。② <strong>开源把预测层拉到地板价</strong>：Materials Project、GNoME 数据、MatterGen 权重免费可用，创业者不必从零造预测模型，能把资源集中到实验闭环与具体应用。③ <strong>资本与人才信号</strong>：顶级 LLM 人才（Fedus、Passos）集体转向 AI4S，叠加 NVIDIA 等在多家公司跟投，标志「LLM red ocean → 科学 blue ocean」迁移开始。④ <strong>产业拉力</strong>：数据中心散热、碳捕集、国防合金、半导体材料有真实且紧迫的付费需求。</p>
+    <h3>可借鉴的打法 + 相邻机会</h3>
+    <ul>
+      <li><strong>borrowable：</strong>(1) <strong>商业模式升维</strong>——别只卖软件 SaaS，把价值锚定在「IP（里程碑/royalty/JV）+ 突破性配方/专利」，软件只是获取专有数据的手段，这正是 Periodic 把估值撑到 $7B 的逻辑；(2) <strong>真实世界当 RL environment</strong>——用「实验反馈（含负样本）反哺模型」做数据飞轮，是可迁移到任何「能做物理实验」领域的范式；(3) <strong>团队血统即融资杠杆</strong>——深科技赛道，明星 research 背景本身就是最强的早期信号。</li>
+      <li><strong>adjacent：</strong>把同一「AI+自主实验闭环」范式平移到<strong>电池/电解质、催化剂、热界面材料、生物制药小分子、农业化学、特种合金</strong>等有清晰产业买家的垂直；或做<strong>上下游卖铲子</strong>——机器人合成/表征硬件、实验数据标准与中台、模拟算力、负样本数据池，比直接赌配方更稳。</li>
+    </ul>
+    <div class="callout warn">
+      <span class="label">风险（诚实给）</span>
+      ① <strong>科学风险极高</strong>：室温/高温超导是几十年未破的难题，「押 IP」可能多年颗粒无收；② <strong>资本碾压</strong>：Periodic 单种子 $300M + 顶配团队，正面硬刚几乎没胜算；③ <strong>巨头悬顶</strong>：Google/Microsoft 随时可把 GNoME/MatterGen 下沉成产品或自建实验室；④ <strong>开源蚕食</strong>：预测层护城河持续被免费方案侵蚀，moat 只能往「真实数据 + 量产配方」退；⑤ <strong>同质化</strong>：人人讲同一个故事，差异化窗口在收窄；⑥ <strong>长周期 + 重资产</strong>：实验室 capex 高、回报慢，轻团队现金流压力大。
+    </div>
+  </section>
+
+  <!-- ⑦ 现实判断 -->
+  <section id="take">
+    <h2><span class="n">⑦</span>现实判断</h2>
+    <p>Periodic Labs 的胜算建立在三件事上：<strong>最强的团队血统、最大的弹药、最硬的赌注</strong>。它把自己放在定位图最贵、最重、风险最集中的「右上角」——如果真做出一个可商业化的超导/散热配方，专利价值足以支撑甚至远超 $7B 估值；但这是个「赢家通吃、否则归零」的赌局，且机器人闭环按其自述<strong>尚未完全跑通</strong>，目前能独立核实的只有「顶配团队 + 明确方向 + 巨额资金」，<strong>产品实效与商业突破均未验证</strong>。对想进场的创业者：正面硬刚 Periodic 不现实，更可行的是避开「超导圣杯」，去做<strong>「重实验室但平台化/数据化、不赌单一 IP」</strong>，或<strong>纵深一个有明确付费方的垂直材料</strong>，用更轻的现金流模型熬过这个资本领先于成果的 emerging 阶段。整个赛道当前的核心矛盾是：<strong>资本与人才已经拥挤，但成果与商业模式仍在萌芽</strong>——这既是泡沫风险，也是「真正跑通闭环者将极度稀缺」的机会窗口。</p>
+    <div class="callout warn">
+      <span class="label">使用提醒</span>
+      本页为对话式调研，信息主要来自公开来源并按等级标注；融资数额、客户、能力声明等以官方一手为准，
+      <strong>产品能力未必经独立验证</strong>（尤其各家「自主闭环」「数据 moat」多为自述 🔴），引用前请核对最新信息。
+    </div>
+  </section>
+
+  <!-- 出处 -->
+  <section id="src">
+    <h2>出处</h2>
+    <ul style="font-size:13.5px">
+      <li><a href="https://periodic.com" target="_blank" rel="noopener">Periodic Labs 官网</a> <span class="src src-a">🟢</span></li>
+      <li><a href="https://a16z.com/announcement/investing-in-periodic-labs/" target="_blank" rel="noopener">a16z — Investing in Periodic Labs</a>（创始人角色、产品、商业模式、领投）<span class="src src-b">🟡</span></li>
+      <li><a href="https://techcrunch.com/2025/10/20/top-openai-google-brain-researchers-set-off-a-300m-vc-frenzy-for-their-startup-periodic-labs/" target="_blank" rel="noopener">TechCrunch — $300M VC frenzy / 关键招募 / stealth 时间线</a> <span class="src src-b">🟡</span></li>
+      <li><a href="https://techcrunch.com/2025/09/30/former-openai-and-deepmind-researchers-raise-whopping-300m-seed-to-automate-science/" target="_blank" rel="noopener">TechCrunch — $300M 种子轮报道</a> <span class="src src-b">🟡</span></li>
+      <li><a href="https://www.bloomberg.com/news/articles/2026-03-25/ai-science-startup-periodic-labs-is-in-deal-talks-at-about-7-billion-valuation" target="_blank" rel="noopener">Bloomberg — 约 $7B 估值融资谈判</a> <span class="src src-b">🟡</span></li>
+      <li><a href="https://siliconangle.com/2025/10/01/periodic-labs-raises-300m-accelerate-scientific-research-ai/" target="_blank" rel="noopener">SiliconANGLE — 融资 / 数据 moat / 负样本</a> <span class="src src-b">🟡</span></li>
+      <li><a href="https://sacra.com/c/lila-sciences/" target="_blank" rel="noopener">Sacra / HPCwire — Lila Sciences 融资与定位</a> <span class="src src-b">🟡</span></li>
+      <li><a href="https://techcrunch.com/2024/06/18/cuspai-raises-30m-to-create-a-gen-ai-driven-search-engine-for-new-materials" target="_blank" rel="noopener">TechCrunch / iamsterdam — CuspAI 创始人与 $100M A 轮</a> <span class="src src-b">🟡</span></li>
+      <li><a href="https://www.radical-ai.com/news/series-seed" target="_blank" rel="noopener">Radical AI — $55M Seed+ / 自主合金实验室</a> <span class="src src-b">🟡</span></li>
+      <li><a href="https://techcrunch.com/2024/02/21/this-startup-is-using-ai-to-discover-new-materials/" target="_blank" rel="noopener">TechCrunch / Fortune — Orbital Materials（Godwin / LINUS / Amazon 试点 / $50M B）</a> <span class="src src-b">🟡</span></li>
+      <li><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10700133/" target="_blank" rel="noopener">Nature — A-Lab: 自主合成 41/58 化合物（Berkeley + Materials Project）</a> <span class="src src-b">🟡</span></li>
+      <li><a href="https://pitchbook.com/news/articles/discovering-new-materials-with-ai-has-a-winding-road-to-vc-returns" target="_blank" rel="noopener">PitchBook — 赛道整体融资与 VC 回报路径</a> <span class="src src-b">🟡</span></li>
+    </ul>
+  </section>
+
+  <footer class="foot">
+    公司竞争格局 / 赛道早期度调研笔记，仅作梳理；信息按来源分级、产品能力未必经独立验证，以官方一手信息为准 · 整理日期 2026-06-15
+  </footer>
+
+</article>
+</body>
+</html>
