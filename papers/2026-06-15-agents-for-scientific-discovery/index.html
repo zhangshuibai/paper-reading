@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent 在科学发现里的应用 · 文献综述</title>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;}
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:920px; margin:0 auto; padding:18px 22px 90px}
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:25px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)} .meta-grid dd{margin:0}
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap; line-height:2}
+  nav.toc a:hover{color:var(--accent)}
+  section{margin:38px 0}
+  h2{font-size:20px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:16.5px; margin:22px 0 8px}
+  p{margin:12px 0} ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)} strong{color:var(--text)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.88em}
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:13px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:8px 10px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  figure{margin:24px 0; text-align:center}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+  .svgwrap{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 8px}
+  .tag{font-size:11px;padding:1px 7px;border-radius:999px;white-space:nowrap}
+  .t-dry{background:#dfeaff;color:#234}.t-wet{background:#cdeae6;color:#13433b}.t-bench{background:#f3e2cf;color:#7a4f12}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">AI for Science</span>
+      <span class="chip">Agentic Science</span>
+      <span class="chip">AI Scientist</span>
+      <span class="chip">Self-Driving Lab</span>
+      <span class="chip">文献综述</span>
+    </div>
+    <h1>Agent 在科学发现里的应用：从「AI for Science」到「Agentic Science」</h1>
+    <p class="orig-title">面向科研全流程的 LLM agent 应用版图（端到端研究 / 假设生成 / 化学材料自驱实验室 / 生物医药 / 评测）</p>
+    <dl class="meta-grid">
+      <dt>整理</dt><dd>对话调研综述，非系统性 survey；论文/系统/数字来自公开检索，引用前请回原文核对</dd>
+      <dt>日期</dt><dd>2026-06-15</dd>
+    </dl>
+  </header>
+
+  <div class="tldr">
+    <b>一句话</b> — agent 正把 AI 从「<strong>AI for Science</strong>（当工具：预测、模拟）」推向「<strong>Agentic Science</strong>（当科研主体：自己提假设、设计实验、跑实验、分析、迭代）」。整个科研闭环——<strong>文献综述 → 提想法 → 设计实验 → 执行 → 分析 → 写论文</strong>——每一环都已有代表系统：dry-lab 端到端的 <strong>AI Scientist / Agent Laboratory</strong>、做假设的 <strong>Google AI co-scientist</strong>、连机器人跑湿实验的 <strong>Coscientist / ChemCrow / A-Lab</strong>、生物医药的 <strong>BioDiscoveryAgent / Virtual Biotech</strong>。但「真做出新科学」与「看起来像在做科学」仍有距离：novelty/rigor、可复现性、wet-lab 落地、评测标准都还不成熟。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#map">全景：发现闭环</a>
+    <a href="#e2e">① 端到端研究 agent</a>
+    <a href="#hypo">② 假设生成</a>
+    <a href="#chem">③ 化学/材料 + 自驱实验室</a>
+    <a href="#bio">④ 生物/医药</a>
+    <a href="#bench">⑤ 怎么评测</a>
+    <a href="#take">⑥ 现状与挑战</a>
+    <a href="#src">出处</a>
+  </nav>
+
+  <!-- 全景 -->
+  <section id="map">
+    <h2>全景：科学发现的「闭环」与自主性阶梯</h2>
+    <p>多篇 2025–2026 综述（如《From AI for Science to Agentic Science》arXiv 2508.14111）都把科研抽象成一个<strong>可迭代的闭环</strong>，并按 agent 的<strong>自主程度</strong>分级：从「assistant（人主导、AI 打下手）」→「collaborator（人机协作）」→「autonomous agent（AI 自己跑完闭环）」。下图是这个闭环（也对应「文献→想法→实验→分析→写作」六阶段工作流）：</p>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 720 270" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12.5">
+        <defs><marker id="sd-ah" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#666"/></marker></defs>
+        <g stroke="#666" stroke-width="1.6" fill="none" marker-end="url(#sd-ah)">
+          <path d="M205,52 L300,52"/>
+          <path d="M470,52 L560,52"/>
+          <path d="M620,84 L620,150"/>
+          <path d="M515,182 L420,182"/>
+          <path d="M250,182 L160,182"/>
+          <path d="M100,150 L100,84"/>
+        </g>
+        <g text-anchor="middle">
+          <rect x="40" y="32" width="165" height="42" rx="9" fill="#eef1fb" stroke="#b9c2e0"/>
+          <text x="122" y="50" fill="#1a1f33" font-weight="600">① 文献综述</text>
+          <text x="122" y="66" fill="#5a627a" font-size="11">读文献 / 找 gap</text>
+          <rect x="300" y="32" width="170" height="42" rx="9" fill="#dfeaff" stroke="#7aa2ff"/>
+          <text x="385" y="50" fill="#1a3060" font-weight="600">② 提假设 / 想法</text>
+          <text x="385" y="66" fill="#33518a" font-size="11">hypothesis generation</text>
+          <rect x="560" y="32" width="130" height="42" rx="9" fill="#dfeaff" stroke="#7aa2ff"/>
+          <text x="625" y="50" fill="#1a3060" font-weight="600">③ 设计实验</text>
+          <text x="625" y="66" fill="#33518a" font-size="11">exp. design</text>
+          <rect x="555" y="150" width="140" height="44" rx="9" fill="#cdeae6" stroke="#2c8a7d"/>
+          <text x="625" y="169" fill="#13433b" font-weight="600">④ 执行实验</text>
+          <text x="625" y="185" fill="#13433b" font-size="11">dry / wet-lab 机器人</text>
+          <rect x="420" y="160" width="130" height="42" rx="9" fill="#cdeae6" stroke="#2c8a7d"/>
+          <text x="485" y="178" fill="#13433b" font-weight="600">⑤ 分析结果</text>
+          <text x="485" y="194" fill="#13433b" font-size="11">data analysis</text>
+          <rect x="155" y="160" width="155" height="42" rx="9" fill="#efe9f7" stroke="#9b8cff"/>
+          <text x="232" y="178" fill="#3a2b52" font-weight="600">⑥ 写论文 / 迭代</text>
+          <text x="232" y="194" fill="#3a2b52" font-size="11">writing → 回到①</text>
+          <text x="100" y="120" fill="#888" font-size="11" transform="rotate(-90 100 120)">迭代</text>
+          <text x="360" y="240" fill="#5a627a" font-size="11.5">自主性阶梯：assistant（打下手）→ collaborator（协作）→ autonomous（自己跑完闭环）</text>
+        </g>
+      </svg>
+      </div>
+      <figcaption>科学发现的闭环与六阶段工作流（本综述据多篇 survey 归纳重绘）。</figcaption>
+    </figure>
+    <p>实践里通常把系统分两类：<strong><span class="tag t-dry">dry-lab</span></strong>（纯计算/写作闭环，不碰真实仪器）与 <strong><span class="tag t-wet">wet-lab / self-driving lab</span></strong>（接机器人真做实验）。下面按应用方向展开。</p>
+  </section>
+
+  <!-- ① 端到端 -->
+  <section id="e2e">
+    <h2><span class="n">①</span>端到端「AI Scientist」研究 agent（dry-lab 全流程）</h2>
+    <p>把「提想法 → 写代码做实验 → 分析 → 写成论文」整条流水线自动化，多为多 agent 分工（hypothesis generator / experimenter / analyst / writer），主要在<strong>计算型学科</strong>（ML、数据科学）上跑得动。</p>
+    <table>
+      <thead><tr><th>系统</th><th>干什么 / 亮点</th><th>出处</th></tr></thead>
+      <tbody>
+        <tr><td><strong>The AI Scientist</strong>（Sakana AI）</td><td>全自动从 idea→实验→写出完整 manuscript；<strong>v2 自动生成的 3 篇投 ICLR workshop、1 篇被接收</strong>（里程碑，但 novelty 争议大）</td><td><a href="https://arxiv.org/abs/2408.06292" target="_blank" rel="noopener">2408.06292</a></td></tr>
+        <tr><td><strong>Agent Laboratory</strong></td><td>把 LLM agent 当研究助理，走 literature review → experimentation → report，强调人可在每阶段介入</td><td><a href="https://arxiv.org/abs/2501.04227" target="_blank" rel="noopener">2501.04227</a></td></tr>
+        <tr><td><strong>AutoSOTA / URSA / OmniScientist</strong></td><td>面向「自动刷 SOTA」「通用科研 agent」「人-AI 科学家共演化生态」的更新一代系统</td><td><a href="https://arxiv.org/abs/2604.05550" target="_blank" rel="noopener">2604.05550</a> · <a href="https://arxiv.org/abs/2506.22653" target="_blank" rel="noopener">2506.22653</a> · <a href="https://arxiv.org/abs/2511.16931" target="_blank" rel="noopener">2511.16931</a></td></tr>
+        <tr><td><strong>AI Scientist 类的批判性评测</strong></td><td>有独立评测指出当前「AI Scientist」更接近「看起来像研究」，离 Artificial Research Intelligence 尚远</td><td><a href="https://arxiv.org/abs/2502.14297" target="_blank" rel="noopener">2502.14297</a></td></tr>
+      </tbody>
+    </table>
+    <p class="callout note" style="margin-top:6px"><span class="label">和本库其它解读的联系</span>这条线和库里的 <strong>SIA</strong>（自我改进 agent）、<strong>MAI-Thinking-1</strong>（把研发当系统优化的 hill-climbing machine）同源——都是「让 AI 参与/自动化研发本身」。AI Scientist 也是 SIA 论文引用的相关工作之一。</p>
+  </section>
+
+  <!-- ② 假设生成 -->
+  <section id="hypo">
+    <h2><span class="n">②</span>假设生成与文献发现（hypothesis generation）</h2>
+    <p>不追求全自动跑实验，而是聚焦科研最「值钱」的一步——<strong>提出新颖、可验证的假设</strong>，再交给人类去验证。代表是 Google / DeepMind 的 <strong>AI co-scientist</strong>。</p>
+    <table>
+      <thead><tr><th>系统</th><th>机制 / 亮点</th><th>出处</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Google AI co-scientist</strong></td><td>Gemini 2.0 驱动的<strong>多 agent</strong> 系统：<strong>self-play 式科学辩论</strong>生成假设、<strong>ranking 锦标赛</strong>比较假设、<strong>evolution</strong> 迭代提质；定位「虚拟科研合作者」，已报道在<strong>药物重定位、抗菌素耐药性机制</strong>等生物医学假设上给出可被实验验证的结果</td><td><a href="https://research.google/blog/accelerating-scientific-breakthroughs-with-an-ai-co-scientist/" target="_blank" rel="noopener">Google Research</a> · <a href="https://deepmind.google/blog/co-scientist-a-multi-agent-ai-partner-to-accelerate-research/" target="_blank" rel="noopener">DeepMind</a></td></tr>
+        <tr><td>literature-based discovery / idea agents</td><td>从海量文献里挖「未被连接的知识」生成假设、做 novelty/significance 评估（多见于 AI4Research 综述）</td><td><a href="https://arxiv.org/abs/2507.01903" target="_blank" rel="noopener">2507.01903</a></td></tr>
+      </tbody>
+    </table>
+    <div class="callout insight">
+      <span class="label">方法论可迁移点</span>
+      AI co-scientist 的「<strong>生成 → 辩论 → 锦标赛排序 → 进化</strong>」其实就是把<strong>test-time scaling / 自我博弈</strong>用在假设空间上——和本库里 TTRL（多数投票自评）、SIA（自改进闭环）是同一套「让模型自己生成-评判-迭代」的思想，只是对象从答案换成了科学假设。
+    </div>
+  </section>
+
+  <!-- ③ 化学材料 -->
+  <section id="chem">
+    <h2><span class="n">③</span>化学 / 材料 + 自驱实验室（wet-lab：闭环到机器人）</h2>
+    <p>这是 agent「真动手做实验」最成熟的方向——LLM 当大脑，调工具/写代码<strong>控制机器人</strong>跑合成与表征，形成 <strong>self-driving lab（SDL）</strong> 闭环（常被归纳为 Comprehension → Design → Execution → Analysis → Optimization 五模块）。</p>
+    <table>
+      <thead><tr><th>系统</th><th>干什么 / 亮点</th><th>出处</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Coscientist</strong></td><td>GPT-4 自主设计/规划/执行化学实验，<strong>写代码控制 Opentrons OT-2 液体处理机器人</strong>真做反应</td><td><a href="https://www.nature.com/articles/s41586-023-06792-0" target="_blank" rel="noopener">Nature 2023</a></td></tr>
+        <tr><td><strong>ChemCrow</strong></td><td>LLM + <strong>18 个化学专家工具</strong>；规划并合成了驱蚊剂、三种 organocatalyst，指导筛选/合成目标 chromophore</td><td><a href="https://arxiv.org/abs/2304.05376" target="_blank" rel="noopener">2304.05376</a></td></tr>
+        <tr><td><strong>A-Lab</strong>（Berkeley/LBNL）</td><td>自主<strong>固态无机材料</strong>合成平台：NLP 从文献提配方 + ARROWS 主动学习优化；报道 <strong>17 天合成 41 种新材料</strong>（与 GNoME 预测衔接）</td><td><a href="https://www.nature.com/articles/s41586-023-06734-w" target="_blank" rel="noopener">Nature 2023</a></td></tr>
+        <tr><td><strong>GNoME</strong>（DeepMind）</td><td>虽非 agent，但是材料发现的「供给侧」：预测 <strong>~220 万</strong> 稳定晶体，给自驱实验室喂候选</td><td><a href="https://www.nature.com/articles/s41586-023-06735-9" target="_blank" rel="noopener">Nature 2023</a></td></tr>
+        <tr><td>Towards Agentic Intelligence for Materials Science</td><td>2026 综述，系统梳理材料 agent 的能力与缺口</td><td><a href="https://arxiv.org/abs/2602.00169" target="_blank" rel="noopener">2602.00169</a></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ④ 生物医药 -->
+  <section id="bio">
+    <h2><span class="n">④</span>生物 / 生物医学 / 药物发现</h2>
+    <p>数据极度异构（基因组、转录组、影像、临床…），agent 多用于<strong>自动化分析、实验设计、靶点发现</strong>，并向「多 agent 虚拟药企」演进。</p>
+    <table>
+      <thead><tr><th>系统</th><th>干什么 / 亮点</th><th>出处</th></tr></thead>
+      <tbody>
+        <tr><td><strong>BioDiscoveryAgent</strong></td><td>为<strong>基因扰动（genetic perturbation）实验</strong>设计：闭环地提扰动假设→模拟结果→修正，缩小实验搜索空间</td><td><a href="https://arxiv.org/abs/2405.17631" target="_blank" rel="noopener">2405.17631</a></td></tr>
+        <tr><td><strong>The Virtual Biotech</strong></td><td>多 agent「虚拟药企」：一个 CSO agent 调度多个领域科学家 agent（统计遗传、功能基因组、化学信息、疾病生物学、临床），跨工具协作做治疗发现</td><td><a href="https://www.biorxiv.org/content/10.64898/2026.02.23.707551v1" target="_blank" rel="noopener">bioRxiv 2026</a></td></tr>
+        <tr><td><strong>Mozi</strong></td><td>「受治理的自治」药物发现 agent：Control Plane（监督-工作者层级）+ Workflow Plane（靶点发现→先导优化的规范化阶段）</td><td><a href="https://arxiv.org/abs/2603.03655" target="_blank" rel="noopener">2603.03655</a></td></tr>
+        <tr><td><strong>CellVoyager</strong> / virtual cell</td><td>自主分析多组学数据；「虚拟细胞」方向把 LLM 与细胞模型结合，做 in-silico 实验</td><td><a href="https://arxiv.org/abs/2510.07706" target="_blank" rel="noopener">2510.07706（survey）</a></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ⑤ 评测 -->
+  <section id="bench">
+    <h2><span class="n">⑤</span>怎么评测科学发现 agent</h2>
+    <p>「会写论文 ≠ 会做科学」，所以评测是这领域的关键基础设施。主流 benchmark 分「数据驱动任务正确性」「真实分析可复现」「虚拟实验室探索」几类。</p>
+    <table>
+      <thead><tr><th>Benchmark</th><th>考什么</th><th>出处</th></tr></thead>
+      <tbody>
+        <tr><td><strong>ScienceAgentBench</strong>（ICLR'25）</td><td><strong>102 个</strong>数据驱动发现任务，取自 44 篇同行评审论文，覆盖 bioinformatics / 计算化学 / GIS / 心理与认知神经，9 位专家验证</td><td><a href="https://arxiv.org/abs/2410.05080" target="_blank" rel="noopener">2410.05080</a></td></tr>
+        <tr><td><strong>BixBench</strong></td><td>计算生物/生信，真实分析「capsule」（基因组/转录组/差异表达/系统发育…）</td><td><a href="https://arxiv.org/abs/2503.00096" target="_blank" rel="noopener">2503.00096</a></td></tr>
+        <tr><td><strong>CORE-Bench</strong></td><td>聚焦<strong>可复现性</strong>：给齐材料与环境，看 agent 能否复现已发表的计算分析</td><td><a href="https://arxiv.org/abs/2409.11363" target="_blank" rel="noopener">2409.11363</a></td></tr>
+        <tr><td><strong>DiscoveryWorld</strong></td><td>虚拟实验室：在模拟仪器里让 agent 跨生物/化学/物理做完整发现循环</td><td><a href="https://arxiv.org/abs/2406.06769" target="_blank" rel="noopener">2406.06769</a></td></tr>
+        <tr><td><strong>LAB-Bench / LAB-Bench2</strong>（FutureHouse）</td><td>生物研究实操能力（文献、图表、协议、克隆…）</td><td><a href="https://arxiv.org/abs/2407.10362" target="_blank" rel="noopener">2407.10362</a> · <a href="https://arxiv.org/abs/2604.09554" target="_blank" rel="noopener">2604.09554</a></td></tr>
+        <tr><td>MLE-Bench（OpenAI）</td><td>自动化 ML 工程/研究（与「自动刷 SOTA」类 agent 对口）</td><td><a href="https://arxiv.org/abs/2410.07095" target="_blank" rel="noopener">2410.07095</a></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ⑥ 现状 -->
+  <section id="take">
+    <h2><span class="n">⑥</span>现状判断与挑战</h2>
+    <div class="callout insight">
+      <span class="label">三条主线</span>
+      <strong>① 自主性在分层推进。</strong>计算型学科（ML/数据科学）已能跑「准自动」的端到端闭环；化学/材料靠机器人做到了 wet-lab 闭环；生物医药多停在「分析+实验设计助手」+ 多 agent 协作雏形。<br><br>
+      <strong>② 最稳的价值不是「全自动出论文」，而是「假设/实验设计的加速器」。</strong>AI co-scientist、BioDiscoveryAgent 这类「人来拍板、AI 扩搜索空间」的协作范式，比「一键生成论文」更经得起检验。<br><br>
+      <strong>③ 方法上和「自我改进 / test-time scaling」收敛。</strong>生成-辩论-排序-进化（co-scientist）、闭环假设迭代（BioDiscoveryAgent）、主动学习优化（A-Lab/ARROWS）本质都是「让系统自己生成-评判-迭代」。
+    </div>
+    <div class="callout warn">
+      <span class="label">公认的坑</span>
+      <strong>novelty / rigor 存疑</strong>（Sakana AI Scientist 的「新颖性」被多方质疑）；<strong>可复现性差</strong>、易<strong>hallucinate 引用与结论</strong>；<strong>wet-lab 落地</strong>仍是少数明星案例、难规模化；<strong>评测不统一</strong>（多为计算任务正确性，难度量「真发现」）；以及<strong>安全与治理</strong>（自主实验的生物/化学风险）。这也是为什么 Mozi 强调「governed autonomy」、co-scientist 强调「human-in-the-loop」。
+    </div>
+    <h3>给想入场者的实务建议</h3>
+    <ul>
+      <li><strong>选对自主层级</strong>：先做「协作式假设/分析加速器」，比硬上「全自动科学家」更易出真价值、也更易评测。</li>
+      <li><strong>闭环要有可验证 reward</strong>：化学/材料有真机表征、计算学科有可执行验证——优先选「结果能被客观判分」的子领域（呼应 ScienceAgentBench/CORE-Bench 的可验证设计）。</li>
+      <li><strong>诚实评测</strong>：用 ScienceAgentBench / BixBench / CORE-Bench 这类有 ground-truth 的基准，别只看「生成的论文像不像」。</li>
+    </ul>
+    <div class="callout warn">
+      <span class="label">使用提醒</span>
+      本页是对话式快速综述，<strong>非系统性 survey</strong>。系统归类、arXiv 编号、里程碑数字（如 41 种材料 / 220 万晶体 / ICLR workshop 接收等）均来自公开检索的二手转述，<strong>正式引用前请回到各原始来源核对</strong>；2026 年新条目尤其建议复核。
+    </div>
+  </section>
+
+  <!-- 出处 -->
+  <section id="src">
+    <h2>主要来源（综述类）</h2>
+    <ul style="font-size:13.5px">
+      <li><a href="https://arxiv.org/abs/2508.14111" target="_blank" rel="noopener">From AI for Science to Agentic Science: A Survey on Autonomous Scientific Discovery (2508.14111)</a></li>
+      <li><a href="https://arxiv.org/abs/2503.08979" target="_blank" rel="noopener">Agentic AI for Scientific Discovery: A Survey (2503.08979)</a> · <a href="https://arxiv.org/abs/2503.24047" target="_blank" rel="noopener">Towards Scientific Intelligence: A Survey of LLM-based Scientific Agents (2503.24047)</a></li>
+      <li><a href="https://arxiv.org/abs/2507.01903" target="_blank" rel="noopener">AI4Research (2507.01903)</a> · <a href="https://arxiv.org/abs/2510.23045" target="_blank" rel="noopener">A Survey of AI Scientists (2510.23045)</a></li>
+      <li><a href="https://github.com/HKUST-KnowComp/Awesome-LLM-Scientific-Discovery" target="_blank" rel="noopener">Awesome-LLM-Scientific-Discovery（EMNLP'25，持续更新的论文清单）</a></li>
+    </ul>
+  </section>
+
+  <footer class="foot">
+    对话调研综述，仅作脉络梳理；系统、里程碑与数字以各原始来源为准 · 整理日期 2026-06-15
+  </footer>
+
+</article>
+</body>
+</html>
