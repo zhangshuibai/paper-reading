@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Radical AI · 竞争格局与赛道早期度调研</title>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --bad:#ff6b81; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --bad:#d23651; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;}
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:920px; margin:0 auto; padding:18px 22px 90px}
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:25px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)} .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap; line-height:2}
+  nav.toc a:hover{color:var(--accent)}
+  section{margin:38px 0}
+  h2{font-size:20px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:16.5px; margin:22px 0 8px}
+  p{margin:12px 0} ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)} strong{color:var(--text)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.88em}
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:13px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:9px 10px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  figure{margin:24px 0; text-align:center}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+  .svgwrap{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 8px}
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+  .src{font-size:10.5px; padding:0 6px; border-radius:999px; white-space:nowrap; vertical-align:middle}
+  .src-a{background:rgba(67,197,158,.18); color:var(--ok)}
+  .src-b{background:rgba(255,180,84,.18); color:var(--warn)}
+  .src-c{background:rgba(255,107,129,.18); color:var(--bad)}
+  .legend{font-size:12px; color:var(--muted); margin:6px 0 0}
+  .verdict{display:inline-block; font-weight:700; padding:3px 12px; border-radius:999px; font-size:14px}
+  .v-nascent{background:rgba(122,162,255,.18); color:var(--accent)}
+  .v-emerging{background:rgba(67,197,158,.18); color:var(--ok)}
+  .v-crowded{background:rgba(255,180,84,.18); color:var(--warn)}
+  .v-mature{background:rgba(255,107,129,.18); color:var(--bad)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">AI4S</span>
+      <span class="chip">材料发现</span>
+      <span class="chip">自驱实验室</span>
+      <span class="chip">极端环境材料</span>
+      <span class="chip">国防订单</span>
+      <span class="chip">竞争格局</span>
+      <span class="chip">赛道早期度</span>
+      <span class="chip">创业 idea</span>
+    </div>
+    <h1>Radical AI：竞争格局与赛道早期度调研</h1>
+    <p class="orig-title">radical-ai.com — AI + 自驱实验室做材料发现（含极端环境 / 高熵合金）/ 赛道是否早期 / 有哪些可借鉴的 idea</p>
+    <dl class="meta-grid">
+      <dt>对象</dt><dd><a href="https://www.radical-ai.com" target="_blank" rel="noopener">https://www.radical-ai.com</a>（Radical AI, Inc.，NYC）</dd>
+      <dt>赛道</dt><dd>AI for Science（AI4S）/ 自驱实验室（self-driving lab）/ 计算 + 自动化材料发现</dd>
+      <dt>整理</dt><dd>对话调研笔记；信息来自公开检索，按来源分级标注，产品能力未必经独立验证</dd>
+      <dt>日期</dt><dd>2026-06-15</dd>
+    </dl>
+    <p class="legend">来源等级：<span class="src src-a">🟢 一手</span> 官网/SEC/官方 ·
+      <span class="src src-b">🟡 二手</span> 媒体/数据库 ·
+      <span class="src src-c">🔴 自述/未证实</span> 营销口径或未独立验证</p>
+  </header>
+
+  <div class="tldr">
+    <b>一句话</b> — Radical AI 是一家 NYC 的<strong>自驱材料实验室</strong>公司：用 AI 预测 + 计算筛选 + 机器人自动合成/表征组成「闭环 flywheel」，把材料 R&D 从「手工试错」加速成「每天上百次自动实验」，并已切入<strong>高熵合金 / 高超声速极端环境材料</strong>这个国防刚需场景 <span class="src src-a">🟢</span>。赛道判断为 <span class="verdict v-emerging">emerging（新兴）</span>——玩家少但每家融资巨大（Lila 累计约 $5.5 亿、Periodic $3 亿种子）、巨头（Google DeepMind、微软）从软件侧压进、缺统一 benchmark。<strong>一个可借鉴 idea</strong>：别去和巨资玩家拼「通用材料超级智能」，而是<strong>抓「极端环境材料 + 政府/国防阶段交付合同」这条壁垒高、订单稳的垂直窄缝</strong>（Radical 已拿到 AFWERX Direct-to-Phase II 合同），把通用闭环平台落地到一个有付费方、有验收标准的真实任务上。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#market">① 赛道地图 + 早期度</a>
+    <a href="#matrix">② 竞品对照矩阵</a>
+    <a href="#map">③ 定位图</a>
+    <a href="#funding">④ 融资 timeline</a>
+    <a href="#snapshot">⑤ 公司速览</a>
+    <a href="#idea">⑥ 创业 idea 借鉴</a>
+    <a href="#take">⑦ 现实判断</a>
+    <a href="#src">出处</a>
+  </nav>
+
+  <!-- 消歧 -->
+  <div class="callout note">
+    <span class="label">先消歧（重名很多）</span>
+    本篇指的是做<strong>材料发现</strong>的 <strong>Radical AI, Inc.</strong>（官网 <a href="https://www.radical-ai.com" target="_blank" rel="noopener">radical-ai.com</a>，NYC，CEO Joseph Krause）<span class="src src-a">🟢</span>。
+    它<strong>不是</strong>：(1) 同名的教育/AI 伦理播客「The Radical AI Podcast」；(2) 加拿大 AI 基金 <em>Radical Ventures</em>（顺带一提，Radical Ventures 反而是其竞品 Orbital Materials 的投资方）；(3) 2026 年做「生物智能」的 <em>Radical Numerics</em>。本调研只讨论做材料的那家。
+  </div>
+
+  <!-- 领域背景速补（读者只有 LLM 基础） -->
+  <div class="callout insight">
+    <span class="label">领域背景速补（给只懂 LLM 的读者）</span>
+    <ul style="margin:6px 0">
+      <li><strong>材料发现（materials discovery）：</strong>找到具备某种性能（耐高温、导电、轻、强）的新化合物/合金。传统做法是「人凭经验猜配方 → 进炉子合成 → 测性能 → 不行再改」，一个候选材料动辄数月、靠博士生手工，慢且贵。这是 AI4S 想攻的「实验科学」瓶颈。</li>
+      <li><strong>自驱实验室（self-driving lab / autonomous lab）：</strong>把「AI 出假设 → 机器人自动配料合成 → 仪器自动表征 → 数据回灌模型」串成<strong>闭环</strong>，不用人盯。类比 LLM 的「self-play / RLHF flywheel」，只不过 reward 来自<strong>真实世界的湿实验</strong>而非文本。难点不在单台机器人，而在<strong>把异构仪器、调度、数据管线整合成一条能 24h 跑的流水线</strong>——这也是 Radical 反复强调「Integration is what drives invention」的原因。</li>
+      <li><strong>高熵合金（HEA, high-entropy alloy）：</strong>由 5 种以上金属近等比例混成的合金，组合空间是天文数字（「billions of compositions」）。性能可远超传统合金，但<strong>组合爆炸</strong>让人工试错几乎不可能——天然适合「AI 先筛掉大概率失败的，再让机器人去做幸存者」。</li>
+      <li><strong>极端环境 / 高超声速材料（extreme environment / hypersonic）：</strong>飞行器以 5 倍音速以上飞行时，蒙皮承受极高温与气动烧蚀，<strong>传统合金扛不住</strong>。所以「高超声速本质上是个材料问题」（Radical CEO 原话）。这是美国国防部/空军的刚需，意味着这条线有<strong>政府付费方</strong>。</li>
+      <li><strong>foundation model for materials（材料基础模型）：</strong>类比 LLM，但训练在晶体结构/分子上，能「给定想要的性质，直接生成候选材料」（如 Orbital 的 LINUS、Google DeepMind 的 GNoME）。这是「软件派」的打法，和 Radical「软件 + 自建湿实验室」的「全栈派」形成路线分野。</li>
+      <li><strong>AFWERX / SBIR / Direct-to-Phase II：</strong>美国空军的创新采购/拨款通道。SBIR 是给中小企业的政府研发拨款，「Direct-to-Phase II」指跳过 Phase I 直接进入更大额的阶段交付——本质是<strong>政府合同 / 拨款 / 阶段交付</strong>这类商业模式（壁垒高、订单稳、受预算与政治影响）。</li>
+    </ul>
+  </div>
+
+  <!-- ① 赛道与早期度 -->
+  <section id="market">
+    <h2><span class="n">①</span>赛道地图 + 早期度判断</h2>
+    <p>Radical AI 属于 <strong>AI for Science（AI4S）</strong> 大类下的<strong>「自驱实验室 / 计算 + 自动化材料发现」</strong>子赛道。这个赛道要解决的需求是：<strong>把材料 R&D 的「假设—实验—数据」循环从人工年级缩到机器天级，并用自产数据训练越来越准的预测模型</strong>。它横跨三层能力——(1) 材料预测/生成 AI；(2) 机器人自动化湿实验室；(3) 数据飞轮——谁能把三层<strong>整合</strong>成闭环，谁就有壁垒。</p>
+    <h3>玩家分群（四象限别漏）</h3>
+    <ul>
+      <li><strong>现有巨头 / 大科技公司：</strong><strong>Google DeepMind</strong>（GNoME 预测了 ~38 万稳定新晶体，并与 Berkeley 的 A-Lab 合作验证）<span class="src src-b">🟡</span>、<strong>Microsoft</strong>（MatterGen 等生成模型）<span class="src src-b">🟡</span>——它们从「软件 + 大数据」侧切，不一定自建大规模湿实验室。</li>
+      <li><strong>垂直创业公司（直接竞品）：</strong><strong>Lila Sciences</strong>（波士顿，「scientific superintelligence」+ 自驱实验室，跨生命科学/化学/材料，累计融资约 $5.5 亿）<span class="src src-b">🟡</span>、<strong>Periodic Labs</strong>（SF，前 OpenAI/DeepMind 团队，$3 亿种子，做无机材料）<span class="src src-b">🟡</span>、<strong>Orbital Materials/Industries</strong>（伦敦+SF/NJ，材料基础模型 LINUS，偏 cleantech/数据中心材料）<span class="src src-b">🟡</span>、<strong>Cambium Materials</strong>（DARPA 合同，AI 找极端温度材料——和 Radical 极端环境线正面相撞）<span class="src src-b">🟡</span>。</li>
+      <li><strong>大厂顺手做 / 国企战投：</strong>能源/工业巨头亲自下场或战投：<strong>Eni</strong>（其 Eni Next 投了 Radical）、<strong>RTX（Raytheon）</strong>（RTX Ventures 领投 Radical——既是钱也是国防客户）、<strong>NVIDIA</strong>（NVentures 同时投了 Radical 与 Lila，卖铲子也卡位）<span class="src src-b">🟡</span>。</li>
+      <li><strong>开源 / 免费 / 国家实验室替代：</strong>最易被忽视的「竞争」其实来自<strong>公共基础设施</strong>：<strong>Materials Project</strong>（Berkeley 的开放材料数据库）、<strong>GNoME 开放数据集</strong>、Berkeley <strong>A-Lab</strong>（学术界的自驱实验室原型，PI 正是 Radical 联创 Gerd Ceder）<span class="src src-b">🟡</span>。这些把「预测数据」这一层大幅商品化，逼创业公司的价值往「湿实验整合 + 专有数据 + 落地任务」上移。</li>
+    </ul>
+    <div class="callout insight">
+      <span class="label">早期度判断</span>
+      <span class="verdict v-emerging">emerging（新兴）</span>
+      （nascent 萌芽 / emerging 新兴 / crowded 拥挤 / mature 成熟）<br><br>
+      <strong>判断信号：</strong>
+      ① <strong>玩家少但增速快</strong>——真正做「全栈自驱材料实验室」的创业公司一只手数得过来（Radical、Lila、Periodic、Orbital…），且基本是 2023–2025 集中冒出来的；
+      ② <strong>融资极热、轮次超大</strong>——种子轮就 $5,500 万–$3 亿（Radical $55M / Periodic $300M / Lila 累计约 $550M），是典型「新兴但资本拥入」的形态，而非成熟期的小步快跑；
+      ③ <strong>巨头已进场但从软件侧</strong>——Google DeepMind、Microsoft 在「预测/生成模型」层强势，但<strong>尚未自建工业级湿实验室</strong>，留下「软硬整合」的窗口；
+      ④ <strong>强开源/公共替代存在</strong>——Materials Project、GNoME、A-Lab 把数据层商品化，说明价值正在向下游迁移；
+      ⑤ <strong>客户认知未成型、无公认 benchmark</strong>——还没有「材料界的 MMLU」，各家自报口径（Radical 还自己发了 LitXBench 想立标准），客户也还在被教育阶段。
+      综合：<strong>不是无人区（nascent），但远未拥挤（crowded）</strong>——窗口仍开，但门票（资本 + research 血统）很贵。
+    </div>
+  </section>
+
+  <!-- ② 竞品矩阵 -->
+  <section id="matrix">
+    <h2><span class="n">②</span>竞品对照矩阵</h2>
+    <p>选这 6 个维度，因为它们最能拉开这个赛道的差距：<strong>技术路线</strong>（纯软件 vs 软硬全栈）决定壁垒与资本强度；<strong>是否自建湿实验室</strong>是「闭环真伪」的分水岭；<strong>领域聚焦</strong>看是通用还是垂直；<strong>商业模式</strong>关系到现金流确定性（尤其本篇关注的「政府合同/阶段交付」类型）；<strong>融资规模</strong>是新兴期最硬的卡位指标；<strong>数据/壁垒来源</strong>决定长期护城河。每格尽量标来源；闭源未披露处明确写出。</p>
+    <table>
+      <thead><tr>
+        <th>玩家</th>
+        <th>技术路线</th>
+        <th>自建湿实验室？</th>
+        <th>领域聚焦</th>
+        <th>商业模式</th>
+        <th>融资规模（累计，口径见来源）</th>
+        <th>数据/壁垒来源</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Radical AI（本篇）</strong></td>
+          <td>软硬<strong>全栈</strong>：AI 预测 + 计算筛选 + 机器人合成/表征闭环 <span class="src src-a">🟢</span></td>
+          <td><strong>是</strong>，Brooklyn Navy Yard，号称 ~100 实验/天、单日造测 25+ 合金 <span class="src src-b">🟡</span></td>
+          <td>合金/无机材料，重点切<strong>高熵合金 / 高超声速极端环境</strong> <span class="src src-a">🟢</span></td>
+          <td>平台 + <strong>政府/国防阶段交付</strong>（已拿 AFWERX D2P2 合同）<span class="src src-a">🟢</span></td>
+          <td>$55M Seed+（2025-07）<span class="src src-a">🟢</span>；坊间另传更高累计数（未证实）<span class="src src-c">🔴</span></td>
+          <td>自产闭环实验数据 + Ceder 的 A-Lab 血统 <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Lila Sciences</td>
+          <td>软硬全栈，主打「scientific superintelligence」<span class="src src-b">🟡</span></td>
+          <td>是（多领域自驱平台）<span class="src src-b">🟡</span></td>
+          <td><strong>跨领域</strong>：生命科学 + 化学 + 材料 <span class="src src-b">🟡</span></td>
+          <td>平台/合作研发（口径未充分披露）<span class="src src-c">🔴</span></td>
+          <td>累计约 $550M，估值 &gt;$1.3B（含 NVentures）<span class="src src-b">🟡</span></td>
+          <td>跨域自产数据 + 资本规模 <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Periodic Labs</td>
+          <td>软硬全栈，前 OpenAI/DeepMind 团队 <span class="src src-b">🟡</span></td>
+          <td>建设中（SF，先 AI 指导的人工合成，再上机器人）<span class="src src-b">🟡</span></td>
+          <td>无机材料/超导等 <span class="src src-b">🟡</span></td>
+          <td>未充分披露 <span class="src src-c">🔴</span></td>
+          <td>$300M 种子；传估值约 $7B（谈判中）<span class="src src-c">🔴</span></td>
+          <td>顶尖 research 团队 + 资本 <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Orbital Materials / Industries</td>
+          <td>偏<strong>软件</strong>：材料基础模型 LINUS（按性质生成）+ 小型 wet lab <span class="src src-b">🟡</span></td>
+          <td>有 wet lab（NJ），规模较小 <span class="src src-b">🟡</span></td>
+          <td>cleantech、碳捕集、数据中心材料 <span class="src src-b">🟡</span></td>
+          <td>产品/材料开发加速（10x 宣称）<span class="src src-c">🔴</span></td>
+          <td>早期约 $21M；后传 $50M Series B（领投 Plural）<span class="src src-b">🟡</span></td>
+          <td>foundation model + 专有数据集 <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Cambium Materials</td>
+          <td>AI 加速发现，<strong>极端温度材料</strong>（与 Radical 极端环境线相撞）<span class="src src-b">🟡</span></td>
+          <td>未充分披露 <span class="src src-c">🔴</span></td>
+          <td>极端温度材料（航空/航天/能源）<span class="src src-b">🟡</span></td>
+          <td><strong>政府合同</strong>（DARPA 合同）+ 商用 <span class="src src-b">🟡</span></td>
+          <td>未披露 <span class="src src-c">🔴</span></td>
+          <td>DARPA 项目 + 专有方法 <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Google DeepMind / Microsoft</td>
+          <td>纯<strong>软件</strong>：预测/生成模型（GNoME、MatterGen）<span class="src src-b">🟡</span></td>
+          <td>否（自身不建工业湿实验室；DeepMind 与 Berkeley A-Lab 合作验证）<span class="src src-b">🟡</span></td>
+          <td>通用晶体/材料预测 <span class="src src-b">🟡</span></td>
+          <td>研究/平台/云（非主营变现）<span class="src src-b">🟡</span></td>
+          <td>母公司无限（非可比口径）</td>
+          <td><strong>开放数据集 + 算力 + 人才</strong> <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Citrine Informatics（老牌）</td>
+          <td>纯软件：materials informatics SaaS 平台 <span class="src src-b">🟡</span></td>
+          <td>否（不碰湿实验，做客户数据 + ML）<span class="src src-b">🟡</span></td>
+          <td>通用化学/材料数据管理 <span class="src src-b">🟡</span></td>
+          <td><strong>SaaS</strong>（卖给商业/政府/学术）<span class="src src-b">🟡</span></td>
+          <td>较早期 VC，规模远小于上面几家 <span class="src src-b">🟡</span></td>
+          <td>客户数据 + 平台粘性 <span class="src src-b">🟡</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>读矩阵：</strong>这一赛道的核心分野是「<strong>纯软件派</strong>（DeepMind/Microsoft/Citrine/部分 Orbital）」vs「<strong>软硬全栈派</strong>（Radical/Lila/Periodic）」。全栈派壁垒更高（自建湿实验室 + 自产数据飞轮）、但资本更密集。Radical 在全栈派里<strong>融资不是最大</strong>（Lila/Periodic 远超），它的差异化不在「钱」也不在「通用超级智能」愿景，而在<strong>三点</strong>：(1) <strong>聚焦合金/极端环境</strong>这个有明确国防付费方的窄场景；(2) 已落地<strong>政府阶段交付合同（AFWERX D2P2）</strong>，现金流确定性强于「纯烧钱做平台」；(3) <strong>Gerd Ceder 的 A-Lab 学术血统</strong>——别人还在论证闭环能跑，他们的联创已经在 Berkeley 把自驱实验室跑过一轮。同质化风险主要来自「极端环境材料」这条线上 Cambium 的正面竞争与巨头软件层的持续压价。</p>
+  </section>
+
+  <!-- ③ 定位图 -->
+  <section id="map">
+    <h2><span class="n">③</span>定位图（whitespace 在哪）</h2>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 640 400" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12">
+        <line x1="40" y1="200" x2="600" y2="200" stroke="#b9c2e0" stroke-width="1.5"/>
+        <line x1="320" y1="24" x2="320" y2="376" stroke="#b9c2e0" stroke-width="1.5"/>
+        <text x="598" y="218" text-anchor="end" fill="#5a627a">软硬全栈 + 自建湿实验室 →</text>
+        <text x="42" y="218" fill="#5a627a">← 纯软件 / 预测模型</text>
+        <text x="326" y="34" fill="#5a627a">↑ 通用 / 跨领域平台</text>
+        <text x="326" y="368" fill="#5a627a">↓ 垂直聚焦 / 极端环境·国防</text>
+        <rect x="322" y="202" width="276" height="172" fill="#7aa2ff" opacity="0.07"/>
+        <text x="455" y="300" text-anchor="middle" fill="#3a66ff" opacity="0.7" font-size="11">whitespace：全栈闭环×</text>
+        <text x="455" y="316" text-anchor="middle" fill="#3a66ff" opacity="0.7" font-size="11">极端环境/国防阶段交付</text>
+        <circle cx="470" cy="278" r="8" fill="#6b4cff"/>
+        <text x="470" y="262" text-anchor="middle" fill="#6b4cff" font-weight="700">Radical AI</text>
+        <circle cx="500" cy="105" r="7" fill="#138a6e"/>
+        <text x="500" y="92" text-anchor="middle" fill="#138a6e">Lila</text>
+        <circle cx="455" cy="150" r="7" fill="#138a6e"/>
+        <text x="455" y="137" text-anchor="middle" fill="#138a6e">Periodic</text>
+        <circle cx="270" cy="135" r="7" fill="#b3701a"/>
+        <text x="270" y="122" text-anchor="middle" fill="#b3701a">Orbital</text>
+        <circle cx="215" cy="300" r="7" fill="#b3701a"/>
+        <text x="215" y="286" text-anchor="middle" fill="#b3701a">Cambium</text>
+        <circle cx="120" cy="95" r="7" fill="#d23651"/>
+        <text x="120" y="82" text-anchor="middle" fill="#d23651">DeepMind / MS</text>
+        <circle cx="135" cy="160" r="7" fill="#d23651"/>
+        <text x="135" y="176" text-anchor="middle" fill="#d23651">Citrine</text>
+        <circle cx="360" cy="250" r="6" fill="#5a627a"/>
+        <text x="360" y="236" text-anchor="middle" fill="#5a627a">A-Lab（学术/公共）</text>
+      </svg>
+      </div>
+      <figcaption>定位图（本调研重绘）。两轴：X=纯软件↔软硬全栈自建湿实验室；Y=通用平台↔垂直/极端环境聚焦。<strong>右下象限「全栈闭环 × 极端环境/国防阶段交付」相对空</strong>，正是 Radical 试图占住的格子；右上是 Lila/Periodic 的「通用全栈 + 巨资」红海。</figcaption>
+    </figure>
+  </section>
+
+  <!-- ④ 融资 timeline -->
+  <section id="funding">
+    <h2><span class="n">④</span>融资 timeline</h2>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 720 170" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12.5">
+        <line x1="70" y1="80" x2="660" y2="80" stroke="#b9c2e0" stroke-width="2"/>
+        <circle cx="130" cy="80" r="7" fill="#3a66ff"/>
+        <text x="130" y="50" text-anchor="middle" fill="#5a627a">2024</text>
+        <text x="130" y="106" text-anchor="middle" fill="#1a1f33" font-weight="700">成立 · 孵化</text>
+        <text x="130" y="122" text-anchor="middle" fill="#5a627a">AlleyCorp「史上最大 pre-seed」</text>
+        <circle cx="340" cy="80" r="9" fill="#6b4cff"/>
+        <text x="340" y="50" text-anchor="middle" fill="#5a627a">2025-07</text>
+        <text x="340" y="106" text-anchor="middle" fill="#1a1f33" font-weight="700">$55M Seed+</text>
+        <text x="340" y="122" text-anchor="middle" fill="#5a627a">领投 RTX Ventures；NVentures/Eni Next 等</text>
+        <circle cx="500" cy="80" r="7" fill="#138a6e"/>
+        <text x="500" y="50" text-anchor="middle" fill="#5a627a">2025-08</text>
+        <text x="500" y="106" text-anchor="middle" fill="#1a1f33" font-weight="700">空军 AFWERX 合同</text>
+        <text x="500" y="122" text-anchor="middle" fill="#5a627a">$1.2M D2P2 · 高熵合金</text>
+        <circle cx="630" cy="80" r="7" fill="#b3701a"/>
+        <text x="630" y="50" text-anchor="middle" fill="#5a627a">2026-01</text>
+        <text x="630" y="106" text-anchor="middle" fill="#1a1f33" font-weight="700">NY 首个自驱材料实验室</text>
+        <text x="630" y="122" text-anchor="middle" fill="#5a627a">Brooklyn Navy Yard</text>
+      </svg>
+      </div>
+      <figcaption>Radical AI 融资 / 里程碑时间线（据公开报道整理）。</figcaption>
+    </figure>
+    <table>
+      <thead><tr><th>时间</th><th>事件 / 轮次</th><th>金额</th><th>投资方 / 主体</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr><td>2024</td><td>成立并被孵化（pre-seed）</td><td>未披露（称 AlleyCorp「史上最大 pre-seed 支票」）</td><td>AlleyCorp（Kevin Ryan）孵化</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2025-07-18/20</td><td>Series Seed+</td><td><strong>$55M</strong>（称 NYC 史上第 3 大股权种子）</td><td>领投 RTX Ventures；NVIDIA NVentures、Eni Next、Infinite Capital、noa、AlleyCorp 等</td><td><span class="src src-a">🟢</span>官网 <span class="src src-b">🟡</span>媒体</td></tr>
+        <tr><td>2025-08-25</td><td>空军 AFWERX Direct-to-Phase II（SBIR/STTR）合同</td><td>$1,197,902</td><td>U.S. Air Force / AFWERX（高熵合金 · 高超声速）</td><td><span class="src src-a">🟢</span>官方新闻稿</td></tr>
+        <tr><td>2026-01-27</td><td>NY 首个全自动材料实验室落地</td><td>~$4M 项目，含至多 $2M Excelsior 税收抵免；称创 115 个岗位</td><td>Empire State Development / 纽约州（Brooklyn Navy Yard Building 20）</td><td><span class="src src-a">🟢</span>州长办/ESD <span class="src src-b">🟡</span></td></tr>
+        <tr><td>—</td><td>坊间「$60M Series A」「累计约 $65M」等说法</td><td>口径不一</td><td>未见一手确认</td><td><span class="src src-c">🔴</span>未证实</td></tr>
+      </tbody>
+    </table>
+    <p><strong>融资节奏佐证阶段判断：</strong>成立（2024）→ 大额种子（2025-07）→ 政府合同（2025-08）→ 实体实验室落地（2026-01），不到两年走完，是典型<strong>新兴期「资本快进 + 同时跑商业化锚点」</strong>的打法。把它放进赛道整体看：Lila 累计约 $5.5 亿、Periodic $3 亿种子、Radical $55M——<strong>整个 AI4S 材料赛道融资极热但金额分层明显</strong>，Radical 不在最顶部，因此它更需要靠「政府订单 + 垂直聚焦」而非「钱多」取胜。注：网传更高累计融资数 <span class="src src-c">🔴</span> 未找到一手确认，不擅自采用。</p>
+  </section>
+
+  <!-- ⑤ 公司速览 -->
+  <section id="snapshot">
+    <h2><span class="n">⑤</span>公司速览</h2>
+    <table>
+      <tbody>
+        <tr><td>是什么 / 定位</td><td>NYC 的自驱材料实验室公司：「Technological breakthroughs happen in materials. Get there faster with a self-driving lab.」核心叙事是「<strong>自动化只是小部分，整合（integration）才是发明的关键</strong>」 <span class="src src-a">🟢</span></td></tr>
+        <tr><td>产品</td><td>一套<strong>软硬一体的自驱实验室系统</strong>：AI 预测 + 计算筛选 billions 组合 → 机器人自动合成 → 自动表征（含 SEM 显微结构自动分析）→ 数据回灌模型的闭环 flywheel。号称单日造测 25+ 合金、~100 实验/天 <span class="src src-a">🟢</span>官网/<span class="src src-b">🟡</span>媒体。另发布 <strong>LitXBench</strong>（从文献抽取实验数据的 LLM benchmark）<span class="src src-a">🟢</span></td></tr>
+        <tr><td>团队</td><td>联创 <strong>Joseph Krause</strong>（CEO，材料科学 PhD 背景，曾在 Rice / 美国陆军研究实验室，陆军国民警卫队老兵）、<strong>Jorge Colindres</strong>（前 VC / 软件团队背景）、<strong>Dr. Gerd Ceder</strong>（材料计算泰斗，Berkeley/LBNL，曾领奥巴马时期 Materials Genome，<strong>Berkeley A-Lab 的 PI</strong>——深科技 research 血统极硬）<span class="src src-b">🟡</span></td></tr>
+        <tr><td>商业模式</td><td>平台 + <strong>政府/国防阶段交付合同</strong>（已拿 AFWERX D2P2，对应用户归类「类型4：政府合同/拨款/阶段交付——壁垒高、订单稳、受预算与政治影响」）；亦有州级产业激励（NY 税收抵免）。长期变现路径（向工业客户卖材料/数据/平台）尚未充分披露 <span class="src src-a">🟢</span>合同/<span class="src src-c">🔴</span>长期模式</td></tr>
+        <tr><td>状态</td><td>成立 2024；约 40 人量级（报道口径）；$55M Seed+（2025-07）；2026-01 实体实验室落地 Brooklyn Navy Yard。产品实效（吞吐、成功率）多为<strong>自述口径，未经独立验证</strong> <span class="src src-b">🟡</span>/<span class="src src-c">🔴</span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ⑥ 创业 idea 借鉴 -->
+  <section id="idea">
+    <h2><span class="n">⑥</span>创业 idea 借鉴</h2>
+    <div class="callout insight">
+      <span class="label">Whitespace / 机会</span>
+      定位图右下象限——<strong>「全栈自驱闭环 × 极端环境/国防级材料 × 政府阶段交付」</strong>——目前只有 Radical 与 Cambium 在抢，远未拥挤。更细的空白：(1) 把自驱实验室<strong>聚焦到单一高价值材料类</strong>（如固态电解质、催化剂、超导体、辐照环境核材料），做「窄而深」而非「通用超级智能」；(2) <strong>「自驱实验室即服务」</strong>——别人买不起自建湿实验室，你把闭环产能按 run 计费租给中小材料公司/国家实验室；(3) 给这个无标准的赛道做<strong>第三方 benchmark / 验证层</strong>（Radical 自己发 LitXBench 已暗示需求存在，但「裁判」最好由中立方做）。
+    </div>
+    <h3>现有玩家共同短板（unmet needs）</h3>
+    <p>① <strong>口径不透明、无公认 benchmark</strong>——「每天 100 实验」「10x 加速」「71% 成功率」各家自报，客户无法横向比较（A-Lab 的成功率甚至被同行论文质疑过），<strong>谁能给出可复现的第三方评测，谁就掌握话语权</strong>。② <strong>从 demo 到工业落地的鸿沟</strong>——发现一个新材料 ≠ 能量产、能进供应链；中间的「放大/中试/认证」几乎没人做。③ <strong>通用平台离付费场景远</strong>——Lila/Periodic 烧巨资做「通用」，但客户要的是「帮我解决这个具体材料问题并按里程碑付款」，<strong>垂直 + 合同制反而现金流更健康</strong>。</p>
+    <h3>Why now（为什么现在值得做）</h3>
+    <p>① <strong>材料基础模型 + 开放数据成熟</strong>（GNoME ~38 万新晶体、Materials Project 开放）——预测层被公共品商品化，创业门槛降到「整合 + 湿实验 + 垂直数据」；② <strong>实验室自动化硬件可得</strong>，闭环工程化第一次现实；③ <strong>地缘 + 国防需求拐点</strong>——高超声速、能源、关键矿物供应链让政府愿意为「极端环境材料」开支票（AFWERX、DARPA、纽约州激励同时出现），<strong>给了「类型4：政府合同/阶段交付」一条壁垒高、订单稳的现金流</strong>；④ 资本正热，种子轮就能拿大钱（但也意味着估值与预期被推高）。</p>
+    <h3>可借鉴的打法 + 相邻机会</h3>
+    <ul>
+      <li><strong>borrowable：</strong>(a) <strong>「学术血统 → 公司」</strong>——把一个已被验证的学术原型（如 Ceder 的 A-Lab）的 PI 拉进联创团队，瞬间获得可信度与领先身位；(b) <strong>「先拿政府合同当第一个付费客户」</strong>——用 SBIR/AFWERX/DARPA 这类 D2P 通道，把烧钱的平台落到一个有验收标准、有预算的真实任务上，既验证又造血；(c) <strong>「叙事钩子」</strong>——「高超声速本质上是个材料问题」这种一句话把宏大平台绑到具体刚需，融资与 PR 都好讲；(d) <strong>把州/市产业政策（税收抵免、navy yard 厂房）纳入选址与成本模型</strong>。</li>
+      <li><strong>adjacent：</strong>(1) <strong>同一闭环换垂直</strong>——电池/固态电解质、催化剂、半导体材料、生物材料、核/辐照材料；(2) <strong>只做「整合层 / OS」</strong>——给别人的湿实验室做调度+数据管线软件，避开重资本自建（卖铲子）；(3) <strong>「放大与中试即服务」</strong>填补发现到量产的鸿沟；(4) <strong>中立 benchmark/认证</strong>机构；(5) 把同款打法搬到<strong>非美国的政府采购市场</strong>（欧盟、英国国防/能源拨款）。</li>
+    </ul>
+    <div class="callout warn">
+      <span class="label">风险（诚实给）</span>
+      ① <strong>资本碾压</strong>——Lila/Periodic 单轮就比 Radical 多数倍，若赛道走向「算力/数据规模为王」，小玩家被融资差距甩开；② <strong>巨头从软件层持续压价</strong>——DeepMind/Microsoft 把预测层做成近免费公共品，挤压「卖预测」的商业空间；③ <strong>政府合同的两面性</strong>——「类型4」订单稳、壁垒高，但<strong>受预算周期与政治影响</strong>（政府停摆、换届、采购流程慢、单笔 $1.2M 体量小、合规/出口管制 ITAR 重），且容易形成对单一客户的依赖；④ <strong>「发现 ≠ 落地」</strong>——大量自驱实验室的产出停在论文/demo，能否进真实供应链未证实；⑤ <strong>口径风险</strong>——本赛道指标普遍自述、樱桃挑选，尽调时务必要第三方复现。
+    </div>
+  </section>
+
+  <!-- ⑦ 现实判断 -->
+  <section id="take">
+    <h2><span class="n">⑦</span>现实判断</h2>
+    <p>把 Radical 放回格局：它在「软硬全栈派」里<strong>钱不是最多</strong>，但<strong>站位更聪明</strong>——不去右上象限和 Lila/Periodic 拼「通用材料超级智能」的烧钱红海，而是占住右下「<strong>全栈闭环 × 极端环境/国防阶段交付</strong>」这个相对空、且有真实付费方的窄缝，再加上 <strong>Ceder 的 A-Lab 血统</strong>给的领先身位与可信度。它的胜算在于「<strong>垂直聚焦 + 政府订单造血 + 数据飞轮</strong>」三者能不能咬合成正循环；软肋是：(1) 资本体量被同行甩开的长期风险；(2) 对政府预算/政治的敞口（类型4 的固有风险）；(3) 产品实效（吞吐/成功率/能否量产）目前几乎全是<strong>自述口径、未经独立验证</strong>。对想入场的创业者：这个赛道是 <strong>emerging（新兴）</strong> 而非拥挤——窗口仍开，但门票（research 血统 + 资本 + 一个有付费方的垂直锚点）很贵；最可复制的不是「再做一个通用平台」，而是 <strong>Radical 这套「学术原型 → 政府合同当首单 → 垂直窄缝里把闭环跑通」的路径</strong>。</p>
+    <div class="callout warn">
+      <span class="label">使用提醒</span>
+      本页为对话式调研，信息主要来自公开来源并按等级标注；融资数额、客户、能力声明等以官方一手为准，
+      <strong>产品能力（吞吐、成功率、加速倍数）未必经独立验证</strong>，引用前请核对最新信息。竞品指标多为各家自报口径、时间与定义不一，横向比较需谨慎。
+    </div>
+  </section>
+
+  <!-- 出处 -->
+  <section id="src">
+    <h2>出处</h2>
+    <ul style="font-size:13.5px">
+      <li><span class="src src-a">🟢</span> 官网：<a href="https://www.radical-ai.com" target="_blank" rel="noopener">radical-ai.com</a>（定位/产品/LitXBench/SEM 分析）</li>
+      <li><span class="src src-a">🟢</span> 官方新闻：<a href="https://www.radical-ai.com/news/series-seed" target="_blank" rel="noopener">$55M Series Seed+（2025-07-18）</a></li>
+      <li><span class="src src-a">🟢</span> 官方新闻：<a href="https://www.radical-ai.com/news/radical-ai-awarded-us-air-force-contract" target="_blank" rel="noopener">U.S. Air Force / AFWERX D2P2 合同（$1,197,902，2025-08-25，高熵合金/高超声速）</a></li>
+      <li><span class="src src-a">🟢</span> 纽约州政府/ESD：<a href="https://esd.ny.gov/esd-media-center/press-releases/governor-hochul-announces-radical-ai-establishing-new-yorks-first-fully-autonomous-materials" target="_blank" rel="noopener">州长 Hochul 宣布 NY 首个全自动材料实验室（Brooklyn Navy Yard）</a></li>
+      <li><span class="src src-b">🟡</span> R&D World：<a href="https://www.rdworldonline.com/how-radical-ai-is-building-a-self-driving-materials-lab/" target="_blank" rel="noopener">How Radical AI is building a self-driving materials lab</a></li>
+      <li><span class="src src-b">🟡</span> AlleyCorp：<a href="https://alleycorp.substack.com/p/alleycorp-in-q2-introducing-radical" target="_blank" rel="noopener">Introducing Radical AI（团队 / 「最大 pre-seed」/ flywheel 描述）</a></li>
+      <li><span class="src src-b">🟡</span> 团队：<a href="https://www.linkedin.com/in/josephfkrause/" target="_blank" rel="noopener">Joseph F. Krause（CEO）</a>；Gerd Ceder（Berkeley/LBNL）背景</li>
+      <li><span class="src src-b">🟡</span> 竞品 Lila Sciences：<a href="https://sacra.com/c/lila-sciences/" target="_blank" rel="noopener">Sacra 估值/融资</a>；<a href="https://www.dakota.com/resources/blog/lila-sciences-raises-350m-series-a-the-future-of-autonomous-ai-labs-in-2025" target="_blank" rel="noopener">$350M Series A 报道</a></li>
+      <li><span class="src src-b">🟡</span> 竞品 Periodic Labs / 赛道综述：<a href="https://www.technologyreview.com/2025/12/15/1129210/ai-materials-science-discovery-startups-investment/" target="_blank" rel="noopener">MIT Tech Review：AI materials discovery needs to move into the real world</a></li>
+      <li><span class="src src-b">🟡</span> 竞品 Orbital Materials/Industries：<a href="https://fortune.com/2026/05/28/exclusive-orbital-industries-raises-50-million-series-b-funding-round-ai-to-discover-exotic-new-materials/" target="_blank" rel="noopener">Fortune：$50M Series B</a>；<a href="https://radical.vc/portfolio/orbital-materials/" target="_blank" rel="noopener">Radical Ventures 组合页（注意是另一个 Radical）</a></li>
+      <li><span class="src src-b">🟡</span> A-Lab / GNoME（公共/学术 + Ceder 血统）：<a href="https://newscenter.lbl.gov/2023/04/17/meet-the-autonomous-lab-of-the-future/" target="_blank" rel="noopener">Berkeley Lab：Autonomous Lab of the Future</a>；<a href="https://www.nature.com/articles/s41586-023-06734-w" target="_blank" rel="noopener">Nature: A-Lab</a>；<a href="https://www.chemistryworld.com/news/new-analysis-raises-doubts-over-autonomous-labs-materials-discoveries/4018791.article" target="_blank" rel="noopener">Chemistry World：对 A-Lab 成果的质疑</a></li>
+      <li><span class="src src-b">🟡</span> 竞品 Cambium（极端温度材料 / DARPA）：<a href="https://www.prnewswire.com/news-releases/cambium-receives-contract-from-darpa-to-leverage-ai-to-accelerate-discovery-of-novel-extreme-temperature-materials-302620441.html" target="_blank" rel="noopener">Cambium × DARPA</a></li>
+      <li><span class="src src-c">🔴</span> 未证实：网传「$60M Series A」「累计约 $65M 融资」「~100 实验/天 / 单日 25+ 合金 / 71% 成功率」等吞吐与融资口径——未见独立验证，按自述/未证实对待。</li>
+    </ul>
+  </section>
+
+  <footer class="foot">
+    公司竞争格局 / 赛道早期度调研笔记，仅作梳理；信息按来源分级、产品能力未必经独立验证，以官方一手信息为准 · 整理日期 2026-06-15
+  </footer>
+
+</article>
+</body>
+</html>
