@@ -38,6 +38,44 @@
     "path": "papers/2023-11-29-a-lab-autonomous-materials/index.html"
   },
   {
+    "slug": "2410.05080-scienceagentbench",
+    "title": "ScienceAgentBench: Toward Rigorous Assessment of Language Agents for Data-Driven Scientific Discovery",
+    "authors": "Ziru Chen, Shijie Chen, ... Yu Su, Huan Sun, et al.",
+    "team": "The Ohio State University (OSU NLP)",
+    "arxiv": "https://arxiv.org/abs/2410.05080",
+    "code": "https://github.com/OSU-NLP-Group/ScienceAgentBench",
+    "date": "2026-06-15",
+    "published": "ICLR 2025",
+    "tldr": "从 44 篇同行评审论文抽取 102 个数据驱动科学发现任务（bioinformatics/计算化学/GIS/认知神经科学），统一成可执行验证的 Python program 生成问题，配 rubric 与防数据污染策略；评测 5 个 LLM × 3 个框架，最好的 agent（Claude-3.5-Sonnet+self-debug）三次尝试也只解 32.4%（带专家知识 34.3%），说明 language agent 离自动化科研还很远。",
+    "tags": [
+      "benchmark",
+      "scientific-discovery",
+      "language-agent",
+      "code-generation",
+      "evaluation"
+    ],
+    "path": "papers/2410.05080-scienceagentbench/index.html"
+  },
+  {
+    "slug": "2026-02-23-virtual-biotech",
+    "title": "The Virtual Biotech: A Multi-Agent AI Framework for Therapeutic Discovery and Development",
+    "authors": "Harrison G. Zhang, Peter Eckmann, Jiacheng Miao, Andrew B. Mahon, James Zou",
+    "team": "Stanford University (James Zou Lab)",
+    "arxiv": "https://www.biorxiv.org/content/10.64898/2026.02.23.707551v1",
+    "code": "",
+    "date": "2026-06-15",
+    "published": "bioRxiv 2026",
+    "tldr": "把一支药企早期研发团队抽象成 multi-agent 系统：CSO agent 编排跨学科科学家 agent（statistical genetics/functional genomics/cheminformatics/clinical 等），经 MCP 工具连接生物医学数据库做证据级分析；以三个真实案例（55,984 临床试验分析、B7-H3 肺癌靶点、OSMRβ 失败试验复盘）展示，全程 keep human in the loop。",
+    "tags": [
+      "multi-agent",
+      "drug-discovery",
+      "biomedicine",
+      "scientific-discovery",
+      "orchestration"
+    ],
+    "path": "papers/2026-02-23-virtual-biotech/index.html"
+  },
+  {
     "slug": "2606.03854-cli-anything",
     "title": "CLI-Anything: Towards Agent-Native Computer Use",
     "authors": "Yuhao Yang, Tianyu Fan, Chao Huang",
@@ -964,24 +1002,5 @@
       "mcp",
       "agent"
     ]
-  },
-  {
-    "slug": "2410.05080-scienceagentbench",
-    "title": "ScienceAgentBench: Toward Rigorous Assessment of Language Agents for Data-Driven Scientific Discovery",
-    "authors": "Ziru Chen, Shijie Chen, ... Yu Su, Huan Sun, et al.",
-    "team": "The Ohio State University (OSU NLP)",
-    "arxiv": "https://arxiv.org/abs/2410.05080",
-    "code": "https://github.com/OSU-NLP-Group/ScienceAgentBench",
-    "date": "2026-06-15",
-    "published": "ICLR 2025",
-    "tldr": "从 44 篇同行评审论文抽取 102 个数据驱动科学发现任务（bioinformatics/计算化学/GIS/认知神经科学），统一成可执行验证的 Python program 生成问题，配 rubric 与防数据污染策略；评测 5 个 LLM × 3 个框架，最好的 agent（Claude-3.5-Sonnet+self-debug）三次尝试也只解 32.4%（带专家知识 34.3%），说明 language agent 离自动化科研还很远。",
-    "tags": [
-      "benchmark",
-      "scientific-discovery",
-      "language-agent",
-      "code-generation",
-      "evaluation"
-    ],
-    "path": "papers/2410.05080-scienceagentbench/index.html"
   }
 ]
