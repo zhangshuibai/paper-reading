@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CuspAI · 竞争格局与赛道早期度调研</title>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --bad:#ff6b81; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --bad:#d23651; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;}
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:920px; margin:0 auto; padding:18px 22px 90px}
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:25px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)} .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap; line-height:2}
+  nav.toc a:hover{color:var(--accent)}
+  section{margin:38px 0}
+  h2{font-size:20px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:16.5px; margin:22px 0 8px}
+  p{margin:12px 0} ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)} strong{color:var(--text)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.88em}
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:13px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:9px 10px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  figure{margin:24px 0; text-align:center}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+  .svgwrap{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 8px}
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+  .src{font-size:10.5px; padding:0 6px; border-radius:999px; white-space:nowrap; vertical-align:middle}
+  .src-a{background:rgba(67,197,158,.18); color:var(--ok)}
+  .src-b{background:rgba(255,180,84,.18); color:var(--warn)}
+  .src-c{background:rgba(255,107,129,.18); color:var(--bad)}
+  .legend{font-size:12px; color:var(--muted); margin:6px 0 0}
+  .verdict{display:inline-block; font-weight:700; padding:3px 12px; border-radius:999px; font-size:14px}
+  .v-nascent{background:rgba(122,162,255,.18); color:var(--accent)}
+  .v-emerging{background:rgba(67,197,158,.18); color:var(--ok)}
+  .v-crowded{background:rgba(255,180,84,.18); color:var(--warn)}
+  .v-mature{background:rgba(255,107,129,.18); color:var(--bad)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">AI4S / 材料发现</span>
+      <span class="chip">Generative AI for Materials</span>
+      <span class="chip">气候 / 碳捕集</span>
+      <span class="chip">竞争格局</span>
+      <span class="chip">赛道早期度</span>
+      <span class="chip">创业 idea</span>
+    </div>
+    <h1>CuspAI：竞争格局与赛道早期度调研</h1>
+    <p class="orig-title">cusp.ai — generative AI for materials 的「材料搜索引擎」 / 赛道处于 emerging 偏拥挤前夜 / 可借鉴：科研服务变现 + 旗舰客户共创数据飞轮</p>
+    <dl class="meta-grid">
+      <dt>对象</dt><dd><a href="https://www.cusp.ai/" target="_blank" rel="noopener">https://www.cusp.ai/</a>（cuspai.com 301 跳转至 cusp.ai）</dd>
+      <dt>赛道</dt><dd>AI for Science（AI4S）· 生成式 AI 材料发现 / 逆向材料设计（inverse design）</dd>
+      <dt>整理</dt><dd>对话调研笔记；信息来自公开检索，按来源分级标注，产品能力未必经独立验证</dd>
+      <dt>日期</dt><dd>2026-06-15</dd>
+    </dl>
+    <p class="legend">来源等级：<span class="src src-a">🟢 一手</span> 官网/SEC/官方 ·
+      <span class="src src-b">🟡 二手</span> 媒体/数据库 ·
+      <span class="src src-c">🔴 自述/未证实</span> 营销口径或未独立验证</p>
+  </header>
+
+  <div class="tldr">
+    <b>一句话</b> — CuspAI 是英国 Cambridge 出身的 <strong>generative AI for materials</strong> 公司，把「逆向材料设计」做成一个<strong>「材料搜索引擎」</strong>：客户输入想要的材料性质（如能高效吸附 CO₂ 的 MOF、能去除 PFAS 的吸附剂），平台用生成模型 + 分子模拟直接「搜/生成」出可合成的候选分子结构。创始人是 deep-tech 出身的 Chad Edwards（CEO）与机器学习大牛 Max Welling（CTO），advisor 含 Geoffrey Hinton、Yann LeCun，并与 <strong>Meta FAIR</strong>（碳捕集 ODAC25 数据集）、Hyundai、Kemira 等共创。已累计融资约 <strong>$130M</strong>（$30M 种子 + $100M+ A 轮），2026 年传在以约 $1B 估值募 $200M。赛道判 <span class="verdict v-emerging">emerging（新兴）</span>，但巨头（Microsoft、Google DeepMind）已带开源模型入场、玩家近一年密集涌现，正向 crowded 滑动。<strong>最值得借鉴的 whitespace</strong>：模型层正在被大厂开源「商品化」，真正稀缺的是<strong>「闭环验证 + 可合成性 + 与下游客户共建专有数据」</strong>这一层——谁能把 AI 候选材料真正做到「合成出来、性能达标、能交付」，谁就拿到 moat。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#bg">领域背景速补</a>
+    <a href="#market">① 赛道地图 + 早期度</a>
+    <a href="#matrix">② 竞品对照矩阵</a>
+    <a href="#map">③ 定位图</a>
+    <a href="#funding">④ 融资 timeline</a>
+    <a href="#snapshot">⑤ 公司速览</a>
+    <a href="#idea">⑥ 创业 idea 借鉴</a>
+    <a href="#take">⑦ 现实判断</a>
+    <a href="#src">出处</a>
+  </nav>
+
+  <!-- 领域背景 -->
+  <section id="bg">
+    <h2><span class="n">★</span>领域背景速补（只懂 LLM 也能跟上）</h2>
+    <p>这家公司在「材料科学 × AI」交叉处，下面把关键名词讲清，假设你只懂 LLM、不懂材料。</p>
+    <ul>
+      <li><strong>材料发现（materials discovery）为什么难？</strong> 传统做法是「猜一个配方 → 在实验室合成 → 测性能 → 不行再改」，一个新材料从想法到量产常常要 10–20 年。可能的化学空间大到天文数字（远超棋类博弈空间），靠人手试错本质上是在大海里捞针。这就是 CuspAI 说的「months, not millennia（要几个月而不是几千年）」的来由。<span class="src src-c">🔴 口号为自述</span></li>
+      <li><strong>逆向设计（inverse design）= 材料界的「文生图」。</strong> 正向是「给定结构 → 预测性质」；逆向是反过来：<strong>「我要这样的性质，请直接给我满足它的结构」</strong>。这正好是生成模型（diffusion / flow 等）擅长的事——和 Stable Diffusion 由 prompt 生成图像同构。CuspAI 把它包装成「材料搜索引擎」：输入性质需求，输出候选分子式/晶体结构。这是整个赛道的共同范式。<span class="src src-b">🟡</span></li>
+      <li><strong>MOF（Metal-Organic Framework，金属有机框架）。</strong> 一类像「分子海绵」的多孔晶体材料，内部表面积极大，特别适合吸附气体——是<strong>直接空气碳捕集（Direct Air Capture, DAC）</strong>的热门候选。MOF 的可能组合极多，正是 AI 逆向设计的理想战场。CuspAI 与 Meta 的合作就聚焦于此。<span class="src src-b">🟡</span></li>
+      <li><strong>DAC / 碳捕集为什么是钱景？</strong> 把空气里的 CO₂ 直接吸出来封存，是气候目标的关键技术，但目前成本高（业界常引「要降到 <$150/吨」这一门槛才有规模化意义）。更好的吸附材料能直接拉低成本——所以「AI 设计碳捕集材料」既有科学价值又有市场。<span class="src src-c">🔴 成本门槛为引用口径</span></li>
+      <li><strong>PFAS（「forever chemicals」永久性化学物质）。</strong> 一类极难自然降解、对水体和人体有害的化合物，监管日益收紧；需要新材料把它从水里去除。CuspAI 与 Kemira 的合作就是做这个。<span class="src src-b">🟡</span></li>
+      <li><strong>「可合成性（synthesizability）」是真正的坎。</strong> AI 生成一堆「理论上很好」的结构容易，但很多在现实里根本合不出来、或合出来成本/纯度不行。GNoME 宣称发现 220 万种晶体，但「能落地的有几个」一直被质疑。所以行业的真竞争点不在「生成多少候选」，而在<strong>「生成的能不能造出来、性能达不达标」</strong>——这点贯穿后文的早期度判断与 idea 借鉴。<span class="src src-b">🟡</span></li>
+      <li><strong>训练数据从哪来？</strong> 材料 AI 需要海量「结构-性质」标注数据，这些数据稀缺且昂贵（来自 DFT 量子计算模拟或真实实验）。谁掌握/能产出数据，谁就有 moat——这解释了为什么大家都在抢着发数据集（Meta 的 OpenCatalyst、ODAC25）或建自动化实验室（Lila、Periodic）。<span class="src src-b">🟡</span></li>
+    </ul>
+  </section>
+
+  <!-- ① 赛道与早期度 -->
+  <section id="market">
+    <h2><span class="n">①</span>赛道地图 + 早期度判断</h2>
+    <p>CuspAI 属于 <strong>AI for Science（AI4S）下的「生成式 AI 材料发现 / 逆向材料设计」</strong>赛道。这个赛道在解决一个共同需求：<strong>把「凭经验试错、动辄十年」的材料研发，变成「按需求生成候选 → 快速筛选 → 验证」的可计算流程</strong>，目标客户横跨气候（碳捕集）、能源（电池/催化）、半导体、水处理、化工等。下面按四象限列玩家，避免只盯垂直创业公司而漏掉最大威胁。</p>
+    <h3>玩家分群（四象限别漏）</h3>
+    <ul>
+      <li><strong>现有巨头 / 在位者：</strong>传统材料与化工巨头（BASF、Dow、Merck 等）有数据与产线，但 AI 能力多靠外部合作补足；专业仿真软件商（Schrödinger 在生物/化学计算，已上市）从计算侧切入。<span class="src src-b">🟡</span></li>
+      <li><strong>垂直创业公司（CuspAI 的同类）：</strong><strong>Orbital Materials/Industries</strong>（Jonathan Godwin，前 DeepMind，做数据中心碳捕集/冷却材料，2026 Series B $50M）、<strong>Periodic Labs</strong>（Liam Fedus + Ekin Cubuk，前 OpenAI/DeepMind，2025 种子约 $300M，主攻超导等）、<strong>Lila Sciences</strong>（自动化「AI 科学家」实验室，累计约 $550M、估值约 $1.3B）。再往外还有 Mat3ra、Citrine、Kebotix 等早期玩家。<span class="src src-b">🟡</span></li>
+      <li><strong>大厂顺手做：</strong><strong>Microsoft</strong>（MatterGen，已 MIT 开源生成模型）、<strong>Google DeepMind</strong>（GNoME，Nature 发文称发现 220 万晶体）、<strong>Meta FAIR</strong>（OpenCatalyst、ODAC25 等开源数据集——注意 Meta 同时是 CuspAI 的<em>合作方</em>而非纯竞品）、NVIDIA（ALCHEMI 等材料 AI 工具 + 投资多家）。<span class="src src-b">🟡</span></li>
+      <li><strong>开源 / 免费替代（最易被忽视的威胁）：</strong>MatterGen（MIT license，可直接下载微调）、GNoME 释出的晶体数据库、Meta 的 OpenCatalyst/ODAC25 数据集、学界的 M3GNet/CHGNet 等通用势函数模型。<strong>这意味着「会生成候选材料」本身正在被免费化</strong>——付费意愿正从「模型」转向「验证 + 数据 + 交付」。<span class="src src-a">🟢 开源事实</span></li>
+    </ul>
+    <div class="callout insight">
+      <span class="label">早期度判断</span>
+      <span class="verdict v-emerging">emerging（新兴，向 crowded 滑动）</span>
+      （nascent 萌芽 / emerging 新兴 / crowded 拥挤 / mature 成熟）<br><br>
+      <strong>判断信号：</strong>
+      <strong>① 玩家数量与新增速度：</strong>近 1–2 年新公司密集涌现（CuspAI 2024、Periodic Labs 2025、Lila 高调扩张、Orbital 转型），「AI 发明材料」类公司两年内合计融资已超 $1.3B（PitchBook/媒体口径<span class="src src-b">🟡</span>）——增速很快，是「热」的信号。
+      <strong>② 融资热度/轮次分布：</strong>种子轮就动辄 $30M–$300M，估值快速冲向独角兽，明显过热。
+      <strong>③ 巨头是否进场：</strong><strong>已经进了</strong>——Microsoft、Google DeepMind、Meta、NVIDIA 都在模型/数据/算力层布局，这是判「不再是纯萌芽」的关键。
+      <strong>④ 开源/免费替代：</strong><strong>已存在且强</strong>（MatterGen 开源、GNoME/Meta 数据集免费），模型层壁垒正在塌。
+      <strong>⑤ 客户认知：</strong>尚未成型——多数仍是「旗舰客户共创/试点（pilot）」，缺乏成熟采购预算与标准化产品。
+      <strong>⑥ 公认 benchmark/标准：</strong>有学界 benchmark（Matbench、OpenCatalyst）但「商业落地有效性」无统一标准，口径混乱。<br><br>
+      综合：技术范式已确立、巨头与资本已涌入，但<strong>商业化验证尚未完成、客户认知未定型</strong>——典型 emerging，且因玩家与资本扎堆，正快速向 crowded 演化。窗口仍在，但「纯做模型」的窗口基本已关。
+    </div>
+  </section>
+
+  <!-- ② 竞品矩阵 -->
+  <section id="matrix">
+    <h2><span class="n">②</span>竞品对照矩阵</h2>
+    <p>选了 7 个对这个赛道决定性的维度：<strong>核心打法（生成 vs 自动化实验）、技术路线、目标场景、商业模式、开源/闭源、规模&融资、数据/壁垒来源</strong>——因为该赛道真正拉开差距的不是「会不会生成」，而是<strong>「靠什么验证、靠什么变现、数据从哪来」</strong>。指标多为媒体/公司口径，已注明等级，口径不一处并列、不替任何一方美化。</p>
+    <table>
+      <thead><tr>
+        <th>玩家</th>
+        <th>核心打法</th>
+        <th>目标场景</th>
+        <th>商业模式</th>
+        <th>开源/闭源</th>
+        <th>规模 & 融资</th>
+        <th>数据 / 壁垒</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>CuspAI（本篇）</strong></td>
+          <td>生成式「材料搜索引擎」+ 分子模拟，按性质逆向出可合成候选 <span class="src src-c">🔴</span></td>
+          <td>碳捕集(MOF/DAC)、PFAS 去除、能源、半导体 <span class="src src-b">🟡</span></td>
+          <td><strong>研发服务变现</strong>：旗舰客户共创/项目交付为主，订阅席位/API 为公开归类（官方未披露细节）<span class="src src-c">🔴</span></td>
+          <td>闭源（模型/平台未公开）<span class="src src-b">🟡</span></td>
+          <td>约 25 人；约 $130M（种子+A）<span class="src src-b">🟡</span></td>
+          <td>与 Meta(ODAC25)/Hyundai/Kemira 共创专有数据；ML 血统(Welling)<span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Orbital Materials / Industries</td>
+          <td>AI 设计 + 自有数据中心做「验证/部署」场景（碳捕集、冷却）<span class="src src-b">🟡</span></td>
+          <td>数据中心去碳/冷却/水效（垂直绑定 AWS）<span class="src src-b">🟡</span></td>
+          <td>项目交付 + 自建数据中心商业化(Orbital IT)<span class="src src-b">🟡</span></td>
+          <td>闭源 <span class="src src-b">🟡</span></td>
+          <td>2026 Series B $50M(累计更多)<span class="src src-b">🟡</span></td>
+          <td>与 AWS 的真实部署场景做数据飞轮 <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Periodic Labs</td>
+          <td>AI + 自动化实验，从文献+物理实验学习<span class="src src-b">🟡</span></td>
+          <td>超导、新材料（科学突破导向）<span class="src src-b">🟡</span></td>
+          <td>未明确（早期，研究导向）<span class="src src-c">🔴</span></td>
+          <td>闭源 <span class="src src-b">🟡</span></td>
+          <td>2025 种子约 $300M（a16z 领投，Bezos/NVIDIA 等）<span class="src src-b">🟡</span></td>
+          <td>自产实验数据 + 顶级 OpenAI/DeepMind 血统<span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Lila Sciences</td>
+          <td>自动化「AI 科学家」实验室（软件+机器人闭环）<span class="src src-b">🟡</span></td>
+          <td>生命科学+化学+材料（横向平台）<span class="src src-b">🟡</span></td>
+          <td>平台/合作；资本密集自建湿实验室<span class="src src-b">🟡</span></td>
+          <td>闭源 <span class="src src-b">🟡</span></td>
+          <td>累计约 $550M，估值约 $1.3B<span class="src src-b">🟡</span></td>
+          <td>机器人自动化产生的专有实验数据<span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Microsoft MatterGen</td>
+          <td>生成式逆向设计模型（diffusion）<span class="src src-a">🟢</span></td>
+          <td>无机晶体（通用，研究/平台）<span class="src src-a">🟢</span></td>
+          <td>非独立商业体；服务 Azure 生态<span class="src src-b">🟡</span></td>
+          <td><strong>开源(MIT，HF+GitHub)</strong><span class="src src-a">🟢</span></td>
+          <td>大厂内部，预算无上限<span class="src src-b">🟡</span></td>
+          <td>Azure 算力 + 论文/模型影响力<span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Google DeepMind GNoME</td>
+          <td>大规模筛选 + 稳定性预测（发现 220 万晶体）<span class="src src-b">🟡</span></td>
+          <td>无机晶体大规模发现（科研）<span class="src src-b">🟡</span></td>
+          <td>非独立商业体（研究项目）<span class="src src-b">🟡</span></td>
+          <td>数据库公开释出<span class="src src-b">🟡</span></td>
+          <td>大厂内部<span class="src src-b">🟡</span></td>
+          <td>海量 DFT 模拟数据 + 品牌<span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Schrödinger（在位计算商）</td>
+          <td>物理基(physics-based)分子模拟，近年加 ML<span class="src src-b">🟡</span></td>
+          <td>药物 + 材料（成熟客户）<span class="src src-b">🟡</span></td>
+          <td>软件订阅 + 药物管线分成（已上市）<span class="src src-b">🟡</span></td>
+          <td>闭源商业软件<span class="src src-b">🟡</span></td>
+          <td>上市公司，规模大<span class="src src-b">🟡</span></td>
+          <td>多年物理引擎 + 客户基础<span class="src src-b">🟡</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>读矩阵：</strong>① <strong>模型层正在被大厂开源拉平</strong>（MatterGen/GNoME），靠「我们模型更强」做 moat 越来越难；② 真正的分化在<strong>「怎么验证 + 怎么拿数据」</strong>——Lila/Periodic 选「自建自动化湿实验室」（重资本、数据自产），Orbital 选「绑定 AWS 真实部署场景」，CuspAI 选「<strong>轻资产 + 与旗舰客户（Meta/Hyundai/Kemira）共创专有数据</strong>」；③ 商业模式普遍未定型，多是 pilot/共创，谁先跑通「可复制的付费产品」谁就领先。CuspAI 的差异化在于<strong>ML 学术血统（Welling）+ 顶级 advisor 背书 + 多行业旗舰客户网络</strong>，软肋在于<strong>自身无湿实验室、可合成性/验证依赖伙伴，闭环不在自己手里</strong>。</p>
+  </section>
+
+  <!-- ③ 定位图 -->
+  <section id="map">
+    <h2><span class="n">③</span>定位图（whitespace 在哪）</h2>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 640 400" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12">
+        <!-- 象限底色提示 whitespace -->
+        <rect x="320" y="20" width="280" height="170" fill="rgba(67,197,158,0.08)"/>
+        <text x="455" y="120" text-anchor="middle" fill="#43c59e" font-size="11" opacity="0.85">whitespace：</text>
+        <text x="455" y="136" text-anchor="middle" fill="#43c59e" font-size="11" opacity="0.85">轻资产 × 强闭环验证</text>
+        <text x="455" y="152" text-anchor="middle" fill="#43c59e" font-size="11" opacity="0.7">（验证即服务 / 合成代工网络）</text>
+        <!-- 轴 -->
+        <line x1="40" y1="200" x2="600" y2="200" stroke="#b9c2e0" stroke-width="1.5"/>
+        <line x1="320" y1="20" x2="320" y2="380" stroke="#b9c2e0" stroke-width="1.5"/>
+        <text x="600" y="218" text-anchor="end" fill="#5a627a">闭环强（自带验证/实验）→</text>
+        <text x="40" y="218" fill="#5a627a">← 纯模型/计算</text>
+        <text x="326" y="32" fill="#5a627a">轻资产 ↑</text>
+        <text x="326" y="372" fill="#5a627a">重资产（自建实验室/产线）↓</text>
+        <!-- 玩家点 -->
+        <!-- CuspAI: 轻资产、靠伙伴验证（偏中、偏上） -->
+        <circle cx="300" cy="95" r="8" fill="#7aa2ff"/>
+        <text x="300" y="82" text-anchor="middle" fill="#3a66ff" font-weight="700">CuspAI</text>
+        <text x="300" y="113" text-anchor="middle" fill="#5a627a" font-size="10">共创数据,无自有湿lab</text>
+        <!-- MatterGen / GNoME: 纯模型、轻 -->
+        <circle cx="120" cy="70" r="7" fill="#9b8cff"/>
+        <text x="120" y="58" text-anchor="middle" fill="#6b4cff">MatterGen</text>
+        <circle cx="150" cy="115" r="7" fill="#9b8cff"/>
+        <text x="150" y="135" text-anchor="middle" fill="#6b4cff">GNoME</text>
+        <!-- Periodic Labs: 强闭环、重 -->
+        <circle cx="470" cy="300" r="8" fill="#ff6b81"/>
+        <text x="470" y="288" text-anchor="middle" fill="#d23651">Periodic Labs</text>
+        <!-- Lila: 强闭环、最重 -->
+        <circle cx="520" cy="340" r="8" fill="#ff6b81"/>
+        <text x="520" y="328" text-anchor="middle" fill="#d23651">Lila Sciences</text>
+        <!-- Orbital: 中等闭环（绑 AWS 部署）、偏重 -->
+        <circle cx="430" cy="265" r="7" fill="#ffb454"/>
+        <text x="430" y="253" text-anchor="middle" fill="#b3701a">Orbital</text>
+        <!-- Schrödinger: 计算偏闭环(物理)、轻偏中 -->
+        <circle cx="250" cy="160" r="7" fill="#43c59e"/>
+        <text x="250" y="178" text-anchor="middle" fill="#138a6e">Schrödinger</text>
+      </svg>
+      </div>
+      <figcaption>定位图（本调研重绘）。横轴：纯模型/计算 ↔ 自带闭环验证；纵轴：重资产(自建实验室/产线) ↔ 轻资产。CuspAI 落在「轻资产但闭环靠伙伴」处；右上「轻资产 × 强闭环」基本空着——谁能用「合成/验证代工网络」补上闭环又不自建重资产，谁占 whitespace。</figcaption>
+    </figure>
+  </section>
+
+  <!-- ④ 融资 timeline -->
+  <section id="funding">
+    <h2><span class="n">④</span>融资 timeline</h2>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 720 170" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12.5">
+        <line x1="60" y1="80" x2="660" y2="80" stroke="#b9c2e0" stroke-width="2"/>
+        <!-- 成立 -->
+        <circle cx="90" cy="80" r="6" fill="#7aa2ff"/>
+        <text x="90" y="50" text-anchor="middle" fill="#3a66ff" font-weight="700">2024-03</text>
+        <text x="90" y="108" text-anchor="middle" fill="#5a627a">成立(Cambridge)</text>
+        <!-- 种子 -->
+        <circle cx="250" cy="80" r="7" fill="#43c59e"/>
+        <text x="250" y="50" text-anchor="middle" fill="#138a6e" font-weight="700">2024-06</text>
+        <text x="250" y="108" text-anchor="middle" fill="#5a627a">种子 $30M</text>
+        <text x="250" y="124" text-anchor="middle" fill="#9aa3bd" font-size="10.5">Hoxton 领投</text>
+        <!-- A 轮 -->
+        <circle cx="470" cy="80" r="8" fill="#9b8cff"/>
+        <text x="470" y="50" text-anchor="middle" fill="#6b4cff" font-weight="700">2025-09</text>
+        <text x="470" y="108" text-anchor="middle" fill="#5a627a">Series A $100M+</text>
+        <text x="470" y="124" text-anchor="middle" fill="#9aa3bd" font-size="10.5">NEA+Temasek 领投</text>
+        <text x="470" y="139" text-anchor="middle" fill="#9aa3bd" font-size="10.5">估值约$520M→$800M</text>
+        <!-- 传闻新轮 -->
+        <circle cx="630" cy="80" r="7" fill="#ffb454" fill-opacity="0.6" stroke="#ffb454" stroke-dasharray="3 2"/>
+        <text x="630" y="50" text-anchor="middle" fill="#b3701a" font-weight="700">2026(传)</text>
+        <text x="630" y="108" text-anchor="middle" fill="#5a627a">$200M(磋商中)</text>
+        <text x="630" y="124" text-anchor="middle" fill="#9aa3bd" font-size="10.5">估值约$1B(未签约)</text>
+      </svg>
+      </div>
+      <figcaption>CuspAI 融资时间线（据公开报道整理；2026 轮为传闻、未签约）。</figcaption>
+    </figure>
+    <table>
+      <thead><tr><th>时间</th><th>事件 / 轮次</th><th>金额</th><th>投资方</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr><td>2024-03</td><td>公司成立（注册于 Cambridge, UK）</td><td>—</td><td>Chad Edwards + Max Welling 共同创立</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2024-06</td><td>种子轮（出 stealth）</td><td>$30M（约 £23.6M）</td><td>Hoxton Ventures 领投；Basis Set、Lightspeed、LocalGlobe、Northzone、Touring、Giant、FJ Labs 等；DeepMind 人士天使</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2025-09</td><td>Series A</td><td>$100M+（媒体亦写 €85M+）</td><td>NEA + Temasek 共同领投；NVentures(NVIDIA)、Samsung Ventures、Hyundai Motor Group、Prosus、Basis Set 等 + 多位天使（Durk Kingma、Thomas Wolf 等）</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2025-09 后</td><td>A 轮后估值上调</td><td>估值约 $520M → 约 $800M（新合同推动）</td><td>—</td><td><span class="src src-c">🔴 媒体口径</span></td></tr>
+        <tr><td>2026（传闻）</td><td>新一轮磋商中</td><td>约 $200M</td><td>未披露领投；目标估值约 $1B（独角兽）。<strong>未签约，存疑</strong></td><td><span class="src src-c">🔴 未证实</span></td></tr>
+      </tbody>
+    </table>
+    <p><strong>读融资：</strong>累计已披露约 <strong>$130M</strong>（$30M + $100M+），节奏极快（成立 1.5 年内冲到 A 轮、估值快速翻倍），且把 <strong>NVIDIA / Samsung / Hyundai</strong> 这类<em>战略 + 客户型</em>投资人拉进股东表——既是钱也是订单与算力。这正佐证赛道「资本过热、估值前置」的 emerging→crowded 特征。<strong>赛道整体融资热度</strong>：AI 发明材料类公司两年合计融资已超 $1.3B（媒体/PitchBook 口径<span class="src src-b">🟡</span>），但商业回报路径仍被质疑「漫长」。</p>
+  </section>
+
+  <!-- ⑤ 公司速览 -->
+  <section id="snapshot">
+    <h2><span class="n">⑤</span>公司速览</h2>
+    <table>
+      <tbody>
+        <tr><td>是什么 / 定位</td><td>generative AI for materials 公司，做「材料搜索引擎」：输入性质需求 → AI 生成可合成的候选材料结构，号称比传统方法快约 10×。总部 Cambridge(UK)，另有 Amsterdam/Berlin/Tokyo 团队，2026 拟开 London Kings Cross 办公室。<span class="src src-b">🟡</span><span class="src src-c">🔴 10× 为自述</span></td></tr>
+        <tr><td>产品</td><td>生成式 AI 基础模型 + 深度学习 + 分子模拟构成的材料发现平台（「search engine for materials」）。产品形态/界面未公开披露。<span class="src src-b">🟡</span></td></tr>
+        <tr><td>团队</td><td><strong>research 血统强：</strong>CEO <strong>Dr. Chad Edwards</strong>（化学家，deep-tech 商业化，曾任 Google、BASF、Quantinuum）；CTO <strong>Prof. Max Welling</strong>（机器学习重量级学者，University of Amsterdam，曾在 Microsoft/高通带 AI research）；CSO <strong>Prof. Aron Walsh</strong>（计算化学/物理）。<strong>Advisor：Geoffrey Hinton、Yann LeCun</strong>，及 Martin van den Brink（前 ASML CTO）、Lord John Browne（前 BP CEO）。约 25 人。<span class="src src-b">🟡</span></td></tr>
+        <tr><td>商业模式</td><td>用户归类为「<strong>类型1：研发服务变现</strong>」。可核实的实态：以<strong>旗舰客户共创 / 项目交付</strong>为主（Meta 碳捕集、Hyundai 能源、Kemira PFAS）。「订阅席位 / API」是对其变现方式的<strong>公开归类/推测</strong>，<strong>官网未披露具体定价或产品化 SaaS 入口</strong>。<span class="src src-c">🔴 商业模式细节未证实</span></td></tr>
+        <tr><td>状态</td><td>已出 stealth；种子 + A 轮，累计约 $130M；约 25 人；2026 传募 $200M@$1B（未签约）。仍属早期、产品商业实效未独立验证。<span class="src src-b">🟡</span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ⑥ 创业 idea 借鉴 -->
+  <section id="idea">
+    <h2><span class="n">⑥</span>创业 idea 借鉴</h2>
+    <div class="callout insight">
+      <span class="label">Whitespace / 机会</span>
+      <strong>「验证层」是空格。</strong> 模型层（生成候选）正被 MatterGen/GNoME 等开源拉平，而「自建湿实验室」（Lila/Periodic）又极重资本、门槛高。<strong>定位图右上「轻资产 × 强闭环验证」基本空着</strong>：做一个<strong>「材料验证即服务 / 可合成性 + 合成代工网络」</strong>——把 AI 候选材料通过外部 CRO/合成代工 + 高通量表征快速验证，按「验证通过的候选」收费，既不自建产线又补上别人最缺的闭环。另一空格：<strong>面向中小材料/化工企业的「自助式材料 copilot」</strong>（大厂忙着服务 Meta/Hyundai 这类巨头，长尾客户没人管）。
+    </div>
+    <h3>现有玩家共同短板（unmet needs）</h3>
+    <p>① <strong>可合成性 & 真实性能验证</strong>是全行业软肋——生成一堆「理论好」的结构容易，能造出来、性能达标的少（GNoME 220 万晶体的落地率长期被质疑）。② <strong>商业模式未定型</strong>：多停在 pilot / 共创，缺标准化、可复制的付费产品，采购预算与认知未成型。③ <strong>数据稀缺且贵</strong>：高质量「结构-性质」数据是命脉，没有数据飞轮的玩家很难持续领先。④ <strong>长尾客户被忽视</strong>：资源都压在少数旗舰客户上。</p>
+    <h3>Why now（为什么现在值得做）</h3>
+    <p>① <strong>生成模型成熟</strong>：diffusion/flow 把逆向设计从「学术 demo」推到「能用」。② <strong>开源拐点</strong>：MatterGen(MIT)、GNoME/Meta 数据集免费释出，<strong>创业者不必从零训模型</strong>，可把精力放在验证/数据/垂直场景，进入门槛骤降。③ <strong>需求侧拐点</strong>：碳捕集(DAC)、PFAS 监管、电池/半导体国产替代、AI 数据中心散热——这些都急需新材料且有真实预算。④ <strong>算力与战略资本</strong>：NVIDIA/Samsung/Hyundai 等愿意「投钱 + 给场景 + 给算力」，缩短验证周期。</p>
+    <h3>可借鉴的打法 + 相邻机会</h3>
+    <ul>
+      <li><strong>borrowable：</strong>（1）<strong>「旗舰客户共创 = 拿数据 + 拿背书 + 拿订单」三合一</strong>——CuspAI 用 Meta/Hyundai/Kemira 同时解决「数据从哪来」「凭什么信你」「谁付钱」三个早期难题，值得任何 AI4S/深科技公司照搬；（2）<strong>顶级学术血统 + 明星 advisor 做信任杠杆</strong>，在「产品没法立刻证明」的深科技里直接降低融资与 BD 摩擦；（3）<strong>把复杂能力包装成一句话产品（「材料搜索引擎」）</strong>，降低非专家客户的认知成本；（4）<strong>战略投资人当客户 / 算力来源</strong>。</li>
+      <li><strong>adjacent：</strong>（1）<strong>验证/合成代工网络</strong>（上面 whitespace，最推荐）；（2）<strong>垂直单点深做</strong>——只做电池电解液 / 只做半导体光刻胶 / 只做 DAC 吸附剂，用深度换巨头的广度；（3）<strong>数据基础设施层</strong>：做材料 AI 的「数据标注/高通量模拟 pipeline / benchmark 标准」，卖给所有玩家（卖铲子）；（4）<strong>换商业模式</strong>：从「项目交付」转向「材料 IP 授权 / 性能分成」，把一次性收入变持续现金流。</li>
+    </ul>
+    <div class="callout warn">
+      <span class="label">风险（诚实给）</span>
+      ① <strong>巨头碾压 + 开源免费</strong>：Microsoft/Google/Meta 在模型与数据层免费供给，纯模型创业窗口基本已关；② <strong>资本过热 / 估值前置</strong>：种子轮就 $30M–$300M，回报路径却「漫长」（PitchBook 直言），后续轮与退出压力大；③ <strong>变现未证实</strong>：CuspAI 等的「产品化 SaaS」多为推测，真实可复制收入尚未公开验证；④ <strong>验证闭环是命门</strong>：轻资产玩家若验证依赖外部伙伴，moat 不在自己手里；重资产玩家（自建实验室）则烧钱极快；⑤ <strong>赛道正向 crowded 滑动</strong>，同质化与人才/客户争夺加剧。
+    </div>
+  </section>
+
+  <!-- ⑦ 现实判断 -->
+  <section id="take">
+    <h2><span class="n">⑦</span>现实判断</h2>
+    <p>CuspAI 在格局里的<strong>胜算</strong>来自三点：顶级 ML 学术血统（Welling）+ 明星 advisor（Hinton/LeCun）做信任杠杆、多行业旗舰客户网络（Meta/Hyundai/Kemira/NVIDIA）形成数据 + 订单 + 算力的正循环、以及轻资产打法让它跑得比自建实验室的玩家快、烧钱少。<strong>软肋</strong>同样清晰：自身无湿实验室，<strong>可合成性与真实性能验证依赖外部伙伴，最关键的「闭环」不在自己手里</strong>；商业模式仍以共创/交付为主、产品化 SaaS 未被独立验证；且模型层正被大厂开源拉平，长期 moat 更多要靠「专有数据 + 客户深度绑定」而非模型本身。对「能不能挤进这个赛道」的判断：emerging 窗口仍开，但<strong>纯做模型的窗口基本已关</strong>——新进入者应直奔「验证层 / 数据层 / 垂直深耕」，而不是再造一个生成模型。CuspAI 自己也正用「旗舰客户共创」往这个方向补课，这恰恰印证了 whitespace 所在。</p>
+    <div class="callout warn">
+      <span class="label">使用提醒</span>
+      本页为对话式调研，信息主要来自公开来源并按等级标注；融资数额、客户、能力声明等以官方一手为准，
+      <strong>产品能力未必经独立验证</strong>（尤其「10× 更快」「订阅/API 变现」「$200M@$1B 新轮」均为自述或未证实），引用前请核对最新信息。
+    </div>
+  </section>
+
+  <!-- 出处 -->
+  <section id="src">
+    <h2>出处</h2>
+    <ul style="font-size:13.5px">
+      <li><a href="https://www.cusp.ai/" target="_blank" rel="noopener">官网 cusp.ai</a><span class="src src-a">🟢</span>（团队、定位；cuspai.com 301 跳转至此）</li>
+      <li><a href="https://medium.com/@CuspAI/securing-our-100m-series-a-to-revolutionise-materials-discovery-with-ai-e6705e8c8fd3" target="_blank" rel="noopener">CuspAI Medium：$100M+ Series A 公告</a><span class="src src-a">🟢</span></li>
+      <li><a href="https://medium.com/@CuspAI/cuspai-secures-30m-to-combat-climate-change-with-ai-designed-materials-e334b4caf560" target="_blank" rel="noopener">CuspAI Medium：$30M 种子轮公告</a><span class="src src-a">🟢</span></li>
+      <li><a href="https://siliconangle.com/2025/09/10/cuspai-raises-100m-build-ai-search-engine-transform-materials-science/" target="_blank" rel="noopener">SiliconANGLE：$100M Series A 报道</a><span class="src src-b">🟡</span></li>
+      <li><a href="https://techcrunch.com/2024/06/18/cuspai-raises-30m-to-create-a-gen-ai-driven-search-engine-for-new-materials/" target="_blank" rel="noopener">TechCrunch：种子轮 + 创始人</a><span class="src src-b">🟡</span></li>
+      <li><a href="https://sifted.eu/articles/cuspai-funding-round-unicorn-valuation" target="_blank" rel="noopener">Sifted：传 $200M@独角兽估值（未签约）</a><span class="src src-c">🔴</span></li>
+      <li><a href="https://www.threads.com/@aiatmeta/post/DM8p5jwT4as/" target="_blank" rel="noopener">Meta AI（Threads）：ODAC25 数据集（Meta FAIR + Georgia Tech + CuspAI）</a> · <a href="https://huggingface.co/facebook/ODAC25" target="_blank" rel="noopener">ODAC25 on HF</a><span class="src src-a">🟢</span></li>
+      <li><a href="https://www.businessweekly.co.uk/posts/cuspai-confirms-100m-raise-from-global-heavyweights-as-hyundai-joins-throng" target="_blank" rel="noopener">Business Weekly：客户/合作（Hyundai/Kemira/Meta）</a><span class="src src-b">🟡</span></li>
+      <li><a href="https://github.com/microsoft/mattergen" target="_blank" rel="noopener">Microsoft MatterGen（开源，MIT）</a><span class="src src-a">🟢</span></li>
+      <li><a href="https://pitchbook.com/news/articles/discovering-new-materials-with-ai-has-a-winding-road-to-vc-returns" target="_blank" rel="noopener">PitchBook：AI 材料发现的 VC 回报路径漫长</a><span class="src src-b">🟡</span></li>
+      <li><a href="https://fortune.com/2026/05/28/exclusive-orbital-industries-raises-50-million-series-b-funding-round-ai-to-discover-exotic-new-materials/" target="_blank" rel="noopener">Fortune：Orbital Industries $50M Series B</a><span class="src src-b">🟡</span></li>
+      <li><a href="https://mlq.ai/news/periodic-labs-reportedly-raises-300m-for-ai-powered-materials-science-platform/" target="_blank" rel="noopener">Periodic Labs 约 $300M 种子</a> · <a href="https://research.contrary.com/company/lila-sciences" target="_blank" rel="noopener">Contrary：Lila Sciences 拆解</a><span class="src src-b">🟡</span></li>
+      <li><a href="https://www.technologyreview.com/2025/12/15/1129210/ai-materials-science-discovery-startups-investment/" target="_blank" rel="noopener">MIT Tech Review：AI 材料发现要走入真实世界</a><span class="src src-b">🟡</span></li>
+    </ul>
+  </section>
+
+  <footer class="foot">
+    公司竞争格局 / 赛道早期度调研笔记，仅作梳理；信息按来源分级、产品能力未必经独立验证，以官方一手信息为准 · 整理日期 2026-06-15
+  </footer>
+
+</article>
+</body>
+</html>
