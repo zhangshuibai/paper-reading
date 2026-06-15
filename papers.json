@@ -135,6 +135,193 @@
     "path": "papers/2026-06-15-unreasonable-labs/index.html"
   },
   {
+    "slug": "2026-06-15-cuspai",
+    "title": "CuspAI：竞争格局与赛道早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://www.cusp.ai/",
+    "code": "",
+    "date": "2026-06-15",
+    "published": "公司调研 2026",
+    "tldr": "材料搜索引擎/generative AI for materials(英国Cambridge,Welling);emerging→crowded,累计~$130M;idea=材料验证即服务+合成代工网络。",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "startup-idea",
+      "AI4S",
+      "materials"
+    ],
+    "path": "papers/2026-06-15-cuspai/index.html"
+  },
+  {
+    "slug": "2026-06-15-quantumbond-ai",
+    "title": "QuantumBond AI：竞争格局与赛道早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-15",
+    "published": "公司调研 2026",
+    "tldr": "声称做AI×电解质/催化剂界面模拟+IP授权,但公司本体网上无法确证(全标🔴);借此摸清电池界面AI4S赛道(emerging);idea=电化学界面轻资产配方IP工坊。",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "startup-idea",
+      "AI4S",
+      "batteries"
+    ],
+    "path": "papers/2026-06-15-quantumbond-ai/index.html"
+  },
+  {
+    "slug": "2026-06-15-periodic-labs",
+    "title": "Periodic Labs：竞争格局与赛道早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://periodic.com",
+    "code": "",
+    "date": "2026-06-15",
+    "published": "公司调研 2026",
+    "tldr": "AI scientist+自驱实验室(物理/材料,Fedus ex-OpenAI+Cubuk ex-DeepMind);a16z领投$300M种子;emerging;idea=自主实验室/数据 as-a-service。",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "startup-idea",
+      "AI4S",
+      "self-driving-lab"
+    ],
+    "path": "papers/2026-06-15-periodic-labs/index.html"
+  },
+  {
+    "slug": "2026-06-15-orbital-materials",
+    "title": "Orbital Industries(原 Orbital Materials)：竞争格局与赛道早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://www.orbitalindustries.com/",
+    "code": "",
+    "date": "2026-06-15",
+    "published": "公司调研 2026",
+    "tldr": "AI+自建制造做数据中心脱碳材料(液冷剂);2026改名Orbital Industries;累计~$70M;emerging;idea=抓监管逼出的刚需实物缺口(无PFAS冷却液)。",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "startup-idea",
+      "AI4S",
+      "materials"
+    ],
+    "path": "papers/2026-06-15-orbital-materials/index.html"
+  },
+  {
+    "slug": "2026-06-15-ares-materials",
+    "title": "Ares Materials：竞争格局与赛道早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://aresmaterials.com/",
+    "code": "",
+    "date": "2026-06-15",
+    "published": "公司调研 2026",
+    "tldr": "Texas柔性显示基板/光学薄膜(2014 UT Dallas spinout),AI仅内部加速器、非真AI4S平台;材料层crowded→mature;2025-10 Series B首笔$12M。",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "materials"
+    ],
+    "path": "papers/2026-06-15-ares-materials/index.html"
+  },
+  {
+    "slug": "2026-06-15-altrove",
+    "title": "Altrove：竞争格局与赛道早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://www.altrove.ai/",
+    "code": "",
+    "date": "2026-06-15",
+    "published": "公司调研 2026",
+    "tldr": "法国AI+自驱产线做无稀土磁体;外层材料发现crowded、内层垂直造磁体nascent;累计~$14M种子;idea=单一卡脖子材料品类自建小产线卖过认证实物+IP。",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "startup-idea",
+      "AI4S",
+      "materials"
+    ],
+    "path": "papers/2026-06-15-altrove/index.html"
+  },
+  {
+    "slug": "2026-06-15-lila-sciences",
+    "title": "Lila Sciences：竞争格局与赛道早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://www.lila.ai/",
+    "code": "",
+    "date": "2026-06-15",
+    "published": "公司调研 2026",
+    "tldr": "Flagship孵化的自驱跨域研发平台;种子$200M→A$350M累计$550M(~$1.3B,传洽$8.5B);emerging偏nascent;idea=自驱实验室 as-a-service(CRO 2.0)。",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "startup-idea",
+      "AI4S",
+      "self-driving-lab"
+    ],
+    "path": "papers/2026-06-15-lila-sciences/index.html"
+  },
+  {
+    "slug": "2026-06-15-radical-ai",
+    "title": "Radical AI：竞争格局与赛道早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://radical-ai.com",
+    "code": "",
+    "date": "2026-06-15",
+    "published": "公司调研 2026",
+    "tldr": "NYC自驱材料实验室,极端环境材料+政府/国防;$55M Seed+(RTX领投)+AFWERX合同;emerging;idea=极端环境材料×政府阶段交付窄缝。",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "startup-idea",
+      "AI4S",
+      "gov-contract"
+    ],
+    "path": "papers/2026-06-15-radical-ai/index.html"
+  },
+  {
+    "slug": "2026-06-15-exa-labs",
+    "title": "Exa Labs：竞争格局与赛道早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://exa.ai",
+    "code": "",
+    "date": "2026-06-15",
+    "published": "公司调研 2026",
+    "tldr": "AI搜索API(自建索引+自研embedding,前身Metaphor);通用搜索emerging→crowded;A→C $250M@$2.2B(a16z);idea=AI4S版的Exa(科研agent领域语义检索API)。",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "startup-idea",
+      "search",
+      "AI-infra"
+    ],
+    "path": "papers/2026-06-15-exa-labs/index.html"
+  },
+  {
+    "slug": "2026-06-15-isomorphic-labs",
+    "title": "Isomorphic Labs：竞争格局与赛道早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://www.isomorphiclabs.com",
+    "code": "",
+    "date": "2026-06-15",
+    "published": "公司调研 2026",
+    "tldr": "DeepMind分拆AI药物发现(Hassabis,AlphaFold);Lilly/Novartis合作+$600M+$2.1B B轮;crowded→maturing,临床尚未兑现;idea=做中立工具/数据/评测层卖铲子。",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "startup-idea",
+      "drug-discovery"
+    ],
+    "path": "papers/2026-06-15-isomorphic-labs/index.html"
+  },
+  {
     "slug": "2606.03854-cli-anything",
     "title": "CLI-Anything: Towards Agent-Native Computer Use",
     "authors": "Yuhao Yang, Tianyu Fan, Chao Huang",
