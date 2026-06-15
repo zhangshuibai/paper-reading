@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lila Sciences · 竞争格局与赛道早期度调研</title>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --bad:#ff6b81; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --bad:#d23651; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;}
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:920px; margin:0 auto; padding:18px 22px 90px}
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:25px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)} .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap; line-height:2}
+  nav.toc a:hover{color:var(--accent)}
+  section{margin:38px 0}
+  h2{font-size:20px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:16.5px; margin:22px 0 8px}
+  p{margin:12px 0} ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)} strong{color:var(--text)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.88em}
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:13px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:9px 10px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  figure{margin:24px 0; text-align:center}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+  .svgwrap{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 8px}
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+  .src{font-size:10.5px; padding:0 6px; border-radius:999px; white-space:nowrap; vertical-align:middle}
+  .src-a{background:rgba(67,197,158,.18); color:var(--ok)}
+  .src-b{background:rgba(255,180,84,.18); color:var(--warn)}
+  .src-c{background:rgba(255,107,129,.18); color:var(--bad)}
+  .legend{font-size:12px; color:var(--muted); margin:6px 0 0}
+  .verdict{display:inline-block; font-weight:700; padding:3px 12px; border-radius:999px; font-size:14px}
+  .v-nascent{background:rgba(122,162,255,.18); color:var(--accent)}
+  .v-emerging{background:rgba(67,197,158,.18); color:var(--ok)}
+  .v-crowded{background:rgba(255,180,84,.18); color:var(--warn)}
+  .v-mature{background:rgba(255,107,129,.18); color:var(--bad)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">AI4S</span>
+      <span class="chip">自驱实验室</span>
+      <span class="chip">材料 / 生命 / 化学</span>
+      <span class="chip">竞争格局</span>
+      <span class="chip">赛道早期度</span>
+      <span class="chip">创业 idea</span>
+    </div>
+    <h1>Lila Sciences：竞争格局与赛道早期度调研</h1>
+    <p class="orig-title">lila.ai — 「scientific superintelligence」+ 自驱 AI Science Factory / 干湿闭环研发平台；这个赛道有多早、谁在抢、有什么 idea 可借鉴</p>
+    <dl class="meta-grid">
+      <dt>对象</dt><dd><a href="https://www.lila.ai/" target="_blank" rel="noopener">https://www.lila.ai/</a></dd>
+      <dt>赛道</dt><dd>AI for Science（AI4S）/ 自驱实验室（self-driving lab）/ 跨域研发平台（材料·生命科学·化学）</dd>
+      <dt>整理</dt><dd>对话调研笔记；信息来自公开检索，按来源分级标注，产品能力未必经独立验证</dd>
+      <dt>日期</dt><dd>2026-06-15</dd>
+    </dl>
+    <p class="legend">来源等级：<span class="src src-a">🟢 一手</span> 官网/官方 newsroom ·
+      <span class="src src-b">🟡 二手</span> 媒体/数据库 ·
+      <span class="src src-c">🔴 自述/未证实</span> 营销口径或未独立验证</p>
+  </header>
+
+  <div class="tldr">
+    <b>一句话</b> — Lila Sciences 是 Flagship Pioneering 2023 年在自家 labs 孵化、由 Geoffrey von Maltzahn / Noubar Afeyan / Molly Gibson 等创办的 deep-tech 公司，要造「scientific superintelligence」：用生成式 AI + 自研软件 + 定制硬件机器人，搭一套自驱的「AI Science Factory」，在<strong>材料、生命科学、化学</strong>跨域跑「提假设→设计实验→真机做→学结果→迭代」的干湿闭环 <span class="src src-a">🟢</span>。<b>赛道判断：emerging（新兴）偏 nascent</b> —— 玩家不多但 2024–2025 一年内集中涌现（Periodic Labs、CuspAI、Radical AI、Orbital Materials…），融资额夸张、Nvidia 几乎逢轮必投，但「AI 自己做出真东西」基本还是 demo 与自述，巨头（DeepMind/Microsoft）从模型侧压顶、学术开源（A-Lab）从另一头逼近。<b>一个可借鉴 idea</b>：别正面拼 Lila 那种「全栈烧钱造工厂」，做<strong>「自驱实验室 as a service / CRO 2.0」</strong>——把闭环按实验通量/时长卖给买不起整套工厂的中小药企与材料公司（用户归类的「类型3」），用商业模式而非资本规模做差异化。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#bg">⓪ 领域背景速补</a>
+    <a href="#market">① 赛道地图 + 早期度</a>
+    <a href="#matrix">② 竞品对照矩阵</a>
+    <a href="#map">③ 定位图</a>
+    <a href="#funding">④ 融资 timeline</a>
+    <a href="#snapshot">⑤ 公司速览</a>
+    <a href="#idea">⑥ 创业 idea 借鉴</a>
+    <a href="#take">⑦ 现实判断</a>
+    <a href="#src">出处</a>
+  </nav>
+
+  <!-- ⓪ 领域背景速补 -->
+  <section id="bg">
+    <h2><span class="n">⓪</span>领域背景速补（只懂 LLM 也能跟上）</h2>
+    <p>这家公司横跨「AI + 实验科学」，下面几个名词是看懂全文的钥匙：</p>
+    <ul>
+      <li><strong>AI for Science（AI4S）</strong>：用 AI 加速科学发现，而不是写代码/聊天。和 LLM 的区别在于——LLM 的「真相」来自互联网文本，而科学的真相来自<strong>真实实验</strong>。这就引出下一个概念。</li>
+      <li><strong>自驱实验室 / self-driving lab（SDL）</strong>：把「AI 出主意」和「机器人真动手做实验」接成一个闭环。AI 提一个假设（比如「这个配方可能是高温超导体」），机器人去合成、表征、测量，结果再喂回 AI 改进下一轮——像自动驾驶，只不过开的是实验台。类比：AlphaGo 靠自己跟自己下棋产生数据，SDL 想靠自己做实验产生数据。这是这一批公司共同的核心叙事。</li>
+      <li><strong>干湿闭环（dry-lab ↔ wet-lab）</strong>：dry 指计算/仿真/AI（在电脑里），wet 指真实的化学生物实验（在实验台）。多数 AI4S 工具只做 dry（给个预测就完事），<strong>Lila 这类强调把 dry 的预测拿到 wet 里真去验证</strong>，闭环回来——这是它和「纯算法公司」的关键分野。</li>
+      <li><strong>materials science / 生命科学 / 化学 的「难」在哪</strong>：这些领域的搜索空间天文数字（可能的分子/材料组合是 10⁶⁰ 量级），且<strong>没有像围棋那样廉价的模拟器</strong>——要知道一个材料行不行，往往只能真做出来测。所以「实验通量」（一天能做多少次实验）本身就是稀缺资源，谁能把它自动化、规模化，谁就有数据飞轮。</li>
+      <li><strong>scientific superintelligence（科学超级智能）</strong>：Lila 的口号，指「在科学发现上超过人类专家的 AI」。<span class="src src-c">🔴</span> 这是<strong>营销/愿景词</strong>，不是已验证的能力，读时请打折。</li>
+      <li><strong>CRO（Contract Research Organization，研发外包）</strong>：药企/材料公司把实验外包给的第三方机构，按项目或按实验次数收费。本文反复提到的「CRO 2.0」= 把传统人力 CRO 升级成「AI + 自驱实验室」的研发外包，按通量/时长卖服务。</li>
+      <li><strong>MOF（metal-organic framework，金属有机框架）</strong>：一类多孔材料，常用于碳捕集（吸 CO₂）。CuspAI、Lila 都拿它做 demo，因为「设计一个好 MOF」是材料 AI 的经典靶子。</li>
+      <li><strong>Flagship Pioneering</strong>：孵化出 Moderna 的著名 venture creation 机构（不是普通 VC，而是自己造公司）。Lila 是它「亲儿子」，这解释了为什么 Lila 一出生就有 $200M 和一堆诺奖级科学家——这是它最硬的背景，也是判断它的关键。</li>
+    </ul>
+  </section>
+
+  <!-- ① 赛道与早期度 -->
+  <section id="market">
+    <h2><span class="n">①</span>赛道地图 + 早期度判断</h2>
+    <p>Lila 属于 <strong>AI for Science 里的「自驱实验室 / 跨域研发平台」</strong>这一支。这个赛道解决的需求很具体：科学发现太慢太贵（一个新材料/新药动辄十年），而瓶颈不在「算得快」而在「试得快」——所以这批公司不只训模型，还<strong>自己造能跑实验的硬件闭环</strong>，目标是把发现周期从「年」压到「天/周」<span class="src-c src">🔴</span>（这是各家共同的自述卖点，尚无独立大规模验证）。</p>
+    <h3>玩家分群（四象限别漏）</h3>
+    <ul>
+      <li><strong>现有巨头 / 大厂顺手做：</strong>Google <strong>DeepMind</strong>（GNoME 预测 220 万新晶体 + 与 Berkeley A-Lab 合作机器人合成）<span class="src src-b">🟡</span>、<strong>Microsoft</strong>（MatterGen 生成式材料模型、Azure Quantum Elements）<span class="src src-b">🟡</span>、<strong>Meta FAIR</strong>（Open Catalyst / OMat 数据集，且与 CuspAI 合作）<span class="src src-b">🟡</span>。它们从「基础模型 + 数据集 + 云」一侧压顶，多走开放/开源路线，是这一层最大的隐性威胁。</li>
+      <li><strong>垂直创业公司（直接竞品）：</strong><strong>Periodic Labs</strong>（前 OpenAI/DeepMind 班底，$300M 种子，专攻材料如超导体）<span class="src src-b">🟡</span>、<strong>CuspAI</strong>（Max Welling 创办，材料「搜索引擎」，碳捕集 MOF）<span class="src src-b">🟡</span>、<strong>Radical AI</strong>（$55M，纽约自驱无机材料实验室）<span class="src src-b">🟡</span>、<strong>Orbital Materials</strong>（材料 + 数据中心）<span class="src src-b">🟡</span>。和 Lila 最像，但多数<strong>聚焦材料单域</strong>，Lila 的差异是<strong>跨材料/生命/化学三域</strong>。</li>
+      <li><strong>相邻替代品（不同形态、同需求）：</strong>药物侧的 AI 平台 <strong>Isomorphic Labs</strong>（DeepMind 系，AlphaFold→药物）、<strong>Recursion / Insitro / Genesis Therapeutics</strong>（AI 制药，自有湿实验）<span class="src src-b">🟡</span>——它们也搞「AI + 实验闭环」，只是把价值锁死在「自有管线/药」而非「卖平台」。</li>
+      <li><strong>开源 / 学术免费替代：</strong>Berkeley <strong>A-Lab</strong>（Ceder 组，自驱无机材料合成，论文+方法公开；本仓库另有其解读）<span class="src src-a">🟢</span>、<strong>Emerald Cloud Lab / Strateos</strong>（商业云实验室，远程下单跑实验，可与 AI 设计拼成自驱）<span class="src src-b">🟡</span>。学术开源证明了「自驱实验室」技术可行（但也曾被质疑发现的真实性），既压低叙事稀缺性，又给创业者现成的积木。</li>
+    </ul>
+    <div class="callout insight">
+      <span class="label">早期度判断</span>
+      <span class="verdict v-emerging">emerging（新兴，偏 nascent）</span>
+      （nascent 萌芽 / emerging 新兴 / crowded 拥挤 / mature 成熟）<br><br>
+      <strong>判断信号：</strong>
+      ① <strong>玩家数与新增速度</strong>——直接做「自驱跨域研发平台」的独立公司是<strong>个位数</strong>，但几乎全在 <strong>2024–2025 一年内集中冒头</strong>（Lila 2025/03 出 stealth、Periodic 2025/09、Radical 2025、CuspAI A 轮 2025/09），新增很快，说明刚过「萌芽」拐点。
+      ② <strong>融资热度极高、轮次靠前</strong>——种子轮就 $200–300M（远超常规），<strong>Nvidia 的 NVentures 几乎逢轮必投</strong>，资本把「自驱实验室」当成和数据中心/晶圆厂并列的新资产类别 <span class="src src-b">🟡</span>，典型的「赛道被押注、但产品未成熟」。
+      ③ <strong>巨头已进场（从模型侧）</strong>——DeepMind/Microsoft/Meta 都有材料 AI，但走「模型+数据集」而非「自建工厂」，尚未正面做平台公司，留了窗口。
+      ④ <strong>开源/学术替代存在</strong>（A-Lab、云实验室），技术不再是秘密。
+      ⑤ <strong>客户认知未成型、无公认 benchmark</strong>——没有一个大家认的「自驱实验室效果」评测，各家都自述「快 N 倍」，<strong>这正是「早期」的强信号</strong>：标准没立、护城河未定、idea 机会还在。
+    </div>
+  </section>
+
+  <!-- ② 竞品矩阵 -->
+  <section id="matrix">
+    <h2><span class="n">②</span>竞品对照矩阵</h2>
+    <p>选了对这个赛道最具决定性的 6 个维度：<strong>覆盖域</strong>（单域还是跨域，决定 TAM 与难度）、<strong>技术路线</strong>（纯模型 / 模型+自建湿实验室）、<strong>商业模式</strong>（卖平台/服务 vs 自有管线——决定护城河与现金流形态）、<strong>开源态度</strong>、<strong>融资&背景</strong>、<strong>是否有可核实的真实产出</strong>。指标多为各家自述，已标来源；口径不一处并列不替谁美化。</p>
+    <table>
+      <thead><tr>
+        <th>玩家</th>
+        <th>覆盖域</th>
+        <th>技术路线</th>
+        <th>商业模式</th>
+        <th>开源</th>
+        <th>融资 / 背景</th>
+        <th>可核实产出</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Lila Sciences（本篇）</strong></td>
+          <td><strong>跨域：材料+生命+化学</strong> <span class="src src-a">🟢</span></td>
+          <td>生成式 AI + 自研软件 + 定制硬件，自建「AI Science Factory」干湿闭环 <span class="src src-a">🟢</span></td>
+          <td>平台/工厂（GTM 未公开披露定价；June 2026 传 $8.5B 估值募资，对标数据中心式资产）<span class="src src-b">🟡</span></td>
+          <td>闭源 <span class="src src-b">🟡</span></td>
+          <td><strong>$550M（截至 2025/10）</strong>；Flagship 孵化，George Church/Kenneth Stanley 等 <span class="src src-a">🟢</span></td>
+          <td>自述：数千项发现、抗体/绿氢非贵金属催化剂/碳捕集材料 <span class="src src-c">🔴</span>（无独立验证）</td>
+        </tr>
+        <tr>
+          <td>Periodic Labs</td>
+          <td>材料（超导体等）<span class="src src-b">🟡</span></td>
+          <td>AI scientist + 自驱实验室，目标超越互联网数据 <span class="src src-b">🟡</span></td>
+          <td>未公开（平台/发现）<span class="src src-c">🔴</span></td>
+          <td>闭源 <span class="src src-b">🟡</span></td>
+          <td>$300M 种子（2025/09，a16z 领、Nvidia 投）；前 OpenAI(Liam Fedus)/DeepMind(Cubuk) <span class="src src-b">🟡</span></td>
+          <td>新公司，产出未披露 <span class="src src-c">🔴</span></td>
+        </tr>
+        <tr>
+          <td>CuspAI</td>
+          <td>材料（碳捕集 MOF、水处理）<span class="src src-b">🟡</span></td>
+          <td>生成式 AI + 物理仿真，「材料搜索引擎」；与 Meta FAIR 合作 <span class="src src-b">🟡</span></td>
+          <td>面向客户按所需属性生成候选材料（偏服务/平台）<span class="src src-b">🟡</span></td>
+          <td>部分模型自研(MOFGEN)，靠 Meta 开放数据 <span class="src src-b">🟡</span></td>
+          <td>$30M 种子(2024)+$100M A轮(2025，NEA/Temasek，Nvidia/三星/现代)；Max Welling 创 <span class="src src-b">🟡</span></td>
+          <td>MOF/碳捕集为主线，效果自述 <span class="src src-c">🔴</span></td>
+        </tr>
+        <tr>
+          <td>Radical AI</td>
+          <td>无机材料 <span class="src src-b">🟡</span></td>
+          <td>自驱材料实验室（Brooklyn Navy Yard，~100 实验/天）<span class="src src-b">🟡</span></td>
+          <td>平台/发现，地方政府补贴建厂 <span class="src src-b">🟡</span></td>
+          <td>闭源 <span class="src src-b">🟡</span></td>
+          <td>$55M Seed+（RTX Ventures 领、Nvidia 投）；2024 成立 <span class="src src-b">🟡</span></td>
+          <td>实验室在建，产出未披露 <span class="src src-c">🔴</span></td>
+        </tr>
+        <tr>
+          <td>DeepMind / Microsoft / Meta（大厂）</td>
+          <td>材料为主（DeepMind GNoME / MS MatterGen / Meta OpenCatalyst）<span class="src src-b">🟡</span></td>
+          <td>基础模型 + 大数据集，部分接机器人(A-Lab)<span class="src src-b">🟡</span></td>
+          <td>不直接卖；嵌云(Azure)/做研究/开放数据 <span class="src src-b">🟡</span></td>
+          <td><strong>多开放/开源</strong>（数据集、模型权重）<span class="src src-a">🟢</span></td>
+          <td>无限弹药 <span class="src src-b">🟡</span></td>
+          <td>有公开论文与数据集（GNoME 220 万晶体等）<span class="src src-a">🟢</span></td>
+        </tr>
+        <tr>
+          <td>A-Lab（Berkeley / 学术）</td>
+          <td>无机材料合成 <span class="src src-a">🟢</span></td>
+          <td>计算+文献+主动学习+机器人；自驱合成 <span class="src src-a">🟢</span></td>
+          <td>非商业（学术）<span class="src src-a">🟢</span></td>
+          <td><strong>方法/论文公开</strong> <span class="src src-a">🟢</span></td>
+          <td>国家实验室经费 <span class="src src-a">🟢</span></td>
+          <td>17 天合成数十种新化合物（曾被质疑真实性）<span class="src src-a">🟢</span></td>
+        </tr>
+        <tr>
+          <td>Emerald Cloud Lab / Strateos</td>
+          <td>生物/化学（通用实验）<span class="src src-b">🟡</span></td>
+          <td>远程云实验室，软件统一调度 200+ 仪器 <span class="src src-b">🟡</span></td>
+          <td><strong>订阅 + 按实验/分析收费（CRO 2.0 原型）</strong> <span class="src src-b">🟡</span></td>
+          <td>闭源平台 <span class="src src-b">🟡</span></td>
+          <td>已商业运营多年 <span class="src src-b">🟡</span></td>
+          <td>可远程并行跑 100+ 实验（容量数据公开）<span class="src src-b">🟡</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>读矩阵：</strong>Lila 的差异化有两点真成立——<strong>(a) 跨三域</strong>（别家几乎都单押材料），<strong>(b) Flagship 孵化带来的科学家阵容与资本规模</strong>（$550M、诺奖级 George Church）。但<strong>同质化也很明显</strong>：技术叙事（生成式 AI + 自驱湿实验室闭环）几乎人手一份，且<strong>全员都缺「独立可核实的真实产出」</strong>——产出栏几乎全是 🔴 自述或在建。真正有公开硬结果的反而是<strong>大厂和学术（🟢）</strong>，而它们不卖平台。商业模式上唯一已被验证能赚钱的是 <strong>Emerald 那种「云实验室 + 按量收费」（即用户说的类型3 / CRO 2.0）</strong>——这恰恰是创业 idea 的落点。</p>
+  </section>
+
+  <!-- ③ 定位图 -->
+  <section id="map">
+    <h2><span class="n">③</span>定位图（whitespace 在哪）</h2>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 640 400" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12">
+        <rect x="40" y="20" width="560" height="340" fill="none"/>
+        <line x1="40" y1="190" x2="600" y2="190" stroke="#b9c2e0" stroke-width="1.5"/>
+        <line x1="320" y1="20" x2="320" y2="360" stroke="#b9c2e0" stroke-width="1.5"/>
+        <text x="598" y="206" text-anchor="end" fill="#5a627a">商业模式 → 卖平台 / 卖服务</text>
+        <text x="42" y="206" fill="#5a627a">自有管线 / 自有发现 ←</text>
+        <text x="326" y="32" fill="#5a627a">↑ 跨多域（材料+生命+化学）</text>
+        <text x="326" y="352" fill="#5a627a">↓ 单域 / 通用实验设施</text>
+
+        <rect x="322" y="192" width="278" height="166" fill="#7aa2ff" opacity="0.08"/>
+        <text x="590" y="348" text-anchor="end" fill="#3a66ff" font-size="11.5" font-weight="700">whitespace: 自驱实验室 as-a-service / CRO 2.0</text>
+
+        <circle cx="470" cy="80" r="9" fill="#6b4cff"/>
+        <text x="484" y="84" fill="#1a1f33" font-weight="700">Lila Sciences</text>
+
+        <circle cx="440" cy="250" r="7" fill="#3a66ff"/>
+        <text x="452" y="254" fill="#1a1f33">Periodic Labs</text>
+        <circle cx="500" cy="290" r="7" fill="#3a66ff"/>
+        <text x="512" y="294" fill="#1a1f33">CuspAI</text>
+        <circle cx="415" cy="300" r="7" fill="#3a66ff"/>
+        <text x="300" y="318" fill="#1a1f33">Radical AI</text>
+        <circle cx="455" cy="320" r="6" fill="#3a66ff"/>
+        <text x="467" y="324" fill="#1a1f33">Orbital</text>
+
+        <circle cx="360" cy="70" r="8" fill="#9aa3bd"/>
+        <text x="372" y="74" fill="#5a627a">DeepMind / MS / Meta（开放，不卖平台）</text>
+
+        <circle cx="150" cy="120" r="7" fill="#43c59e"/>
+        <text x="60" y="108" fill="#138a6e">Isomorphic / Recursion（自有药管线）</text>
+
+        <circle cx="150" cy="310" r="7" fill="#43c59e"/>
+        <text x="60" y="328" fill="#138a6e">A-Lab（学术开源·单域）</text>
+
+        <circle cx="520" cy="330" r="7" fill="#b3701a"/>
+        <text x="380" y="346" fill="#b3701a">Emerald Cloud Lab（按量收费·已盈利原型）</text>
+      </svg>
+      </div>
+      <figcaption>定位图（本调研重绘）。横轴=商业模式（自有管线↔卖平台/服务），纵轴=覆盖域（单域↔跨域）。Lila 独占「跨域 × 卖平台」右上角；<strong>右下蓝色区「卖服务 × 单域聚焦」= whitespace</strong>：除已验证商业模式的 Emerald 外几乎没人占——这是「自驱实验室 as-a-service / CRO 2.0」的机会窗。</figcaption>
+    </figure>
+  </section>
+
+  <!-- ④ 融资 timeline -->
+  <section id="funding">
+    <h2><span class="n">④</span>融资 timeline</h2>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 760 170" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12.5">
+        <line x1="60" y1="80" x2="700" y2="80" stroke="#b9c2e0" stroke-width="2"/>
+        <circle cx="90" cy="80" r="6" fill="#7aa2ff"/>
+        <text x="90" y="55" text-anchor="middle" fill="#5a627a">2023</text>
+        <text x="90" y="105" text-anchor="middle" fill="#1a1f33" font-size="11">Flagship 孵化成立</text>
+        <circle cx="270" cy="80" r="7" fill="#3a66ff"/>
+        <text x="270" y="55" text-anchor="middle" fill="#5a627a">2025/03</text>
+        <text x="270" y="105" text-anchor="middle" fill="#1a1f33" font-size="11" font-weight="700">种子 $200M</text>
+        <text x="270" y="120" text-anchor="middle" fill="#5a627a" font-size="10">Flagship 领 + ADIA/GC</text>
+        <circle cx="460" cy="80" r="8" fill="#6b4cff"/>
+        <text x="460" y="55" text-anchor="middle" fill="#5a627a">2025/09–10</text>
+        <text x="460" y="105" text-anchor="middle" fill="#1a1f33" font-size="11" font-weight="700">Series A $350M</text>
+        <text x="460" y="120" text-anchor="middle" fill="#5a627a" font-size="10">Braidwell/Collective 领·Nvidia</text>
+        <text x="460" y="134" text-anchor="middle" fill="#5a627a" font-size="10">估值 ~$1.3B·累计 $550M</text>
+        <circle cx="650" cy="80" r="8" fill="#d23651"/>
+        <text x="650" y="55" text-anchor="middle" fill="#5a627a">2026/06</text>
+        <text x="650" y="105" text-anchor="middle" fill="#d23651" font-size="11" font-weight="700">传 募 ~$2B</text>
+        <text x="650" y="120" text-anchor="middle" fill="#5a627a" font-size="10">估值 ~$8.5B（pre）</text>
+        <text x="650" y="134" text-anchor="middle" fill="#5a627a" font-size="10">未官宣·Bloomberg 报道</text>
+      </svg>
+      </div>
+      <figcaption>Lila Sciences 融资时间线（据公开报道整理；2026/06 一轮为媒体传闻，未经官方确认）。</figcaption>
+    </figure>
+    <table>
+      <thead><tr><th>时间</th><th>事件 / 轮次</th><th>金额</th><th>投资方</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr><td>2023</td><td>成立（Flagship labs 内孵化）</td><td>—</td><td>Flagship Pioneering</td><td><span class="src src-a">🟢</span> 官网/Flagship</td></tr>
+        <tr><td>2025-03</td><td>出 stealth + 种子轮（口径多记为 seed）</td><td>$200M</td><td>Flagship 领；General Catalyst、March Capital、ARK Venture、Altitude、Blue Horizon、Michigan Retirement、Modi Ventures、ADIA 子公司</td><td><span class="src src-a">🟢</span> Flagship newsroom</td></tr>
+        <tr><td>2025-09 → 10</td><td>Series A（先报 $235M，10 月最终 close $350M / 含 $115M 扩展）</td><td>$350M（累计 $550M）</td><td>Braidwell &amp; Collective Global 共同领投；NVentures(Nvidia)、Khosla 等加入；估值 ~$1.3B</td><td><span class="src src-a">🟢</span> Lila + <span class="src src-b">🟡</span> Bloomberg/Reuters</td></tr>
+        <tr><td>2026-06</td><td>（传）新一轮 / Series B 洽谈中</td><td>约 $2B（pre-money 估值 ~$8.5B）</td><td>传由 CalPERS + Nvidia NVentures 牵头</td><td><span class="src src-b">🟡</span> Bloomberg（未官宣）</td></tr>
+      </tbody>
+    </table>
+    <p><strong>融资节奏佐证阶段：</strong>从成立到「传 $8.5B」只用约 3 年、种子直接 $200M——这是<strong>典型的「叙事驱动、资本超前于产品」</strong>。一年内估值从 ~$1.3B 跳到传闻 $8.5B（×6+），主要由<strong>团队背景 + 赛道热度</strong>而非已证实营收支撑（多个数据库未给出可核实营收）。<strong>赛道整体融资热度</strong>同样滚烫：Periodic $300M 种子、CuspAI A 轮 $100M、Radical $55M，且 <strong>Nvidia 在几乎每家都有份</strong>——资本已把「自驱实验室」当新资产类别押注，<strong>这是「热钱涌入早期赛道」的标志，不是「赛道成熟」的标志</strong>。</p>
+  </section>
+
+  <!-- ⑤ 公司速览 -->
+  <section id="snapshot">
+    <h2><span class="n">⑤</span>公司速览</h2>
+    <table>
+      <tbody>
+        <tr><td>是什么 / 定位</td><td>「scientific superintelligence」公司：用 AI + 自驱实验室在材料/生命/化学跨域做发现 <span class="src src-a">🟢</span>。总部 Cambridge, MA。</td></tr>
+        <tr><td>产品</td><td><strong>AI Science Factory</strong>——「AI + 自研软件 + 定制硬件闭合『推理↔真实世界验证』的统一设施」，自称把发现从「天/周」级跑通，已做过抗体/绿氢非贵金属催化剂/碳捕集材料 demo <span class="src src-c">🔴</span>（自述，无独立验证；GTM/定价未公开）。</td></tr>
+        <tr><td>团队</td><td>深科技 research 血统极强：Geoffrey von Maltzahn（Co-Founder/CEO）、Noubar Afeyan（Flagship CEO、Moderna 主席，Co-Founder/Chairman）、Molly Gibson（Co-Founder/President）、<strong>George Church</strong>（Chief Scientist，基因组学泰斗）、Andrew Beam（CTO）、<strong>Kenneth Stanley</strong>（前 OpenAI，open-endedness 专家）、Rafael Gómez-Bombarelli（材料 CSO，MIT）<span class="src src-a">🟢</span>。</td></tr>
+        <tr><td>商业模式</td><td>官方未公开披露 GTM/定价 <span class="src src-b">🟡</span>。从「AI Science Factory」+ 跨域看，更像<strong>自建全栈平台 / 自有发现</strong>（可能走「平台 + 与药企/材料客户合作发现并分成/授权」），而非单纯 CRO 卖通量。June 2026 估值叙事对标「数据中心式资产」<span class="src src-b">🟡</span>。</td></tr>
+        <tr><td>状态</td><td>已出 stealth；累计融资 $550M（2025/10），传洽谈新一轮 ~$8.5B 估值（2026/06，未官宣）。闭源。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ⑥ 创业 idea 借鉴 -->
+  <section id="idea">
+    <h2><span class="n">⑥</span>创业 idea 借鉴</h2>
+    <div class="callout insight">
+      <span class="label">Whitespace / 机会</span>
+      定位图右下角「<strong>卖服务 × 单域聚焦</strong>」基本空着（只有 Emerald 这种通用云实验室）。即：<strong>「自驱实验室 as a service / CRO 2.0」</strong>——不烧钱自建跨域大工厂、也不押自有管线，而是<strong>把「AI 设计 + 机器人闭环」按实验通量 / 时长打包卖给买不起整套工厂的中小药企、材料公司、学术组</strong>（用户归类的「类型3：研发外包 CRO 2.0，按实验次数或时长收费，交付物多归客户」）。Lila/Periodic 都在抢「造神」，没人安心做「卖铲子+代跑」的现金流生意。
+    </div>
+    <h3>现有玩家共同短板（unmet needs）</h3>
+    <p>① <strong>都缺独立可核实的真实产出</strong>——产出栏几乎全是 🔴 自述，客户难判断「快 N 倍」是真是假 → <strong>谁先立起可信、可复现的 benchmark / 第三方验证，谁就抢话语权</strong>。② <strong>都极度资本密集、面向自身发现</strong>，中小客户「想用但用不起、也接触不到」这套闭环 → <strong>可负担的按量服务是真空白</strong>。③ <strong>跨域是叙事但也是分散</strong>——Lila 三域并进，单点深度未必比专注单域的强 → 垂直深耕（如只做「电池材料」或「酶工程」）反而能做出更可信的结果与口碑。</p>
+    <h3>Why now（为什么现在值得做）</h3>
+    <p>① <strong>积木齐了</strong>：生成式/基础模型 + 开放数据集（Meta OMat、DeepMind GNoME）+ 商业云实验室（Emerald/Strateos）+ 实验室机器人成本下降 —— <strong>不必像 Lila 那样全栈自研，可以「拼装」起步</strong>。② <strong>资本极热但只投少数明星</strong>，留出「不烧 $300M 也能做」的务实细分。③ <strong>客户侧 why-now</strong>：药企/材料公司预算紧、想外包研发提通量，<strong>CRO 升级（人力→AI+自驱）是刚需且可即时收费</strong>，不必等「超级智能」兑现。④ 学术（A-Lab）已证明技术可行，<strong>降低了「这事能不能成」的认知门槛</strong>。</p>
+    <h3>可借鉴的打法 + 相邻机会</h3>
+    <ul>
+      <li><strong>borrowable（从 Lila 学）：</strong>(a) <strong>「闭环造数据飞轮」叙事</strong>——强调自有湿实验产生的专有数据是护城河，比纯算法公司更有故事；(b) <strong>顶尖科学家背书 + 机构孵化</strong>大幅降低早期融资/信任成本（Flagship→George Church 模式）；(c) <strong>把实验设施包装成「资产类别」</strong>讲给基建型资本（这是它估值跳级的关键叙事）。</li>
+      <li><strong>adjacent（换商业模式/垂直化）：</strong>(a) <strong>CRO 2.0 按量服务</strong>（上文 whitespace，类型3，现金流好、不赌兑现）；(b) <strong>「自驱实验室的卖铲人」</strong>——只做调度软件/实验编排 OS / 数据标准/机器人改造，卖给所有想自建闭环的人（避开重资产）；(c) <strong>第三方验证 / benchmark 平台</strong>——做「自驱实验室效果的 MLPerf」，赛道越拥挤越需要裁判；(d) <strong>极致垂直</strong>：只攻一个高价值单域（固态电解质、绿氢催化剂、酶/蛋白），靠深度做出 Lila 跨域做不出的可信结果。</li>
+    </ul>
+    <div class="callout warn">
+      <span class="label">风险（诚实给）</span>
+      ① <strong>资本碾压</strong>：明星公司种子就 $200–300M，正面拼全栈工厂几乎没戏——务实 idea 必须靠<strong>商业模式 / 垂直深度</strong>而非规模取胜。② <strong>巨头 + 开源夹击</strong>：DeepMind/Meta 从模型与开放数据一侧持续压低「算法侧」价值，护城河只能建在<strong>专有湿实验数据 / 客户关系 / 通量</strong>上。③ <strong>兑现风险</strong>：整个赛道的「快 N 倍」尚未被独立大规模证实，A-Lab 都曾被质疑发现真实性——<strong>讲超级智能容易，做出可复现结果难</strong>。④ <strong>重资产/长周期</strong>：自建湿实验室烧钱、回报慢，CRO 模式虽现金流好但天花板与毛利受限。⑤ <strong>监管/安全</strong>（生物、化学合成）随能力增强会变重。
+    </div>
+  </section>
+
+  <!-- ⑦ 现实判断 -->
+  <section id="take">
+    <h2><span class="n">⑦</span>现实判断</h2>
+    <p>Lila 的胜算主要押在<strong>「人 + 钱 + 跨域全栈」</strong>：Flagship 孵化（造过 Moderna）、George Church/Kenneth Stanley 级别的阵容、$550M 弹药与传闻中的 $8.5B 估值，使它有资格做「最重、最贵、最像 OpenAI of Science」的那条路。它的软肋同样清楚：<strong>(1) 估值远跑在产品前面</strong>——一年 ×6 的估值跳级几乎全由叙事与团队支撑，可核实的真实产出与营收薄弱；<strong>(2) 跨三域=战线长</strong>，单域深度未必赢过 Periodic/CuspAI 的专注；<strong>(3) 技术叙事高度同质</strong>，护城河目前更多来自「资本 + 人」而非「已证实的不可复制成果」。对它而言，<strong>下一步成败取决于能不能拿出独立可信、可复现的发现</strong>，把「superintelligence」从口号变成证据。</p>
+    <p>对<strong>想找 idea 的创业者</strong>而言，结论很清楚：<strong>这条「造科学超级智能 + 自建跨域工厂」的主路已被几家重金选手占住，正面硬刚不明智</strong>；但赛道整体仍是 <strong>emerging（偏早）</strong>——标准未立、产出未证、中小客户够不着。<strong>真正可做的是侧翼：CRO 2.0 按量服务、自驱实验室的「卖铲人 / 编排 OS」、第三方 benchmark、极致垂直单域</strong>。用<strong>商业模式与聚焦</strong>对冲资本劣势，比跟 Lila 拼规模现实得多。</p>
+    <div class="callout warn">
+      <span class="label">使用提醒</span>
+      本页为对话式调研，信息主要来自公开来源并按等级标注；融资数额、估值、客户、能力声明等以官方一手为准，
+      <strong>「scientific superintelligence」「数千项发现」「快 N 倍」等均为公司自述、未经独立验证</strong>，2026/06 的 $8.5B 一轮为媒体传闻未官宣，引用前请核对最新信息。
+    </div>
+  </section>
+
+  <!-- 出处 -->
+  <section id="src">
+    <h2>出处</h2>
+    <ul style="font-size:13.5px">
+      <li><span class="src src-a">🟢</span> <a href="https://www.lila.ai/" target="_blank" rel="noopener">Lila Sciences 官网</a> / <a href="https://www.lila.ai/news/series-a-235-million" target="_blank" rel="noopener">官方 Series A 公告（$235M→$350M，累计 $550M，2025/10）</a></li>
+      <li><span class="src src-a">🟢</span> <a href="https://www.flagshippioneering.com/news/press-release/flagship-pioneering-unveils-lila-sciences-to-build-superintelligence-in-science" target="_blank" rel="noopener">Flagship Pioneering 揭幕新闻稿（创始团队、$200M 种子、三域定义）</a></li>
+      <li><span class="src src-b">🟡</span> <a href="https://www.biopharmadive.com/news/lila-flagship-ai-superintelligence-startup-seed/742213/" target="_blank" rel="noopener">BioPharma Dive — $200M seed</a> · <a href="https://www.fiercebiotech.com/biotech/flagships-lila-sciences-lands-235m-expand-ai-powered-autonomous-research-labs" target="_blank" rel="noopener">Fierce Biotech — $235M Series A</a></li>
+      <li><span class="src src-b">🟡</span> <a href="https://techstartups.com/2025/10/14/ai-startup-lila-sciences-hits-1-3b-valuation-after-115m-raise-from-nvidia-to-build-ai-science-factories-and-speed-up-discovery/" target="_blank" rel="noopener">Tech Startups — $115M 扩展、Nvidia、~$1.3B 估值</a> · <a href="https://finance.yahoo.com/news/exclusive-ai-lab-lila-sciences-101645391.html" target="_blank" rel="noopener">Reuters/Yahoo — Nvidia 背书 $1.3B</a></li>
+      <li><span class="src src-b">🟡</span> <a href="https://www.bloomberg.com/news/articles/2026-06-03/lila-sciences-said-in-talks-for-funds-at-8-5-billion-valuation" target="_blank" rel="noopener">Bloomberg — 传洽谈 ~$2B / 估值 ~$8.5B（CalPERS+Nvidia，2026/06，未官宣）</a> · <a href="https://www.startuphub.ai/investment_rounds/lila-sciences-funding-round-2026" target="_blank" rel="noopener">StartupHub 同源转述</a></li>
+      <li><span class="src src-b">🟡</span> 竞品：<a href="https://siliconangle.com/2025/10/01/periodic-labs-raises-300m-accelerate-scientific-research-ai/" target="_blank" rel="noopener">Periodic Labs $300M（SiliconANGLE）</a> · <a href="https://techfundingnews.com/cuspai-lands-100m-to-build-the-ai-search-engine-for-molecules/" target="_blank" rel="noopener">CuspAI $100M A 轮（TFN）</a> · <a href="https://pulse2.com/radical-ai-55-million-series-seed-raised-for-advancing-materials-research/" target="_blank" rel="noopener">Radical AI $55M</a></li>
+      <li><span class="src src-a">🟢</span> 学术/开源对照：<a href="https://www.nature.com/articles/s41586-023-06734-w" target="_blank" rel="noopener">Berkeley A-Lab（Nature 2023）</a> · <a href="https://www.chemistryworld.com/news/new-analysis-raises-doubts-over-autonomous-labs-materials-discoveries/4018791.article" target="_blank" rel="noopener">A-Lab 发现真实性质疑（Chemistry World）</a></li>
+      <li><span class="src src-b">🟡</span> 商业模式对照：<a href="https://www.the-scientist.com/how-cloud-labs-and-remote-research-shape-science-71734" target="_blank" rel="noopener">云实验室 / Emerald Cloud Lab（The Scientist）</a> · <a href="https://techpolitik.substack.com/p/self-driving-labs-infrastructure" target="_blank" rel="noopener">自驱实验室=基础设施（赛道视角）</a></li>
+    </ul>
+  </section>
+
+  <footer class="foot">
+    公司竞争格局 / 赛道早期度调研笔记，仅作梳理；信息按来源分级、产品能力未必经独立验证，以官方一手信息为准 · 整理日期 2026-06-15
+  </footer>
+
+</article>
+</body>
+</html>
