@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI4S × 中国创业机会总览（国外 idea → 中国对标 / 拥挤度 / 切口）</title>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --bad:#ff6b81; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --bad:#d23651; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.7; font-size:16px;}
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:1000px; margin:0 auto; padding:18px 22px 90px}
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:24px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)} .meta-grid dd{margin:0}
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+  section{margin:34px 0}
+  h2{font-size:20px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:16.5px; margin:22px 0 8px}
+  p{margin:12px 0} ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)} strong{color:var(--text)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.88em}
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:12.5px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:8px 9px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-word}
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+  .op{font-weight:700; white-space:nowrap}
+  .op-g{color:var(--ok)} .op-y{color:var(--warn)} .op-r{color:var(--bad)}
+  .legend{font-size:12.5px; color:var(--muted)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">AI4S</span><span class="chip">中国创业机会</span>
+      <span class="chip">国外 idea 借鉴</span><span class="chip">竞争格局总览</span>
+    </div>
+    <h1>AI4S × 中国创业机会总览：国外 idea → 中国对标 / 拥挤度 / 本土化切口</h1>
+    <p class="orig-title">把 11 家国外公司的「中国对标」调研横向汇总，给想在中国创业的人当找 idea 的总入口</p>
+    <dl class="meta-grid">
+      <dt>整理</dt><dd>对话调研汇总；每家详情见对应单篇的「★ 中国对标」节；信息按来源分级、产品/数字未必经独立验证</dd>
+      <dt>日期</dt><dd>2026-06-15</dd>
+    </dl>
+    <p class="legend">中国机会分级：<span class="op op-g">🟢 whitespace（相对空白、值得切）</span> ·
+      <span class="op op-y">🟡 有切口但需差异化</span> ·
+      <span class="op op-r">🔴 红海 / 壁垒高，谨慎或只做卖铲子</span></p>
+  </header>
+
+  <div class="tldr">
+    <b>一句话</b> — 跨这 11 家看下来，<strong>预测/模型层中国并不落后（深势 / 晶泰 / AISI 已占位且部分反超），真正的中国机会在「下游闭环、卖铲子、垂直卡脖子品类」</strong>。最像「中国 whitespace」的两条：① <strong>AI 设计数据中心冷却液</strong>（东数西算 + 3M 退出 PFAS 双 why-now，上下游都有但没人合）；② <strong>给国产 agent 用的中文 search API</strong>（博查独苗、墙内语料是护城河）。最该避开的红海：<strong>AI 药物发现</strong>（英矽已 IPO、临床比 Isomorphic 还快）与 <strong>C 端 AI 搜索</strong>（大厂碾压）。
+  </div>
+
+  <!-- 总表 -->
+  <section id="map">
+    <h2><span class="n">★</span>总表：国外公司 → 中国对标 / 拥挤度 / 切口</h2>
+    <table>
+      <thead><tr>
+        <th>国外公司（赛道）</th><th>国外早期度</th><th>中国对标</th><th>中国赛道早/晚</th><th>本土化切口</th><th>机会</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td><a href="../2026-06-15-orbital-materials/index.html"><strong>Orbital</strong></a>（数据中心冷却材料）</td>
+          <td>emerging</td>
+          <td>英维克 / 曙光（系统）、巨化 / 新宙邦（氟液）</td>
+          <td>下游 crowded × <strong>AI 材料初创空白</strong></td>
+          <td>AI 直接设计无 PFAS / 低 GWP 冷却液 ×「巨化 / 新宙邦在位产能合资代工」</td>
+          <td class="op op-g">🟢</td>
+        </tr>
+        <tr>
+          <td><a href="../2026-06-15-exa-labs/index.html"><strong>Exa Labs</strong></a>（AI 搜索 API）</td>
+          <td>emerging→crowded</td>
+          <td><strong>博查 Bocha</strong>（几乎独占）、秘塔（C 端）</td>
+          <td>C 端 crowded × <strong>agent API emerging</strong></td>
+          <td>「中文 / 合规版 Exa」，押微信 / 小红书 / B站 墙内独有语料 + 数据出域合规</td>
+          <td class="op op-g">🟢</td>
+        </tr>
+        <tr>
+          <td><a href="../2026-06-15-cuspai/index.html"><strong>CuspAI</strong></a>（AI 材料发现）</td>
+          <td>emerging→crowded</td>
+          <td>深势科技、晶泰、AISI</td>
+          <td>不晚、局部更早；头部成熟、长尾稀薄</td>
+          <td>站开源（DPA / MatterGen）肩上，补「逆向生成 + 可合成性 + 本土合成代工网络」</td>
+          <td class="op op-y">🟡</td>
+        </tr>
+        <tr>
+          <td><a href="../2026-06-15-periodic-labs/index.html"><strong>Periodic Labs</strong></a>（自驱材料实验室 / IP）</td>
+          <td>emerging（偏 crowded）</td>
+          <td>USTC 机器化学家、深势、晶泰、镁伽</td>
+          <td>科研端 emerging（圣杯级亮点）、<strong>创业端 nascent</strong></td>
+          <td>政产学研 +「自驱实验室即服务」先跑现金流，用机器人 / 制造成本优势</td>
+          <td class="op op-y">🟡</td>
+        </tr>
+        <tr>
+          <td><a href="../2026-06-15-quantumbond-ai/index.html"><strong>QuantumBond</strong></a>（AI 电池界面，本体存疑）</td>
+          <td>赛道 emerging</td>
+          <td>深势 Piloteye、晶泰、<strong>宁德 / 比亚迪内部</strong></td>
+          <td>产业全球最成熟 × <strong>AI 渗透极早期</strong>（剪刀差）</td>
+          <td>贴电池 / 电解液龙头，做嵌入研发管线的界面级 AI 工具 / 联合实验室，别卖纯 IP</td>
+          <td class="op op-y">🟡</td>
+        </tr>
+        <tr>
+          <td><a href="../2026-06-15-altrove/index.html"><strong>Altrove</strong></a>（无稀土磁体）</td>
+          <td>外 crowded · 内 nascent</td>
+          <td>中科三环 / 金力（在位）、院所研究</td>
+          <td>地缘<strong>相反</strong>（中国是稀土供给方）</td>
+          <td>学打法、<strong>换品类</strong>：换成中国真被卡的（少用重稀土镝 / 铽、高温合金、半导体材料）</td>
+          <td class="op op-y">🟡</td>
+        </tr>
+        <tr>
+          <td><a href="../2026-06-15-ares-materials/index.html"><strong>Ares Materials</strong></a>（显示材料，非真 AI4S）</td>
+          <td>材料 crowded→mature</td>
+          <td>瑞华泰 / 万润 / 莱特光电 / 激智（上市成熟）</td>
+          <td>材料 mature × <strong>AI 研发工具缺位</strong></td>
+          <td>做「给显示材料厂的 AI 研发加速工具 / 服务」，别自己造材料卷红海</td>
+          <td class="op op-y">🟡</td>
+        </tr>
+        <tr>
+          <td><a href="../2026-06-15-lila-sciences/index.html"><strong>Lila Sciences</strong></a>（自驱平台 / CRO 2.0）</td>
+          <td>emerging（偏 nascent）</td>
+          <td><strong>晶泰（已上市 / 盈利）</strong>、药明、镁伽</td>
+          <td>⭐<strong>中国反超</strong>（已收费 / 盈利）</td>
+          <td>别复制晶泰；垂直单一高价值域 / 卖铲人 / 中小客户按量服务 / 第三方 benchmark</td>
+          <td class="op op-r">🔴</td>
+        </tr>
+        <tr>
+          <td><a href="../2026-06-15-isomorphic-labs/index.html"><strong>Isomorphic Labs</strong></a>（AI 药物发现）</td>
+          <td>crowded→maturing</td>
+          <td><strong>英矽（已 IPO、临床更靠前）</strong>、晶泰、百图、剂泰</td>
+          <td><strong>crowded、已上市</strong>，和国外同步甚至更激进</td>
+          <td>赛道已挤，正面没空间——卖铲子（数据 / 评测 / 工程化）或深绑药企 / CRO</td>
+          <td class="op op-r">🔴</td>
+        </tr>
+        <tr>
+          <td><a href="../2026-06-15-radical-ai/index.html"><strong>Radical AI</strong></a>（极端材料 + 政府）</td>
+          <td>emerging</td>
+          <td>中科院金属所 / 航材院（<strong>全在体制内</strong>）</td>
+          <td>能力成熟 × <strong>创业生态空白</strong>、壁垒极高</td>
+          <td>军民两用先攒民用数据 + 给院所卖铲子（自驱实验室 OS），别和院所抢订单</td>
+          <td class="op op-r">🔴</td>
+        </tr>
+        <tr>
+          <td><a href="../2026-06-15-unreasonable-labs/index.html"><strong>Unreasonable Labs</strong></a>（跨域知识发现）</td>
+          <td>nascent / emerging</td>
+          <td>（本批未单独做中国对标，可参考深势 / AISI 的知识图谱方向）</td>
+          <td>—</td>
+          <td>知识图谱 + 多 agent 假设生成，国内多在大厂 / 院所内部，独立创业少</td>
+          <td class="op op-y">🟡</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="legend">点公司名进各自单篇，看完整「中国对标」小表（含中国玩家融资 / 上市 / 🟢🟡🔴 来源分级）。</p>
+  </section>
+
+  <!-- 分组 -->
+  <section id="buckets">
+    <h2><span class="n">①</span>按「该不该切」分三组</h2>
+    <div class="callout insight">
+      <span class="label">🟢 最像 whitespace（相对空白，值得切）</span>
+      <strong>① Orbital 那条——AI 设计数据中心冷却液：</strong>中国有液冷系统厂（英维克）、有氟化液厂（巨化 / 新宙邦承接 3M 退出 PFAS 的国产替代），<strong>但没人把「AI 设计新冷却液材料 + 制造」合起来</strong>；东数西算 PUE 红线 + 无 PFAS 是双 why-now，可「AI 团队 × 在位产能合资代工」避开重资本。<br>
+      <strong>② Exa 那条——给国产 agent 用的中文 search API：</strong>C 端 AI 搜索很卷，但「按调用收费、给大模型 / agent 用的 search API」国内几乎只有博查一家；护城河押在海外拿不到的微信 / 小红书 / B站墙内语料 + 合规。
+    </div>
+    <div class="callout note">
+      <span class="label">🟡 有切口但要差异化 / 换打法</span>
+      材料发现（CuspAI）、自驱材料实验室（Periodic）、电池界面（QuantumBond）、显示材料 AI 工具（Ares）、垂直卡脖子材料（Altrove 换品类）——共同打法是<strong>「别造通用模型 / 别赌单一重资产 IP，去做工具 / as-a-service / 贴龙头 / 换成中国真被卡的品类」</strong>。
+    </div>
+    <div class="callout warn">
+      <span class="label">🔴 红海 / 壁垒高，谨慎或只做卖铲子</span>
+      <strong>AI 药物发现</strong>（英矽已 IPO、临床比 Isomorphic 还靠前，晶泰 / 百图 / 剂泰扎堆）、<strong>CRO 2.0</strong>（晶泰已上市盈利、份额 &gt;30%）、<strong>极端材料 / 国防</strong>（能力在体制内、军工四证等结构性壁垒）。正面硬刚没空间，能做的多是<strong>卖铲子（数据 / 评测 / 工程化工具）或深度绑定在位者</strong>。
+    </div>
+  </section>
+
+  <!-- 主线 -->
+  <section id="take">
+    <h2><span class="n">②</span>三条贯穿性结论（给创业）</h2>
+    <ol>
+      <li><strong>「卖铲子 / as-a-service」是反复出现的安全切口。</strong> 多数拥挤赛道（药物、CRO、材料平台）的中国版结论都指向：别赌单一 IP / 重资产，去做工具、数据、评测、按量服务。</li>
+      <li><strong>中国在「预测 / 模型层」并不落后，甚至反超。</strong> 深势、晶泰、AISI、机器化学家、英矽——纯做模型 / 平台的窗口在中国也基本关了；机会在<strong>下游闭环（造 + 认证 + 合同）</strong>与<strong>垂直卡脖子品类 + 国产替代 / 地缘 why-now</strong>。</li>
+      <li><strong>「中国独有」往往就是护城河。</strong> 墙内语料（中文 search API）、在位制造产能（冷却液代工）、CRO + 工程师红利（低成本 AI↔实验闭环）、国产替代政策——这些是海外玩家拿不到的本土壁垒。</li>
+    </ol>
+    <div class="callout warn">
+      <span class="label">使用提醒</span>
+      本页为跨公司汇总，中国玩家的融资 / 上市 / 份额 / 能力声明多为媒体 / 数据库 / 自述口径，<strong>未逐一独立验证</strong>；详情与来源分级见各单篇 <code>#cn</code> 节。创业决策请以一手信息再核。
+    </div>
+  </section>
+
+  <footer class="foot">
+    AI4S × 中国创业机会汇总笔记，仅作梳理；信息按来源分级、未必经独立验证 · 整理日期 2026-06-15
+  </footer>
+
+</article>
+</body>
+</html>

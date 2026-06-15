@@ -322,6 +322,25 @@
     "path": "papers/2026-06-15-isomorphic-labs/index.html"
   },
   {
+    "slug": "2026-06-15-ai4s-china-startup-map",
+    "title": "AI4S × 中国创业机会总览(国外 idea → 中国对标/拥挤度/切口)",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-15",
+    "published": "公司调研 2026",
+    "tldr": "把11家国外AI4S/AI公司的中国对标横向汇总:中国在模型层不落后甚至反超,机会在下游闭环/卖铲子/垂直卡脖子;最像whitespace的是AI冷却液与中文agent search API;避开AI药物与C端搜索红海。",
+    "tags": [
+      "AI4S",
+      "china",
+      "startup-idea",
+      "competitive-landscape",
+      "overview"
+    ],
+    "path": "papers/2026-06-15-ai4s-china-startup-map/index.html"
+  },
+  {
     "slug": "2606.03854-cli-anything",
     "title": "CLI-Anything: Towards Agent-Native Computer Use",
     "authors": "Yuhao Yang, Tianyu Fan, Chao Huang",
