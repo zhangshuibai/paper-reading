@@ -124,12 +124,38 @@
 
   <nav class="toc">
     <b>目录</b>
+    <a href="#bg">★ 领域背景</a>
     <a href="#opensource">① 开源贡献</a>
     <a href="#motivation">② 动机与贡献</a>
     <a href="#method">③ 方法</a>
     <a href="#evaluation">④ 实验评估</a>
     <a href="#insight">⑤ 洞见</a>
   </nav>
+
+  <!-- ============================ ★ 领域背景速补 ============================ -->
+  <section id="bg">
+    <h2><span class="n">★</span>领域背景速补（给只懂 LLM 的读者）</h2>
+    <p>如果你熟悉 LLM 但没碰过医学超声，这一节先把本文涉及的几个领域名词讲清楚——每个都按「<strong>是什么 / 为什么难 / 和这篇什么关系</strong>」来讲。你会发现核心思想（world model、attention、表征学习）其实和 LLM 世界完全相通，只是把「文本」换成了「超声图像 + 探头动作」。</p>
+
+    <h3>echocardiography（超声心动图 / 心脏超声成像）</h3>
+    <p><strong>是什么：</strong>医生手持一个 <code>probe</code>（探头）贴在病人胸口，探头发出超声波、接收回声，实时画出心脏某个剖面的灰度图像。它<strong>无创、实时、便宜</strong>，是看心脏病最常用的检查。<strong>类比：</strong>有点像用手电筒在黑屋里照——你照的角度决定你看见什么，画面是连续动的视频流。<strong>为什么难：</strong>它<strong>极度依赖操作者手法</strong>——同一个病人，老手和新手照出来的画面天差地别。<strong>和本文关系：</strong>本文要做的「探头导航」就是教 AI 给出「探头该怎么挪」的指令，本质是把老手的手感学出来。</p>
+
+    <h3>standard plane（标准切面，如 A4C / PLAX）</h3>
+    <p><strong>是什么：</strong>要量心脏结构、下诊断，必须把探头摆到若干<strong>约定俗成的标准视角</strong>，每个视角叫一个 standard plane。例如 <code>A4C</code>（apical four-chamber，心尖四腔切面）能同时看到四个心腔；<code>PLAX</code>（胸骨旁长轴）是另一个常用切面。<strong>类比：</strong>像拍证件照必须「正脸、平视、露双耳」——角度不对就不合规。<strong>为什么难：</strong>心脏埋在肋骨和肺之间，能照到标准切面的「窗口」很窄，找对角度要反复试。<strong>和本文关系：</strong>「找到标准切面」就是本文导航任务的<strong>目标</strong>——给定当前画面，预测还要怎么动才能到达目标切面。</p>
+
+    <h3>probe pose / 6-DoF（探头位姿 / 六自由度）</h3>
+    <p><strong>是什么：</strong>探头在三维空间里的姿态用 <code>6-DoF</code>（six degrees of freedom，六自由度）描述：3 个平移（前后、左右、上下挪）+ 3 个旋转（绕三个轴转）。<strong>类比：</strong>就像无人机的「移动 + 翻滚/俯仰/偏航」，一共 6 个能拧的旋钮。<strong>和本文关系：</strong>本文的<strong>动作空间</strong>就是这 6 个数——模型输出「该往这 6 个方向各动多少」，正是 LLM 里「输出 token」在这里的对应物，只不过输出的是连续的运动向量。</p>
+
+    <h3>为什么这个任务本质上很难</h3>
+    <p>三重困难叠加：<strong>(1) 心脏在跳动</strong>——目标本身是动态的，画面每一帧都在变；<strong>(2) 每个人解剖不同</strong>——胖瘦、肋骨位置、心脏朝向都不一样，没有统一坐标；<strong>(3) 超声图噪声大且不直观</strong>——满是斑点噪声、阴影，不像照片那样一眼能看懂。正因如此，培养一名 <code>sonographer</code>（超声技师 / 超声医师）要长期训练，合格人手全球短缺。这也是为什么需要 AI 辅助导航。</p>
+
+    <h3>「world model」在这里是什么（和 LLM 是一回事）</h3>
+    <div class="callout note">
+      <span class="label">关键连接</span>
+      <p style="margin:6px 0">在 LLM / RL 圈子里，<code>world model</code>（世界模型）指「一个能<strong>预测『我做了某动作之后，世界会变成什么样』</strong>的模型」。本文的 world model 一模一样，只是模态换了：它学的是「<strong>探头一动，超声画面会怎么变</strong>」。一旦模型能预测「这样转探头→画面变成那样」，就能<strong>反推</strong>「要让画面变成目标切面，我现在该往哪动」。</p>
+      <p style="margin:6px 0">用 LLM 的话讲：这就像让模型学会「给定上下文 + 一个动作，预测下一个状态的表征」，然后拿这个学到的表征去做下游的「动作规划」。所以本文用的 <code>JEPA</code>、masked prediction、contrastive、attention 这些词你都不陌生——它把这套自监督表征学习的工具，搬到了「超声图 + 探头动作」这个新模态上。</p>
+    </div>
+  </section>
 
   <!-- ============================ ① 开源贡献 ============================ -->
   <section id="opensource">

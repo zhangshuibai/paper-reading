@@ -122,12 +122,40 @@
 
   <nav class="toc">
     <b>目录</b>
+    <a href="#bg">★ 领域背景</a>
     <a href="#opensource">① 开源贡献</a>
     <a href="#motivation">② 动机与贡献</a>
     <a href="#method">③ 方法</a>
     <a href="#evaluation">④ 结果与争议</a>
     <a href="#insight">⑤ 洞见</a>
   </nav>
+
+  <section id="bg">
+    <h2><span class="n">★</span>领域背景速补（给只懂 LLM 的读者）</h2>
+    <p>如果你熟悉 LLM 但没碰过材料化学，这一节先把本文涉及的领域名词讲清楚——每个都按「<strong>是什么 / 为什么难 / 和这篇什么关系</strong>」来讲。一句话总览：A-Lab 想做的是「<strong>计算机预测了一堆理论上该存在的新材料，能不能让机器人自动把它们真的合成出来并验证</strong>」，而这一节解释的就是「合成」与「验证」各自卡在哪。</p>
+
+    <h3>solid-state synthesis（固相合成）</h3>
+    <p><strong>是什么：</strong>无机材料最常用的一种「做菜」方式——把几种粉末 <code>precursor</code>（前驱体，即原料粉，如某某氧化物、碳酸盐）<strong>按配方称量、混匀，再高温煅烧</strong>，让它们在固态下反应、长成想要的 <code>target</code>（目标化合物）。<strong>类比：</strong>像烘焙——面粉糖鸡蛋（前驱体）按比例混好、进烤箱定温定时（煅烧），出来一个蛋糕（目标）。<strong>为什么难：</strong>「<strong>用哪几种前驱体 + 多高温度 + 烧多久</strong>」基本靠经验试错，没有可靠公式；换个原料或温度，可能就长不出来或长出别的东西。<strong>和本文关系：</strong>A-Lab 就是把这套「配粉→加热→看结果→改配方」的试错流程交给机器人自动闭环来做。</p>
+
+    <h3>phase（物相 / 晶相）</h3>
+    <p><strong>是什么：</strong>同样一组元素，可以排列成<strong>不同的晶体结构</strong>，每一种结构叫一个 <code>phase</code>（物相）。<strong>类比：</strong>碳的石墨和金刚石——成分完全一样，原子排法不同，就是两个 phase，性质天差地别。<strong>为什么难：</strong>合成时往往不是只长出你要的那个 phase，而是一锅<strong>多相混合物</strong>（目标相 + 各种副产物）。<strong>和本文关系：</strong>「合成成功」在本文里被定义为「<strong>想要的那个 phase 成为主相（占比最大）</strong>」——注意这条定义比较宽松（允许有副产物、允许是已知相），后续争议正源于此。</p>
+
+    <h3>powder XRD（粉末 X 射线衍射）</h3>
+    <p><strong>是什么：</strong>判断「到底长出了什么 phase」的主力检测手段。把样品磨成粉，用 X 射线照，不同晶体结构会在不同角度反射出特定的<strong>衍射峰图样</strong>——相当于每个 phase 的「<strong>指纹</strong>」。<strong>类比：</strong>像用条形码扫描——每种结构有独特的条纹，对照数据库就能认出是谁。<strong>为什么难：</strong>多相混合时，多个指纹叠在一起，自动算法容易认错；峰也可能和已知相撞。<strong>和本文关系：</strong>A-Lab 用 ML 模型自动读 XRD 图来判相，这是它闭环里「验证」的核心一步，也是争议最集中的一环。</p>
+
+    <h3>Rietveld refinement（里特沃尔德精修）</h3>
+    <p><strong>是什么：</strong>一种算法拟合方法——拿 XRD 实测图，反复调结构参数去<strong>拟合</strong>它，从而定量反推「样品里有哪些 phase、各占多少重量」。<strong>类比：</strong>像曲线拟合 / 参数回归，把一堆候选结构的理论图谱加权叠起来，调到最贴近实测曲线为止。<strong>为什么难：</strong>很吃人的经验，做得粗糙会得出错误的相组成。<strong>和本文关系：</strong>A-Lab 用<strong>自动 Rietveld</strong> 来确认相和产率；批评者恰恰认为它的自动精修质量太差，导致判相不可靠（详见争议节）。</p>
+
+    <h3>Materials Project / GNoME（计算预测数据库）</h3>
+    <p><strong>是什么：</strong>用 <code>DFT</code>（density functional theory，密度泛函理论——一种第一性原理量子计算）和 AI <strong>大规模计算预测</strong>「理论上稳定、可能存在」的新化合物，存成数据库。<code>Materials Project</code> 是经典的这类库，Google DeepMind 的 <code>GNoME</code> 又把候选推到百万量级。<strong>类比：</strong>像一份「<strong>理论上该能做出来的菜谱清单</strong>」，但没人验证过真能不能做出来。<strong>和本文关系：</strong>这些库给 A-Lab 提供「<strong>该去合成什么</strong>」的目标清单——本文正是想把「计算预测」这一端真正落地到「实验合成」那一端，补上中间的鸿沟。</p>
+
+    <h3>为什么「是不是新材料」会有争议</h3>
+    <div class="callout warn">
+      <span class="label">争议根源（先建立直觉）</span>
+      <p style="margin:6px 0">声称「合成了 N 个<strong>新</strong>材料」要同时站得住两件事，而两件都容易出问题：<strong>(1) 判相可能错</strong>——XRD 峰可能其实对应某个已知相、或是混合物叠加，自动算法会误判，把「没真做出目标」误读成「做出来了」；<strong>(2) novelty（新颖性）标准可能过宽</strong>——有些被算作「新」的化合物其实早已收录在 ICSD 等已知结构库里，或只是已知材料换个元素的「新变体」，是否真算「新材料」存在分歧。</p>
+      <p style="margin:6px 0">用 LLM 的话类比：这有点像评测一个模型时，<strong>评分标准（judge）本身不够严</strong>、又有<strong>数据泄漏（目标其实早已知）</strong>——于是「成功率」这个数字的含金量被打了折扣。这也是本篇<strong>争议节</strong>要展开的核心。</p>
+    </div>
+  </section>
 
   <section id="opensource">
     <h2><span class="n">①</span>开源贡献 Open-source Artifacts</h2>
