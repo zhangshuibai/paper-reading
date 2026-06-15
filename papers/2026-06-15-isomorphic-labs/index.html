@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Isomorphic Labs · 竞争格局与赛道早期度调研</title>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --bad:#ff6b81; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --bad:#d23651; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;}
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:920px; margin:0 auto; padding:18px 22px 90px}
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:25px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)} .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap; line-height:2}
+  nav.toc a:hover{color:var(--accent)}
+  section{margin:38px 0}
+  h2{font-size:20px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:16.5px; margin:22px 0 8px}
+  p{margin:12px 0} ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)} strong{color:var(--text)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.88em}
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:13px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:9px 10px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  figure{margin:24px 0; text-align:center}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+  .svgwrap{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 8px}
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+  .src{font-size:10.5px; padding:0 6px; border-radius:999px; white-space:nowrap; vertical-align:middle}
+  .src-a{background:rgba(67,197,158,.18); color:var(--ok)}
+  .src-b{background:rgba(255,180,84,.18); color:var(--warn)}
+  .src-c{background:rgba(255,107,129,.18); color:var(--bad)}
+  .legend{font-size:12px; color:var(--muted); margin:6px 0 0}
+  .verdict{display:inline-block; font-weight:700; padding:3px 12px; border-radius:999px; font-size:14px}
+  .v-nascent{background:rgba(122,162,255,.18); color:var(--accent)}
+  .v-emerging{background:rgba(67,197,158,.18); color:var(--ok)}
+  .v-crowded{background:rgba(255,180,84,.18); color:var(--warn)}
+  .v-mature{background:rgba(255,107,129,.18); color:var(--bad)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">AI Drug Discovery</span>
+      <span class="chip">TechBio</span>
+      <span class="chip">DeepMind 系</span>
+      <span class="chip">竞争格局</span>
+      <span class="chip">赛道早期度</span>
+      <span class="chip">创业 idea</span>
+    </div>
+    <h1>Isomorphic Labs：竞争格局与赛道早期度调研</h1>
+    <p class="orig-title">isomorphiclabs.com — AI 药物发现 / 这是不是一个早期赛道 / 头部之外还有哪些 whitespace 可借鉴</p>
+    <dl class="meta-grid">
+      <dt>对象</dt><dd><a href="https://www.isomorphiclabs.com" target="_blank" rel="noopener">https://www.isomorphiclabs.com</a></dd>
+      <dt>赛道</dt><dd>AI-first 药物发现（AI drug discovery / TechBio），以结构预测为底座的小分子（及更广义生物分子）药物设计</dd>
+      <dt>整理</dt><dd>对话调研笔记；信息来自公开检索，按来源分级标注，产品能力未必经独立验证</dd>
+      <dt>日期</dt><dd>2026-06-15</dd>
+    </dl>
+    <p class="legend">来源等级：<span class="src src-a">🟢 一手</span> 官网/SEC/官方 ·
+      <span class="src src-b">🟡 二手</span> 媒体/数据库 ·
+      <span class="src src-c">🔴 自述/未证实</span> 营销口径或未独立验证</p>
+  </header>
+
+  <div class="tldr">
+    <b>一句话</b> — Isomorphic Labs 是 Alphabet / Google DeepMind 分拆、由 Demis Hassabis（AlphaFold 的 2024 诺奖得主）兼任 CEO 的 AI 药物发现公司，把 AlphaFold（含 AlphaFold3）的结构预测能力工程化成一套「AI 药物设计引擎」，靠「与大药企合作（upfront + 里程碑 + royalty）+ 自有管线」两条腿赚钱。它<strong>不是早期初创</strong>：诺奖级 research 血统、与 Eli Lilly / Novartis 近 30 亿美元合作、2025 年 $600M 首轮外部融资、2026 年 $2.1B Series B——它是一个正在<strong>从 emerging 走向 crowded/maturing</strong> 的赛道里资本与品牌最厚的头部。<b>可借鉴 idea</b>：头部都在卷「自有管线 + 闭源大模型」，而开源底座（AlphaFold3/Boltz/Chai/Protenix）已把「结构预测」拉成商品；whitespace 在「<strong>不碰临床、只做 AI 药企的工具/数据/评测层</strong>」——卖铲子而非自己淘金。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#bg">领域背景速补</a>
+    <a href="#market">① 赛道地图 + 早期度</a>
+    <a href="#matrix">② 竞品对照矩阵</a>
+    <a href="#map">③ 定位图</a>
+    <a href="#funding">④ 融资 timeline</a>
+    <a href="#snapshot">⑤ 公司速览</a>
+    <a href="#idea">⑥ 创业 idea 借鉴</a>
+    <a href="#take">⑦ 现实判断</a>
+    <a href="#src">出处</a>
+  </nav>
+
+  <!-- 领域背景速补：读者只有 LLM 基础 -->
+  <section id="bg">
+    <h2><span class="n">★</span>领域背景速补（只懂 LLM 也能跟上）</h2>
+    <p>这家公司在「AI + 药物发现」交叉口，下面把关键术语用 LLM 视角讲清楚，术语保留英文。</p>
+    <ul>
+      <li><strong>药物发现（drug discovery）为什么难：</strong>大多数药是<strong>小分子（small molecule）</strong>——能进细胞、卡住某个致病蛋白（<strong>target / 靶点</strong>）的小化合物。难点是：要先知道靶点蛋白长什么样（3D 结构）、再在天文数字级的化学空间里找到一个能精准结合、又安全、又能口服的分子。传统做法靠湿实验试错，一款药从立项到上市平均 10 年、十几亿美元，且 90% 以上在临床阶段失败。这就是 AI 想切的痛点。</li>
+      <li><strong>AlphaFold = 给蛋白质「画 3D 像」的模型：</strong>蛋白质由氨基酸序列折叠成 3D 形状，形状决定功能。预测「序列→3D 结构」是生物学半世纪难题。DeepMind 的 <strong>AlphaFold2</strong>（2021）首次把它做到接近实验精度，<strong>AlphaFold3</strong>（2024）进一步能预测蛋白质和小分子、DNA/RNA 等<strong>相互作用</strong>（即「药物分子怎么贴到靶点上」）。Hassabis 因此拿 2024 诺贝尔化学奖。<span class="src src-b">🟡</span> 类比 LLM：AlphaFold 之于结构生物学，约等于一个领域 foundation model——别人在它上面做下游。</li>
+      <li><strong>为什么 AlphaFold 能催生一家药企：</strong>有了「快速、便宜地预测结构与结合」的能力，就能在电脑里筛掉大量不靠谱分子、把湿实验留给少数候选，理论上压缩时间与成本。Isomorphic 就是把 AlphaFold 这条 research 能力，工程化成一套面向「设计能成药的分子」的<strong>drug design engine</strong>。</li>
+      <li><strong>商业模式两条腿：</strong>(1) <strong>药企合作（pharma partnership）</strong>：大药企付一笔 <strong>upfront（预付）</strong>，约定若分子推进到某阶段付 <strong>milestone（里程碑款）</strong>，上市后按销售额抽 <strong>royalty（提成）</strong>——AI 公司只管「设计出好分子」，临床和销售交给大药企。(2) <strong>自有管线（own pipeline / proprietary programs）</strong>：自己挑靶点、自己推进新药，价值更大但也更烧钱、更晚变现。</li>
+      <li><strong>临床阶段（Phase I/II/III）：</strong>药进人体试验分三期，I 看安全、II 看初步有效、III 大规模验证。一个关键现实：<strong>截至 2025–2026，市面上还没有一款「由 AI 设计」的药真正上市</strong>，多数 AI 药企仍在临床早期甚至临床前。<span class="src src-b">🟡</span> 这意味着整个赛道的「AI 到底能不能提高成功率」尚未被终局验证。</li>
+      <li><strong>开源底座（Boltz / Chai-1 / Protenix）：</strong>AlphaFold3 论文出来后，社区很快用<strong>开源、可商用</strong>的模型复刻了它的能力——MIT 的 <strong>Boltz-1/2</strong>（MIT 许可、权重全开）、<strong>Chai-1</strong>（Chai Discovery，研究免费）、字节的 <strong>Protenix</strong>。结果是「结构预测」这层正在<strong>商品化（commoditized）</strong>——谁都能拿到接近 AF3 的能力。这点对判断「Isomorphic 的护城河到底在哪」非常关键。</li>
+    </ul>
+  </section>
+
+  <!-- ① 赛道与早期度 -->
+  <section id="market">
+    <h2><span class="n">①</span>赛道地图 + 早期度判断</h2>
+    <p>Isomorphic 属于 <strong>AI-first 药物发现 / TechBio</strong> 赛道：用机器学习（尤其结构与生成模型）压缩「找靶点→设计分子→优化成药性」的早期研发环节，把药企最贵、失败率最高的前段做得更快更准。这是一个 2020 年前后随 AlphaFold2、扩散/生成模型成熟而爆发、近两年资本极度密集、但<strong>终局产出（上市药）尚未兑现</strong>的赛道。</p>
+    <h3>玩家分群（四象限别漏）</h3>
+    <ul>
+      <li><strong>AI 药物发现头部（垂直创业公司）：</strong><strong>Recursion</strong>（已并购 Exscientia、上市、phenomics 路线，2025 砍管线重组）<span class="src src-b">🟡</span>、<strong>Insilico Medicine</strong>（生成化学 + 自有管线，唯一有 Phase II 人体读出之一，2025 末港股 IPO）<span class="src src-b">🟡</span>、<strong>Xaira Therapeutics</strong>（2024 带 $1B 出生，David Baker 共创，生成生物学）<span class="src src-b">🟡</span>、<strong>Iambic</strong>、<strong>Genesis Therapeutics</strong>（生成 + 物理模拟小分子，a16z/NVIDIA 背书）、<strong>Chai Discovery</strong>（开源 Chai-1 起家、研究免费+药企合作变现）<span class="src src-b">🟡</span>。Isomorphic 本身就在这一格、且资本与品牌最厚。</li>
+      <li><strong>现有巨头 / 大药企内部 AI：</strong><strong>Eli Lilly</strong>、<strong>Novartis</strong>、<strong>AstraZeneca</strong>、<strong>Roche/Genentech</strong> 等都在自建 AI/计算药物团队，并同时「外包」给多家 AI 公司（Lilly 同时签了 Isomorphic、Genesis、Insilico 等）<span class="src src-b">🟡</span>——它们既是<strong>客户</strong>也是<strong>潜在自做的替代者</strong>，是最容易被低估的威胁之一。</li>
+      <li><strong>科技巨头的 bio 团队（大厂顺手做）：</strong>Isomorphic 自己就是 <strong>Google DeepMind</strong> 分拆；此外 <strong>NVIDIA</strong>（BioNeMo 平台 + 投资多家 AI 药企）、<strong>Microsoft</strong>（AI for Science / 蛋白与分子模型）、<strong>ByteDance</strong>（Protenix）、<strong>Baidu</strong> 等都在做生物分子大模型，多以平台/模型而非自研药切入。</li>
+      <li><strong>开源 / 免费替代（最易被忽视的威胁）：</strong><strong>AlphaFold3</strong>（学术免费，经 Google Cloud）、<strong>Boltz-1/2</strong>（MIT 全开、可商用）、<strong>Chai-1</strong>、<strong>Protenix</strong> + 海量学术工作（RFdiffusion 等）。它们把「结构预测/结合预测」这一最核心能力<strong>拉成近乎商品</strong>——任何新团队几乎零成本就能拿到接近 AF3 的底座。</li>
+    </ul>
+    <div class="callout insight">
+      <span class="label">早期度判断</span>
+      <span class="verdict v-crowded">crowded → maturing（拥挤、走向成熟）</span>
+      （nascent 萌芽 / emerging 新兴 / crowded 拥挤 / mature 成熟）<br><br>
+      <strong>判断信号：</strong>
+      ①<strong>玩家多且仍在新增</strong>，但已出现<strong>并购与洗牌</strong>（Recursion 吞 Exscientia、并在 2025 砍管线）——典型「从拥挤进入整合」的信号；
+      ②<strong>融资极热但分层明显</strong>：Isomorphic（$600M→$2.1B）、Xaira（$1B 出生）、Insilico（IPO）、Genesis（$200M B 轮）——头部吸走巨量资本；
+      ③<strong>巨头全面进场</strong>：既有 DeepMind/NVIDIA/Microsoft 做平台，又有 Lilly/Novartis 自建团队；
+      ④<strong>开源/免费替代已成熟</strong>（Boltz/Chai/AF3）——核心模型层正在商品化，是「不再早期」的强信号；
+      ⑤<strong>但终局未验证</strong>：截至 2026 年中<strong>仍无一款「AI 设计」药上市</strong>，多数玩家在临床早期。<br>
+      综合：<strong>资本与技术层已不早期（crowded），但临床产出层仍未兑现（maturing 而非 mature）</strong>。这不是一个「先发就能赢」的萌芽赛道，而是「卷管线、卷数据、卷资本」的头部游戏。
+    </div>
+  </section>
+
+  <!-- ② 竞品矩阵 -->
+  <section id="matrix">
+    <h2><span class="n">②</span>竞品对照矩阵</h2>
+    <p>选了对这个赛道最具决定性的 6 个维度：<strong>技术路线 · 开源/闭源 · 商业模式 · 自有管线进度 · 大药企绑定 · 规模&融资</strong>。注意：各家「临床进度」「成功案例」口径差异大、且多为自述，谨慎对待。闭源公司大量信息未披露，标「闭源未披露」而非留空。</p>
+    <table>
+      <thead><tr>
+        <th>玩家</th>
+        <th>技术路线</th><th>开源/闭源</th><th>商业模式</th>
+        <th>自有管线进度</th><th>大药企绑定</th><th>规模 & 融资</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Isomorphic Labs（本篇）</strong></td>
+          <td>AlphaFold3 结构/相互作用预测 → drug design engine（小分子为主）<span class="src src-a">🟢</span></td>
+          <td>闭源；AF3 仅学术非商用开放<span class="src src-a">🟢</span></td>
+          <td>药企合作（upfront+里程碑+royalty）+ 自有管线<span class="src src-a">🟢</span></td>
+          <td>临床前；首批临床预计 2026 底，<strong>尚无人体给药</strong><span class="src src-b">🟡</span></td>
+          <td>Eli Lilly、Novartis（合计近 $3B 潜在值）<span class="src src-a">🟢</span></td>
+          <td>$600M(2025)+$2.1B(2026)；Alphabet 系<span class="src src-a">🟢</span></td>
+        </tr>
+        <tr>
+          <td>Recursion (+Exscientia)</td>
+          <td>Phenomics（细胞影像）大规模实验数据 + 自动化化学<span class="src src-b">🟡</span></td>
+          <td>闭源（部分数据集开放）</td>
+          <td>自有管线为主 + 药企合作</td>
+          <td>多个临床；2025 砍多条管线、重组<span class="src src-b">🟡</span></td>
+          <td>Roche/Genentech、Bayer 等（历史）<span class="src src-b">🟡</span></td>
+          <td>已上市（NASDAQ: RXRX）<span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Insilico Medicine</td>
+          <td>生成化学 + 靶点发现 + 自动化实验室<span class="src src-b">🟡</span></td>
+          <td>闭源（曾开源若干工具）</td>
+          <td>自有管线 + 软件订阅 + 合作</td>
+          <td><strong>最靠前之一</strong>：ISM001-055 IPF 有 Phase IIa 阳性读出<span class="src src-b">🟡</span></td>
+          <td>多家；Lilly 等合作<span class="src src-b">🟡</span></td>
+          <td>2025 末港股 IPO，累计 >$800M<span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Xaira Therapeutics</td>
+          <td>生成生物学（David Baker 系）+ 大规模数据生成<span class="src src-b">🟡</span></td>
+          <td>闭源未披露</td>
+          <td>自有管线为主（平台 + 治疗）</td>
+          <td>早期（2024 成立）<span class="src src-b">🟡</span></td>
+          <td>闭源未披露</td>
+          <td>$1B 出生（ARCH/Foresite 领投），估值约 $4B<span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Genesis Therapeutics</td>
+          <td>GEMS：3D 结构感知深度网络 + 分子模拟，攻 data-poor/难成药靶点<span class="src src-b">🟡</span></td>
+          <td>闭源未披露</td>
+          <td>药企合作 + 自有管线</td>
+          <td>早中期<span class="src src-b">🟡</span></td>
+          <td>Eli Lilly（$20M upfront + 最高 $670M 里程碑）<span class="src src-b">🟡</span></td>
+          <td>累计 >$304M；B 轮 $200M（a16z、NVIDIA）<span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Iambic Therapeutics</td>
+          <td>生成 + 物理化学（translational/生成 chem 路线）<span class="src src-b">🟡</span></td>
+          <td>闭源未披露</td>
+          <td>自有管线为主</td>
+          <td>已有临床候选（肿瘤）<span class="src src-b">🟡</span></td>
+          <td>闭源未披露</td>
+          <td>累计 >$300M（A/B + 2025 加注）<span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Chai Discovery</td>
+          <td>Chai-1 生物分子相互作用模型（对标 AF3）<span class="src src-b">🟡</span></td>
+          <td><strong>半开源</strong>：研究免费、权重部分开放<span class="src src-b">🟡</span></td>
+          <td>「研究免费 + 药企合作变现」</td>
+          <td>偏平台/模型，自有管线早期<span class="src src-b">🟡</span></td>
+          <td>闭源未披露</td>
+          <td>Thrive、OpenAI 系投资人背书<span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>开源底座（Boltz / Protenix / AF3）</td>
+          <td>开放的结构/相互作用预测 foundation model<span class="src src-b">🟡</span></td>
+          <td><strong>全开源可商用</strong>（Boltz MIT；Protenix 开放）<span class="src src-b">🟡</span></td>
+          <td>非商业实体 / 平台分发</td>
+          <td>无管线（是底座，非药企）</td>
+          <td>—（被所有人使用）</td>
+          <td>学术 + 大厂（MIT、ByteDance 等）<span class="src src-b">🟡</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>读矩阵：</strong>（1）Isomorphic 的差异化是<strong>AF3 原班 research 血统 + Alphabet 资本 + 大药企旗舰合作</strong>，但在「临床进度」上反而<strong>落后于</strong> Insilico、Recursion（它们已有人体数据，Isomorphic 尚无人体给药）。（2）赛道<strong>同质化严重</strong>：大家都讲「生成 + 结构 + 自动化湿实验 + 自有管线 + 药企合作」，分化主要在「自有管线 vs 平台」「闭源 vs 开源」两轴。（3）最危险的对手不在表里同行，而在<strong>开源底座</strong>（把核心模型变商品）与<strong>大药企自建</strong>（既是客户又能内化）。</p>
+  </section>
+
+  <!-- ③ 定位图 -->
+  <section id="map">
+    <h2><span class="n">③</span>定位图（whitespace 在哪）</h2>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 640 400" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12">
+        <rect x="320" y="200" width="280" height="180" fill="rgba(122,162,255,.08)"/>
+        <line x1="40" y1="200" x2="600" y2="200" stroke="#b9c2e0" stroke-width="1.5"/>
+        <line x1="320" y1="24" x2="320" y2="376" stroke="#b9c2e0" stroke-width="1.5"/>
+        <text x="600" y="218" text-anchor="end" fill="#5a627a">闭源黑箱 →</text>
+        <text x="40" y="218" fill="#5a627a">← 开源/开放</text>
+        <text x="326" y="20" fill="#5a627a">自有管线（自己做药·重）</text>
+        <text x="326" y="392" fill="#5a627a">卖工具/平台/数据（卖铲子·轻）</text>
+
+        <circle cx="470" cy="95" r="8" fill="#7aa2ff"/>
+        <text x="482" y="92" fill="#1a1f33" font-weight="700">Isomorphic</text>
+        <text x="482" y="108" fill="#5a627a" font-size="10.5">闭源·自有管线+大药企合作</text>
+
+        <circle cx="430" cy="70" r="6" fill="#9b8cff"/>
+        <text x="442" y="66" fill="#5a627a">Recursion</text>
+        <circle cx="400" cy="120" r="6" fill="#9b8cff"/>
+        <text x="412" y="124" fill="#5a627a">Insilico</text>
+        <circle cx="510" cy="55" r="6" fill="#9b8cff"/>
+        <text x="458" y="48" fill="#5a627a">Xaira</text>
+        <circle cx="450" cy="150" r="6" fill="#9b8cff"/>
+        <text x="462" y="154" fill="#5a627a">Genesis</text>
+        <circle cx="500" cy="135" r="6" fill="#9b8cff"/>
+        <text x="512" y="139" fill="#5a627a">Iambic</text>
+
+        <circle cx="250" cy="250" r="6" fill="#43c59e"/>
+        <text x="150" y="254" fill="#5a627a">Chai（半开源·平台）</text>
+        <circle cx="120" cy="300" r="7" fill="#43c59e"/>
+        <text x="132" y="304" fill="#138a6e">Boltz / AF3 / Protenix</text>
+        <circle cx="420" cy="290" r="6" fill="#ffb454"/>
+        <text x="432" y="294" fill="#5a627a">NVIDIA BioNeMo</text>
+
+        <text x="430" y="345" fill="#3a66ff" font-weight="700">▢ whitespace</text>
+        <text x="430" y="362" fill="#5a627a" font-size="10.5">不碰临床的「AI 药企工具/数据/评测层」</text>
+      </svg>
+      </div>
+      <figcaption>定位图（本调研重绘）。横轴开源↔闭源，纵轴「自己做药（重资本）↔卖铲子（工具/平台/数据，轻）」。头部全挤在<strong>右上「闭源+自有管线」</strong>；真正的 whitespace 是<strong>面向所有 AI 药企的中立工具/数据/评测层</strong>（图中蓝框）。</figcaption>
+    </figure>
+  </section>
+
+  <!-- ④ 融资 timeline -->
+  <section id="funding">
+    <h2><span class="n">④</span>融资 timeline</h2>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 720 170" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12.5">
+        <line x1="60" y1="80" x2="680" y2="80" stroke="#b9c2e0" stroke-width="2"/>
+
+        <circle cx="90" cy="80" r="6" fill="#7aa2ff"/>
+        <text x="90" y="55" text-anchor="middle" fill="#5a627a">2021-11</text>
+        <text x="90" y="105" text-anchor="middle" fill="#1a1f33" font-weight="700">成立 / 分拆</text>
+        <text x="90" y="121" text-anchor="middle" fill="#5a627a" font-size="10.5">DeepMind 系，Alphabet</text>
+
+        <circle cx="270" cy="80" r="6" fill="#43c59e"/>
+        <text x="270" y="55" text-anchor="middle" fill="#5a627a">2024-01</text>
+        <text x="270" y="105" text-anchor="middle" fill="#1a1f33" font-weight="700">大药企合作</text>
+        <text x="270" y="121" text-anchor="middle" fill="#5a627a" font-size="10.5">Lilly+Novartis ~$3B 潜在值</text>
+
+        <circle cx="450" cy="80" r="8" fill="#9b8cff"/>
+        <text x="450" y="52" text-anchor="middle" fill="#5a627a">2025-03</text>
+        <text x="450" y="105" text-anchor="middle" fill="#1a1f33" font-weight="700">$600M 首轮外部</text>
+        <text x="450" y="121" text-anchor="middle" fill="#5a627a" font-size="10.5">Thrive 领投，GV/Alphabet</text>
+
+        <circle cx="640" cy="80" r="9" fill="#3a66ff"/>
+        <text x="640" y="50" text-anchor="middle" fill="#5a627a">2026-05</text>
+        <text x="640" y="105" text-anchor="middle" fill="#1a1f33" font-weight="700">$2.1B Series B</text>
+        <text x="640" y="121" text-anchor="middle" fill="#5a627a" font-size="10.5">Thrive 领投 + MGX/Temasek 等</text>
+      </svg>
+      </div>
+      <figcaption>Isomorphic Labs 融资 / 里程碑时间线（据公开报道整理）。</figcaption>
+    </figure>
+    <table>
+      <thead><tr><th>时间</th><th>事件 / 轮次</th><th>金额</th><th>投资方 / 对手方</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr><td>2021-11</td><td>成立并对外公布（DeepMind 分拆，隶属 Alphabet）</td><td>—（Alphabet 内部资助）</td><td>Alphabet / Google DeepMind</td><td><span class="src src-a">🟢</span> 官网/Wikipedia</td></tr>
+        <tr><td>2024-01</td><td>与 Eli Lilly 战略合作（多靶点小分子）</td><td>$45M upfront + 最高 $1.7B 里程碑 + 分层 royalty</td><td>Eli Lilly</td><td><span class="src src-a">🟢</span> PRNewswire 官稿</td></tr>
+        <tr><td>2024-01</td><td>与 Novartis 战略合作（3 个靶点）</td><td>$37.5M upfront + 最高 $1.2B 里程碑 + royalty（2025-02 扩展+3 项目）</td><td>Novartis</td><td><span class="src src-a">🟢</span> PRNewswire 官稿</td></tr>
+        <tr><td>2025-03-31</td><td><strong>首轮外部融资</strong>（媒体多称 Series A 级）</td><td><strong>$600M</strong></td><td>Thrive Capital 领投；GV、Alphabet 跟投</td><td><span class="src src-a">🟢</span> 官网 + <span class="src src-b">🟡</span> Reuters/Crunchbase</td></tr>
+        <tr><td>2026-05-12</td><td><strong>Series B</strong></td><td><strong>$2.1B</strong></td><td>Thrive Capital 领投；Alphabet、GV、MGX、Temasek、CapitalG、UK Sovereign AI Fund</td><td><span class="src src-a">🟢</span> 官网 + <span class="src src-b">🟡</span> Yahoo/Reuters</td></tr>
+      </tbody>
+    </table>
+    <p><strong>融资节奏佐证阶段：</strong>从「内部孵化（无外部）」→「先拿下旗舰药企合作」→「$600M 首轮」→ 一年出头再 $2.1B B 轮，金额曲线极陡——这是<strong>头部虹吸</strong>的典型，绝非早期。注：<strong>两轮均未披露估值</strong>，请勿臆测。赛道整体融资仍极热（Xaira $1B 出生、Insilico IPO、Genesis $200M B 轮），但资本明显向少数头部集中。</p>
+  </section>
+
+  <!-- ⑤ 公司速览 -->
+  <section id="snapshot">
+    <h2><span class="n">⑤</span>公司速览</h2>
+    <table>
+      <tbody>
+        <tr><td>是什么 / 定位</td><td>Alphabet / Google DeepMind 分拆的 AI-first 药物发现公司，使命「用 AI 重构并加速药物发现」（官方口径甚至提「solve all disease」）。<span class="src src-a">🟢</span><span class="src src-c">🔴</span>（愿景属自述）</td></tr>
+        <tr><td>产品</td><td><strong>AI drug design engine</strong>：以 AlphaFold（含 AlphaFold3 的结构与相互作用预测）为底座，向「设计能成药的分子」延伸。非对外标准化 SaaS，主要通过合作与自有管线落地。<span class="src src-a">🟢</span></td></tr>
+        <tr><td>团队</td><td>CEO <strong>Demis Hassabis</strong>（兼 Google DeepMind CEO，2024 诺贝尔化学奖 / AlphaFold）；CAIO <strong>Max Jaderberg</strong>、CSO <strong>Miles Congreve</strong>（资深药化）、COO Pamela Carroll、CTO Sergei Yakneen。<strong>诺奖级 research 血统 + 药化老兵</strong>是其最硬资产。<span class="src src-a">🟢</span></td></tr>
+        <tr><td>商业模式</td><td>(1) 药企合作：upfront + 里程碑 + royalty（Lilly、Novartis）；(2) 自有管线：自选靶点推进新药。<span class="src src-a">🟢</span></td></tr>
+        <tr><td>状态</td><td>非早期：成立 2021、$2.1B B 轮、近 $3B 药企合作潜在值。<strong>但临床前为主——截至 2026 年中尚无人体给药</strong>，首批临床预计 2026 底（曾被 Hassabis 口误为「2025 进临床」，后澄清指临床前）。<span class="src src-b">🟡</span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ⑥ 创业 idea 借鉴 -->
+  <section id="idea">
+    <h2><span class="n">⑥</span>创业 idea 借鉴</h2>
+    <div class="callout insight">
+      <span class="label">Whitespace / 机会</span>
+      头部全挤在「闭源大模型 + 自己做药（自有管线，重资本、回报极晚）」这一格，且核心模型层（结构/相互作用预测）已被 <strong>Boltz/Chai/AF3/Protenix 商品化</strong>。空白在<strong>「卖铲子」一侧</strong>：做一家<strong>不碰临床、面向所有 AI 药企与药企内部团队的中立工具/数据/评测层</strong>——把别人重金做药时的脏活标准化。例如：①<strong>湿实验↔AI 闭环的数据飞轮 SaaS</strong>（高质量、可复用的结合亲和力/ADMET 实验数据集 + 标注管线，正是开源模型最缺的）；②<strong>AI-药物分子的独立评测/benchmark 平台</strong>（赛道至今缺公认 benchmark，谁定标准谁有话语权）；③<strong>把开源底座工程化成可商用合规产品</strong>（Boltz 是 MIT，但药企要的是合规、可审计、带支持的部署）。</div>
+    <h3>现有玩家共同短板（unmet needs）</h3>
+    <p>①<strong>临床产出未兑现</strong>——所有家都还没有上市药，「AI 提高成功率」是集体未证命题，谁先拿出真实 Phase II/III 数据谁就重定价；②<strong>数据稀缺与质量</strong>——结构预测已商品化，但「分子是否安全、可口服、能合成」依赖大量私有、高质量湿实验数据，这才是真壁垒，多数玩家自建数据昂贵且不共享；③<strong>缺公认 benchmark/标准</strong>——各家口径自报、樱桃挑选，买方（药企）难横评；④<strong>重资本、回报极晚</strong>——自有管线烧钱十年级，小团队玩不起。</p>
+    <h3>Why now（为什么现在值得做）</h3>
+    <p>①<strong>底座商品化</strong>：Boltz/Chai/AF3 让「结构预测」近乎免费，创业者不必再自训地基大模型，可把精力放到数据、评测、工程化与垂直场景；②<strong>大药企已养成「外包 AI」的购买习惯</strong>（Lilly 同时签多家），买方市场成型；③<strong>资本仍热但开始挑剔</strong>，从「讲故事」转向「要数据/要产出」，利好做<strong>可验证价值（工具/数据/评测）</strong>而非又一条十年管线的团队；④AI agent / 自动化湿实验室成熟，闭环数据生成成本在降。</p>
+    <h3>可借鉴的打法 + 相邻机会</h3>
+    <ul>
+      <li><strong>borrowable：</strong>Isomorphic「<strong>先把一项世界级 research 资产（AF3）工程化，再用旗舰药企合作（Lilly/Novartis）做信用背书、再融大钱</strong>」的顺序很可复制——但前提是你有别人没有的独家资产（数据/模型/方法）。其「<strong>合作（轻、早现金）+ 自有管线（重、晚但大）</strong>」双轨也值得借：用合作养现金流，用管线博上行。</li>
+      <li><strong>adjacent：</strong>① 把同一套「结构/生成 + 自动化」迁到<strong>抗体/多肽/PROTAC、农业化学、材料、酶工程</strong>等小分子之外的设计空间（竞争更稀）；② 做<strong>AI 药企的「数据中台 / 标注 / 合规与可重复性」垂直 SaaS</strong>；③ 做<strong>临床转化层</strong>（用 AI 预测毒性/PK/患者分层，攻「临床失败率」这个真正的成本黑洞，而非只卷分子设计）。</li>
+    </ul>
+    <div class="callout warn">
+      <span class="label">风险（诚实给）</span>
+      ①<strong>赛道拥挤 + 头部资本碾压</strong>：直接做「又一家自研管线 AI 药企」要和 $2.1B 在手、诺奖品牌、Alphabet 算力的 Isomorphic 同台，几乎没戏。②<strong>开源免费蚕食</strong>：你若卖模型/预测能力，Boltz 这类 MIT 全开会持续压价。③<strong>大药企自建</strong>：你的工具客户（药企）随时可能内化你做的事。④<strong>监管 + 极长周期 + 极高失败率</strong>：药物本身就是十年级、九成失败的生意，AI 没改变这条物理定律。⑤<strong>价值未证</strong>：整个赛道至今无上市药，若头部临床接连失败，资本与叙事会一起退潮。</div>
+  </section>
+
+  <!-- ⑦ 现实判断 -->
+  <section id="take">
+    <h2><span class="n">⑦</span>现实判断</h2>
+    <p>Isomorphic 在格局里是<strong>资本、品牌、research 血统最厚的头部</strong>：AF3 原班 + Hassabis 诺奖光环 + Alphabet 算力 + Lilly/Novartis 旗舰合作 + $2.7B 在手，几乎集齐了「赢家」该有的牌。但它的软肋同样明确：<strong>临床进度反而落后</strong>（Insilico/Recursion 已有人体数据，它尚无人体给药且首批临床推迟到 2026 底）、<strong>核心模型层已被开源商品化</strong>（护城河更多在数据、工程化与合作关系，而非「我有 AF3 你没有」——AF3 同源能力别人也能近似拿到）、以及与整个赛道共担的<strong>「AI 能否真正降低临床失败率」尚未被验证</strong>。对想入场的创业者：<strong>这不是一个能靠先发或又一条管线挤进去的早期赛道</strong>——正面硬刚头部基本无解；务实的机会在<strong>「卖铲子」的工具/数据/评测层</strong>，以及把同一套能力迁到竞争更稀的相邻设计空间（抗体/酶/材料）或攻临床转化这个真正的成本黑洞。</p>
+    <div class="callout warn">
+      <span class="label">使用提醒</span>
+      本页为对话式调研，信息主要来自公开来源并按等级标注；融资数额、客户、能力声明等以官方一手为准，
+      <strong>产品能力未必经独立验证</strong>（尤其「临床进度」「成功率提升」多为各家自述口径），引用前请核对最新信息。
+    </div>
+  </section>
+
+  <!-- 出处 -->
+  <section id="src">
+    <h2>出处</h2>
+    <ul style="font-size:13.5px">
+      <li><span class="src src-a">🟢</span> <a href="https://www.isomorphiclabs.com" target="_blank" rel="noopener">官网</a> / <a href="https://www.isomorphiclabs.com/partnerships" target="_blank" rel="noopener">Partnerships</a> / <a href="https://www.isomorphiclabs.com/people/sir-demis-hassabis-phd" target="_blank" rel="noopener">团队页</a></li>
+      <li><span class="src src-a">🟢</span> <a href="https://www.isomorphiclabs.com/articles/isomorphic-labs-announces-600m-external-investment-round" target="_blank" rel="noopener">官方：$600M 首轮（2025-03）</a> · <a href="https://www.isomorphiclabs.com/articles/isomorphic-labs-announces-series-b-investment-round" target="_blank" rel="noopener">官方：$2.1B Series B（2026-05）</a></li>
+      <li><span class="src src-a">🟢</span> <a href="https://www.prnewswire.com/news-releases/isomorphic-labs-announces-strategic-multi-target-research-collaboration-with-lilly-302027392.html" target="_blank" rel="noopener">官稿：Lilly 合作（$45M+$1.7B 里程碑）</a> · <a href="https://www.prnewswire.com/news-releases/isomorphic-labs-announces-strategic-multi-target-research-collaboration-with-novartis-302027387.html" target="_blank" rel="noopener">官稿：Novartis 合作（$37.5M+$1.2B 里程碑）</a></li>
+      <li><span class="src src-b">🟡</span> <a href="https://en.wikipedia.org/wiki/Isomorphic_Labs" target="_blank" rel="noopener">Wikipedia: Isomorphic Labs</a>（成立/管理层）</li>
+      <li><span class="src src-b">🟡</span> <a href="https://www.cnbc.com/2025/04/09/inside-isomorphic-labs-google-deepminds-ai-life-sciences-spinoff.html" target="_blank" rel="noopener">CNBC: Inside Isomorphic Labs</a> · <a href="https://www.clinicaltrialsarena.com/news/isomorphic-labs-prepares-trials-ai-designed-drugs/" target="_blank" rel="noopener">临床时间线（推迟至 2026 底）</a></li>
+      <li><span class="src src-b">🟡</span> <a href="https://finance.yahoo.com/sectors/healthcare/articles/isomorphic-labs-raises-2-1-164235060.html" target="_blank" rel="noopener">$2.1B Series B 报道（投资方名单）</a></li>
+      <li><span class="src src-b">🟡</span> 赛道 / 竞品：<a href="https://www.onhealthcare.tech/p/the-ai-drug-discovery-capital-stack" target="_blank" rel="noopener">AI Drug Discovery Capital Stack 2026</a> · <a href="https://www.fiercebiotech.com/biotech/new-ai-drug-discovery-powerhouse-xaira-rises-1b-funding" target="_blank" rel="noopener">Xaira $1B</a> · <a href="https://ir.recursion.com/news-releases/news-release-details/recursion-and-exscientia-two-leaders-ai-drug-discovery-space" target="_blank" rel="noopener">Recursion×Exscientia 合并</a> · <a href="https://www.pharmaceutical-technology.com/news/genesis-therapeutics-200m-series-b/" target="_blank" rel="noopener">Genesis $200M B 轮</a></li>
+      <li><span class="src src-b">🟡</span> 开源底座：<a href="https://github.com/jwohlwend/boltz" target="_blank" rel="noopener">Boltz (MIT, GitHub)</a> · <a href="https://blog.booleanbiotech.com/alphafold3-boltz-chai1" target="_blank" rel="noopener">AlphaFold3 / Boltz / Chai-1 对比</a></li>
+    </ul>
+  </section>
+
+  <footer class="foot">
+    公司竞争格局 / 赛道早期度调研笔记，仅作梳理；信息按来源分级、产品能力未必经独立验证，以官方一手信息为准 · 整理日期 2026-06-15
+  </footer>
+
+</article>
+</body>
+</html>
