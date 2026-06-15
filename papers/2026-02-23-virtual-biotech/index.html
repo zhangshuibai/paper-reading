@@ -129,12 +129,52 @@
 
   <nav class="toc">
     <b>目录</b>
+    <a href="#bg">★ 领域背景</a>
     <a href="#opensource">① 开源情况</a>
     <a href="#motivation">② 动机与贡献</a>
     <a href="#method">③ 系统架构</a>
     <a href="#evaluation">④ 案例与评估</a>
     <a href="#insight">⑤ 洞见与局限</a>
   </nav>
+
+  <!-- ★ 领域背景速补 -->
+  <section id="bg">
+    <h2><span class="n">★</span>领域背景速补（给只懂 LLM 的读者）</h2>
+    <p>这篇论文搭的是一支「虚拟药企」，里面每个 agent 对应一种现实里的科研专业。但如果你只熟 LLM、对生物医药是外行，光看 statistical genetics、L2G、ADC 这些词会一头雾水。这一节用大白话把新药研发的链条和文中关键术语讲清楚——<strong>每个名词都说明「是什么 / 为什么难 / 和这篇什么关系」</strong>。</p>
+
+    <h3>先建立一张全局地图：一个新药是怎么诞生的</h3>
+    <p>可以把新药研发想成<strong>四步接力</strong>，每一步都是一个独立学科：</p>
+    <blockquote>① <strong>遗传证据找靶点</strong>（这病的「病根」在哪个基因/蛋白？）→ ② <strong>功能验证</strong>（实验确认动它真的有用）→ ③ <strong>化学设计分子</strong>（造一个能精准作用上去的药）→ ④ <strong>临床验证</strong>（在人身上证明安全又有效）。</blockquote>
+    <p>现实里没有哪个专家能一个人吃透这四步，所以药企靠的是「一支跨学科团队 + 一个 CSO（首席科学官）统筹」。<strong>本文的核心 idea 就是把这套人类团队的分工，直接翻译成「多个领域专精的 agent + 一个 CSO agent 编排」</strong>——这就是为什么读懂下面这些学科名词，就读懂了这篇论文的骨架。</p>
+
+    <h3>① 靶点：整条链条的起点（也是最容易出错的地方）</h3>
+    <ul>
+      <li><strong>drug target / target discovery（药物靶点 / 靶点发现）。</strong><em>是什么：</em>靶点就是药物要去「掰动」的那个分子开关——通常是一个和疾病有因果关系、且药物能结合上去的蛋白或基因。类比：疾病像一台运转失常的机器，靶点就是你决定去拧的那颗螺丝。<em>为什么难：</em><strong>选错靶点是新药失败的头号原因</strong>——很多药在人体试验里失败，根子是当初那颗「螺丝」根本不是病因，拧了也没用。<em>和这篇关系：</em>文中 B7-H3、OSMRβ 两个案例本质都是在问「这个靶点选得对不对」，整个虚拟药企的第一要务就是靠证据把靶点选准。</li>
+    </ul>
+
+    <h3>② 找靶点的证据从哪来：人类遗传学</h3>
+    <ul>
+      <li><strong>statistical genetics / GWAS（统计遗传学 / 全基因组关联分析）。</strong><em>是什么：</em>在几十万人的大人群里做统计，找出「哪些基因变异（DNA 上的小差异）和某种病显著相关」。类比：像在海量用户数据里做 A/B test，找出「带某个基因版本的人更容易得这个病」。<em>为什么重要：</em>遗传证据最接近「因果」——如果天生带某变异的人就更易/更不易得病，说明那个基因很可能真的是病根，而不是结果。<strong>这是找靶点最硬的证据源。</strong><em>和这篇关系：</em>虚拟药企里专门有一个 statistical genetics agent 干这件事。</li>
+      <li><strong>fine-mapping / L2G / QTL colocalization（精细定位 / locus-to-gene / 表达数量性状共定位）。</strong><em>为什么需要它们：</em>GWAS 有个先天短板——它只能告诉你「<strong>大致这一段染色体区域</strong>和病相关」，可这段区域里往往挤着好几个基因，到底是哪个、通过什么机制起作用，GWAS 答不了。这三种方法就是来补这个洞的：<strong>fine-mapping（精细定位）</strong>把信号从「一大片」缩小到「几个最可疑的位点」；<strong>L2G（locus-to-gene，位点到基因）</strong>用机器学习把可疑位点指派到「最可能的那个因果基因」；<strong>QTL colocalization（共定位）</strong>检查「影响某基因表达量的变异」和「影响疾病的变异」是不是同一个，从而解释机制。类比：GWAS 像测出「信号来自这栋楼」，这几种方法帮你定位到「具体哪一户、为什么」。<em>和这篇关系：</em>文中 statistical genetics agent 正是靠组合调用这些工具来给靶点打分。</li>
+    </ul>
+
+    <h3>③ 选好的靶点要验证、要造药</h3>
+    <ul>
+      <li><strong>functional genomics（功能基因组学）。</strong><em>是什么：</em>用实验直接验证「某个基因到底干什么」，最典型的手段是 <strong>CRISPR 扰动</strong>——人为把某个基因敲掉或调高，看细胞/疾病有什么变化。类比：遗传学是「观察到相关」，功能基因组学是「亲手做实验确认因果」。<em>和这篇关系：</em>用来给候选靶点提供「动它真的有用」的佐证，是从「怀疑」到「确信」的关键一步。</li>
+      <li><strong>cheminformatics（化学信息学）。</strong><em>是什么：</em>用计算方法去设计、筛选「能结合靶点的分子」——可能是小分子药，也可能是抗体。类比：靶点是锁，这一步是用计算机批量试钥匙、再设计一把最合适的钥匙。<em>和这篇关系：</em>对应虚拟药企里负责「成药性 / 选药物形态」的 agent。</li>
+    </ul>
+
+    <h3>④ 最后一关：在人身上验证</h3>
+    <ul>
+      <li><strong>clinical trial phases（临床 I / II / III 期）。</strong><em>是什么：</em>药物在人体上分阶段试验——<strong>I 期</strong>少量人，主要看安全/毒性；<strong>II 期</strong>更多病人，初步看有没有疗效；<strong>III 期</strong>大规模，严格证明确实有效且安全，过了才能上市。<em>为什么难：</em><strong>绝大多数候选药都死在这里</strong>——前面计算和实验都漂亮，到了真人身上才发现没效或副作用太大。<em>和这篇关系：</em>文中分析了 55,984 个临床试验、还复盘了一个失败的临床试验，就是在挖「什么样的靶点更容易闯过这几关」。</li>
+      <li><strong>ADC（antibody-drug conjugate，抗体偶联药物）。</strong><em>是什么：</em>一种药物「形态」——把一个毒性很强的药「挂」在抗体上，靠抗体的精准识别能力把毒药专门送到癌细胞门口再释放，尽量不伤正常细胞。类比：与其全身投放毒药，不如用「制导导弹」精准打击。<em>和这篇关系：</em>文中 B7-H3 肺癌案例，agent 给出的建议正是用 ADC 这种形态。</li>
+    </ul>
+
+    <div class="callout note">
+      <span class="label">一句话把整条链串起来</span>
+      发现一个新药，要「<strong>遗传证据找靶点 → 功能实验验证 → 化学设计分子 → 临床在人身上验证</strong>」横跨好几门完全不同的学科，没人能全包。<strong>所以本文用「多个领域专精的 agent，各管一段；再用一个 CSO agent 做拆解、分派和综合」来模拟一支真实的药企研发团队</strong>——你把上面这条链读顺了，就理解了这篇论文为什么要这么设计。
+    </div>
+  </section>
 
   <!-- ① 开源情况 -->
   <section id="opensource">

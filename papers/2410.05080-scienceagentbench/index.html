@@ -122,12 +122,38 @@
 
   <nav class="toc">
     <b>目录</b>
+    <a href="#bg">★ 领域背景</a>
     <a href="#opensource">① 开源贡献</a>
     <a href="#motivation">② 动机与贡献</a>
     <a href="#method">③ 基准构建</a>
     <a href="#evaluation">④ 实验评估</a>
     <a href="#insight">⑤ 洞见</a>
   </nav>
+
+  <!-- ★ 领域背景速补 -->
+  <section id="bg">
+    <h2><span class="n">★</span>领域背景速补（给只懂 LLM 的读者）</h2>
+    <p>这篇相对好懂——它本质是个「让 agent 写代码做数据分析」的评测。但有几个词如果不点破，外行容易误会，这里简短补一下。</p>
+
+    <h3>什么叫「data-driven scientific discovery 任务」</h3>
+    <p><strong>不是让 agent 去实验室做物理实验</strong>，而是：<strong>给定一份现成的科学数据 + 一句自然语言要求</strong>（比如「在这份数据上训一个模型预测药物毒性，把结果存成 csv」），<strong>agent 要写出一段能真正跑起来、并得到正确结果的 Python 代码</strong>。类比 LLM 圈：很像让 agent 解一道「带真实数据集的 Kaggle 小题」，但用的是真实科研论文里的数据和任务。重点全在「代码能不能跑通 + 结果对不对」，不在「实验台操作」。</p>
+
+    <h3>四个学科各在分析什么（不必懂细节，知道数据长什么样即可）</h3>
+    <ul>
+      <li><strong>bioinformatics（生物信息学）：</strong>分析基因/蛋白序列、基因表达数据、细胞图像这类生物数据。</li>
+      <li><strong>computational chemistry（计算化学）：</strong>算分子的性质、做分子模拟，比如预测一个化合物有没有毒。</li>
+      <li><strong>GIS（地理信息系统）：</strong>处理地图、遥感影像、空间数据，比如画一张洪水风险地图。</li>
+      <li><strong>cognitive neuroscience（认知神经科学）：</strong>分析脑电（EEG）、fMRI、行为实验等大脑/心理数据。</li>
+    </ul>
+    <p>它们的共同难点：数据高度<strong>异构</strong>（图像、序列、地图、时序各不相同），而且常要用学科专用的工具库（如 Geopandas、Biopsykit），LLM 往往不会用、会瞎编 API——这正是文中 agent 频频失败的原因。</p>
+
+    <h3>三个评测词</h3>
+    <ul>
+      <li><strong>rubric（评分细则）。</strong>把一个任务拆成几个阶段（读数据、处理数据、建模、输出格式、保存结果），逐阶段打分。好处是能给「部分分」——程序步骤大体对、只卡在某一环，也能看出它差在哪，而不是简单判一个对/错。</li>
+      <li><strong>Success Rate（SR，成功率）。</strong>最核心的指标：程序跑出来的结果<strong>真正满足任务要求</strong>的比例（报错或没存对结果直接算 0）。本文最强 agent 也只有三成出头，就是这个数。</li>
+      <li><strong>data contamination（数据污染）。</strong><em>为什么严格基准要专门防它：</em>这些题目和答案都来自公开论文和开源代码，很可能<strong>早就被写进了 LLM 的训练数据</strong>——那模型不是「现场分析」，而是「背过答案」，分数会虚高、不可信。所以本文专门设计了「删测试样本、把测试标签换成 dummy 值」等手段，让靠背答案的 agent 露馅。类比 LLM 圈常说的「benchmark 泄漏 / 刷榜」问题。</li>
+    </ul>
+  </section>
 
   <!-- ① 开源 -->
   <section id="opensource">
