@@ -114,6 +114,7 @@
     <a href="#snapshot">⑤ 公司速览</a>
     <a href="#idea">⑥ 创业 idea 借鉴</a>
     <a href="#take">⑦ 现实判断</a>
+    <a href="#cn">★ 中国对标</a>
     <a href="#src">出处</a>
   </nav>
 
@@ -378,6 +379,82 @@
     </div>
   </section>
 
+  <!-- 中国对标 -->
+  <section id="cn">
+    <h2><span class="n">★</span>中国对标 / 在中国能不能借鉴</h2>
+    <p>把 CuspAI 这套「<strong>generative AI for materials / 材料搜索引擎 / 分子-材料模拟平台</strong>」放到中国语境里看：中国<strong>有</strong>正面对标，而且在「AI for Science（AI4S）+ 材料」这条线上起步并不晚——甚至在<strong>「学术-开源-公司」一体化生态</strong>与<strong>政策驱动</strong>上比国外更系统。只是对标的几家走的是<strong>「科学大模型 / 原子间势函数 + 高通量模拟 + 自动化实验」</strong>的路子，和 CuspAI 主打的「diffusion 逆向生成出可合成候选 + 旗舰客户共创」侧重略有不同。下面如实拆。</p>
+
+    <h3>① 中国对标一览</h3>
+    <table>
+      <thead><tr>
+        <th>公司 / 机构</th>
+        <th>做什么（与 CuspAI 的可比性）</th>
+        <th>阶段 / 融资</th>
+        <th>上市或大厂背景</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>深势科技 DP Technology</strong>（北京，2018）</td>
+          <td><strong>最接近 CuspAI 的一家</strong>：做 AI4S「科学大模型」体系（深势·宇知®）、深度势能预训练大模型 <strong>DPA-1/DPA-2</strong>（覆盖近 70 种元素，含半导体/钙钛矿/合金/催化/正极/固态电解质等），平台 <strong>Bohrium®（玻尔）</strong> 科研云 + Piloteye® 电池设计自动化。打法偏「势函数 + 高通量模拟 + 平台」，逆向生成是其中一环。<span class="src src-b">🟡</span></td>
+          <td>未上市；2025-12 完成 C 轮约 <strong>8 亿元人民币</strong>（达晨、联想创投、华创、北京 AI 产业基金等），累计多轮融资。<span class="src src-b">🟡</span></td>
+          <td>独立公司，由 <strong>北京科学智能研究院（AISI）</strong>核心成员（鄂维南院士体系）创办；国资背景资方进入。<span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td><strong>晶泰科技 XtalPi</strong>（深圳，2015）</td>
+          <td>起家于「AI + 自动化实验室」做药物发现，<strong>近两年明确横向扩到材料科学</strong>（新能源、化工）。2024-08 与<strong>协鑫集团</strong>签 5 年战略合作共建新能源材料 AI 大模型，金额约 10 亿元。打法 = 计算 + <strong>机器人湿实验室闭环</strong>（更像 Lila/Periodic 路线）。<span class="src src-b">🟡</span></td>
+          <td><strong>已上市</strong>（港股 2228.HK，2024-06 挂牌，港交所 18C「特专科技」第一股）；一年内累计募资约 87 亿港元；仍处大额亏损。<span class="src src-b">🟡</span></td>
+          <td>上市公司；腾讯、红杉等早期股东，规模大、现金厚。<span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td><strong>北京科学智能研究院 AISI</strong>（2021）</td>
+          <td>非营利研究院（鄂维南院士领衔），是深势的「学术源头」，主导 <strong>DPA 系列预训练模型、DeepModeling 开源社区</strong>。对标的是国外大厂/学界的「开源模型 + 数据集」供给侧（类比 Meta FAIR / Microsoft 角色）。<span class="src src-b">🟡</span></td>
+          <td>研究机构（非创业公司），政府/产业支持。<span class="src src-b">🟡</span></td>
+          <td>学术机构，与深势深度绑定，构成「研究院→公司→开源社区」生态链。<span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td><strong>华为 / 百度等大厂内部</strong></td>
+          <td>无独立「材料发现公司」，但在<strong>科学计算 / AI4S 框架</strong>（如华为昇思 MindSpore 科学计算、盘古科学大模型方向）与算力侧布局，可成材料 AI 的<strong>底座供给方</strong>（类比 NVIDIA/Microsoft 顺手做）。<span class="src src-c">🔴 具体材料产品线公开信息有限</span></td>
+          <td>大厂内部项目，预算与算力无上限。<span class="src src-b">🟡</span></td>
+          <td>上市大厂；以平台/框架/算力切入，而非垂直材料交付。<span class="src src-c">🔴</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>② 中国该赛道成熟度 / 拥挤度——比国外早还是晚？</h3>
+    <div class="callout note">
+      <span class="label">判断</span>
+      <strong>不晚，局部更早；但「diffusion 逆向生成出可合成材料」这一窄口径上，国内偏空。</strong><br><br>
+      <strong>① 起步时间：</strong>深势/AISI 早在 2018–2021 年就在「势函数 + 科学大模型」上发力，<strong>与国外学界几乎同步、比多数国外垂直创业公司（CuspAI 2024、Periodic 2025）还早</strong>——AI4S 这个概念在中国甚至更早被体系化推广（「科研的安卓系统」叙事）。<span class="src src-b">🟡</span><br>
+      <strong>② 生态完整度：</strong>中国独有「<strong>研究院（AISI）→ 公司（深势）→ 开源社区（DeepModeling）→ 平台（Bohrium）</strong>」一条龙，比国外更早把「学术-工程-商业」缝合在一个生态里。<span class="src src-b">🟡</span><br>
+      <strong>③ 拥挤度：</strong>头部高度集中在<strong>深势、晶泰</strong>两家，腰部/早期垂直创业公司远不如美国密集——所以总体<strong>「头部成熟、长尾稀薄」</strong>，不算拥挤。<br>
+      <strong>④ 路线差异：</strong>国内主流是<strong>势函数/模拟 + 自动化实验</strong>（重平台、重数据、重实验闭环），CuspAI 那种<strong>「纯生成模型逆向出候选 + 轻资产共创」</strong>的窄打法，国内尚无高调对标——这恰是个可切入的相对空白。
+    </div>
+
+    <h3>③ 中国特有的 why-now / 政策 / 国产替代 / 供给差异</h3>
+    <ul>
+      <li><strong>政策强驱动（国外没有的顺风）：</strong>工信部《新材料大数据中心总体建设方案》（2024-10）、上海《材料智能引擎发展专项（2025–2027）》、北京《AI 赋能科学研究高质量发展行动计划（2025–2027）》与「AI+新材料」专项课题征集——<strong>从国家到地方密集出政策 + 给经费 + 建数据中心/智能实验室</strong>，把「材料基因组 + AI」写进十四五/十五五的新质生产力叙事。创业者能拿到<strong>政府课题、产业基金、国资订单</strong>，这是国外初创拿不到的资金/场景。<span class="src src-b">🟡</span></li>
+      <li><strong>国产替代是真实需求侧拐点：</strong>半导体材料（光刻胶、电子特气、高纯靶材）、固态电池电解质、高端催化剂、膜材料等<strong>「卡脖子」材料</strong>都急需自研——给「AI 加速材料研发」一个比国外更刚性的本土买单理由。新能源（电池/光伏）产业链规模全球第一，是天然的旗舰客户池（深势×宁德系、晶泰×协鑫即例）。<span class="src src-b">🟡</span></li>
+      <li><strong>供给差异：</strong>① <strong>数据</strong>——国外靠 Meta/Google 开源数据集（OpenCatalyst/ODAC25/GNoME），国内靠 <strong>DeepModeling 开源社区 + 国家新材料大数据中心</strong>自建，数据主权在内部；② <strong>算力</strong>——受出口管制影响，国内更依赖国产算力（昇腾等）与云平台（Bohrium），「国产算力 + 国产模型 + 国产材料」可形成闭环卖点；③ <strong>验证闭环</strong>——国内制造业/产线密集，找合成代工、中试、高通量表征比国外更便宜、更近，<strong>这恰好补上 CuspAI 最缺的「可合成性闭环」</strong>。<span class="src src-b">🟡</span></li>
+    </ul>
+
+    <h3>④ 能借鉴什么 + 本土化建议（你想在中国创业）</h3>
+    <div class="callout insight">
+      <span class="label">借鉴 + 本土化打法</span>
+      <strong>直接照搬 CuspAI 的：</strong>（1）<strong>「旗舰客户共创 = 数据 + 背书 + 订单」三合一</strong>——在中国换成<strong>龙头制造商（宁德/比亚迪系、协鑫、万华化学、半导体材料厂）+ 国资产业基金</strong>，既拿真实数据与场景，又拿政府/产业信任；（2）<strong>把复杂能力包装成一句话产品（「材料搜索引擎」）</strong>降低非专家客户认知门槛；（3）<strong>顶级学术血统做信任杠杆</strong>——国内对接<strong>高校/院士团队 + AISI/DeepModeling 生态</strong>。<br><br>
+      <strong>本土化、别硬刚的：</strong>
+      <strong>①</strong> 别再造一个通用生成模型或势函数大模型——<strong>深势/AISI 已把这层占住且开源</strong>，应站在 DPA/DeepModeling、MatterGen 等开源肩上，把精力放在<strong>验证层与垂直场景</strong>。
+      <strong>②</strong> <strong>主攻 CuspAI 在中国的空白窄口径</strong>：「逆向生成 + 可合成性 + 本土合成/中试代工网络」——利用中国制造业密度把「轻资产 × 强闭环验证」这个 whitespace 真正补上（国外这格也空着，但中国做成本更低）。
+      <strong>③</strong> 选一个<strong>国产替代刚需 + 有龙头买单</strong>的垂直点单点击穿（如固态电解质 / 半导体光刻胶 / DAC 与碳捕集吸附剂 / 钠电正极），用深度换巨头的广度。
+      <strong>④</strong> 用足<strong>政策红利</strong>：申报「AI+新材料」专项、对接国家新材料大数据中心与地方智能实验室，把政府经费当早期非稀释资金、把国资订单当 PMF 验证。
+      <strong>⑤</strong> 供给上拥抱<strong>国产算力 + 国产模型</strong>，规避出口管制风险，并把「自主可控」作为对国资/央企客户的卖点。
+    </div>
+
+    <div class="callout warn">
+      <span class="label">诚实提示</span>
+      ① 中国<strong>有强对标</strong>（深势最像、晶泰已上市且在扩材料），但<strong>没有一家是 CuspAI 那种「纯 diffusion 逆向生成 + 轻资产共创」的精确镜像</strong>——既说明有空白可切，也说明国内验证过的主流路线是「模拟/势函数 + 自动化实验」，纯生成路线在国内商业可行性尚未被证明；② 头部（深势/晶泰）资金与生态壁垒已高，新进入者宜走「<strong>它们没覆盖的垂直 + 验证层</strong>」差异化，不要正面比拼通用平台；③ 政策红利是双刃——拿国资钱/课题往往伴随合规、信创、本地化要求与较慢的回款节奏，需提前规划现金流。
+    </div>
+  </section>
+
   <!-- 出处 -->
   <section id="src">
     <h2>出处</h2>
@@ -395,6 +472,10 @@
       <li><a href="https://fortune.com/2026/05/28/exclusive-orbital-industries-raises-50-million-series-b-funding-round-ai-to-discover-exotic-new-materials/" target="_blank" rel="noopener">Fortune：Orbital Industries $50M Series B</a><span class="src src-b">🟡</span></li>
       <li><a href="https://mlq.ai/news/periodic-labs-reportedly-raises-300m-for-ai-powered-materials-science-platform/" target="_blank" rel="noopener">Periodic Labs 约 $300M 种子</a> · <a href="https://research.contrary.com/company/lila-sciences" target="_blank" rel="noopener">Contrary：Lila Sciences 拆解</a><span class="src src-b">🟡</span></li>
       <li><a href="https://www.technologyreview.com/2025/12/15/1129210/ai-materials-science-discovery-startups-investment/" target="_blank" rel="noopener">MIT Tech Review：AI 材料发现要走入真实世界</a><span class="src src-b">🟡</span></li>
+      <li><strong>中国对标：</strong><a href="https://www.dp.tech/" target="_blank" rel="noopener">深势科技官网（Bohrium/DPA）</a><span class="src src-a">🟢</span> · <a href="https://www.pharnexcloud.com/zixun/yytrz_24816" target="_blank" rel="noopener">深势 C 轮约 8 亿元（2025-12）</a><span class="src src-b">🟡</span> · <a href="http://www.news.cn/tech/20240412/8221e99c7d294c54ad6f9f3628b394de/c.html" target="_blank" rel="noopener">新华网：深势·宇知科学大模型体系</a><span class="src src-b">🟡</span></li>
+      <li><a href="https://www.xtalpi.com/%E6%99%B6%E6%B3%B0%E7%A7%91%E6%8A%80%E5%9C%A8%E6%B8%AF%E4%BA%A4%E6%89%80%E4%B8%BB%E6%9D%BF%E6%8C%82%E7%89%8C%E4%B8%8A%E5%B8%82/" target="_blank" rel="noopener">晶泰科技 港股上市（2228.HK，18C 第一股）</a><span class="src src-a">🟢</span> · <a href="https://finance.sina.com.cn/jjxw/2025-04-08/doc-inesnfym6793999.shtml" target="_blank" rel="noopener">新浪财经：晶泰 2024 年报/扩材料</a><span class="src src-b">🟡</span></li>
+      <li><a href="https://www.ncsti.gov.cn/kjdt/ztbd/szn/snhc/202501/t20250103_191555.html" target="_blank" rel="noopener">专访北京科学智能研究院 AISI</a><span class="src src-b">🟡</span> · <a href="https://www.qbitai.com/2022/06/35648.html" target="_blank" rel="noopener">量子位：AISI「科研安卓模式」</a><span class="src src-b">🟡</span></li>
+      <li><a href="https://kw.beijing.gov.cn/zwgk/zcwj/202507/t20250711_4146595.html" target="_blank" rel="noopener">北京《AI 赋能科学研究行动计划 2025-2027》</a><span class="src src-a">🟢</span> · <a href="https://www.ncsti.gov.cn/kjdt/tzgg/202505/t20250530_206455.html" target="_blank" rel="noopener">「AI+新材料」专项课题征集（2025）</a><span class="src src-a">🟢</span> · <a href="https://www.rmzxw.com.cn/c/2025-03-27/3700582.shtml" target="_blank" rel="noopener">人民政协网：AI4S 变革新材料研发范式</a><span class="src src-b">🟡</span></li>
     </ul>
   </section>
 
