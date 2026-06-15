@@ -115,6 +115,26 @@
     "path": "papers/2304.05376-chemcrow/index.html"
   },
   {
+    "slug": "2026-06-15-unreasonable-labs",
+    "title": "Unreasonable Labs 公司调研（AI for 科学发现）",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://www.unreasonablelabs.ai/",
+    "code": "",
+    "date": "2026-06-15",
+    "published": "公司调研 2026",
+    "tldr": "Unreasonable Labs(2026-03 出 stealth, 3.5M, Playground 领投)做 AI 科学发现引擎 Unreasonable.DISCOVERY;创始人 Yuan Cao(Gemini)+Markus Buehler(MIT/SciAgents);技术血统=知识图谱+多agent图推理(SciAgents)+范畴论式生成+前沿LLM;早期、产品实效待验证。",
+    "tags": [
+      "AI-for-science",
+      "company",
+      "knowledge-graph",
+      "multi-agent",
+      "scientific-discovery",
+      "startup"
+    ],
+    "path": "papers/2026-06-15-unreasonable-labs/index.html"
+  },
+  {
     "slug": "2606.03854-cli-anything",
     "title": "CLI-Anything: Towards Agent-Native Computer Use",
     "authors": "Yuhao Yang, Tianyu Fan, Chao Huang",

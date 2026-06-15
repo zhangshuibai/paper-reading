@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Unreasonable Labs 公司调研 · AI for 科学发现</title>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;}
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:900px; margin:0 auto; padding:18px 22px 90px}
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:25px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)} .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap; line-height:2}
+  nav.toc a:hover{color:var(--accent)}
+  section{margin:38px 0}
+  h2{font-size:20px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:16.5px; margin:22px 0 8px}
+  p{margin:12px 0} ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)} strong{color:var(--text)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.88em}
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:13.5px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:9px 11px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  figure{margin:24px 0; text-align:center}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+  .svgwrap{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 8px}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">AI for Science</span>
+      <span class="chip">Knowledge Graph</span>
+      <span class="chip">Multi-Agent</span>
+      <span class="chip">公司调研</span>
+      <span class="chip">早期 / Stealth-out</span>
+    </div>
+    <h1>Unreasonable Labs 公司调研：用「超级智能」做自主科学发现</h1>
+    <p class="orig-title">unreasonablelabs.ai — 是什么 / 产品 / 团队 / 有什么 research / 现实判断</p>
+    <dl class="meta-grid">
+      <dt>对象</dt><dd><a href="https://www.unreasonablelabs.ai/" target="_blank" rel="noopener">unreasonablelabs.ai</a></dd>
+      <dt>整理</dt><dd>对话调研笔记，基于官网与公开报道；早期公司、信息有限，存疑处已标注</dd>
+      <dt>日期</dt><dd>2026-06-15</dd>
+    </dl>
+  </header>
+
+  <div class="tldr">
+    <b>一句话</b> — Unreasonable Labs 是 <strong>2026-03 刚出 stealth</strong> 的「AI for 科学发现」初创，口号「<strong>Build superintelligence for autonomous knowledge creation and discovery</strong>」——做一个能<em>跨学科组合出新知识、生成新假设</em>（而非检索已有事实）的 AI 发现引擎。产品是 <strong>Unreasonable.DISCOVERY</strong>。创始团队是明星配置：<strong>Yuan Cao</strong>（CEO，前 DeepMind、Gemini 核心贡献者）+ <strong>Markus Buehler</strong>（MIT 教授，AI 材料科学、SciAgents 作者）。技术血统 = <strong>知识图谱 + 多 agent 图推理（SciAgents）+ 范畴论式生成 + 前沿 LLM</strong>。属「明星团队 + 强叙事 + 产品实效待验证」阶段。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#what">① 是什么</a>
+    <a href="#who">② 团队与资本</a>
+    <a href="#product">③ 产品 Unreasonable.DISCOVERY</a>
+    <a href="#research">④ 有什么 research（技术血统）</a>
+    <a href="#take">⑤ 现实判断</a>
+    <a href="#src">出处</a>
+  </nav>
+
+  <!-- ① -->
+  <section id="what">
+    <h2><span class="n">①</span>是什么</h2>
+    <p>一家做「<strong>autonomous knowledge creation and discovery</strong>（自主知识创造与发现）」的 AI 公司。官网两句核心：</p>
+    <blockquote style="border-left:3px solid var(--accent);margin:14px 0;padding:6px 16px;color:var(--muted);background:var(--panel2);border-radius:0 8px 8px 0">
+      “Build superintelligence for autonomous knowledge creation and discovery.”<br>
+      “AI that discovers new knowledge and solves the hardest problems across domains, making experts faster and smarter.”
+    </blockquote>
+    <p>关键词是「<strong>新知识 / 跨学科 / 生成假设</strong>」——强调不是 RAG 式检索已有事实，而是<strong>组合出此前没人连起来的连接</strong>。目标用户：科学家（基础研究）、工程师（材料 / 生物 / 能源 / 半导体）、企业战略与创新分析师、研究员（假设生成、文献综合）。</p>
+  </section>
+
+  <!-- ② -->
+  <section id="who">
+    <h2><span class="n">②</span>团队与资本</h2>
+    <table>
+      <tbody>
+        <tr><td>状态 / 融资</td><td><strong>2026-03 出 stealth</strong>，<strong>$13.5M 种子轮</strong>，<strong>Playground Global</strong> 领投（AIX Ventures、E14 Fund、MS&amp;AD Ventures 等跟投）</td></tr>
+        <tr><td>地点</td><td>Palo Alto, CA + Cambridge, MA（硅谷 + MIT 两头）</td></tr>
+        <tr><td><strong>Yuan Cao</strong>（联创 / CEO）</td><td>前 Google DeepMind 资深研究科学家，<strong>Gemini 模型家族 + Search AI Mode</strong> 核心贡献者——负责「强推理大模型」这条腿</td></tr>
+        <tr><td><strong>Markus Buehler</strong>（联创）</td><td>MIT 工程学教授，AI 驱动<strong>材料科学</strong>权威，LAMM 实验室负责人，<strong>SciAgents</strong> 作者——负责「图谱 + 多 agent 科学发现」这条腿</td></tr>
+        <tr><td>顾问</td><td><strong>Kostya Novoselov</strong>（石墨烯，诺贝尔物理奖）、<strong>Robert Langer</strong>（MIT，生物科技）、<strong>Thomas Wolf</strong>（Hugging Face 联创 / CSO）</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ③ -->
+  <section id="product">
+    <h2><span class="n">③</span>产品：Unreasonable.DISCOVERY</h2>
+    <p>官网定位「<strong>An AI discovery engine that helps you compose new knowledge across disciplines</strong>」。由三块组成：</p>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 720 180" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12.5">
+        <defs><marker id="u-ah" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#666"/></marker></defs>
+        <g stroke="#666" stroke-width="1.6" fill="none" marker-end="url(#u-ah)">
+          <path d="M205,70 L250,70"/><path d="M470,70 L515,70"/>
+        </g>
+        <g text-anchor="middle">
+          <rect x="20" y="40" width="185" height="62" rx="10" fill="#dfeaff" stroke="#7aa2ff"/>
+          <text x="112" y="64" fill="#1a3060" font-weight="600">① Unified World Model</text>
+          <text x="112" y="82" fill="#33518a" font-size="11">跨领域数据 → 互联表征</text>
+          <text x="112" y="96" fill="#33518a" font-size="11">（知识图谱）</text>
+          <rect x="250" y="40" width="220" height="62" rx="10" fill="#cdeae6" stroke="#2c8a7d"/>
+          <text x="360" y="64" fill="#13433b" font-weight="600">② Insight Generation</text>
+          <text x="360" y="82" fill="#13433b" font-size="11">多步 deep reasoning</text>
+          <text x="360" y="96" fill="#13433b" font-size="11">→ 生成新假设（非检索）</text>
+          <rect x="515" y="40" width="185" height="62" rx="10" fill="#efe9f7" stroke="#9b8cff"/>
+          <text x="607" y="64" fill="#3a2b52" font-weight="600">③ Human-AI</text>
+          <text x="607" y="80" fill="#3a2b52" font-weight="600">Co-Discovery</text>
+          <text x="607" y="96" fill="#3a2b52" font-size="11">科学家可引导/批判</text>
+          <text x="360" y="138" fill="#5a627a" font-size="11.5">技术口径：LLM ＋「关系图谱（map of relationships）」＋ neurosymbolic 数学抽象 → 跨领域 generative discovery</text>
+          <text x="360" y="158" fill="#888" font-size="11">覆盖：化学 · 材料 · 生物 · 半导体 · 能源 · biotech</text>
+        </g>
+      </svg>
+      </div>
+      <figcaption>Unreasonable.DISCOVERY 三组件（本调研据官网描述重绘）。</figcaption>
+    </figure>
+    <ul>
+      <li><strong>Unified World Model</strong>：把跨领域数据整合成互联的「世界表征」——本质是大规模知识图谱式的统一表示。</li>
+      <li><strong>Insight Generation &amp; Deep Reasoning</strong>：多步推理<strong>生成新假设</strong>，官网明确「rather than retrieve existing facts」。</li>
+      <li><strong>Human-AI Co-Discovery</strong>：透明、可被科学家引导与批判的协作（呼应「可解释、非纯黑箱」）。</li>
+    </ul>
+    <p class="callout note" style="margin-top:6px"><span class="label">注</span>截至调研日，产品为官网描述层级；<strong>未见公开 demo、定价、客户案例或第三方 benchmark</strong>。</p>
+  </section>
+
+  <!-- ④ -->
+  <section id="research">
+    <h2><span class="n">④</span>有什么 research（技术血统）</h2>
+    <p>公司刚出 stealth，<strong>暂无公司署名论文</strong>。但 Unreasonable.DISCOVERY 的技术原型，就是联创 Markus Buehler 在 MIT 的研究线——把它对回官网的「LLM + 关系图谱 + neurosymbolic 抽象」，几乎是逐条对应：</p>
+    <table>
+      <thead><tr><th>研究 / 系统</th><th>核心思想（= 产品原型）</th><th>出处</th></tr></thead>
+      <tbody>
+        <tr><td><strong>SciAgents</strong></td><td><strong>多 agent + 知识图谱推理</strong>自动做科学发现：大规模 <em>ontological 知识图谱</em> + 一组 LLM/检索工具 + 带 in-situ 学习的多 agent，「模拟一个科学家社区做发现」，在 bio-inspired 材料上揭示跨学科隐藏关系</td><td><a href="https://arxiv.org/abs/2409.05556" target="_blank" rel="noopener">arXiv 2409.05556</a>（<em>Advanced Materials</em> 2025）· <a href="https://github.com/lamm-mit/SciAgentsDiscovery" target="_blank" rel="noopener">开源</a></td></tr>
+        <tr><td><strong>Graph-based generative discovery</strong></td><td><strong>范畴论（category theory）启发</strong>的图生成 AI：靠「揭示隐藏连接」拿到更高 novelty / 探索性 / 技术细节</td><td><a href="https://arxiv.org/abs/2403.11996" target="_blank" rel="noopener">arXiv 2403.11996</a>（<em>Mach. Learn. Sci. Technol.</em>）</td></tr>
+        <tr><td><strong>Yuan Cao 一侧</strong></td><td>前沿 LLM 工程（Gemini、大规模训练 / 推理）——补上「强推理大模型」这条腿</td><td>Google DeepMind（Gemini）</td></tr>
+      </tbody>
+    </table>
+    <div class="callout insight">
+      <span class="label">读法</span>
+      把官网三组件翻译成学术语言：<strong>Unified World Model ≈ SciAgents 的 ontological 知识图谱</strong>；<strong>Insight Generation ≈ 多 agent 图推理 + 范畴论式生成（找隐藏连接）</strong>；<strong>Human-AI Co-Discovery ≈ 多 agent 里把人放进 critique 环</strong>。再叠 Yuan Cao 的前沿 LLM。所以它的 research 不是空的——是把一条已发表、且开源过原型（SciAgents）的学术路线，做成产品。
+    </div>
+  </section>
+
+  <!-- ⑤ -->
+  <section id="take">
+    <h2><span class="n">⑤</span>现实判断</h2>
+    <ul>
+      <li><strong>定位独特性：</strong>在「AI 做科学假设」这条赛道里，它走的是<strong>知识图谱 / 范畴论 + 多 agent</strong>路线——区别于 Google <strong>AI co-scientist</strong> 的「生成-辩论-锦标赛」纯 LLM 路线，也区别于 <strong>A-Lab</strong> 的 wet-lab 机器人闭环。卖点是「跨学科组合出隐藏连接」+ neurosymbolic（想要可解释）。</li>
+      <li><strong>团队是最大资产：</strong>Gemini 核心 + MIT 材料 AI 权威 + 诺奖/Langer/HF 顾问，叙事与背书都顶配。</li>
+      <li><strong>诚实的保留：</strong>非常早期（种子轮、刚露面）。<strong>目前能核实的是「团队 + 方向 + 学术原型」；产品实效、是否真做出过新发现，暂无第三方证据。</strong>「discover new knowledge / superintelligence」是强叙事，需用时间和案例检验——这也正是整条「自主科学」赛道的通病（参见本库的科学发现综述与 A-Lab 争议）。</li>
+    </ul>
+    <div class="callout warn">
+      <span class="label">使用提醒</span>
+      本页为对早期初创的对话式调研，信息主要来自官网与少量公开报道；融资数额、顾问名单、技术细节均为官方/媒体口径，<strong>产品能力未经独立验证</strong>，引用前请核对最新一手信息。
+    </div>
+  </section>
+
+  <!-- 出处 -->
+  <section id="src">
+    <h2>出处</h2>
+    <ul style="font-size:13.5px">
+      <li><a href="https://www.unreasonablelabs.ai/" target="_blank" rel="noopener">Unreasonable Labs 官网</a>（mission、产品、团队/careers、news）</li>
+      <li>出 stealth / 融资报道：<a href="https://www.hpcwire.com/aiwire/2026/03/10/unreasonable-labs-emerges-from-stealth-with-ai-platform-for-scientific-discovery/" target="_blank" rel="noopener">HPCwire / AIwire</a> · BusinessWire 融资稿</li>
+      <li>技术血统：<a href="https://arxiv.org/abs/2409.05556" target="_blank" rel="noopener">SciAgents (2409.05556)</a> · <a href="https://arxiv.org/abs/2403.11996" target="_blank" rel="noopener">Graph generative discovery (2403.11996)</a> · <a href="https://news.mit.edu/2024/need-research-hypothesis-ask-ai-1219" target="_blank" rel="noopener">MIT News</a> · <a href="https://github.com/lamm-mit/SciAgentsDiscovery" target="_blank" rel="noopener">lamm-mit/SciAgentsDiscovery</a></li>
+      <li>相关：本库《<a href="../2026-06-15-agents-for-scientific-discovery/index.html">Agent 在科学发现里的应用</a>》综述</li>
+    </ul>
+  </section>
+
+  <footer class="foot">
+    公司调研笔记，仅作梳理；早期公司信息有限，产品能力未经独立验证，以官方一手信息为准 · 整理日期 2026-06-15
+  </footer>
+
+</article>
+</body>
+</html>
