@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mercor · AI 专家数据市场的竞争格局与早期度调研</title>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --bad:#ff6b81; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --bad:#d23651; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;}
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:920px; margin:0 auto; padding:18px 22px 90px}
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:25px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)} .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap; line-height:2}
+  nav.toc a:hover{color:var(--accent)}
+  section{margin:38px 0}
+  h2{font-size:20px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:16.5px; margin:22px 0 8px}
+  p{margin:12px 0} ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)} strong{color:var(--text)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.88em}
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:13px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:9px 10px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  figure{margin:24px 0; text-align:center}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+  .svgwrap{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 8px}
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+  .src{font-size:10.5px; padding:0 6px; border-radius:999px; white-space:nowrap; vertical-align:middle}
+  .src-a{background:rgba(67,197,158,.18); color:var(--ok)}
+  .src-b{background:rgba(255,180,84,.18); color:var(--warn)}
+  .src-c{background:rgba(255,107,129,.18); color:var(--bad)}
+  .legend{font-size:12px; color:var(--muted); margin:6px 0 0}
+  .verdict{display:inline-block; font-weight:700; padding:3px 12px; border-radius:999px; font-size:14px}
+  .v-nascent{background:rgba(122,162,255,.18); color:var(--accent)}
+  .v-emerging{background:rgba(67,197,158,.18); color:var(--ok)}
+  .v-crowded{background:rgba(255,180,84,.18); color:var(--warn)}
+  .v-mature{background:rgba(255,107,129,.18); color:var(--bad)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">AI 训练数据</span>
+      <span class="chip">专家人才市场</span>
+      <span class="chip">RLHF / eval</span>
+      <span class="chip">竞争格局</span>
+      <span class="chip">赛道早期度</span>
+      <span class="chip">创业 idea</span>
+    </div>
+    <h1>Mercor：AI 专家数据市场的竞争格局与早期度调研</h1>
+    <p class="orig-title">mercor.com — expert marketplace for AI training &amp; eval / 赛道是否拥挤 / 有没有可借鉴 idea</p>
+    <dl class="meta-grid">
+      <dt>对象</dt><dd><a href="https://mercor.com" target="_blank" rel="noopener">https://mercor.com</a></dd>
+      <dt>赛道</dt><dd>AI 训练数据 / 专家人才市场（用 AI 招聘把医生、律师、PhD、工程师等领域专家接入 frontier labs，做高端数据标注、rubric 编写与模型 eval）</dd>
+      <dt>整理</dt><dd>对话调研笔记；信息来自公开检索，按来源分级标注，产品能力未必经独立验证</dd>
+      <dt>日期</dt><dd>2026-06-16</dd>
+    </dl>
+    <p class="legend">来源等级：<span class="src src-a">🟢 一手</span> 官网/SEC/官方 ·
+      <span class="src src-b">🟡 二手</span> 媒体/数据库 ·
+      <span class="src src-c">🔴 自述/未证实</span> 营销口径或未独立验证</p>
+  </header>
+
+  <div class="tldr">
+    <b>一句话</b> — Mercor 是一个由 AI 驱动的<strong>专家数据市场</strong>：用 20 分钟 AI 视频面试批量筛选并匹配领域专家（医生 / 律师 / PhD / 软件工程师），把他们接入 OpenAI、Anthropic、Google 等 frontier labs，做 post-training 阶段的高端标注、rubric 设计与模型 eval。三位 22 岁的 Thiel Fellow（Brendan Foody / Adarsh Hiremath / Surya Midha）创办，三年从 Seed $3.6M 干到 Series C $350M @ <strong>$10B 估值</strong>（2025-10，Felicis 领投）<span class="src src-b">🟡</span>，被称为 2025 年「最年轻自造亿万富翁」。赛道判档 <strong>emerging→crowded</strong>：方向新（「为专家数据/eval 做市场」是新物种），但资本极热、玩家挤进（Surge、Scale、Turing、Micro1、Handshake……），同质化正在升温。可借鉴 whitespace：<strong>垂直科学/医疗的深度专家网络 + eval-as-a-service</strong>，以及把「AI 面试 → 专家供给」打法迁到中国出海接单。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#bg">领域背景速补</a>
+    <a href="#market">① 赛道地图 + 早期度</a>
+    <a href="#matrix">② 竞品对照矩阵</a>
+    <a href="#map">③ 定位图</a>
+    <a href="#funding">④ 融资 timeline</a>
+    <a href="#snapshot">⑤ 公司速览</a>
+    <a href="#idea">⑥ 创业 idea 借鉴</a>
+    <a href="#cn">⑦ 中国对标</a>
+    <a href="#take">⑧ 现实判断</a>
+    <a href="#src">出处</a>
+  </nav>
+
+  <!-- 领域背景速补 -->
+  <section id="bg">
+    <h2>领域背景速补（只懂 LLM 也能跟上）</h2>
+    <p>这篇讲的是「给 AI 喂数据」这门生意。即便你只熟 LLM 训练，下面几个术语也值得先对齐，否则会看不懂为什么一家「招聘公司」能值 $10B。</p>
+    <ul>
+      <li><strong>post-training / RLHF</strong>：预训练（pre-training，把全网文本灌进模型）之后的阶段。模型已经「会说话」，但还要靠人类反馈把它对齐到「有用、安全、专业」。RLHF（Reinforcement Learning from Human Feedback）就是让人去给模型的多个回答打分、排序，再用这些偏好信号微调模型。<strong>这一步的质量天花板，取决于打分的人有多专业。</strong></li>
+      <li><strong>从「便宜众包」到「专家标注」的转变</strong>：早期标注（标图里的猫狗、转写语音）靠低价众包工人就行。但当模型要在<strong>法律推理、临床诊断、博士级数学、复杂软件工程</strong>上变强时，打分的人也得是律师、医生、数学 PhD、资深工程师——这就是「expert data / 专家数据」。Mercor 们卖的正是这种稀缺的高端人力。</li>
+      <li><strong>rubric（评分细则）</strong>：给专家一套「怎么算好回答」的打分标准。frontier labs 越来越多让专家不仅打分，还帮忙<strong>设计 rubric</strong>——这本身是高阶脑力活，单价更高。</li>
+      <li><strong>eval / benchmark（评测）</strong>：衡量一个模型「到底有多强」的标准化测试。光训练不够，labs 需要可信的、由专家出题的评测集来判断模型在真实专业工作上的水平。谁掌握高质量 eval，谁就掌握了 labs 的「考卷」——这是比标注更有壁垒的位置。</li>
+      <li><strong>frontier labs（前沿大模型实验室）</strong>：OpenAI、Anthropic、Google DeepMind、xAI、Meta 等做最前沿大模型的机构。它们是这门生意几乎唯一的「大金主」——客户高度集中是这个赛道最大的特征，也是最大的风险。</li>
+      <li><strong>为什么这是个「市场（marketplace）」</strong>：传统数据公司（如 Scale）自己雇/管标注工。Mercor 的差异化叙事是它更像<strong>双边市场</strong>：一边用 AI 面试批量评估、匹配专家（供给侧），一边对接 labs 的任务（需求侧），靠撮合抽成（take rate）。这也是为什么它从「AI 招聘平台」起家、再 pivot 到「专家数据」——底层都是「用 AI 评估和匹配人」。</li>
+    </ul>
+    <p>一句话总结这门生意的逻辑：<strong>模型越强，越需要更专业的人来教它和考它；而能把这些稀缺专家高效筛出来、匹配进去的人，就能站在 AI 价值链上抽税。</strong></p>
+  </section>
+
+  <!-- ① 赛道与早期度 -->
+  <section id="market">
+    <h2><span class="n">①</span>赛道地图 + 早期度判断</h2>
+    <p>Mercor 属于 <strong>AI 训练数据 / 专家人才市场</strong>赛道，更精确地说是其中「<strong>expert data for post-training &amp; eval</strong>」这条新支线。这个赛道在解决的需求是：frontier labs 在 RLHF / SFT / DPO / eval 各环节都越来越需要<strong>领域专家</strong>（而非廉价众包），但专家既稀缺又难筛，labs 自己招聘成本极高——于是出现了专门「用 AI 筛专家、再批量供给给 labs」的中间层。Meta 在 2025-06 投资 Scale AI 后，OpenAI、Google 等出于「中立性」顾虑减少与 Scale 合作 <span class="src src-b">🟡</span>，把大量需求外溢给了 Mercor、Surge、Handshake 等中立供应商——这是过去一年这个细分爆发的直接催化剂。</p>
+    <h3>玩家分群（四象限别漏）</h3>
+    <ul>
+      <li><strong>现有巨头 / 老牌数据公司：</strong>Scale AI（2024 营收 $870M→2025 目标/达成约 $2B；Meta 2025-06 以 $14.3B 买 49% 无投票权股权，估值约 $29B <span class="src src-b">🟡</span>）、Appen 澳鹏（老牌众包，正转型大模型数据）、Invisible Technologies（2024 营收约 $134M <span class="src src-b">🟡</span>）。</li>
+      <li><strong>垂直创业公司（同层正面竞争）：</strong>Surge AI（bootstrapped，2024 营收 &gt;$1B、首轮外部融资传 ~$25B+ 估值 <span class="src src-b">🟡</span>）、Turing（$300M ARR、Series E $2.2B 估值 <span class="src src-b">🟡</span>）、Micro1（2025 ARR 传 $50M、$500M 估值 <span class="src src-b">🟡</span>）、Snorkel AI（programmatic + expert data，Series D $1.3B 估值 <span class="src src-b">🟡</span>）。Mercor 自己也在这格。</li>
+      <li><strong>大厂顺手做 / 跨界切入：</strong>Handshake（原大学生招聘平台，2025-01 推 Handshake AI 做专家标注，传 2026-04 已跑出近 $1B 年化 AI training 收入 <span class="src src-b">🟡</span>）；以及 labs 自建内部专家团队（OpenAI / Anthropic 都在直接招 PhD/律师做数据）——这是最隐蔽的威胁。</li>
+      <li><strong>开源 / 免费替代：</strong>开源 RLHF 数据集（如各类 preference / instruction 数据）、众包平台（MTurk 等）可覆盖低端；但「博士级专家 + 定制 eval」几乎没有免费替代——<strong>高端这一格没有开源平替，正是 Mercor 们溢价的根基</strong>。</li>
+    </ul>
+    <div class="callout insight">
+      <span class="label">早期度判断</span>
+      <span class="verdict v-emerging">emerging</span> →
+      <span class="verdict v-crowded">crowded</span>
+      （nascent 萌芽 / emerging 新兴 / crowded 拥挤 / mature 成熟）<br><br>
+      <strong>判断信号：</strong>
+      ① <strong>玩家数量与新增速度</strong>——「专家数据市场」这个具体形态是 2023–2025 才成型的新物种（emerging 信号），但一年内已挤进 Mercor / Surge / Turing / Micro1 / Handshake / Snorkel 等至少 6–8 家在抢同一批 labs 客户（crowded 信号）。
+      ② <strong>融资热度</strong>——极热且轮次密集：Mercor 17 个月内 ARR 从 ~$1M 蹿到传 $450–500M、估值一年翻 5 倍到 $10B；Scale $29B、Surge 传 $25B+——典型资本过热。
+      ③ <strong>巨头是否进场</strong>——已进：Meta 直接买下 Scale 49%；frontier labs 自建专家团队。
+      ④ <strong>开源/免费替代</strong>——低端有（众包/开源数据），高端专家+eval 这一格暂无平替。
+      ⑤ <strong>客户认知</strong>——已成型（labs 普遍认「专家数据 &gt; 廉价众包」），但客户高度集中在 5–10 家 labs。
+      ⑥ <strong>公认 benchmark/标准</strong>——尚无统一标准，各家自建 eval（Mercor 推 APEX、APEX-Agents、APEX-SWE <span class="src src-a">🟢</span>），「谁定义 eval」之争才刚开始。<br><br>
+      <strong>综合：方向仍 emerging（新物种、无统一标准），但资本与玩家密度已把它快速推向 crowded（同质化、抢同一批客户与同一批专家）。</strong>
+    </div>
+  </section>
+
+  <!-- ② 竞品矩阵 -->
+  <section id="matrix">
+    <h2><span class="n">②</span>竞品对照矩阵</h2>
+    <p>选了 7 个对这个赛道最具决定性的维度：<strong>模式</strong>（专家市场 vs 数据平台 vs 众包）· <strong>数据类型</strong>（专家 / RLHF / eval）· <strong>主要客户</strong> · <strong>规模 / 估值 / 融资</strong> · <strong>专家供给壁垒</strong> · <strong>AI 招聘/匹配技术</strong> · <strong>是否做 eval</strong>。数字口径不一、时间点各异，已逐格标来源；闭源未披露处写明。本篇主角 Mercor 一行加粗。</p>
+    <table>
+      <thead><tr>
+        <th>玩家</th>
+        <th>模式</th><th>数据类型</th><th>主要客户</th>
+        <th>规模 / 估值 / 融资</th><th>专家供给壁垒</th><th>AI 招聘技术</th><th>做 eval?</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Mercor（本篇）</strong></td>
+          <td><strong>AI 专家市场</strong>（双边撮合）</td>
+          <td>专家标注 + rubric + <strong>eval</strong></td>
+          <td>OpenAI / Anthropic / Google / Meta 等「top 5 labs」<span class="src src-c">🔴自述</span></td>
+          <td>ARR 传 $450–500M（2025-09/10）；$1.5B ARR（传 2026-05）<span class="src src-c">🔴</span>；估值 $10B（2025-10 Series C）<span class="src src-b">🟡</span></td>
+          <td>30K+ 周活专家 / 300K+ 池 / 100K+ 雇过；45+ 国<span class="src src-b">🟡</span></td>
+          <td><strong>核心</strong>：20 分钟 AI 语音面试 + 可复用评估画像<span class="src src-a">🟢</span></td>
+          <td><strong>是</strong>：APEX / APEX-Agents / APEX-SWE<span class="src src-a">🟢</span></td>
+        </tr>
+        <tr>
+          <td>Surge AI</td>
+          <td>数据平台（自管标注网络）</td>
+          <td>RLHF + 专家标注</td>
+          <td>frontier labs（含 Anthropic 等）<span class="src src-b">🟡</span></td>
+          <td>2024 营收 &gt;$1B（bootstrapped/盈利）；2025 传融资 ~$25B+ 估值<span class="src src-b">🟡</span></td>
+          <td>~1M annotators<span class="src src-b">🟡</span></td>
+          <td>闭源未披露（重质量/流程，非 AI 面试叙事）</td>
+          <td>部分（RLHF/质量评估），无公开 benchmark 品牌</td>
+        </tr>
+        <tr>
+          <td>Scale AI</td>
+          <td>数据平台（巨头）</td>
+          <td>全栈：标注 / RLHF / 专家</td>
+          <td>labs + 政府/国防 + 车企</td>
+          <td>2024 营收 $870M→2025 目标 ~$2B；估值 ~$29B（Meta 入股 49%）<span class="src src-b">🟡</span></td>
+          <td>~300K contractors<span class="src src-b">🟡</span></td>
+          <td>有平台化工具（非 Mercor 式 AI 面试主打）</td>
+          <td>是（含各类 eval / 红队服务）</td>
+        </tr>
+        <tr>
+          <td>Turing</td>
+          <td>专家市场（偏工程师）</td>
+          <td>偏 coding / 工程数据 + RLHF</td>
+          <td>labs + 企业</td>
+          <td>$300M ARR；Series E $2.2B 估值（2025-03）<span class="src src-b">🟡</span></td>
+          <td>全球开发者网络（招聘起家）</td>
+          <td>有（开发者评测/匹配，招聘血统）</td>
+          <td>部分（coding eval）</td>
+        </tr>
+        <tr>
+          <td>Micro1</td>
+          <td>AI 专家市场（直接对标 Mercor）</td>
+          <td>专家标注 + RLHF</td>
+          <td>labs<span class="src src-b">🟡</span></td>
+          <td>ARR 传 $50M；$500M 估值（2025-09 Series A）<span class="src src-b">🟡</span></td>
+          <td>AI 面试筛选的全球人才网络</td>
+          <td><strong>是</strong>：AI 面试匹配为卖点</td>
+          <td>部分</td>
+        </tr>
+        <tr>
+          <td>Snorkel AI</td>
+          <td>工具+服务（programmatic data）</td>
+          <td>专家数据 + 合成/弱监督</td>
+          <td>labs + 企业</td>
+          <td>累计融资 ~$185M；Series D $1.3B 估值（2025）<span class="src src-b">🟡</span></td>
+          <td>偏技术/方法（弱监督）而非纯人力池</td>
+          <td>否（靠程序化标注+少量专家）</td>
+          <td>是（开发 eval/数据集）</td>
+        </tr>
+        <tr>
+          <td>Handshake (AI)</td>
+          <td>招聘平台跨界做专家标注</td>
+          <td>专家标注 + eval</td>
+          <td>frontier labs</td>
+          <td>Handshake AI 传 2026-04 近 $1B 年化 AI training 收入<span class="src src-b">🟡</span></td>
+          <td><strong>独家</strong>：大学生/校友求职网络存量供给</td>
+          <td>有（招聘平台底子）</td>
+          <td>是（含 eval）</td>
+        </tr>
+        <tr>
+          <td>Invisible Tech</td>
+          <td>运营外包+数据服务</td>
+          <td>RLHF + 流程外包</td>
+          <td>labs + 企业</td>
+          <td>2024 营收 ~$134M；累计融资 ~$144M<span class="src src-b">🟡</span></td>
+          <td>托管运营团队（非专家市场叙事）</td>
+          <td>闭源未披露</td>
+          <td>部分</td>
+        </tr>
+        <tr>
+          <td>Sana</td>
+          <td>企业 AI 平台（相邻/弱竞品）</td>
+          <td>非专家数据（企业知识/agent）</td>
+          <td>企业（非 labs 为主）</td>
+          <td>企业 AI assistant/搜索赛道，非数据标注核心<span class="src src-b">🟡</span></td>
+          <td>不在专家供给这条线</td>
+          <td>不适用</td>
+          <td>不适用</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>读矩阵：</strong>（1）Surge / Scale 强在<strong>规模与营收</strong>（已 $1–2B 量级），Mercor 强在<strong>「AI 面试筛专家」的供给侧效率叙事 + 主动做 eval（APEX 系列）</strong>——后者是它区别于纯标注厂的关键。（2）真正与 Mercor 同质化的是 <strong>Micro1</strong>（连「AI 面试 + 专家市场」的故事都几乎一样）和 <strong>Handshake AI</strong>（用招聘网络存量供给跨界打）。（3）几乎所有人都在抢<strong>同一批 5–10 家 labs 客户</strong>、同一批稀缺专家——这正是赛道从 emerging 滑向 crowded 的结构性证据。（4）Sana 放进来是提醒：它常被一并提及，但其实在<strong>企业 AI 平台</strong>那条线，不是专家数据正面竞品，列为相邻参照。</p>
+  </section>
+
+  <!-- ③ 定位图 -->
+  <section id="map">
+    <h2><span class="n">③</span>定位图（whitespace 在哪）</h2>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 640 400" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12">
+        <line x1="40" y1="200" x2="600" y2="200" stroke="#b9c2e0" stroke-width="1.5"/>
+        <line x1="320" y1="24" x2="320" y2="372" stroke="#b9c2e0" stroke-width="1.5"/>
+        <text x="598" y="218" text-anchor="end" fill="#5a627a">通用/水平（跨行业专家）→</text>
+        <text x="42" y="218" fill="#5a627a">← 垂直/深领域（科学·医疗·法律）</text>
+        <text x="326" y="36" fill="#5a627a">↑ 市场/撮合（AI 筛专家 · 双边）</text>
+        <text x="326" y="366" fill="#5a627a">↓ 平台/自管（自雇标注网络）</text>
+
+        <circle cx="430" cy="105" r="8" fill="#3a66ff"/>
+        <text x="444" y="109" fill="#1a1f33" font-weight="700">Mercor</text>
+        <circle cx="470" cy="150" r="7" fill="#7aa2ff"/>
+        <text x="484" y="154" fill="#36406b">Micro1</text>
+        <circle cx="250" cy="120" r="7" fill="#7aa2ff"/>
+        <text x="150" y="124" fill="#36406b">Turing(工程)</text>
+        <circle cx="505" cy="95" r="7" fill="#7aa2ff"/>
+        <text x="519" y="99" fill="#36406b">Handshake</text>
+        <circle cx="450" cy="290" r="8" fill="#9b8cff"/>
+        <text x="464" y="294" fill="#36406b">Surge</text>
+        <circle cx="510" cy="325" r="9" fill="#9b8cff"/>
+        <text x="524" y="329" fill="#36406b">Scale</text>
+        <circle cx="400" cy="330" r="6" fill="#9b8cff"/>
+        <text x="300" y="334" fill="#36406b">Invisible</text>
+        <circle cx="360" cy="255" r="6" fill="#9b8cff"/>
+        <text x="374" y="259" fill="#36406b">Snorkel</text>
+
+        <rect x="60" y="60" width="195" height="118" rx="10" fill="none" stroke="#138a6e" stroke-dasharray="6 5" stroke-width="2"/>
+        <text x="72" y="84" fill="#138a6e" font-weight="700">whitespace</text>
+        <text x="72" y="104" fill="#138a6e" font-size="11">垂直深领域专家市场</text>
+        <text x="72" y="121" fill="#138a6e" font-size="11">（医疗/生命科学/法律 PhD）</text>
+        <text x="72" y="138" fill="#138a6e" font-size="11">+ eval-as-a-service</text>
+        <text x="72" y="155" fill="#138a6e" font-size="11">暂无人主导占据</text>
+      </svg>
+      </div>
+      <figcaption>定位图（本调研重绘）。X 轴：垂直深领域 ↔ 通用水平；Y 轴：市场撮合 ↔ 自管平台。<strong>右上（通用 + 撮合）已被 Mercor / Micro1 / Handshake 挤满；左上（垂直科学医疗专家市场 + 专属 eval）相对空白，是最值得切的 whitespace。</strong></figcaption>
+    </figure>
+  </section>
+
+  <!-- ④ 融资 timeline -->
+  <section id="funding">
+    <h2><span class="n">④</span>融资 timeline</h2>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 760 170" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12">
+        <line x1="50" y1="80" x2="710" y2="80" stroke="#b9c2e0" stroke-width="2"/>
+
+        <circle cx="70" cy="80" r="6" fill="#7aa2ff"/>
+        <text x="70" y="56" text-anchor="middle" fill="#5a627a">2023</text>
+        <text x="70" y="104" text-anchor="middle" fill="#1a1f33" font-weight="700">成立</text>
+
+        <circle cx="210" cy="80" r="6" fill="#7aa2ff"/>
+        <text x="210" y="56" text-anchor="middle" fill="#5a627a">2023</text>
+        <text x="210" y="104" text-anchor="middle" fill="#1a1f33" font-weight="700">Seed $3.6M</text>
+        <text x="210" y="122" text-anchor="middle" fill="#5a627a" font-size="11">General Catalyst 领</text>
+
+        <circle cx="360" cy="80" r="7" fill="#3a66ff"/>
+        <text x="360" y="56" text-anchor="middle" fill="#5a627a">2024-09</text>
+        <text x="360" y="104" text-anchor="middle" fill="#1a1f33" font-weight="700">Series A ~$32M</text>
+        <text x="360" y="122" text-anchor="middle" fill="#5a627a" font-size="11">Benchmark 领 @ ~$250M</text>
+
+        <circle cx="520" cy="80" r="8" fill="#3a66ff"/>
+        <text x="520" y="56" text-anchor="middle" fill="#5a627a">2025-02</text>
+        <text x="520" y="104" text-anchor="middle" fill="#1a1f33" font-weight="700">Series B $100M</text>
+        <text x="520" y="122" text-anchor="middle" fill="#5a627a" font-size="11">Felicis 领 @ $2B</text>
+
+        <circle cx="680" cy="80" r="10" fill="#138a6e"/>
+        <text x="680" y="56" text-anchor="middle" fill="#5a627a">2025-10</text>
+        <text x="680" y="104" text-anchor="middle" fill="#1a1f33" font-weight="700">Series C $350M</text>
+        <text x="680" y="122" text-anchor="middle" fill="#5a627a" font-size="11">Felicis 领 @ $10B</text>
+      </svg>
+      </div>
+      <figcaption>Mercor 融资时间线（据公开报道整理；早期 Seed/A 金额各源略有出入，详见下表与出处）。</figcaption>
+    </figure>
+    <table>
+      <thead><tr><th>时间</th><th>事件 / 轮次</th><th>金额</th><th>估值</th><th>领投 / 参投</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr><td>2023-01</td><td>成立（先做 AI 招聘平台，后 pivot 专家数据）</td><td>—</td><td>—</td><td>Foody / Hiremath / Midha 三人</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2023</td><td>Seed</td><td>$3.6M</td><td>未披露</td><td>General Catalyst 领投</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2024-09</td><td>Series A</td><td>~$30–32M（各源略异）</td><td>~$250M</td><td>Benchmark &amp; General Catalyst 领投</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2025-02</td><td>Series B</td><td>$100M</td><td>$2B</td><td>Felicis 领；General Catalyst / DST Global / Benchmark / Menlo 参投</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2025-10（≈10/27–28）</td><td>Series C</td><td>$350M</td><td>$10B</td><td>Felicis 领；Benchmark / General Catalyst / Robinhood Ventures 参投</td><td><span class="src src-b">🟡</span></td></tr>
+      </tbody>
+    </table>
+    <div class="callout note">
+      <span class="label">估值 / ARR 口径打架（并列，不替任何一方取整）</span>
+      <strong>估值：</strong>$2B（2025-02 Series B 已确认）<span class="src src-b">🟡</span> → $10B（2025-10 Series C 已确认）<span class="src src-b">🟡</span>。题面提到的「~$2B→$10B」即这两点；中途 2025-09 曾有「eyeing $10B」的传闻属预期，非已成交。<br>
+      <strong>ARR / run rate（口径混乱，务必当心）：</strong>
+      $1M（2023 起步）→ $75M（2025-02）<span class="src src-b">🟡</span> → <strong>$450M run rate（2025-09，TechCrunch 报道，融资时口径）</strong><span class="src src-b">🟡</span> / 「on track to hit $500M ARR」<span class="src src-c">🔴 给投资人的口径</span> → 传 $760M（2025 年底）/ <strong>$1.5B（传 2026-05）</strong><span class="src src-c">🔴 未独立证实</span>。
+      <em>注意：Mercor 的「revenue」多为 <strong>gross（客户总支出，扣除给专家的 payout 之前）</strong>，专家 payout 占 60–70%，<strong>净 take-rate 约 30–40%</strong></em><span class="src src-b">🟡</span>——所以「$450M ARR」远不等于公司净收入，跨公司比营收时要小心口径。<br>
+      <strong>专家网络：</strong>30K+ 周活 / 100K+ 雇过 / 300K+ 池；平均时薪 $85+（专家可达 $200/h）；日付专家传 $1.5–2M<span class="src src-b">🟡</span>。这些多为公司自报，未经独立审计<span class="src src-c">🔴</span>。
+    </div>
+    <p><strong>融资节奏佐证阶段：</strong>三年走完 Seed→A→B→C 且估值一年翻 5 倍、顶级 VC（Benchmark / Felicis / General Catalyst / DST）连续加注，叠加 Thiel / Jack Dorsey / Adam D'Angelo / Larry Summers 等天使<span class="src src-b">🟡</span>——是典型「资本极热、抢卡位」的 emerging→crowded 赛道特征。整个细分（Scale $29B、Surge 传 $25B+、Mercor $10B）一年内涌入数十亿美元，估值与营收倍数都已显著拉高。</p>
+  </section>
+
+  <!-- ⑤ 公司速览 -->
+  <section id="snapshot">
+    <h2><span class="n">⑤</span>公司速览</h2>
+    <table>
+      <tbody>
+        <tr><td>是什么 / 定位</td><td>AI 驱动的<strong>专家数据市场</strong>：撮合领域专家与 frontier labs，供给 post-training 标注、rubric、eval。前身是 AI 招聘平台，2023 年与 OpenAI/xAI 接触后 pivot 到专家数据。</td></tr>
+        <tr><td>产品</td><td>① 专家供给市场（AI 20 分钟语音面试筛选 + 评估画像可跨任务复用 <span class="src src-a">🟢</span>）；② <strong>APEX 系列 eval / benchmark</strong>：APEX（经济价值脑力工作生产力指数）、APEX-Agents（长程 agentic 任务，frontier agent 首次仅完成 &lt;25%）、APEX-SWE（与 Cognition 合作的软件工程 benchmark）<span class="src src-a">🟢</span>。</td></tr>
+        <tr><td>团队</td><td>Brendan Foody（co-CEO）、Adarsh Hiremath、Surya Midha；三人是 San Jose 同一所高中（Bellarmine）辩论队队友，2023 年大二创业，2024-03 获 <strong>Thiel Fellowship</strong> 后退学；2025 年成为「最年轻自造亿万富翁」<span class="src src-b">🟡</span>。</td></tr>
+        <tr><td>商业模式</td><td>双边市场抽成：对客户按工时加价计费（take-rate 约 <strong>35%</strong>），永久岗位收约首年薪 30% 安置费；专家 payout 占 gross 收入 60–70%。固定成本低、团队精简（曾在 $50M ARR 时仅 ~30 名美国全职 + ~20 名印度承包）<span class="src src-b">🟡</span>。H1 2025 传 FCF 约 $6M 盈利<span class="src src-b">🟡</span>。</td></tr>
+        <tr><td>状态</td><td>成长期，已融至 Series C，估值 $10B（2025-10）；客户为头部 frontier labs（OpenAI / Anthropic / Google / Meta 等，部分为公司自述「top 5 labs / Magnificent Seven 中 6 家」<span class="src src-c">🔴</span>）。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ⑥ 创业 idea 借鉴 -->
+  <section id="idea">
+    <h2><span class="n">⑥</span>创业 idea 借鉴</h2>
+    <div class="callout insight">
+      <span class="label">Whitespace / 机会</span>
+      <strong>① 垂直深领域专家市场。</strong>右上角「通用 + 撮合」已被 Mercor/Micro1/Handshake 挤满，但<strong>医疗/生命科学/法律/金融监管</strong>等深垂直领域的专家网络与合规壁垒（HIPAA、临床、licensing）高、通用玩家难快速复制——「医生专属数据市场」「生命科学 PhD eval 网络」是相对空白。<br>
+      <strong>② eval 专家网络 / eval-as-a-service。</strong>谁定义「模型在专业工作上有多强」的考卷，谁就握住 labs 的命脉。Mercor 用 APEX 卡位，但<strong>独立、第三方、可信、领域专属的 eval</strong>仍是更早期、壁垒更硬、且不必然要做重人力供给的位置。
+    </div>
+    <h3>现有玩家共同短板（unmet needs）</h3>
+    <p>（1）<strong>客户极度集中</strong>在 5–10 家 labs，议价权在客户侧，labs 一旦自建/转单收入即受冲击。（2）<strong>质量难标准化/难审计</strong>——「专家有多专家」「eval 公不公正」缺第三方背书。（3）<strong>专家供给被互相挖角</strong>，同一批稀缺专家被多家平台争抢，留存与独占性弱。（4）<strong>口径/营收透明度差</strong>（gross vs net 混用），客户与投资人都难比较。这些缺口都对应可切的产品机会（合规垂直、可信 eval、专家独占性激励、净收入透明度）。</p>
+    <h3>Why now（为什么现在值得做）</h3>
+    <p>① <strong>模型能力上行</strong>——推理/agentic/专业领域成为竞争焦点，labs 对「博士级人力 + 专属 eval」需求结构性上升。② <strong>中立性洗牌</strong>——Meta 入股 Scale 后引发 labs 出于中立性顾虑分散供应商，给中立新玩家腾出窗口。③ <strong>AI 自己降低了筛人成本</strong>——AI 面试/评估让「批量筛专家」第一次在单位经济上跑得通（Mercor 的核心 enabler）。④ <strong>专家侧供给意愿强</strong>——$85–200/h 的兼职对医生/律师/PhD 有吸引力。</p>
+    <h3>可借鉴的打法 + 相邻机会</h3>
+    <ul>
+      <li><strong>borrowable：</strong>（a）「<strong>用 AI 面试做供给侧引擎</strong>」——把招聘/评估自动化成可复用画像，是 Mercor 单位经济的关键，可迁移到任何「高端人力撮合」赛道（专业咨询、医疗第二意见、专家网络）。（b）「<strong>先免费做 eval / benchmark 占心智，再用数据飞轮反哺供给</strong>」——APEX 既是营销也是护城河起点。（c）「<strong>从招聘 pivot 到数据</strong>」证明：底层资产是「评估并匹配人」，找到更高单价的需求侧（labs）即可换赛道。</li>
+      <li><strong>adjacent：</strong>（a）<strong>企业版专家数据</strong>——不止服务 labs，给做垂直 agent 的企业供专家数据/eval；（b）<strong>专家网络的二次变现</strong>——同一批被筛出的专家可做专家咨询、expert call、培训内容；（c）<strong>合成数据 + 专家校验</strong>混合模式（Snorkel 路线）压低成本、抬高毛利；（d）<strong>非英语/区域专家供给</strong>（多语种、特定司法辖区法律/医疗）。</li>
+    </ul>
+    <div class="callout warn">
+      <span class="label">风险（诚实给）</span>
+      ① <strong>labs 自建</strong>——OpenAI/Anthropic 直接招专家团队，中间层被去掉；② <strong>估值泡沫</strong>——一年估值翻 5 倍、营收多为 gross 口径，倍数已高，若 labs 资本开支收缩或转单，回调风险大；③ <strong>专家供给被抢</strong>——稀缺专家被多家高价争夺，供给壁垒不如看上去硬；④ <strong>客户集中</strong>——丢一两个大 labs 即重创；⑤ <strong>同质化</strong>——Micro1/Handshake 故事高度雷同，价格战与挖角战逼近；⑥ <strong>监管/合规</strong>——垂直医疗法律涉数据隐私与执业资质，进入门槛与责任都高。
+    </div>
+  </section>
+
+  <!-- ⑦ 中国对标 -->
+  <section id="cn">
+    <h2><span class="n">⑦</span>中国对标：「AI 专家市场」模式在中国可行吗？</h2>
+    <p>中国有成熟的「数据采集与标注」产业，但<strong>形态与 Mercor 不同</strong>：中国偏「<strong>众包 + 项目制外包</strong>」，Mercor 偏「<strong>AI 撮合的双边专家市场</strong>」。把玩家分两侧看：</p>
+    <table>
+      <thead><tr><th>玩家</th><th>类型</th><th>做什么 / 与本赛道关系</th><th>模式</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr><td>海天瑞声（688787）</td><td>数据标注上市公司</td><td>训练数据集 + 标注，明确覆盖大模型 SFT/RLHF/DPO 及模型评估 benchmark 全流程；多模态自动标注平台</td><td>数据集产品 + 项目制服务</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>数据堂</td><td>数据服务商</td><td>采集/标注老牌；传启动北交所上市辅导，被称「AI 训练数据第二股」候选</td><td>项目制 + 数据集</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>整数智能</td><td>数据标注创业公司</td><td>自动化数据标注平台，对标 Scale 路线（工具+服务）</td><td>平台工具 + 服务</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>云测 Testin</td><td>测试/数据服务</td><td>从软件测试切入 AI 数据采集标注</td><td>项目制 + 平台</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>百度众包</td><td>大厂平台</td><td>中国最大数据采集标注平台之一，百万级日处理；全职+众包混合</td><td>众包平台（大厂自建）</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>阿里「晓天睿士」/ 字节 Xpert</td><td>大厂专家众包平台</td><td>大厂自建<strong>专家众包平台</strong>：要求名校硕士、做专业知识测试、博士级出题；专家时薪传可达约 ¥1000/h</td><td>大厂内建专家众包（最接近 Mercor 形态）</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>猪八戒网 / 通用众包</td><td>通用众包</td><td>通用任务众包，可承接低端标注，但非专家/大模型导向</td><td>通用众包市场</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>BOSS 直聘（招聘侧）</td><td>招聘平台</td><td>大量「AI 数据标注/AI 训练师」岗位（月薪近 2 万、偏好名校硕士），是供给入口而非数据中台</td><td>招聘市场</td><td><span class="src src-b">🟡</span></td></tr>
+      </tbody>
+    </table>
+    <div class="callout insight">
+      <span class="label">可行性判断 + whitespace</span>
+      <strong>判断：照搬 Mercor 的「服务 frontier labs 的中立专家市场」在中国不直接成立，但有两三条现实路径。</strong><br><br>
+      <strong>不成立的原因：</strong>（1）<strong>需求侧结构不同</strong>——中国头部模型方（阿里/字节/百度/DeepSeek 等）倾向<strong>自建专家众包平台</strong>（阿里晓天睿士、字节 Xpert 已是「中国版 Mercor 内建版」），不依赖外部中立市场；中立性溢价在中国弱。（2）客户集中在大厂自有生态，第三方撮合层议价空间小。（3）老牌数据公司（海天瑞声/数据堂）走「项目制+数据集」而非 AI 撮合市场。<br><br>
+      <strong>whitespace / 可行路径：</strong>
+      ① <strong>出海接单</strong>——中国/印度等地大量高学历专家是全球最便宜的高端供给，做「中文/多语种专家 → 海外 frontier labs」的供给侧通道（已有海外平台在中国招博士级出题，需求被验证）。
+      ② <strong>垂直 + 合规</strong>——医疗（执业医生）、法律（中国法专家）、金融等本地化专家数据/eval，服务国内做垂直 agent 的企业，避开与大厂自建平台正面撞。
+      ③ <strong>「AI 面试筛专家」工具层</strong>——把 Mercor 的供给侧引擎产品化，卖给国内做数据/众包的公司（海天瑞声、数据堂、整数智能）当能力升级，而非自己做双边市场。
+    </div>
+  </section>
+
+  <!-- ⑧ 现实判断 -->
+  <section id="take">
+    <h2><span class="n">⑧</span>现实判断</h2>
+    <p><strong>胜算：</strong>Mercor 在「AI 撮合专家供给 + 主动做 eval」这条叙事上卡位清晰，顶级 VC 与天使背书、增长曲线极陡、团队执行凶猛，且踩中了「labs 去 Scale 化求中立」的时间窗——短期内是这条新支线里跑得最快的之一。<strong>软肋：</strong>（1）营收口径以 gross 为主、take-rate 30–40%，$10B 估值对应的「真实净收入」远小于 ARR 数字暗示的体量，倍数偏贵；（2）客户极度集中且议价权在 labs，labs 自建或砍单是头号系统性风险；（3）与 Micro1/Handshake 同质化严重，专家供给可被互相挖角，护城河更多在「执行速度+客户关系」而非结构性壁垒；（4）赛道整体处于资本过热，若 AI capex 节奏放缓，估值回调首当其冲。<strong>一句话：方向真、卡位准、但贵且拥挤——它是 emerging→crowded 赛道里的领跑者，不是已建立深护城河的赢家。</strong></p>
+    <div class="callout warn">
+      <span class="label">使用提醒</span>
+      本页为对话式调研，信息主要来自公开来源并按等级标注；融资数额、客户、能力声明等以官方一手为准，
+      <strong>产品能力与 ARR/估值口径未必经独立验证</strong>（尤其 $1.5B ARR、「top 5 labs 全覆盖」等为公司自述或单一媒体口径），引用前请核对最新信息。
+    </div>
+  </section>
+
+  <!-- 出处 -->
+  <section id="src">
+    <h2>出处</h2>
+    <ul style="font-size:13.5px">
+      <li><span class="src src-a">🟢</span> <a href="https://mercor.com" target="_blank" rel="noopener">Mercor 官网</a> · <a href="https://www.mercor.com/blog/series-c/" target="_blank" rel="noopener">Series C 官方博客</a> · <a href="https://www.mercor.com/apex/" target="_blank" rel="noopener">APEX benchmarks</a> · <a href="https://github.com/Mercor-Intelligence/apex-evals" target="_blank" rel="noopener">apex-evals (GitHub)</a></li>
+      <li><span class="src src-b">🟡</span> <a href="https://techcrunch.com/2025/10/27/mercor-quintuples-valuation-to-10b-with-350m-series-c/" target="_blank" rel="noopener">TechCrunch：Series C $350M @ $10B</a> · <a href="https://techcrunch.com/2025/09/09/sources-ai-training-startup-mercor-eyes-10b-valuation-on-450m-run-rate/" target="_blank" rel="noopener">TechCrunch：$450M run rate</a> · <a href="https://techcrunch.com/2025/02/20/mercor-an-ai-recruiting-startup-founded-by-21-year-olds-raises-100m-at-2b-valuation/" target="_blank" rel="noopener">TechCrunch：Series B $100M @ $2B</a></li>
+      <li><span class="src src-b">🟡</span> <a href="https://www.cnbc.com/2025/10/27/ai-hiring-startup-mercor-funding.html" target="_blank" rel="noopener">CNBC：$10B 估值</a> · <a href="https://research.contrary.com/company/mercor" target="_blank" rel="noopener">Contrary Research：商业拆解 / 竞品 / take-rate</a> · <a href="https://sacra.com/c/mercor/" target="_blank" rel="noopener">Sacra：营收/估值/口径</a></li>
+      <li><span class="src src-b">🟡</span> 融资细节：<a href="https://www.thesaasnews.com/news/mercor-raises-30-million-in-series-a" target="_blank" rel="noopener">SaaS News：Series A $30M</a> · <a href="https://www.generalcatalyst.com/stories/our-investment-in-mercor" target="_blank" rel="noopener">General Catalyst：投资 Mercor</a> · <a href="https://fortune.com/2025/11/12/brendan-foody-mercor-interview-ai-adarsh-hiremath-surya-midha-youngest-self-made-billionaires/" target="_blank" rel="noopener">Fortune：创始人/Thiel Fellow</a></li>
+      <li><span class="src src-b">🟡</span> 竞品：<a href="https://sacra.com/c/surge-ai/" target="_blank" rel="noopener">Sacra：Surge AI</a> · <a href="https://sacra.com/c/scale-ai/" target="_blank" rel="noopener">Sacra：Scale AI</a> · <a href="https://sacra.com/c/handshake/" target="_blank" rel="noopener">Sacra：Handshake</a> · <a href="https://techcrunch.com/2025/09/12/micro1-a-competitor-to-scale-ai-raises-funds-at-500m-valuation/" target="_blank" rel="noopener">TechCrunch：Micro1 $500M</a> · <a href="https://www.crunchbase.com/organization/snorkel-ai" target="_blank" rel="noopener">Crunchbase：Snorkel AI</a></li>
+      <li><span class="src src-b">🟡</span> 中国对标：<a href="https://awtmt.com/articles/3706457" target="_blank" rel="noopener">华尔街见闻：数据堂启动上市辅导</a> · <a href="https://finance.sina.com.cn/cj/2025-12-09/doc-inhaecqr1085817.shtml" target="_blank" rel="noopener">新浪财经：大模型抢名校生给 AI 当老师（晓天睿士/Xpert/时薪）</a> · <a href="https://www.haitianruisheng.com/" target="_blank" rel="noopener">海天瑞声官网</a> · <a href="https://www.bosszhipin.com/" target="_blank" rel="noopener">BOSS 直聘</a></li>
+      <li><span class="src src-c">🔴</span> 自述/未独立证实：「服务 top 5 labs / Magnificent Seven 中 6 家」「$500M ARR on track」「$1.5B ARR（2026-05 传闻）」等为公司口径或单源媒体，未经独立审计。</li>
+    </ul>
+  </section>
+
+  <footer class="foot">
+    公司竞争格局 / 赛道早期度调研笔记，仅作梳理；信息按来源分级、产品能力未必经独立验证，以官方一手信息为准 · 整理日期 2026-06-16
+  </footer>
+
+</article>
+</body>
+</html>

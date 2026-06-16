@@ -179,27 +179,6 @@
     "path": "papers/2026-06-16-ai-datacenter-cooling-materials/index.html"
   },
   {
-    "slug": "2026-06-16-snorkel-ai",
-    "title": "Snorkel AI：programmatic labeling 与 AI 评测的竞争格局与早期度调研",
-    "authors": "—",
-    "team": "公司调研",
-    "arxiv": "https://snorkel.ai",
-    "code": "",
-    "date": "2026-06-16",
-    "published": "公司调研 2026",
-    "tldr": "Stanford 衍生、以 programmatic labeling/弱监督起家的 AI 数据公司，2025 转向专家数据+模型评测（Series D $100M@$1.3B）；赛道整体 crowded 但 programmatic+垂直 eval 切口仍 emerging，中国 whitespace 显著。",
-    "tags": [
-      "company",
-      "competitive-landscape",
-      "market-map",
-      "startup-idea",
-      "ai-data",
-      "data-labeling",
-      "china"
-    ],
-    "path": "papers/2026-06-16-snorkel-ai/index.html"
-  },
-  {
     "slug": "2026-06-15-agents-for-scientific-discovery",
     "title": "Agent 在科学发现里的应用（文献综述）",
     "authors": "—",
@@ -1469,6 +1448,27 @@
     ]
   },
   {
+    "slug": "2026-06-16-snorkel-ai",
+    "title": "Snorkel AI：programmatic labeling 与 AI 评测的竞争格局与早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://snorkel.ai",
+    "code": "",
+    "date": "2026-06-16",
+    "published": "公司调研 2026",
+    "tldr": "Stanford 衍生、以 programmatic labeling/弱监督起家的 AI 数据公司，2025 转向专家数据+模型评测（Series D $100M@$1.3B）；赛道整体 crowded 但 programmatic+垂直 eval 切口仍 emerging，中国 whitespace 显著。",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "market-map",
+      "startup-idea",
+      "ai-data",
+      "data-labeling",
+      "china"
+    ],
+    "path": "papers/2026-06-16-snorkel-ai/index.html"
+  },
+  {
     "slug": "2026-06-16-scientific-agent-infra",
     "title": "科学 agent 基础设施深挖：仪器 MCP 协议层 × agent 评测即服务",
     "authors": "—",
@@ -1509,5 +1509,26 @@
       "china"
     ],
     "path": "papers/2026-06-16-turing/index.html"
+  },
+  {
+    "slug": "2026-06-16-mercor",
+    "title": "Mercor：AI 专家数据市场的竞争格局与早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://mercor.com",
+    "code": "",
+    "date": "2026-06-16",
+    "published": "公司调研 2026",
+    "tldr": "AI驱动的专家数据市场:用20分钟AI面试筛医生/律师/PhD/工程师接入OpenAI/Anthropic等frontier labs做高端标注与eval;创始人Brendan Foody/Adarsh Hiremath/Surya Midha(22岁Thiel Fellow);Seed$3.6M→A~$32M→B$100M@$2B→C$350M@$10B(2025-10,Felicis领);ARR口径打架(传$450-500M@2025-09/$1.5B@2026-05,多为gross,take-rate30-40%);早期度emerging→crowded(Surge$25B/Scale$29B/Micro1/Handshake同质化升温);中国whitespace=出海接单+垂直医疗法律专家+AI面试工具层(大厂已自建晓天睿士/Xpert)。",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "market-map",
+      "startup-idea",
+      "ai-data",
+      "rlhf",
+      "china"
+    ],
+    "path": "papers/2026-06-16-mercor/index.html"
   }
 ]
