@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI4S「卖铲子」机会扫描 · 给中国创业者的细分赛道地图</title>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --bad:#ff6b81; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --bad:#d23651; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.7; font-size:16px;}
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:1000px; margin:0 auto; padding:18px 22px 90px}
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:24px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)} .meta-grid dd{margin:0}
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap; line-height:2}
+  nav.toc a:hover{color:var(--accent)}
+  section{margin:34px 0}
+  h2{font-size:20px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:16px; margin:20px 0 6px}
+  p{margin:11px 0} ul,ol{padding-left:22px} li{margin:5px 0}
+  a{color:var(--accent)} strong{color:var(--text)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.88em}
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:12.5px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:8px 9px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-word}
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+  .seg{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:16px 0; background:var(--panel)}
+  .seg h3{margin-top:4px}
+  .op{font-weight:700;white-space:nowrap}.op-g{color:var(--ok)}.op-y{color:var(--warn)}.op-r{color:var(--bad)}
+  .src{font-size:10.5px;padding:0 5px;border-radius:999px}
+  .src-a{background:rgba(67,197,158,.18);color:var(--ok)}.src-b{background:rgba(255,180,84,.18);color:var(--warn)}.src-c{background:rgba(255,107,129,.18);color:var(--bad)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">AI4S</span><span class="chip">卖铲子 / picks &amp; shovels</span>
+      <span class="chip">中国创业机会</span><span class="chip">机会扫描</span>
+    </div>
+    <h1>AI4S「卖铲子」机会扫描：给中国创业者的细分赛道地图</h1>
+    <p class="orig-title">不做底座、不赌单一 IP——给 AI for Science 提供数据 / 评测 / 中间件 / 工具链 / 验证服务的 6 个子赛道，各自有谁、哪格空、中国切口在哪</p>
+    <dl class="meta-grid">
+      <dt>缘起</dt><dd>承接深势科技调研里「adjacent：给 AI4S 卖铲子」那条 idea 的深挖</dd>
+      <dt>整理</dt><dd>对话调研；玩家 / 数字按来源分级（<span class="src src-a">🟢一手</span>/<span class="src src-b">🟡二手</span>/<span class="src src-c">🔴自述</span>），未必经独立验证</dd>
+      <dt>日期</dt><dd>2026-06-16</dd>
+    </dl>
+  </header>
+
+  <div class="tldr">
+    <b>一句话</b> — AI4S 的<strong>模型 / 平台层</strong>已被深势、晶泰、巨头(MatterGen/GNoME)和开源(DeePMD)三向夹击；而它脚下的「<strong>卖铲子层</strong>」——科学数据、模拟数据、模型评测、实验中间件、科研 agent 工具链、按结果收费的验证服务——既是<strong>持续刚需、又不押单一 IP</strong>，且在中国<strong>大多还没人专门做</strong>。其中最像「中国 whitespace」的三格：<strong>① 科学专精的专家数据/RLHF</strong>(通用巨头 Surge/Mercor 不碰垂直科学)、<strong>② 实验室中间件 / lab OS + agent↔仪器协议</strong>(中国硬件强、软件层空)、<strong>③ 中立的科学模型评测即服务</strong>(MLIP Arena 类还在学术阶段)。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#why">为什么卖铲子</a>
+    <a href="#s1">① 科学数据 & 专家 RLHF</a>
+    <a href="#s2">② 模拟数据 / 数据飞轮</a>
+    <a href="#s3">③ 模型评测 benchmark</a>
+    <a href="#s4">④ 实验自动化中间件 / lab OS</a>
+    <a href="#s5">⑤ 科研 agent 工具链 / 协议</a>
+    <a href="#s6">⑥ CRO-like 按 outcome 验证</a>
+    <a href="#tbl">总表</a>
+    <a href="#take">给中国创业者</a>
+  </nav>
+
+  <section id="why">
+    <h2>为什么是「卖铲子」</h2>
+    <p>淘金热里最稳的生意是卖铲子和牛仔裤。AI4S 同理:</p>
+    <ul>
+      <li><strong>底座被夹击：</strong>材料/分子大模型(势函数、生成)正被 GNoME、MatterGen、DeePMD/DPA 等<strong>开源 + 大厂免费</strong>拉平,纯做模型窗口在关。</li>
+      <li><strong>铲子是持续刚需：</strong>所有做 AI4S 的人(包括深势/晶泰/巨头/药企)都要<strong>买数据、评模型、连仪器、跑验证</strong>——这层需求与谁赢无关、复购稳。</li>
+      <li><strong>不押单一 IP、毛利可控：</strong>避开「赌一个材料/一款药」的重资产与长周期,用工具/服务/数据现金流活着。</li>
+    </ul>
+    <p>下面把这层拆成 6 个子赛道。每个标<strong>国外玩家 / 中国现状 / 拥挤度 / 中国切口</strong>(<span class="op op-g">🟢 空白可切</span> / <span class="op op-y">🟡 有切口需差异化</span> / <span class="op op-r">🔴 已挤/巨头压</span>)。</p>
+  </section>
+
+  <!-- 1 -->
+  <section id="s1">
+    <h2><span class="n">①</span>高质量科学数据 & 专家 RLHF <span class="op op-g">🟢→🟡</span></h2>
+    <div class="seg">
+      <p><strong>是什么：</strong>给训练 AI4S / 科学推理模型提供「<strong>专家级</strong>」数据——材料/化学/生物博士标注、实验记录结构化、科学推理轨迹、偏好对(RLHF)、领域 eval 集。</p>
+      <p><strong>国外：</strong>通用专家数据巨头已起飞——<strong>Surge AI</strong>(自述 $1B+ ARR、$25B 估值 <span class="src src-b">🟡</span>)、<strong>Mercor</strong>($2B→$10B 估值 / 2025 <span class="src src-b">🟡</span>)、Turing、Micro1、Snorkel,主打「科学/医学/代码专家进训练环」;数据标注市场据测 $1.2B→$10.2B(2034)<span class="src src-b">🟡</span>。但它们<strong>偏通用 LLM,不专精「材料/化学/实验」这种要懂 DFT、会读谱图、能判可合成性的硬核科学数据</strong>。</p>
+      <p><strong>中国现状：</strong>通用数据有海天瑞声(主板上市)、数据堂、云测等 <span class="src src-b">🟡</span>;<strong>科学专精的专家数据/RLHF 基本没人单独做</strong>。</p>
+      <p><strong>中国切口 🟢：</strong>做「<strong>科学家在环</strong>」的数据公司——签约材料/化学/药学 PhD + 把<strong>模拟(DFT/MD)与湿实验结果作为「自动标注的真值」</strong>,产出可验证的高质量科学数据/偏好对,卖给国产 AI4S 模型(深势/华为/高校)。护城河=领域专家网络 + 仿真验证飞轮,海天瑞声那套通用众包做不了。</p>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section id="s2">
+    <h2><span class="n">②</span>模拟数据集 / 数据飞轮 <span class="op op-y">🟡</span></h2>
+    <div class="seg">
+      <p><strong>是什么：</strong>用 DFT/MD/第一性原理大规模算出来的<strong>结构-性质数据集</strong>,以及把它做成「datasets-as-a-service / 数据飞轮」。</p>
+      <p><strong>国外：</strong>多为<strong>开放公共品</strong>——Materials Project、Open Catalyst(OC20/22)、Meta 的 OMat24、OMol25 等;商业化「按需算数据卖数据」反而少 <span class="src src-b">🟡</span>。</p>
+      <p><strong>中国现状：</strong>深势/AISI 有大规模 DPA 训练语料但不单卖;公共数据平台偏学术。</p>
+      <p><strong>中国切口 🟡：</strong>这格<strong>资本/算力密集</strong>(要堆 DFT 机时),纯卖通用数据难赚;更现实是<strong>「为某垂直行业按需生成专用模拟数据 + 配套微调」</strong>(如某类电解液/催化剂),或当<strong>第②与第①的结合体</strong>(模拟真值喂专家数据)。别正面拼「最大开放数据集」。</p>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section id="s3">
+    <h2><span class="n">③</span>科学模型 benchmark / 评测即服务 <span class="op op-g">🟢</span></h2>
+    <div class="seg">
+      <p><strong>是什么：</strong>给势模型(MLIP)、材料/分子大模型做<strong>中立、可信、持续更新的评测榜与诊断</strong>——治「各家自报 SOTA、benchmark 数据泄漏、樱桃挑选」的乱象(深势的「100× / 71%」、Sakana 的「CUDA 100×」都是反面教材)。</p>
+      <p><strong>国外：</strong><strong>MLIP Arena</strong>(<a href="https://github.com/atomind-ai/mlip-arena" target="_blank" rel="noopener">atomind-ai</a> 在做,已是创业雏形)、<strong>Matbench Discovery</strong> 榜、<strong>LAMBench</strong>(深势/AISI, Peng 2026)、OMol25 榜、MLIPAudit——但<strong>多停在学术/开源、没人做成商业「评测即服务」</strong> <span class="src src-b">🟡</span>。</p>
+      <p><strong>中国切口 🟢：</strong>做「<strong>AI4S 的 MLPerf / 第三方质检</strong>」——中立评测平台 + 给药企/材料厂/基金做「这个模型/这家供应商到底行不行」的尽调报告,按报告/订阅收费。卖的是<strong>信任与中立</strong>(所以最好别自己也卖模型)。门槛在评测体系的科学严谨度与公信力。</p>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section id="s4">
+    <h2><span class="n">④</span>实验自动化中间件 / lab OS <span class="op op-g">🟢</span></h2>
+    <div class="seg">
+      <p><strong>是什么：</strong>把异构的实验仪器/机器人/液体处理站<strong>连起来、调度、记录、对接 AI 决策</strong>的中间件层——「实验室的操作系统」。这是自驱实验室真正的瓶颈(不是缺机器人,是缺把它们粘起来的软件)。</p>
+      <p><strong>国外：</strong><strong>Artificial.com</strong>(全实验室编排调度, <a href="https://arxiv.org/abs/2504.00986" target="_blank" rel="noopener">arXiv 2504.00986</a>)、<strong>Emerald Cloud Lab</strong>(远程 API 云实验室)、Strateos;开源 ChemOS / Helao / AresOS;标准 <strong>SiLA2</strong>、Bluesky、ROS <span class="src src-a">🟢</span>。</p>
+      <p><strong>中国现状：</strong>硬件层强(<strong>镁伽 Megarobo</strong> 实验室机器人、各院所自动化站),但<strong>「lab OS / 编排中间件」软件层基本空白</strong>;深圳已组「多 AI-多机器人」造材料 <span class="src src-b">🟡</span>,仍偏项目制非产品。</p>
+      <p><strong>中国切口 🟢：</strong>做<strong>厂商中立的实验室中间件/OS</strong>——适配国产仪器与机器人,提供调度、数据、协议、AI 接口,卖给所有想搭自驱实验室的药企/材料厂/高校。中国制造 + 机器人成本优势在这里是顺风;难点是<strong>仪器协议碎片化</strong>(也正是壁垒)。</p>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section id="s5">
+    <h2><span class="n">⑤</span>科研 agent 工具链 / agent↔仪器协议 <span class="op op-g">🟢</span></h2>
+    <div class="seg">
+      <p><strong>是什么：</strong>给「科研 agent」做基础设施——检索领域文献/数据、调用模拟器与仪器、结构化记录、评测——相当于「<strong>AI4S 版的 LangChain / Exa / MCP</strong>」。</p>
+      <p><strong>国外：</strong>SciAgents 等科研 agent 框架(多学术);尤其值得注意 <strong>LAP(Agent-to-Instrument Protocol)</strong>(<a href="https://arxiv.org/abs/2606.03755" target="_blank" rel="noopener">arXiv 2606.03755</a>)——<strong>把 MCP 思想搬到实验仪器</strong>,让 agent 标准化地控制设备,目前是<strong>极早期的新标准</strong> <span class="src src-b">🟡</span>。</p>
+      <p><strong>中国现状：</strong>几乎空白;国内 agent 工具链(Coze 等)面向通用,不接科学工具/仪器。</p>
+      <p><strong>中国切口 🟢：</strong>做「<strong>给科研 agent 用的工具/协议层</strong>」——① 领域语义检索(接 CNKI/万方/专利/材料库的「科研版 Exa」,墙内语料是护城河);② <strong>实验仪器的 MCP/LAP 适配层</strong>,让 agent 能调国产仪器。这与 ④ 的 lab OS 高度协同,可一起做。</p>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section id="s6">
+    <h2><span class="n">⑥</span>「计算 + 验证」按 outcome / 里程碑收费(CRO-like) <span class="op op-y">🟡</span></h2>
+    <div class="seg">
+      <p><strong>是什么：</strong>不卖软件 license,而是<strong>用 AI 算 + 湿实验验证,按「交付了通过验证的结果/里程碑」收费</strong>的垂直 CRO-like 服务。</p>
+      <p><strong>国外/中国头部：</strong>深势、晶泰(已上市盈利)、药明(传统 CRO + AI)都在做平台型/全栈,已较拥挤 <span class="src src-b">🟡</span>。</p>
+      <p><strong>中国切口 🟡：</strong>头部已占住通用全栈,新进入者别全栈——<strong>挑一个单一高价值、可客观验证的细分</strong>(某类正极/电解液、某难成药靶点、某半导体材料),做「AI 设计 + 第三方/自有湿实验验证 + 按 outcome 计费」的窄而深服务,绑上游开源模型与算力、轻资产起步。这是把卖铲子(①③④⑤)整合成业务交付的<strong>商业模式选项</strong>。</p>
+    </div>
+  </section>
+
+  <!-- 总表 -->
+  <section id="tbl">
+    <h2>总表：6 个子赛道 × 拥挤度 × 中国机会</h2>
+    <table>
+      <thead><tr><th>子赛道</th><th>国外代表</th><th>中国现状</th><th>中国机会</th><th>一句切口</th></tr></thead>
+      <tbody>
+        <tr><td>① 科学数据 & 专家 RLHF</td><td>Surge / Mercor / Turing（通用）</td><td>海天瑞声/数据堂（通用），科学专精空白</td><td class="op op-g">🟢→🟡</td><td>科学家在环 + 仿真真值，卖给国产 AI4S 模型</td></tr>
+        <tr><td>② 模拟数据 / 数据飞轮</td><td>Materials Project / Open Catalyst / OMat（开放）</td><td>深势语料不单卖</td><td class="op op-y">🟡</td><td>按行业按需生成专用模拟数据 + 微调，别拼最大集</td></tr>
+        <tr><td>③ 模型评测即服务</td><td>MLIP Arena(atomind) / Matbench / LAMBench（学术）</td><td>几乎空白</td><td class="op op-g">🟢</td><td>AI4S 的 MLPerf / 第三方质检，卖中立与信任</td></tr>
+        <tr><td>④ 实验中间件 / lab OS</td><td>Artificial / Emerald / SiLA2 / ChemOS</td><td>硬件强(镁伽)、软件层空白</td><td class="op op-g">🟢</td><td>厂商中立的国产实验室 OS / 编排中间件</td></tr>
+        <tr><td>⑤ 科研 agent 工具链 / 协议</td><td>SciAgents / LAP 协议（极早期）</td><td>空白</td><td class="op op-g">🟢</td><td>科研版 Exa + 仪器 MCP/LAP 适配层</td></tr>
+        <tr><td>⑥ CRO-like 按 outcome</td><td>深势 / 晶泰 / 药明（平台型）</td><td>头部已占通用全栈</td><td class="op op-y">🟡</td><td>单一高价值细分 + 按结果收费，轻资产</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 收敛 -->
+  <section id="take">
+    <h2>给中国创业者的 3 条收敛建议</h2>
+    <div class="callout insight">
+      <span class="label">怎么选</span>
+      <strong>① 优先「结果可被客观验证」的铲子。</strong> ③评测、④中间件、⑤工具链门槛在工程与公信力、不赌科学运气,最适合小团队冷启动;①数据次之(要专家网络);②⑥更重(算力/湿实验)。<br><br>
+      <strong>② 绑国产模型 + 算力 + 仪器生态。</strong> 站在深势 DeePMD/DPA、玻尔算力、国产实验仪器肩上做「最后一公里」,把「中国独有」(墙内语料、本土仪器、制造成本、国产替代政策)做成护城河。<br><br>
+      <strong>③ 用 outcome 收费、别卖软件 license。</strong> 把 ①③④⑤ 的能力,最终包成「按通过验证的结果/里程碑收费」的窄垂直服务(⑥),现金流稳、客户认账。
+    </div>
+    <div class="callout note">
+      <span class="label">最值得先挖的两格(我的判断)</span>
+      <strong>④ 实验室中间件 / lab OS</strong>(中国硬件强、软件空,且是自驱实验室真瓶颈)与 <strong>⑤ 仪器 MCP/LAP 适配 + 科研版 Exa</strong>(全球都极早、和你之前看的 MCP / agent 主题一脉相承)——这两格协同性强,可一起做成「<strong>国产自驱实验室的软件层</strong>」。
+    </div>
+    <div class="callout warn">
+      <span class="label">风险与使用提醒</span>
+      卖铲子的天花板受「金矿有多大」约束——AI4S 整体仍在<strong>「能不能真做出科学突破」的全局问号</strong>下;铲子需求依赖淘金者持续投入。本页玩家/估值/市场数字多为媒体或自述口径(🟡/🔴)、<strong>未逐一独立验证</strong>;创业决策请回一手信息再核。
+    </div>
+  </section>
+
+  <section>
+    <h2 style="border-top:none;padding-top:0">出处</h2>
+    <p style="font-size:13px;color:var(--muted)">
+      <a href="https://github.com/atomind-ai/mlip-arena" target="_blank" rel="noopener">MLIP Arena (atomind-ai)</a> ·
+      <a href="https://matbench-discovery.materialsproject.org/" target="_blank" rel="noopener">Matbench Discovery</a> ·
+      <a href="https://arxiv.org/abs/2504.00986" target="_blank" rel="noopener">Artificial 实验室编排 (2504.00986)</a> ·
+      <a href="https://arxiv.org/abs/2606.03755" target="_blank" rel="noopener">LAP agent↔仪器协议 (2606.03755)</a> ·
+      Surge/Mercor 估值(媒体口径)· 中国数据标注(海天瑞声/数据堂,媒体)·
+      本库《<a href="../2026-06-16-dp-technology/index.html">深势科技</a>》《<a href="../2026-06-15-ai4s-china-startup-map/index.html">AI4S 中国创业机会总览</a>》
+    </p>
+  </section>
+
+  <footer class="foot">
+    机会扫描笔记,仅作梳理;玩家与数字按来源分级、未必经独立验证,创业决策以一手信息为准 · 整理日期 2026-06-16
+  </footer>
+
+</article>
+</body>
+</html>

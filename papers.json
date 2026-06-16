@@ -1324,5 +1324,24 @@
       "mcp",
       "agent"
     ]
+  },
+  {
+    "slug": "2026-06-16-ai4s-picks-and-shovels",
+    "title": "AI4S「卖铲子」机会扫描：给中国创业者的细分赛道地图",
+    "authors": "—",
+    "team": "机会扫描",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-16",
+    "published": "机会扫描 2026",
+    "tldr": "为 AI4S 做卖铲子的 6 个细分赛道扫描（科学数据/专家RLHF、模拟数据飞轮、模型评测即服务、实验室中间件 lab OS、科研 agent 工具链/协议、CRO-like 按 outcome 收费），每格标早期度与拥挤度，给出最值得先挖的 whitespace。",
+    "tags": [
+      "AI4S",
+      "startup-idea",
+      "competitive-landscape",
+      "picks-and-shovels",
+      "china"
+    ],
+    "path": "papers/2026-06-16-ai4s-picks-and-shovels/index.html"
   }
 ]
