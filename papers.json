@@ -1551,5 +1551,26 @@
       "china"
     ],
     "path": "papers/2026-06-16-mercor/index.html"
+  },
+  {
+    "slug": "2606.03755-lap-agent-to-instrument",
+    "title": "LAP: An Agent-to-Instrument Protocol for Autonomous Science",
+    "authors": "Linwu Zhu, Liqiang Gao, Yan Chen, Dan Zhu, Jian Huang",
+    "team": "Shiyanjia Lab",
+    "arxiv": "https://arxiv.org/abs/2606.03755",
+    "code": "",
+    "date": "2026-06-16",
+    "published": "arXiv 2026",
+    "tldr": "把 agentic 生态的第三条边 agent-to-instrument 标准化的协议设计：用 InstrumentCard、独占预约、绑定参数哈希的安全围栏 token、和强制带单位/标定/不确定度的 MeasurementResult 四原语，补上 MCP/A2A 没覆盖的「agent 驱动物理仪器」那条边；封装而非取代 SiLA 2/OPC-UA。仅 v0.1 设计规范，尚无开源实现。",
+    "tags": [
+      "agent",
+      "mcp",
+      "lab-automation",
+      "autonomous-science",
+      "AI4S",
+      "protocol",
+      "A2A"
+    ],
+    "path": "papers/2606.03755-lap-agent-to-instrument/index.html"
   }
 ]
