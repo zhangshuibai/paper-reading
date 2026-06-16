@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRO / CDMO 行业全景：赛道分段早期度与中国创业 whitespace</title>
+<style>
+  :root{
+    --bg:#0f1115; --panel:#171a21; --panel2:#1d212b; --ink:#e8eaf0; --mut:#9aa3b2;
+    --line:#2a2f3a; --acc:#5b9cff; --good:#3ecf8e; --warn:#f2c94c; --bad:#ff6b6b;
+    --emer:#7c5cff; --mature:#5a6577; --crowd:#ff8e53;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;}
+  .wrap{max-width:980px;margin:0 auto;padding:32px 20px 96px}
+  h1{font-size:30px;line-height:1.3;margin:0 0 8px}
+  h2{font-size:23px;margin:48px 0 14px;padding-top:14px;border-top:1px solid var(--line)}
+  h3{font-size:18px;margin:26px 0 10px;color:#cdd6e6}
+  p{margin:10px 0}
+  a{color:var(--acc);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .sub{color:var(--mut);font-size:14px;margin:4px 0 0}
+  .lede{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--acc);border-radius:10px;padding:16px 18px;margin:22px 0}
+  .grid{display:grid;gap:14px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+  .card2{background:var(--panel2)}
+  small,.mut{color:var(--mut)}
+  code{background:#222733;padding:1px 6px;border-radius:5px;font-size:13px;color:#cfe0ff}
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14px}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:var(--panel2);color:#cdd6e6;font-weight:600}
+  tr:nth-child(even) td{background:#14171e}
+  .src{font-size:11px;font-weight:700;border-radius:4px;padding:1px 5px;white-space:nowrap}
+  .s1{background:#10331f;color:#6fe3a8;border:1px solid #1c5a37}      /* 一手 */
+  .s2{background:#33300f;color:#f2d985;border:1px solid #5a521c}      /* 二手 */
+  .s3{background:#331414;color:#ffa3a3;border:1px solid #5a1c1c}      /* 自述 */
+  .pill{display:inline-block;font-size:12px;font-weight:700;border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0}
+  .p-emer{background:rgba(124,92,255,.16);color:#b8a6ff;border:1px solid #4b3aa0}
+  .p-crowd{background:rgba(255,142,83,.14);color:#ffb892;border:1px solid #a05c34}
+  .p-mature{background:rgba(90,101,119,.2);color:#aebacb;border:1px solid #46505f}
+  .p-nasc{background:rgba(62,207,142,.14);color:#7fe3b3;border:1px solid #1c5a37}
+  .legend span{margin-right:14px;font-size:13px}
+  ul{margin:8px 0;padding-left:22px}
+  li{margin:5px 0}
+  .toc{columns:2;font-size:14px}
+  .toc a{display:block;padding:2px 0}
+  .figcap{font-size:13px;color:var(--mut);text-align:center;margin:6px 0 0}
+  .fig{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;margin:18px 0}
+  .note{font-size:13px;color:var(--mut)}
+  .kbar{height:10px;border-radius:6px;background:#222733;overflow:hidden;display:inline-block;width:120px;vertical-align:middle}
+  .kbar > i{display:block;height:100%}
+  .tag{display:inline-block;background:#222733;color:#aab6c8;border:1px solid var(--line);border-radius:6px;padding:1px 8px;font-size:12px;margin:2px 4px 2px 0}
+  .warnbox{background:#1c1614;border:1px solid #4a2a22;border-left:3px solid var(--bad);border-radius:10px;padding:14px 16px;margin:18px 0}
+  .goodbox{background:#0f1c16;border:1px solid #1c5a37;border-left:3px solid var(--good);border-radius:10px;padding:14px 16px;margin:18px 0}
+  hr{border:none;border-top:1px solid var(--line);margin:30px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>CRO / CDMO 行业全景：赛道分段早期度与中国创业 whitespace</h1>
+<p class="sub">机会扫描 · 2026-06-16 · 赛道层面调研（非单公司）· 中文，术语保留英文</p>
+
+<div class="lede">
+  <strong>一句话定位：</strong>CRO/CDMO 是制药公司把「研发 + 生产」外包出去的<strong>卖水卖铲子赛道</strong>——药企不养全套实验室/产线，按项目把活儿包给专业组织。<strong>整体赛道已 mature（巨头主导、成熟、增速 7–9%）</strong>，但<strong>按「分子类型 × 产业链环节」切开后，几个子赛道仍 emerging</strong>：TIDES（寡核苷酸+多肽）/ADC/CGT 新分子 CDMO（产能紧缺、双位数增长）、AI+CRO（在发现端，emerging→crowded）、以及<strong>实验室软件/数据层（lab OS / LIMS / ELN）——国内偏空白</strong>。叠加美国 <strong>BIOSECURE Act 已于 2025-12-18 签署成法</strong>，制造了「友岸产能 / 国产替代」的机会窗。给中国创业者最该切的一个：<strong>给 CRO/CDMO 卖铲子的研发数据/实验室软件层</strong>。
+</div>
+
+<div class="card">
+  <strong>来源分级图例：</strong>
+  <span class="legend">
+    <span><span class="src s1">🟢 一手</span> 公司财报/法案原文/监管文件</span>
+    <span><span class="src s2">🟡 二手</span> 调研机构/媒体/券商</span>
+    <span><span class="src s3">🔴 自述</span> 公司自我宣称/未独立验证</span>
+  </span>
+  <p class="note" style="margin-top:8px">⚠️ <strong>数字口径警告：</strong>「市场规模/增速」在不同调研机构之间口径极乱（CRO 含不含临床前？CDMO 含不含 API/疫苗？healthcare CRO vs pharmaceutical CRO？），下文数字一律标「谁的口径 / 哪一年 / 单位」，打架时并列多个，<strong>不擅自取一个均值</strong>。</p>
+</div>
+
+<h2 id="toc">目录</h2>
+<div class="toc card">
+  <a href="#bg">0 · 领域背景速补（只懂 LLM 也能跟上）</a>
+  <a href="#chain">1 · 产业链拆解（内联 SVG）</a>
+  <a href="#size">2 · 市场规模与增速（多机构口径）</a>
+  <a href="#map">3 · 玩家地图（四象限）</a>
+  <a href="#early">4 · 赛道早期度——分段给档位（核心）</a>
+  <a href="#geo">5 · 地缘政治：BIOSECURE Act</a>
+  <a href="#ai">6 · AI 对 CRO 的冲击与融合</a>
+  <a href="#white">7 · 给中国创业者的 whitespace（核心）</a>
+  <a href="#verdict">8 · 现实判断 + 存疑</a>
+  <a href="#src">参考来源</a>
+</div>
+
+<!-- ============ 0 领域背景 ============ -->
+<h2 id="bg">0 · 领域背景速补（假设你只懂 LLM / ML，不懂医药）</h2>
+<p>读这篇前，先把医药外包行业的「黑话」补齐。每个名词第一次出现都讲清「是什么 / 为什么难 / 和本篇关系」。</p>
+
+<h3>0.1 这堆缩写到底谁是谁</h3>
+<table>
+  <tr><th>缩写</th><th>全称 / 中文</th><th>一句话：它在卖什么</th></tr>
+  <tr><td><strong>CRO</strong></td><td>Contract Research <em>Organization</em>，合同研发组织</td><td>把「<strong>研发</strong>」外包出去：帮药企做发现、做动物毒理、跑临床试验。卖的是「研发服务+人头+实验」。</td></tr>
+  <tr><td><strong>CDMO</strong></td><td>Contract Development & Manufacturing Org，合同研发<strong>生产</strong>组织</td><td>把「<strong>工艺开发 + 生产制造</strong>」外包出去：帮药企把分子从克级放大到吨级、合规量产原料药/制剂。卖的是「产能 + 工艺 + GMP 产线」。</td></tr>
+  <tr><td><strong>CMO</strong></td><td>Contract Manufacturing Org</td><td>CDMO 的「只生产、不做开发」版前身，纯代工。</td></tr>
+  <tr><td><strong>CRDMO</strong></td><td>药明康德自造的合成词：CRO+CDMO 一体化</td><td>「从发现一直陪到生产」的一条龙叙事，强调「跟着分子赚一辈子的钱」（follow-the-molecule）。</td></tr>
+  <tr><td><strong>CMC</strong></td><td>Chemistry, Manufacturing & Controls</td><td>申报新药时关于「这药怎么造、质量怎么控」的那一大摞资料；CDMO 干的活很大一块就是 CMC。</td></tr>
+  <tr><td><strong>CXO</strong></td><td>中国资本市场对 CRO/CDMO/CSO 等「合同外包X」的统称</td><td>看 A 股/港股研报时「CXO 板块」≈ 医药外包板块。</td></tr>
+</table>
+
+<h3>0.2 新药研发的大致流程，以及「为什么会外包」</h3>
+<p>一款新药从想法到上市，平均要<strong>10 年以上、十亿美元级别</strong>投入，且九成以上中途失败。流程大致是：</p>
+<p style="background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:10px 14px;font-size:14px">
+<strong>靶点发现 Target</strong>（找到致病蛋白）→ <strong>苗头/先导化合物 Hit→Lead</strong>（筛出能结合靶点的分子并优化）→ <strong>临床前 Preclinical</strong>（动物体内做药效/<strong>毒理 toxicology</strong>/药代，拿 <strong>IND</strong> 批件）→ <strong>临床 I 期</strong>（少量健康人，看安全）→ <strong>II 期</strong>（病人，看有没有效）→ <strong>III 期</strong>（大规模，看确证疗效）→ <strong>申报上市 NDA/BLA</strong>（递交给监管：美国 <strong>FDA</strong>、中国 <strong>NMPA</strong>）。
+</p>
+<p><strong>为什么外包会存在？</strong>三个硬理由：① <strong>成本与速度</strong>——自建一整套化学/生物/动物房/GMP 产线极贵且周期长，按项目外包更划算；② <strong>专业分工</strong>——跑一个 III 期临床要协调几百家医院、上万患者、海量数据，这是 CRO 几十年攒下的专业能力；③ <strong>产能弹性</strong>——一款药火了（比如 GLP-1 减肥药）需求暴涨，药企自己扩产来不及，CDMO 的共享产能能顶上。Biotech 小公司更是「只有几个科学家+一个分子」，从头到尾都靠外包，这是 CRO/CDMO 的核心客户群。</p>
+
+<h3>0.3 分子类型：为什么要按「小分子 / 生物药 / 新分子」分赛道</h3>
+<p>不同分子的「造法」完全不同，需要的产线和 know-how 不通用，所以 CDMO 是按分子类型分赛道的：</p>
+<ul>
+  <li><strong>小分子 Small molecule</strong>：传统化学药（阿司匹林那种），靠有机合成，技术最成熟、玩家最多、最卷。</li>
+  <li><strong>生物药 Biologics</strong>：抗体/蛋白等大分子，靠细胞培养（CHO 细胞「养」出来），产线重、壁垒高，药明生物/三星生物/Lonza 主战场。</li>
+  <li><strong>寡核苷酸 Oligonucleotide / 多肽 Peptide</strong>：合称 <strong>TIDES</strong>。siRNA、ASO（核酸药）和 GLP-1（司美格鲁肽那类减肥/降糖肽）就属于这里，<strong>近两年最火、产能最缺</strong>。</li>
+  <li><strong>ADC</strong>（Antibody-Drug Conjugate，抗体偶联药物）：抗体当「导弹」把毒素精准送到癌细胞，工艺横跨生物+化学+高活性毒素，难做、高增长。</li>
+  <li><strong>CGT</strong>（Cell & Gene Therapy，细胞与基因治疗）：CAR-T、AAV 基因疗法这类「活药」，最前沿、最难标准化、最 emerging。</li>
+</ul>
+
+<h3>0.4 还会用到的几个缩写</h3>
+<ul>
+  <li><strong>DEL</strong>（DNA-Encoded Library，DNA 编码化合物库）：给每个候选小分子贴一段 DNA「条形码」，一次性把上亿个分子混在一起对靶点做筛选，再用测序读出哪个结合了——是「发现端」的高通量筛选利器，也很适合接 ML。</li>
+  <li><strong>LIMS</strong>（Laboratory Information Management System）/ <strong>ELN</strong>（Electronic Lab Notebook，电子实验记录本）：实验室的「操作系统」——管样品、排实验、记数据、保合规。CRO/CDMO 每天产生海量实验数据，靠这类软件沉淀；这恰恰是后文「卖铲子软件层」whitespace 的核心。</li>
+  <li><strong>GMP</strong>（Good Manufacturing Practice）：药品生产质量规范，CDMO 产线必须合规才能给上市药供货，是重资产+强监管壁垒的来源。</li>
+  <li><strong>AI4S</strong>（AI for Science）：用 AI 做科研/研发，本文里特指晶泰、深势、英矽这类「用 AI 切入药物发现」的新势力。</li>
+</ul>
+
+<!-- ============ 1 产业链 ============ -->
+<h2 id="chain">1 · 产业链拆解：外包链条长什么样</h2>
+<p>把新药研发外包链条画出来——从最上游的「发现」到最下游的「生产」，每段在干嘛、谁主导：</p>
+
+<div class="fig">
+<svg viewBox="0 0 940 430" width="100%" role="img" aria-label="CRO/CDMO 产业链示意图">
+  <defs>
+    <marker id="arr" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#5b9cff"/>
+    </marker>
+    <linearGradient id="g1" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#1d2740"/><stop offset="1" stop-color="#243153"/>
+    </linearGradient>
+  </defs>
+  <text x="20" y="30" fill="#9aa3b2" font-size="13">新药研发外包链条（上游发现 → 下游生产）</text>
+
+  <rect x="20" y="50" width="200" height="120" rx="10" fill="url(#g1)" stroke="#3a4a72"/>
+  <text x="120" y="74" fill="#cfe0ff" font-size="15" font-weight="700" text-anchor="middle">发现 CRO</text>
+  <text x="120" y="92" fill="#9aa3b2" font-size="11" text-anchor="middle">Discovery</text>
+  <text x="30" y="114" fill="#dfe5f0" font-size="11">· 靶点发现 / 化学合成</text>
+  <text x="30" y="131" fill="#dfe5f0" font-size="11">· Hit→Lead 筛选 / DEL</text>
+  <text x="30" y="148" fill="#dfe5f0" font-size="11">· 计算化学 / AI 设计</text>
+
+  <rect x="245" y="50" width="200" height="120" rx="10" fill="url(#g1)" stroke="#3a4a72"/>
+  <text x="345" y="74" fill="#cfe0ff" font-size="15" font-weight="700" text-anchor="middle">临床前 CRO</text>
+  <text x="345" y="92" fill="#9aa3b2" font-size="11" text-anchor="middle">Preclinical</text>
+  <text x="255" y="114" fill="#dfe5f0" font-size="11">· 动物药效 / 药代 ADME</text>
+  <text x="255" y="131" fill="#dfe5f0" font-size="11">· 安全性评价（安评）</text>
+  <text x="255" y="148" fill="#dfe5f0" font-size="11">· 毒理 toxicology / IND</text>
+
+  <rect x="470" y="50" width="200" height="120" rx="10" fill="url(#g1)" stroke="#3a4a72"/>
+  <text x="570" y="74" fill="#cfe0ff" font-size="15" font-weight="700" text-anchor="middle">临床 CRO</text>
+  <text x="570" y="92" fill="#9aa3b2" font-size="11" text-anchor="middle">Clinical</text>
+  <text x="480" y="114" fill="#dfe5f0" font-size="11">· I/II/III 期试验运营</text>
+  <text x="480" y="131" fill="#dfe5f0" font-size="11">· 患者招募 / 数据管理</text>
+  <text x="480" y="148" fill="#dfe5f0" font-size="11">· 统计 / 注册申报</text>
+
+  <rect x="695" y="50" width="225" height="120" rx="10" fill="#26233f" stroke="#4b3aa0"/>
+  <text x="807" y="74" fill="#cdbcff" font-size="15" font-weight="700" text-anchor="middle">CDMO 生产</text>
+  <text x="807" y="92" fill="#9aa3b2" font-size="11" text-anchor="middle">Develop & Manufacture</text>
+  <text x="705" y="114" fill="#dfe5f0" font-size="11">· 工艺开发 / 放大</text>
+  <text x="705" y="131" fill="#dfe5f0" font-size="11">· 原料药 API / 制剂</text>
+  <text x="705" y="148" fill="#dfe5f0" font-size="11">· GMP 商业化量产</text>
+
+  <line x1="222" y1="110" x2="242" y2="110" stroke="#5b9cff" stroke-width="2" marker-end="url(#arr)"/>
+  <line x1="447" y1="110" x2="467" y2="110" stroke="#5b9cff" stroke-width="2" marker-end="url(#arr)"/>
+  <line x1="672" y1="110" x2="692" y2="110" stroke="#5b9cff" stroke-width="2" marker-end="url(#arr)"/>
+
+  <text x="20" y="205" fill="#9aa3b2" font-size="13">谁主导这一段：</text>
+  <rect x="20" y="215" width="200" height="56" rx="8" fill="#15181f" stroke="#2a2f3a"/>
+  <text x="30" y="236" fill="#dfe5f0" font-size="11">药明康德 · 康龙化成</text>
+  <text x="30" y="253" fill="#b8a6ff" font-size="11">AI4S：晶泰/深势/英矽/薛定谔</text>
+
+  <rect x="245" y="215" width="200" height="56" rx="8" fill="#15181f" stroke="#2a2f3a"/>
+  <text x="255" y="236" fill="#dfe5f0" font-size="11">Charles River · 昭衍</text>
+  <text x="255" y="253" fill="#dfe5f0" font-size="11">药明康德 · 康龙化成</text>
+
+  <rect x="470" y="215" width="200" height="56" rx="8" fill="#15181f" stroke="#2a2f3a"/>
+  <text x="480" y="236" fill="#dfe5f0" font-size="11">IQVIA · ICON · Labcorp</text>
+  <text x="480" y="253" fill="#dfe5f0" font-size="11">PPD(TF) · 泰格医药</text>
+
+  <rect x="695" y="215" width="225" height="56" rx="8" fill="#1a1830" stroke="#4b3aa0"/>
+  <text x="705" y="236" fill="#dfe5f0" font-size="11">Lonza · 三星生物 · Catalent</text>
+  <text x="705" y="253" fill="#dfe5f0" font-size="11">药明生物 · 凯莱英 · 博腾</text>
+
+  <rect x="20" y="300" width="900" height="44" rx="8" fill="#10211a" stroke="#1c5a37"/>
+  <text x="470" y="320" fill="#7fe3b3" font-size="13" font-weight="700" text-anchor="middle">「Follow-the-molecule」一体化（CRDMO）：药明系叙事 —— 从发现一路陪到生产，越往下游越赚钱、越粘客</text>
+  <text x="470" y="337" fill="#9aa3b2" font-size="11" text-anchor="middle">发现端是「引流入口」（便宜、走量）→ 临床/CDMO 是「利润与产能」（贵、长周期、强绑定）</text>
+
+  <text x="20" y="378" fill="#9aa3b2" font-size="12">价值规律：越往左（发现）单价低、项目多、易被 AI 渗透；越往右（CDMO）资产重、监管强、收入大、退出难、壁垒高。</text>
+  <text x="20" y="400" fill="#9aa3b2" font-size="12">钱在哪：全球外包支出 CDMO（生产）&gt; 临床 CRO &gt; 临床前 CRO &gt; 发现 CRO。发现端是「入口」不是「利润中心」。</text>
+</svg>
+<p class="figcap">图 1 · 新药研发外包产业链：发现 CRO → 临床前 CRO → 临床 CRO → CDMO 生产，及各段主导玩家</p>
+</div>
+
+<!-- ============ 2 市场规模 ============ -->
+<h2 id="size">2 · 市场规模与增速（多机构口径并列，标年份）</h2>
+
+<h3>2.1 全球 CRO 市场（口径打架最严重的一块）</h3>
+<table>
+  <tr><th>口径 / 机构</th><th>规模</th><th>增速</th><th>来源</th></tr>
+  <tr><td><strong>Pharmaceutical CRO</strong> · Grand View Research</td><td>2025 ≈ <strong>$45.3B</strong> → 2033 $83.3B</td><td>CAGR 8.04%（2026–33）</td><td><span class="src s2">🟡</span> GVR</td></tr>
+  <tr><td><strong>Healthcare CRO</strong>（含更广）· Grand View Research</td><td>2024 ≈ <strong>$55.8B</strong> → 2033 $105.7B</td><td>CAGR 7.42%（2025–33）</td><td><span class="src s2">🟡</span> GVR</td></tr>
+  <tr><td><strong>CRO Services</strong> · MarketsandMarkets</td><td>2025 ≈ <strong>$85.4B</strong> → 2026 $93.0B → 2031 $140.3B</td><td>CAGR 8.6%（2026–31）</td><td><span class="src s2">🟡</span> M&amp;M</td></tr>
+  <tr><td>Frost &amp; Sullivan（旧口径，仅供历史参照）</td><td>2018 $45.8B → 2024 $71.7B</td><td>CAGR 7.9%</td><td><span class="src s2">🟡</span> F&amp;S（2019 报告）</td></tr>
+  <tr><td><strong>Preclinical CRO</strong>（子赛道）· Grand View Research</td><td>→ 2025 ≈ $6.6B</td><td>CAGR 8.3%</td><td><span class="src s2">🟡</span> GVR</td></tr>
+</table>
+<p class="note">⚠️ 同是「CRO 市场」，2025 年规模从 ~$45B（窄口径，只算药企 pharmaceutical CRO）到 ~$85B（宽口径，含 healthcare/器械/学术等）差近一倍。<strong>看任何「CRO 市场 XX 亿美元」时务必先问：算的是哪一层。</strong>但各家增速高度一致：<strong>CAGR 7–9%</strong>，这是个稳健中速增长的成熟市场。</p>
+
+<h3>2.2 全球 CDMO 市场（2025 规模区间 ~$197–255B）</h3>
+<table>
+  <tr><th>机构</th><th>2025 规模</th><th>增速（口径）</th><th>来源</th></tr>
+  <tr><td>Fortune Business Insights</td><td><strong>$255.0B</strong></td><td>CAGR ~9.9%（2026–34）</td><td><span class="src s2">🟡</span></td></tr>
+  <tr><td>Expert Market Research</td><td>$246.1B</td><td>CAGR 9.10%（→2035）</td><td><span class="src s2">🟡</span></td></tr>
+  <tr><td>MarketsandMarkets（pharma contract mfg 口径）</td><td>$209.9B</td><td>CAGR 8.2%（2025–30）</td><td><span class="src s2">🟡</span></td></tr>
+  <tr><td>Precedence Research</td><td>$197.4B</td><td>—（2035 $392.7B）</td><td><span class="src s2">🟡</span></td></tr>
+  <tr><td>PharmaSource（综合）</td><td>≈ $220B</td><td>共识 ~7.5%</td><td><span class="src s2">🟡</span></td></tr>
+</table>
+<p class="note">CDMO 是 CRO 的 3–4 倍体量（生产环节的钱更大）。共识：<strong>2025 ~$200–255B，CAGR 7–10%</strong>。</p>
+
+<h3>2.3 中国市场（增速高于全球，但绝对体量仍小）</h3>
+<table>
+  <tr><th>子赛道</th><th>规模</th><th>增速</th><th>来源</th></tr>
+  <tr><td>中国 Pharmaceutical CRO</td><td>2024 ≈ <strong>$2.95B</strong> → 2030 $4.90B</td><td>CAGR 8.9%（2025–30）</td><td><span class="src s2">🟡</span> GVR</td></tr>
+  <tr><td>中国 CDMO（整体）</td><td>2024 ≈ <strong>$21.3B</strong> → 2034 $64.3B</td><td>CAGR 11.7%</td><td><span class="src s2">🟡</span> Expert Market Research</td></tr>
+  <tr><td>中国小分子 CDMO</td><td>2024 $3.71B → 2025 $4.01B → 2033 $8.34B</td><td>CAGR 9.58%（2025–33）</td><td><span class="src s2">🟡</span> GVR</td></tr>
+  <tr><td>中国 API CDMO（原料药）</td><td>2024 ≈ $9.41B → 2033 $21.3B</td><td>CAGR 9.6%</td><td><span class="src s2">🟡</span> GVR</td></tr>
+  <tr><td>中国实验室信息化（LIMS/ELN/informatics）</td><td>2024 ≈ <strong>$197M</strong> → 2030 $300.9M（占全球仅 5.1%）</td><td>CAGR 7.3%</td><td><span class="src s2">🟡</span> GVR</td></tr>
+</table>
+<p class="note">中国 CRO/CDMO 增速（9–12%）普遍高于全球（7–9%）；但<strong>实验室软件层中国只占全球 5%、绝对值不足 2 亿美元</strong>——这正是后文 whitespace ① 的量化依据：客户（中国 CRO/CDMO）已是全球产能重镇，配套软件却严重欠发达。</p>
+
+<h3>2.4 高增长子赛道：TIDES / GLP-1 / ADC / CGT</h3>
+<table>
+  <tr><th>子赛道</th><th>规模 / 信号</th><th>来源</th></tr>
+  <tr><td><strong>TIDES（多肽+寡核苷酸）CDMO</strong></td><td>2025 ≈ $2.68B → 2031 $5.03B，<strong>CAGR 11.05%</strong>（另一口径 GVR：→2030 $5.67B，CAGR 12.5%）</td><td><span class="src s2">🟡</span> Mordor / GVR</td></tr>
+  <tr><td><strong>GLP-1（减肥/降糖肽，TIDES 需求引擎）</strong></td><td>2025 全球药物市场 ≈ <strong>$53B</strong> → 2030 $157B；<strong>头部多肽 CDMO 产能利用率 &gt;85%</strong>（供不应求）</td><td><span class="src s2">🟡</span> Insightace / Vector Biomed</td></tr>
+  <tr><td><strong>CGT（细胞基因治疗）开发方</strong></td><td>CGT developer 端 <strong>CAGR 13.91%</strong>（→2031），需求最猛、最前沿</td><td><span class="src s2">🟡</span> Mordor</td></tr>
+  <tr><td><strong>ADC</strong></td><td>横跨生物+化学+高活性，专精产能稀缺、双位数增长（药明 XDC 即专注此）</td><td><span class="src s2">🟡</span></td></tr>
+</table>
+<p class="note">一句话：<strong>钱正从「传统小分子」流向「新分子」</strong>。GLP-1 减肥药的爆发把多肽 CDMO 产能拉到 85%+ 利用率——这就是「产能紧缺=机会窗」的最硬证据。</p>
+
+<!-- ============ 3 玩家地图 ============ -->
+<h2 id="map">3 · 玩家地图：四象限（国际巨头 / 中国龙头 / AI4S 新势力）</h2>
+<p>按「主战环节（发现/临床前/临床/CDMO）」和「阵营」摆位。营收若无注明均为 <strong>2024 财年</strong>。</p>
+
+<h3>3.1 国际巨头</h3>
+<table>
+  <tr><th>公司</th><th>主战环节</th><th>定位 / 规模信号</th><th>来源</th></tr>
+  <tr><td><strong>IQVIA</strong></td><td>临床 CRO + 数据</td><td>临床 CRO+真实世界数据王者，2024 总营收 ≈ <strong>$15.4B</strong>（含数据分析业务，非纯 CRO）</td><td><span class="src s2">🟡</span></td></tr>
+  <tr><td><strong>ICON</strong></td><td>临床 CRO</td><td>纯临床 CRO 头部，2024 ≈ <strong>$8.3B</strong>（收购 PRA 后规模跃升）</td><td><span class="src s2">🟡</span></td></tr>
+  <tr><td><strong>Charles River (CRL)</strong></td><td>临床前 / 安评 / 模型动物</td><td>临床前+实验动物+安全性评价的全球老大</td><td><span class="src s2">🟡</span></td></tr>
+  <tr><td><strong>Labcorp / Fortrea</strong></td><td>临床 CRO + 中心实验室</td><td>Labcorp 把 CRO 业务分拆为 Fortrea 独立上市（2023），专注临床</td><td><span class="src s2">🟡</span></td></tr>
+  <tr><td><strong>Thermo Fisher (PPD)</strong></td><td>临床 CRO + CDMO</td><td>2021 以 $174 亿收 PPD，2024 推 CRO+CDMO 一体化「Accelerator Drug Development」</td><td><span class="src s2">🟡</span></td></tr>
+  <tr><td><strong>Catalent</strong></td><td>CDMO（制剂/无菌灌装）</td><td>制剂 CDMO 巨头，被 Novo Holdings 收购（2024，服务 GLP-1 产能）</td><td><span class="src s2">🟡</span></td></tr>
+  <tr><td><strong>Lonza</strong></td><td>CDMO（生物药/小分子）</td><td>瑞士生物药 CDMO 龙头，2024 YoY 增长 &gt;10%</td><td><span class="src s2">🟡</span></td></tr>
+  <tr><td><strong>Samsung Biologics</strong></td><td>CDMO（生物药）</td><td>韩国大产能生物药 CDMO，2024 YoY 增长 &gt;10%，受益 BIOSECURE 转单</td><td><span class="src s2">🟡</span></td></tr>
+  <tr><td><strong>Syneos Health</strong></td><td>临床 CRO + 商业化</td><td>临床+商业化一体，2023 被私有化退市</td><td><span class="src s2">🟡</span></td></tr>
+</table>
+
+<h3>3.2 中国龙头（CXO，营收为 2024 财年 RMB，来自公司财报）</h3>
+<table>
+  <tr><th>公司</th><th>主战环节</th><th>2024 营收 & 信号</th><th>来源</th></tr>
+  <tr><td><strong>药明康德 WuXi AppTec</strong></td><td>CRDMO 全链（发现→CDMO，小分子为主）</td><td>RMB <strong>392.4 亿</strong>（剔除新冠商业化项目后 YoY +5.2%）；2025H1 持续经营 YoY +24.2%</td><td><span class="src s1">🟢</span> 财报</td></tr>
+  <tr><td><strong>药明生物 WuXi Biologics</strong></td><td>生物药 CDMO</td><td>RMB <strong>186.8 亿</strong>（YoY +9.6%，非新冠 +13.1%）</td><td><span class="src s1">🟢</span> 财报</td></tr>
+  <tr><td><strong>康龙化成 Pharmaron</strong></td><td>发现 + 临床前 + CDMO 全链</td><td>RMB <strong>122.8 亿</strong>（YoY +6.4%）</td><td><span class="src s1">🟢</span> 财报</td></tr>
+  <tr><td><strong>泰格医药 Tigermed</strong></td><td>临床 CRO（中国最大）</td><td>RMB <strong>66.0 亿</strong>（YoY −10.6%，行业投融资寒冬下承压）</td><td><span class="src s1">🟢</span> 财报</td></tr>
+  <tr><td><strong>凯莱英 Asymchem</strong></td><td>小分子 CDMO（+新分子）</td><td>2024 RMB <strong>58.0 亿</strong>（YoY −25.8%，新冠大单退潮）；2025 恢复增长 +14.9%</td><td><span class="src s1">🟢</span> 财报</td></tr>
+  <tr><td><strong>博腾股份 Porton</strong></td><td>小分子 CDMO（+CGT）</td><td>新冠后回调期，向多肽/寡核苷酸/CGT 转型中</td><td><span class="src s2">🟡</span></td></tr>
+  <tr><td><strong>九洲药业 Jiuzhou</strong></td><td>原料药 + 小分子 CDMO</td><td>「原料药+CDMO」双轮，特色原料药起家</td><td><span class="src s2">🟡</span></td></tr>
+  <tr><td><strong>昭衍新药 Joinn</strong></td><td>临床前安评（毒理）</td><td>中国安全性评价（毒理）龙头，强监管壁垒</td><td><span class="src s2">🟡</span></td></tr>
+</table>
+
+<h3>3.3 AI4S 新势力（自下而上渗透/替代部分「发现」环节）</h3>
+<table>
+  <tr><th>公司</th><th>切入点</th><th>状态信号</th><th>来源</th></tr>
+  <tr><td><strong>晶泰科技 XtalPi</strong></td><td>AI+自动化实验室（量子物理+ML+机器人）</td><td>港股 18C 上市，「AI+机器人干湿闭环」，既做发现服务也卖平台</td><td><span class="src s2">🟡</span></td></tr>
+  <tr><td><strong>深势科技 DP Technology</strong></td><td>AI for Science 底座（分子模拟+大模型）</td><td>从计算物理/材料切药物，做「科学计算+药物」工具底座</td><td><span class="src s2">🟡</span></td></tr>
+  <tr><td><strong>英矽智能 Insilico Medicine</strong></td><td>生成式 AI 全流程（靶点→分子→临床设计）</td><td>ISM001-055（抗纤维化）已进 II 期 — <strong>「首个 AI 发现+设计药」进 II 期</strong>的标杆 <span class="src s3">🔴 部分自述</span></td><td><span class="src s2">🟡</span></td></tr>
+  <tr><td><strong>Schrödinger</strong></td><td>物理基计算化学软件（卖 license + 自研管线）</td><td>软件双轮：TAK-279（Nimbus 衍生）已进 III 期，验证物理基设计</td><td><span class="src s2">🟡</span></td></tr>
+  <tr><td><strong>Isomorphic Labs</strong></td><td>AlphaFold 谱系（DeepMind 拆分）</td><td>不做 CRO，做「AI 药物设计平台 + 与药企管线合作」</td><td><span class="src s2">🟡</span></td></tr>
+  <tr><td><strong>Recursion</strong></td><td>表型组学 phenomics（高通量细胞影像+ML）</td><td>2024 与 Exscientia 合并，凑成「表型筛选+自动化化学」端到端平台</td><td><span class="src s2">🟡</span></td></tr>
+</table>
+<p class="note">⚠️ 关键判断：AI4S 新势力多数<strong>不是来「全面取代」CRO，而是从「发现」这一最易被算法压缩的环节切入</strong>。它们要么把自己变成「带 AI 的发现 CRO」（晶泰），要么自研管线当 biotech（英矽/Recursion）。越往临床/CDMO 下游，AI 越使不上劲（那是产能、合规、患者运营的活）。</p>
+
+<!-- ============ 4 早期度 ============ -->
+<h2 id="early">4 · 赛道早期度——分段给档位（本篇核心增值）</h2>
+<p><strong>整体 CRO/CDMO = mature（成熟、巨头主导）。</strong>但「赛道早不早」必须<strong>按「分子类型 × 产业链环节」切开看</strong>——同一个行业里，传统临床 CRO 已经卷到见底，TIDES CDMO 却产能告急。下面逐段给档位 + 信号。</p>
+
+<div class="card">
+  <span class="pill p-nasc">nascent 萌芽</span>
+  <span class="pill p-emer">emerging 早期高增长</span>
+  <span class="pill p-crowd">crowded 拥挤</span>
+  <span class="pill p-mature">mature 成熟</span>
+</div>
+
+<table>
+  <tr><th>子赛道（环节 × 分子）</th><th>档位</th><th>信号（玩家数 / 增速 / 巨头是否进 / 是否标准化）</th></tr>
+  <tr>
+    <td><strong>传统临床 CRO</strong>（I/II/III 期运营）</td>
+    <td><span class="pill p-mature">mature</span><span class="pill p-crowd">/crowded</span></td>
+    <td>IQVIA/ICON/Labcorp/PPD 寡头垄断；增速 7–9%；高度标准化；新进入者几无空间。中国端泰格 2024 营收还 <strong>−10.6%</strong>（投融资寒冬）。</td>
+  </tr>
+  <tr>
+    <td><strong>小分子 CDMO</strong></td>
+    <td><span class="pill p-mature">mature</span></td>
+    <td>技术最成熟、玩家最多、最卷；凯莱英 2024 营收 −25.8%（新冠大单退潮+价格战）。增长靠抢份额而非扩品类。</td>
+  </tr>
+  <tr>
+    <td><strong>临床前 / 安评（毒理）</strong></td>
+    <td><span class="pill p-mature">mature</span></td>
+    <td>Charles River / 昭衍主导；强监管壁垒（GLP 资质）；增速稳健但不性感；标准化程度高。</td>
+  </tr>
+  <tr>
+    <td><strong>生物药 CDMO</strong></td>
+    <td><span class="pill p-mature">mature</span><span class="pill p-emer">→局部 emerging</span></td>
+    <td>Lonza/三星/药明生物寡头；重资产高壁垒；增速 &gt;10%；受 BIOSECURE 转单影响，<strong>非中国产能正成稀缺品</strong>。</td>
+  </tr>
+  <tr>
+    <td><strong>TIDES（多肽+寡核苷酸）CDMO</strong></td>
+    <td><span class="pill p-emer">emerging</span></td>
+    <td><strong>产能紧缺（头部利用率 &gt;85%）</strong>；CAGR 11–12.5%；GLP-1 把需求拉爆；巨头疯狂扩产但供不应求；工艺尚未充分标准化 = <strong>窗口期</strong>。</td>
+  </tr>
+  <tr>
+    <td><strong>ADC CDMO</strong></td>
+    <td><span class="pill p-emer">emerging</span></td>
+    <td>工艺横跨生物+化学+高活性毒素，专精产能稀缺；药明 XDC 专注此并高增；玩家少、壁垒高、双位数增长。</td>
+  </tr>
+  <tr>
+    <td><strong>CGT（细胞基因治疗）CDMO</strong></td>
+    <td><span class="pill p-emer">emerging</span><span class="pill p-nasc">/局部 nascent</span></td>
+    <td>最前沿、最难标准化；developer 端 CAGR ~13.9%；但工艺/良率/成本仍是世界难题，<strong>「想象空间大、坑也最深」</strong>。</td>
+  </tr>
+  <tr>
+    <td><strong>AI+CRO（AI 做发现）</strong></td>
+    <td><span class="pill p-emer">emerging</span><span class="pill p-crowd">→crowded</span></td>
+    <td>玩家暴增（晶泰/英矽/Recursion/Schrödinger/Isomorphic…）；融资热；但<strong>「AI 真做出获批药」尚未验证</strong>（最远 II/III 期，0 个 FDA 批准）；发现端在快速变拥挤。</td>
+  </tr>
+  <tr>
+    <td><strong>实验室软件 / 数据层（lab OS / LIMS / ELN）</strong></td>
+    <td><span class="pill p-emer">emerging</span><span class="pill p-nasc"> · 国内偏空白</span></td>
+    <td>全球被 Benchling/Dotmatics/LabVantage/STARLIMS 占；<strong>中国仅占全球 5.1%、绝对值 ~$197M、本土厂商弱</strong>；标准化低、AI-native 重做窗口开着 = <strong>最适合中国软件创业者切</strong>。</td>
+  </tr>
+</table>
+
+<div class="goodbox">
+<strong>一句话总结这张表：</strong>别问「CRO 赛道还早吗」（答案是不早）；要问「<strong>哪个分子 × 哪个环节</strong>还早」。答案是：<strong>新分子（TIDES/ADC/CGT）的 CDMO 产能、AI 发现工具、给行业卖铲子的软件数据层</strong>——这三块仍 emerging。
+</div>
+
+<!-- ============ 5 地缘政治 ============ -->
+<h2 id="geo">5 · 地缘政治必写：BIOSECURE Act 与「去中国化」转单</h2>
+
+<div class="warnbox">
+<strong>最新进展（截至 2026-06）：BIOSECURE Act 已成法。</strong>2025-12-18 作为 <strong>FY2026 国防授权法案（NDAA）</strong>的一部分由总统签署生效，限制美国政府采购/拨款流向被列为「<strong>biotechnology companies of concern（BCC，受关注生物技术公司）</strong>」的实体。<span class="src s2">🟡 Latham/Ropes&amp;Gray/Foley Hoag/Arnold&amp;Porter 法律评析</span>
+</div>
+
+<h3>5.1 这版法案和早期版本的关键差别</h3>
+<ul>
+  <li><strong>2023–24 旧版</strong>：直接<strong>点名</strong> BGI、MGI、Complete Genomics、<strong>药明康德 WuXi AppTec、药明生物 WuXi Biologics</strong>。但 2024 未能搭上 FY2025 NDAA，<strong>当年流产</strong>。<span class="src s2">🟡</span></li>
+  <li><strong>2025 成法版</strong>：<strong>不再写死具体公司名</strong>，改为授权 <strong>OMB（管理与预算办公室）</strong>主任按程序编制 BCC 名单。<span class="src s2">🟡</span></li>
+  <li><strong>药明系当前状态</strong>：截至签署日，药明康德/药明生物/药明 XDC <strong>尚未</strong>被正式列入 BCC（1260H 或 OMB 名单均无）；<strong>但</strong>有报道称药明康德被提议纳入下一次 1260H 名单更新，且 2025-12-18 多位参众两院委员会主席<strong>联名致函国防部，建议</strong>把药明康德/药明生物/药明 XDC 加进 1260H 名单——一旦入列即成 BCC。<span class="src s2">🟡 Fierce Pharma / Ropes&amp;Gray</span></li>
+</ul>
+
+<h3>5.2 对中国 CRO/CDMO 的真实影响 & 机会反面</h3>
+<p>法案直接约束的是「美国政府采购/联邦拨款」，但<strong>真正的杀伤是「寒蝉效应」</strong>：美国 biotech/pharma 客户出于供应链安全与政治风险，主动<strong>「去中国化 / 友岸外包 friend-shoring」</strong>——把新订单分流给非中国产能（三星生物、Lonza、印度/韩国/欧美 CDMO），或要求「China + 1」双源。</p>
+<div class="goodbox">
+<strong>反面就是机会窗：</strong>客户「去中国化」需求 = <strong>「友岸产能 / 国产替代供应链」的结构性机会</strong>。① 对中国创业者：服务「不出海也不依赖美国客户」的国内创新药外包需求（国产替代）；② 在友岸地（东南亚/中东/欧洲）建非中国籍产能、承接 BIOSECURE 分流（重资产、慢，但卡位价值高）。
+</div>
+
+<!-- ============ 6 AI 冲击 ============ -->
+<h2 id="ai">6 · AI 对 CRO 的冲击与融合：替代还是赋能？</h2>
+
+<h3>6.1 AI 能压缩的，和压缩不了的</h3>
+<table>
+  <tr><th>环节</th><th>AI 影响</th><th>现实判断</th></tr>
+  <tr><td>靶点发现 / 苗头-先导</td><td>生成式分子设计、DEL+ML 筛选、AlphaFold 类结构预测，<strong>压缩发现端时间/成本</strong></td><td>这是 AI 的主战场，<strong>对「发现 CRO」既是替代也是工具</strong></td></tr>
+  <tr><td>临床前毒理</td><td>AI 毒理/ADME 预测 + 类器官/器官芯片（受 <strong>FDA Modernization Act 2.0</strong> 推动，2022 起允许非动物替代法 NAMs）</td><td>有望<strong>部分替代动物实验</strong>，但监管认可仍在早期</td></tr>
+  <tr><td>临床试验运营</td><td>AI 做患者招募/数据清洗/方案优化，<strong>提效但不替代</strong></td><td>核心是患者+医院+合规，AI 是赋能不是颠覆</td></tr>
+  <tr><td>CDMO 生产</td><td>AI 优化工艺/排产/良率，机器人自动化实验室</td><td>赋能为主；<strong>产能、GMP、设备是物理壁垒，算法替代不了</strong></td></tr>
+</table>
+
+<div class="warnbox">
+<strong>最该记住的现实判断：「AI 真做出一个 FDA 获批新药」目前尚未被验证。</strong>截至 2025，AI 发现/设计的药物最远到 <strong>II/III 期</strong>（英矽 ISM001-055 进 II 期、Schrödinger 谱系 TAK-279 进 III 期），<strong>0 个完全由 AI 设计的药获 FDA 批准</strong>。AI「压缩临床前时间」证据较多，但「提高临床成功率」尚无硬证据——临床失败的根因往往是生物学假设错，不是分子设计差。<span class="src s2">🟡 Pharmacological Reviews 2025 综述</span>
+</div>
+
+<h3>6.2 CRO 自己也在上 AI</h3>
+<p>不是「AI 公司 vs CRO」的零和——药明、康龙等龙头自己也在内部部署 AI/自动化（DEL 库、计算化学、机器人合成）。所以更准确的格局是：<strong>「AI 是发现端的新生产要素」，谁都得用；区别在于「AI-native 新势力把它当核心叙事」，而「传统 CRO 把它当一个提效模块」。</strong></p>
+
+<!-- ============ 7 whitespace ============ -->
+<h2 id="white">7 · 给中国创业者的 whitespace（本篇核心）</h2>
+<p>每条标 <strong>why-now / 拥挤度 / 风险</strong>，诚实给。优先级从「软件轻资产」到「产能重资产」排。</p>
+
+<h3>① 卖铲子软件 / 数据层：给 CRO/CDMO 做实验室 OS / LIMS / ELN / 研发数据标准化 / AI 模型 <span class="pill p-emer">最推荐</span></h3>
+<div class="card">
+  <p><strong>why-now：</strong>中国已是全球 CRO/CDMO 产能重镇（药明系/康龙体量全球前列），但<strong>中国实验室信息化市场仅占全球 5.1%、绝对值 ~$197M（2024）、本土软件厂商弱、海外 Benchling/Dotmatics/LabVantage 又贵又不接地气</strong>。海量实验数据躺着没被结构化沉淀 = AI 时代的「数据 underground」。AI-native 重做 LIMS/ELN 的窗口正开。</p>
+  <p><strong>拥挤度：</strong>国内<span style="color:var(--good)">偏空白</span>（这是全篇里中国玩家最少、最适合软件创业者的一块）。</p>
+  <p><strong>风险：</strong>To-B 销售周期长、客户（CRO）保守且数据敏感、合规（GMP/数据完整性）门槛高、单客单价天花板需靠多模块/AI 增值打开。<strong>切入法：从单一痛点 wedge（如某类实验的数据采集/标准化）进，别一上来做「全平台」。</strong></p>
+</div>
+
+<h3>② AI+实验闭环的垂直单技术 CRO（按 outcome 收费，绕开全能平台） <span class="pill p-emer">emerging→crowded</span></h3>
+<div class="card">
+  <p><strong>why-now：</strong>全能 AI 药企（英矽/Recursion）叙事大但难证伪；<strong>单病种/单模态/单技术</strong>的垂直 CRO（如「只做某类靶点的 AI+自动化苗头发现」「只做某种毒理预测」）反而能用「干湿闭环+按 outcome（按交付分子/按里程碑）收费」建立可验证的护城河，绕开和大平台正面碰。</p>
+  <p><strong>拥挤度：</strong>发现端整体正变<span style="color:var(--crowd)">crowded</span>，但「垂直单技术+真闭环」仍有空位。</p>
+  <p><strong>风险：</strong>「AI 出药」尚未验证，按 outcome 收费意味着你扛研发风险；需要真实验能力（不只是算法 demo）；容易被大平台用资本碾压或抄走方向。</p>
+</div>
+
+<h3>③ 承接 BIOSECURE 分流的友岸 / 国产替代 CDMO <span class="pill p-emer">机会窗</span></h3>
+<div class="card">
+  <p><strong>why-now：</strong>BIOSECURE 已成法（2025-12），美国客户「去中国化/China+1」转单是结构性趋势。两个方向：(a) 在友岸地（东南亚/中东/欧洲）建<strong>非中国籍产能</strong>承接分流；(b) 服务<strong>国内创新药</strong>的国产替代外包（绕开对美依赖）。</p>
+  <p><strong>拥挤度：</strong>友岸产能<span style="color:var(--good)">稀缺</span>（三星生物/印度在抢），但门槛极高。</p>
+  <p><strong>风险：</strong><strong>重资产、长周期、GMP 认证慢、巨头碾压</strong>——这是「钱多、慢、苦」的活，更适合有产业资源/资本的团队，不适合纯软件创业者轻装上阵。</p>
+</div>
+
+<h3>④ 新分子专精产能：TIDES（寡核苷酸/多肽）/ ADC / CGT 的高增长缺口 <span class="pill p-emer">emerging</span></h3>
+<div class="card">
+  <p><strong>why-now：</strong>GLP-1 把多肽产能拉到 &gt;85% 利用率、TIDES CDMO CAGR 11–12.5%、ADC/CGT 双位数增长且产能稀缺。<strong>「产能就是稀缺资源」</strong>，谁有合规新分子产能谁就有定价权。</p>
+  <p><strong>拥挤度：</strong>巨头在疯狂扩产但仍<span style="color:var(--good)">供不应求</span>。</p>
+  <p><strong>风险：</strong>同样重资产、工艺壁垒高、扩产周期长（2–3 年），且<strong>GLP-1 周期性</strong>——若需求回落产能会过剩。适合做「专精单一新分子工艺」的差异化卡位，而非和巨头拼通用产能。</p>
+</div>
+
+<h3>⑤ 相邻机会：DEL 库即服务 / AI 毒理预测替代部分动物实验 <span class="pill p-nasc">nascent</span></h3>
+<div class="card">
+  <p><strong>why-now：</strong>(a) <strong>DEL（DNA 编码库）即服务</strong>——把上亿分子库 + ML 命中预测打包成发现端「铲子」卖给 biotech；(b) <strong>AI 毒理/ADME 预测</strong>——借 FDA Modernization Act 2.0（2022 允许 NAMs 替代动物实验）+ FDA NAM Roadmap 的政策东风，做「计算毒理替代部分动物房」。</p>
+  <p><strong>拥挤度：</strong><span style="color:var(--good)">较空</span>，但市场教育成本高。</p>
+  <p><strong>风险：</strong>监管认可是慢变量（「FDA 接受非动物数据」仍在逐步落地）；DEL 库构建有技术与化学资产门槛；客户验证周期长。</p>
+</div>
+
+<!-- ============ 8 现实判断 ============ -->
+<h2 id="verdict">8 · 现实判断 + 存疑</h2>
+
+<h3>8.1 三层格局，给创业者最务实的切入建议</h3>
+<div class="fig">
+<svg viewBox="0 0 920 280" width="100%" role="img" aria-label="三层格局图">
+  <rect x="20" y="20" width="880" height="70" rx="10" fill="#1a1622" stroke="#5a6577"/>
+  <text x="36" y="46" fill="#aebacb" font-size="15" font-weight="700">① 传统 CRO/CDMO 巨头（mature）</text>
+  <text x="36" y="68" fill="#9aa3b2" font-size="12.5">药明系 · 康龙 · 凯莱英 · IQVIA · Lonza · 三星生物 —— 规模、产能、合规、客户关系护城河；创业者难正面碰，但可「卖铲子/做差异化产能」搭车。</text>
+
+  <rect x="20" y="100" width="880" height="70" rx="10" fill="#1a1830" stroke="#4b3aa0"/>
+  <text x="36" y="126" fill="#b8a6ff" font-size="15" font-weight="700">② AI4S 新势力（emerging→crowded，发现端）</text>
+  <text x="36" y="148" fill="#9aa3b2" font-size="12.5">晶泰 · 深势 · 英矽 · Schrödinger · Recursion · Isomorphic —— 叙事大、融资热，但「AI 出药」未验证；发现端在变拥挤。创业者宜走「垂直单技术+真闭环」，别做又一个全能平台。</text>
+
+  <rect x="20" y="180" width="880" height="80" rx="10" fill="#10211a" stroke="#1c5a37"/>
+  <text x="36" y="206" fill="#7fe3b3" font-size="15" font-weight="700">③ 卖铲子软件 / 数据层（emerging · 国内偏空白）★ 最适合中国软件创业者</text>
+  <text x="36" y="228" fill="#9aa3b2" font-size="12.5">lab OS / LIMS / ELN / 研发数据标准化 / AI 模型 —— 服务①和②两层，轻资产、不靠「赌出药」、避开巨头与监管最重的部分。</text>
+  <text x="36" y="248" fill="#9aa3b2" font-size="12.5">务实建议：软件团队从「层③」切（wedge 单痛点）；有产业/资本的团队看「层①的差异化产能（新分子/友岸）」；想做 AI 药的从「层②的垂直单技术」起，按 outcome 收费、控制赌注。</text>
+</svg>
+<p class="figcap">图 2 · 三层格局与切入建议：巨头层 / AI4S 层 / 卖铲子软件层</p>
+</div>
+
+<h3>8.2 存疑与口径不确定性（必读）</h3>
+<ul>
+  <li><strong>市场规模数字口径极乱：</strong>同是「CRO 2025 规模」，窄口径 ~$45B、宽口径 ~$85B 差近一倍；CDMO 2025 在 $197–255B 间。本文已并列多源，<strong>读者引用前务必带上「谁的口径/哪年/含不含什么」</strong>，勿当成精确数。</li>
+  <li><strong>「AI 出药」是叙事还是现实：</strong>0 个完全 AI 设计的药获 FDA 批准；II/III 期的成功也无法等同于「AI 提高了临床成功率」。对 AI+CRO 的估值需打折看。</li>
+  <li><strong>BIOSECURE 是慢变量：</strong>药明系尚未被正式列入 BCC（截至签署日），但政治风向在加压。「去中国化」是趋势但落地速度、豁免/过渡期、客户实际转单比例都有不确定性。</li>
+  <li><strong>来源分级提醒：</strong>市场规模/增速几乎全是 <span class="src s2">🟡 二手</span>（调研机构）；公司营收为 <span class="src s1">🟢 一手</span>（财报）；「首个 AI 药」「平台能力」类表述含 <span class="src s3">🔴 自述</span> 成分，已就近标注。</li>
+  <li><strong>GLP-1 周期性风险：</strong>当前 TIDES 产能紧缺很大程度由 GLP-1 单一品类驱动，若减肥药需求/竞争格局生变，「产能稀缺」逻辑会松动。</li>
+</ul>
+
+<!-- ============ 来源 ============ -->
+<h2 id="src">参考来源</h2>
+<p class="note">下列为本文事实的主要来源（市场数据多为二手调研机构，口径见正文标注；公司营收为一手财报）：</p>
+<ul style="font-size:13px;line-height:1.8">
+  <li><span class="src s2">🟡</span> Grand View Research — Pharmaceutical/Healthcare/Preclinical CRO、CDMO、China CRO/CDMO、Laboratory Informatics 系列市场报告（grandviewresearch.com）</li>
+  <li><span class="src s2">🟡</span> MarketsandMarkets — CRO Services / Pharmaceutical Contract Manufacturing 市场报告</li>
+  <li><span class="src s2">🟡</span> Fortune Business Insights / Expert Market Research / Precedence Research / PharmaSource — 全球 CDMO 市场规模区间</li>
+  <li><span class="src s2">🟡</span> Mordor Intelligence / InsightAce / Vector Biomed / DCAT — Peptide & Oligonucleotide (TIDES) CDMO、GLP-1、产能利用率</li>
+  <li><span class="src s1">🟢</span> 公司 2024 财报 — WuXi AppTec / WuXi Biologics / Pharmaron / Tigermed / Asymchem（wuxiapptec.com、wuxibiologics.com、ir.pharmaron.com、tigermedgrp.com、asymchem.com、各 PR Newswire 公告）</li>
+  <li><span class="src s2">🟡</span> 全球 CRO/CDMO 营收排名 — companiesmarketcap / stockanalysis / 新浪财经 2024 全球 CRO TOP10</li>
+  <li><span class="src s2">🟡</span> BIOSECURE Act 法律评析 — Latham & Watkins、Ropes & Gray、Foley Hoag、Arnold & Porter、Freshfields、Duane Morris；Fierce Pharma 报道（药明系 1260H 提名）</li>
+  <li><span class="src s2">🟡</span> AI 药物发现 — Pharmacological Reviews《Leading AI-driven drug discovery platforms: 2025 landscape》综述；axis-intelligence / morningglorysciences 现状分析</li>
+  <li><span class="src s2">🟡</span> FDA Modernization Act 2.0 / NAM Roadmap / DEL+ML — PMC 文献、FDA 文件、arXiv (DEL hit-finding)</li>
+</ul>
+
+<hr>
+<p class="note">本调研为赛道层面的机会扫描，非投资建议。市场数字口径不一，已尽量多源交叉并标注来源等级与年份；如需精确数据请回到原始报告核对口径。完成于 2026-06-16。</p>
+
+</div>
+</body>
+</html>

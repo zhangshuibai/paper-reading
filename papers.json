@@ -1404,5 +1404,26 @@
       "china"
     ],
     "path": "papers/2026-06-16-wuxi-apptec/index.html"
+  },
+  {
+    "slug": "2026-06-16-cro-industry-landscape",
+    "title": "CRO / CDMO 行业全景：赛道分段早期度与中国创业 whitespace",
+    "authors": "—",
+    "team": "机会扫描",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-16",
+    "published": "机会扫描 2026",
+    "tldr": "CRO/CDMO 是制药公司把研发+生产外包出去的卖铲子赛道;整体 mature(巨头主导、增速7-9%),但按分子×环节切开,TIDES(寡核苷酸+多肽)/ADC/CGT 新分子CDMO产能紧缺双位数增长、AI+CRO(发现端)emerging→crowded、实验室软件数据层(lab OS/LIMS/ELN)国内偏空白仍 emerging;叠加美国 BIOSECURE Act(2025-12 成法)制造友岸/国产替代窗口;给中国创业者最该切的一个=给CRO/CDMO卖铲子的研发数据/实验室软件层。数字口径乱,已多源并列标年份。",
+    "tags": [
+      "AI4S",
+      "startup-idea",
+      "competitive-landscape",
+      "cro",
+      "cdmo",
+      "china",
+      "industry-landscape"
+    ],
+    "path": "papers/2026-06-16-cro-industry-landscape/index.html"
   }
 ]
