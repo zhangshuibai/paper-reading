@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Snorkel AI · 竞争格局与赛道早期度调研</title>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --bad:#ff6b81; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --bad:#d23651; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;}
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:920px; margin:0 auto; padding:18px 22px 90px}
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:25px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)} .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap; line-height:2}
+  nav.toc a:hover{color:var(--accent)}
+  section{margin:38px 0}
+  h2{font-size:20px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:16.5px; margin:22px 0 8px}
+  p{margin:12px 0} ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)} strong{color:var(--text)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.88em}
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:13px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:9px 10px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  figure{margin:24px 0; text-align:center}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+  .svgwrap{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 8px}
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+  .src{font-size:10.5px; padding:0 6px; border-radius:999px; white-space:nowrap; vertical-align:middle}
+  .src-a{background:rgba(67,197,158,.18); color:var(--ok)}
+  .src-b{background:rgba(255,180,84,.18); color:var(--warn)}
+  .src-c{background:rgba(255,107,129,.18); color:var(--bad)}
+  .legend{font-size:12px; color:var(--muted); margin:6px 0 0}
+  .verdict{display:inline-block; font-weight:700; padding:3px 12px; border-radius:999px; font-size:14px}
+  .v-nascent{background:rgba(122,162,255,.18); color:var(--accent)}
+  .v-emerging{background:rgba(67,197,158,.18); color:var(--ok)}
+  .v-crowded{background:rgba(255,180,84,.18); color:var(--warn)}
+  .v-mature{background:rgba(255,107,129,.18); color:var(--bad)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">AI Data</span>
+      <span class="chip">Programmatic Labeling</span>
+      <span class="chip">AI Evaluation</span>
+      <span class="chip">竞争格局</span>
+      <span class="chip">赛道早期度</span>
+      <span class="chip">创业 idea</span>
+    </div>
+    <h1>Snorkel AI：programmatic labeling 与 AI 评测的竞争格局与早期度调研</h1>
+    <p class="orig-title">snorkel.ai — AI 数据开发平台 / 弱监督编程式标注 + 专家数据与模型评测 / 赛道整体 crowded、但 programmatic+eval 切口仍 emerging / 中国 whitespace 显著</p>
+    <dl class="meta-grid">
+      <dt>对象</dt><dd><a href="https://snorkel.ai" target="_blank" rel="noopener">https://snorkel.ai</a></dd>
+      <dt>赛道</dt><dd>AI 训练/微调数据 + 模型评测（data labeling / weak supervision / expert data / model & agent evaluation）</dd>
+      <dt>整理</dt><dd>对话调研笔记；信息来自公开检索，按来源分级标注，产品能力未必经独立验证</dd>
+      <dt>日期</dt><dd>2026-06-16</dd>
+    </dl>
+    <p class="legend">来源等级：<span class="src src-a">🟢 一手</span> 官网/SEC/官方 ·
+      <span class="src src-b">🟡 二手</span> 媒体/数据库 ·
+      <span class="src src-c">🔴 自述/未证实</span> 营销口径或未独立验证</p>
+  </header>
+
+  <div class="tldr">
+    <b>一句话</b> — Snorkel AI 是 <strong>Stanford AI Lab 衍生</strong>（创始团队 Alex Ratner、Chris Ré 等，源自开源 <code>snorkel</code> 弱监督/programmatic labeling 研究 <span class="src src-a">🟢</span>）的 AI 数据公司：早期靠产品 <strong>Snorkel Flow</strong>（用「写规则/labeling function 批量打标」替代纯人工众包）切入「data-centric AI」，2025 年起转向 <strong>专家数据（Expert Data-as-a-Service）+ 模型/agent 评测（Snorkel Evaluate）</strong>。融资到 2025-05 的 <strong>Series D（$100M @ $1.3B 估值，Addition 领投）</strong> <span class="src src-b">🟡</span>。<strong>赛道判 crowded</strong>（Scale/Surge/Mercor/Labelbox/Label Studio 一堆玩家、巨头进场、开源免费替代成熟），但 Snorkel 押注的「<strong>programmatic labeling × 专家数据 × 垂直 eval</strong>」切口仍属 <strong>emerging</strong>。可借鉴 whitespace：<strong>中国几乎没有「programmatic labeling」叙事，垂直行业（金融/医疗/法律）的专家数据 + eval 是空白</strong>。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#bg">领域背景速补</a>
+    <a href="#market">① 赛道地图 + 早期度</a>
+    <a href="#matrix">② 竞品对照矩阵</a>
+    <a href="#map">③ 定位图</a>
+    <a href="#funding">④ 融资 timeline</a>
+    <a href="#snapshot">⑤ 公司速览</a>
+    <a href="#cn">中国对标</a>
+    <a href="#idea">⑥ 创业 idea 借鉴</a>
+    <a href="#take">⑦ 现实判断</a>
+    <a href="#src">出处</a>
+  </nav>
+
+  <!-- 领域背景 -->
+  <section id="bg">
+    <h2>领域背景速补（给只懂 LLM 的人）</h2>
+    <p>这篇涉及「数据标注 / 弱监督 / 模型评测」三个相邻概念，先用大白话讲清，后面格局才看得懂。</p>
+    <ul>
+      <li><strong>data labeling（数据标注）</strong>：训练/微调一个模型需要「带答案的数据」——比如给每封邮件标「是否垃圾」、给每张 CT 标「有无病灶」。传统做法是雇大量人工（众包）一条条标，慢、贵、且质量参差。这是整个赛道的原始需求。</li>
+      <li><strong>weak supervision / programmatic labeling（弱监督 / 编程式标注）</strong>：Snorkel 的「根」。不再让人一条条标，而是让领域专家<strong>写一堆「规则/启发式函数」（labeling function）</strong>——比如「邮件里出现 unsubscribe 大概率是营销」「含某药名+剂量大概率是处方」。每条规则单独看都不准（noisy、会互相打架），但 Snorkel 用一个统计模型<strong>自动学习「哪条规则更可信、如何融合」</strong>，把一堆弱标签合成出可用的训练标签。一句话：<strong>用代码批量造标签，而不是用人力一条条标</strong>，这是它对纯人工众包（Scale/Surge）的差异化叙事。</li>
+      <li><strong>data-centric AI（以数据为中心的 AI）</strong>：相对「调模型结构/超参」（model-centric），主张「模型架构差不多了，提升效果主要靠改进数据」。Snorkel Flow 是这个理念的产品化。</li>
+      <li><strong>RLHF / 专家数据（expert data）</strong>：到了 LLM 时代，前沿 labs（OpenAI/Anthropic 等）发现要让模型更聪明，需要的不再是廉价众包工人标「猫狗」，而是<strong>医生、资深码农、律师、PhD 级专家</strong>来写高质量推理/对话/打分数据（用于 SFT、RLHF、reward model）。这催生了 Mercor/Surge/Scale 的「expert data」转向，Snorkel 也跟进推出 Expert Data-as-a-Service。</li>
+      <li><strong>evaluation / eval（模型评测）</strong>：怎么知道一个模型/agent「在我这个垂直场景到底行不行」？通用 benchmark（MMLU 之类）覆盖不到企业的真实任务。<strong>eval = 构建领域专属的评测集 + 评分器（evaluator/LLM-judge），细粒度找出模型在哪类问题上出错</strong>。Snorkel Evaluate 做的就是这件事——这是它从「造训练数据」往「衡量模型好坏」延伸的新增长线。</li>
+      <li><strong>LLM-as-a-judge</strong>：用一个强模型给另一个模型的输出打分，是 eval 的常用手段。Snorkel Evaluate 强调把它「对齐到企业标准」、做出比通用方法更准的专属 evaluator。</li>
+    </ul>
+  </section>
+
+  <!-- ① 赛道与早期度 -->
+  <section id="market">
+    <h2><span class="n">①</span>赛道地图 + 早期度判断</h2>
+    <p>Snorkel AI 处在 <strong>「AI 训练/微调数据 + 模型评测」</strong> 这个大赛道。需求本质：模型公司和企业要把通用模型变成「在我的垂直任务上靠谱」，这需要(1)高质量带标数据去训/微调、(2)可信的评测去衡量。这条赛道在 2023–2025 因 LLM/RLHF/agent 爆发被重新点燃，且正从「廉价众包标注」整体迁移到「专家数据 + 评测」。</p>
+    <h3>玩家分群（四象限别漏）</h3>
+    <ul>
+      <li><strong>现有巨头 / 规模化服务商：</strong>Scale AI（Meta $14B 投资入股后部分 labs 切走 <span class="src src-b">🟡</span>）、Appen、iMerit、Sama——人力密集、众包/管理式标注起家。</li>
+      <li><strong>垂直创业公司：</strong>Surge AI（无 VC、传 2024 营收 $1.2B、寻求 $25B 估值 <span class="src src-b">🟡</span>）、Mercor（传 Series C @ $10B 估值 <span class="src src-b">🟡</span>）、Turing、Micro1（2025 Series A $35M @ $500M <span class="src src-b">🟡</span>）——主打「专家网络 + 给前沿 labs 供数据」。<strong>Snorkel 自己也在这一格</strong>，但差异化叙事是 programmatic + 平台。</li>
+      <li><strong>大厂顺手做 / 平台工具：</strong>Labelbox、SuperAnnotate、Encord、V7、Toloka（原 Yandex 系众包）——SaaS 标注平台；以及云厂自带的（AWS SageMaker Ground Truth 等）。</li>
+      <li><strong>开源 / 免费替代：</strong><strong>Label Studio（Heartex/HumanSignal）</strong>是最大威胁——开源标注平台，社区庞大；以及 Snorkel 自己的开源库 <code>snorkel</code>（Apache-2.0、约 6k stars，但已进维护模式、重心转商业版 Snorkel Flow <span class="src src-a">🟢</span>）。更隐蔽的替代是「<strong>用 LLM 自动标注/合成数据</strong>」，正在吃掉一部分人工标注需求。</li>
+    </ul>
+    <div class="callout insight">
+      <span class="label">早期度判断</span>
+      整体赛道 <span class="verdict v-crowded">crowded（拥挤）</span> ；Snorkel 押注的「programmatic labeling × 专家数据 × 垂直 eval」细分切口 <span class="verdict v-emerging">emerging（新兴）</span><br><br>
+      <strong>判断信号：</strong>(1) <strong>玩家众多且高速新增</strong>——Scale/Surge/Mercor/Turing/Micro1/Labelbox/Toloka/Appen/Sama… 同质化明显；(2) <strong>融资极热</strong>——Surge 传 $25B、Mercor 传 $10B、Scale 被 Meta $14B 入股，资本密集 <span class="src src-b">🟡</span>；(3) <strong>巨头已进场</strong>（Meta 入股 Scale、云厂自带标注）；(4) <strong>开源/免费替代成熟</strong>（Label Studio）+ LLM 自动标注侵蚀；(5) 客户认知成型（labeling、RLHF data 是常识）。<strong>但</strong>：「写代码批量打标」这套 programmatic 范式仍非主流（大多数对手仍是人力驱动）；「企业垂直 eval（细粒度评测 agent）」缺公认标准、玩家少——这两块是 emerging，也是 Snorkel 试图与人力众包军备竞赛拉开身位的地方。
+    </div>
+  </section>
+
+  <!-- ② 竞品矩阵 -->
+  <section id="matrix">
+    <h2><span class="n">②</span>竞品对照矩阵</h2>
+    <p>选 7 个维度，最能拉开这个赛道的差距：<strong>标注范式</strong>（programmatic/弱监督 vs 人工众包 vs 专家网络，这是 Snorkel 的差异化主轴）· <strong>产品形态</strong>（平台 SaaS vs 服务/外包）· <strong>目标客户</strong> · <strong>是否做 eval</strong>（新增长线）· <strong>开源生态</strong> · <strong>规模/估值/融资</strong> · <strong>数据壁垒来源</strong>。各家口径混乱（尤其估值/营收为传闻），逐格标来源。</p>
+    <table>
+      <thead><tr>
+        <th>玩家</th>
+        <th>标注范式</th><th>产品形态</th><th>目标客户</th>
+        <th>做 eval?</th><th>开源生态</th><th>规模 / 估值 / 融资</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Snorkel AI（本篇）</strong></td>
+          <td><strong>programmatic / weak supervision</strong>（labeling function 批量打标）+ 近年叠加专家数据 <span class="src src-a">🟢</span></td>
+          <td>平台（Snorkel Flow / Evaluate）+ Expert Data 服务混合 <span class="src src-a">🟢</span></td>
+          <td>大型企业、银行（自称 7/10 美国大行）、联邦机构、LLM 提供商 <span class="src src-c">🔴自述</span></td>
+          <td><strong>是</strong>（Snorkel Evaluate，2025 GA）<span class="src src-a">🟢</span></td>
+          <td>有（开源 <code>snorkel</code>，~6k★，Apache-2.0，维护模式）<span class="src src-a">🟢</span></td>
+          <td>Series D $100M @ <strong>$1.3B</strong>（2025-05，Addition 领投），累计约 $238M <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Scale AI</td>
+          <td>人工众包 + 管理式标注 + 近年专家数据 <span class="src src-b">🟡</span></td>
+          <td>服务为主 + 平台 <span class="src src-b">🟡</span></td>
+          <td>前沿 labs、政府/国防、自驾、企业 <span class="src src-b">🟡</span></td>
+          <td>有（评测/红队等）<span class="src src-b">🟡</span></td>
+          <td>弱（闭源为主）</td>
+          <td>Meta 2025 以约 $14B 入股、估值约 $29B 量级；部分 labs 转单 <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Surge AI</td>
+          <td>专家/高技能人工（RLHF data）<span class="src src-b">🟡</span></td>
+          <td>服务为主 <span class="src src-b">🟡</span></td>
+          <td>前沿 labs <span class="src src-b">🟡</span></td>
+          <td>部分（数据质量/偏好）<span class="src src-c">🔴</span></td>
+          <td>无</td>
+          <td>无 VC；传 2024 营收 $1.2B、寻求约 $25B 估值 <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Mercor</td>
+          <td>专家网络（按人匹配，医生/码农/PhD）<span class="src src-b">🟡</span></td>
+          <td>服务 / marketplace <span class="src src-b">🟡</span></td>
+          <td>前沿 labs <span class="src src-b">🟡</span></td>
+          <td>部分（专家评测）<span class="src src-c">🔴</span></td>
+          <td>无</td>
+          <td>传 Series C 寻求约 $10B（B 轮约 $2B 后 7 个月）<span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Turing / Micro1</td>
+          <td>专家/工程师网络 <span class="src src-b">🟡</span></td>
+          <td>服务为主 <span class="src src-b">🟡</span></td>
+          <td>labs、Fortune 100 <span class="src src-b">🟡</span></td>
+          <td>部分 <span class="src src-c">🔴</span></td>
+          <td>无</td>
+          <td>Micro1：2025 Series A $35M @ $500M、传 ARR $50M <span class="src src-b">🟡</span>；Turing 估值数十亿级 <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Labelbox</td>
+          <td>人工标注 + model-assisted labeling <span class="src src-b">🟡</span></td>
+          <td><strong>平台 SaaS</strong>（API/no-code）<span class="src src-b">🟡</span></td>
+          <td>ML 团队、企业 <span class="src src-b">🟡</span></td>
+          <td>少（以标注为主）<span class="src src-b">🟡</span></td>
+          <td>弱（闭源平台）</td>
+          <td>累计约 $189M（含 SoftBank/a16z 等）<span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Toloka</td>
+          <td>全球众包（原 Yandex 系）<span class="src src-b">🟡</span></td>
+          <td>众包平台 + 服务 <span class="src src-b">🟡</span></td>
+          <td>企业、labs <span class="src src-b">🟡</span></td>
+          <td>部分 <span class="src src-c">🔴</span></td>
+          <td>弱</td>
+          <td>非公开（Bezos 等 2025 注资传闻）<span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Label Studio（开源）</td>
+          <td>人工标注框架（可接 ML 预标）<span class="src src-a">🟢</span></td>
+          <td><strong>开源平台</strong> + 商企版（HumanSignal）<span class="src src-a">🟢</span></td>
+          <td>开发者、ML 团队、自托管需求 <span class="src src-a">🟢</span></td>
+          <td>少 <span class="src src-b">🟡</span></td>
+          <td><strong>强</strong>（开源社区大，自部署免费）<span class="src src-a">🟢</span></td>
+          <td>HumanSignal 累计数千万美元级 <span class="src src-b">🟡</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>读矩阵：</strong>(1) 「专家数据/人力网络」这一格已经<strong>极度拥挤且资本碾压</strong>（Surge/Mercor/Scale 体量远超 Snorkel 的 $1.3B），Snorkel 若纯比人力供给很难赢；(2) Snorkel 真正的<strong>独占格子是「programmatic / weak supervision」</strong>——几乎没有第二家以「写代码批量打标」为核心叙事，这是它的护城河来源，但也意味着市场教育成本高、需要客户有工程能力；(3) <strong>eval 这一列大多数人是「部分/未证实」</strong>，Snorkel 把 Evaluate 做成正式产品（2025 GA）相对靠前；(4) 开源这一列，<strong>Label Studio 才是真正免费替代</strong>，Snorkel 自家开源库已转维护模式、护城河在商业平台。整体：标注同质化严重，Snorkel 的差异化清晰但偏「工具/平台」，规模上被纯服务对手压制。</p>
+  </section>
+
+  <!-- ③ 定位图 -->
+  <section id="map">
+    <h2><span class="n">③</span>定位图（whitespace 在哪）</h2>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 640 400" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12">
+        <line x1="40" y1="200" x2="600" y2="200" stroke="#b9c2e0" stroke-width="1.5"/>
+        <line x1="320" y1="20" x2="320" y2="380" stroke="#b9c2e0" stroke-width="1.5"/>
+        <text x="598" y="220" text-anchor="end" fill="#5a627a">人力 / 众包 / 专家网络驱动 →</text>
+        <text x="42" y="220" fill="#5a627a">← programmatic / 弱监督 / 软件驱动</text>
+        <text x="326" y="30" fill="#5a627a">↑ 平台 / 自助 SaaS（软件）</text>
+        <text x="326" y="372" fill="#5a627a">↓ 服务 / 外包（人力交付）</text>
+
+        <!-- 软件×programmatic 象限：Snorkel 的核心格子 -->
+        <circle cx="180" cy="95" r="8" fill="#7aa2ff"/>
+        <text x="172" y="84" text-anchor="end" fill="#1a1f33" font-weight="700">Snorkel AI</text>
+        <text x="172" y="108" text-anchor="end" fill="#5a627a" font-size="10.5">Flow+Evaluate(平台)+Expert(服务)</text>
+
+        <!-- 软件×人工：标注平台 SaaS -->
+        <circle cx="450" cy="95" r="7" fill="#9b8cff"/>
+        <text x="462" y="92" fill="#1a1f33">Labelbox / SuperAnnotate / V7</text>
+        <circle cx="500" cy="135" r="7" fill="#9b8cff"/>
+        <text x="512" y="139" fill="#1a1f33">Toloka（众包平台）</text>
+
+        <!-- 开源软件 -->
+        <circle cx="210" cy="150" r="7" fill="#43c59e"/>
+        <text x="222" y="154" fill="#1a1f33">Label Studio（开源）</text>
+
+        <!-- 服务×人力：专家数据/众包巨头 -->
+        <circle cx="470" cy="285" r="9" fill="#ff6b81"/>
+        <text x="482" y="289" fill="#1a1f33">Scale AI</text>
+        <circle cx="520" cy="320" r="8" fill="#ff6b81"/>
+        <text x="510" y="340" text-anchor="end" fill="#1a1f33">Surge / Mercor / Turing</text>
+        <circle cx="420" cy="335" r="6" fill="#ffb454"/>
+        <text x="408" y="339" text-anchor="end" fill="#1a1f33">Appen / Sama / iMerit</text>
+
+        <!-- whitespace 框 -->
+        <rect x="60" y="235" width="220" height="120" fill="none" stroke="#43c59e" stroke-dasharray="5 4" stroke-width="1.5"/>
+        <text x="170" y="300" text-anchor="middle" fill="#138a6e" font-weight="700" font-size="11.5">whitespace：</text>
+        <text x="170" y="318" text-anchor="middle" fill="#138a6e" font-size="11">软件化 programmatic</text>
+        <text x="170" y="334" text-anchor="middle" fill="#138a6e" font-size="11">+ 垂直行业 eval（轻服务）</text>
+      </svg>
+      </div>
+      <figcaption>定位图（本调研重绘）。横轴 = programmatic/软件驱动 ↔ 人力/专家网络驱动；纵轴 = 平台 SaaS ↔ 服务外包。Snorkel 独占「软件 × programmatic」象限；右下角「服务 × 人力」最拥挤且资本碾压。<strong>whitespace 在左下：用软件/programmatic 把垂直行业的 eval/数据做成「轻服务、可复制」</strong>，避开纯人力军备竞赛。</figcaption>
+    </figure>
+  </section>
+
+  <!-- ④ 融资 timeline -->
+  <section id="funding">
+    <h2><span class="n">④</span>融资 timeline</h2>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 740 170" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12">
+        <line x1="55" y1="80" x2="690" y2="80" stroke="#b9c2e0" stroke-width="2"/>
+
+        <circle cx="90" cy="80" r="6" fill="#7aa2ff"/>
+        <text x="90" y="55" text-anchor="middle" fill="#1a1f33" font-weight="700">2019</text>
+        <text x="90" y="105" text-anchor="middle" fill="#5a627a" font-size="10.5">成立 / Seed</text>
+        <text x="90" y="120" text-anchor="middle" fill="#5a627a" font-size="10.5">Greylock·GV</text>
+
+        <circle cx="230" cy="80" r="6" fill="#7aa2ff"/>
+        <text x="230" y="55" text-anchor="middle" fill="#1a1f33" font-weight="700">2019–20</text>
+        <text x="230" y="105" text-anchor="middle" fill="#5a627a" font-size="10.5">Series A</text>
+        <text x="230" y="120" text-anchor="middle" fill="#5a627a" font-size="10.5">Greylock 领·In-Q-Tel</text>
+
+        <circle cx="370" cy="80" r="6" fill="#9b8cff"/>
+        <text x="370" y="55" text-anchor="middle" fill="#1a1f33" font-weight="700">2021</text>
+        <text x="370" y="105" text-anchor="middle" fill="#5a627a" font-size="10.5">Series B $35M</text>
+        <text x="370" y="120" text-anchor="middle" fill="#5a627a" font-size="10.5">Lightspeed 领</text>
+
+        <circle cx="510" cy="80" r="7" fill="#43c59e"/>
+        <text x="510" y="55" text-anchor="middle" fill="#1a1f33" font-weight="700">2021-08</text>
+        <text x="510" y="105" text-anchor="middle" fill="#5a627a" font-size="10.5">Series C $85M</text>
+        <text x="510" y="120" text-anchor="middle" fill="#5a627a" font-size="10.5">@$1B · Addition+BlackRock</text>
+
+        <circle cx="650" cy="80" r="8" fill="#ff6b81"/>
+        <text x="650" y="55" text-anchor="middle" fill="#1a1f33" font-weight="700">2025-05</text>
+        <text x="650" y="105" text-anchor="middle" fill="#5a627a" font-size="10.5">Series D $100M</text>
+        <text x="650" y="120" text-anchor="middle" fill="#5a627a" font-size="10.5">@$1.3B · Addition 领</text>
+      </svg>
+      </div>
+      <figcaption>Snorkel AI 融资时间线（据公开报道整理）。注：Seed/A 早期金额合并口径不一，Tracxn 称累计约 $238M。</figcaption>
+    </figure>
+    <table>
+      <thead><tr><th>时间</th><th>事件 / 轮次</th><th>金额</th><th>投资方</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr><td>2019（春）</td><td>成立 / Seed</td><td>Seed+A 合计约 $15M（口径不一）</td><td>Greylock、GV 共同领投种子</td><td><span class="src src-b">🟡</span> Greylock/Crunchbase</td></tr>
+        <tr><td>2019 秋–2020</td><td>Series A</td><td>（含于上）</td><td>Greylock 领；GV、In-Q-Tel 等</td><td><span class="src src-b">🟡</span> Crunchbase/媒体</td></tr>
+        <tr><td>2021</td><td>Series B</td><td>$35M</td><td>Lightspeed 领；Greylock、GV、In-Q-Tel、Nepenthe、Walden、BlackRock 系</td><td><span class="src src-a">🟢</span> 官方 blog</td></tr>
+        <tr><td>2021-08-09</td><td>Series C</td><td><strong>$85M @ $1B 估值</strong>（累计约 $135M）</td><td>Addition 与 BlackRock 系共同领投；Greylock、GV、Lightspeed、Nepenthe、Walden 跟投</td><td><span class="src src-a">🟢</span> 官方 + <span class="src src-b">🟡</span> Fortune/VB</td></tr>
+        <tr><td>2025-05-29</td><td>Series D</td><td><strong>$100M @ $1.3B 估值</strong></td><td>Addition 领；Prosperity7、QBE Ventures、Greylock、Lightspeed 等</td><td><span class="src src-a">🟢</span> 官方 + <span class="src src-b">🟡</span> Yahoo/BusinessWire</td></tr>
+      </tbody>
+    </table>
+    <p><strong>口径打架提醒：</strong>「累计融资」一项 Tracxn 报约 <strong>$238M</strong>（含 7 轮），而把官方披露的 Seed/A≈$15M + B$35M + C$85M + D$100M 相加约 <strong>$235M</strong>，量级一致但具体早期轮金额未一一披露——<strong>以官方逐轮为准，累计取「约 $235–238M」并列</strong>，不擅自取单一值。估值方面 C 轮 $1B、D 轮 $1.3B 均有官方背书。<strong>赛道整体融资极热但 Snorkel 估值增速温和</strong>（4 年 $1B→$1.3B），相比 Surge/Mercor 的指数级估值，Snorkel 更像「稳健平台公司」而非「资本风口标的」。</p>
+  </section>
+
+  <!-- ⑤ 公司速览 -->
+  <section id="snapshot">
+    <h2><span class="n">⑤</span>公司速览</h2>
+    <table>
+      <tbody>
+        <tr><td>是什么 / 定位</td><td><strong>AI 数据开发平台</strong>：以 programmatic labeling / weak supervision 为根，帮企业与 labs 造高质量训练/微调数据，并做模型与 agent 的专属评测 <span class="src src-a">🟢</span></td></tr>
+        <tr><td>产品</td><td><strong>Snorkel Flow</strong>（programmatic 数据开发平台，定期 release）· <strong>Snorkel Evaluate</strong>（2025 GA，垂直模型/agent 评测）· <strong>Snorkel Expert Data-as-a-Service</strong>（2025 GA，专家定制数据集）· 开源 <code>snorkel</code> 库（维护模式）<span class="src src-a">🟢</span></td></tr>
+        <tr><td>团队</td><td><strong>Stanford AI Lab research 血统</strong>：联创 Alex Ratner（CEO，Chris Ré 门下 PhD，开源 Snorkel 项目发起人，UW 兼职教授）、Chris Ré（Stanford 副教授、MacArthur Genius，前 DeepDive→Lattice 被 Apple 收购）、Henry Ehrenberg、Braden Hancock、Paroma Varma；源自 60+ 篇弱监督论文 <span class="src src-a">🟢</span></td></tr>
+        <tr><td>商业模式</td><td>企业 SaaS 平台订阅（Flow/Evaluate）+ Expert Data 白手套服务；客户偏大型受监管行业 <span class="src src-a">🟢</span></td></tr>
+        <tr><td>客户（多为自述）</td><td>自称「7/10 美国大型银行、Fortune 500、联邦机构、领先 LLM 提供商」；设计伙伴举例 Rox、某 Top-5 电信公司 <span class="src src-c">🔴自述</span>；活动出现过 Accenture、BNY、Comcast、QBE 等名字 <span class="src src-b">🟡</span></td></tr>
+        <tr><td>状态</td><td>独角兽（$1.3B，2025-05 Series D），独立、未上市；约 7 轮累计约 $235–238M <span class="src src-b">🟡</span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 中国对标 -->
+  <section id="cn">
+    <h2>中国对标（programmatic labeling + eval 在中国可行吗）</h2>
+    <p>把 Snorkel 的两条腿（programmatic 数据 + 模型评测）拆开看中国对应玩家：</p>
+    <h3>数据标注 / 训练数据玩家</h3>
+    <ul>
+      <li><strong>海天瑞声（Haitian Ruisheng，688787 科创板上市）</strong> <span class="src src-b">🟡</span>：AI 训练数据老牌供应商，数据采集/标注/评估/定制，合作近 700 家机构。<strong>范式仍是人力 + 项目制</strong>，无 programmatic 叙事。</li>
+      <li><strong>数据堂（DataTang）</strong> <span class="src src-b">🟡</span>：老牌数据服务商，语音/图像/NLP 数据，人工标注为主。</li>
+      <li><strong>整数智能、星尘数据（Stardust）、景联文（Jinglianwen）</strong> <span class="src src-b">🟡</span>：新一代标注服务商，景联文称 1000+ 全职标注员、四大处理中心——<strong>人力密集、规模化外包</strong>路线，更接近 Appen/Scale 的中国版，非 Snorkel 式软件公司。</li>
+      <li><strong>开源 Label Studio 生态</strong>：在中国团队中被广泛自托管使用，是「免费替代」的现实主力。</li>
+    </ul>
+    <h3>模型评测玩家</h3>
+    <ul>
+      <li><strong>OpenCompass / 司南（上海 AI Lab）</strong> <span class="src src-b">🟡</span>：开源大模型评测框架，70+ 数据集、约 40 万题，开放公平可复现——<strong>对应 Snorkel Evaluate 的「评测」一面，但走开源公益路线、非企业 SaaS</strong>。</li>
+      <li><strong>FlagEval / 天秤（北京智源 BAAI）</strong> <span class="src src-b">🟡</span>：6 大任务、近 30 数据集、10 万+ 题的评测平台，自动化+自适应。</li>
+    </ul>
+    <div class="callout insight">
+      <span class="label">可行性 + whitespace 判断</span>
+      中国在「人力标注」一侧<strong>已 crowded</strong>（海天瑞声上市、数据堂/景联文一堆），在「评测」一侧有<strong>强开源公益方（OpenCompass/FlagEval）但缺企业级商业化 eval 产品</strong>。<strong>「programmatic labeling」这套软件化叙事在中国基本空白</strong>——几乎没有以「写 labeling function + 弱监督建模」为核心卖点的本土公司。这意味着两个 whitespace：(1) <strong>面向垂直行业（金融/医疗/法律/政务）的「programmatic + 专家数据」混合平台</strong>，把中国丰富但敏感的行业数据用软件化方式低成本造标；(2) <strong>企业级垂直 eval 商业化</strong>——把 OpenCompass 式开源能力包装成「帮企业评测自家模型/agent 是否合规、是否够用」的付费服务（监管/金融特别需要）。
+    </div>
+  </section>
+
+  <!-- ⑥ 创业 idea 借鉴 -->
+  <section id="idea">
+    <h2><span class="n">⑥</span>创业 idea 借鉴</h2>
+    <div class="callout insight">
+      <span class="label">Whitespace / 机会</span>
+      定位图左下角：<strong>「软件化 programmatic × 垂直行业 eval（轻服务）」</strong>。当下「专家数据/人力网络」格子已被 Surge/Mercor/Scale 用资本填满，纯比人力供给打不过；而「用软件把垂直行业（金融/医疗/法律）的数据标注 + 模型评测做成可复制、低人力的产品」几乎无人占稳——尤其在中国近乎空白。eval 作为新品类（衡量 agent 在垂直任务行不行）缺公认标准，先建标准者占位。
+    </div>
+    <h3>现有玩家共同短板（unmet needs）</h3>
+    <p>(1) <strong>纯人力路线毛利天花板低、规模不经济</strong>——Surge/Scale 营收高但本质是人力外包，估值靠增速撑；(2) <strong>众包/外包数据质量与一致性差</strong>，受监管行业（金融/医疗）不敢用；(3) <strong>eval 普遍「部分、未证实」</strong>，缺细粒度、可对齐企业标准的评测；(4) Snorkel 自身短板：<strong>programmatic 需要客户有工程能力，市场教育成本高</strong>，且开源版已停滞、护城河靠闭源平台。</p>
+    <h3>Why now（为什么现在值得做）</h3>
+    <p>(1) <strong>从训练转向「微调 + 评测」</strong>：通用模型见顶，企业要的是「在我的垂直任务上靠谱 + 可衡量」，eval 需求井喷；(2) <strong>LLM 自动标注/合成数据成熟</strong>，让「软件批量造数据」（programmatic 的精神后继）成本骤降；(3) <strong>受监管行业（金融/医疗/政务）合规压力大</strong>，必须有可审计的数据与评测，而非黑箱众包；(4) <strong>中国大模型落地进入「行业垂直化」阶段</strong>，行业数据+eval 是刚需但供给空白。</p>
+    <h3>可借鉴的打法 + 相邻机会</h3>
+    <ul>
+      <li><strong>borrowable：</strong>① <strong>「research 血统 + 开源引流 → 闭源平台变现」</strong>（Snorkel 用开源库建立学术声誉与心智，再做商业平台），这套在垂直 eval 上可复用；② <strong>用「范式差异化」对抗人力军备竞赛</strong>——不跟你比谁人多，而是换一套「软件批量造」的叙事；③ <strong>瞄准受监管大客户（银行/政府）做白手套</strong>，客单价高、壁垒深。</li>
+      <li><strong>adjacent：</strong>① <strong>垂直 eval-as-a-service</strong>（金融合规评测、医疗安全评测、agent 可靠性评测）；② <strong>「合成数据 + programmatic 质检」</strong>工具，给 LLM 自动标注做质量保证层；③ <strong>中国版「programmatic + 专家数据」混合平台</strong>，主打行业敏感数据的本地化、可审计标注；④ data flywheel / 数据飞轮工具，把生产环境反馈持续回灌训练与 eval。</li>
+    </ul>
+    <div class="callout warn">
+      <span class="label">风险（诚实给）</span>
+      (1) <strong>赛道整体 crowded 且资本碾压</strong>——Surge/Mercor/Scale 体量是 Snorkel 数倍至数十倍，纯数据供给打不过；(2) <strong>开源免费替代</strong>（Label Studio）+ <strong>LLM 自动标注</strong>正吃掉人工标注的中低端需求；(3) <strong>巨头渗透</strong>（云厂自带标注/eval、Meta 入股 Scale）；(4) <strong>programmatic 市场教育成本高</strong>，客户需工程能力，扩张慢；(5) 中国侧 <strong>评测有强开源公益方（OpenCompass/FlagEval）</strong>压低商业化空间，且数据合规/出境监管严格；(6) eval 尚无公认标准，「先发建标准」与「白做市场教育」两面性并存。
+    </div>
+  </section>
+
+  <!-- ⑦ 现实判断 -->
+  <section id="take">
+    <h2><span class="n">⑦</span>现实判断</h2>
+    <p>Snorkel 的胜算与软肋都很清楚。<strong>软肋</strong>：它的 $1.3B 估值在这个赛道里偏小（对手动辄 $10B–$25B 传闻），若把战场拖进「谁专家多、谁给 labs 供数据多」的人力军备竞赛，它必输于 Surge/Mercor；同时它的开源根（<code>snorkel</code> 库）已停滞，护城河实质在闭源平台与 research 品牌。<strong>胜算</strong>：它几乎独占「programmatic / weak supervision」这块心智，并较早把 <strong>eval 做成正式产品</strong>、瞄准受监管大企业（银行/联邦）——这是「高客单、重合规、对手少」的相对安全岛。它更像一家「稳健的企业软件公司」而非「资本风口标的」，能不能赢取决于<strong>「企业垂直 eval + 软件化数据」这个 emerging 切口能否跑出独立大品类</strong>，而非在拥挤的标注红海里硬拼。对想借鉴者：别进右下角的人力红海，去左下角用软件+垂直 eval 卡位，中国尤其空白。</p>
+    <div class="callout warn">
+      <span class="label">使用提醒</span>
+      本页为对话式调研，信息主要来自公开来源并按等级标注；融资数额、客户、能力声明等以官方一手为准，
+      <strong>产品能力未必经独立验证</strong>（客户名单多为公司自述🔴、对手估值/营收多为媒体传闻🟡），引用前请核对最新信息。
+    </div>
+  </section>
+
+  <!-- 出处 -->
+  <section id="src">
+    <h2>出处</h2>
+    <ul style="font-size:13.5px">
+      <li><a href="https://snorkel.ai" target="_blank" rel="noopener">官网 snorkel.ai</a> <span class="src src-a">🟢</span></li>
+      <li><a href="https://snorkel.ai/blog/building-the-ai-data-development-platform-for-specialized-ai/" target="_blank" rel="noopener">官方 blog：Series D $100M @ $1.3B + Snorkel Evaluate / Expert Data-as-a-Service（2025-05）</a> <span class="src src-a">🟢</span></li>
+      <li><a href="https://snorkel.ai/blog/85-million-series-c-accelerating-data-centric-ai-enterprise/" target="_blank" rel="noopener">官方 blog：Series C $85M @ $1B（2021-08）</a> <span class="src src-a">🟢</span></li>
+      <li><a href="https://snorkel.ai/blog/introducing-application-studio/" target="_blank" rel="noopener">官方 blog：Series B $35M（Lightspeed 领）</a> <span class="src src-a">🟢</span></li>
+      <li><a href="https://github.com/snorkel-team/snorkel" target="_blank" rel="noopener">GitHub：开源 snorkel（~6k★，Apache-2.0，v0.10.0 / 2024-02 维护模式）</a> <span class="src src-a">🟢</span></li>
+      <li><a href="https://arxiv.org/abs/1711.10160" target="_blank" rel="noopener">论文：Snorkel: Rapid Training Data Creation with Weak Supervision（弱监督出处）</a> <span class="src src-a">🟢</span></li>
+      <li><a href="https://ajratner.github.io/" target="_blank" rel="noopener">Alex Ratner 个人主页（团队背景）</a> · <a href="https://cs.stanford.edu/~chrismre/" target="_blank" rel="noopener">Chris Ré 主页</a> <span class="src src-a">🟢</span></li>
+      <li><a href="https://fortune.com/2021/08/09/snorkel-ai-funding-data-labeling-startup/" target="_blank" rel="noopener">Fortune：Snorkel $1B 估值</a> · <a href="https://venturebeat.com/ai/data-labeling-platform-snorkel-ai-nabs-85m" target="_blank" rel="noopener">VentureBeat：$85M</a> <span class="src src-b">🟡</span></li>
+      <li><a href="https://research.contrary.com/company/snorkel-ai" target="_blank" rel="noopener">Contrary Research：Snorkel 商业拆解与创办史</a> <span class="src src-b">🟡</span></li>
+      <li><a href="https://tracxn.com/d/companies/snorkel-ai/__-dGw6Pyn7pLIBKs5yfyA5FUaeAHPmFQySQ2J9Esr41U/funding-and-investors" target="_blank" rel="noopener">Tracxn：累计约 $238M / 7 轮 / 19 投资方</a> <span class="src src-b">🟡</span></li>
+      <li><a href="https://techcrunch.com/2025/09/12/micro1-a-competitor-to-scale-ai-raises-funds-at-500m-valuation/" target="_blank" rel="noopener">TechCrunch：Micro1 $35M @ $500M（竞品/赛道）</a> <span class="src src-b">🟡</span></li>
+      <li><a href="https://medium.com/@ishisinghal/the-evolution-of-data-labelling-sama-scale-ai-surge-ai-and-mercor-8a8d69514336" target="_blank" rel="noopener">综述：Scale/Surge/Mercor/Sama 演进（Surge $1.2B 营收、Mercor 估值传闻）</a> <span class="src src-b">🟡</span></li>
+      <li><a href="https://labelbox.com/compare/snorkel-alternative/" target="_blank" rel="noopener">Labelbox vs Snorkel（竞品视角，注意为对手口径）</a> <span class="src src-c">🔴</span></li>
+      <li><a href="https://opencompass.org.cn/" target="_blank" rel="noopener">OpenCompass / 司南（中国评测对标）</a> · <a href="https://flageval.baai.ac.cn/" target="_blank" rel="noopener">FlagEval / 天秤</a> <span class="src src-b">🟡</span></li>
+    </ul>
+  </section>
+
+  <footer class="foot">
+    公司竞争格局 / 赛道早期度调研笔记，仅作梳理；信息按来源分级、产品能力未必经独立验证，以官方一手信息为准 · 整理日期 2026-06-16
+  </footer>
+
+</article>
+</body>
+</html>
