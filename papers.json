@@ -1467,5 +1467,26 @@
       "mcp",
       "agent"
     ]
+  },
+  {
+    "slug": "2026-06-16-turing",
+    "title": "Turing：从开发者人才平台到 AI 训练数据的竞争格局与早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://www.turing.com",
+    "code": "",
+    "date": "2026-06-16",
+    "published": "公司调研 2026",
+    "tldr": "起家远程开发者人才平台、2022 后转向给 frontier labs 供 coding/reasoning/RLHF 训练数据（2025 估值 $2.2B）；赛道判 crowded（专家 coding/agent 数据细分仍 emerging）；可借鉴 whitespace：把全球开发者供给池做成垂直 agent 轨迹数据护城河。",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "market-map",
+      "startup-idea",
+      "ai-data",
+      "coding-data",
+      "china"
+    ],
+    "path": "papers/2026-06-16-turing/index.html"
   }
 ]

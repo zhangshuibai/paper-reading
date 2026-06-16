@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Turing · 从开发者人才平台到 AI 训练数据 · 竞争格局与赛道早期度调研</title>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --bad:#ff6b81; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --bad:#d23651; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;}
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:920px; margin:0 auto; padding:18px 22px 90px}
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:25px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)} .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap; line-height:2}
+  nav.toc a:hover{color:var(--accent)}
+  section{margin:38px 0}
+  h2{font-size:20px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:16.5px; margin:22px 0 8px}
+  p{margin:12px 0} ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)} strong{color:var(--text)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.88em}
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:13px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:9px 10px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  figure{margin:24px 0; text-align:center}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+  .svgwrap{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 8px}
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+  .src{font-size:10.5px; padding:0 6px; border-radius:999px; white-space:nowrap; vertical-align:middle}
+  .src-a{background:rgba(67,197,158,.18); color:var(--ok)}
+  .src-b{background:rgba(255,180,84,.18); color:var(--warn)}
+  .src-c{background:rgba(255,107,129,.18); color:var(--bad)}
+  .legend{font-size:12px; color:var(--muted); margin:6px 0 0}
+  .verdict{display:inline-block; font-weight:700; padding:3px 12px; border-radius:999px; font-size:14px}
+  .v-nascent{background:rgba(122,162,255,.18); color:var(--accent)}
+  .v-emerging{background:rgba(67,197,158,.18); color:var(--ok)}
+  .v-crowded{background:rgba(255,180,84,.18); color:var(--warn)}
+  .v-mature{background:rgba(255,107,129,.18); color:var(--bad)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">AI 训练数据</span>
+      <span class="chip">Coding / Reasoning Data</span>
+      <span class="chip">RLHF / Post-training</span>
+      <span class="chip">人才平台转型</span>
+      <span class="chip">竞争格局</span>
+      <span class="chip">赛道早期度</span>
+      <span class="chip">创业 idea</span>
+    </div>
+    <h1>Turing：从开发者人才平台到 AI 训练数据的竞争格局与早期度调研</h1>
+    <p class="orig-title">turing.com — frontier labs 的 coding/reasoning 训练数据与 RLHF 供应商 / 赛道拥挤度 / 「人才平台转 AI 数据」可借鉴 idea</p>
+    <dl class="meta-grid">
+      <dt>对象</dt><dd><a href="https://www.turing.com" target="_blank" rel="noopener">https://www.turing.com</a>（Turing Enterprises Inc.，非 Turing 量子计算等同名公司）</dd>
+      <dt>赛道</dt><dd>面向 frontier LLM 实验室的 expert AI 训练数据 + RLHF/后训练（coding、reasoning、agent 轨迹）；兼营企业级 AI 落地</dd>
+      <dt>整理</dt><dd>对话调研笔记；信息来自公开检索，按来源分级标注，产品能力未必经独立验证</dd>
+      <dt>日期</dt><dd>2026-06-16</dd>
+    </dl>
+    <p class="legend">来源等级：<span class="src src-a">🟢 一手</span> 官网/SEC/官方 ·
+      <span class="src src-b">🟡 二手</span> 媒体/数据库 ·
+      <span class="src src-c">🔴 自述/未证实</span> 营销口径或未独立验证</p>
+  </header>
+
+  <div class="tldr">
+    <b>一句话</b> — Turing 早期是「远程开发者人才平台」（vetting + 派遣全球工程师，2021 年凭 Series D 成为独角兽），
+    2022 年与 OpenAI 研究员的一次会面后转向给 frontier labs 提供 <strong>coding / reasoning / agentic 训练数据与 RLHF（Turing AGI Advancement）</strong>，
+    并在 2025-03 以 <strong>$2.2B 估值</strong>拿到 $111M Series E（领投为马来西亚主权基金 Khazanah）。
+    赛道判定 <span class="verdict v-crowded">crowded（拥挤，但向 expert/coding 数据迁移中）</span>：通用数据标注已巨头化（Scale/Surge），
+    但「专家级 coding/reasoning/agent 轨迹数据」仍在 emerging 阶段、玩家激增、估值飞涨。
+    可借鉴 whitespace：<strong>把「全球开发者供给池」做成垂直 coding/agent 数据的护城河</strong>——但要警惕 labs 自建 + 老本行人才平台被 AI 编程蚕食。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#market">① 赛道地图 + 早期度</a>
+    <a href="#matrix">② 竞品对照矩阵</a>
+    <a href="#map">③ 定位图</a>
+    <a href="#funding">④ 融资 timeline</a>
+    <a href="#snapshot">⑤ 公司速览</a>
+    <a href="#idea">⑥ 创业 idea 借鉴</a>
+    <a href="#cn">⑦ 中国对标</a>
+    <a href="#take">⑧ 现实判断</a>
+    <a href="#src">出处</a>
+  </nav>
+
+  <!-- ① 赛道与早期度 -->
+  <section id="market">
+    <h2><span class="n">①</span>赛道地图 + 早期度判断</h2>
+    <p>Turing 横跨两个赛道，调研主赛道取后者：<strong>（A）远程开发者人才平台 / talent cloud</strong>（vetting、匹配、派遣全球工程师，
+      是它的起家业务）；<strong>（B）面向 frontier LLM 实验室的 expert 训练数据 + RLHF / 后训练服务</strong>——具体卖
+      <strong>code 数据、reasoning 链路、agent 轨迹、SFT/RLHF/DPO 偏好数据、model eval</strong>。
+      这个赛道在解决一个很硬的需求：当模型预训练语料见顶，<strong>提升 coding 与 reasoning 能力越来越依赖「专家产出的高质量人类数据」</strong>，
+      而 frontier labs（OpenAI/Anthropic/Google 等）愿意为此重金外采。Turing 的差异化叙事是：它本来就握有「被严格 vetting 过的全球高级工程师供给池」，
+      正好能转化为「写代码/做推理标注的专家数据生产者」。<span class="src src-b">🟡</span></p>
+    <h3>玩家分群（四象限别漏）</h3>
+    <ul>
+      <li><strong>现有巨头（数据标注原生）：</strong>Scale AI（2024 估值 $13.8B，2025 Meta 投资后 $29B+，创始人 Alexandr Wang 出走 Meta）、
+        Surge AI（bootstrapped，2024 营收传 $1B+，2025 传以 $15–25B 估值融资）。<span class="src src-b">🟡</span></li>
+      <li><strong>垂直创业公司（人才/专家供给型）：</strong>Mercor（2025-10 以 $10B 估值融 $350M）、Micro1（2025-09 $500M 估值融 $35M）、
+        以及 <strong>Turing 本身</strong>——共同点是「把人（专家）而非纯标注流程当核心资产」。<span class="src src-b">🟡</span></li>
+      <li><strong>大厂顺手做：</strong>frontier labs 自建数据团队（OpenAI/Anthropic/Google 内部 RLHF 团队）；Uber 等也开始卖「数据 for AI」业务线；
+        Meta 通过收购 Scale 49% 股权把数据能力内化。<span class="src src-b">🟡</span></li>
+      <li><strong>开源 / 免费替代：</strong>开源代码语料（The Stack / StarCoder 数据集等）、合成数据（用强模型自动生成 coding/reasoning 数据）、
+        社区 RLHF 数据集——对「低端、可自动化」的那部分数据形成长期价格压制。<span class="src src-b">🟡</span></li>
+    </ul>
+    <div class="callout insight">
+      <span class="label">早期度判断</span>
+      <span class="verdict v-crowded">crowded（拥挤）</span>
+      （nascent 萌芽 / emerging 新兴 / crowded 拥挤 / mature 成熟）<br><br>
+      <strong>判断信号：</strong>
+      ① <strong>玩家数量与新增速度</strong>：Scale/Surge/Mercor/Micro1/Turing/Invisible/Snorkel/Labelbox 等密集涌现，2025 一年内多家完成大额融资；
+      ② <strong>融资热度极高、轮次后移</strong>：Mercor 8 个月估值翻 5 倍至 $10B，Surge 传 $15–25B，Turing $2.2B——资本明显过热；
+      ③ <strong>巨头已进场</strong>：Meta $14.3B 买 Scale 49% 股权并挖走 CEO，标志赛道进入巨头整合期；
+      ④ <strong>开源/合成替代存在</strong>：通用数据被合成数据与开源语料压价，护城河上移到「专家/coding/agent」；
+      ⑤ <strong>客户认知成型但高度集中</strong>：买方就是少数几家 frontier labs，议价权在买方，且 Scale 失宠后客户在重新洗牌。<br><br>
+      <strong>细分修正：</strong>「通用数据标注」已接近 mature/crowded；但 <strong>「专家级 coding / reasoning / agent 轨迹数据」这一细分仍处 emerging</strong>——
+      这正是 Turing、Mercor、Micro1 抢的格子，也是 Turing 把人才平台资产变现的窗口。
+    </div>
+  </section>
+
+  <!-- ② 竞品矩阵 -->
+  <section id="matrix">
+    <h2><span class="n">②</span>竞品对照矩阵</h2>
+    <p>选了 7 个对这个赛道最具决定性的维度：<strong>起家路径</strong>（人才平台 vs 数据原生）、<strong>主打数据类型</strong>、<strong>核心客户</strong>、
+      <strong>规模/估值/融资</strong>、<strong>人才供给方式</strong>、<strong>向 AI 数据转型的进度</strong>、<strong>是否做 eval</strong>。
+      数字口径打架的（估值/营收）已并列并标来源时间，<strong>不替任何一方美化</strong>。</p>
+    <table>
+      <thead><tr>
+        <th>玩家</th>
+        <th>起家路径</th>
+        <th>主打数据类型</th>
+        <th>核心客户</th>
+        <th>规模 / 估值 / 融资</th>
+        <th>人才供给方式</th>
+        <th>转 AI 数据进度 / 是否做 eval</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Turing（本篇）</strong></td>
+          <td><strong>人才平台</strong>（远程开发者 talent cloud）</td>
+          <td><strong>code / reasoning / agent 轨迹 / SFT·RLHF·DPO</strong> <span class="src src-c">🔴</span></td>
+          <td>OpenAI（明确）+「leading AI labs」(自述 Gemini/Meta/Anthropic) <span class="src src-c">🔴</span>；企业客户</td>
+          <td>估值 $2.2B（2025-03）；总融资 $225M / 一说 $247M；ARR 定价时 $167M、现称 ~$300M 且已盈利约 1 年 <span class="src src-b">🟡</span></td>
+          <td>自有全球被 vetting 的高级工程师池（自称 1000+ 客户经验）<span class="src src-c">🔴</span></td>
+          <td>已转型为双业务线（AGI Advancement + Intelligence），用 ALAN 平台；做 model eval <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Scale AI</td>
+          <td>数据原生（标注起家）</td>
+          <td>全品类（视觉/文本/RLHF/coding）</td>
+          <td>labs + 政府 + 车企；Meta 投资后部分 labs 减少依赖</td>
+          <td>$13.8B(2024)→Meta 2025 投资后 $29B+；Meta 付 $14.3B 买 49% 股权 <span class="src src-b">🟡</span></td>
+          <td>大规模众包 + 专家网络（execution engine）</td>
+          <td>成熟；做 eval（SEAL 榜单等）<span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Surge AI</td>
+          <td>数据原生（RLHF 数据起家）</td>
+          <td>高质量 RLHF / 文本偏好数据</td>
+          <td>头部 labs（自述含 Anthropic 等）<span class="src src-c">🔴</span></td>
+          <td>bootstrapped；2024 营收传 $1B+；2025 传融资估值 $15–25B（口径打架）<span class="src src-b">🟡</span></td>
+          <td>众包 + 专家（execution engine）</td>
+          <td>成熟；eval/红队等 <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Mercor</td>
+          <td>人才平台（专家招聘/匹配）</td>
+          <td>专家标注（coding/医/法/金融等领域）</td>
+          <td>头部 labs <span class="src src-b">🟡</span></td>
+          <td>$10B 估值（2025-10 融 $350M）；run rate 传 $450M <span class="src src-b">🟡</span></td>
+          <td>AI 招聘/面试匹配专家（people-centric）</td>
+          <td>快速上升；偏数据供给 <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Micro1</td>
+          <td>人才平台（AI 招聘 Zara）</td>
+          <td>资深工程师/医生/教授等专家数据</td>
+          <td>Microsoft + Fortune 100 <span class="src src-b">🟡</span></td>
+          <td>$500M 估值（2025-09 融 $35M）；ARR $7M→$50M(2025) <span class="src src-b">🟡</span></td>
+          <td>AI 面试官 Zara 自动 vetting</td>
+          <td>新兴；偏数据供给 <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Snorkel AI</td>
+          <td>数据原生（programmatic labeling，斯坦福血统）</td>
+          <td>编程式 / 弱监督数据 + 企业专家数据</td>
+          <td>企业 + labs</td>
+          <td>2023 传 $1B 估值（D 轮）<span class="src src-b">🟡</span></td>
+          <td>程序化标注 + 专家网络</td>
+          <td>成熟工具链；做 eval <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Invisible Technologies</td>
+          <td>数据原生（运营外包 / BPO 起家）</td>
+          <td>RLHF / 运营流程数据</td>
+          <td>labs（自述含 OpenAI）<span class="src src-c">🔴</span></td>
+          <td>传多十亿美金估值；以盈利著称 <span class="src src-b">🟡</span></td>
+          <td>众包运营网络</td>
+          <td>成熟；偏后训练运营 <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>TensorOpera</td>
+          <td>技术原生（分布式训练平台，FedML 改名）</td>
+          <td>训练/推理基础设施（非数据标注）</td>
+          <td>企业 / 开发者</td>
+          <td>规模小、Series A 量级；未见独角兽口径 <span class="src src-b">🟡</span></td>
+          <td>不以人力供给为核心</td>
+          <td>属相邻替代品（infra），非直接数据竞品 <span class="src src-b">🟡</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>读矩阵：</strong>赛道清晰分两派——<strong>「数据原生 execution engine」</strong>（Scale/Surge/Invisible/Snorkel，把数据生产做成可复制流程）
+      与 <strong>「人才/专家供给型」</strong>（Turing/Mercor/Micro1，核心资产是「谁来产数据」）。Turing 与 Mercor/Micro1 同质化最严重——
+      都是「人才平台转专家数据」，但 Turing 的差异在于：<strong>起家就是 software engineer 供给</strong>（天然贴 coding 数据），且
+      <strong>已盈利 + ARR 体量（~$300M 自述）领先 Mercor/Micro1</strong>；而它的估值（$2.2B）远低于 Mercor（$10B），说明资本对「老本行是人才外包、转型纯度」有折价。
+      最大威胁不在矩阵内任一家，而在 <strong>labs 自建 + 合成数据</strong> 这两个「免费/内化」象限。</p>
+  </section>
+
+  <!-- ③ 定位图 -->
+  <section id="map">
+    <h2><span class="n">③</span>定位图（whitespace 在哪）</h2>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 640 400" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12">
+        <line x1="40" y1="200" x2="600" y2="200" stroke="#b9c2e0" stroke-width="1.5"/>
+        <line x1="320" y1="24" x2="320" y2="372" stroke="#b9c2e0" stroke-width="1.5"/>
+        <text x="600" y="218" text-anchor="end" fill="#5a627a">人才 / 专家供给型 →</text>
+        <text x="40" y="218" fill="#5a627a">← 数据原生 / 流程型</text>
+        <text x="326" y="34" fill="#5a627a">↑ 垂直 coding / reasoning / agent 数据</text>
+        <text x="326" y="366" fill="#5a627a">↓ 通用多品类标注数据</text>
+        <rect x="324" y="40" width="270" height="156" fill="rgba(122,162,255,.10)" stroke="#7aa2ff" stroke-dasharray="5 4" stroke-width="1"/>
+        <text x="460" y="120" text-anchor="middle" fill="#3a66ff" font-size="11.5" font-weight="700">whitespace：</text>
+        <text x="460" y="138" text-anchor="middle" fill="#3a66ff" font-size="11.5" font-weight="700">垂直 agent 轨迹 / 专家 coding 数据</text>
+        <circle cx="150" cy="250" r="7" fill="#ff6b81"/><text x="162" y="254" fill="#1a1f33">Scale AI</text>
+        <circle cx="180" cy="290" r="7" fill="#ff6b81"/><text x="192" y="294" fill="#1a1f33">Surge AI</text>
+        <circle cx="120" cy="300" r="6" fill="#ffb454"/><text x="132" y="304" fill="#1a1f33">Invisible</text>
+        <circle cx="170" cy="150" r="6" fill="#ffb454"/><text x="182" y="154" fill="#1a1f33">Snorkel</text>
+        <circle cx="455" cy="115" r="9" fill="#3a66ff"/><text x="468" y="119" fill="#3a66ff" font-weight="700">Turing</text>
+        <circle cx="420" cy="165" r="7" fill="#9b8cff"/><text x="432" y="169" fill="#1a1f33">Mercor</text>
+        <circle cx="480" cy="185" r="6" fill="#9b8cff"/><text x="492" y="189" fill="#1a1f33">Micro1</text>
+        <circle cx="95" cy="335" r="6" fill="#43c59e"/><text x="107" y="339" fill="#1a1f33">合成/开源数据</text>
+      </svg>
+      </div>
+      <figcaption>定位图（本调研重绘）。两轴：横轴=数据原生流程型↔人才/专家供给型；纵轴=通用标注↔垂直 coding/agent 数据。
+        Turing 落在右上「人才供给 × 垂直 coding」象限，与 Mercor/Micro1 拥挤；更尖的 whitespace 是<strong>「agent 多步轨迹 / 真实软件工程任务」级数据</strong>，目前无人完全占据。</figcaption>
+    </figure>
+  </section>
+
+  <!-- ④ 融资 timeline -->
+  <section id="funding">
+    <h2><span class="n">④</span>融资 timeline</h2>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 760 170" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12">
+        <line x1="50" y1="95" x2="710" y2="95" stroke="#b9c2e0" stroke-width="2"/>
+        <circle cx="70" cy="95" r="6" fill="#7aa2ff"/>
+        <text x="70" y="120" text-anchor="middle" fill="#5a627a">2018</text>
+        <text x="70" y="135" text-anchor="middle" fill="#5a627a" font-size="10.5">成立 · 种子</text>
+        <circle cx="210" cy="95" r="6" fill="#7aa2ff"/>
+        <text x="210" y="78" text-anchor="middle" fill="#1a1f33" font-weight="700">$14M Seed</text>
+        <text x="210" y="120" text-anchor="middle" fill="#5a627a">2020-08</text>
+        <text x="210" y="135" text-anchor="middle" fill="#5a627a" font-size="10.5">Foundation Capital</text>
+        <circle cx="350" cy="95" r="6" fill="#9b8cff"/>
+        <text x="350" y="78" text-anchor="middle" fill="#1a1f33" font-weight="700">$32M Series B</text>
+        <text x="350" y="120" text-anchor="middle" fill="#5a627a">2020-09</text>
+        <text x="350" y="135" text-anchor="middle" fill="#5a627a" font-size="10.5">WestBridge+Foundation</text>
+        <circle cx="510" cy="95" r="8" fill="#43c59e"/>
+        <text x="510" y="74" text-anchor="middle" fill="#138a6e" font-weight="700">$87M Series D</text>
+        <text x="510" y="120" text-anchor="middle" fill="#5a627a">2021-12</text>
+        <text x="510" y="135" text-anchor="middle" fill="#5a627a" font-size="10.5">独角兽 $1.1B</text>
+        <circle cx="680" cy="95" r="9" fill="#3a66ff"/>
+        <text x="680" y="70" text-anchor="middle" fill="#3a66ff" font-weight="700">$111M Series E</text>
+        <text x="680" y="120" text-anchor="middle" fill="#5a627a">2025-03</text>
+        <text x="680" y="135" text-anchor="middle" fill="#5a627a" font-size="10.5">$2.2B · Khazanah</text>
+      </svg>
+      </div>
+      <figcaption>Turing 融资时间线（据公开报道整理）。注意：2018 成立、2020 Seed/B 两轮、2021 Series D 成独角兽（人才平台期），2025 Series E（AI 数据转型期）。</figcaption>
+    </figure>
+    <table>
+      <thead><tr><th>时间</th><th>事件 / 轮次</th><th>金额</th><th>投资方 / 估值</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr><td>2018</td><td>公司成立（前身经验来自 Rover，2017 被 Revcontent 以约 $30M 收购）</td><td>—（早期种子 ~$2.5M 口径存在但未官方确认）</td><td>Jonathan Siddharth、Vijay Krishnan 创立</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2020-08</td><td>Seed</td><td>$14M</td><td>领投 Foundation Capital</td><td><span class="src src-a">🟢</span>官方 blog</td></tr>
+        <tr><td>2020-09</td><td>Series B</td><td>$32M</td><td>领投 WestBridge Capital + Foundation Capital；Altair、Mindset、Frontier、Gaingels 跟投</td><td><span class="src src-a">🟢</span>官方 blog</td></tr>
+        <tr><td>2020-12</td><td>Convertible Note</td><td>$6.2M</td><td>—</td><td><span class="src src-b">🟡</span> Tracxn</td></tr>
+        <tr><td>2021-12</td><td>Series D（成独角兽）</td><td>$87M</td><td>领投 WestBridge；Foundation、StepStone 跟投；估值 ~$1.1B；累计融资超 $140M</td><td><span class="src src-b">🟡</span> TechCrunch / <span class="src src-a">🟢</span> PRNewswire</td></tr>
+        <tr><td>2025-03</td><td>Series E</td><td>$111M</td><td>领投 Khazanah Nasional（马来西亚主权基金）；AltaIR、Amino、WestBridge 等跟投；估值 <strong>$2.2B</strong>；累计 $225M（一说 $247M）</td><td><span class="src src-b">🟡</span> Tech Startups / Yahoo / pulse2</td></tr>
+      </tbody>
+    </table>
+    <p><strong>口径打架提示：</strong>① <strong>累计融资</strong>：Series E 报道称 $225M，Tracxn 称 $247M（6 轮 / 50 投资方）——并列，未擅取。
+      ② <strong>ARR</strong>：Series E 定价时为 $167M、CEO 自述「现 ~$300M 且盈利约 1 年」<span class="src src-b">🟡</span>；另有 getlatka 给出 $300M 与一处异常的 $7M 条目（疑为不同实体/抓取错误）<span class="src src-c">🔴</span>——以「ARR 量级数亿、定价 $167M」为可信区间，$2.2B 是 2025-03 的口径，<strong>题面提到的「2025 传新轮 ~$2.2B」与此为同一轮（Series E），并非另有新轮</strong>。
+      ③ <strong>缺失轮次</strong>：未见公开 Series A/C 的独立披露（可能并入 Seed/B 或未单独命名）。
+      赛道整体：2024–2025 AI 数据赛道融资极热（Scale Meta $14.3B、Mercor $10B、Surge 传 $15–25B），Turing 估值在同类中偏中游。</p>
+  </section>
+
+  <!-- ⑤ 公司速览 -->
+  <section id="snapshot">
+    <h2><span class="n">⑤</span>公司速览</h2>
+    <table>
+      <tbody>
+        <tr><td>是什么 / 定位</td><td>Turing Enterprises Inc.（turing.com，总部加州）：起家「Intelligent Talent Cloud」远程开发者人才平台，现自我定位为
+          <strong>「frontier AI labs 的 AGI advancement 合作方」</strong>——提供 coding/reasoning/agent 训练数据与 RLHF/后训练，并兼营企业 AI 落地。<span class="src src-b">🟡</span></td></tr>
+        <tr><td>产品</td><td><strong>Turing AGI Advancement</strong>（与 labs 合作做 model refinement：reasoning/coding/复杂任务的 SFT·RLHF·DPO 数据与流程）；
+          <strong>Turing Intelligence</strong>（企业 AI 解决方案）；底层 <strong>ALAN</strong> fine-tuning / RL 平台。<span class="src src-b">🟡</span></td></tr>
+        <tr><td>团队</td><td>联合创始人 <strong>Jonathan Siddharth</strong>（CEO，Stanford 计算机 AI 方向硕士、最佳硕士论文奖；曾 Yahoo 搜索相关性实习）与
+          <strong>Vijay Krishnan</strong>（Stanford CS 硕士，曾任 CTO）。二人 2008 年共同创办 AI 发现引擎 <strong>Rover</strong>，2017 被 Revcontent 以约 $30M 收购，
+          其经验沉淀成 Turing。深科技 research 血统（Stanford AI）<span class="src src-b">🟡</span>。</td></tr>
+        <tr><td>商业模式</td><td>（B）向 labs 按项目/工时出售专家产出的训练数据与 RLHF 服务（高毛利、买方集中）；（A）向企业按人/项目派遣远程开发者并抽成。
+          自称已盈利约 1 年、ARR 数亿美金量级 <span class="src src-c">🔴</span>（CEO 口径，未独立审计）。</td></tr>
+        <tr><td>状态</td><td>成立 2018；2021 独角兽；2025-03 Series E 后估值 <strong>$2.2B</strong>，累计融资 $225M（一说 $247M）；员工/承包工程师全球分布，自称服务 1000+ 客户 <span class="src src-c">🔴</span>。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ⑥ 创业 idea 借鉴 -->
+  <section id="idea">
+    <h2><span class="n">⑥</span>创业 idea 借鉴</h2>
+    <div class="callout insight">
+      <span class="label">Whitespace / 机会</span>
+      定位图右上角的尖端格子仍未被完全占据：<strong>「真实软件工程任务级的 agent 轨迹数据」</strong>——不是单条代码标注，而是
+      <strong>多步骤、带工具调用/调试/PR review 的完整 agentic trajectory</strong>，以及垂直语言/框架（Rust、CUDA、嵌入式、特定行业 codebase）的稀缺专家数据。
+      labs 正从「静态代码数据」转向「agent 怎么解决一个真实 issue」的过程数据，谁能把全球工程师组织成「产出可验证的 agent 轨迹 + reward signal」的网络，谁就握住下一波。
+    </div>
+    <h3>现有玩家共同短板（unmet needs）</h3>
+    <p>① <strong>买方极度集中、议价权在 labs</strong>：所有玩家都依赖少数几家 frontier labs，Scale 失宠即说明单一大客户风险；缺「可服务长尾企业/二线模型厂」的数据产品化能力。
+      ② <strong>质量验证难、口径不透明</strong>：专家数据的真实质量与可复用性难独立审计（本调研多处只能标 🔴 自述）；缺「数据质量可量化、可审计」的中立基础设施。
+      ③ <strong>合成数据正在吃掉低端</strong>：通用/可自动生成的数据被开源+合成压价，人力供给型玩家必须不断往「越来越专家、越来越难合成」的方向跑。</p>
+    <h3>Why now（为什么现在值得做）</h3>
+    <p>① <strong>预训练语料见顶、后训练成主战场</strong>：coding/reasoning/agentic 能力的边际提升高度依赖专家人类数据；
+      ② <strong>Scale-Meta 事件重排客户</strong>：OpenAI/Google 等减少对 Scale 依赖，给中立供应商打开窗口（Micro1/Mercor/Turing 都在抢）；
+      ③ <strong>agent 元年</strong>：labs 抢「coding agent / computer-use」轨迹数据，需求曲线陡升；
+      ④ <strong>资本充裕</strong>：2025 同类多家完成大额融资，window 仍开着（但已偏热，估值有回调风险）。</p>
+    <h3>可借鉴的打法 + 相邻机会</h3>
+    <ul>
+      <li><strong>borrowable：</strong>Turing 的核心打法是<strong>「把存量供给资产重定向到新需求」</strong>——本是开发者外包池，遇到 OpenAI 的一次 insight（代码进训练集能提升推理）就把同一批人转成「数据生产者」。
+        任何握有<strong>垂直专家供给网络</strong>（医生、律师、芯片工程师、生物实验员）的平台，都可复用这套「人才平台 → 专家 RLHF 数据」迁移。此外其 <strong>parallel fundraising</strong> 与「先盈利再融资」的节奏也值得学。</li>
+      <li><strong>adjacent：</strong>（a）做<strong>中立的「数据质量 eval / 审计」层</strong>（解决买方对供应商数据质量不透明的痛点）；
+        （b）<strong>agent 轨迹数据专营</strong>（只做 coding agent / computer-use 的过程数据 + reward 标注）；
+        （c）<strong>面向二线模型厂/企业的「数据即产品」</strong>（把昂贵定制服务标准化成可订阅的垂直数据集，绕开对单一大客户的依赖）；
+        （d）<strong>合成 + 人审混合管线</strong>（用强模型量产、专家只做高价值修正，压低成本对冲合成替代）。</li>
+    </ul>
+    <div class="callout warn">
+      <span class="label">风险（诚实给）</span>
+      ① <strong>labs 自建 / 内化</strong>：Meta 收 Scale、各 labs 自建 RLHF 团队，最大客户随时可能变成最大竞争对手；
+      ② <strong>老本行萎缩</strong>：Turing 起家的「远程开发者外包」正被 AI 编程（Copilot/Cursor/coding agent）直接蚕食，供给池的「为人付费」逻辑长期承压；
+      ③ <strong>估值/营收口径波动</strong>：ARR 多为自述、赛道估值过热（Mercor 8 月翻 5 倍），存在回调风险；
+      ④ <strong>同质化拥挤</strong>：与 Mercor/Micro1 高度重叠，差异化窗口靠「更专、更难合成」的数据维持；
+      ⑤ <strong>合成数据替代</strong>：人力供给的护城河被持续抬高，低端必失守。
+    </div>
+  </section>
+
+  <!-- ⑦ 中国对标 -->
+  <section id="cn">
+    <h2><span class="n">⑦</span>中国对标 — 「人才平台转 AI 数据」在中国可行吗</h2>
+    <p>把 Turing 这套「开发者/灵活用工平台 → 给 labs 供 coding/RLHF 数据」的模式映射到中国，玩家来自三类，但<strong>目前没有一家完整复刻 Turing 这条路径</strong>：</p>
+    <ul>
+      <li><strong>开发者 / 灵活用工平台：</strong>程序员客栈、猿急送（开发者接单/众包派单平台）、各类程序员外包社区——握有「中国开发者供给」，理论上可像 Turing 一样转「coding 数据生产」，
+        但目前主要还停在外包接单，<strong>尚未见规模化为大模型厂供 RLHF/coding 数据的公开案例</strong>。<span class="src src-c">🔴</span></li>
+      <li><strong>数据标注 / 众包原生：</strong>海天瑞声（A 股「AI 数据第一股」，语音/视觉/NLP 全品类，DOTS 标注平台）、数据堂、云测数据（Testin）、龙猫数据（龙猫众包）、倍赛 BasicFinder——
+        中国数据标注产业成熟但<strong>历史上偏「通用标注 + 低价人力」</strong>，毛利与单价被压得低（行业被称「卖水人但没站上风口」），<strong>向「专家级 coding/reasoning 数据」升级是它们当前要补的课</strong>。<span class="src src-b">🟡</span></li>
+      <li><strong>大厂自建 coding 数据团队：</strong>百度、阿里、腾讯、字节、DeepSeek、月之暗面等均自建数据/RLHF 团队，内部消化大部分高价值 coding/reasoning 数据需求——
+        这意味着中国版「中立第三方专家数据供应商」的市场空间被大厂内化挤压得更厉害。<span class="src src-b">🟡</span></li>
+    </ul>
+    <div class="callout note">
+      <span class="label">可行性 + whitespace 判断</span>
+      <strong>可行性中等偏谨慎</strong>：中国「人才平台转 AI 数据」具备供给（庞大开发者池 + 成熟标注产业），但有两道坎——
+      ① <strong>买方更集中且更倾向自建</strong>（大厂内部团队 + 主权安全考量，第三方中立供应商空间小于美国）；
+      ② <strong>历史路径偏低价通用标注</strong>，向「专家 coding/agent 数据」的品牌与定价升级难。
+      <strong>whitespace</strong>：（a）<strong>垂直高门槛 coding/reasoning 数据</strong>（国产芯片/CUDA 替代栈、信创/特定行业 codebase、数学奥赛级推理）——大厂也缺、且难合成；
+      （b）<strong>面向出海/二线模型厂与海外 labs 的「中国工程师 agent 轨迹数据」</strong>（成本优势 + 工程师密度）；
+      （c）把现有<strong>开发者众包平台升级为「可验证 reward 的 agent 轨迹工厂」</strong>，是程序员客栈/猿急送类玩家最有想象力的转型方向。
+    </div>
+  </section>
+
+  <!-- ⑧ 现实判断 -->
+  <section id="take">
+    <h2><span class="n">⑧</span>现实判断</h2>
+    <p><strong>胜算：</strong>Turing 是「人才平台转 AI 数据」最典型、且转得相对成功的案例——它的工程师供给天然贴 coding 数据这一最热细分，
+      自述已盈利、ARR 数亿，且赶上了 Scale 失宠后客户重洗牌的窗口。在「人才供给型」三家（Turing/Mercor/Micro1）里，它的营收体量与盈利性是优势。<br><br>
+      <strong>软肋：</strong>① 估值（$2.2B）显著低于 Mercor（$10B），反映资本对它「老本行是人才外包、转型纯度不及数据原生」的折价；
+      ② 买方高度集中于 frontier labs，单客户风险大，且 labs 自建是悬顶之剑；
+      ③ 起家的远程开发者外包业务正被 AI 编程直接侵蚀，长期看「为人力付费」逻辑承压；
+      ④ 关键经营数据（ARR、客户名单、1000+ 客户、数据质量）多为自述 🔴，独立可验证的硬指标有限。<br><br>
+      <strong>对「能不能挤进去」的含义：</strong>通用数据标注已 crowded/接近 mature，新入者别碰；真正的机会在 <strong>emerging 的「专家级 coding / reasoning / agent 轨迹数据」</strong> 细分——
+      靠「更垂直、更难被合成、买方更分散」三条同时立住，才有差异化生存空间。</p>
+    <div class="callout warn">
+      <span class="label">使用提醒</span>
+      本页为对话式调研，信息主要来自公开来源并按等级标注；融资数额、客户、ARR、能力声明等以官方一手为准，
+      <strong>产品能力与营收口径未必经独立验证</strong>（多处只能标 🔴 自述），引用前请核对最新信息。
+    </div>
+  </section>
+
+  <!-- 出处 -->
+  <section id="src">
+    <h2>出处</h2>
+    <ul style="font-size:13.5px">
+      <li><span class="src src-a">🟢</span> <a href="https://www.turing.com" target="_blank" rel="noopener">Turing 官网</a>（含 services/LLM training、AGI advancement、blog 融资稿）</li>
+      <li><span class="src src-a">🟢</span> <a href="https://www.turing.com/blog/turing-announces-14-million-seed-round-led-by-foundation-capital" target="_blank" rel="noopener">官方 blog：$14M Seed（Foundation Capital）</a></li>
+      <li><span class="src src-a">🟢</span> <a href="https://www.turing.com/blog/turing-announces-32m-in-series-b-led-by-westbridge-capital-and-foundation-capital" target="_blank" rel="noopener">官方 blog：$32M Series B</a></li>
+      <li><span class="src src-a">🟢</span> <a href="https://www.prnewswire.com/news-releases/turing-achieves-unicorn-status-following-series-d-bringing-total-raised-to-over-140-million-301448350.html" target="_blank" rel="noopener">PRNewswire：Series D 独角兽，累计 >$140M</a></li>
+      <li><span class="src src-b">🟡</span> <a href="https://techcrunch.com/2021/12/20/turing-books-87m-at-a-1-1b-valuation-to-help-source-hire-and-manage-engineers-remotely/" target="_blank" rel="noopener">TechCrunch：$87M Series D @ $1.1B</a></li>
+      <li><span class="src src-b">🟡</span> <a href="https://techstartups.com/2025/03/06/turing-raises-111m-to-accelerate-agi-advancement-hits-2-2b-valuation/" target="_blank" rel="noopener">Tech Startups：$111M Series E @ $2.2B、ARR $167M→~$300M、OpenAI 合作、双业务线、ALAN</a></li>
+      <li><span class="src src-b">🟡</span> <a href="https://pulse2.com/turing-111-million-series-e-raised-at-2-2-billion-valuation-for-agi-infrastructure/" target="_blank" rel="noopener">pulse2：Series E 细节</a></li>
+      <li><span class="src src-b">🟡</span> <a href="https://tracxn.com/d/companies/turing/__bsYFKMgtiGqFroe-LC60IsybQOYBXGHuW--LOtZ3q5Q/funding-and-investors" target="_blank" rel="noopener">Tracxn：融资轮次（累计一说 $247M / 6 轮 / 50 投资方）</a></li>
+      <li><span class="src src-b">🟡</span> <a href="https://fortune.com/2025/11/13/jonathan-siddharth-ceo-of-turing-free-time-pto-chatgpt-advice-day-in-life/" target="_blank" rel="noopener">Fortune：CEO Jonathan Siddharth（$2.2B 公司）</a> · <a href="https://www.turing.com/blog/how-turings-ceo-raised-capital-using-parallel-fundraising" target="_blank" rel="noopener">官方：parallel fundraising 打法</a></li>
+      <li><span class="src src-b">🟡</span> 创始人 / Rover 背景：<a href="https://medium.com/@AI-bees.io/turing-ceo-founder-jonathan-siddharth-formed-worlds-largest-intelligent-talent-cloud-aa9529bdd8a2" target="_blank" rel="noopener">AI bees 专访</a>（Rover 2017 被 Revcontent 收购 ~$30M）</li>
+      <li><span class="src src-b">🟡</span> 竞品：<a href="https://www.cnbc.com/2025/10/27/ai-hiring-startup-mercor-funding.html" target="_blank" rel="noopener">CNBC：Mercor $10B</a> · <a href="https://techcrunch.com/2025/09/12/micro1-a-competitor-to-scale-ai-raises-funds-at-500m-valuation/" target="_blank" rel="noopener">TechCrunch：Micro1 $500M</a> · <a href="https://www.inc.com/brian-contreras/surge-ai-startup-bootstrapped-1-billion-revenue-venture-capital-vc/91205888" target="_blank" rel="noopener">Inc：Surge $1B+ 营收</a></li>
+      <li><span class="src src-b">🟡</span> 赛道格局：<a href="https://lemon.io/blog/rlhf-platforms/" target="_blank" rel="noopener">Lemon.io：RLHF 平台格局</a> · <a href="https://medium.com/@ishisinghal/the-evolution-of-data-labelling-sama-scale-ai-surge-ai-and-mercor-8a8d69514336" target="_blank" rel="noopener">数据标注演进（Scale/Surge/Mercor）</a></li>
+      <li><span class="src src-b">🟡</span> 中国对标：<a href="https://www.news.cn/money/20250718/93d1aebf4cd6489f993fc2fea50feab2/c.html" target="_blank" rel="noopener">新华网：海天瑞声 AI 数据</a> · <a href="https://zhuanlan.zhihu.com/p/1918063014449517334" target="_blank" rel="noopener">中国 AI 数据采集与标注服务商分析</a></li>
+      <li><span class="src src-c">🔴</span> ARR / 客户数 / 1000+ 客户 / 客户名单（Gemini/Meta/Anthropic 等）：多为 CEO 口径或营销自述，未独立审计；getlatka 等第三方数字（$300M / 异常 $7M 条目）口径不一，仅供参考。</li>
+    </ul>
+  </section>
+
+  <footer class="foot">
+    公司竞争格局 / 赛道早期度调研笔记，仅作梳理；信息按来源分级、产品能力与营收口径未必经独立验证，以官方一手信息为准 · 整理日期 2026-06-16
+  </footer>
+
+</article>
+</body>
+</html>
