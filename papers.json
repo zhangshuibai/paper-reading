@@ -1383,5 +1383,26 @@
       "mcp",
       "agent"
     ]
+  },
+  {
+    "slug": "2026-06-16-wuxi-apptec",
+    "title": "药明康德 WuXi AppTec：CRDMO 巨头的竞争格局与赛道成熟度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://www.wuxiapptec.com",
+    "code": "",
+    "date": "2026-06-16",
+    "published": "公司调研 2026",
+    "tldr": "CRDMO 一体化药物研发+生产外包巨头（CRO+小分子/寡核苷酸/多肽 CDMO），赛道 mature 巨头主导；最大风险是美国 BIOSECURE Act；创业者最现实的 whitespace 是给 CRO/CDMO 卖铲子的实验室软件/数据层。",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "market-map",
+      "startup-idea",
+      "cro",
+      "cdmo",
+      "china"
+    ],
+    "path": "papers/2026-06-16-wuxi-apptec/index.html"
   }
 ]
