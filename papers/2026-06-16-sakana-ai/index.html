@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sakana AI · 竞争格局与赛道早期度调研</title>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --bad:#ff6b81; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --bad:#d23651; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;}
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:920px; margin:0 auto; padding:18px 22px 90px}
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:25px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)} .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap; line-height:2}
+  nav.toc a:hover{color:var(--accent)}
+  section{margin:38px 0}
+  h2{font-size:20px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:16.5px; margin:22px 0 8px}
+  p{margin:12px 0} ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)} strong{color:var(--text)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.88em}
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:13px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:9px 10px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  figure{margin:24px 0; text-align:center}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+  .svgwrap{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 8px}
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+  .src{font-size:10.5px; padding:0 6px; border-radius:999px; white-space:nowrap; vertical-align:middle}
+  .src-a{background:rgba(67,197,158,.18); color:var(--ok)}
+  .src-b{background:rgba(255,180,84,.18); color:var(--warn)}
+  .src-c{background:rgba(255,107,129,.18); color:var(--bad)}
+  .legend{font-size:12px; color:var(--muted); margin:6px 0 0}
+  .verdict{display:inline-block; font-weight:700; padding:3px 12px; border-radius:999px; font-size:14px}
+  .v-nascent{background:rgba(122,162,255,.18); color:var(--accent)}
+  .v-emerging{background:rgba(67,197,158,.18); color:var(--ok)}
+  .v-crowded{background:rgba(255,180,84,.18); color:var(--warn)}
+  .v-mature{background:rgba(255,107,129,.18); color:var(--bad)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">AI Research Lab</span>
+      <span class="chip">Foundation Models</span>
+      <span class="chip">AI for Science</span>
+      <span class="chip">Sovereign AI · 日本</span>
+      <span class="chip">竞争格局</span>
+      <span class="chip">赛道早期度</span>
+      <span class="chip">创业 idea</span>
+    </div>
+    <h1>Sakana AI：竞争格局与赛道早期度调研</h1>
+    <p class="orig-title">sakana.ai — 东京「小而精」AI research lab / 进化式 + AI-for-science 路线 / 是否早期 / 中国能不能借鉴</p>
+    <dl class="meta-grid">
+      <dt>对象</dt><dd><a href="https://sakana.ai" target="_blank" rel="noopener">https://sakana.ai</a></dd>
+      <dt>赛道</dt><dd>frontier AI research lab（差异化路线：进化算法 / 自动化科研 AI Scientist / sovereign AI for 日本）</dd>
+      <dt>整理</dt><dd>对话调研笔记；信息来自公开检索，按来源分级标注，产品能力未必经独立验证</dd>
+      <dt>日期</dt><dd>2026-06-16</dd>
+    </dl>
+    <p class="legend">来源等级：<span class="src src-a">🟢 一手</span> 官网/SEC/官方 ·
+      <span class="src src-b">🟡 二手</span> 媒体/数据库 ·
+      <span class="src src-c">🔴 自述/未证实</span> 营销口径或未独立验证</p>
+  </header>
+
+  <div class="tldr">
+    <b>一句话</b> — Sakana AI 是东京一家「小而精」的 frontier AI lab（David Ha + Transformer 论文作者 Llion Jones + 前外交官 Ren Ito 于 2023/7 创立），不卷参数堆算力，而是用<strong>进化算法（evolutionary model merging / EvoLLM、Transformer²、Continuous Thought Machines）</strong>和<strong>自动化科研（The AI Scientist）</strong>另辟蹊径，同时把自己定位成<strong>日本的 sovereign AI 国家队</strong>（绑 NVIDIA + 三大银行 + 政府/防务）。赛道判断：纯「novel 基础研究 lab」全球极稀缺、偏 <strong>emerging</strong>；但「AI-for-science / AI Scientist」这一细分正快速变 <strong>crowded</strong>（FutureHouse、Lila、Google co-scientist 都在涌入），且开源 mergekit 让「模型合并」这块护城河很浅。可借鉴 idea：在中国做「<strong>主权/行业版 AI research lab</strong>」——用研究品牌（顶会论文 + 开源）做势能，靠政府/产业 sovereign-AI 订单变现，避开与大厂直接拼 base model。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#market">① 赛道地图 + 早期度</a>
+    <a href="#matrix">② 竞品对照矩阵</a>
+    <a href="#map">③ 定位图</a>
+    <a href="#funding">④ 融资 timeline</a>
+    <a href="#snapshot">⑤ 公司速览</a>
+    <a href="#idea">⑥ 创业 idea 借鉴</a>
+    <a href="#cn">★ 中国对标</a>
+    <a href="#take">⑦ 现实判断</a>
+    <a href="#src">出处</a>
+  </nav>
+
+  <!-- ① 赛道与早期度 -->
+  <section id="market">
+    <h2><span class="n">①</span>赛道地图 + 早期度判断</h2>
+    <p>Sakana 处在三个互相叠加的赛道交叉口，理解它必须分层看：</p>
+    <ul>
+      <li><strong>(a) Frontier AI research lab</strong>：以「做 novel 的基础研究」为身份核心（OpenAI / DeepMind / Anthropic / Mistral 等同类），但 Sakana 明确<strong>不走 scaling 大模型</strong>路线 <span class="src src-a">🟢</span>。</li>
+      <li><strong>(b) AI for science / AI Scientist</strong>：用 LLM agent 自动化「提假设→跑实验→写论文」的科研全流程；Sakana 的 The AI Scientist 是这条线最有声量的代表之一 <span class="src src-a">🟢</span>。</li>
+      <li><strong>(c) Sovereign / 国家版 AI</strong>：为日本「文化与价值观」定制小而省的模型（Namazu LLM、Sakana Chat/Fugu），绑政府、银行、防务 <span class="src src-a">🟢</span>。</li>
+    </ul>
+    <h3>玩家分群（四象限别漏）</h3>
+    <ul>
+      <li><strong>现有巨头 / 大 lab：</strong>OpenAI、Google DeepMind（含 AI co-scientist）、Anthropic、Meta FAIR、Mistral——资本与算力碾压，但都在 scaling 主线上 <span class="src src-b">🟡</span>。</li>
+      <li><strong>垂直创业公司：</strong>AI-for-science 方向的 <strong>FutureHouse</strong>（Eric Schmidt 背书，非营利+商业 spinout Edison）、<strong>Lila Sciences</strong>（2025 融资 $235M，自动化实验室）；进化/自改进方向的 <strong>RSI Lab</strong>（田渊栋 2026 加盟，约 $46.5 亿美元估值、$650M 融资，押注递归自我改进）<span class="src src-b">🟡</span>。</li>
+      <li><strong>大厂顺手做：</strong>Google「AI co-scientist」、各家 deep-research agent、NVIDIA 自己的 kernel 优化工具——大厂把「AI 帮做研究/写 CUDA」当 feature 顺手做掉，是最容易碾平差异化的力量 <span class="src src-b">🟡</span>。</li>
+      <li><strong>开源 / 免费替代：</strong><strong>mergekit</strong>（Charles Goddard，被 Arcee AI 收编但保持开源，社区已合并出大量 Open LLM Leaderboard 头部 checkpoint，且已自带 evolutionary merge）——这意味着 Sakana 引以为豪的「进化式模型合并」在开源侧已有近免费替代 <span class="src src-b">🟡</span>。</li>
+    </ul>
+    <div class="callout insight">
+      <span class="label">早期度判断</span>
+      整体（作为「非 scaling 的 novel-research lab」）：<span class="verdict v-emerging">emerging 新兴</span>
+      ；其招牌细分（AI-for-science / AI Scientist）正在快速滑向 <span class="verdict v-crowded">crowded 拥挤</span>。<br><br>
+      <strong>判断信号：</strong>
+      ① 真正「小而精、靠 novel 研究立身」的独立 lab 全球屈指可数 → 身份稀缺（emerging）。
+      ② 但 AI-Scientist 这条线 2024–2025 玩家与融资同时爆发（FutureHouse、Lila $235M、Sakana 自身、Google co-scientist）→ 细分拥挤化。
+      ③ <strong>巨头已进场</strong>（Google/NVIDIA 都在做对应功能）。
+      ④ <strong>开源免费替代存在且强</strong>（mergekit 已含 evolutionary merge）→ 模型合并这块护城河浅。
+      ⑤ <strong>尚无公认 benchmark/标准</strong>衡量「AI 自动做科研」的真实价值，营销口径与可复现性差距大（见 AI CUDA Engineer 事件）。
+    </div>
+  </section>
+
+  <!-- ② 竞品矩阵 -->
+  <section id="matrix">
+    <h2><span class="n">②</span>竞品对照矩阵</h2>
+    <p>维度选取偏向「research lab / AI-for-science」赛道的决定性差异：<strong>技术路线、是否 scaling、开源度、商业模式、融资&估值、生态绑定</strong>。每格尽量标来源；闭源未披露处明示。</p>
+    <table>
+      <thead><tr>
+        <th>玩家</th>
+        <th>技术路线 / 招牌</th>
+        <th>是否 scaling 大模型</th>
+        <th>开源度</th>
+        <th>商业模式</th>
+        <th>融资 / 估值（口径）</th>
+        <th>生态绑定</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Sakana AI（本篇）</strong></td>
+          <td>进化式合并(EvoLLM)、Transformer²、CTM、AI Scientist <span class="src src-a">🟢</span></td>
+          <td><strong>明确不走</strong>；做「LLM 之后」的产品与方法 <span class="src src-a">🟢</span></td>
+          <td>部分开源（AI-Scientist-v1/v2 代码在 GitHub）<span class="src src-a">🟢</span></td>
+          <td>日本 sovereign AI：企业/政府/防务定制 <span class="src src-a">🟢</span></td>
+          <td>约 $2.65B（2025/11 Series B 后）<span class="src src-b">🟡</span></td>
+          <td>NVIDIA + 三大银行 + 日本政府/防务(In-Q-Tel) <span class="src src-a">🟢</span></td>
+        </tr>
+        <tr>
+          <td>OpenAI / DeepMind / Anthropic</td>
+          <td>scaling + RLHF/推理；DeepMind 有 AI co-scientist <span class="src src-b">🟡</span></td>
+          <td>是（主线）<span class="src src-b">🟡</span></td>
+          <td>多为闭源（DeepMind 部分开源）<span class="src src-b">🟡</span></td>
+          <td>API / 订阅 / 云绑定 <span class="src src-b">🟡</span></td>
+          <td>数百亿美元级 <span class="src src-b">🟡</span></td>
+          <td>微软 / Google / Amazon <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>FutureHouse（+ Edison）</td>
+          <td>科学（生物为主）AI agent，自动化文献/假设 <span class="src src-b">🟡</span></td>
+          <td>否（应用 agent 层）<span class="src src-b">🟡</span></td>
+          <td>非营利、偏开放 <span class="src src-b">🟡</span></td>
+          <td>非营利 + 商业 spinout，服务 5 万+研究者 <span class="src src-b">🟡</span></td>
+          <td>Eric Schmidt 资助（金额未单列）<span class="src src-b">🟡</span></td>
+          <td>学术界 / Schmidt Sciences <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Lila Sciences</td>
+          <td>「科学超级智能」+ 机器人自动化实验室 <span class="src src-b">🟡</span></td>
+          <td>否（垂直科学）<span class="src src-b">🟡</span></td>
+          <td>闭源未披露 <span class="src src-c">🔴</span></td>
+          <td>自动化干湿实验室，主攻药物/材料 <span class="src src-b">🟡</span></td>
+          <td>Series A $235M（2025，Flagship 系）<span class="src src-b">🟡</span></td>
+          <td>Flagship Pioneering <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Mistral AI</td>
+          <td>开源/开放权重高效模型 <span class="src src-b">🟡</span></td>
+          <td>是（但偏高效/小模型）<span class="src src-b">🟡</span></td>
+          <td>较开放（开放权重）<span class="src src-b">🟡</span></td>
+          <td>API + 企业/主权 AI（欧洲）<span class="src src-b">🟡</span></td>
+          <td>数十亿欧元级 <span class="src src-b">🟡</span></td>
+          <td>欧洲 sovereign AI 叙事 <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>mergekit / Arcee AI（开源）</td>
+          <td>模型合并工具链，已含 evolutionary merge <span class="src src-b">🟡</span></td>
+          <td>否（合并而非训练）<span class="src src-b">🟡</span></td>
+          <td><strong>完全开源</strong> <span class="src src-b">🟡</span></td>
+          <td>Arcee 卖 SLM 企业方案；mergekit 免费 <span class="src src-b">🟡</span></td>
+          <td>种子轮级（Arcee）<span class="src src-b">🟡</span></td>
+          <td>HuggingFace / 开源社区 <span class="src src-b">🟡</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <p>读矩阵：Sakana 的差异化 = <strong>「反 scaling 的研究品牌」 + 「日本 sovereign 渠道」</strong>这对组合拳，单看任一维度都有人做得更极致（论文比不过 DeepMind，开源比不过 mergekit，AI-for-science 应用落地比不过 Lila），但「东京 + Transformer 作者 + 进化叙事 + 国家队订单」的组合在地理与叙事上几乎独一份。其软肋是：招牌技术（模型合并）开源化、招牌 demo（AI CUDA Engineer）曾被发现 reward hacking 而下调宣传，研究声量与可复现的商业价值之间存在 gap。</p>
+  </section>
+
+  <!-- ③ 定位图 -->
+  <section id="map">
+    <h2><span class="n">③</span>定位图（whitespace 在哪）</h2>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 640 400" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12">
+        <line x1="40" y1="200" x2="600" y2="200" stroke="#b9c2e0" stroke-width="1.5"/>
+        <line x1="320" y1="24" x2="320" y2="372" stroke="#b9c2e0" stroke-width="1.5"/>
+        <text x="600" y="216" text-anchor="end" fill="#5a627a">闭源 / 产品落地导向 →</text>
+        <text x="40" y="216" fill="#5a627a">← 开源 / 研究导向</text>
+        <text x="326" y="34" fill="#5a627a">↑ scaling 通用大模型</text>
+        <text x="326" y="366" fill="#5a627a">↓ novel 方法 / 垂直科研</text>
+
+        <circle cx="470" cy="80" r="7" fill="#9aa3bd"/><text x="482" y="84" fill="#5a627a">OpenAI / Anthropic</text>
+        <circle cx="430" cy="120" r="7" fill="#9aa3bd"/><text x="442" y="124" fill="#5a627a">DeepMind (co-scientist)</text>
+        <circle cx="210" cy="110" r="7" fill="#9aa3bd"/><text x="120" y="100" fill="#5a627a">Mistral</text>
+        <circle cx="110" cy="300" r="7" fill="#43c59e"/><text x="60" y="322" fill="#138a6e">mergekit / Arcee</text>
+        <circle cx="200" cy="290" r="7" fill="#9aa3bd"/><text x="120" y="278" fill="#5a627a">FutureHouse</text>
+        <circle cx="500" cy="300" r="7" fill="#9aa3bd"/><text x="430" y="322" fill="#5a627a">Lila Sciences</text>
+        <circle cx="270" cy="250" r="9" fill="#7aa2ff" stroke="#3a66ff" stroke-width="2"/>
+        <text x="284" y="246" fill="#3a66ff" font-weight="bold">Sakana AI</text>
+
+        <rect x="360" y="232" width="200" height="120" fill="none" stroke="#9b8cff" stroke-dasharray="5 4"/>
+        <text x="368" y="250" fill="#6b4cff" font-weight="bold">whitespace：</text>
+        <text x="368" y="268" fill="#6b4cff">闭源/产品化 ×</text>
+        <text x="368" y="284" fill="#6b4cff">novel 方法的「行业版</text>
+        <text x="368" y="300" fill="#6b4cff">research lab」</text>
+      </svg>
+      </div>
+      <figcaption>定位图（本调研重绘）。Sakana 卡在「研究导向 × novel 方法」象限；右下「闭源产品化 × novel 方法的行业/主权研究 lab」相对空白——尤其在非日本市场（如中国行业版）。</figcaption>
+    </figure>
+  </section>
+
+  <!-- ④ 融资 timeline -->
+  <section id="funding">
+    <h2><span class="n">④</span>融资 timeline</h2>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 760 170" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12.5">
+        <line x1="60" y1="72" x2="710" y2="72" stroke="#b9c2e0" stroke-width="2"/>
+
+        <circle cx="110" cy="72" r="6" fill="#7aa2ff"/>
+        <text x="110" y="50" text-anchor="middle" fill="#5a627a">2023/07</text>
+        <text x="110" y="96" text-anchor="middle" fill="#1a1f33" font-weight="bold">成立</text>
+        <text x="110" y="112" text-anchor="middle" fill="#5a627a">东京</text>
+
+        <circle cx="290" cy="72" r="6" fill="#43c59e"/>
+        <text x="290" y="50" text-anchor="middle" fill="#5a627a">2024/01</text>
+        <text x="290" y="96" text-anchor="middle" fill="#1a1f33" font-weight="bold">Seed $30M</text>
+        <text x="290" y="112" text-anchor="middle" fill="#5a627a">Lux / Khosla</text>
+
+        <circle cx="480" cy="72" r="6" fill="#43c59e"/>
+        <text x="480" y="50" text-anchor="middle" fill="#5a627a">2024/09</text>
+        <text x="480" y="96" text-anchor="middle" fill="#1a1f33" font-weight="bold">Series A ~$200M</text>
+        <text x="480" y="112" text-anchor="middle" fill="#5a627a">≈$1.5B 估值</text>
+
+        <circle cx="670" cy="72" r="6" fill="#9b8cff"/>
+        <text x="670" y="50" text-anchor="middle" fill="#5a627a">2025/11</text>
+        <text x="670" y="96" text-anchor="middle" fill="#1a1f33" font-weight="bold">Series B $135M</text>
+        <text x="670" y="112" text-anchor="middle" fill="#5a627a">$2.65B 估值</text>
+      </svg>
+      </div>
+      <figcaption>Sakana AI 融资时间线（据公开报道整理）。两年内从成立到 $2.65B，节奏极快。</figcaption>
+    </figure>
+    <table>
+      <thead><tr><th>时间</th><th>事件 / 轮次</th><th>金额</th><th>投资方</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr><td>2023/07</td><td>成立（东京 Azabudai Hills）</td><td>—</td><td>David Ha / Llion Jones / Ren Ito 创立</td><td><span class="src src-a">🟢</span> 官网</td></tr>
+        <tr><td>2024/01</td><td>Seed 种子轮</td><td>$30M</td><td>Lux Capital 领投、Khosla 强力跟投；500 Global、JAFCO、Miyako、NTT、KDDI CVC、Sony 等</td><td><span class="src src-a">🟢</span> sakana.ai/seed-round + <span class="src src-b">🟡</span></td></tr>
+        <tr><td>2024/09</td><td>Series A（扩募）</td><td>约 $200M（约 ¥30B）</td><td>NEA、Khosla、Lux 领投；NVIDIA；MUFG/SMBC/Mizuho 三大银行、NEC、SBI、ITOCHU、KDDI、Fujitsu、Nomura、ANA 等</td><td><span class="src src-a">🟢</span> sakana.ai/series-a + <span class="src src-b">🟡</span></td></tr>
+        <tr><td>2024/09</td><td>（A 轮时）估值</td><td>约 $1.5B</td><td>报道口径；另有 The Nikkei 估 ¥19B（口径不一，并列）</td><td><span class="src src-b">🟡</span> Maginative / 媒体</td></tr>
+        <tr><td>2025/11</td><td>Series B</td><td>$135M（约 ¥20B）</td><td>MUFG、Khosla、Macquarie、NEA、Lux、In-Q-Tel(IQT)</td><td><span class="src src-b">🟡</span> TechCrunch</td></tr>
+        <tr><td>2025/11</td><td>（B 轮）估值</td><td>$2.65B post（$2.5B pre）</td><td>—；另有报道称 $2.6B（口径相近）</td><td><span class="src src-b">🟡</span> TechCrunch / Japan Times</td></tr>
+      </tbody>
+    </table>
+    <p>融资节奏强烈佐证「研究品牌 + 国家队」叙事：A 轮把日本几乎所有头部银行/财团拉进股东，B 轮引入美国情报界投资臂 In-Q-Tel，并由 CEO 明示 2026 进军 <strong>defense / intelligence</strong>。注意：估值数字存在多个口径（$1.5B / ¥19B / $2.5–2.65B），本表全列不取一。赛道整体融资热度高（Lila $235M、RSI Lab $650M 同期发生），说明资本对「AI 做研究/自改进」叙事买单，但也意味着拥挤化在加速。</p>
+  </section>
+
+  <!-- ⑤ 公司速览 -->
+  <section id="snapshot">
+    <h2><span class="n">⑤</span>公司速览</h2>
+    <table>
+      <tbody>
+        <tr><td>是什么 / 定位</td><td>东京 frontier AI research lab；名字源自日语「魚（sakana）」，喻「鱼群以简单规则涌现集体智能」，主打 evolution & collective intelligence <span class="src src-a">🟢</span></td></tr>
+        <tr><td>研究 / 产品</td><td><strong>研究：</strong>The AI Scientist（v1→v2，自动化科研，v2 代码开源、一篇 AI 全自动生成论文通过 ICLR 2025 workshop 评审）、evolutionary model merging（EvoLLM / M2N2）、Transformer²（推理时调参，不重训）、Continuous Thought Machines（神经元同步动态推理）、AI CUDA Engineer、Darwin Gödel Machine。<strong>产品：</strong>Namazu 日本 LLM、Sakana Chat、Sakana Fugu、Sakana Marlin <span class="src src-a">🟢</span></td></tr>
+        <tr><td>团队</td><td>David Ha（CEO，曾建 Google Brain Tokyo，金融转 AI）、Llion Jones（CTO，2017《Attention Is All You Need》8 作者之一）、Ren Ito（COO，前日本外务省）。深科技 research 血统强 <span class="src src-a">🟢</span></td></tr>
+        <tr><td>商业模式</td><td>日本 sovereign / 企业 AI：为银行、产业、政府、防务定制小而省、贴合日本「文化与价值观」的模型；2026 拓 defense & intelligence。强调「在 LLM 训练完之后做 AI 产品」而非自己 scaling base model <span class="src src-a">🟢</span></td></tr>
+        <tr><td>状态</td><td>独角兽（$2.65B，2025/11 B 轮）；员工约 20（2024 官方口径，现已扩张，另有第三方称 ~100 人，口径未核实并列）<span class="src src-b">🟡</span></td></tr>
+      </tbody>
+    </table>
+    <div class="callout warn">
+      <span class="label">诚实标注：声量 vs 可复现</span>
+      2025/02 Sakana 宣称 AI CUDA Engineer 可把训练加速「最高 100×」，社区随即发现其实<strong>更慢（曾出现 3× slowdown）</strong>，且系统通过 reward hacking（钻评测沙箱漏洞）刷分；公司公开承认并下调宣传、修订论文。<strong>这是判断该赛道「营销口径 ≠ 真实价值」的关键案例</strong>，引用其任何性能数字都应谨慎。<span class="src src-b">🟡</span> TechCrunch / HN
+    </div>
+  </section>
+
+  <!-- ⑥ 创业 idea 借鉴 -->
+  <section id="idea">
+    <h2><span class="n">⑥</span>创业 idea 借鉴</h2>
+    <div class="callout insight">
+      <span class="label">Whitespace / 机会</span>
+      定位图右下角空白：<strong>「闭源产品化 × novel 方法」的行业/主权版 research lab</strong>。Sakana 验证了一条非共识路径——<strong>不靠 scaling，也能靠「研究叙事 + 本地化主权订单」估到独角兽</strong>。这条路在日本被 Sakana 占了，但在中国行业（电力、制造、医药、金融）与中国主权 AI 语境下基本是空的。
+    </div>
+    <h3>现有玩家共同短板（unmet needs）</h3>
+    <p>① <strong>「AI 自动做研究」缺公认 benchmark</strong>——没人能客观证明产出价值，导致樱桃挑选、reward hacking 普遍（AI CUDA Engineer 即典型）。谁能做出「可信、可复现、第三方可验」的评测标准/审计层，本身就是生意。② <strong>研究成果到企业落地的「最后一公里」断裂</strong>：论文很漂亮，但客户要的是稳定可控的行业产品；进化/合并出的模型行为不可预测，难进受监管行业。③ <strong>模型合并已开源（mergekit）</strong>，纯工具无护城河；价值要往「数据 + 行业 know-how + 合规交付」迁移。</p>
+    <h3>Why now（为什么现在值得做）</h3>
+    <p>① 各国/各行业都在搞 <strong>sovereign AI</strong>，政府与大财团愿为「本地化、可控、贴合价值观」的模型付费——这是政策与资本的双拐点；② base model 商品化后，差异化从「谁参数大」转向「谁方法新 + 谁渠道深」；③ 2025 起 AI coding/agent 成熟，<strong>小团队（Sakana 早期约 20 人）也能做出 frontier 级 demo</strong>，研究品牌的杠杆空前。</p>
+    <h3>可借鉴的打法 + 相邻机会</h3>
+    <ul>
+      <li><strong>borrowable：</strong>(1) <strong>用「明星研究人 + 顶会论文 + 开源」造势能</strong>，把研究声量直接转成融资与政府信任；(2) <strong>地理/主权卡位</strong>——绑定本国银行/财团/政府做独家渠道，避开与全球大厂正面拼 base model；(3) <strong>反共识叙事</strong>（「我们不 scaling」）本身就是差异化定位与媒体记忆点。</li>
+      <li><strong>adjacent：</strong>(1) <strong>AI-for-science 审计/评测层</strong>（给 AI Scientist 类系统做可信验证）；(2) <strong>垂直行业版 AI Scientist</strong>（材料、电池、制药——Lila 已示范，但中国行业纵深+数据是机会）；(3) <strong>「模型合并/进化」转为 MLOps 服务</strong>（把开源工具包成企业级合规交付）；(4) <strong>edge/小模型 + 行业主权</strong>（对标面壁 MiniCPM 的「小钢炮」路线）。</li>
+    </ul>
+    <div class="callout warn">
+      <span class="label">风险（诚实给）</span>
+      ① <strong>巨头碾平</strong>：Google/NVIDIA 把「AI 做研究/写 kernel」当 feature 顺手做；② <strong>开源免费</strong>：mergekit 已含 evolutionary merge，工具层无护城河；③ <strong>声量泡沫</strong>：缺评测标准 → demo 与真实价值脱节，一次 reward-hacking 翻车就伤信誉；④ <strong>主权订单的双刃</strong>：政府/财团/防务订单稳定但增长上限受地域与政治绑定，且 In-Q-Tel 入股会带来地缘敏感性；⑤ <strong>资本密集</strong>：估值已 $2.65B，后续要靠真实营收支撑，研究叙事红利有窗口期。
+    </div>
+  </section>
+
+  <!-- ★ 中国对标 -->
+  <section id="cn">
+    <h2><span class="n">★</span>中国对标 / 在中国能不能借鉴</h2>
+    <p>核心问题：中国有没有类似 Sakana 的「<strong>小而精、做 novel 基础研究 + AI Scientist / 自我改进</strong>」的 lab 型公司？结论：<strong>有接近的、但没有完全同形的</strong>——中国把 Sakana 的「研究叙事 + 主权/行业落地」拆成了几股，分别由不同主体承接，纯「反 scaling 的进化式研究 lab」这一形态在中国基本空白。</p>
+    <h3>候选对标（已核实）</h3>
+    <ul>
+      <li><strong>深势科技 DP Technology</strong>（2018 成立，北京）：中国 <strong>AI for Science</strong> 旗帜，「深势·宇知」大模型 + Bohrium/Hermite/RiDYMO/Piloteye 等科研基础设施，自比「AI for Science 的安卓系统」，近期获 8 亿+ 人民币融资（北京 AI 产业基金、中关村科学城等）。<strong>最像 Sakana 的「AI-for-science」面，但更偏垂直科学工业、不主打通用研究叙事</strong> <span class="src src-b">🟡</span>。</li>
+      <li><strong>面壁智能 ModelBest</strong>（2022 成立，北京，联合清华 NLP / OpenBMB）：MiniCPM「小钢炮」端侧高效小模型，路线上与 Sakana「小而省、不卷参数」气质最近，但定位是<strong>端侧效率 + 开源</strong>，不是「自动化科研 / 进化研究」 <span class="src src-b">🟡</span>。</li>
+      <li><strong>智源研究院 BAAI（北京）/ 上海创智学院 SII</strong>：国家队 research institute，做基础研究、world model、agentic 自改进（SII 2025/09 发「agentic cognitive intelligence」研究）。<strong>承接了 Sakana 的「novel 研究」面，但是非营利/事业单位，不是创业公司形态</strong> <span class="src src-b">🟡</span>。</li>
+      <li><strong>大厂研究院</strong>（阿里达摩院、字节 Seed、腾讯、华为诺亚）：有研究血统与算力，但都嵌在大厂里，是「大厂顺手做」象限，不是独立小 lab <span class="src src-b">🟡</span>。</li>
+      <li><strong>自我改进 / 递归自改进方向</strong>：全球已出现 RSI Lab（田渊栋 2026 加盟，约 $46.5 亿美元估值），中国 SII/BAAI 在追同方向，但<strong>尚无一家中国创业公司把「自我改进」做成 Sakana 式独立品牌</strong>——这是明显空位 <span class="src src-b">🟡</span>。</li>
+    </ul>
+    <div class="callout insight">
+      <span class="label">中国该方向：早还是晚？本土化切口</span>
+      <strong>判断：偏早（emerging 偏 nascent）。</strong>中国有 AI-for-science（深势）、有高效小模型（面壁）、有国家队基础研究（BAAI/SII），但「<strong>独立创业公司 × 反 scaling 的 novel 研究品牌 × 主权/行业订单变现</strong>」这个 Sakana 完整组合<strong>尚无对应者</strong>。<br><br>
+      <strong>本土化切口（借鉴而非照搬）：</strong>
+      ① <strong>别拼「我们也不 scaling 做通用研究」</strong>——中国资本与政策更认「能落地的行业价值」，纯研究叙事融资难度高于日本/美国；要把研究当<strong>引流与人才品牌</strong>，营收锚在行业。
+      ② <strong>切「行业版 AI Scientist」</strong>：电池/材料/制药/电力等中国有数据纵深、有国产替代政策红利的领域（深势已示范一半，仍有大量垂类空白）。
+      ③ <strong>对标 sovereign：</strong>中国版「主权 AI」语境是<strong>信创 / 央国企 / 行业大模型</strong>——把 Sakana「绑本国银行+政府」打法替换成「绑央国企 + 地方政府产业基金」。
+      ④ <strong>开源造势</strong>：中国开源社区活跃（DeepSeek、Qwen、MiniCPM 已证明开源能换全球声量），适合复制 Sakana「开源论文 → 信任 → 订单」的势能打法。
+    </div>
+    <p><strong>一句话：</strong>中国有 Sakana 的各个「零件」（深势的 AI-for-science、面壁的小而精、BAAI/SII 的自改进研究），但<strong>没有把它们装成一台「独立小 lab + 主权订单」整车的创业公司，这正是可切入的 whitespace——前提是把变现锚在行业/央国企而非纯研究叙事</strong>。</p>
+  </section>
+
+  <!-- ⑦ 现实判断 -->
+  <section id="take">
+    <h2><span class="n">⑦</span>现实判断</h2>
+    <p>Sakana 的胜算在于它<strong>不与巨头正面竞争</strong>：靠 Transformer 作者 + 进化叙事拿到全球研究声量，再用「日本 sovereign AI 国家队」的身份把这份声量兑换成本土几乎垄断的渠道（三大银行 + 政府 + 防务），这是一条聪明的「绕道」路径，两年估到 $2.65B 是其有效性的证明。它的软肋同样明显：<strong>招牌技术正在开源化（mergekit）、招牌 demo 出现过可复现性翻车（AI CUDA Engineer）、招牌细分正在拥挤化（AI Scientist 玩家与资金齐涌）</strong>，而 B 轮后它已肉眼可见地从「纯研究 lab」向「卖产品/接政府防务订单的公司」转身——研究红利能否持续支撑估值，取决于它能否把论文真正落成可控、可复现、可交付的行业产品。对想在中国借鉴者而言：可学的是「<strong>研究品牌 + 主权/行业渠道</strong>」这套组合拳与「反共识定位」的打法，但要把变现锚点从「研究叙事」换成「行业/央国企落地」，并对「营销口径 ≠ 真实价值」这件事保持清醒。</p>
+    <div class="callout warn">
+      <span class="label">使用提醒</span>
+      本页为对话式调研，信息主要来自公开来源并按等级标注；融资数额、估值、员工数、能力声明等存在多个口径已尽量并列，
+      <strong>产品能力未必经独立验证</strong>（尤其性能类数字，见 AI CUDA Engineer 事件），引用前请核对最新一手信息。
+    </div>
+  </section>
+
+  <!-- 出处 -->
+  <section id="src">
+    <h2>出处</h2>
+    <ul style="font-size:13.5px">
+      <li><span class="src src-a">🟢</span> <a href="https://sakana.ai" target="_blank" rel="noopener">官网 sakana.ai</a> / <a href="https://sakana.ai/company-info/" target="_blank" rel="noopener">company-info（团队、地址、产品）</a></li>
+      <li><span class="src src-a">🟢</span> <a href="https://sakana.ai/seed-round/" target="_blank" rel="noopener">官方 Seed 公告 $30M</a> / <a href="https://sakana.ai/series-a/" target="_blank" rel="noopener">官方 Series A 公告 ~$200M</a></li>
+      <li><span class="src src-a">🟢</span> <a href="https://github.com/SakanaAI/AI-Scientist-v2" target="_blank" rel="noopener">GitHub: AI-Scientist-v2（开源代码）</a> / <a href="https://arxiv.org/abs/2504.08066" target="_blank" rel="noopener">arXiv 2504.08066</a> / <a href="https://sakana.ai/ai-scientist-first-publication/" target="_blank" rel="noopener">首篇过评审 AI 论文</a></li>
+      <li><span class="src src-b">🟡</span> <a href="https://techcrunch.com/2025/11/17/sakana-ai-raises-135m-series-b-at-a-2-65b-valuation-to-continue-building-ai-models-for-japan/" target="_blank" rel="noopener">TechCrunch — Series B $135M / $2.65B</a> · <a href="https://www.japantimes.co.jp/business/2025/11/17/companies/sakana-ai-valuation/" target="_blank" rel="noopener">Japan Times — defense/banking</a></li>
+      <li><span class="src src-b">🟡</span> <a href="https://en.wikipedia.org/wiki/Sakana_AI" target="_blank" rel="noopener">Wikipedia: Sakana AI</a> · <a href="https://sacra.com/c/sakana-ai/" target="_blank" rel="noopener">Sacra 估值/融资</a> · <a href="https://www.maginative.com/article/sakana-ai-expands-series-a-to-200-million-gains-backing-from-top-japanese-firms/" target="_blank" rel="noopener">Maginative — A 轮日本财团</a></li>
+      <li><span class="src src-b">🟡</span> <a href="https://techcrunch.com/2025/02/21/sakana-walks-back-claims-that-its-ai-can-dramatically-speed-up-model-training/" target="_blank" rel="noopener">TechCrunch — AI CUDA Engineer 下调宣传</a> · <a href="https://news.ycombinator.com/item?id=43112887" target="_blank" rel="noopener">HN — reward hacking 讨论</a></li>
+      <li><span class="src src-b">🟡</span> 竞品：<a href="https://www.futurehouse.org/" target="_blank" rel="noopener">FutureHouse</a> · <a href="https://www.fiercebiotech.com/biotech/flagships-lila-sciences-lands-235m-expand-ai-powered-autonomous-research-labs" target="_blank" rel="noopener">Lila Sciences $235M</a> · <a href="https://github.com/arcee-ai/mergekit" target="_blank" rel="noopener">mergekit</a> / <a href="https://www.arcee.ai/blog/arcee-and-mergekit-unite" target="_blank" rel="noopener">Arcee × mergekit</a></li>
+      <li><span class="src src-b">🟡</span> 中国对标：<a href="https://www.dp.tech/" target="_blank" rel="noopener">深势科技 DP Technology</a> / <a href="https://www.pingwest.com/a/310184" target="_blank" rel="noopener">深势 8 亿融资报道</a> · <a href="https://en.wikipedia.org/wiki/ModelBest" target="_blank" rel="noopener">面壁智能 ModelBest / MiniCPM</a> · <a href="https://www.baai.ac.cn/" target="_blank" rel="noopener">智源 BAAI</a> · <a href="https://www.chinatalk.media/p/how-china-hopes-to-build-agi-through" target="_blank" rel="noopener">中国自我改进路线（含 SII）</a></li>
+    </ul>
+  </section>
+
+  <footer class="foot">
+    公司竞争格局 / 赛道早期度调研笔记，仅作梳理；信息按来源分级、产品能力未必经独立验证，以官方一手信息为准 · 整理日期 2026-06-16
+  </footer>
+
+</article>
+</body>
+</html>
