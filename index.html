@@ -153,10 +153,21 @@ function renderCatbar(){
   });
 }
 
+function isPinned(p){
+  return String(p.published||'').indexOf('公司调研')===0 || (p.tags||[]).includes('competitive-landscape');
+}
 function render(list){
-  grid.innerHTML = list.length
-    ? list.map(card).join('')
-    : `<div class="empty" style="grid-column:1/-1">没有匹配的解读。</div>`;
+  if(!list.length){ grid.innerHTML = `<div class="empty" style="grid-column:1/-1">没有匹配的解读。</div>`; return; }
+  const HDR = (t)=>`<div style="grid-column:1/-1;margin:22px 0 4px;padding-top:12px;border-top:1px solid rgba(128,128,128,.25);font-size:13px;font-weight:700;letter-spacing:.3px;opacity:.85">${t}</div>`;
+  const pinned = list.filter(isPinned);
+  const rest   = list.filter(p=>!isPinned(p));
+  let html = '';
+  if(pinned.length) html += HDR('📌 公司调研 · 中国创业机会（'+pinned.length+'）') + pinned.map(card).join('');
+  if(rest.length){
+    if(pinned.length) html += HDR('📄 论文 / 其它解读（'+rest.length+'）');
+    html += rest.map(card).join('');
+  }
+  grid.innerHTML = html;
 }
 
 function applyFilter(){
