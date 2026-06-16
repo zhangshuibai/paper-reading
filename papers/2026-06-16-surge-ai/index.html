@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Surge AI · 竞争格局与赛道早期度调研</title>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --bad:#ff6b81; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --bad:#d23651; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;}
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:920px; margin:0 auto; padding:18px 22px 90px}
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:25px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)} .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap; line-height:2}
+  nav.toc a:hover{color:var(--accent)}
+  section{margin:38px 0}
+  h2{font-size:20px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:16.5px; margin:22px 0 8px}
+  p{margin:12px 0} ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)} strong{color:var(--text)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.88em}
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:13px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:9px 10px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  figure{margin:24px 0; text-align:center}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+  .svgwrap{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 8px}
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+  .src{font-size:10.5px; padding:0 6px; border-radius:999px; white-space:nowrap; vertical-align:middle}
+  .src-a{background:rgba(67,197,158,.18); color:var(--ok)}
+  .src-b{background:rgba(255,180,84,.18); color:var(--warn)}
+  .src-c{background:rgba(255,107,129,.18); color:var(--bad)}
+  .legend{font-size:12px; color:var(--muted); margin:6px 0 0}
+  .verdict{display:inline-block; font-weight:700; padding:3px 12px; border-radius:999px; font-size:14px}
+  .v-nascent{background:rgba(122,162,255,.18); color:var(--accent)}
+  .v-emerging{background:rgba(67,197,158,.18); color:var(--ok)}
+  .v-crowded{background:rgba(255,180,84,.18); color:var(--warn)}
+  .v-mature{background:rgba(255,107,129,.18); color:var(--bad)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">AI 训练数据</span>
+      <span class="chip">RLHF</span>
+      <span class="chip">专家数据</span>
+      <span class="chip">竞争格局</span>
+      <span class="chip">赛道早期度</span>
+      <span class="chip">创业 idea</span>
+    </div>
+    <h1>Surge AI：RLHF 专家数据赛道的竞争格局与早期度调研</h1>
+    <p class="orig-title">surgehq.ai — frontier labs 的「人类数据」供应商 / 赛道有多挤 / 有没有可借鉴 idea</p>
+    <dl class="meta-grid">
+      <dt>对象</dt><dd><a href="https://www.surgehq.ai" target="_blank" rel="noopener">https://www.surgehq.ai</a></dd>
+      <dt>赛道</dt><dd>AI 训练数据 / RLHF / 专家人类标注（human data for frontier labs）</dd>
+      <dt>整理</dt><dd>对话调研笔记；信息来自公开检索，按来源分级标注，产品能力未必经独立验证</dd>
+      <dt>日期</dt><dd>2026-06-16</dd>
+    </dl>
+    <p class="legend">来源等级：<span class="src src-a">🟢 一手</span> 官网/SEC/官方 ·
+      <span class="src src-b">🟡 二手</span> 媒体/数据库 ·
+      <span class="src src-c">🔴 自述/未证实</span> 营销口径或未独立验证</p>
+  </header>
+
+  <div class="tldr">
+    <b>一句话</b> — Surge AI 是给前沿大模型实验室供「高质量人类数据」（RLHF / 专家标注 / 评测 / RL 环境）的公司，
+    创始人 <strong>Edwin Chen</strong>（ex-Google/Facebook/Twitter/Dropbox，MIT），最大标签是 <strong>5 年零 VC、纯 bootstrap</strong>
+    就做到 <strong>2024 年传 ~$1.2B 营收、反超 Scale AI</strong> <span class="src src-b">🟡</span>，2025 年才传出首轮融资（估值口径 &gt;$15B ~ $25B+，<strong>是否完成未证实</strong>）。
+    赛道判 <strong>crowded（拥挤）但高端仍有空</strong>：传统标注早成红海，而「服务 frontier labs 的<strong>专家级</strong> RLHF / eval 数据」过去 12 个月被 Meta 收 Scale 引爆，
+    Mercor/Micro1/Turing 等新贵集体爆发——一个可借鉴 whitespace 是 <strong>垂直专家（科学/医疗/法律）的 eval &amp; RL 环境数据</strong>，目前只有 Scale、Mercor 把「公开 benchmark」做成品牌护城河。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#market">① 赛道地图 + 早期度</a>
+    <a href="#matrix">② 竞品对照矩阵</a>
+    <a href="#map">③ 定位图</a>
+    <a href="#funding">④ 融资 timeline</a>
+    <a href="#snapshot">⑤ 公司速览</a>
+    <a href="#cn">⑥ 中国对标</a>
+    <a href="#idea">⑦ 创业 idea 借鉴</a>
+    <a href="#take">⑧ 现实判断</a>
+    <a href="#src">出处</a>
+  </nav>
+
+  <!-- ① 赛道与早期度 -->
+  <section id="market">
+    <h2><span class="n">①</span>赛道地图 + 早期度判断</h2>
+    <p>Surge 属于 <strong>AI 训练数据（human data / data labeling for AI）</strong> 赛道里最高端的一层：不是给自动驾驶画框、给图片打标签那种「传统标注」，而是给 OpenAI、Anthropic、Google 这类 <strong>frontier labs</strong> 供
+    <strong>RLHF 偏好数据、专家级（PhD / 医生 / 律师 / 资深工程师）标注、模型评测（eval）数据、以及 RL 训练环境</strong>。这层解决的核心需求是：当模型预训练语料快被「读完」、能力越来越接近人类专家时，
+    模型继续变强靠的不再是更多网页，而是<strong>更难、更专业、更高质量的人类判断信号</strong>——「教模型什么是好、什么是坏」。Surge 的官网口号正是 <em>“Human Intelligence for AGI”</em> <span class="src src-a">🟢</span>。</p>
+
+    <h3>玩家分群（四象限别漏）</h3>
+    <ul>
+      <li><strong>现有巨头 / 老牌：</strong><strong>Scale AI</strong>（赛道原老大，2025-06 被 Meta 以 $14.3B 拿 ~49% 无投票权股、估值跳到 ~$29B <span class="src src-b">🟡</span>）、<strong>Appen</strong>（ASX 上市老兵，丢了 Google 合同后近乎崩盘、营收 ~A$233M 在做转型 <span class="src src-b">🟡</span>）、<strong>Labelbox</strong>（标注平台 + Alignerr 专家网络）。</li>
+      <li><strong>垂直创业新贵：</strong><strong>Surge AI</strong>（本篇）、<strong>Mercor</strong>（专家 marketplace，$10B 估值 <span class="src src-b">🟡</span>）、<strong>Micro1</strong>（AI 面试官 Zara 选人，$500M 估值）、<strong>Turing</strong>（从程序员外包转 coding/AGI 数据，$2.2B 估值）、<strong>Invisible Technologies</strong>（RLHF + AI 运营外包，$2B+ 估值）、<strong>Snorkel AI</strong>（程序化标注 + 专家数据，$1.3B 估值）。</li>
+      <li><strong>大厂顺手做 / 自建：</strong>各 frontier lab 都有<strong>内部数据团队</strong>，且不断把高价值数据收回自建；<strong>Meta</strong> 直接把 Scale 半收编当自家数据引擎；Google/OpenAI 既是大客户也在内部组队。这是这一层最容易被忽视、却最致命的「需求方向供给方渗透」。</li>
+      <li><strong>开源 / 免费替代：</strong>开源偏好/指令数据集（如各类 RLHF/DPO 公开数据、UltraFeedback、合成偏好数据）、以及 <strong>RLAIF / LLM-as-judge / 合成数据</strong> 用 AI 代替部分人工——这是对「人类数据」生意最根本的长期替代威胁。Surge 自己也开源过 <code>surge-ai/toxicity</code>、<code>surge-ai/profanity</code> 等数据集（GitHub）<span class="src src-a">🟢</span>。</li>
+    </ul>
+
+    <div class="callout insight">
+      <span class="label">早期度判断</span>
+      <span class="verdict v-crowded">crowded（拥挤）</span>
+      —— 但要分两层看：<strong>「传统标注」mature/红海</strong>；<strong>「服务 frontier labs 的专家级 RLHF/eval 数据」属于 crowded 里偏新、过去 12 个月才爆发的高增长段</strong>。
+      <br><br>
+      <strong>判断信号：</strong>
+      ① <strong>玩家数量与新增速度</strong>——直接竞品一抓一大把（Scale/Mercor/Micro1/Turing/Invisible/Snorkel/Labelbox/Toloka/Appen），且 2025 年还在密集冒新名字；
+      ② <strong>融资热度</strong>——2025 一年内 Mercor $10B、Turing $2.2B、Invisible $2B+、Micro1 $500M、Snorkel $1.3B、Toloka 拿 Bezos 钱，热度极高 <span class="src src-b">🟡</span>；
+      ③ <strong>巨头已进场且在「收编」</strong>——Meta 收 Scale 是分水岭，需求方（labs）正反向渗透供给侧；
+      ④ <strong>开源/合成替代存在</strong>——RLAIF / 合成数据在持续蚕食低端人工；
+      ⑤ <strong>benchmark/标准开始成型</strong>——Scale 的 SEAL/HLE、Mercor 的 APEX 已是公开 benchmark 品牌，说明赛道在从「拼人头」走向「拼标准/拼专家池」。
+      综合：不是萌芽期，是<strong>资本与玩家都已涌入的拥挤高增长期</strong>，但「最难、最专业的那部分数据」仍是少数人能做的高墙。
+    </div>
+  </section>
+
+  <!-- ② 竞品矩阵 -->
+  <section id="matrix">
+    <h2><span class="n">②</span>竞品对照矩阵</h2>
+    <p>选了对这个赛道最有区分度的 7 个维度：<strong>数据类型 · 交付模式 · 主要客户 · 估值/营收/融资 · bootstrapped vs VC · 质量壁垒/专家池 · 是否做公开 eval/benchmark</strong>。
+    营收数字最危险——多为 gross（含付给 contractor 的部分）且常来自聚合器（getLatka/Growjo），口径不一，已逐条标级；<strong>估值/融资相对可靠（🟡），营收/ARR 最弱（多 🔴）</strong>。Surge 一列加粗。</p>
+    <table>
+      <thead><tr>
+        <th>玩家</th>
+        <th>数据类型</th>
+        <th>交付模式</th>
+        <th>主要客户</th>
+        <th>估值 / 营收 / 融资</th>
+        <th>资本路径</th>
+        <th>质量壁垒 / 专家池</th>
+        <th>公开 eval/benchmark</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Surge AI（本篇）</strong></td>
+          <td>RLHF 偏好、专家标注、eval、RL 环境（文本/代码/多模态）<span class="src src-b">🟡</span></td>
+          <td>精选专家网络（“Surgers”）+ 平台/托管交付</td>
+          <td>frontier labs（<strong>Anthropic 一手证实</strong><span class="src src-a">🟢</span>；Google 常被点名<span class="src src-b">🟡</span>；OpenAI/Meta/Microsoft 传闻 <span class="src src-c">🔴</span>）</td>
+          <td>估值传 &gt;$15B(Reuters)~$25B+(Bloomberg) <span class="src src-b">🟡</span>；营收 2024 传 ~$1.2B <span class="src src-b">🟡</span></td>
+          <td><strong>纯 bootstrap，零 VC（2020→2025）</strong><span class="src src-b">🟡</span></td>
+          <td>obsess 质量 + ~50k 专家级标注员（创始人/二手估） <span class="src src-c">🔴</span></td>
+          <td>有 eval/RL 环境产品线（AdvancedIF/EnterpriseBench 等），但<strong>无公开 benchmark 品牌</strong><span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td><strong>Scale AI</strong></td>
+          <td>全栈：标注、RLHF、专家数据、eval；起家自动驾驶<span class="src src-b">🟡</span></td>
+          <td>托管服务 + 平台 + 大众包（Remotasks/Outlier）</td>
+          <td>OpenAI、Meta、Microsoft、美国国防部、企业<span class="src src-b">🟡</span></td>
+          <td><strong>~$29B 估值</strong>（Meta $14.3B 拿 ~49%，2025-06）；营收 ~$870M(2024)→~$2B(2025 est) <span class="src src-b">🟡</span></td>
+          <td>重度 VC → 现 Meta 锚定</td>
+          <td>规模、政府资质、品牌；但 Meta 入股后 labs 因利益冲突外流 <span class="src src-b">🟡</span></td>
+          <td><strong>SEAL leaderboards + 共建 HLE</strong>（最强 eval 品牌）<span class="src src-a">🟢</span></td>
+        </tr>
+        <tr>
+          <td><strong>Mercor</strong></td>
+          <td>专家 marketplace：PhD/律师/医生/资深 SWE 供 RLHF + eval<span class="src src-b">🟡</span></td>
+          <td>marketplace + AI 选人/匹配</td>
+          <td>OpenAI、Anthropic、「七巨头」中六家<span class="src src-b">🟡</span></td>
+          <td><strong>$10B 估值</strong>（$350M C 轮，2025-10）；ARR ~$760M(2025末)→~$1.5B(Sacra est 2026) <span class="src src-b">🟡</span></td>
+          <td>VC（Felicis/Benchmark/General Catalyst）</td>
+          <td>AI 化的面试→付费 rubric 评估→末位淘汰流水线<span class="src src-b">🟡</span></td>
+          <td><strong>APEX 系列</strong>（APEX-SWE/Agents）公开 leaderboard <span class="src src-a">🟢</span></td>
+        </tr>
+        <tr>
+          <td><strong>Turing</strong></td>
+          <td>coding/AGI 数据、post-training、eval（编程为主）<span class="src src-b">🟡</span></td>
+          <td>4M+ 工程师/专家网络 + 托管交付</td>
+          <td>OpenAI、Google、Anthropic、Meta（需求方）<span class="src src-b">🟡</span></td>
+          <td><strong>$2.2B 估值</strong>（$111M E 轮，2025-03）；ARR ~$300M、已盈利约一年 <span class="src src-b">🟡</span></td>
+          <td>VC（Khazanah 领投等）</td>
+          <td>把已有的「全球工程师网络」改造做 AI 数据；盈利+coding 专长</td>
+          <td>无旗舰公开 benchmark（评测作为服务）<span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td><strong>Micro1</strong></td>
+          <td>专家数据（医/法/物理 PhD、资深 SWE）需人类判断的训练<span class="src src-b">🟡</span></td>
+          <td>AI 招聘官「Zara」自动面试/筛选 + 托管</td>
+          <td>AI labs（未完全披露）<span class="src src-c">🔴</span></td>
+          <td><strong>$500M 估值</strong>（$35M A 轮，2025-09）；ARR ~$50M(年中)→~$125M(年末) <span class="src src-b">🟡</span></td>
+          <td>早期偏 bootstrap → A 轮机构化</td>
+          <td>Zara 高吞吐专家筛选；资本效率高</td>
+          <td>无显著公开 benchmark<span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td><strong>Invisible Tech</strong></td>
+          <td>RLHF/微调数据 + AI 运营/agentic 外包<span class="src src-b">🟡</span></td>
+          <td>分布式「agent」工作流（35+ 国 3000+ 人）+ 工具层</td>
+          <td>frontier labs + 企业（曾为大模型方做事）<span class="src src-b">🟡</span></td>
+          <td><strong>$2B+ 估值</strong>（$100M 轮，2025-09）；曾盈利（~$15M EBITDA / 11% 利润率，2024）<span class="src src-b">🟡</span></td>
+          <td>类 bootstrap，2025 前几乎不融</td>
+          <td>盈利+资本效率；分层资深工作力 + ops 平台混合</td>
+          <td>无公开 benchmark 品牌<span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td><strong>Snorkel AI</strong></td>
+          <td><strong>程序化标注</strong>（弱监督）+ 专家数据 + eval；Stanford 血统<span class="src src-b">🟡</span></td>
+          <td>软件平台（数据开发）+ 专家数据服务，最「产品/IP 化」</td>
+          <td>企业（银行、受监管行业）自建模型<span class="src src-b">🟡</span></td>
+          <td><strong>$1.3B 估值</strong>（$100M D 轮，2025-05）；营收聚合器称 ~$148M(2025) <span class="src src-c">🔴</span></td>
+          <td>VC（Greylock/Lightspeed/In-Q-Tel/Addition）</td>
+          <td>专有程序化标注（label functions/弱监督）→ 少依赖人头，有 IP/专利</td>
+          <td>Snorkel Evaluate（企业 eval，非公开排行榜）<span class="src src-a">🟢</span></td>
+        </tr>
+        <tr>
+          <td><strong>Labelbox</strong></td>
+          <td>标注平台 + Alignerr 专家服务（RLHF/eval/对齐）<span class="src src-b">🟡</span></td>
+          <td>软件平台 + Alignerr 托管专家网络（3% 录取）</td>
+          <td>自称合作「90%+ 头部美国 AI labs」<span class="src src-c">🔴</span>；企业/医疗</td>
+          <td>上轮 $110M E 轮、~$1B 估值（2022-01）；<strong>未见 2025 新定价轮</strong> <span class="src src-b">🟡</span></td>
+          <td>VC（SoftBank/a16z/Google Gradient/KP）</td>
+          <td>成熟标注平台 + Alignerr 专家网络 + 收 Upcraft（agent）</td>
+          <td>经 Alignerr 提供 eval/对齐，无旗舰公开榜<span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td><strong>Toloka</strong></td>
+          <td>多语言/复杂域人类数据，训练+评测；ex-Yandex 众包<span class="src src-b">🟡</span></td>
+          <td>众包/专家平台 + 托管服务</td>
+          <td>Amazon、Microsoft、Anthropic<span class="src src-b">🟡</span></td>
+          <td>$72M 轮（2025-05，<strong>Bezos Expeditions 领投</strong>），估值未披露；Nebius(NBIS) 子公司<span class="src src-b">🟡</span></td>
+          <td>母公司+战投（非 bootstrap）</td>
+          <td>Yandex 传承的大规模众包基建、多语言、算力背书</td>
+          <td>发研究/eval 数据集，无单一 benchmark 品牌<span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td><strong>Appen</strong></td>
+          <td>传统数据采集/标注/评测，硬转 GenAI 数据<span class="src src-b">🟡</span></td>
+          <td>托管服务 + 全球众包（Appen Connect）</td>
+          <td>丢了最大客户 Google(2024)，在多元化；中国 GenAI 增长<span class="src src-b">🟡</span></td>
+          <td><strong>上市(ASX:APX)</strong>；FY25 营收 ~A$233M(-1%)、仍亏；市值较 2020 峰跌 ~99% <span class="src src-b">🟡</span></td>
+          <td>公开市场融资（2015 IPO）</td>
+          <td>1M+ 众包、200+ 语言、合规——但已商品化、被新贵反超</td>
+          <td>提供评测服务，无公开 benchmark 品牌<span class="src src-b">🟡</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>怎么读这张表：</strong>赛道明显分两群——(a) <strong>专家 marketplace 新贵</strong>（Surge、Mercor、Micro1、Turing、Invisible）吃 frontier-lab 的 post-training/RLHF 红利，打法是 AI 化选人 + 资本轻 + 跑得快；(b) <strong>平台/老牌</strong>（Scale、Snorkel、Labelbox、Toloka、Appen）。
+    Surge 的差异化非常清晰：<strong>同样服务 frontier labs，但它是唯一靠「纯 bootstrap + 极高资本效率（不到 100 人做 $1B+）」打出来的</strong>，且因从不拿 lab/巨头的钱而天然「中立」。同质化主要在「专家供给」这件事上（大家都在抢 PhD/资深工程师），真正拉开差距的是 <strong>专家池质量、客户信任（中立性）、以及是否把 eval 做成公开 benchmark 品牌</strong>——后者目前只有 Scale(SEAL/HLE) 和 Mercor(APEX) 占住了。</p>
+  </section>
+
+  <!-- ③ 定位图 -->
+  <section id="map">
+    <h2><span class="n">③</span>定位图（whitespace 在哪）</h2>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 640 400" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12">
+        <rect x="320" y="20" width="280" height="170" fill="rgba(122,162,255,0.06)"/>
+        <line x1="40" y1="200" x2="600" y2="200" stroke="#b9c2e0" stroke-width="1.5"/>
+        <line x1="320" y1="20" x2="320" y2="380" stroke="#b9c2e0" stroke-width="1.5"/>
+        <text x="598" y="216" text-anchor="end" fill="#5a627a">高端 / 专家 · frontier-lab 数据 →</text>
+        <text x="42" y="216" fill="#5a627a">← 通用 / 大众包 · 传统标注</text>
+        <text x="326" y="32" fill="#5a627a">↑ 资本轻 / bootstrap 倾向</text>
+        <text x="326" y="374" fill="#5a627a">↓ 重度 VC / 巨头资本</text>
+
+        <rect x="430" y="36" width="160" height="50" rx="8" fill="none" stroke="#43c59e" stroke-dasharray="5 4" stroke-width="1.4"/>
+        <text x="510" y="56" text-anchor="middle" fill="#138a6e" font-size="11">whitespace：</text>
+        <text x="510" y="72" text-anchor="middle" fill="#138a6e" font-size="11">垂直专家 eval/RL 环境 · 资本轻</text>
+
+        <circle cx="475" cy="105" r="8" fill="#7aa2ff"/>
+        <text x="488" y="109" fill="#1a1f33" font-weight="700">Surge AI</text>
+        <circle cx="430" cy="135" r="6" fill="#9b8cff"/>
+        <text x="442" y="139" fill="#5a627a">Micro1</text>
+        <circle cx="408" cy="160" r="6" fill="#9b8cff"/>
+        <text x="420" y="164" fill="#5a627a">Invisible</text>
+        <circle cx="500" cy="250" r="6" fill="#9b8cff"/>
+        <text x="512" y="254" fill="#5a627a">Turing</text>
+        <circle cx="540" cy="300" r="7" fill="#9b8cff"/>
+        <text x="552" y="304" fill="#5a627a">Mercor</text>
+        <circle cx="360" cy="340" r="9" fill="#ff6b81"/>
+        <text x="374" y="344" fill="#5a627a">Scale AI</text>
+        <circle cx="250" cy="285" r="6" fill="#9b8cff"/>
+        <text x="160" y="289" fill="#5a627a">Snorkel</text>
+        <circle cx="225" cy="245" r="6" fill="#9b8cff"/>
+        <text x="140" y="249" fill="#5a627a">Labelbox</text>
+        <circle cx="180" cy="300" r="6" fill="#9b8cff"/>
+        <text x="100" y="304" fill="#5a627a">Toloka</text>
+        <circle cx="130" cy="345" r="7" fill="#ffb454"/>
+        <text x="56" y="349" fill="#5a627a">Appen</text>
+      </svg>
+      </div>
+      <figcaption>定位图（本调研重绘）。X 轴：通用大众包标注 ↔ 高端专家/frontier-lab 数据；Y 轴：资本轻(bootstrap) ↔ 重度 VC/巨头资本。
+      Surge 独占「右上」——高端专家数据 + 几乎零外部资本；右上偏外的虚线框是相对空的 whitespace：<strong>资本轻 + 垂直专家 eval/RL 环境</strong>。</figcaption>
+    </figure>
+  </section>
+
+  <!-- ④ 融资 timeline -->
+  <section id="funding">
+    <h2><span class="n">④</span>融资 timeline</h2>
+    <p>Surge 的 timeline 很特殊：<strong>前 5 年是一条「没有融资」的直线</strong>（这本身就是它的故事），直到 2025 年才传出首轮——且<strong>多个估值口径打架、且未见任何「已完成」的确认</strong>。下图把「长期无融资 + 近期传闻轮次」一起画出来，传闻节点用虚线/问号标注。</p>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 720 175" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12.5">
+        <line x1="60" y1="80" x2="660" y2="80" stroke="#b9c2e0" stroke-width="2"/>
+
+        <circle cx="90" cy="80" r="7" fill="#43c59e"/>
+        <text x="90" y="58" text-anchor="middle" fill="#5a627a">2020</text>
+        <text x="90" y="104" text-anchor="middle" fill="#1a1f33" font-weight="600">成立</text>
+        <text x="90" y="120" text-anchor="middle" fill="#5a627a" font-size="11">Edwin Chen</text>
+
+        <text x="250" y="68" text-anchor="middle" fill="#138a6e" font-size="11.5">— 5 年零 VC · 第一季度起就盈利 —</text>
+
+        <circle cx="410" cy="80" r="7" fill="#7aa2ff"/>
+        <text x="410" y="58" text-anchor="middle" fill="#5a627a">2024</text>
+        <text x="410" y="104" text-anchor="middle" fill="#1a1f33" font-weight="600">营收传 ~$1.2B</text>
+        <text x="410" y="120" text-anchor="middle" fill="#5a627a" font-size="11">反超 Scale(~$870M)</text>
+
+        <circle cx="540" cy="80" r="7" fill="none" stroke="#ffb454" stroke-width="2" stroke-dasharray="4 3"/>
+        <text x="540" y="58" text-anchor="middle" fill="#5a627a">2025-07</text>
+        <text x="540" y="104" text-anchor="middle" fill="#b3701a" font-weight="600">传首轮 ?</text>
+        <text x="540" y="120" text-anchor="middle" fill="#5a627a" font-size="11">Reuters: 估值 &gt;$15B</text>
+
+        <circle cx="640" cy="80" r="7" fill="none" stroke="#ffb454" stroke-width="2" stroke-dasharray="4 3"/>
+        <text x="640" y="58" text-anchor="middle" fill="#5a627a">2025-07</text>
+        <text x="640" y="104" text-anchor="middle" fill="#b3701a" font-weight="600">在谈 ?</text>
+        <text x="640" y="120" text-anchor="middle" fill="#5a627a" font-size="11">Bloomberg: ≥$25B</text>
+
+        <text x="360" y="150" text-anchor="middle" fill="#d23651" font-size="11">⚠ 虚线节点为媒体传闻 / 未见完成确认；$24B、$30B 口径来源更弱（🔴）</text>
+      </svg>
+      </div>
+      <figcaption>Surge AI 融资时间线（据公开报道整理）。绿/蓝实心=已发生的事实节点，橙色虚线=媒体传闻轮次。</figcaption>
+    </figure>
+    <table>
+      <thead><tr><th>时间</th><th>事件 / 轮次</th><th>金额 / 估值</th><th>投资方 / 来源</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr><td>2020（一说 2021 上线）</td><td>公司成立，纯 bootstrap，零外部资本，<strong>首季即盈利</strong></td><td>—</td><td>Edwin Chen 自筹 / Wikipedia、Sacra、Inc. 口径不一</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2024（全年）</td><td>营收里程碑：传 <strong>~$1.2B</strong>，反超 Scale(~$870M)</td><td>营收 ~$1.0–1.2B</td><td>The Information 首报，Inc./Wikipedia/Sacra 跟进</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2025-07-01</td><td>传<strong>首轮融资</strong>（secondary + 新股，J.P. Morgan 协助）</td><td>至多 $1B / 估值 <strong>&gt;$15B</strong></td><td>Reuters（独家，"seeking"）；潜在投资方传 a16z / Warburg Pincus / TPG（非确认）</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2025-07-30</td><td>同一轮，更高估值口径</td><td>~$1B / 估值 <strong>≥$25B</strong></td><td>Bloomberg（"in talks"）</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2025 末</td><td>更弱来源的估值口径（并列保留）</td><td>~$24B（newsletter）/ ~$30B（LinkedIn 等）</td><td>Today in AI / LinkedIn 等弱来源</td><td><span class="src src-c">🔴</span></td></tr>
+        <tr><td>—</td><td><strong>是否完成 / 最终估值</strong></td><td colspan="2">未找到任何「已 close」的确认 → <strong>未证实</strong></td><td><span class="src src-c">🔴</span></td></tr>
+      </tbody>
+    </table>
+    <p>融资节奏佐证了阶段判断：<strong>赛道整体融资极热</strong>（2025 一年内 Mercor/Turing/Invisible/Micro1/Snorkel/Toloka 接连大额融资），而 Surge 偏偏是「最晚才被迫接触资本」的那个——这既强化了它「资本效率怪物」的人设，也说明<strong>当 VC 都想挤进来时，赛道已不再早期</strong>。</p>
+  </section>
+
+  <!-- ⑤ 公司速览 -->
+  <section id="snapshot">
+    <h2><span class="n">⑤</span>公司速览</h2>
+    <table>
+      <tbody>
+        <tr><td>是什么 / 定位</td><td>给前沿大模型实验室供「高质量人类数据」的公司：RLHF 偏好数据、专家级标注、模型评测(eval)、RL 训练环境。口号 <em>“Human Intelligence for AGI”</em> <span class="src src-a">🟢</span>。主打区别于 MTurk 式廉价众包的<strong>高质量</strong>。</td></tr>
+        <tr><td>产品</td><td>数据标注/反馈平台，把原始文本/代码/图像/对话转成结构化训练数据；标注员叫 <strong>“Surgers”</strong>（精选专家网络）；含 RLHF（实时打分/改写更优回答）、red-teaming，并向 <strong>evals + RL 环境</strong>延伸（公开提到 AdvancedIF / EnterpriseBench / Hemingway-bench / RL Environments）<span class="src src-b">🟡</span>。</td></tr>
+        <tr><td>团队</td><td><strong>Edwin Chen</strong>（创始人兼 CEO）：MIT 念数学/CS/语言学（是否毕业说法不一）；曾在 <strong>Google、Facebook、Twitter</strong> 做研究科学家，当过 <strong>Dropbox 数据科学总监</strong>，早年在 Clarium（Thiel 对冲基金）做算法交易 <span class="src src-b">🟡</span>。台裔，2025 年以 37 岁登 Forbes 400（传最年轻者之一、净值约 $18B、持股约 75%）<span class="src src-b">🟡</span>。全职员工 <strong>~110–130 人</strong>（口径不一，曾用「不到 100 人」叙事）<span class="src src-b">🟡</span>；contractor 网络传 ~1M（总池）/ ~50k「专家级」（活跃）<span class="src src-c">🔴</span>。</td></tr>
+        <tr><td>商业模式</td><td>按数据项目向 labs/企业收费；<strong>客户高度集中</strong>（传 ~12 家 frontier labs 撑起 $1B+ 营收）<span class="src src-b">🟡</span>。客户中 <strong>Anthropic 有官方 case study（一手证实，含 red-teaming）</strong><span class="src src-a">🟢</span>，Google 常被点名 <span class="src src-b">🟡</span>，OpenAI/Meta/Microsoft 多为传闻 <span class="src src-c">🔴</span>。</td></tr>
+        <tr><td>状态</td><td>San Francisco；<strong>盈利、bootstrap</strong>，2025 年才传首轮融资（见 ④，估值口径打架、未证实完成）。Edwin Chen 入选 TIME100 AI 2025 <span class="src src-b">🟡</span>。负面：2025-05 一桩 contractor 用工分类 class-action、透明度投诉 <span class="src src-b">🟡</span>。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ⑥ 中国对标 -->
+  <section id="cn">
+    <h2><span class="n">⑥</span>中国对标：谁在做 RLHF / 专家数据？能复刻吗？</h2>
+    <p>中国 AI 训练数据这条线，<strong>主体仍是「传统标注（语音/图像/自动驾驶）+ 数据集供应」起家，正在往大模型/RLHF 升级</strong>，但「直接服务全球 frontier labs 的专家数据网络」这种打法基本没有对应物——结构性原因后面说。</p>
+    <table>
+      <thead><tr><th>玩家</th><th>是什么 / 现状</th><th>和 RLHF/专家数据的关系</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr><td><strong>海天瑞声</strong>(688787)</td><td>A 股科创板上市，「AI 训练数据第一股」；2024 营收 ~2.37 亿元(+39.5%)、净利 ~1130 万、回到盈利，2025Q1 +72%；储备数据集 1700+、覆盖 200+ 语言；在布局具身智能数据 + 出海标注。<strong>注：英文品牌 “Speechocean” 是其语音数据线，同一家、非独立公司。</strong></td><td><strong>最接近高端：</strong>明确提供 SFT / <strong>RLHF</strong> / DPO + 模型 eval 数据集，向大模型升级；但规模（~$33M）与 Surge($1.2B) 完全不在一个量级。</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td><strong>数据堂</strong>(Datatang)</td><td>老牌数据公司（NEEQ 831428），2024-01 起启动北交所上市辅导，冲「AI 训练数据第二股」；有 DataPlus+ 数据工厂、隐私计算。</td><td>年报点名训练数据正从传统 AI 转向 ChatGPT 式大模型、RLHF 拉动增长；但仍以<strong>传统采集/标注为主</strong>。</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td><strong>整数智能</strong>（MooreData）</td><td>数据服务创业公司，自动标注平台 MooreData；服务智能驾驶/GenAI/具身智能，1000+ 客户；2024-08 拿数千万级 A 轮。</td><td>覆盖预训练/SFT/RLHF/benchmark，自动化为主；客户多为国内大模型厂与车企，非专家-RLHF 优先。</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td><strong>曼孚科技</strong>（MindFlow SEED）</td><td>第三代 MindFlow SEED 平台，引入驾驶数据 RLHF + 大模型自动标注；2025 自动驾驶数据标注 TOP 榜居前。</td><td>自动驾驶为主，叠加 RLHF 式方法。<strong>（注：MindFlow=曼孚，非整数智能。）</strong></td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td><strong>云测数据</strong>(Testin)</td><td>测试公司 Testin（云测）旗下感知数据标注平台（图像/语音/文本），自称高精度。</td><td>偏传统感知/自动驾驶标注。</td><td><span class="src src-c">🔴</span></td></tr>
+        <tr><td><strong>Appen 中国</strong>（澳鹏）</td><td>Appen 全球转型中，<strong>中国 GenAI 数据是其少数增长点</strong>。</td><td>把全球众包打法落到中国，承接 GenAI 数据。</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td><strong>大厂自建</strong>（字节/阿里/百度）</td><td>主流大模型厂多<strong>自建数据/标注团队与工具</strong>（如字节 Xpert、阿里云 RLHF 标注工具），把高价值数据收回内部。</td><td>RLHF/SFT/eval 大量在内部完成，外采更多是低端/补充产能；不对外卖「专家网络」。</td><td><span class="src src-c">🔴</span></td></tr>
+      </tbody>
+    </table>
+    <div class="callout note">
+      <span class="label">能否复刻「专家数据网络」打法</span>
+      <strong>短期难、但有垂直 whitespace。</strong> 复刻 Surge 的核心障碍有三：①<strong>客户在哪</strong>——Surge 的钱来自全球 frontier labs，地缘/数据安全让中国厂很难拿到「服务美国 labs」这块需求；国内对标客户（DeepSeek/Qwen/豆包/文心等 + 大厂）外采高端 RLHF 的预算与意愿都远小于 OpenAI/Anthropic，且倾向自建；②<strong>专家池与单价</strong>——Surge/Mercor 模式建立在「按小时付 PhD/资深工程师 $50–95」的高端供给上，国内此类专家更稀缺、更可能被大厂内部吸收，本土玩家普遍卷「低成本 + 自动化」而非「高端专家」；③<strong>语言/合规/出海</strong>——服务海外 labs 涉及数据合规与信任摩擦。
+      whitespace 在于：<strong>面向国产模型的中文/多语种垂直专家数据（医疗、法律、金融、理工竞赛级）+ eval/benchmark + red-teaming 产品 + 具身智能/agent 轨迹数据</strong>——海天瑞声「具身智能数据 + 出海」、整数智能那批「行业专家参与的高精度标注」正朝这个方向走，但目前还远没有出现「不到百人做 10 亿营收」的中国版 Surge。
+    </div>
+  </section>
+
+  <!-- ⑦ 创业 idea 借鉴 -->
+  <section id="idea">
+    <h2><span class="n">⑦</span>创业 idea 借鉴</h2>
+    <div class="callout insight">
+      <span class="label">Whitespace / 机会</span>
+      矩阵里相对空的格子：<strong>① 垂直科学/医疗/法律专家的 eval &amp; RL 环境数据</strong>——大家都在抢「通用专家供给」，但把某个高门槛垂直域（如临床、药化、量化金融、形式化数学）做成「专家池 + 可复用 RL 环境 + 公开 benchmark」的，几乎没人占满；
+      <strong>② eval-as-a-product</strong>——目前只有 Scale(SEAL/HLE)、Mercor(APEX) 把公开 benchmark 做成品牌护城河，绝大多数玩家（含 Surge）只把 eval 当服务，谁先在某垂直域立起「事实标准 benchmark」，谁就拿到 labs 的入口与信任；
+      <strong>③ 中立性即护城河</strong>——Meta 收 Scale 后 labs 集体外逃「找中立供应商」，一个明确「不拿任何 lab/巨头钱、纯中立」的高端数据商，本身就是卖点（Surge 的 bootstrap 故事正好踩中）。
+    </div>
+    <h3>现有玩家共同短板（unmet needs）</h3>
+    <p>① <strong>营收/质量口径不透明</strong>——全行业 ARR 多为 gross、聚合器数据可信度低，客户难横向比「单位成本的数据质量」，谁能给出可验证的质量指标谁就赢信任；
+    ② <strong>专家供给的真实性与防作弊</strong>——marketplace 普遍靠 AI 面试筛人，但「专家是否真专家、是否用 AI 代答」是公认痛点，标注质量的可审计性是缺口；
+    ③ <strong>利益冲突</strong>——绑定某巨头（Scale-Meta）会吓跑其它 labs，中立供给稀缺；
+    ④ <strong>合成数据的边界</strong>——RLAIF/合成数据在替代低端人工，但「最难的人类判断」仍替代不了，谁能讲清「哪部分必须真人、哪部分可合成」并据此定价，谁更有定价权。</p>
+    <h3>Why now（为什么现在值得做）</h3>
+    <p>① <strong>预训练语料见顶</strong>——模型继续变强从「读更多网页」转向「更难的人类判断信号」，需求结构性右移到高端专家数据；
+    ② <strong>Meta 收 Scale（2025-06）是分水岭</strong>——一夜之间「中立高端供给」成了稀缺品，需求侧重新洗牌；
+    ③ <strong>AI 化选人/质检让资本效率暴涨</strong>——Surge「不到百人做 $1B」、Mercor/Micro1 用 AI 面试官规模化筛专家，证明这门生意能用很少的人跑很大的盘；
+    ④ <strong>eval 成为新战场</strong>——模型能力逼近人类专家后，「怎么衡量」本身变成高价值产品。</p>
+    <h3>可借鉴的打法 + 相邻机会</h3>
+    <ul>
+      <li><strong>borrowable：</strong>(a) <strong>bootstrap + 极致资本效率</strong>——靠盈利而非烧钱增长，既保留全部股权又天然「中立」，是这门高毛利数据生意特别适配的路径；(b) <strong>把「质量」做成可感知的产品叙事</strong>（Surge 长期对外讲「我们比 MTurk 强在哪」、发 toxicity/profanity 开源数据集做内容营销）；(c) <strong>客户极度集中但黏性高</strong>（少数 frontier labs 撑起绝大部分营收）——锁定头部客户、做深而非做广。</li>
+      <li><strong>adjacent：</strong>(a) 某<strong>垂直专家域</strong>的数据 + eval + RL 环境一体化（医疗/法律/理工竞赛/量化）；(b) <strong>专家真实性/防作弊基础设施</strong>（给所有 data marketplace 当军火商）；(c) <strong>面向国产模型的中文/多语种高端 RLHF 与 eval</strong>（见中国对标节）；(d) <strong>RL 环境/agent 任务数据</strong>——随 agentic 模型升温，从「打标签」转向「造任务/造环境」。</li>
+    </ul>
+    <div class="callout warn">
+      <span class="label">风险（诚实给）</span>
+      ① <strong>巨头/labs 自建</strong>——最大威胁是需求方把高价值数据收回内部（Meta 直接半收编 Scale），客户即对手；
+      ② <strong>拥挤 + 同质化</strong>——专家 marketplace 一年内冒出一大批，估值已被炒高（Mercor $10B），后来者窗口在收窄；
+      ③ <strong>合成数据/RLAIF 替代</strong>——低端人工被持续蚕食，长期看「必须真人」的边界会缩；
+      ④ <strong>客户集中风险</strong>——少数 labs 撑营收，丢一个大客户（参考 Appen 丢 Google 后崩盘）就伤筋动骨；
+      ⑤ <strong>口径/估值泡沫</strong>——本赛道营收多 gross、估值多传闻，资本退潮时回调风险大。
+    </div>
+  </section>
+
+  <!-- ⑧ 现实判断 -->
+  <section id="take">
+    <h2><span class="n">⑧</span>现实判断</h2>
+    <p>Surge 在格局里的位置相当独特也相当强：<strong>它是唯一靠纯 bootstrap 把高端 frontier-lab 数据做到 $1B+ 量级的玩家</strong>，资本效率、盈利能力、以及「天然中立（从不拿 lab/巨头钱）」三件事叠加，构成了别人难抄的软护城河——尤其在 Meta 收 Scale、labs 集体找中立供给的当下，这个时点对它极其有利。
+    软肋也清楚：① <strong>客户高度集中</strong>，且这些客户（labs）正是最有动力自建数据、把它边缘化的人；② <strong>同质化竞争</strong>——Mercor/Micro1/Turing 在抢同一批专家与同一批客户，且更激进地用资本和公开 benchmark(APEX) 抢心智，而 Surge 至今<strong>没有把 eval 做成公开 benchmark 品牌</strong>，在「标准制定权」上落后；③ <strong>它刚被迫接触资本</strong>，说明再往上走（拓品类、做 eval/RL 环境平台）单靠 bootstrap 可能不够。
+    对「想挤进去的人」而言：通用专家数据这格已经很挤、且巨头随时碾压，<strong>真正的机会在垂直专家域 + eval/RL 环境 + 中立性</strong>这三件没被占满的事上——Surge 证明了这门生意能用很少的人跑很大的盘，但也证明了窗口正在快速关闭。</p>
+    <div class="callout warn">
+      <span class="label">使用提醒</span>
+      本页为对话式调研，信息主要来自公开来源并按等级标注；<strong>Surge 为私有公司、从未公布官方财报</strong>，其营收(~$1.2B)、估值(&gt;$15B~$25B+)、客户名单、专家池规模等关键数字<strong>多为媒体报道或创始人口径，未经独立审计</strong>；融资是否完成<strong>未证实</strong>。引用前请核对最新信息，产品能力未必经独立验证。
+    </div>
+  </section>
+
+  <!-- 出处 -->
+  <section id="src">
+    <h2>出处</h2>
+    <ul style="font-size:13.5px">
+      <li><a href="https://www.surgehq.ai" target="_blank" rel="noopener">Surge AI 官网</a> <span class="src src-a">🟢</span>（口号/产品定位）；GitHub <a href="https://github.com/surge-ai/toxicity" target="_blank" rel="noopener">surge-ai/toxicity</a>、<a href="https://github.com/surge-ai/profanity" target="_blank" rel="noopener">profanity</a> 开源数据集 <span class="src src-a">🟢</span></li>
+      <li><a href="https://en.wikipedia.org/wiki/Surge_AI" target="_blank" rel="noopener">Wikipedia: Surge AI</a> / <a href="https://en.wikipedia.org/wiki/Edwin_Chen" target="_blank" rel="noopener">Edwin Chen</a> <span class="src src-b">🟡</span></li>
+      <li><a href="https://sacra.com/c/surge-ai/" target="_blank" rel="noopener">Sacra — Surge AI（营收/客户/员工/产品线估计）</a> <span class="src src-b">🟡</span></li>
+      <li><a href="https://www.inc.com/brian-contreras/surge-ai-startup-bootstrapped-1-billion-revenue-venture-capital-vc/91205888" target="_blank" rel="noopener">Inc. — bootstrapped to $1B revenue</a> · <a href="https://www.inc.com/sam-blum/bootstrapped-to-1-billion-surge-ai-ceo-edwin-chen-on-how-he-did-it/91207937" target="_blank" rel="noopener">Inc. — Edwin Chen 访谈</a> <span class="src src-b">🟡</span></li>
+      <li><a href="https://www.lennysnewsletter.com/p/surge-ai-edwin-chen" target="_blank" rel="noopener">Lenny's Newsletter — Edwin Chen（客户 Anthropic/Google、不到百人做 $1B）</a> <span class="src src-b">🟡</span></li>
+      <li>Reuters（2025-07-01，估值 &gt;$15B，via <a href="https://money.usnews.com/investing/news/articles/2025-07-01/exclusive-scale-ais-bigger-rival-surge-ai-seeks-up-to-1-billion-capital-raise-sources-say" target="_blank" rel="noopener">US News</a>） <span class="src src-b">🟡</span></li>
+      <li><a href="https://www.bloomberg.com/news/articles/2025-07-30/scale-rival-surge-ai-in-talks-for-funding-at-25-billion-value" target="_blank" rel="noopener">Bloomberg（2025-07-30，估值 ≥$25B）</a> <span class="src src-b">🟡</span></li>
+      <li><a href="https://time.com/collections/time100-ai-2025/7305876/edwin-chen/" target="_blank" rel="noopener">TIME100 AI 2025 — Edwin Chen</a> <span class="src src-b">🟡</span></li>
+      <li>竞品：<a href="https://www.cnbc.com/2025/06/12/scale-ai-founder-wang-announces-exit-for-meta-part-of-14-billion-deal.html" target="_blank" rel="noopener">CNBC — Meta $14.3B 入股 Scale</a>、<a href="https://techcrunch.com/2025/10/27/mercor-quintuples-valuation-to-10b-with-350m-series-c/" target="_blank" rel="noopener">TechCrunch — Mercor $10B</a>、<a href="https://www.turing.com/blog/turing-raises-111m-to-accelerate-the-future-of-agi" target="_blank" rel="noopener">Turing $111M/$2.2B</a>、<a href="https://techcrunch.com/2025/09/12/micro1-a-competitor-to-scale-ai-raises-funds-at-500m-valuation/" target="_blank" rel="noopener">TechCrunch — Micro1 $500M</a>、<a href="https://www.finsmes.com/2025/05/snorkel-ai-raises-100m-in-series-d-funding-at-a-1-3-billion-valuation.html" target="_blank" rel="noopener">Snorkel $1.3B</a>、<a href="https://siliconangle.com/2025/09/16/ai-data-provider-invisible-raises-100m-2b-valuation/" target="_blank" rel="noopener">Invisible $2B+</a>、<a href="https://siliconangle.com/2025/05/07/ai-data-provider-toloka-raises-72m-funding/" target="_blank" rel="noopener">Toloka / Bezos $72M</a>、<a href="https://www.businessnewsaustralia.com/articles/appen-shares-slump-41-per-cent-after-google-terminates--83m-contract.html" target="_blank" rel="noopener">Appen 丢 Google 合同</a> <span class="src src-b">🟡</span></li>
+      <li>中国：<a href="http://star.sse.com.cn/disclosure/listedinfo/announcement/c/new/2025-08-30/688787_20250830_2L0L.pdf" target="_blank" rel="noopener">海天瑞声 2025 半年报</a>、<a href="https://awtmt.com/articles/3706457" target="_blank" rel="noopener">华尔街见闻 — 数据堂启动上市辅导</a>、<a href="https://www.qbitai.com/2023/11/98629.html" target="_blank" rel="noopener">量子位 — 中国 AIGC 数据标注全景报告</a>、<a href="https://finance.sina.com.cn/tech/roll/2025-03-04/doc-inenmxpv5610219.shtml" target="_blank" rel="noopener">新浪 — 2025 自动驾驶数据标注 TOP10</a> <span class="src src-b">🟡</span></li>
+    </ul>
+  </section>
+
+  <footer class="foot">
+    公司竞争格局 / 赛道早期度调研笔记，仅作梳理；信息按来源分级、产品能力未必经独立验证，以官方一手信息为准 · 整理日期 2026-06-16
+  </footer>
+
+</article>
+</body>
+</html>

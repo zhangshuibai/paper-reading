@@ -1572,5 +1572,26 @@
       "A2A"
     ],
     "path": "papers/2606.03755-lap-agent-to-instrument/index.html"
+  },
+  {
+    "slug": "2026-06-16-surge-ai",
+    "title": "Surge AI：RLHF 专家数据赛道的竞争格局与早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://www.surgehq.ai",
+    "code": "",
+    "date": "2026-06-16",
+    "published": "公司调研 2026",
+    "tldr": "纯 bootstrap、零 VC 做到 2024 传 ~$1.2B 营收反超 Scale 的 RLHF/专家数据公司；赛道判 crowded（高端仍有空），whitespace 在垂直专家 eval/RL 环境数据。",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "market-map",
+      "startup-idea",
+      "ai-data",
+      "rlhf",
+      "china"
+    ],
+    "path": "papers/2026-06-16-surge-ai/index.html"
   }
 ]
