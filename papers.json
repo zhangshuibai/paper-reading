@@ -116,6 +116,69 @@
     "path": "papers/2026-06-16-insilico-medicine/index.html"
   },
   {
+    "slug": "2026-06-16-wuxi-apptec",
+    "title": "药明康德 WuXi AppTec：CRDMO 巨头的竞争格局与赛道成熟度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://www.wuxiapptec.com",
+    "code": "",
+    "date": "2026-06-16",
+    "published": "公司调研 2026",
+    "tldr": "CRDMO 一体化药物研发+生产外包巨头（CRO+小分子/寡核苷酸/多肽 CDMO），赛道 mature 巨头主导；最大风险是美国 BIOSECURE Act；创业者最现实的 whitespace 是给 CRO/CDMO 卖铲子的实验室软件/数据层。",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "market-map",
+      "startup-idea",
+      "cro",
+      "cdmo",
+      "china"
+    ],
+    "path": "papers/2026-06-16-wuxi-apptec/index.html"
+  },
+  {
+    "slug": "2026-06-16-cro-industry-landscape",
+    "title": "CRO / CDMO 行业全景：赛道分段早期度与中国创业 whitespace",
+    "authors": "—",
+    "team": "机会扫描",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-16",
+    "published": "机会扫描 2026",
+    "tldr": "CRO/CDMO 是制药公司把研发+生产外包出去的卖铲子赛道;整体 mature(巨头主导、增速7-9%),但按分子×环节切开,TIDES(寡核苷酸+多肽)/ADC/CGT 新分子CDMO产能紧缺双位数增长、AI+CRO(发现端)emerging→crowded、实验室软件数据层(lab OS/LIMS/ELN)国内偏空白仍 emerging;叠加美国 BIOSECURE Act(2025-12 成法)制造友岸/国产替代窗口;给中国创业者最该切的一个=给CRO/CDMO卖铲子的研发数据/实验室软件层。数字口径乱,已多源并列标年份。",
+    "tags": [
+      "AI4S",
+      "startup-idea",
+      "competitive-landscape",
+      "cro",
+      "cdmo",
+      "china",
+      "industry-landscape"
+    ],
+    "path": "papers/2026-06-16-cro-industry-landscape/index.html"
+  },
+  {
+    "slug": "2026-06-16-ai-datacenter-cooling-materials",
+    "title": "AI 数据中心散热「材料」机会扫描：分层赛道早期度与中国创业 whitespace",
+    "authors": "—",
+    "team": "机会扫描",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-16",
+    "published": "机会扫描 2026",
+    "tldr": "AI 算力推高 GPU 机柜功率密度(GB200/GB300 ~120–140kW vs 风冷 ~15–30kW),液冷渗透拐点在 2024H2;散热从机房问题变材料问题——junction→TIM→冷板/均热板→冷却液 每层材料都是瓶颈。普通硅脂/铜冷板已 mature 红海;真正早的是两相介电工质(3M 退出 PFAS 留窗口)、沸腾强化涂层、高导热衬底(diamond/BN/graphene) nascent→emerging。给中国创业者最值得切的 whitespace=用 AI 找 PFAS-free 冷却液/TIM 配方 + 快速实测闭环,配套 immersion 兼容性测试数据库;PFAS 监管+3M 退出+AIDC capex 爆发=国产替代窗口。",
+    "tags": [
+      "AI4S",
+      "startup-idea",
+      "competitive-landscape",
+      "materials",
+      "thermal-management",
+      "datacenter-cooling",
+      "china"
+    ],
+    "path": "papers/2026-06-16-ai-datacenter-cooling-materials/index.html"
+  },
+  {
     "slug": "2026-06-15-agents-for-scientific-discovery",
     "title": "Agent 在科学发现里的应用（文献综述）",
     "authors": "—",
@@ -1383,47 +1446,5 @@
       "mcp",
       "agent"
     ]
-  },
-  {
-    "slug": "2026-06-16-wuxi-apptec",
-    "title": "药明康德 WuXi AppTec：CRDMO 巨头的竞争格局与赛道成熟度调研",
-    "authors": "—",
-    "team": "公司调研",
-    "arxiv": "https://www.wuxiapptec.com",
-    "code": "",
-    "date": "2026-06-16",
-    "published": "公司调研 2026",
-    "tldr": "CRDMO 一体化药物研发+生产外包巨头（CRO+小分子/寡核苷酸/多肽 CDMO），赛道 mature 巨头主导；最大风险是美国 BIOSECURE Act；创业者最现实的 whitespace 是给 CRO/CDMO 卖铲子的实验室软件/数据层。",
-    "tags": [
-      "company",
-      "competitive-landscape",
-      "market-map",
-      "startup-idea",
-      "cro",
-      "cdmo",
-      "china"
-    ],
-    "path": "papers/2026-06-16-wuxi-apptec/index.html"
-  },
-  {
-    "slug": "2026-06-16-cro-industry-landscape",
-    "title": "CRO / CDMO 行业全景：赛道分段早期度与中国创业 whitespace",
-    "authors": "—",
-    "team": "机会扫描",
-    "arxiv": "",
-    "code": "",
-    "date": "2026-06-16",
-    "published": "机会扫描 2026",
-    "tldr": "CRO/CDMO 是制药公司把研发+生产外包出去的卖铲子赛道;整体 mature(巨头主导、增速7-9%),但按分子×环节切开,TIDES(寡核苷酸+多肽)/ADC/CGT 新分子CDMO产能紧缺双位数增长、AI+CRO(发现端)emerging→crowded、实验室软件数据层(lab OS/LIMS/ELN)国内偏空白仍 emerging;叠加美国 BIOSECURE Act(2025-12 成法)制造友岸/国产替代窗口;给中国创业者最该切的一个=给CRO/CDMO卖铲子的研发数据/实验室软件层。数字口径乱,已多源并列标年份。",
-    "tags": [
-      "AI4S",
-      "startup-idea",
-      "competitive-landscape",
-      "cro",
-      "cdmo",
-      "china",
-      "industry-landscape"
-    ],
-    "path": "papers/2026-06-16-cro-industry-landscape/index.html"
   }
 ]

@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 数据中心散热「材料」机会扫描：分层赛道早期度与中国创业 whitespace</title>
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c2330; --ink:#e6edf3; --mut:#9da7b3;
+    --line:#2a3340; --accent:#4ea1ff; --accent2:#7ee787; --warn:#ffb454; --red:#ff6b6b;
+    --chip:#222b39;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    line-height:1.75;font-size:16px;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:920px;margin:0 auto;padding:40px 22px 90px}
+  h1{font-size:30px;line-height:1.35;margin:0 0 10px;letter-spacing:.3px}
+  h2{font-size:22px;margin:46px 0 14px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+  h3{font-size:18px;margin:30px 0 8px;color:#cdd6e0}
+  p{margin:12px 0}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .sub{color:var(--mut);font-size:14.5px;margin:4px 0 0}
+  .lead{font-size:17px;background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--accent);
+    padding:16px 18px;border-radius:10px;margin:22px 0}
+  .tldr{background:linear-gradient(180deg,#15203100,#16243a55);border:1px solid var(--line);
+    border-radius:12px;padding:18px 20px;margin:24px 0}
+  .tldr b{color:var(--accent2)}
+  code{background:#0b0f15;border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:13.5px;color:#d2b8ff}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:18px 0}
+  .grade{font-weight:700;font-size:13px}
+  ul{margin:10px 0;padding-left:22px}
+  li{margin:6px 0}
+  .src{color:var(--mut);font-size:13px}
+  .src a{color:#86b7ff}
+  table{border-collapse:collapse;width:100%;margin:16px 0;font-size:14px;display:block;overflow-x:auto}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:var(--panel2);color:#cdd6e0;font-weight:600}
+  tr:nth-child(even) td{background:#12171f}
+  .tag{display:inline-block;background:var(--chip);border:1px solid var(--line);border-radius:999px;
+    padding:2px 10px;font-size:12.5px;color:#b8c2cd;margin:2px 4px 2px 0}
+  .badge{display:inline-block;border-radius:6px;padding:1px 9px;font-size:12.5px;font-weight:700;letter-spacing:.3px}
+  .b-nascent{background:#3a1d2a;color:#ff9fb5;border:1px solid #5e2a3e}
+  .b-emerging{background:#2a2138;color:#c4a6ff;border:1px solid #44345e}
+  .b-crowded{background:#332a18;color:#ffce7a;border:1px solid #5a4622}
+  .b-mature{background:#1b3329;color:#8fe0b4;border:1px solid #2c5341}
+  .legend span{margin-right:14px;font-size:13px;color:var(--mut)}
+  .note{font-size:13.5px;color:var(--mut);border-top:1px dashed var(--line);margin-top:14px;padding-top:10px}
+  .warnbox{background:#241b10;border:1px solid #4a3717;border-left:3px solid var(--warn);
+    border-radius:10px;padding:14px 18px;margin:18px 0}
+  .redbox{background:#241314;border:1px solid #4a1d1f;border-left:3px solid var(--red);
+    border-radius:10px;padding:14px 18px;margin:18px 0}
+  .figwrap{background:#0b0f15;border:1px solid var(--line);border-radius:12px;padding:16px;margin:22px 0;overflow-x:auto}
+  .figcap{color:var(--mut);font-size:13px;text-align:center;margin-top:8px}
+  .kpi{display:flex;flex-wrap:wrap;gap:12px;margin:18px 0}
+  .kpi div{flex:1 1 160px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+  .kpi b{display:block;font-size:22px;color:var(--accent)}
+  .kpi small{color:var(--mut);font-size:12.5px}
+  hr{border:none;border-top:1px solid var(--line);margin:34px 0}
+  .toc{columns:2;font-size:14.5px;color:#c2ccd6}
+  @media(max-width:600px){.toc{columns:1}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>AI 数据中心散热「材料」机会扫描</h1>
+<p class="sub">分层赛道早期度（nascent/emerging/crowded/mature）与中国创业 whitespace · 机会扫描 2026-06-16</p>
+<p class="sub">视角：<b>材料层</b>（不是机房工程层）。每条关键事实标来源等级 —
+  <span class="grade" style="color:var(--accent2)">🟢 一手</span> /
+  <span class="grade" style="color:var(--warn)">🟡 二手</span> /
+  <span class="grade" style="color:var(--red)">🔴 自述/未核实</span>。
+  数字口径乱的地方并列多源、标年份与单位。
+</p>
+
+<div class="tldr">
+  <p style="margin-top:0"><b>一句话：</b>AI 算力把 GPU 机柜功率密度从风冷的 ~15–30kW/柜 顶到液冷的 ~120–140kW/柜（GB200/GB300），<b>散热从「机房问题」变成「材料问题」——junction→TIM→冷板/均热板→冷却液 这条链上每一层的材料都是瓶颈</b>。</p>
+  <p><b>哪几层还早：</b>普通导热硅脂、铜冷板/热管已是 <span class="badge b-mature">mature</span> 红海；真正早的是 <b>两相介电工质（受 3M 退出 PFAS 重创、替代窗口刚开）</b>、<b>沸腾强化涂层 boiling enhancement coating</b>、<b>高导热衬底/填料（diamond / BN / graphene）</b> 这三层，处在 <span class="badge b-nascent">nascent</span>→<span class="badge b-emerging">emerging</span>。</p>
+  <p><b>给中国创业者最值得切的一个 whitespace：</b>把「AI 找配方」接到散热需求侧拐点——做 <b>PFAS-free 两相/单相介电工质的 ML 辅助配方发现 + 快速实测闭环</b>，配套<b>面向 immersion 的材料兼容性/老化数据库与第三方测试服务</b>。PFAS 监管 + 3M 退出 + 国内 AIDC 资本开支爆发 = 国产替代窗口同时打开。</p>
+</div>
+
+<div class="panel">
+  <b>目录</b>
+  <div class="toc">
+    1. 领域背景速补（只懂 LLM 也能跟上）<br>
+    2. 一句话定位 + why-now：液冷渗透率拐点<br>
+    3. 散热材料分层地图（SVG）<br>
+    4. 按材料类目分赛道：玩家 + 早期度 + 参数口径<br>
+    5. AI4S 角度：用 ML 找散热新材料<br>
+    6. 国产替代 + 需求侧预算<br>
+    7. 给中国创业者的 whitespace（核心）<br>
+    8. 现实判断 + 存疑
+  </div>
+</div>
+
+<!-- ===================== 1. 领域背景速补 ===================== -->
+<h2>1. 领域背景速补（假设你只懂 LLM/ML、不懂热管理材料）</h2>
+<p>这一节把后文第一次出现的术语讲清「是什么 / 为什么难 / 和本篇关系」，术语保留英文+中文解释。读完你应能明白「数据中心散热里，材料到底卡在哪几层、每层有哪些候选材料」。</p>
+
+<h3>为什么 AI 数据中心散热突然成大问题</h3>
+<p>训练/推理的算力堆在 GPU 上，单芯片 <b>TDP（thermal design power，热设计功耗）</b>从 H100 的 <b>700W</b> 涨到 Blackwell B200 的 <b>1000W（风冷）/1200W（液冷）</b>，GB200 超级芯片整封 <b>~2700W</b>。
+<span class="src">🟡 TweakTown，2024：<a href="https://www.tweaktown.com/news/97059/nvidias-full-spec-blackwell-b200-ai-gpu-uses-1200w-of-power-up-from-700w-on-hopper-h100/index.html">B200 1200W vs H100 700W</a></span>。
+把 72 颗 GPU 塞进一个机柜，<b>NVIDIA GB200 NVL72 单柜约 120kW（标称）/ 实际部署 ~132kW</b>，GB300 可达 <b>~140kW</b>，而<b>传统风冷的机柜上限只有约 15–30kW</b>。
+<span class="src">🟡 Tom's Hardware，2025：<a href="https://www.tomshardware.com/pc-components/cooling/the-data-center-cooling-state-of-play-2025-liquid-cooling-is-on-the-rise-thermal-density-demands-skyrocket-in-ai-data-centers-and-tsmc-leads-with-direct-to-silicon-solutions">GB300 up to 140kW，风冷 20–30kW 失效</a>；🟡 Sunbird DCIM：<a href="https://www.sunbirddcim.com/blog/your-data-center-ready-nvidia-gb200-nvl72">GB200 NVL72 ≈120kW</a>。注：NVIDIA 官网产品页<b>不公布</b>单柜 kW 数，故所有 kW 数字均为二手。</span>
+功率密度暴涨约 10 倍，倒逼从风冷转向<b>液冷</b>——这就是 why-now 的物理根因。Vertiv 与 NVIDIA 共同发布的 GB200 NVL72 参考架构按 <b>132kW/机柜、7MW pod</b> 设计。<span class="src">🟢/🟡 <a href="https://investors.vertiv.com/financial-news/news-details/2024/Vertiv-Codevelops-with-NVIDIA-Complete-Power-and-Cooling-Blueprint-for-NVIDIA-GB200-NVL72-Platform/default.aspx">Vertiv×NVIDIA</a></span></p>
+
+<h3>散热路径的层级：热量要一层层传出去，每一层材料都是瓶颈</h3>
+<p>芯片产热后，热量要沿一条「链」一层层往外传，任何一层的材料导热不够，整链就卡住：</p>
+<ul>
+  <li><b>结温 junction</b>：芯片内部最热的点，要控制在硅能承受的温度（一般 &lt;~90–105°C）。</li>
+  <li><b>TIM（thermal interface material，导热界面材料）</b>：填在芯片与散热器之间那层微观空隙的「胶/脂/垫」。两个固体表面看起来贴合，微观上其实有空气缝（空气导热极差），TIM 就是把缝填掉、让热顺利过去。<b>这是离热源最近、最被低估的瓶颈层。</b></li>
+  <li><b>散热器 / 冷板 cold plate / 均热板 vapor chamber / 热管 heat pipe</b>：把热从芯片表面摊开、带走。<b>vapor chamber 均热板</b>和 <b>heat pipe 热管</b>内部靠工质相变循环 + <b>wick 毛细结构</b>把热「泵」走（铜网毛细+纯水的均热板等效导热可达约万级 W/m·K 量级）。</li>
+  <li><b>冷却液 coolant</b>：把热从冷板/浸没槽带到换热器（<b>CDU，冷却液分配单元</b>）。</li>
+  <li><b>换热 → 机房</b>：最后排到外界（这一层是机房工程，本篇<b>不展开</b>）。</li>
+</ul>
+
+<h3>冷却方式谱系</h3>
+<ul>
+  <li><b>风冷 air cooling</b>：靠风扇吹冷空气。物理上限硬——空气分子稀、贴壁少，单纯吹更多风会缩短接触时间，裸面对空气换热 &lt;1 W/cm²，加翅片+强制对流的芯片热流上限约 &lt;100 W/cm²。<span class="src">🟡 Introl：<a href="https://introl.com/blog/liquid-vs-air-cooling-ai-data-centers">空气散热的物理上限</a></span></li>
+  <li><b>direct-to-chip 冷板液冷 cold plate</b>：把通液的金属冷板直接压在芯片上，冷却液在板内微通道流过带热。当前 AI 服务器主流路线。</li>
+  <li><b>浸没式 immersion</b>：把整台服务器泡进<b>介电（绝缘）冷却液</b>里。分两种——<b>单相 single-phase</b>（液体只升温不沸腾，靠泵循环）和<b>两相 two-phase</b>（液体在芯片表面<b>沸腾</b>，靠汽化潜热带走巨量热，再在顶部冷凝回流，效率最高但工程最难）。</li>
+  <li><b>rear-door heat exchanger 后门换热</b>：在机柜后门装液冷换热盘管，是风冷到液冷的过渡形态。</li>
+</ul>
+
+<h3>关键材料类目（后文每一类会单独展开）</h3>
+<ul>
+  <li><b>TIM</b>：导热硅脂 grease / 导热垫 gap pad / 相变 PCM / <b>liquid metal 液态金属</b>（镓基，导热极高但导电、会腐蚀铝）。</li>
+  <li><b>dielectric coolant 介电冷却液</b>（必须绝缘，否则泡着的电路会短路）：碳氢/矿物油、合成酯 synthetic ester、<b>氟化液 fluorinated</b>（如 3M Novec / Fluorinert FC 系列、Solvay Galden）。</li>
+  <li><b>两相沸腾强化涂层 boiling enhancement coating</b>：在芯片/冷板表面做多孔/微纳结构，制造更多「成核点」让液体更易沸腾、提高<b>临界热流密度 CHF（critical heat flux，沸腾失效前能承受的最大热流）</b>。</li>
+  <li><b>vapor chamber 均热板 / heat pipe 热管</b>及其 <b>wick 毛细结构</b>。</li>
+  <li><b>高导热衬底材料</b>：<b>diamond 金刚石、BN 氮化硼、AlN 氮化铝、SiC 碳化硅、graphene 石墨烯、石墨膜</b>——用作散热衬底/扩热片或 TIM 里的高导热<b>填料 filler</b>。</li>
+  <li><b>先进封装散热</b>：chiplet 小芯片、HBM 高带宽内存堆叠，把多块芯片叠在一起，单位面积更热、热更难导出——这是 AI 芯片散热最尖端的难题。</li>
+</ul>
+
+<h3>PFAS：为什么和这篇强相关</h3>
+<div class="warnbox">
+  <b>PFAS（per- and polyfluoroalkyl substances，全氟/多氟烷基物质）</b>= 含 C–F 键的一大类「永久化学品」，在环境里几乎不降解。
+  <b>很多氟化介电冷却液（3M Novec / Fluorinert FC、Solvay Galden）和部分含氟 TIM 本身就是 PFAS。</b>
+  关键事件：<b>3M 于 2022-12-20 宣布将在 2025 年底前退出 PFAS 制造</b>，明确包括「所有 <b>fluoropolymers、fluorinated fluids、PFAS-based additive products</b>」——即 Novec、Fluorinert 全线停产。
+  <span class="src">🟢 3M 投资者关系新闻稿：<a href="https://investors.3m.com/news-events/press-releases/detail/5/3m-to-exit-pfas-manufacturing-by-the-end-of-2025">3M to Exit PFAS Manufacturing by the End of 2025</a>（2022）</span>。
+  叠加 <b>欧盟 REACH 通用 PFAS 限制提案</b>（2023-01 由丹麦/德国/荷兰/瑞典/挪威 5 国提交，覆盖 &gt;10,000 种物质，2025-08 更新背景文件、仍在评估）
+  <span class="src">🟢 ECHA：<a href="https://echa.europa.eu/-/echa-receives-pfass-restriction-proposal-from-five-national-authorities">5 国提案</a> / <a href="https://www.echa.europa.eu/-/echa-publishes-updated-pfas-restriction-proposal">2025 更新</a></span>
+  和 <b>美国 EPA 2024-04 PFAS 饮用水规则</b>——<b>氟化冷却液配方正面临一个被迫替换的窗口期</b>。两相浸没尤其受伤，因为它高度依赖正在停产的氟化工质（3M 一家约占芯片干刻冷媒 ~90% 份额，二手口径）。
+</div>
+
+<!-- ===================== 2. why-now ===================== -->
+<h2>2. 一句话定位 + why-now：液冷渗透率拐点</h2>
+<p><b>定位：</b>这不是「机房空调」生意，而是「<b>每一层散热材料</b>」的生意。AI 算力→功率密度→液冷渗透率拐点，把一条沉睡多年的材料链同时点燃；越靠近芯片（TIM、工质、沸腾表面），越是早期、越缺标准、越有定价权。</p>
+
+<div class="kpi">
+  <div><b>700→1200W</b><small>单芯片 TDP，H100→B200（🟡 TweakTown）</small></div>
+  <div><b>~120–140kW</b><small>GB200/GB300 单柜功率（🟡 Tom's HW/Sunbird）</small></div>
+  <div><b>15→76%</b><small>液冷 AI 服务器渗透率 2024→2026E（🟡 Goldman Sachs 口径之一）</small></div>
+  <div><b>~$3B→$7B</b><small>DC 液冷市场 2025→2029E（🟢 Dell'Oro，厂商收入口径）</small></div>
+</div>
+
+<h3>液冷渗透率（多源、口径打架，并列）</h3>
+<table>
+<thead><tr><th>来源 / 口径</th><th>数字</th><th>年份</th><th>等级</th></tr></thead>
+<tbody>
+<tr><td>Goldman Sachs（液冷 AI 服务器，口径一）</td><td>15%（2024）→ 54%（2025）→ <b>76%（2026E）</b></td><td>2024–26</td><td>🟡 二手转述（GS 原页 403 不可取）</td></tr>
+<tr><td>Goldman Sachs（AI 服务器液冷渗透，口径二）</td><td>23%（2024）→ <b>57%（2026E）</b></td><td>2024–26</td><td>🟡 同上，两套口径并存、未能对齐到单一 GS 源</td></tr>
+<tr><td>TrendForce（GB200/GB300 高端 AI 芯片液冷渗透）</td><td>14%（2024）→ <b>33%（2025）</b></td><td>2024–25</td><td>🟡 行研</td></tr>
+<tr><td>Tom's Hardware（<b>整体</b> DC 冷却市场，非 AI-only）</td><td>液冷占比 ~5%（2015）→ ~10%（2020）→ <b>46%（2024）</b></td><td>2024</td><td>🟡</td></tr>
+<tr><td>Dell'Oro（整体 DC 热管理）</td><td>到 2028 液冷占 <b>&gt;1/3</b>；<b>主流化从 2024 下半年起</b></td><td>2024–28</td><td>🟢 一手分析机构</td></tr>
+</tbody>
+</table>
+<p class="src">来源：<a href="https://www.delloro.com/news/data-center-liquid-cooling-market-to-approach-7-billion-by-2029-as-ai-deployments-accelerate/">Dell'Oro（~$7B by 2029）</a> · <a href="https://www.trendforce.com/presscenter/news/20250724-12653.html">TrendForce 2025</a> · <a href="https://www.tomshardware.com/pc-components/cooling/the-data-center-cooling-state-of-play-2025-liquid-cooling-is-on-the-rise-thermal-density-demands-skyrocket-in-ai-data-centers-and-tsmc-leads-with-direct-to-silicon-solutions">Tom's Hardware 2025</a>。GS 数字经 trade press 转述，原文不可取，故标 🟡。</p>
+
+<h3>市场规模（差异巨大，按口径并列）</h3>
+<table>
+<thead><tr><th>来源</th><th>基年</th><th>终值</th><th>CAGR</th><th>等级</th></tr></thead>
+<tbody>
+<tr><td><b>Dell'Oro</b>（厂商收入口径，最保守也最权威）</td><td>~$3B（2025）</td><td><b>~$7B（2029）</b></td><td>「2025 约翻倍」</td><td>🟢</td></tr>
+<tr><td>Dell'Oro（2024 旧稿）</td><td>—</td><td><b>2024–2028 累计 &gt;$15B</b></td><td>—</td><td>🟢</td></tr>
+<tr><td>Mordor Intelligence</td><td>$5.52B（2025）</td><td>$18.79B（2031）</td><td>22.65%</td><td>🟡</td></tr>
+<tr><td>Grand View Research</td><td>$6.65B（2025）</td><td>$29.46B（2033）</td><td>20.1%</td><td>🟡</td></tr>
+<tr><td>MarketsandMarkets</td><td>$4.07B（2026）</td><td>$27.65B（2033）</td><td>31.5%</td><td>🟡</td></tr>
+</tbody>
+</table>
+<p class="src">来源：<a href="https://www.delloro.com/news/data-center-liquid-cooling-market-to-approach-7-billion-by-2029-as-ai-deployments-accelerate/">Dell'Oro</a> · <a href="https://www.mordorintelligence.com/industry-reports/data-center-liquid-cooling-market">Mordor</a> · <a href="https://www.marketsandmarkets.com/PressReleases/data-center-liquid-cooling.asp">M&amp;M</a>。<b>口径提醒：</b>Dell'Oro 是「厂商收入」、其余调研行是「整体市场价值」（含系统集成/服务），后者天然更大。可引区间：<b>2025/26 约 $4–7B → 2031–33 约 $18–30B，CAGR ~20–31%</b>。</p>
+<p class="redbox" style="margin-top:14px">⚠️ <b>DC 专用 TIM 市场规模</b>没核到可信一手——唯一查到的细分数字（$1.43B→$3.29B，CAGR 9.7%）来自方法不透明的 syndicated 报告，标 🔴 仅供参考。若要可辩护数字，引「整体 TIM 市场」：$4.4B（2024）→ $7.5B（2029），CAGR 11.5%。<span class="src">🟡 BCC Research：<a href="https://www.bccresearch.com/market-research/semiconductor-manufacturing/thermal-interface-materials-technologies-applications-global-markets-report.html">TIM 全市场</a></span></p>
+
+<!-- ===================== 3. SVG 分层地图 ===================== -->
+<h2>3. 散热材料分层地图：一条链，每层标「卡点 + 候选材料 + 代表厂商」</h2>
+<div class="figwrap">
+<svg viewBox="0 0 880 470" width="100%" role="img" aria-label="散热材料分层链路图">
+  <defs>
+    <marker id="arr" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#4ea1ff"/>
+    </marker>
+    <style>
+      .box{fill:#161b22;stroke:#2a3340}
+      .t{fill:#e6edf3;font:600 14px sans-serif}
+      .s{fill:#9da7b3;font:11.5px sans-serif}
+      .h{fill:#4ea1ff;font:700 13px sans-serif}
+      .lane{fill:#0b0f15;stroke:#222b39}
+    </style>
+  </defs>
+
+  <rect class="box" x="20" y="30" width="150" height="92" rx="10"/>
+  <text class="h" x="35" y="54">① junction 结温</text>
+  <text class="s" x="35" y="74">芯片内最热点</text>
+  <text class="s" x="35" y="90">B200 1200W·GB200 2700W</text>
+  <text class="s" x="35" y="106">卡点：硅 &lt;~100°C</text>
+
+  <line x1="170" y1="76" x2="215" y2="76" stroke="#4ea1ff" stroke-width="2" marker-end="url(#arr)"/>
+
+  <rect class="box" x="218" y="20" width="172" height="112" rx="10" stroke="#c4a6ff"/>
+  <text class="h" x="233" y="44" style="fill:#c4a6ff">② TIM 界面材料</text>
+  <text class="s" x="233" y="64">卡点：填微观空隙·热阻</text>
+  <text class="s" x="233" y="82">候选：硅脂/垫/PCM/液态金属</text>
+  <text class="s" x="233" y="100">/ 石墨膜·石墨烯膜</text>
+  <text class="s" x="233" y="118">Honeywell·Dow·信越·汉高·富烯</text>
+
+  <line x1="390" y1="76" x2="435" y2="76" stroke="#4ea1ff" stroke-width="2" marker-end="url(#arr)"/>
+
+  <rect class="box" x="438" y="20" width="172" height="112" rx="10" stroke="#8fe0b4"/>
+  <text class="h" x="453" y="44" style="fill:#8fe0b4">③ 冷板/均热板/热管</text>
+  <text class="s" x="453" y="64">卡点：微通道·wick 毛细</text>
+  <text class="s" x="453" y="82">候选：铜·微通道·3D打印·VC</text>
+  <text class="s" x="453" y="100">高导热衬底：diamond/AlN/BN</text>
+  <text class="s" x="453" y="118">Boyd·CoolIT·奇鋐·双鸿·健策</text>
+
+  <line x1="610" y1="76" x2="655" y2="76" stroke="#4ea1ff" stroke-width="2" marker-end="url(#arr)"/>
+
+  <rect class="box" x="658" y="20" width="200" height="112" rx="10" stroke="#ffce7a"/>
+  <text class="h" x="673" y="44" style="fill:#ffce7a">④ 冷却液 coolant</text>
+  <text class="s" x="673" y="64">卡点：绝缘·沸点·PFAS</text>
+  <text class="s" x="673" y="82">候选：碳氢/合成酯（单相）</text>
+  <text class="s" x="673" y="100">氟化液 Novec/FC/Galden（退场）</text>
+  <text class="s" x="673" y="118">3M(退)·Chemours·Castrol·巨化</text>
+
+  <text class="h" x="20" y="178">冷却方式谱系（越往右、芯片越近、材料越早期）</text>
+
+  <rect class="lane" x="20" y="195" width="200" height="70" rx="9"/>
+  <text class="t" x="34" y="222">风冷 air</text>
+  <text class="s" x="34" y="242">&lt;~30kW/柜 · 已到物理墙</text>
+  <text class="s" x="34" y="258"><tspan style="fill:#8fe0b4">mature</tspan>（出局中）</text>
+
+  <rect class="lane" x="232" y="195" width="200" height="70" rx="9"/>
+  <text class="t" x="246" y="222">冷板 direct-to-chip</text>
+  <text class="s" x="246" y="242">~100 W/cm² · AI 服务器主流</text>
+  <text class="s" x="246" y="258"><tspan style="fill:#8fe0b4">mature</tspan>（先进结构 emerging）</text>
+
+  <rect class="lane" x="444" y="195" width="200" height="70" rx="9"/>
+  <text class="t" x="458" y="222">单相浸没 single-phase</text>
+  <text class="s" x="458" y="242">碳氢/合成酯 · PUE&lt;1.1</text>
+  <text class="s" x="458" y="258"><tspan style="fill:#c4a6ff">emerging</tspan></text>
+
+  <rect class="lane" x="656" y="195" width="202" height="70" rx="9"/>
+  <text class="t" x="670" y="222">两相浸没 two-phase</text>
+  <text class="s" x="670" y="242">沸腾·&gt;250 W/cm² · 工质受 PFAS 冲击</text>
+  <text class="s" x="670" y="258"><tspan style="fill:#ff9fb5">nascent→emerging</tspan></text>
+
+  <text class="h" x="20" y="312">芯片热流密度阶梯（W/cm²，🟡 Introl/Tom's HW）</text>
+  <rect class="lane" x="20" y="328" width="838" height="120" rx="9"/>
+  <text class="s" x="40" y="356">裸面对空气换热 &lt;1 W/cm²</text>
+  <text class="s" x="40" y="382">风冷（加翅片+强制对流）芯片上限 &lt;~100 W/cm²（常引 ~37 W/cm²）</text>
+  <text class="s" x="40" y="408">单相 direct-to-chip ~100 W/cm² · 两相浸没 ~250 W/cm²（≈10× 风冷），可上探 &gt;1000 W/cm²</text>
+  <text class="s" x="40" y="434">现状参考：Blackwell Ultra ~1400W / ~2850mm² ≈ <tspan style="fill:#ffce7a">49 W/cm²</tspan>；2028 单芯片或达 ~4.4kW，逼近并越过风冷天花板</text>
+</svg>
+<div class="figcap">图：散热材料分层链路（①→④）+ 冷却方式谱系 + 热流密度阶梯。越靠近芯片、越往两相走，材料越早期、越缺标准、越有 whitespace。</div>
+</div>
+
+<!-- ===================== 4. 分赛道 ===================== -->
+<h2>4. 按材料类目分赛道：代表玩家 + 早期度 + 关键参数口径</h2>
+<p class="legend">早期度档位：
+  <span class="badge b-nascent">nascent</span> 还在研发/极少玩家 ·
+  <span class="badge b-emerging">emerging</span> 商业化早期、标准未定 ·
+  <span class="badge b-crowded">crowded</span> 玩家众多、巨头已进 ·
+  <span class="badge b-mature">mature</span> 红海、指标公认。
+</p>
+
+<table>
+<thead><tr><th>材料类目</th><th>早期度</th><th>有公认指标?</th><th>巨头是否已进</th></tr></thead>
+<tbody>
+<tr><td>TIM（硅脂/垫）</td><td><span class="badge b-mature">mature</span></td><td>有（W/m·K，虽口径乱）</td><td>是（全到齐）</td></tr>
+<tr><td>TIM：液态金属 / 高纵向导热石墨烯膜</td><td><span class="badge b-emerging">emerging</span></td><td>部分</td><td>部分</td></tr>
+<tr><td>介电冷却液（碳氢/合成酯单相）</td><td><span class="badge b-emerging">emerging</span></td><td>弱（无统一替代标准）</td><td>是（化工巨头进场）</td></tr>
+<tr><td>介电冷却液（PFAS-free 两相工质）</td><td><span class="badge b-nascent">nascent</span>→<span class="badge b-emerging">emerging</span></td><td>无</td><td>Chemours/三星/NTT 入场</td></tr>
+<tr><td>沸腾强化涂层 boiling enhancement coating</td><td><span class="badge b-nascent">nascent</span></td><td>无（多内嵌不外卖）</td><td>否（专利/实验室为主）</td></tr>
+<tr><td>冷板 / 均热板 / 热管（基础）</td><td><span class="badge b-mature">mature</span></td><td>有</td><td>是（台系集中）</td></tr>
+<tr><td>先进结构：3D 打印冷板 / 新 wick</td><td><span class="badge b-nascent">nascent</span>→<span class="badge b-emerging">emerging</span></td><td>无</td><td>探路中</td></tr>
+<tr><td>高导热衬底/填料（diamond/BN/graphene）</td><td><span class="badge b-nascent">nascent</span>→<span class="badge b-emerging">emerging</span></td><td>有 bulk 值、无器件标准</td><td>晶圆厂探路</td></tr>
+</tbody>
+</table>
+
+<h3>4.1 TIM 导热界面材料 — 整体 <span class="badge b-mature">mature</span>，但液态金属 / 高端石墨烯膜仍 <span class="badge b-emerging">emerging</span></h3>
+<p><b>玩家：</b>国际 Honeywell、Dow（Dowsil）、Shin-Etsu 信越、Henkel（Bergquist）、Parker Lord、Indium、Laird/DuPont；国内 <b>中石科技、碳元科技、富烯科技、天奈科技（CNT）、苏州天脉、德邦科技</b> 等。</p>
+<p><b>参数口径（W/m·K，厂商口径水分大，务必带测法）：</b></p>
+<table>
+<thead><tr><th>类目</th><th>典型导热系数</th><th>说明 / 风险</th><th>早期度</th></tr></thead>
+<tbody>
+<tr><td>导热硅脂 grease/paste</td><td>~3–10（高端更高）</td><td>已是标准品，普通硅脂是红海</td><td><span class="badge b-mature">mature</span></td></tr>
+<tr><td>导热垫 gap pad</td><td>~1–15</td><td>厚度可控、易装配</td><td><span class="badge b-mature">mature</span></td></tr>
+<tr><td>相变材料 PCM</td><td>类硅脂量级</td><td>受热软化贴合，高功率场景</td><td><span class="badge b-crowded">crowded</span></td></tr>
+<tr><td>液态金属 liquid metal（镓基）</td><td>~20–80+</td><td><b>导热顶尖但导电、腐蚀铝、需绝缘封边</b>；已用于部分高端笔电/PS5，DC 采用仍谨慎</td><td><span class="badge b-emerging">emerging</span></td></tr>
+<tr><td>石墨膜 / 石墨烯膜（面内）</td><td>面内 300–1900（合成石墨膜）</td><td>面内极高、<b>纵向(through-plane)才是芯片散热关键、数值低得多</b>——别被面内数字误导</td><td><span class="badge b-emerging">emerging</span></td></tr>
+</tbody>
+</table>
+<p class="src">🟡 综述/专利数据：合成石墨膜面内 <a href="https://www.allpcb.com/allelectrohub/high-thermal-conductivity-graphite-films-and-thermal-grade-polyimide-processes">300–1900 W/m·K</a>，最薄 ~0.01mm；液态金属/石墨烯复合膜 through-plane 实测可低至 ~0.42 W/m·K（<a href="https://www.sciencedirect.com/science/article/abs/pii/S2352940722002517">ScienceDirect</a>）——印证「面内 vs 纵向」口径陷阱。国内：中石科技合成石墨膜导热达 ~1200 W/m·K、量供华为/比亚迪；碳元科技 0.025mm 超薄石墨片进三星链；富烯做石墨烯 TIM。<a href="https://www.cls.cn/detail/1338798">🟡 财联社</a>。另：CMU 衍生 TIM 初创 NovoLINC 称热阻 &lt;1 mm²·K/W（TDK Ventures/M Ventures 投，2025-12），但属纳米结构工程、<b>无证据其 TIM 由 AI 发现</b>。</p>
+<div class="note"><b>信号：</b>玩家数多、巨头全到齐、有公认 W/m·K 指标、进各大供应链 → 普通 TIM 是 <b>mature 红海</b>。早期度只剩在「液态金属规模化用于 DC」「高纵向导热石墨烯膜」这两个口子。工信部 2025 把<b>高导热石墨烯 TIM</b>列入未来产业创新清单（2026 目标纵向 &gt;300 W/m·K、热阻 &lt;0.05 K·cm²/W）。</div>
+
+<h3>4.2 介电冷却液 dielectric coolant — 氟化液受 PFAS 重创，<b>合成酯/碳氢替代 + 两相工质 = <span class="badge b-emerging">emerging</span> 窗口</b></h3>
+<p><b>玩家：</b>3M（<b>退出</b>）、Chemours、Solvay/Syensqo、Castrol（BP）、Shell、ExxonMobil、Engineered Fluids、Submer/GRC（自有液）；国内 <b>新宙邦（Capchem，含氟海斯福）、巨化（巨芯）、中化蓝天（昊华科技）</b>。</p>
+<table>
+<thead><tr><th>路线</th><th>代表产品 / 玩家</th><th>关键参数（带口径）</th><th>PFAS / 早期度</th></tr></thead>
+<tbody>
+<tr><td>氟化两相工质</td><td>3M Novec 649（退）</td><td>沸点 <b>49°C</b>、GWP ~1、液体导热 ~0.059–0.063 W/m·K、介电强度 ~40kV(2.54mm)<br><span class="src">🟢 3M datasheet</span></td><td>是 PFAS·停产 → 留出替代窗口</td></tr>
+<tr><td>氟化两相工质</td><td>Fluorinert FC-72（退）</td><td>沸点 56°C、介电强度 38kV、介电常数 1.76 <span class="src">🟡</span></td><td>是 PFAS·停产</td></tr>
+<tr><td>氟化单相/换热</td><td>Solvay Galden PFPE</td><td>沸点 55–270°C、介电强度 40kV、体电阻率 1.5×10¹⁵ Ω·cm <span class="src">🟢 Syensqo</span></td><td><b>仍是 PFAS（PFPE 未被欧盟豁免）</b></td></tr>
+<tr><td><b>新两相工质（Novec 替代）</b></td><td><b>Chemours Opteon 2P50</b>（HFO）</td><td>零 ODP、GWP 远低；2023 公布研发，2025 联合 NTT DATA/日比谷工程全规模试用、<b>三星已认证</b>、目标 2026 上市 <span class="src">🟢 Chemours</span></td><td><span class="badge b-emerging">emerging</span> 抢占窗口</td></tr>
+<tr><td>碳氢/合成单相（PFAS-free）</td><td>Castrol ON、Shell、ExxonMobil、Engineered Fluids（ElectroCool）、Submer SmartCoolant、GRC ElectroSafe</td><td>可生物降解、非卤代；<b>但只能单相、且高于燃点(如 Submer 174°C)可燃</b> <span class="src">🔴 多为厂商自述</span></td><td><span class="badge b-emerging">emerging</span></td></tr>
+</tbody>
+</table>
+<p class="src">来源：<a href="https://www.chemours.com/en/news-media-center/all-news/press-releases/2025/samsung-electronics-successfully-qualifies-chemours-opteon-two-phase-immersion-cooling-fluid">Chemours×三星 认证</a> · <a href="https://www.castrol.com/en/global/corporate/products/data-centre-and-it-cooling/immersion-cooling-fluids.html">Castrol ON</a> · <a href="https://submer.com/immersion-fluids/">Submer 流体</a>。</p>
+<div class="warnbox"><b>单相 vs 两相现状：</b>单相占浸没收入约 <b>65–80%（2024，口径不一）</b>。<span class="src">🟡 <a href="https://www.futuremarketinsights.com/reports/immersion-cooling-market">FMI</a></span>
+两相被 3M 退出 + PFAS 规则<b>打击最重</b>（工质停产）；两相更难还因：①氟化工质成本约比碳氢单相<b>贵一个数量级</b>、单机柜要 300+ 加仑；②槽体须<b>蒸汽密封</b>防贵液跑掉、维护更难；③部分两相部署因 PFAS 健康诉讼<b>暂停</b>。<span class="src">🟡 <a href="https://www.datacenterdynamics.com/en/news/two-phase-cooling-will-be-hit-by-epa-rules-and-3ms-exit-from-pfas-forever-chemicals/">DCD</a> · <a href="https://www.grcooling.com/two-phase-versus-single-phase-immersion-cooling/">GRC</a></span></div>
+<div class="note"><b>信号：</b>巨头（3M 退、Chemours/三星/NTT 进场）+ 还没出现公认替代标准 + 国内刚起量 → <b>介电工质是整条链里「材料学」含量最高、最值得切的 emerging 层</b>，尤其是 PFAS-free 两相工质。</div>
+
+<h3>4.3 两相 immersion + 沸腾强化涂层 — two-phase <span class="badge b-emerging">emerging</span> / 涂层 <span class="badge b-nascent">nascent</span></h3>
+<p><b>系统玩家（单/两相分清）：</b></p>
+<table>
+<thead><tr><th>厂商</th><th>类型</th><th>近期动态 / 融资</th><th>等级</th></tr></thead>
+<tbody>
+<tr><td>LiquidStack</td><td>两相浸没（+DTC）</td><td>源自 Allied Control→Bitfury→2021 独立(Wiwynn 投)；<b>Trane Technologies 拟整体收购</b>（2025-26）</td><td>🟡</td></tr>
+<tr><td>ZutaCore</td><td>两相 direct-on-chip</td><td><b>$100M C 轮（2026-06，三菱电机/Carrier/三星参投，估值约 $600M、累计约 $200M）</b>，75+ 部署</td><td>🟡</td></tr>
+<tr><td>Accelsius</td><td>两相 direct-to-chip</td><td>源自 Nokia 贝尔实验室；A 轮 $24M(2024)、<b>B 轮 $65M（2026-01，Johnson Controls 领投，Legrand 战投）</b></td><td>🟡</td></tr>
+<tr><td>GRC（Green Revolution Cooling）</td><td><b>单相</b>浸没</td><td>2009 创立；2025-06 三星 Ventures 新进（金额未披露）</td><td>🟢/🔴</td></tr>
+<tr><td>Submer</td><td><b>单相</b>浸没</td><td>巴塞罗那；<b>$55.5M 成长轮（2024-10，M&amp;G 领投）</b>，累计约 $102M</td><td>🟢/🟡</td></tr>
+</tbody>
+</table>
+<p class="src">来源：<a href="https://siliconangle.com/2026/06/02/zutacore-raises-100m-scale-waterless-cooling-ai-data-centers/">ZutaCore C 轮</a> · <a href="https://www.coolingpost.com/world-news/jci-closes-65m-investment-in-accelsius/">Accelsius B 轮</a> · <a href="https://www.datacenterdynamics.com/en/news/submer-secures-555m-funding-to-scale-immersion-cooling/">Submer</a> · <a href="https://www.meawards.ie/news/trane-technologies-to-acquire-liquidstack/">Trane×LiquidStack</a>。</p>
+<p><b>沸腾强化涂层 boiling enhancement coating（材料/表面工程，最 nascent）：</b>在芯片/冷板表面做<b>多孔/微纳结构</b>（烧结、电镀、冷喷等），通过①提高成核位点密度②毛细回液③气液通道分离，提高沸腾换热系数(HTC)与 <b>CHF</b>。量化（实验级）：烧结铜微孔涂层水中 HTC 可达 ~400 kW/m²·K（约 8× 光铜）、CHF +~100%；纳米涂层 CHF 提升可达 ~81.6%；多尺度电镀涂层热阻降 56%、核温降 18–26°C。<span class="src">🟢 <a href="https://www.sciencedirect.com/science/article/pii/S1738573316300018">Nucl. Eng. &amp; Tech. 2016</a> · <a href="https://pubs.rsc.org/en/content/articlehtml/2023/na/d2na00669c">RSC Nanoscale Adv. 2023</a> · <a href="https://www.sciencedirect.com/science/article/abs/pii/S0017931009005481">纳米涂层 CHF</a></span>。商业化少数玩家：Wieland Microcool（MDT 增强沸腾表面）、3M Boiling Enhancement Coating（~100µm 多孔金属涂层，二手转述）；ZutaCore/Accelsius 把涂层<b>内嵌</b>在自家蒸发器里、<b>不外卖、配方不披露</b>。</p>
+<div class="note"><b>信号：</b>玩家少、无公认指标、巨头主要通过投资/收购卡位（Vertiv 收 GRC、Trane 收 LiquidStack、三菱/Carrier 投 ZutaCore、JCI 投 Accelsius） → 两相系统 emerging、<b>「可独立贴上去」的商品化沸腾涂层这层材料几乎空白 nascent，且与「材料发现」最贴近</b>。</div>
+
+<h3>4.4 冷板 / 均热板 / 热管材料 — <span class="badge b-mature">mature</span>，但先进结构 <span class="badge b-emerging">emerging</span> / <span class="badge b-nascent">nascent</span></h3>
+<p><b>玩家：</b>Boyd（NVIDIA GB200 NVL72 推荐厂商）、CoolIT、Asetek、JetCool（已并入 Flex，2024-11）、Vertiv；台系热模组 <b>奇鋐 AVC、双鸿 Auras、健策 Jentech、Cooler Master、Delta</b>；陆系英维克、高澜等。资本动作：<b>CoolIT 由 KKR(2023,~$270M) → Ecolab 拟 $4.75B 收购（2026，约 15× 回报）</b>；Asetek 2024 把数据中心液冷资产组合「休眠/求售」、转聚焦 SimSports（注：并非「退出数据中心」的简单措辞）。</p>
+<ul>
+  <li>材料/结构：<b>铜冷板 + 微通道 microchannel、3D 打印冷板、vapor chamber 均热板 + wick 毛细</b>。Blackwell 占 NVIDIA 2025 高端 GPU 出货 &gt;80%、带动液冷渗透上行。<span class="src">🟡 <a href="https://www.trendforce.com/presscenter/news/20250724-12653.html">TrendForce</a></span></li>
+  <li>供应链份额（行研口径）：<b>奇鋐 AVC</b> 据传拿下 GB200 水冷板较大份额；<b>双鸿 Auras</b> 液冷营收占比从 2024 的 ~12% 升向 2025 的 &gt;40%、自研 3D Loop VC 可应对 TDP 至 1600W；<b>健策 Jentech</b> 是全球前三 vapor chamber 供应商、推 VC+微通道一体化 lid。<b>NVIDIA Vera Rubin（2H2026）冷板点名 AVC/Cooler Master/Jentech/Delta 四家</b>。<span class="src">🟡 DigiTimes / CommonWealth / KGI 转述</span></li>
+  <li><b>3D 打印冷板（nascent）：</b>Fabric8Labs 用 ECAM 电化学增材（铜，33µm 分辨率、免后处理）做 AI-optimized 冷板，与 Wiwynn（Computex/OCP 2025）、Asetek（Computex 2024）合作。<span class="src">🟢/🟡 <a href="https://www.prnewswire.com/news-releases/fabric8labs-to-showcase-ecam-enabled-cold-plate-with-wiwynn-at-computex-2025...">PRNewswire</a></span></li>
+</ul>
+<div class="note"><b>信号：</b>有成熟供应商、铜/微通道是标准工艺、份额向台系集中、巨头化工/暖通公司大手笔收购整合（Ecolab、Trane、JCI、Flex）→ 基础冷板是 mature；早期度在「3D 打印复杂流道」「VC+微通道一体化」「高导热衬底替铜」这些先进结构。</div>
+
+<h3>4.5 高导热衬底 / 封装散热材料（diamond、BN、AlN、SiC、graphene）— <span class="badge b-nascent">nascent</span>→<span class="badge b-emerging">emerging</span>，最贴近 AI4S 材料发现</h3>
+<p>当芯片热流逼近风冷天花板，扩热/衬底材料的<b>体导热</b>就成了限制。参考量级（材料学公认值，bulk）：</p>
+<table>
+<thead><tr><th>材料</th><th>体导热 ~W/m·K</th><th>角色 / 成熟度</th></tr></thead>
+<tbody>
+<tr><td>diamond 金刚石（CVD）</td><td>~2000</td><td>顶级扩热片/衬底，TSMC 等探索直接贴硅；贵、工艺难 → <span class="badge b-nascent">nascent</span></td></tr>
+<tr><td>graphene 石墨烯（面内理论）</td><td>~2000–5000（理论）</td><td>面内极高、纵向/规模化是难点 → <span class="badge b-emerging">emerging</span></td></tr>
+<tr><td>AlN 氮化铝</td><td>~150–200</td><td>成熟陶瓷绝缘衬底（功率/封装） → <span class="badge b-crowded">crowded</span></td></tr>
+<tr><td>BN 氮化硼（h-BN/c-BN）</td><td>面内高、绝缘</td><td>常作 TIM 高导热<b>填料</b> → <span class="badge b-emerging">emerging</span></td></tr>
+<tr><td>SiC 碳化硅</td><td>~120–490（视形态）</td><td>功率器件衬底为主 → <span class="badge b-crowded">crowded</span></td></tr>
+<tr><td>铜 / 铝（参照）</td><td>~400 / ~200</td><td>现行冷板/扩热基准</td></tr>
+</tbody>
+</table>
+<p><b>先进封装散热难题：</b>chiplet/2.5D/3D 把多块芯片+HBM 叠在一起，单位面积更热、热要穿过更多界面层导出——这是 AI 芯片散热最尖端、也最需要「新材料」的地方（高导热填料、嵌入式微流道、diamond 中介层等）。</p>
+<div class="note"><b>信号：</b>多在研发/早期、无统一商用指标、巨头/晶圆厂在探路 → <b>这一层 nascent→emerging，且最适合用 AI4S（MLIP/生成模型）去做材料发现</b>。</div>
+
+<!-- ===================== 5. AI4S ===================== -->
+<h2>5. AI4S 角度：用 ML 找散热新材料（呼应「AI 找新材料」主线）</h2>
+<p>把<b>材料发现</b>接到<b>散热需求侧拐点</b>，是这篇最「性感」的连接点。可切的方向：</p>
+<ul>
+  <li><b>发现新介电冷却液配方（最直接的一击）：</b>用分子生成 + 性质预测（沸点/介电常数/粘度/导热/PFAS-free）筛 Novec 替代工质。已有 <b>Org-Mol</b>（3D transformer）从数百万自动构建的酯类分子里筛浸没冷却液、test R²&gt;0.95，<b>并实验验证了 2 个候选</b>——这是少有的「ML + 实测」冷却剂发现工作。<span class="src">🟢 npj Comput. Mater. 11:224 (2025) / <a href="https://arxiv.org/abs/2501.09896">arXiv:2501.09896</a></span></li>
+  <li><b>高导热 TIM / 填料：</b>通用 MLIP（MatterSim、Meta eSEN/OMat24、MACE、GRACE-2L 等）已近 DFT 精度算声子/晶格热导，是热学高通量筛选的真正使能技术；TIM 复合导热 GNN 报 MAE 0.18 W/m·K、约 30× 加速。<span class="src">🟢 <a href="https://arxiv.org/abs/2412.16551">npj CM 2025</a> · 🟡 arXiv:2311.03139</span></li>
+  <li><b>沸腾强化表面：</b>DNN/物理信息 NN 已能预测/优化微柱/微通道核态沸腾换热（HTC/CHF），但多停在「预测/优化」、缺「设计→制造→实测」端到端闭环。<span class="src">🟢 arXiv:2501.16867</span></li>
+  <li><b>高导热衬底/填料：</b>高通量筛 BN/diamond 复合、晶界工程；介电材料 ML 引导搜索已合成出 CsTaTeO6、Bi2Zr2O7 等新候选。<span class="src">🟡 <a href="https://www.cell.com/cell-reports-physical-science/fulltext/S2666-3864(24)00546-0">Cell Rep. Phys. Sci. 2024</a></span></li>
+</ul>
+<div class="redbox">
+  <b>诚实给「能不能做出来 + 验证周期」：</b>
+  ① <b>旗舰生成模型并不针对散热：</b>微软 MatterGen 的条件是化学/对称/电子/磁/力学（体模量），<b>不含热导/冷却剂</b>；DeepMind GNoME 高亮的是电池/超导/电子，<b>热导/冷却剂不在其列</b>（且 2025 末有报道指 GNoME 库存在重复结构争议）。<span class="src">🟢 <a href="https://www.nature.com/articles/s41586-025-08628-5">MatterGen Nature</a> · <a href="https://www.nature.com/articles/s41586-023-06735-9">GNoME Nature</a></span>
+  ② <b>瓶颈在合成+实测：</b>散热材料的核心物性（导热、沸点、CHF、长期老化、与金属/密封件兼容）很难只靠算就定，必须真合成、真上测试台跑——合成一个晶体可超 1 年、再测数年；介电工质还要过电气安全/相容/可靠性/客户认证，周期以<b>年</b>计。
+  ③ <b>创业现状：</b>MIT Tech Review 2025 的 AI 材料发现公司名单里<b>几乎没有专做热/冷却/TIM/冷却剂的</b>——这正说明它是 whitespace。AI4S 在这里的现实价值是「<b>缩小搜索空间 + 主动学习挑实验</b>」，护城河在「<b>生成模型 + 自动化实测闭环(self-driving lab) + 老化/兼容性数据</b>」，而非单纯预测模型。这与本仓库其它 AI4S 解读（自驱实验室、势函数大模型）的判断一致。
+</div>
+
+<!-- ===================== 6. 国产替代 ===================== -->
+<h2>6. 国产替代 + 需求侧预算：PFAS 监管 × 3M 退出 × AIDC 资本开支爆发</h2>
+<p><b>三重窗口叠加：</b>① PFAS 监管收紧（欧盟 REACH + 美 EPA）；② 3M 2025 年底停产 Novec/FC 留出供给真空（3M 约占芯片干刻冷媒 ~90%，二手口径）；③ 国内 AI 数据中心（AIDC）资本开支爆发、且有「自主可控」诉求。</p>
+<p><b>需求侧预算（云厂 capex，多为 🟡）：</b>阿里 2025-02 宣布未来 3 年云+AI 基建投入 <b>≥RMB 3800 亿</b>（超过去十年总和，🟢 阿里官方）；腾讯 2024 capex <b>RMB 768 亿</b>（较 2023 的 239 亿三倍多增，🟡 CNBC）；字节 2025 capex 计划 <b>&gt;RMB 1500 亿</b>（约 US$20.6B，🟡 Reuters）。国内液冷服务器市场 2024 = <b>US$2.37B（+67% YoY）</b>、&gt;23 万台，2024–2029 CAGR ~46.8% 至约 US$16.2B（🟡 IDC 经 Webull）。政策：MIIT 要求大型数据中心 PUE 2025 起 &lt;1.3。</p>
+<table>
+<thead><tr><th>类目</th><th>国内玩家与动态</th><th>等级</th></tr></thead>
+<tbody>
+<tr><td>含氟介电工质</td><td><b>新宙邦/Capchem</b>（子公司海斯福）HFE+PFPE 已规模用于半导体工艺冷却+数据中心浸没，产能称 ~5500 吨；「Boreaf」系列被列为 3M 退出受益标的</td><td>🟢/🟡 <a href="https://www.capchem.com/Products_1/32.html">官网</a></td></tr>
+<tr><td>含氟介电工质</td><td><b>巨化</b> 自研「巨芯」冷却液，子公司浙江创氟高科建 5000 吨/年浸没冷却液项目（投资额各源不一、需谨慎）；国产电子氟化液对标 3M。中国数据中心浸没氟化液需求预计 2026 &gt;3 万吨（约 RMB 46 亿，🟡 未来智库）</td><td>🟡</td></tr>
+<tr><td>含氟介电工质</td><td><b>中化蓝天</b>（已注入昊华科技，2024-06 证监会核准）做低 GWP 浸没式电子氟化液</td><td>🟢/🟡 <a href="https://www.sinochem.com/zhjtwap/xwzx/gdwdt/2024/10/I1294310407514619904.html">中化</a></td></tr>
+<tr><td>液冷系统/集成</td><td><b>英维克</b>（液冷龙头股，9M-2024 营收 RMB 28.72 亿 +38.61%）、<b>高澜股份</b>（少数同时掌握冷板+浸没核心技术，与字节/阿里/腾讯合作，2025 计划向字节交付浸没产品）</td><td>🟡 <a href="https://www.cls.cn/detail/1338798">财联社</a></td></tr>
+<tr><td>云厂自研</td><td><b>阿里</b>以<b>单相浸没（1PIC）</b>为主方向，仁和数据中心整机浸没、PUE ~1.07–1.09，已入 OCP 并计划开源该设计；<b>华为</b> CloudMatrix 384 全液冷、PUE 由 ~2.2 降至 ~1.1、约 80kW/柜</td><td>🟡 <a href="https://www.datacenterdynamics.com/en/news/alibaba-is-developing-its-own-immersion-cooling-tech/">DCD</a></td></tr>
+<tr><td>TIM/石墨膜</td><td>中石科技（~1200 W/m·K 石墨膜、量供华为/比亚迪）、碳元、富烯（石墨烯 TIM）、天奈（CNT）；工信部 2025 把高导热石墨烯 TIM 列入未来产业清单</td><td>🟡 <a href="https://www.cls.cn/detail/1338798">财联社</a></td></tr>
+</tbody>
+</table>
+
+<!-- ===================== 7. whitespace ===================== -->
+<h2>7. 给中国创业者的 whitespace（核心）</h2>
+<p>把「哪几格没人占/国内空白」拆出来，每条标 why-now + 拥挤度 + 风险。客户高度集中在<b>几家云厂（阿里/腾讯/字节/华为）+ 服务器 OEM（浪潮/工业富联等）</b>——这是机会也是风险。</p>
+
+<div class="panel">
+  <h3 style="margin-top:0">① PFAS-free 两相介电工质 + 配套沸腾涂层 <span class="badge b-emerging">emerging</span> / <span class="badge b-nascent">nascent</span></h3>
+  <p><b>why-now：</b>3M 停产 Novec/FC 留出供给真空，Chemours Opteon 2P50 刚起量、远未标准化；两相工质 + 表面成核是「材料+表面工程」双壁垒。<b>拥挤度：低</b>（国内几乎空白，国内多在做含氟单相/工艺冷媒，专攻两相工质+涂层的稀缺）。<b>风险：重资产化工产能、电气安全/可靠性认证周期以年计、客户集中。</b></p>
+</div>
+<div class="panel">
+  <h3 style="margin-top:0">② AI 驱动的冷却液/TIM 配方发现 + 快速实测闭环 <span class="badge b-nascent">nascent</span></h3>
+  <p><b>why-now：</b>替代窗口要求「短时间内试出大量配方」，正是 ML 缩小搜索空间 + self-driving lab 的强项；与用户一直在挖的「AI 找新材料」直接接上，且全球专做「AI 找冷却剂」的商业公司目前几乎未找到（Org-Mol 是学术先例）。<b>拥挤度：极低</b>。<b>风险：必须真合成真测、护城河在数据与实测闭环而非模型本身、验证周期长。</b></p>
+</div>
+<div class="panel">
+  <h3 style="margin-top:0">③ 高导热填料 / 石墨烯散热膜（纵向导热）<span class="badge b-emerging">emerging</span></h3>
+  <p><b>why-now：</b>chiplet/HBM 先进封装把热挤到更小面积，纵向(through-plane)高导热是真痛点；工信部已把高导热石墨烯 TIM 列入未来产业清单。<b>拥挤度：中</b>（面内石墨膜已 crowded，但<b>纵向高导热</b>仍空）。<b>风险：厂商 W/m·K 口径水分大、要拿真器件级热阻/可靠性说话。</b></p>
+</div>
+<div class="panel">
+  <h3 style="margin-top:0">④ 面向 immersion 的材料兼容性数据库 + 第三方测试服务 <span class="badge b-nascent">nascent</span></h3>
+  <p><b>why-now：</b>浸没液会泡到主板、连接器、密封件、光模块——<b>长期相容性/老化/溶胀数据极缺、又是采购决策的硬门槛</b>；做「中立的测试+数据」既轻资产又卡在所有玩家上游，还能反哺方向①②的配方闭环。<b>拥挤度：极低</b>。<b>风险：要建实测能力与公信力、商业化节奏取决于行业标准（如 OCP Immersion）成型速度。</b></p>
+</div>
+
+<!-- ===================== 8. 现实判断 ===================== -->
+<h2>8. 现实判断 + 存疑</h2>
+<ul>
+  <li><b>已是红海、别碰：</b>普通导热硅脂/导热垫、基础铜冷板/热管 —— 玩家多、指标公认、份额向台系集中、巨头大手笔整合（Ecolab 收 CoolIT、Trane 收 LiquidStack、JCI 投 Accelsius），新进入者没空间。</li>
+  <li><b>真早期、值得切：</b>PFAS-free 两相工质、沸腾强化涂层、高纵向导热膜/填料、AI 配方发现 + 实测闭环、immersion 兼容性测试服务。越靠近芯片、越往两相走，材料越早。</li>
+  <li><b>参数口径警告：</b>导热系数 W/m·K 厂商数字水分大——<b>面内 vs 纵向(through-plane)差几个数量级</b>、测法不同不可比；引用必须带「谁的口径/测法/方向」。介电工质要看真实工况下的沸点/介电强度/老化，而非 datasheet 理想值。均热板「等效导热万级 W/m·K」是系统等效值、非材料体导热。</li>
+  <li><b>市场规模差异：</b>Dell'Oro（厂商收入）最保守可信、调研行（整体市场价值）天然更大，CAGR 从 ~20% 到 ~31%——别只引一个数。</li>
+</ul>
+<div class="redbox">
+  <b>本页存疑/未核到：</b>
+  ① NVIDIA <b>未官方公布</b>单柜 kW，所有 120–140kW 均为二手；
+  ② Goldman Sachs 液冷渗透率<b>两套口径</b>（15/54/76% vs 23%→57%）并存、未能对齐单一 GS 原文；
+  ③ Novec「2025-03-31 末单 / 2025-12-31 停供」具体日期为 trade press 二手、未对到 3M 一手文件；
+  ④ <b>DC 专用 TIM 市场规模</b>无可信一手；
+  ⑤ 巨化「巨芯」投资额各源不一（疑「亿/十亿」翻译误差）；
+  ⑥ 部分融资/份额（LiquidStack B 轮金额、GRC 2025 轮金额、AVC/Auras 份额）依赖行研（TrendForce/DigiTimes/KGI）、记为 🟡 指示性；
+  ⑦ 国内云厂/玩家动态多为媒体转述（🟡/🔴），交付与份额数字请以最新公告为准；
+  ⑧ 专做「AI 找冷却剂/介电流体」的商业创业公司<b>未找到</b>（仅学术 Org-Mol），故 whitespace ② 判断为「几乎空白」。
+</div>
+
+<hr>
+<p class="sub">机会扫描 · 2026-06-16 · 视角=材料层 · 方法=WebSearch+WebFetch 多源交叉，关键事实标来源等级（🟢一手/🟡二手/🔴自述）。数字口径冲突处并列多源、标年份单位。本页只做<b>材料</b>层机会判断，不构成投资建议。</p>
+
+</div>
+</body>
+</html>
