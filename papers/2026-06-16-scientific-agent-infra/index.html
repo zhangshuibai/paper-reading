@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>科学 agent 基础设施深挖：仪器 MCP 协议层 × agent 评测即服务</title>
+<style>
+  :root{
+    --bg:#0f1115; --card:#171a21; --card2:#1d212b; --ink:#e8eaed; --mut:#9aa3b2;
+    --line:#2a2f3a; --acc:#6ea8fe; --acc2:#9b8cff; --good:#3fb950; --warn:#d29922; --bad:#f85149;
+    --aA:#5ec8d8; --aB:#e0a96d;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans CJK SC","Microsoft YaHei",sans-serif;
+    line-height:1.75;font-size:16px}
+  .wrap{max-width:1000px;margin:0 auto;padding:32px 20px 80px}
+  header.top{border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:8px}
+  h1{font-size:26px;line-height:1.35;margin:0 0 10px}
+  h2{font-size:21px;margin:42px 0 12px;padding-top:14px;border-top:1px solid var(--line)}
+  h3{font-size:17px;margin:26px 0 8px;color:var(--acc)}
+  h4{font-size:15px;margin:18px 0 6px;color:var(--mut);letter-spacing:.03em;text-transform:uppercase}
+  p{margin:10px 0}
+  a{color:var(--acc);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .sub{color:var(--mut);font-size:14px}
+  .pill{display:inline-block;font-size:12px;padding:2px 9px;border-radius:999px;border:1px solid var(--line);
+    background:var(--card2);color:var(--mut);margin:2px 4px 2px 0;white-space:nowrap}
+  .pA{border-color:#2c5c66;color:var(--aA)}
+  .pB{border-color:#6b4f30;color:var(--aB)}
+  .tldr{background:linear-gradient(180deg,#1a1f2b,#171a21);border:1px solid var(--line);
+    border-radius:14px;padding:18px 20px;margin:18px 0}
+  .tldr b{color:var(--ink)}
+  .grade{display:inline-block;font-size:11px;padding:1px 6px;border-radius:6px;margin-left:4px;vertical-align:middle;font-weight:600}
+  .g1{background:#10311b;color:#74e08c;border:1px solid #1c5e33}
+  .g2{background:#3a2f10;color:#e9c46a;border:1px solid #6b4f17}
+  .g3{background:#3a1414;color:#ff8a80;border:1px solid #6b1f1f}
+  .legend{font-size:13px;color:var(--mut);background:var(--card);border:1px dashed var(--line);
+    border-radius:10px;padding:10px 14px;margin:14px 0}
+  .callout{background:var(--card);border-left:3px solid var(--acc);border-radius:0 10px 10px 0;
+    padding:12px 16px;margin:16px 0}
+  .callout.warn{border-left-color:var(--warn)}
+  .callout.bad{border-left-color:var(--bad)}
+  .callout.good{border-left-color:var(--good)}
+  .box{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:16px 0}
+  table{border-collapse:collapse;width:100%;font-size:13.5px;margin:14px 0;display:block;overflow-x:auto}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top;min-width:90px}
+  th{background:var(--card2);color:var(--ink);position:sticky;top:0;font-weight:600}
+  tr:nth-child(even) td{background:#14171e}
+  .y{color:var(--good)}.n{color:var(--bad)}.p{color:var(--warn)}
+  ul,ol{margin:10px 0;padding-left:22px}
+  li{margin:5px 0}
+  .small{font-size:13px;color:var(--mut)}
+  code{background:#0b0d11;border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:13px;color:#d7c3ff}
+  .verdict{display:inline-block;font-weight:700;padding:3px 12px;border-radius:8px;font-size:14px}
+  .v-nascent{background:#3a1414;color:#ff8a80}
+  .v-emerging{background:#3a2f10;color:#e9c46a}
+  .v-crowded{background:#10311b;color:#74e08c}
+  .scale{margin:18px 0}
+  .toc{columns:2;font-size:14px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 22px}
+  .toc a{color:var(--ink)}
+  .twogrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0}
+  @media(max-width:760px){.twogrid{grid-template-columns:1fr}.toc{columns:1}}
+  .tag-a{color:var(--aA);font-weight:700}
+  .tag-b{color:var(--aB);font-weight:700}
+  figure{margin:20px 0;text-align:center}
+  figcaption{font-size:13px;color:var(--mut);margin-top:8px}
+  hr{border:none;border-top:1px solid var(--line);margin:30px 0}
+  .ref{font-size:12.5px;color:var(--mut);word-break:break-all}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <div class="sub">机会扫描 · 深度调研 · 2026-06-16</div>
+  <h1>科学 agent 基础设施深挖：<span class="tag-a">仪器 MCP / agent-to-instrument 协议层</span> × <span class="tag-b">科学 agent 评测即服务（eval-as-a-service）</span></h1>
+  <div class="sub">竞品 / 出处 / 中国创业适配 — 承接「AI4S 卖铲子机会扫描」对这两格的深挖，每条关键事实标来源等级</div>
+  <div style="margin-top:10px">
+    <span class="pill pA">Part A 仪器 MCP</span>
+    <span class="pill pB">Part B agent 评测</span>
+    <span class="pill">competitive-landscape</span>
+    <span class="pill">AI4S</span>
+    <span class="pill">lab-automation</span>
+    <span class="pill">china</span>
+  </div>
+</header>
+
+<div class="legend">
+  <b>来源分级</b>（每条关键事实尽量带可点击出处）：
+  <span class="grade g1">🟢 一手</span> 官网/论文/官方公告原文，已交叉核对
+  <span class="grade g2">🟡 二手</span> 媒体/数据库报道，或部分未独立证实
+  <span class="grade g3">🔴 自述/未证实</span> 公司自述、传闻、或没能核到出处。
+  <br><span class="small">原则：核不到的 URL/数字一律标 🔴 或写「未找到」，绝不编造。融资/估值多为二手数据库口径，引用前请再核一手。</span>
+</div>
+
+<!-- ===================== TL;DR ===================== -->
+<h2 id="tldr">TL;DR</h2>
+<div class="tldr">
+  <p><b>一句话：</b>两格都是 AI4S 的「卖铲子」基础设施——A 格是让 agent <b>真去动手操作实验仪器</b>的协议/编排中间件，B 格是给科研 agent <b>卖可信度量（benchmark / leaderboard / 认证）</b>。两格都很早，但「早」的性质完全不同，对中国创业者的可行性也相反。</p>
+  <p><span class="tag-a">Part A 仪器 MCP：</span><span class="verdict v-nascent">nascent（萌芽）</span>——标准林立未统一（SiLA2 / OPC-UA LADS / Allotrope 各占一摊），「真把 MCP 接到物理仪器」的案例屈指可数（LBNL 的 TEM Agent、InstrMCP），业界刚意识到 MCP 对仪器不够用、于是冒出 <b>LAP</b>（<a href="https://arxiv.org/abs/2606.03755">arXiv 2606.03755</a>）和<b>上海 AI Lab 的 SCP</b>（<a href="https://github.com/InternScience/scp">Science Context Protocol</a>）两个新协议提案。<b>中国适配结论：可做，且上海 AI Lab 已在卡位——切「自驱实验室编排落地 / 国产仪器 agent 化」，付费方（药企、材料厂、国家实验室）真在中国。</b></p>
+  <p><span class="tag-b">Part B agent 评测：</span>科研专用评测 <span class="verdict v-nascent">nascent</span>（几乎全是学术开源、无人商业化）；对比通用 eval 已 <span class="verdict v-emerging">emerging→crowded</span>（Scale / Surge / Mercor / LMArena 估值 $10B–$29B 级）。<b>中国适配结论：作为「卖可信度量」的独立第三方生意，科研评测在中国短期跑不通（付费意愿弱、ground-truth 太贵、公信力要官方背书），更宜作为 A 格或模型公司的附属能力，不建议作为独立创业主轴。</b></p>
+  <p style="margin-bottom:0"><b>哪一格更适合中国早期创业 → <span class="tag-a">A 格（仪器编排 / 自驱实验室）</b></span>。理由：付费方在中国且预算实在、政策（国产替代 + 国家实验室采购）是助力、可借鉴的国外成功商业模式清晰（Emerald Cloud Lab 的「云实验室订阅 + 按实验计费」、Ginkgo 的「foundry 数据飞轮 + Catalyst/EstiMate agent」）。B 格更适合作为能力嵌进 A 格或模型评测平台，而非单独卖。</p>
+</div>
+
+<div class="toc">
+  <b>目录</b><br>
+  <a href="#bg">① 领域背景速补</a><br>
+  <a href="#partA">② Part A：仪器 MCP / agent-to-instrument 协议层</a><br>
+  &nbsp;&nbsp;<a href="#A-def">赛道定义</a> · <a href="#A-matrix">竞品四象限 + 对照矩阵</a> · <a href="#A-mcp">MCP 真接到仪器了吗</a> · <a href="#A-early">早期度</a> · <a href="#A-case">国外成功案例</a> · <a href="#A-china">中国适配四维</a> · <a href="#A-white">whitespace</a><br>
+  <a href="#partB">③ Part B：科学 agent 评测即服务</a><br>
+  &nbsp;&nbsp;<a href="#B-def">赛道定义</a> · <a href="#B-matrix">竞品矩阵</a> · <a href="#B-early">早期度</a> · <a href="#B-case">国外成功案例</a> · <a href="#B-china">中国适配四维</a> · <a href="#B-white">whitespace</a><br>
+  <a href="#concl">④ 合并结论：两格对比 + 取舍建议</a><br>
+  <a href="#caveat">⑤ 现实判断 + 存疑</a>
+</div>
+
+<!-- ===================== 领域背景速补 ===================== -->
+<h2 id="bg">① 领域背景速补（读者只有 LLM/agent 基础）</h2>
+<p>这两格都站在「实验室自动化」和「科研评测」两个对 LLM 圈陌生的领域上。下面把第一次出现的术语讲清「是什么 / 为什么难 / 和本篇关系」，术语保留英文。</p>
+
+<div class="box">
+<h4>A. 让 agent 真去「动手」的世界</h4>
+<ul>
+  <li><b>自驱实验室 self-driving lab / autonomous lab：</b>一套「机器人 + 仪器 + 调度软件 + 决策算法」的闭环系统，能自己<b>提配方 → 跑实验 → 测结果 → 改配方再跑</b>，无需人盯着。<i>为什么难</i>：现实世界有物理状态（试剂会用完、机械臂会撞、反应不可逆、危险操作要安全确认），不像软件那样可随意重试。<i>和本篇关系</i>：A 格就是给这套闭环装上「LLM/agent 大脑」并标准化它和仪器对话的接口。</li>
+  <li><b>lab automation / orchestration（实验室编排）：</b>「编排」= 把移液机器人（pipetting robot）、HPLC（高效液相色谱，分离/纯化分子）、plate reader（酶标仪，读微孔板里的光信号）、synthesizer（合成仪）这些异构设备，按一个实验流程协调起来跑。<i>为什么难</i>：每家厂商的设备 SDK/协议都不一样，像 Windows、Mac、打印机各说各话——编排层就是那个「统一翻译 + 调度」的中间件。</li>
+  <li><b>移液机器人 / 液体处理（liquid handler）：</b>实验室里最常见的自动化设备，用机械臂+移液枪在微孔板（96/384 孔）之间精确吸/打液体，是生物/化学高通量实验的主力。Opentrons、Hamilton、Tecan、Beckman 是主要厂商。</li>
+</ul>
+
+<h4>B. 实验室设备互联标准（这格的「TCP/IP 之争」）</h4>
+<ul>
+  <li><b>SiLA2</b>（Standardization in Lab Automation）：开放、免版税的实验室设备通信标准，2018 年基于 gRPC/Protobuf 重写。把「设备能做什么命令、有什么属性」定义成统一接口。<a href="https://sila-standard.com/">sila-standard.com</a> <span class="grade g1">🟢</span></li>
+  <li><b>OPC-UA LADS</b>（官方全称 <b>Laboratory and Analytical Device Standard</b>，注意常被写作「Agnostic」是早期用法）：把工业界成熟的 OPC-UA 工业通信协议扩展到实验室分析仪器的 companion spec，由 OPC Foundation + 德国 SPECTARIS/VDMA 主导。<a href="https://opcfoundation.org/markets-collaboration/lads/">opcfoundation.org/.../lads</a> <span class="grade g1">🟢</span></li>
+  <li><b>AnIML / Allotrope ADF</b>（数据格式）：实验数据怎么存才能跨厂商/跨实验室读懂。AnIML 是 XML 的开放标准；Allotrope ADF 基于 HDF5+RDF 语义元数据，由大药企联盟推。<a href="https://www.allotrope.org/">allotrope.org</a> <span class="grade g2">🟡</span>。<i>为什么重要</i>：agent 要做决策，必须先能读懂仪器吐出来的数据。</li>
+  <li><b>LIMS / ELN：</b>LIMS（Laboratory Information Management System，管样品/流程/数据）和 ELN（Electronic Lab Notebook，电子实验记录本）是实验室既有的「记账系统」。agent 落地绕不开和它们对接——这是壁垒也是入口。</li>
+</ul>
+
+<h4>C. MCP 与把它用到「仪器」上的设想</h4>
+<ul>
+  <li><b>MCP</b>（Model Context Protocol）：Anthropic 2024 年 11 月提出的开放协议，标准化「agent ↔ 工具/数据源」怎么对话，2025 年被 OpenAI/Google/Microsoft 广泛采纳，成了 agent 接工具的事实标准。<a href="https://modelcontextprotocol.io/">modelcontextprotocol.io</a> <span class="grade g1">🟢</span>。但 MCP 设计的是「agent → 软件工具」这条边。</li>
+  <li><b>把 MCP 用到仪器上为什么不够：</b>仪器操作是<b>有状态、安全攸关、独占占用、物理具身</b>的——你不能像调用一个无状态 API 那样调用一台离心机或电镜。这正是 <b>LAP / SCP</b> 等新协议想补的「agent→仪器」这条边。</li>
+  <li><b>LAP 协议</b>（arXiv <a href="https://arxiv.org/abs/2606.03755">2606.03755</a>）：<span class="grade g1">🟢 已三源核实，真实存在</span>。官方标题 <i>「LAP: An Agent-to-Instrument Protocol for Autonomous Science」</i>，2026-06-02 提交，cs.AI。提出四个物理世界原语：<code>InstrumentCard</code>（签名的能力/物理极限描述）、独占预约（exclusive reservation）、安全握手（safety-fence handshake，密码学绑定操作员确认 token，闸住危险/不可逆操作）、<code>MeasurementResult</code>（带单位 QUDT/UCUM、校准锚定、不确定度的结果 schema）。明确定位为补 MCP（agent↔工具）/ A2A（agent↔agent）未覆盖的 agent↔仪器层，并封装 SiLA2/OPC-UA。<span class="grade g2">🟡 提示：2 周新的提案性预印本，无代码、无实现、无独立采用，别当成已落地标准。</span></li>
+</ul>
+
+<h4>D. 评测侧（Part B 的世界）</h4>
+<ul>
+  <li><b>benchmark / leaderboard / arena：</b>benchmark = 一组带标准答案的题，给模型打分；leaderboard = 把多个模型分数排成榜；arena（对战式评测）= 让两个模型同台答同一问题、人/裁判盲投谁更好，算 Elo（LMArena 是代表）。</li>
+  <li><b>eval-as-a-service：</b>把「评测」做成一门生意——卖订阅看榜、卖第三方认证、卖定制评测咨询、或顺带卖评测用的数据。</li>
+  <li><b>为什么科研 agent 评测比通用 LLM 更难：</b>通用 LLM 评测的 ground-truth（标准答案）相对好搞（人标、考题）；但科研 agent 要验证「这个材料配方对不对 / 这个分子能不能合成」，<b>ground-truth 往往要真做一次实验或跑一次昂贵仿真</b>。这是 B 格商业化最大的死结：可信的答案太贵，便宜的答案不可信。</li>
+</ul>
+</div>
+
+<!-- ===================== PART A ===================== -->
+<h2 id="partA" style="border-top-color:var(--aA)">② <span class="tag-a">Part A：科学仪器 MCP / agent-to-instrument 协议层</span></h2>
+
+<h3 id="A-def">赛道定义</h3>
+<p>让 LLM/agent 真正「动手」操作实验仪器的<b>中间件 / 协议 / 编排层</b>——不是只生成 protocol 文本（那是 ChemCrow、Coscientist 的「大脑」部分），而是把指令<b>落到真实设备</b>：驱动移液机器人、HPLC、酶标仪、合成仪、电镜，处理排队/独占/安全/结果回传。可以把它类比成 AI4S 实验室的「<b>操作系统 + 设备驱动 + MCP 总线</b>」。这一层值钱，是因为它卡在「能跑实验的 agent」和「冷冰冰的厂商设备」之间，谁统一了它，谁就收过路费。</p>
+
+<h3 id="A-matrix">竞品集（四象限）+ 对照矩阵</h3>
+
+<figure>
+<svg viewBox="0 0 760 430" width="100%" style="max-width:760px" role="img" aria-label="仪器MCP四象限地图">
+  <defs>
+    <style>
+      .qt{fill:#9aa3b2;font-size:12px;font-family:sans-serif}
+      .lbl{fill:#e8eaed;font-size:12.5px;font-family:sans-serif}
+      .qbg{fill:#171a21;stroke:#2a2f3a}
+    </style>
+  </defs>
+  <rect x="0" y="0" width="760" height="430" fill="#0f1115"/>
+  <rect class="qbg" x="40" y="30" width="340" height="175" rx="8"/>
+  <rect class="qbg" x="385" y="30" width="335" height="175" rx="8"/>
+  <rect class="qbg" x="40" y="210" width="340" height="195" rx="8"/>
+  <rect class="qbg" x="385" y="210" width="335" height="195" rx="8"/>
+  <text class="qt" x="52" y="50" style="fill:#5ec8d8;font-weight:bold">巨头 / 大平台</text>
+  <text class="qt" x="397" y="50" style="fill:#e0a96d;font-weight:bold">垂直创业（云实验室 / 编排）</text>
+  <text class="qt" x="52" y="230" style="fill:#9b8cff;font-weight:bold">设备 / 机器人厂商（大厂顺手）</text>
+  <text class="qt" x="397" y="230" style="fill:#74e08c;font-weight:bold">开源 / 标准 / 协议提案</text>
+  <text class="lbl" x="52" y="78">Ginkgo Bioworks（Cloud Lab + Catalyst</text>
+  <text class="lbl" x="52" y="98">　+ EstiMate agent；GPT-5 自驱实验室）</text>
+  <text class="lbl" x="52" y="122">Microsoft（M12 投 Artificial）</text>
+  <text class="lbl" x="52" y="146">NVIDIA（NVentures 投 Radical AI）</text>
+  <text class="lbl" x="52" y="170">OpenAI（GPT-5 进 Ginkgo 自驱实验室）</text>
+  <text class="lbl" x="52" y="194">Eli Lilly（与 Strateos 合建云实验室）</text>
+  <text class="lbl" x="397" y="78">Emerald Cloud Lab（ECL + SLL）</text>
+  <text class="lbl" x="397" y="100">Artificial.com（aLab Suite 编排）</text>
+  <text class="lbl" x="397" y="122">Strateos（Cloud Lab + Autoprotocol）</text>
+  <text class="lbl" x="397" y="144">Synthace（Antha 编排既有设备）</text>
+  <text class="lbl" x="397" y="166">Radical AI（自驱材料实验室）</text>
+  <text class="lbl" x="397" y="188">QPillars（MCP+SiLA2，瑞士）</text>
+  <text class="lbl" x="52" y="258">Opentrons（Flex / OT-2，开源 API）</text>
+  <text class="lbl" x="52" y="282">Hamilton（VENUS；参与 SiLA）</text>
+  <text class="lbl" x="52" y="306">Tecan（开源 SiLA2 SDK，BSD-3）</text>
+  <text class="lbl" x="52" y="330">Beckman（与 Automata 押 agentic AI）</text>
+  <text class="lbl" x="52" y="360">镁伽 MegaRobo（中国，生命科学机器人）</text>
+  <text class="lbl" x="397" y="258">SiLA2（gRPC，免版税）· OPC-UA LADS</text>
+  <text class="lbl" x="397" y="282">Allotrope ADF / AnIML（数据格式）</text>
+  <text class="lbl" x="397" y="306">PyLabRobot（MIT，开源 SDK）</text>
+  <text class="lbl" x="397" y="330" style="fill:#74e08c">LAP（2606.03755）· SCP（上海AI Lab）</text>
+  <text class="lbl" x="397" y="354">InstrMCP · TEM Agent（LBNL，真接仪器）</text>
+  <text class="lbl" x="397" y="378" style="fill:#9aa3b2">学术先例：A-Lab · Coscientist · ChemOS</text>
+</svg>
+<figcaption>图 1　仪器 MCP / agent-to-instrument 赛道四象限。注意：右上「垂直创业」最拥挤也最有人付费；右下「开源/标准」林立未统一是这格最大特征，且 2026 年涌现 LAP / SCP 两个 agent↔仪器协议提案。</figcaption>
+</figure>
+
+<h4>竞品对照矩阵（仪器 MCP）</h4>
+<table>
+<thead>
+<tr>
+  <th>玩家</th><th>开放/闭源</th><th>落到真实设备?</th><th>绑定的标准/语言</th><th>目标客户</th><th>商业模式</th><th>含 agent/LLM?</th><th>数据壁垒</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><b>Emerald Cloud Lab (ECL)</b><br><span class="ref"><a href="https://www.emeraldcloudlab.com/">emeraldcloudlab.com</a> <span class="grade g1">🟢</span></span></td>
+  <td>混合：语言 SLL <b>开源 GPL-3</b>（<a href="https://github.com/emeraldsci/SymbolicLabLanguage">repo</a>），云实验室闭源</td>
+  <td class="y">是（200+ 仪器型号，已跑 60 万+ 真实实验）</td>
+  <td>Symbolic Lab Language（基于 Wolfram）</td>
+  <td>biopharma / CRO / 学术（CMU 建大学云实验室）</td>
+  <td>订阅 + lab-as-a-service；入门门槛高、按实验/数据计费</td>
+  <td class="p">非原生；但是 Coscientist（GPT-4）经 prompt→SLL 驱动真实仪器的标杆后端</td>
+  <td>高（全栈实验数据 + Constellation 知识图谱）</td>
+</tr>
+<tr>
+  <td><b>Artificial.com</b><br><span class="ref"><a href="https://www.artificial.com/">artificial.com</a> · <a href="https://arxiv.org/abs/2504.00986">arXiv 2504.00986</a> <span class="grade g1">🟢</span></span></td>
+  <td>闭源（aLab Suite / LabOps）</td>
+  <td class="y">是（经 Lab Gateway 桥接云与现场仪器，对接 Cellario/Momentum 调度器及 Tecan/Thermo/Hamilton/Agilent）</td>
+  <td>HTTPS + <b>gRPC（含 SiLA）</b> + 厂商 SDK + LIMS/ELN</td>
+  <td>biopharma / 合成生物（Thermo Fisher、Beam）</td>
+  <td>企业 B2B SaaS + 现场网关</td>
+  <td class="p">论文明确：核心调度<b>不用 LLM agent</b>，是编排预训练模型 + 启发式约束调度 <span class="grade g1">🟢</span></td>
+  <td>中</td>
+</tr>
+<tr>
+  <td><b>Strateos</b>（原 Transcriptic）<br><span class="ref"><a href="https://strateos.com/">strateos.com</a> <span class="grade g1">🟢</span></span></td>
+  <td>平台闭源；<b>Autoprotocol 开源 BSD-3</b>（<a href="https://github.com/autoprotocol">repo</a>）</td>
+  <td class="y">是（旗舰 Eli Lilly Life Sciences Studio，100+ 仪器）</td>
+  <td><b>Autoprotocol JSON</b>（机器可读实验语言）</td>
+  <td>biopharma（Lilly 既客户又投资人）</td>
+  <td>lab-as-a-service 订阅 + 用量 + 按实验计费</td>
+  <td class="p">无 LLM；code/JSON 控制（pre-LLM 先例）</td>
+  <td>高</td>
+</tr>
+<tr>
+  <td><b>Synthace (Antha)</b><br><span class="ref"><a href="https://www.synthace.com/">synthace.com</a> <span class="grade g2">🟡</span></span></td>
+  <td>Antha 语言曾开源（已休眠）；当前平台闭源 SaaS</td>
+  <td class="y">是，厂商无关（驱动 Tecan/Hamilton/Gilson/Beckman Echo）</td>
+  <td>自有 Go DSL + "Antha Connect" 驱动层（未见 SiLA/OPC）</td>
+  <td>大药企工艺开发 / 合成生物（Merck/Ipsen）</td>
+  <td>企业级 SaaS 订阅（ARR）</td>
+  <td class="p">无嵌入 LLM；定位"AI-Ready Data"喂下游 AI</td>
+  <td>中</td>
+</tr>
+<tr>
+  <td><b>Opentrons / Opentrons AI</b><br><span class="ref"><a href="https://opentrons.com/">opentrons.com</a> · <a href="https://github.com/Opentrons/opentrons">GitHub</a> <span class="grade g1">🟢</span></span></td>
+  <td>硬件 + <b>开源 Apache-2.0</b>（OT-2 开源硬件）；Opentrons AI 后端闭源</td>
+  <td class="y">是（Flex / OT-2，OT-2 起价 ~$10k；机器人 31950 端口暴露 HTTP API）</td>
+  <td>Opentrons Python Protocol API v2 + HTTP REST</td>
+  <td>学术 / biotech / 教育（自动化平民化）</td>
+  <td>卖机器人 + 耗材 + 软件/AI；融资 &gt;$200M 独角兽（SoftBank 领投 C 轮）<span class="grade g2">🟡</span></td>
+  <td class="y">Opentrons AI = 自然语言<b>生成协议代码</b>（非自主驱动；执行仍人发起）</td>
+  <td>低（开放生态）</td>
+</tr>
+<tr>
+  <td><b>Ginkgo Bioworks</b><br>（Cloud Lab + Catalyst + EstiMate）<br><span class="ref"><a href="https://www.ginkgo.bio/">ginkgo.bio</a>（NYSE: DNA）<span class="grade g1">🟢</span></span></td>
+  <td>闭源 foundry；Cloud Lab 对外开放</td>
+  <td class="y">是（RAC 自动化推车 + Cloud Lab 远程接 70+ 仪器；&gt;$1B 自动化投入）</td>
+  <td>专有 <b>Catalyst Automation Control</b>（未用 SiLA 等公开标准）</td>
+  <td>biopharma + 政府/国家实验室（PNNL）</td>
+  <td>foundry 服务 + Datapoints 数据 + Cloud Lab 按用量；FY2025 转向聚焦 Autonomous Labs</td>
+  <td class="y"><b>本报告关键正例</b>：Catalyst Agent（对话式）+ EstiMate（NL 协议→可行性/报价）+ GPT-5 自驱实验室（6 月跑 580+ 板、sfGFP 成本降 ~40%）<span class="grade g2">🟡 厂商稿</span></td>
+  <td>极高（海量生物数据）</td>
+</tr>
+<tr>
+  <td><b>Radical AI</b><br><span class="ref"><a href="https://www.radical-ai.com/">radical-ai.com</a> <span class="grade g2">🟡</span></span></td>
+  <td>闭源（无公开代码/模型；闭环数据为护城河）</td>
+  <td class="y">是（NY 首个全自动材料实验室，~25 合金/天表征：SEM/XRD/XRF…）</td>
+  <td>未披露任何公开标准/协议（专有内部栈）</td>
+  <td>国防 / 半导体 / 核聚变 / 能源（<b>非生物制药</b>）</td>
+  <td>双轨：卖专有材料/部件 + 选择性授权；$55M Seed+（RTX/NVentures/AlleyCorp，2025-07）<span class="grade g2">🟡</span></td>
+  <td class="p">ML + 逆向设计；无来源确认 LLM 直接驱动仪器</td>
+  <td>高（材料合成数据）</td>
+</tr>
+<tr>
+  <td><b>Hamilton / Tecan / Beckman</b><br><span class="ref"><a href="https://sila-standard.com/device_author/hamilton-company/">SiLA 厂商页</a> <span class="grade g2">🟡</span></span></td>
+  <td>专有硬件；<b>Tecan 开源 SiLA2 SDK（BSD-3）</b></td>
+  <td class="y">是（液体处理设备本体）</td>
+  <td>Tecan/Hamilton 参与 SiLA；Beckman 经 Automata 押 agentic AI</td>
+  <td>biopharma / 临床</td>
+  <td>卖设备 + 软件 + 服务</td>
+  <td class="p">Beckman×Automata 押注「AI-ready/agentic」编排 <span class="grade g2">🟡</span></td>
+  <td>中（设备级数据）</td>
+</tr>
+<tr>
+  <td><b>镁伽 MegaRobo（中国）</b><br><span class="ref"><a href="https://en.megarobo.com/">en.megarobo.com</a> <span class="grade g2">🟡</span></span></td>
+  <td>专有</td>
+  <td class="y">是（生命科学实验室自动化机器人）</td>
+  <td>自有栈</td>
+  <td>中国药企 / 诊断 / 合成生物</td>
+  <td>卖自动化方案；累计融资数据库口径约 $4亿+、独角兽级 <span class="grade g3">🔴 数据库口径，谨慎；注册地有冲突</span></td>
+  <td class="p">AI + 机器人</td>
+  <td>中</td>
+</tr>
+<tr>
+  <td><b>SiLA2 / OPC-UA LADS / Allotrope / PyLabRobot / LAP / SCP</b><br><span class="ref">标准 & 开源 & 协议提案层</span></td>
+  <td><b>开放标准 / 开源</b></td>
+  <td class="p">本身不驱动，是「驱动的语言/协议」（PyLabRobot 真能驱动 Hamilton/Tecan/Opentrons）</td>
+  <td>—（它们<i>就是</i>标准）</td>
+  <td>整个生态</td>
+  <td>非营利联盟 / 开源（不直接变现）</td>
+  <td class="p">LAP / SCP 专为 agent↔仪器设计</td>
+  <td>无（公共品）</td>
+</tr>
+</tbody>
+</table>
+<p class="small">关键事实出处：Artificial $21.5M Series A（M12 领投）<a href="https://techcrunch.com/2021/05/18/artificial-raises-21m-led-by-microsofts-m12-for-a-lab-automation-platform-aimed-at-life-sciences-rd/">TechCrunch</a> <span class="grade g1">🟢</span>，技术细节 <a href="https://arxiv.org/abs/2504.00986">arXiv 2504.00986</a>；Coscientist 经 prompt→SLL 驱动 ECL 仪器 <a href="https://www.nature.com/articles/s41586-023-06792-0">Nature 2023</a> <span class="grade g1">🟢</span>；Ginkgo GPT-5 自驱实验室 <a href="https://www.prnewswire.com/news-releases/ginkgo-bioworks-autonomous-laboratory-driven-by-openais-gpt-5-achieves-40-improvement-over-state-of-the-art-scientific-benchmark-302680619.html">PRNewswire（厂商稿）</a> <span class="grade g2">🟡</span>；Tecan 开源 SiLA2 SDK <a href="https://www.sciencedirect.com/science/article/pii/S2472630323000444">SLAS Technology</a> <span class="grade g1">🟢</span>；Beckman×Automata <a href="https://themedicinemaker.com/issues/2026/articles/february/beckman-coulter-and-automatain-agentic-ai-partnership/">The Medicine Maker</a> <span class="grade g2">🟡</span>。<b>提示：Strateos 据报 2023-12 被 Multiply Labs 收购（建议落地前再核一手）。</b></p>
+
+<h3 id="A-mcp">MCP 真的接到物理仪器了吗？（这格最关键的现状）</h3>
+<p>这是本格最值得讲清的一点：<b>「真正用 MCP 驱动物理仪器」的案例屈指可数且极早期</b>。市面上大多数叫「lab MCP」的 server，包的其实是数据库 / web API / 模拟器（UniProt、PDB、PubMed、Qiskit 仿真等），<b>不是仪器</b>，别混淆。按可信度排序：</p>
+
+<div class="box">
+<h4>Tier 1 — 真驱动物理仪器（最强证据）</h4>
+<ul>
+  <li><b>TEM Agent / Foundry MCP（LBNL）</b><span class="grade g1">🟢</span>：arXiv <a href="https://arxiv.org/abs/2511.08819">2511.08819</a>「TEM Agent」（作者 Ercius 等，LBNL Molecular Foundry），用 MCP 把 LLM 接到 Molecular Foundry 的双球差校正<b>透射电镜</b>（经 Gatan DigitalMicrograph），用文本命令统一管理多个 TEM 子系统/数据/算力。<b>国家实验室背书，最可信的真实仪器案例。</b></li>
+  <li><b>InstrMCP</b><span class="grade g1">🟢</span>：<a href="https://github.com/caidish/instrMCP">github.com/caidish/instrMCP</a>，MCP 暴露 <b>QCodes</b> 仪器驱动 + JupyterLab 给 LLM，可读/操作量子器件实验室仪器；有 safe/unsafe 模式，MIT 许可，已测可配 Claude Desktop / Claude Code / Codex CLI。研究原型但工程成熟。</li>
+  <li><b>opentrons-mcp（社区）</b><span class="grade g2">🟡</span>：<a href="https://github.com/yerbymatey/opentrons-mcp">github.com/yerbymatey/opentrons-mcp</a>，经 31950 HTTP API 真控 OT-2/Flex（上传协议、起停 run、归位等）。但<b>个人 hobby 作品、非官方、无 license</b>。值得注意：<b>HighRes × Opentrons 在 SLAS 2026（2026-02 波士顿）</b>用「Opentrons MCP server + OpentronsAI + HighRes Cellario」演示 agent-to-agent 生成 qPCR 工作流——这是最「工业级」的 MCP-in-loop 信号，<b>但仍是会议 demo，非生产</b><span class="grade g2">🟡</span>。</li>
+</ul>
+<h4>Tier 2 — 公开承认 MCP 不够、提出扩展协议（早期 / 实现弱）</h4>
+<ul>
+  <li><b>LAP — Lab/Agent-to-Instrument Protocol</b><span class="grade g1">🟢</span>：arXiv <a href="https://arxiv.org/abs/2606.03755">2606.03755</a>（2026-06，实验家 Shiyanjia Lab）。在 MCP/A2A 上加签名 InstrumentCard、预约/租约、加密 safety-fence 确认令牌、带单位与不确定度的 MeasurementResult；传输兼容 MCP/A2A，封装 SiLA2/OPC-UA。<b>无代码、无实现。</b></li>
+  <li><b>SCP — Science Context Protocol（上海 AI Lab，SAIL）</b><span class="grade g1">🟢</span>：<a href="https://github.com/InternScience/scp">github.com/InternScience/scp</a>，2025-12-30 开源（另见 arXiv 2512.24189）。MCP 的科研扩展，加中央 hub 编排、实验生命周期管理、JSON 实验上下文，连异构科研资源（软件/模型/数据集/工作流/<b>实验室仪器</b>）；配套 Intern-Discovery 平台称 1600+ 工具（生物 45.9% / 物理 21.1% / 化学 11.6%…）<span class="grade g3">🔴 工具数为平台自述</span>。<b>真实仪器控制未公开演示</b><span class="grade g2">🟡</span>，但<b>中国国家队已在卡这个位</b>，对中国创业适配判断极重要。</li>
+</ul>
+<h4>对照 — 真自主、但不走 MCP 的成熟玩家</h4>
+<p class="small">Artificial（SiLA+网关）、ECL（SLL）、Strateos（Autoprotocol JSON）、Synthace（Antha）、Ginkgo（Catalyst 脚本）<b>都已解决「驱动级控制」的难点，但各用专有/非 MCP 路径</b>。PyLabRobot（MIT 开源、硬件无关 SDK，真驱动 Hamilton/Tecan/Opentrons，但走代码生成、无 MCP 层）是<b>最自然的「可 MCP 化」底座</b>。</p>
+</div>
+
+<div class="callout">
+<b>一句话定性：</b>「科学仪器 MCP 协议层」的市场空位，正是——<b>在 Artificial/ECL/Ginkgo/PyLabRobot 这些已经能控制设备的底座<u>之上</u>，补一层标准化的 NL/agent 接口</b>。LAP / SCP 是这层的早期协议提案，TEM Agent / InstrMCP 是早期实现，但<b>没有一个赢家、没有一个已落地标准</b>。
+</div>
+
+<h3 id="A-early">早期度判档</h3>
+<div class="scale">
+<svg viewBox="0 0 760 96" width="100%" style="max-width:760px" role="img" aria-label="Part A 早期度">
+  <rect x="0" y="0" width="760" height="96" fill="#0f1115"/>
+  <line x1="40" y1="58" x2="720" y2="58" stroke="#2a2f3a" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="135" cy="58" r="12" fill="#f85149"/>
+  <text x="135" y="32" fill="#ff8a80" font-size="13" text-anchor="middle" font-family="sans-serif" font-weight="bold">▲ Part A 在这</text>
+  <text x="135" y="86" fill="#9aa3b2" font-size="12" text-anchor="middle" font-family="sans-serif">nascent</text>
+  <text x="320" y="86" fill="#9aa3b2" font-size="12" text-anchor="middle" font-family="sans-serif">emerging</text>
+  <text x="520" y="86" fill="#9aa3b2" font-size="12" text-anchor="middle" font-family="sans-serif">crowded</text>
+  <text x="690" y="86" fill="#9aa3b2" font-size="12" text-anchor="middle" font-family="sans-serif">mature</text>
+</svg>
+</div>
+<p><span class="verdict v-nascent">nascent（萌芽）</span>，理由（信号）：</p>
+<ul>
+  <li><b>标准林立未统一：</b>SiLA2（gRPC 派）、OPC-UA LADS（工业 OPC 派）、Allotrope/AnIML（数据格式派）三摊并存；专为 agent 设计的 LAP（无实现）与 SCP（中国国家队，2025-12 才开源）同期冒头，谁都没赢。<span class="grade g1">🟢</span></li>
+  <li><b>「MCP 真接仪器」案例屈指可数：</b>最硬的只有 LBNL TEM Agent 与 InstrMCP（学术/国家实验室），社区 opentrons-mcp 是 hobby 级，自称 production 的 QPillars 公开 demo 跑在数字孪生上。<span class="grade g2">🟡</span></li>
+  <li><b>巨头未通吃，但在押注：</b>Microsoft（M12 投 Artificial）、NVIDIA（NVentures 投 Radical AI）、OpenAI（GPT-5 进 Ginkgo 自驱实验室）都从外围下注，但没有一家做出「仪器界的 MCP 总线」标准。<span class="grade g2">🟡</span></li>
+  <li><b>开源刚起：</b>PyLabRobot（MIT，硬件无关 SDK，支持 Hamilton/Tecan/Opentrons）是最像「公共基础设施」的项目，但只几百 star 量级，远未到生态规模。<span class="grade g1">🟢</span> <a href="https://github.com/PyLabRobot/pylabrobot">github.com/PyLabRobot</a></li>
+  <li><b>学术先例已证可行、但未平台化：</b>A-Lab、Coscientist 证明了「agent 真能驱动仪器跑出结果」，但每套系统都从零重造 agent↔仪器的连接——这正是 LAP/SCP 论文点名的痛点，也是创业 whitespace 的来源。</li>
+</ul>
+
+<h3 id="A-case">国外成功案例拆解（商业模式怎么跑通）</h3>
+<div class="twogrid">
+<div class="box">
+<h4 style="color:var(--aA)">案例 1：Emerald Cloud Lab（ECL）</h4>
+<p><b>做什么：</b>「<b>云实验室</b>」——科学家在浏览器里用自研的 <b>Symbolic Lab Language (SLL)</b> 写实验，提交给 ECL 的机器人实验室跑，拿回结构化、可直接分析的数据。覆盖 200+ 仪器型号、已跑 60 万+ 真实实验。<span class="grade g1">🟢</span></p>
+<p><b>商业模式：</b>订阅平台 access + 按实验/数据分析计费；用「一年全托管实验室的费用 &lt; 买一台仪器的预付款」打动早期团队。<span class="grade g2">🟡</span></p>
+<p class="small"><b>能复刻的：</b>「把仪器变成云 API + 订阅/按次计费」这条打法在中国可复刻（药企/CRO 愿为产能和复现性付费）。<b>难复刻的：</b>SLL 这种自研语言 + 全栈自营重资产，需要长期资本和仪器 know-how，不是软件团队能快速搭起来的。</p>
+</div>
+<div class="box">
+<h4 style="color:var(--aA)">案例 2：Ginkgo Bioworks（foundry 数据飞轮 + agent）</h4>
+<p><b>做什么：</b>自营巨型 foundry（&gt;$1B 自动化投入），用 <b>Ginkgo Datapoints</b> 卖「AI-ready 高质量生物数据」；2025 推 <b>Cloud Lab</b> + agent 栈：<b>Catalyst Agent</b>（对话式把意图转执行）、<b>EstiMate</b>（读自然语言 protocol、判可行性、给报价）、GPT-5 驱动自驱实验室。<span class="grade g1">🟢</span></p>
+<p><b>商业模式：</b>foundry 服务 + 数据订阅 + Cloud Lab 按用量；护城河是<b>数据飞轮</b>。FY2025 已战略转向聚焦 Autonomous Labs。<span class="grade g2">🟡</span></p>
+<p class="small"><b>能复刻的：</b>「自动化产能 → 标准化数据 → 卖数据/卖模型」的飞轮逻辑，对中国合成生物/材料国家队和大厂很有借鉴价值。<b>难复刻的：</b>需要十亿美元级重资产，早期团队碰不了——但可以做飞轮的「上层 agent / 编排层」那一段。</p>
+</div>
+</div>
+<p class="small">另一组可借鉴：<b>Strateos × Eli Lilly</b> 证明大药企愿为「远程云实验室」买单 <span class="grade g1">🟢</span>；<b>Opentrons</b> 证明「便宜开源硬件 + 自然语言生成 protocol（Opentrons AI）」能做成独角兽规模生态 <span class="grade g2">🟡</span>。</p>
+
+<h3 id="A-china">中国适配（四维）</h3>
+<table>
+<thead><tr><th>维度</th><th>判断</th><th>说明</th></tr></thead>
+<tbody>
+<tr>
+  <td><b>① 客户与付费方在不在中国</b></td>
+  <td class="y">在，且预算实在 <span class="grade g2">🟡</span></td>
+  <td>付费方齐全：创新药企/CRO（药明、康龙等产业链）、材料厂（电池/半导体）、高校与<b>国家实验室</b>（怀柔、合肥等大科学装置）、合成生物公司。痛点真实：招技术员贵、实验复现性差、产能瓶颈。预算量级：单个自动化实验室项目可达数百万至千万人民币级（设备+集成），药企/国家队付得起。镁伽 MegaRobo 已验证国内有这块市场。</td>
+</tr>
+<tr>
+  <td><b>② 国外成功模式哪条能复刻</b></td>
+  <td class="p">部分能 <span class="grade g2">🟡</span></td>
+  <td><b>能复刻：</b>ECL 式「云实验室订阅 + 按实验计费」、Ginkgo 式「自动化→数据飞轮」的<b>上层编排/agent 层</b>、Strateos 式「给大药企做远程托管实验」。<b>难复刻：</b>从零自研一套全球标准（SLL/Autoprotocol 级）以及十亿美元级重资产 foundry——这些靠资本和时间，早期团队不碰。</td>
+</tr>
+<tr>
+  <td><b>③ 政策与数据壁垒</b></td>
+  <td class="y">总体助力 <span class="grade g2">🟡</span></td>
+  <td><b>助力：</b>信创/国产替代直接利好「国产仪器编排中间件」（替代进口 SiLA/OPC 闭源栈）；国家实验室采购倾向国产；自主可控诉求强。<b>更重要的信号：上海 AI Lab 已开源 SCP（Science Context Protocol）</b>，国家队亲自下场做「科研 MCP」，说明政策与生态资源在向这格倾斜——创业公司可借势（建生态/接 SCP）而非对抗。<b>阻力：</b>高端仪器（Hamilton/Tecan）进口受限——但这反过来是国产编排层的机会；生物样本/基因数据出境受《人类遗传资源管理条例》约束，做生物方向需注意。</td>
+</tr>
+<tr>
+  <td><b>④ 团队与技术门槛</b></td>
+  <td class="p">高，但中国队拿得下 <span class="grade g2">🟡</span></td>
+  <td>需要的不是顶级 research 血统，而是<b>仪器/标准 know-how + 系统集成工程量 + 实验室运营经验</b>——这恰是中国制造/自动化团队的强项。门槛在「懂设备协议 + 懂实验流程 + 能把 agent 接到物理世界并保证安全」，工程驱动，可控。比纯算法/模型创业更看苦活，但也更有壁垒、更难被大模型抹平。</td>
+</tr>
+</tbody>
+</table>
+
+<h3 id="A-white">这格最该切的 whitespace</h3>
+<div class="callout good">
+<p><b>切口：做「自驱实验室的编排/agent 落地层」，绑定国产仪器 + 行业垂直闭环交付，并接住 SCP/MCP 生态，而不是去死磕一个全新通用协议标准。</b></p>
+<ul>
+  <li><b>why-now：</b>① MCP/agent 范式 2025 成熟，「让 agent 动手」从科幻变工程问题；② LAP/SCP/TEM Agent 等说明业界刚意识到 agent↔仪器这条边缺标准且尚无赢家——早入场能定义事实标准或吃生态红利；③ 国产仪器 + 信创替代给了「不依赖进口闭源栈」的政策窗口；④ 上海 AI Lab 的 SCP 给了中国创业者一个可对接的本土协议底座；⑤ 国家实验室/大科学装置正大规模自动化升级，是真实采购订单。</li>
+  <li><b>具体打法：</b>选一个垂直（如电池材料 / 抗体筛选 / 合成生物），做「自然语言/agent → 编排既有国产设备 → 安全执行 → 结构化数据回流」的<b>整体交付</b>，按项目+订阅+数据收费。技术上站在 PyLabRobot（开源）肩上，吸收 LAP 的「安全握手/独占预约/结果 schema」思想、接 SCP 生态，落地到国产设备。</li>
+  <li><b>风险（诚实）：</b>① 重——要碰物理硬件、现场集成、安全责任，交付周期长、毛利受集成拖累；② 标准未定，押错协议有返工成本；③ 巨头（镁伽、深势玻尔生态、大药企自建、上海 AI Lab 顺手下沉）可能挤压；④ 客户决策慢（国家队采购周期长）。<b>对冲：</b>先做「软件编排层 + agent」轻资产切入，硬件用合作伙伴的，验证 PMF 后再决定要不要重。</li>
+</ul>
+</div>
+
+<!-- ===================== PART B ===================== -->
+<h2 id="partB" style="border-top-color:var(--aB)">③ <span class="tag-b">Part B：科学 agent 评测即服务（eval-as-a-service）</span></h2>
+
+<h3 id="B-def">赛道定义</h3>
+<p>给 AI4S 模型 / 科研 agent 做 <b>benchmark、leaderboard、arena、第三方评测与认证</b>——卖「可信度量」。买方逻辑：当药企/材料厂要采购或信任一个科研 agent 时，需要一个<b>中立可信的「它到底行不行」的度量</b>。这格的核心矛盾在背景速补已点明：<b>科研 agent 的 ground-truth 太贵</b>（要真做实验或跑昂贵仿真），便宜的答案（人标选择题、文献 QA）又不够说明「能不能真发现」。</p>
+
+<h3 id="B-matrix">竞品 / 项目集 + 矩阵</h3>
+
+<h4>B-1　科研专用 benchmark（多为学术开源，几乎无商业化）</h4>
+<table>
+<thead><tr><th>Benchmark</th><th>评什么</th><th>学科</th><th>开/闭</th><th>第三方独立?</th><th>ground-truth 来源</th><th>谁做的</th></tr></thead>
+<tbody>
+<tr><td><b>ScienceAgentBench</b><br><span class="ref"><a href="https://arxiv.org/abs/2410.05080">arXiv 2410.05080</a> <span class="grade g1">🟢</span></span></td><td>agent 为数据驱动的科学发现写可执行 Python（102 任务/44 篇论文）</td><td>生信/计算化学/GIS/认知神经</td><td>开源</td><td>学术</td><td>专家 co-design 的人工策展答案</td><td>Ohio State（Yu Su 组）</td></tr>
+<tr><td><b>LAB-Bench</b><br><span class="ref"><a href="https://arxiv.org/abs/2407.10362">arXiv 2407.10362</a> <span class="grade g1">🟢</span></span></td><td>生物科研能力 2400+ 多选（LitQA2/ProtocolQA/SeqQA…）</td><td>生物</td><td>开源（含私有测试集）</td><td>私营研究机构</td><td>人工策展 + 人类专家基线</td><td>FutureHouse</td></tr>
+<tr><td><b>ChemBench</b><br><span class="ref"><a href="https://arxiv.org/abs/2404.01475">arXiv 2404.01475</a> <span class="grade g1">🟢</span></span></td><td>化学知识/推理 2700+ 问答，对照专家化学家</td><td>化学/材料/安全</td><td>开源（leaderboard 在 chembench.lamalab.org）</td><td>学术</td><td>专家策展答案</td><td>LamaLab（Jena/EPFL）</td></tr>
+<tr><td><b>BixBench</b><br><span class="ref"><a href="https://arxiv.org/abs/2503.00096">arXiv 2503.00096</a> <span class="grade g1">🟢</span></span></td><td>真实生物数据上多步分析（写/跑 notebook）~53 场景</td><td>计算生物/生信</td><td>开源 Apache-2.0</td><td>私营</td><td>从已发表研究复现的「分析胶囊」</td><td>FutureHouse + ScienceMachine</td></tr>
+<tr><td><b>SciCode</b><br><span class="ref"><a href="https://arxiv.org/abs/2407.13168">arXiv 2407.13168</a> <span class="grade g1">🟢</span></span></td><td>写代码解真实科研问题（80 主题/338 子题）</td><td>16 个自然科学子领域</td><td>开源</td><td>学术+国家实验室</td><td>科学家标注金标准解+测试</td><td>UIUC + Argonne</td></tr>
+<tr><td><b>DiscoveryWorld</b><br><span class="ref"><a href="https://arxiv.org/abs/2406.06769">arXiv 2406.06769</a> <span class="grade g1">🟢</span></span></td><td>走完假设→实验→分析→结论闭环（120 任务）</td><td>8 个虚拟科学主题</td><td>开源</td><td>学术（AI2）</td><td><b>模拟环境</b></td><td>Allen Institute (AI2)</td></tr>
+<tr><td><b>MLAgentBench</b><br><span class="ref"><a href="https://arxiv.org/abs/2310.03302">arXiv 2310.03302</a> <span class="grade g1">🟢</span></span></td><td>agent 自主做 ML 实验（13 任务）</td><td>机器学习/数据科学</td><td>开源</td><td>学术</td><td><b>真实实验</b>（实际跑代码测模型）</td><td>Stanford（SNAP）</td></tr>
+<tr><td><b>CORE-Bench</b><br><span class="ref"><a href="https://arxiv.org/abs/2409.11363">arXiv 2409.11363</a> <span class="grade g1">🟢</span></span></td><td>计算复现已发表论文（270 任务/90 篇）</td><td>CS/社科/医学</td><td>开源</td><td>学术</td><td><b>真实实验输出</b>（CodeOcean 胶囊）</td><td>Princeton（Narayanan 组）</td></tr>
+<tr><td><b>AAAR-1.0</b><br><span class="ref"><a href="https://arxiv.org/abs/2410.22394">arXiv 2410.22394</a> <span class="grade g1">🟢</span></span></td><td>专家级 AI 科研任务（方程推断/实验设计/找弱点/评审）</td><td>AI/ML 研究本身</td><td>开源</td><td>学术</td><td>资深 AI 研究者人工标注</td><td>Penn State</td></tr>
+<tr><td><b>MLIP Arena</b>（材料）<br><span class="ref"><a href="https://github.com/atomind-ai/mlip-arena">GitHub atomind-ai</a> · <a href="https://arxiv.org/abs/2509.20630">2509.20630</a> <span class="grade g1">🟢</span></span></td><td>机器学习原子间势（MLIP）的物理自洽性/反应性/极端稳定性</td><td>计算材料/分子</td><td>开源 Apache-2.0</td><td>学术</td><td><b>DFT 参考 + 物理判据</b></td><td>UC Berkeley/LBNL（atomind-ai）</td></tr>
+<tr><td><b>Matbench Discovery</b><br><span class="ref"><a href="https://matbench-discovery.materialsproject.org/">leaderboard</a> · <a href="https://arxiv.org/abs/2308.14920">2308.14920</a> <span class="grade g1">🟢</span></span></td><td>ML 能量模型预测稳定无机晶体（社区可 PR 提交）</td><td>无机晶体稳定性</td><td>开源 MIT</td><td>学术（Materials Project）</td><td><b>DFT (PBE)</b></td><td>Janosh Riebesell 等</td></tr>
+<tr><td><b>LAMBench</b><br><span class="ref"><a href="https://arxiv.org/abs/2504.19578">arXiv 2504.19578</a> · <a href="https://github.com/deepmodeling/LAMBench">GitHub</a> <span class="grade g1">🟢</span></span></td><td>大原子模型（LAM）作为通用势能面的泛化/适应</td><td>跨域原子模拟</td><td>开源 CC-BY</td><td>社区（DeepModeling）</td><td><b>DFT</b></td><td>DeepModeling / AISI / DP 生态（含中国）</td></tr>
+</tbody>
+</table>
+<div class="callout warn">
+<b>横向观察（关键）：</b>把 ground-truth 排成谱系——<b>人工策展答案</b>（ScienceAgentBench/LAB-Bench/ChemBench/BixBench/AAAR）、<b>真实执行/复现</b>（MLAgentBench/CORE-Bench）、<b>物理模拟</b>（DiscoveryWorld）、<b>DFT 第一性原理</b>（三个材料 benchmark）。<b>没有一个用真实湿实验（wet-lab）做 ground-truth</b>——这正是「eval-as-a-service」最大的空白带，也是它和 Part A（真能跑实验）天然该结合的地方。另：材料/原子势方向是<b>唯一有真正持续运营的「arena/leaderboard」形态</b>（Matbench Discovery 社区 PR、MLIP Arena HF Space、LAMBench AIS Square），其余多是「静态 benchmark + 一篇论文」。
+</div>
+
+<h4>B-2　通用 eval-as-a-service 成功案例（给中国创业者看商业模式）</h4>
+<table>
+<thead><tr><th>玩家</th><th>做什么</th><th>商业模式</th><th>第三方独立?</th><th>融资/估值（标注口径）</th></tr></thead>
+<tbody>
+<tr><td><b>Scale AI</b><br><span class="ref"><a href="https://scale.com/">scale.com</a> <span class="grade g1">🟢</span></span></td><td>数据标注 + 评测（SEAL 榜/红队）</td><td>Data + Eval + API + 项目制</td><td class="p">弱（本质供应商，Meta 入股后更受质疑）</td><td>Meta 投 <b>~$14.3B 换约 49%、估值 ~$29B</b>（2025-06）<span class="grade g1">🟢</span></td></tr>
+<tr><td><b>Surge AI</b><br><span class="ref"><a href="https://surgehq.ai/">surgehq.ai</a> <span class="grade g2">🟡</span></span></td><td>高端专家数据标注/RLHF</td><td>Data + 专家市场（长期 bootstrapped 盈利）</td><td class="n">否</td><td>首轮外部融资在谈，估值 $15B–$25B 口径并存 <span class="grade g3">🔴 均为传闻/在谈</span>；2024 年化营收 ~$1.2B <span class="grade g2">🟡</span></td></tr>
+<tr><td><b>Mercor</b><br><span class="ref"><a href="https://mercor.com/">mercor.com</a> <span class="grade g1">🟢</span></span></td><td>专家数据/评测市场（撮合科学家/医生）</td><td>Data + marketplace（30% 撮合费）</td><td class="p">部分</td><td>Series C <b>$350M @ $10B</b>（2025-10）<span class="grade g1">🟢</span></td></tr>
+<tr><td><b>LMArena</b>（原 LMSYS）<br><span class="ref"><a href="https://lmarena.ai/">lmarena.ai</a> <span class="grade g1">🟢</span></span></td><td>盲投对战式 LLM 排行榜（Elo）</td><td>公司化后 VC 驱动；商业化路径待定</td><td class="p">部分（被论文质疑偏向大厂）</td><td>种子 <b>$100M @ $600M</b>（2025-05，a16z+UC）<span class="grade g1">🟢</span>；Series A $150M @ $1.7B（2026-01）<span class="grade g2">🟡</span></td></tr>
+<tr><td><b>Artificial Analysis</b><br><span class="ref"><a href="https://artificialanalysis.ai/">artificialanalysis.ai</a> <span class="grade g2">🟡</span></span></td><td>独立横评各家 LLM 的智能/价格/速度</td><td>免费站 + <b>企业订阅</b></td><td class="y"><b>是（真中立）</b></td><td>经 AI Grant 拿种子，金额未公开 <span class="grade g3">🔴 未找到</span></td></tr>
+<tr><td><b>Epoch AI</b><br><span class="ref"><a href="https://epoch.ai/">epoch.ai</a> <span class="grade g1">🟢</span></span></td><td>AI 趋势/算力研究；FrontierMath 数学基准</td><td>非营利 + 拨款 + 委托咨询</td><td class="p">部分（FrontierMath 由 OpenAI 出资委托，曾爆披露争议）</td><td>主资助方累计 ~$21.7M <span class="grade g2">🟡</span></td></tr>
+<tr><td><b>METR</b><br><span class="ref"><a href="https://metr.org/">metr.org</a> <span class="grade g1">🟢</span></span></td><td>评前沿 AI 自主能力/风险（task time-horizon）</td><td>非营利/捐赠，<b>明确不收评测费</b></td><td class="y"><b>是（强）</b></td><td>非营利，2023 从 ARC 分拆 <span class="grade g1">🟢</span></td></tr>
+<tr><td><b>Galileo / Patronus / Braintrust / Arize</b><br><span class="ref"><a href="https://galileo.ai/">galileo</a> · <a href="https://www.patronus.ai/">patronus</a> · <a href="https://www.braintrust.dev/">braintrust</a> · <a href="https://arize.com/">arize</a> <span class="grade g1">🟢</span></span></td><td>LLM eval/observability 开发者工具</td><td>订阅 SaaS（让团队评测「自己」模型）</td><td class="n">否（自助平台，非裁判）</td><td>Galileo Series B $45M（2024）；Patronus ~$20M；Braintrust Series B $80M（2026-02）；Arize Series C $70M（2025-02）<span class="grade g2">🟡</span></td></tr>
+<tr><td><b>Hugging Face Open LLM Leaderboard</b><br><span class="ref"><a href="https://huggingface.co/">huggingface.co</a> <span class="grade g1">🟢</span></span></td><td>曾经最中立的开放 LLM 榜</td><td>免费（HF 生态引流）</td><td class="y">是</td><td><b>已于 2025-03 归档/退役</b>（基准失效、转去中心化）<span class="grade g1">🟢</span></td></tr>
+</tbody>
+</table>
+
+<h4>B-3　中国对标</h4>
+<table>
+<thead><tr><th>平台</th><th>后台</th><th>性质</th><th>商业模式</th><th>第三方?</th></tr></thead>
+<tbody>
+<tr><td><b>OpenCompass / 司南</b><br><span class="ref"><a href="https://opencompass.org.cn/">opencompass.org.cn</a> <span class="grade g1">🟢</span></span></td><td>上海 AI 实验室</td><td>非营利科研机构</td><td>开源（Apache-2.0）+ 生态共建，无明确营收</td><td class="p">部分（有自研 InternLM）</td></tr>
+<tr><td><b>FlagEval / 天秤</b><br><span class="ref"><a href="https://flageval.baai.ac.cn/">flageval.baai.ac.cn</a> <span class="grade g1">🟢</span></span></td><td>智源 BAAI</td><td>非营利科研机构</td><td>开源开放，无明确营收</td><td class="p">部分（有自研悟道）</td></tr>
+<tr><td><b>SuperCLUE</b><br><span class="ref"><a href="https://www.superclueai.com/">superclueai.com</a> <span class="grade g2">🟡</span></span></td><td>CLUE 社区/团队</td><td>社区/团队</td><td>评测报告</td><td class="p">自述第三方（用 GPT-4 当裁判，方法论有争议）</td></tr>
+</tbody>
+</table>
+<p class="small">注：中国三家均为<b>机构背书的开源/非营利平台，没有跑通的独立商业模式</b>——这恰恰印证了「评测在中国当独立生意难变现」。它们的价值是生态影响力与品牌，不是营收。</p>
+
+<h3 id="B-early">早期度判档</h3>
+<div class="scale">
+<svg viewBox="0 0 760 120" width="100%" style="max-width:760px" role="img" aria-label="Part B 早期度">
+  <rect x="0" y="0" width="760" height="120" fill="#0f1115"/>
+  <line x1="40" y1="70" x2="720" y2="70" stroke="#2a2f3a" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="120" cy="70" r="11" fill="#f85149"/>
+  <text x="120" y="44" fill="#ff8a80" font-size="12.5" text-anchor="middle" font-family="sans-serif" font-weight="bold">▲ 科研专用评测</text>
+  <circle cx="380" cy="70" r="11" fill="#e9c46a"/>
+  <text x="380" y="44" fill="#e9c46a" font-size="12.5" text-anchor="middle" font-family="sans-serif" font-weight="bold">▲ 通用 eval（对比）</text>
+  <text x="135" y="98" fill="#9aa3b2" font-size="12" text-anchor="middle" font-family="sans-serif">nascent</text>
+  <text x="320" y="98" fill="#9aa3b2" font-size="12" text-anchor="middle" font-family="sans-serif">emerging</text>
+  <text x="520" y="98" fill="#9aa3b2" font-size="12" text-anchor="middle" font-family="sans-serif">crowded</text>
+  <text x="690" y="98" fill="#9aa3b2" font-size="12" text-anchor="middle" font-family="sans-serif">mature</text>
+</svg>
+</div>
+<p><b>科研专用评测：<span class="verdict v-nascent">nascent</span>（几乎无人商业化）</b>；<b>通用 eval：<span class="verdict v-emerging">emerging→crowded</span>（作对比）</b>。信号：</p>
+<ul>
+  <li><b>科研专用评测全是学术开源、零商业化：</b>上表 11 个 benchmark 无一靠卖评测赚钱，全是论文产出物；连最活跃的私营玩家 FutureHouse（占 LAB-Bench/BixBench 两个）也是慈善资助、不靠评测变现。<span class="grade g1">🟢</span></li>
+  <li><b>通用 eval 已挤：</b>数据+eval 巨头 Scale($29B)/Surge/Mercor($10B) 估值高企；独立横评（Artificial Analysis）、非营利评测（METR/Epoch）、开发者 eval 工具（Galileo/Patronus/Braintrust/Arize）各占位；连最中立的 HF Open LLM Leaderboard 都因「基准失效」在 2025-03 退役——说明<b>「卖一个静态榜单」本身不可持续</b>。<span class="grade g1">🟢</span></li>
+  <li><b>真正能持续的评测形态有两种：</b>① 绑死「数据/标注劳动力」（Scale/Surge/Mercor，估值来自数据生意而非「评测」本身）；② 非营利/中立公共品（METR/HF）。<b>纯粹靠「卖科研评测度量」当独立生意，目前全球都没跑通。</b></li>
+</ul>
+
+<h3 id="B-case">国外成功案例拆解</h3>
+<div class="twogrid">
+<div class="box">
+<h4 style="color:var(--aB)">案例 1：Scale AI —「评测是数据生意的尾巴」</h4>
+<p>Scale 真正赚钱的是<b>数据标注</b>，评测（SEAL 榜、红队）是为了卖更多数据、增强客户黏性的附加层。Meta 2025-06 以 ~$14.3B 拿约 49%、估值 ~$29B。<span class="grade g1">🟢</span></p>
+<p class="small"><b>启示：</b>评测本身难单独卖，但「评测 + 数据/标注劳动力」能撑起巨大估值。中国能复刻「数据生意」（已有数据标注产业），但「独立第三方评测」这层在中国客户付费意愿弱。</p>
+</div>
+<div class="box">
+<h4 style="color:var(--aB)">案例 2：LMArena —「中立榜单 → 公司化」的样板与陷阱</h4>
+<p>LMSYS 的 Chatbot Arena 用「盲投对战 + Elo」做出全球最有公信力的 LLM 榜，2025 公司化（Arena Intelligence），种子 $100M @ $600M（a16z+UC）。<span class="grade g1">🟢</span> 但商业化路径仍待定，且公司化后中立性遭论文质疑。</p>
+<p class="small"><b>启示：</b>arena 模式（社区盲投）是少数能<b>持续运营</b>的评测形态，对「科研 agent arena」有借鉴价值。但「公信力」与「商业化」天然冲突——一旦收钱，中立性受损。</p>
+</div>
+</div>
+
+<h3 id="B-china">中国适配（四维）</h3>
+<table>
+<thead><tr><th>维度</th><th>判断</th><th>说明</th></tr></thead>
+<tbody>
+<tr>
+  <td><b>① 客户与付费方在不在中国</b></td>
+  <td class="n">付费方弱/不清晰 <span class="grade g3">🔴</span></td>
+  <td>谁为「科研 agent 评测」付费？药企/材料厂买的是<b>结果</b>（药/材料），不是「评测报告」；模型公司（百度/智谱/月之暗面）会自建评测、不愿外包；国家实验室/高校做评测是<b>科研产出（发论文/拿影响力）</b>，不是采购。结论：缺真实的、预算明确的 B 端付费方。中国三家（OpenCompass/FlagEval/SuperCLUE）全是机构非营利，恰好印证。</td>
+</tr>
+<tr>
+  <td><b>② 国外成功模式哪条能复刻</b></td>
+  <td class="p">只有「数据生意」那条能 <span class="grade g2">🟡</span></td>
+  <td>Scale 路径中能复刻的是<b>数据标注/数据生成</b>（中国有成熟数据标注产业），但那本质是 Part A 式「数据飞轮」或数据外包，不是「评测即服务」。LMArena 的 arena 模式可借鉴形态，但变现难。METR/Epoch 的非营利路线在中国对应 OpenCompass/FlagEval——靠机构养，不是创业生意。</td>
+</tr>
+<tr>
+  <td><b>③ 政策与数据壁垒</b></td>
+  <td class="p">中性偏阻力 <span class="grade g3">🔴</span></td>
+  <td>「独立第三方评测/认证」在中国更可能由<b>官方/国家队主导</b>（信通院、上海 AI Lab、智源），留给创业公司的「中立认证」空间小——公信力背书往往需要官方身份。科研数据合规反而增加做评测的数据获取成本。</td>
+</tr>
+<tr>
+  <td><b>④ 团队与技术门槛</b></td>
+  <td class="p">技术不高，但「公信力」门槛极高 <span class="grade g2">🟡</span></td>
+  <td>做一个 benchmark 的工程量不大（学术界一篇论文就能产出），真正的壁垒是<b>公信力/中立性背书</b>——这恰恰是创业公司最难自证、且最容易被「既当裁判又当选手」质疑的（LMArena/Scale 都中过招）。对科研评测还要叠加领域 ground-truth 的获取（昂贵）。</td>
+</tr>
+</tbody>
+</table>
+
+<h3 id="B-white">这格最该切的 whitespace（诚实：偏小）</h3>
+<div class="callout warn">
+<p><b>切口：不要把「科研评测」当独立生意卖，而是把它做成 Part A（自驱实验室）或某个垂直 AI4S 产品的<u>嵌入能力</u>——用「真实实验/仿真 ground-truth」做出别人做不出的评测，反哺自己的模型/服务。</b></p>
+<ul>
+  <li><b>why-now：</b>① 全球没有一个 benchmark 用真实湿实验做 ground-truth——谁有自驱实验室，谁就能做出「真·可信」的科研 agent 评测，这是 A×B 的天然协同；② 材料/原子势方向已有持续运营的 arena 形态（Matbench Discovery / MLIP Arena / LAMBench），中国 DP 生态已在 LAMBench 占位，可顺势做「材料 agent arena」。</li>
+  <li><b>可行的小生意：</b>给特定行业（如药物/材料）做「闭源 holdout + 真实实验回测」的<b>认证/排名</b>，但更可能是 To 政府/联盟的项目，而非可规模化的 SaaS。</li>
+  <li><b>风险（诚实）：</b>① 付费方不明确，独立做大概率饿死；② 公信力靠官方背书，创业公司天然弱势；③ 容易被模型公司/巨头顺手做掉（自带评测）。<b>结论：作为创业主轴不推荐；作为 A 格的护城河组件或学术影响力工具，价值高。</b></li>
+</ul>
+</div>
+
+<!-- ===================== 合并结论 ===================== -->
+<h2 id="concl">④ 合并结论：两格对比 + 给中国创业者的取舍</h2>
+
+<figure>
+<svg viewBox="0 0 760 360" width="100%" style="max-width:760px" role="img" aria-label="两格对比定位图">
+  <rect x="0" y="0" width="760" height="360" fill="#0f1115"/>
+  <line x1="90" y1="320" x2="720" y2="320" stroke="#3a4150" stroke-width="2"/>
+  <line x1="90" y1="40" x2="90" y2="320" stroke="#3a4150" stroke-width="2"/>
+  <text x="405" y="350" fill="#9aa3b2" font-size="13" text-anchor="middle" font-family="sans-serif">中国付费方清晰度 / 商业模式可复刻度 →</text>
+  <text x="30" y="180" fill="#9aa3b2" font-size="13" text-anchor="middle" font-family="sans-serif" transform="rotate(-90 30 180)">政策助力 + 壁垒强度 →</text>
+  <line x1="405" y1="40" x2="405" y2="320" stroke="#1d212b" stroke-width="1" stroke-dasharray="4 4"/>
+  <line x1="90" y1="180" x2="720" y2="180" stroke="#1d212b" stroke-width="1" stroke-dasharray="4 4"/>
+  <circle cx="590" cy="120" r="58" fill="#5ec8d8" fill-opacity="0.18" stroke="#5ec8d8" stroke-width="2"/>
+  <text x="590" y="112" fill="#5ec8d8" font-size="15" text-anchor="middle" font-family="sans-serif" font-weight="bold">Part A</text>
+  <text x="590" y="132" fill="#cfeaf0" font-size="11.5" text-anchor="middle" font-family="sans-serif">仪器编排/自驱实验室</text>
+  <text x="590" y="150" fill="#9aa3b2" font-size="11" text-anchor="middle" font-family="sans-serif">付费方在中国·政策助力</text>
+  <circle cx="230" cy="245" r="48" fill="#e0a96d" fill-opacity="0.16" stroke="#e0a96d" stroke-width="2"/>
+  <text x="230" y="240" fill="#e0a96d" font-size="15" text-anchor="middle" font-family="sans-serif" font-weight="bold">Part B</text>
+  <text x="230" y="260" fill="#f0d8b8" font-size="11.5" text-anchor="middle" font-family="sans-serif">科研评测即服务</text>
+  <text x="230" y="278" fill="#9aa3b2" font-size="11" text-anchor="middle" font-family="sans-serif">付费方不明·难独立变现</text>
+  <text x="700" y="58" fill="#74e08c" font-size="11" text-anchor="end" font-family="sans-serif">更适合中国早期创业</text>
+  <text x="100" y="312" fill="#f85149" font-size="11" font-family="sans-serif">不适合独立创业</text>
+</svg>
+<figcaption>图 2　两格在「中国付费方清晰度 × 政策/壁垒」二维上的定位。A 格落在右上（推荐），B 格落在左下（不建议独立做，宜作为能力嵌入）。</figcaption>
+</figure>
+
+<div class="box">
+<h3 style="margin-top:0">明确结论</h3>
+<ol>
+  <li><b>哪一格更适合中国早期创业 → <span class="tag-a">Part A（仪器 MCP / 自驱实验室编排层）</b></span>。三条硬理由：<b>(1) 付费方真在中国且预算实在</b>（药企/CRO/材料厂/国家实验室）；<b>(2) 政策是助力</b>（信创国产替代 + 国家实验室自动化升级采购，且上海 AI Lab 已开源 SCP 给出本土协议底座）；<b>(3) 国外成功商业模式清晰可借鉴</b>（ECL 云实验室订阅+按次计费、Ginkgo 数据飞轮 + Catalyst/EstiMate agent、Strateos 大药企远程托管）。门槛是仪器 know-how + 工程量——这是中国自动化/制造团队的<b>主场</b>，不是劣势。</li>
+  <li><b>Part B（科研评测）不建议作为独立创业主轴</b>：全球都没跑通「卖科研评测度量」的独立商业模式，中国付费方更不明确、公信力又靠官方背书。<b>正确姿势</b>：把评测做成 Part A 的护城河组件（用真实实验 ground-truth 做出别人做不出的评测），或作为模型/垂直产品的内部能力。</li>
+  <li><b>两格的天然协同</b>：B 格最大空白是「没有 benchmark 用真实湿实验做 ground-truth」，而 A 格<i>恰好能产生</i>真实实验数据——<b>做 A 格的团队顺手就能做出 B 格做不出的可信评测</b>。这是「先 A 后 B」的正确顺序，反过来不成立。</li>
+</ol>
+</div>
+
+<div class="box">
+<h4>可借鉴的国外成功案例清单（带链接）</h4>
+<ul>
+  <li><b>Emerald Cloud Lab</b>（云实验室订阅 + 按实验计费；SLL 开源、实验室闭源）<a href="https://www.emeraldcloudlab.com/">链接</a></li>
+  <li><b>Ginkgo Bioworks</b>（自动化→数据飞轮 + Cloud Lab 的 Catalyst/EstiMate agent + GPT-5 自驱实验室）<a href="https://www.ginkgo.bio/">链接</a></li>
+  <li><b>Strateos × Eli Lilly</b>（大药企远程云实验室付费验证；Autoprotocol JSON 开源）<a href="https://strateos.com/">链接</a></li>
+  <li><b>Opentrons</b>（便宜开源硬件 + 自然语言生成 protocol 做成独角兽生态）<a href="https://opentrons.com/">链接</a></li>
+  <li><b>Radical AI</b>（自驱材料实验室，巨头资本背书，~25 合金/天）<a href="https://www.radical-ai.com/">链接</a></li>
+  <li><b>PyLabRobot</b>（开源硬件无关 SDK，可作为「可 MCP 化」技术底座）<a href="https://github.com/PyLabRobot/pylabrobot">链接</a></li>
+  <li>（协议/实现借鉴）<b>LBNL TEM Agent</b> <a href="https://arxiv.org/abs/2511.08819">arXiv 2511.08819</a> · <b>InstrMCP</b> <a href="https://github.com/caidish/instrMCP">repo</a> · <b>上海 AI Lab SCP</b> <a href="https://github.com/InternScience/scp">repo</a></li>
+  <li>（评测侧借鉴形态）<b>LMArena</b> 的 arena 盲投模式 <a href="https://lmarena.ai/">链接</a> · <b>Matbench Discovery</b> 的社区 PR leaderboard <a href="https://matbench-discovery.materialsproject.org/">链接</a></li>
+</ul>
+</div>
+
+<!-- ===================== 现实判断 + 存疑 ===================== -->
+<h2 id="caveat">⑤ 现实判断 + 存疑</h2>
+<div class="callout bad">
+<b>口径与来源提醒（必须诚实告知）：</b>
+<ul>
+  <li><b>A-Lab 数字别写错（学术先例引用时）：</b>Nature 2023（<a href="https://www.nature.com/articles/s41586-023-06734-w">DOI 10.1038/s41586-023-06734-w</a>）摘要原文是「17 天连续运行，从 <b>58 个目标中实现了 41 个新化合物</b>」（41/58）；正文图 2 的更严口径是「<b>36 个目标级别明确成功合成</b>」（按 57 计，约 36/57）。<b>切勿把「36」说成「58 个里 36 个」</b>——那是混用两套口径。<span class="grade g1">🟢 已逐字核对</span></li>
+  <li><b>LAP（arXiv 2606.03755）真实存在</b>（三源核实），但它是 <b>2 周新的提案性预印本，无代码、无实现、无独立采用</b>，别当成已落地标准。<span class="grade g1">🟢</span></li>
+  <li><b>SCP（上海 AI Lab）</b>于 2025-12-30 开源，Intern-Discovery「1600+ 工具」为平台自述；其<b>真实仪器控制尚未公开演示</b>。<span class="grade g2">🟡</span></li>
+  <li><b>OPC-UA LADS</b> 全称是「Laboratory <u>and Analytical</u> Device Standard」（非「Agnostic」）；其「2024 初发布」与「未发布」两源有冲突，表述为「约 2024 初定稿/发布」并注明存疑。<span class="grade g2">🟡</span></li>
+  <li><b>Ginkgo「GPT-5 自驱实验室 +40%」</b>来自厂商新闻稿，属自述基准，未独立验证。<span class="grade g2">🟡（厂商稿）</span></li>
+  <li><b>Strateos</b> 据报 2023-12 被 Multiply Labs 收购——建议落地前再做一手确认。<span class="grade g2">🟡</span></li>
+  <li><b>融资/估值数字多为二手数据库口径</b>：ECL 与 Opentrons 累计融资额（口径不一）、Surge 估值（$15B vs $25B 均在谈/传闻）、LMArena 2026 $1.7B（二手）、镁伽 MegaRobo 累计融资/估值/注册地、Artificial Analysis 融资额（未找到）——引用前请再核一手。<span class="grade g3">🔴</span></li>
+  <li><b>PyLabRobot</b> 由 MIT Media Lab 的 Sculpting Evolution Group（Esvelt 组）维护，预印本在 bioRxiv（非 arXiv），正式版发表于 Cell《Device》。<span class="grade g1">🟢</span></li>
+  <li><b>消歧提醒：</b>Artificial.com（Palo Alto 实验室自动化）≠ 英国保险科技 Artificial Labs；Radical AI（材料自驱实验室）≠ 教育 AI 家教 Radical AI；勿混淆。</li>
+</ul>
+</div>
+<p class="small">本报告为机会扫描的二次深挖，不构成投资建议。所有「适合中国创业」的判断是基于公开信息的<b>主观推断</b>，标注 🟡/🔴 的维度尤其需要落地尽调。Part A 的「重资产 + 长交付周期 + 标准未定」三重风险真实存在，建议从「轻资产软件编排层 + agent」切入验证 PMF 后再决定要不要重。</p>
+
+<hr>
+<p class="sub">机会扫描 · 2026-06-16 · 来源分级见顶部。承接「AI4S 卖铲子机会扫描」对仪器 MCP 与 agent 评测两格的深挖。</p>
+
+</div>
+</body>
+</html>

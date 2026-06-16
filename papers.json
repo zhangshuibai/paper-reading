@@ -179,6 +179,27 @@
     "path": "papers/2026-06-16-ai-datacenter-cooling-materials/index.html"
   },
   {
+    "slug": "2026-06-16-scientific-agent-infra",
+    "title": "科学 agent 基础设施深挖：仪器 MCP 协议层 × agent 评测即服务",
+    "authors": "—",
+    "team": "机会扫描",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-16",
+    "published": "机会扫描 2026",
+    "tldr": "深挖AI4S卖铲子两格:①科学仪器MCP/agent-to-instrument协议层(让agent真驱动移液机器人/HPLC/电镜)——判nascent,标准林立未统一(SiLA2/OPC-UA LADS/Allotrope),MCP真接仪器案例屈指可数(LBNL TEM Agent/InstrMCP),LAP(arXiv2606.03755)与上海AI Lab的SCP两个agent-to-instrument协议刚提出;②科学agent评测即服务——科研专用benchmark全是学术开源几乎无人商业化(judnascent),对比通用eval已crowded(Scale$29B/Mercor$10B/LMArena)。结论:A格更适合中国早期创业(付费方在中国+政策助力国产替代+商业模式可借鉴ECL/Ginkgo),B格付费方不明宜作A格嵌入能力。可借鉴:Emerald Cloud Lab/Ginkgo/Strateos/Opentrons/PyLabRobot。",
+    "tags": [
+      "AI4S",
+      "startup-idea",
+      "competitive-landscape",
+      "mcp",
+      "agent-eval",
+      "lab-automation",
+      "china"
+    ],
+    "path": "papers/2026-06-16-scientific-agent-infra/index.html"
+  },
+  {
     "slug": "2026-06-15-agents-for-scientific-discovery",
     "title": "Agent 在科学发现里的应用（文献综述）",
     "authors": "—",
