@@ -38,6 +38,25 @@
     "path": "papers/2026-06-16-fin-intercom/index.html"
   },
   {
+    "slug": "2026-06-16-dp-technology",
+    "title": "深势科技 DP Technology：竞争格局与赛道早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://www.dp.tech",
+    "code": "",
+    "date": "2026-06-16",
+    "published": "公司调研 2026",
+    "tldr": "深势科技=中国最早体系化做AI for Science的平台型龙头(脱胎于鄂维南院士AISI,创始人孙伟杰/张林峰);开源DeePMD-kit势函数+DPA原子间势大模型+Uni-Mol,中层卖Bohrium玻尔科学计算云,上层做电池(Piloteye)/制药(Hermite)/材料;2025-12超8亿C轮、投后>60亿独角兽;赛道emerging→局部crowded(国内对标晶泰/百图,国际对标CuspAI/Periodic Labs/MS MatterGen);whitespace=站在深势开源+玻尔算力肩上做垂直行业×轻应用层闭环交付、按outcome收费。",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "startup-idea",
+      "AI4S",
+      "china"
+    ],
+    "path": "papers/2026-06-16-dp-technology/index.html"
+  },
+  {
     "slug": "2026-06-15-agents-for-scientific-discovery",
     "title": "Agent 在科学发现里的应用（文献综述）",
     "authors": "—",

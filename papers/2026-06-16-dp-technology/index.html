@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>深势科技 DP Technology · 竞争格局与赛道早期度调研</title>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --bad:#ff6b81; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --bad:#d23651; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;}
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:920px; margin:0 auto; padding:18px 22px 90px}
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:25px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)} .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap; line-height:2}
+  nav.toc a:hover{color:var(--accent)}
+  section{margin:38px 0}
+  h2{font-size:20px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:16.5px; margin:22px 0 8px}
+  p{margin:12px 0} ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)} strong{color:var(--text)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.88em}
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:13px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:9px 10px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  figure{margin:24px 0; text-align:center}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+  .svgwrap{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 8px}
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+  .src{font-size:10.5px; padding:0 6px; border-radius:999px; white-space:nowrap; vertical-align:middle}
+  .src-a{background:rgba(67,197,158,.18); color:var(--ok)}
+  .src-b{background:rgba(255,180,84,.18); color:var(--warn)}
+  .src-c{background:rgba(255,107,129,.18); color:var(--bad)}
+  .legend{font-size:12px; color:var(--muted); margin:6px 0 0}
+  .verdict{display:inline-block; font-weight:700; padding:3px 12px; border-radius:999px; font-size:14px}
+  .v-nascent{background:rgba(122,162,255,.18); color:var(--accent)}
+  .v-emerging{background:rgba(67,197,158,.18); color:var(--ok)}
+  .v-crowded{background:rgba(255,180,84,.18); color:var(--warn)}
+  .v-mature{background:rgba(255,107,129,.18); color:var(--bad)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">AI for Science</span>
+      <span class="chip">分子模拟 / 计算化学</span>
+      <span class="chip">中国独角兽</span>
+      <span class="chip">竞争格局</span>
+      <span class="chip">赛道早期度</span>
+      <span class="chip">创业 idea</span>
+    </div>
+    <h1>深势科技 DP Technology：竞争格局与赛道早期度调研</h1>
+    <p class="orig-title">dp.tech — 中国 AI4S 平台型龙头 / 赛道有多挤 / 给新进入者留了哪些 whitespace</p>
+    <dl class="meta-grid">
+      <dt>对象</dt><dd><a href="https://www.dp.tech" target="_blank" rel="noopener">https://www.dp.tech</a>（玻尔平台 <a href="https://bohrium.com" target="_blank" rel="noopener">bohrium.com</a> · 开源 <a href="https://github.com/deepmodeling" target="_blank" rel="noopener">github.com/deepmodeling</a>）</dd>
+      <dt>赛道</dt><dd>AI for Science（AI4S）平台 + 分子模拟 / 原子间势 / 计算驱动的电池·制药·材料研发</dd>
+      <dt>整理</dt><dd>对话调研笔记；信息来自公开检索，按来源分级标注，产品能力未必经独立验证</dd>
+      <dt>日期</dt><dd>2026-06-16</dd>
+    </dl>
+    <p class="legend">来源等级：<span class="src src-a">🟢 一手</span> 官网/GitHub/官方 newsroom ·
+      <span class="src src-b">🟡 二手</span> 媒体/融资数据库 ·
+      <span class="src src-c">🔴 自述/未证实</span> 营销口径或未独立验证</p>
+  </header>
+
+  <div class="tldr">
+    <b>一句话</b> — 深势科技（2018 成立，脱胎于鄂维南院士的北京科学智能研究院 AISI）是<strong>中国最早体系化做 AI for Science 的平台型龙头</strong>：底层靠开源生态 <code>DeePMD-kit</code>（机器学习势函数）+ <code>DPA</code> 原子间势大模型 + <code>Uni-Mol</code> 分子表示，中层是 <strong>Bohrium 玻尔</strong>科学计算云平台（卖算力/软件/模型），上层做电池（Piloteye）、制药（Hermite/RiDYMO）、材料行业解决方案。赛道判 <span class="verdict v-emerging">emerging→局部 crowded</span>：AI4S「平台层」全球都还早、巨头（微软/谷歌）刚进场，但国内 AI 制药一格已拥挤、且海外资本 2025 起疯狂砸钱（CuspAI $100M A 轮、Periodic Labs $200M seed@$1B）。<strong>给中国创业者的 whitespace</strong>：别和深势硬刚平台/底座，<strong>站在它开源的 DeePMD/DPA + 玻尔算力肩上做「垂直行业 × 闭环交付」的应用层</strong>（如某类电解液/正极材料、某类难成药靶点、半导体/催化剂某细分），用 outcome 而非软件 license 收费。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#market">① 赛道地图 + 早期度</a>
+    <a href="#matrix">② 竞品对照矩阵</a>
+    <a href="#map">③ 定位图</a>
+    <a href="#funding">④ 融资 timeline</a>
+    <a href="#snapshot">⑤ 公司速览</a>
+    <a href="#idea">⑥ 创业 idea 借鉴</a>
+    <a href="#take">⑦ 现实判断</a>
+    <a href="#src">出处</a>
+  </nav>
+
+  <!-- ① 赛道与早期度 -->
+  <section id="market">
+    <h2><span class="n">①</span>赛道地图 + 早期度判断</h2>
+    <p>深势属于 <strong>AI for Science（AI4S）</strong> 赛道，更精确说是它的「<strong>平台/基础设施层</strong>」：用 AI（尤其是机器学习势函数、生成模型、表示学习）替代或加速传统的<strong>第一性原理计算与分子模拟</strong>，再把这套能力封装成<strong>云平台 + 行业解决方案</strong>卖给科研院校和电池/制药/材料企业。它解决的核心需求是：<em>量子化学/分子动力学精度高但极慢极贵，AI 在保持「从头算（ab initio）精度」的前提下把模拟规模和速度提升几个数量级</em>，从而让「计算先于实验、计算指导实验」在工业 R&D 里真正跑通。<span class="src src-b">🟡</span></p>
+
+    <div class="callout note">
+      <span class="label">领域背景速补（只懂 LLM 的读者请先看这里）</span>
+      <ul style="margin:6px 0">
+        <li><strong>AI for Science（AI4S）</strong>：用 AI 加速科学发现的范式。和「LLM 聊天/写代码」不同，它处理的是分子、晶体、蛋白、流体这些<strong>物理实体</strong>，目标是预测能量/力/结构/性质。鄂维南院士 2018 年在北大提出这个方向、推动它体系化。</li>
+        <li><strong>第一性原理计算 / DFT</strong>：从量子力学方程直接算材料/分子性质（不靠经验拟合），精度高，但算一个稍大的体系就要超算跑很久——这是 AI4S 要打击的「慢且贵」痛点。</li>
+        <li><strong>分子动力学（MD）/ 原子间势（interatomic potential）</strong>：模拟成千上万原子随时间怎么运动，需要一个函数告诉你「给定原子位置→受力多大」。传统势函数要么准但慢（DFT）、要么快但糙（经验势）。<strong>机器学习势函数（如深势的 Deep Potential / DeePMD）</strong>用神经网络学一个「又快又准」的势——这是深势的看家本领，相关工作拿过 2020 年高性能计算最高奖<strong>戈登·贝尔奖（Gordon Bell Prize）</strong>。<span class="src src-b">🟡</span></li>
+        <li><strong>原子间势「科学大模型」（DPA 系列）</strong>：把单体系的势函数升级成在海量材料数据上预训练、能迁移到新体系的<strong>基础模型</strong>——相当于材料界的「预训练大模型」，可微调到具体材料/合金/催化剂。</li>
+        <li><strong>Uni-Mol</strong>：分子的 3D 表示学习模型（类似 LLM 的 embedding，但对象是带空间构象的分子），用于性质预测、对接（docking）、药物设计。</li>
+      </ul>
+    </div>
+
+    <h3>玩家分群（四象限别漏）</h3>
+    <ul>
+      <li><strong>现有巨头（在位 / 传统计算软件）：</strong><a href="https://www.schrodinger.com" target="_blank" rel="noopener">Schrödinger</a>（薛定谔，物理基础的 CADD/材料模拟软件，2020 NASDAQ 上市，TOP20 药企平均用了 15 年以上 <span class="src src-b">🟡</span>）；传统 DFT/MD 软件 VASP、Gaussian、Materials Studio（被 AI 势函数加速/替代的对象）。</li>
+      <li><strong>垂直创业公司（国内）：</strong><a href="https://www.xtalpi.com" target="_blank" rel="noopener">晶泰科技 XtalPi</a>（2228.HK，「AI 制药第一股」，MIT 三博士创立，量子物理+自动化机器人）；<a href="https://www.biomap.com" target="_blank" rel="noopener">百图生科 BioMap</a>（李彦宏创立，生命科学基础大模型）；<a href="https://www.megarobo.tech" target="_blank" rel="noopener">镁伽 MegaRobo</a>（生命科学自动化机器人/干湿闭环）。</li>
+      <li><strong>垂直创业公司（国际）：</strong><a href="https://www.cusp.ai" target="_blank" rel="noopener">CuspAI</a>（剑桥，Max Welling 创立，材料逆向设计搜索引擎，2025 $100M A 轮 <span class="src src-b">🟡</span>）；<a href="https://periodic.com" target="_blank" rel="noopener">Periodic Labs</a>（前 OpenAI/DeepMind 团队，自主物理实验室，2025 $200M seed@$1B <span class="src src-b">🟡</span>）；Schrödinger（亦属创业出身的在位者）。</li>
+      <li><strong>大厂顺手做（最大潜在威胁）：</strong><strong>Microsoft</strong>（MatterGen 材料生成扩散模型 + Azure Quantum Elements + 已收编的 AI4Science 团队）；<strong>Google DeepMind</strong>（GNoME 发现 220 万晶体、AlphaFold 系）；<strong>华为</strong>（盘古药物分子大模型、盘古气象/材料；2023 还以哈勃投资独家投了深势 <span class="src src-b">🟡</span>）；<strong>AISI</strong>（深势母体，持续产出底座，既是生态盟友也是「上游可下沉」者）；Meta（OMat/UMA 开放材料数据与势模型）。</li>
+      <li><strong>开源 / 免费替代（易被忽视的威胁，也是 idea 来源）：</strong>深势<strong>自己开源</strong>的 <code>DeePMD-kit</code>（LGPLv3，~2k★ <span class="src src-a">🟢</span>）+ <code>DeepModeling</code> 社区 + <code>Uni-Mol</code>；学界 MACE、NequIP、CHGNet、M3GNet 等机器学习势；Meta 的开放材料势模型。这些让「底座」逐渐商品化——平台型公司的护城河被迫上移到算力规模、行业 know-how 与交付。</li>
+    </ul>
+
+    <div class="callout insight">
+      <span class="label">早期度判断</span>
+      <span class="verdict v-emerging">emerging（新兴，局部已 crowded）</span>
+      （nascent 萌芽 / emerging 新兴 / crowded 拥挤 / mature 成熟）<br><br>
+      <strong>判断信号：</strong>
+      ① <strong>平台/基础设施层全球都还早</strong>——没有公认的「AI4S 操作系统」赢家，标准（benchmark、数据格式、势模型评测）尚未收敛；巨头微软/谷歌 2024–2025 才高调进场，说明拐点刚到、远未成熟。
+      ② <strong>但应用细分已分化</strong>：<em>AI 制药</em>一格在国内已 crowded（晶泰、英矽智能、百图、深势的 Hermite 同台，且多数仍在亏损/「死亡谷」<span class="src src-b">🟡</span>）；<em>AI 材料/电池</em>相对 emerging、想象空间更大但落地更难。
+      ③ <strong>融资极热</strong>：2025 海外材料 AI 一年内 CuspAI $100M A 轮@~$520M、Periodic Labs $200M seed@$1B；国内深势 2025-12 完成超 8 亿元 C 轮、投后估值超 60 亿元、跻身独角兽 <span class="src src-b">🟡</span>。资本涌入是「emerging 转 crowded 早期」的典型信号。
+      ④ <strong>开源/免费替代已存在</strong>（DeePMD、MACE、Meta OMat 等），底座商品化进行中——这压低了「再做一个底座」的价值，把机会推向<strong>应用层与垂直闭环</strong>。
+    </div>
+  </section>
+
+  <!-- ② 竞品矩阵 -->
+  <section id="matrix">
+    <h2><span class="n">②</span>竞品对照矩阵</h2>
+    <p>AI4S 这条赛道里「拉得开差距」的维度是：<strong>主攻领域</strong>（材料/能源 vs 制药 vs 生物）、<strong>技术路线</strong>（物理基础的分子模拟 vs 数据驱动大模型 vs 干湿实验闭环）、<strong>产品形态/商业模式</strong>（平台/SaaS vs 软件 license vs 服务/管线分成）、<strong>开源态度</strong>、<strong>规模 & 融资/上市</strong>、<strong>护城河来源</strong>。每格尽量标来源与口径；深势一行加粗。</p>
+    <table>
+      <thead><tr>
+        <th>玩家</th>
+        <th>主攻领域</th>
+        <th>技术路线</th>
+        <th>产品形态 / 商业模式</th>
+        <th>开源</th>
+        <th>规模 / 融资</th>
+        <th>护城河</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>深势科技 DP Tech（本篇）</strong></td>
+          <td><strong>材料/能源 + 制药 + 基础科研，最全</strong> <span class="src src-b">🟡</span></td>
+          <td><strong>机器学习势函数 / 原子间势大模型 (DPA) + 分子模拟，物理+AI 融合</strong> <span class="src src-a">🟢</span></td>
+          <td><strong>玻尔 Bohrium 云平台（算力+软件+模型）+ 行业解决方案 + 开源生态</strong> <span class="src src-a">🟢</span></td>
+          <td><strong>是（DeePMD/Uni-Mol/DeepModeling）</strong> <span class="src src-a">🟢</span></td>
+          <td><strong>独角兽，C 轮超 8 亿元、投后 &gt;60 亿元（2025-12）</strong> <span class="src src-b">🟡</span></td>
+          <td><strong>AISI 学术血统 + 开源生态 + 平台/算力 + Gordon Bell</strong></td>
+        </tr>
+        <tr>
+          <td>晶泰科技 XtalPi</td>
+          <td>制药（+新能源/材料延伸）</td>
+          <td>量子物理计算 + AI + 自动化机器人（干湿一体）</td>
+          <td>药物发现服务 / 管线合作 / 机器人解决方案（订单制）</td>
+          <td>偏闭源</td>
+          <td>2024-06 港股 2228.HK 上市；累计募资 &gt;32 亿港元；2024 仍亏损逾 15 亿元 <span class="src src-b">🟡</span></td>
+          <td>自动化湿实验室 + 大药企长约（含辉瑞）</td>
+        </tr>
+        <tr>
+          <td>百图生科 BioMap</td>
+          <td>生物 / 免疫 / 制药</td>
+          <td>生命科学基础大模型（千亿参数生物语言模型）</td>
+          <td>平台 + 药物发现合作（自述客户订单 &gt;$2B <span class="src src-c">🔴</span>）</td>
+          <td>部分开放</td>
+          <td>李彦宏创立；多轮融资（未独立核实最新估值）</td>
+          <td>数据 + 生物大模型 + 百度系资源</td>
+        </tr>
+        <tr>
+          <td>镁伽 MegaRobo</td>
+          <td>生命科学自动化 / 应用化学</td>
+          <td>机器人 + 自动化 + AI 的「智能实验室」</td>
+          <td>自动化设备 / 实验外包 / 数据基础设施</td>
+          <td>闭源未披露</td>
+          <td>多轮融资（未独立核实）</td>
+          <td>干实验数据「水龙头」+ 硬件壁垒</td>
+        </tr>
+        <tr>
+          <td>Schrödinger（薛定谔）</td>
+          <td>制药 + 材料</td>
+          <td>物理基础的计算化学（FEP 等），近年加 ML</td>
+          <td>软件 license（订阅）+ 自有/合作管线 + 协作分成</td>
+          <td>闭源</td>
+          <td>2020 NASDAQ（SDGR）上市；曾约 $50 亿市值，近年股价低迷 <span class="src src-b">🟡</span></td>
+          <td>20+ 年算法积累 + 大药企长期绑定</td>
+        </tr>
+        <tr>
+          <td>CuspAI（剑桥）</td>
+          <td>材料（碳捕集等）</td>
+          <td>生成式 + 基础模型做材料「逆向设计搜索引擎」</td>
+          <td>平台 / 与客户共研</td>
+          <td>部分开放（学术血统）</td>
+          <td>$30M seed（2024）+ $100M A 轮@~$520M（2025-09，NEA/Temasek 领投）<span class="src src-b">🟡</span></td>
+          <td>Max Welling（VAE 共同发明人）团队 + 资本</td>
+        </tr>
+        <tr>
+          <td>Periodic Labs（美）</td>
+          <td>材料 / 物理（自主实验室）</td>
+          <td>AI scientist + 自动化物理实验闭环</td>
+          <td>自建 proprietary 自主实验室（产数据→训模型）</td>
+          <td>闭源未披露</td>
+          <td>$200M seed@$1B（2025，a16z 领投）<span class="src src-b">🟡</span></td>
+          <td>顶配团队（前 OpenAI/DeepMind）+ 自有实验数据</td>
+        </tr>
+        <tr>
+          <td>Microsoft（AI4Science）</td>
+          <td>材料 + 化学 + 制药</td>
+          <td>MatterGen 生成模型 + 势模型 + Azure Quantum Elements</td>
+          <td>云平台（Azure）+ 模型即服务</td>
+          <td>部分开源（MatterGen 已开放）</td>
+          <td>巨头自有资金</td>
+          <td>云 + 算力 + 全球渠道 + 收编的顶尖研究团队</td>
+        </tr>
+        <tr>
+          <td>Google DeepMind</td>
+          <td>材料 + 生物结构</td>
+          <td>GNoME（晶体发现）、AlphaFold 系</td>
+          <td>研究主导，部分成果/数据开放</td>
+          <td>部分开放（含数据集）</td>
+          <td>巨头自有资金</td>
+          <td>顶尖研究 + 数据规模 + 品牌</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>读矩阵：</strong>深势的差异化在于「<strong>覆盖最全 + 底座最硬 + 开源生态最强</strong>」——别人多是单点（晶泰/百图押制药、CuspAI/Periodic 押材料、Schrödinger 押软件），深势是少数同时握有<em>开源底座（DeePMD/DPA/Uni-Mol）+ 云平台（玻尔）+ 多行业落地</em>的「全栈平台型」玩家，且有 AISI 院士血统持续供给前沿。软肋同样明显：<strong>战线宽 = 每条线都有更专注的对手</strong>（制药打不过晶泰的湿实验闭环、材料要面对微软/谷歌/Meta 的开放模型碾压、平台要扛底座被开源商品化）；且和多数 AI4S 公司一样，<strong>「平台收入能否覆盖重研发」仍是未证实的商业问号</strong>（深势未上市，营收/毛利未公开 <span class="src src-c">🔴</span>）。</p>
+  </section>
+
+  <!-- ③ 定位图 -->
+  <section id="map">
+    <h2><span class="n">③</span>定位图（whitespace 在哪）</h2>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 640 400" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12">
+        <line x1="40" y1="200" x2="600" y2="200" stroke="#b9c2e0" stroke-width="1.5"/>
+        <line x1="320" y1="24" x2="320" y2="372" stroke="#b9c2e0" stroke-width="1.5"/>
+        <text x="600" y="216" text-anchor="end" fill="#5a627a">闭源 / 垂直交付 →</text>
+        <text x="40" y="216" fill="#5a627a">← 开源 / 平台底座</text>
+        <text x="326" y="34" fill="#5a627a">↑ 软件 / 云平台（轻资产）</text>
+        <text x="326" y="366" fill="#5a627a">↓ 干湿实验闭环（重资产）</text>
+
+        <rect x="330" y="58" width="252" height="122" fill="#7aa2ff" opacity="0.10"/>
+        <text x="456" y="118" text-anchor="middle" fill="#3a66ff" font-size="12.5" font-weight="700">whitespace</text>
+        <text x="456" y="136" text-anchor="middle" fill="#3a66ff" font-size="11">垂直行业 × 轻应用层</text>
+        <text x="456" y="151" text-anchor="middle" fill="#3a66ff" font-size="11">（站在开源底座上做交付）</text>
+
+        <circle cx="250" cy="150" r="8" fill="#6b4cff"/>
+        <text x="262" y="146" fill="#1a1f33" font-weight="700">深势 DP Tech</text>
+        <text x="262" y="161" fill="#5a627a" font-size="10.5">开源底座+玻尔平台+行业</text>
+
+        <circle cx="210" cy="95" r="7" fill="#43c59e"/>
+        <text x="150" y="90" fill="#1a1f33">Microsoft</text>
+
+        <circle cx="160" cy="120" r="7" fill="#43c59e"/>
+        <text x="98" y="116" fill="#1a1f33">DeepMind</text>
+
+        <circle cx="70" cy="175" r="6" fill="#9aa3bd"/>
+        <text x="56" y="193" fill="#5a627a" font-size="10.5">DeePMD/MACE 开源</text>
+
+        <circle cx="470" cy="108" r="7" fill="#ffb454"/>
+        <text x="482" y="104" fill="#1a1f33">Schrödinger</text>
+
+        <circle cx="432" cy="148" r="7" fill="#ffb454"/>
+        <text x="444" y="164" fill="#1a1f33">CuspAI</text>
+
+        <circle cx="430" cy="78" r="7" fill="#ffb454"/>
+        <text x="442" y="74" fill="#1a1f33">百图 BioMap</text>
+
+        <circle cx="472" cy="292" r="7" fill="#ff6b81"/>
+        <text x="484" y="288" fill="#1a1f33">晶泰 XtalPi</text>
+
+        <circle cx="418" cy="332" r="7" fill="#ff6b81"/>
+        <text x="296" y="337" fill="#1a1f33">Periodic Labs</text>
+
+        <circle cx="360" cy="318" r="7" fill="#ff6b81"/>
+        <text x="372" y="314" fill="#1a1f33">镁伽 MegaRobo</text>
+      </svg>
+      </div>
+      <figcaption>定位图（本调研重绘）。X = 开源平台底座↔闭源垂直交付；Y = 软件/云平台（轻）↔干湿实验闭环（重）。深势占据「开源底座 + 平台」的中左偏上；<strong>右上「垂直行业 × 轻应用层」格相对空</strong>——新进入者可站在深势开源 + 玻尔算力上做某行业的闭环交付。</figcaption>
+    </figure>
+  </section>
+
+  <!-- ④ 融资 timeline -->
+  <section id="funding">
+    <h2><span class="n">④</span>融资 timeline</h2>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 760 200" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12">
+        <line x1="50" y1="100" x2="720" y2="100" stroke="#b9c2e0" stroke-width="2"/>
+
+        <circle cx="70" cy="100" r="6" fill="#6b4cff"/>
+        <text x="70" y="78" text-anchor="middle" fill="#5a627a">2018</text>
+        <text x="70" y="128" text-anchor="middle" fill="#1a1f33">成立</text>
+
+        <circle cx="170" cy="100" r="6" fill="#7aa2ff"/>
+        <text x="170" y="78" text-anchor="middle" fill="#5a627a">2020.07</text>
+        <text x="170" y="128" text-anchor="middle" fill="#1a1f33">天使·百度风投</text>
+
+        <circle cx="270" cy="100" r="6" fill="#7aa2ff"/>
+        <text x="270" y="78" text-anchor="middle" fill="#5a627a">2021.02</text>
+        <text x="270" y="128" text-anchor="middle" fill="#1a1f33">种子·元璟</text>
+
+        <circle cx="360" cy="100" r="6" fill="#43c59e"/>
+        <text x="360" y="78" text-anchor="middle" fill="#5a627a">2021.08</text>
+        <text x="360" y="128" text-anchor="middle" fill="#1a1f33">A·高瓴</text>
+
+        <circle cx="450" cy="100" r="6" fill="#43c59e"/>
+        <text x="450" y="78" text-anchor="middle" fill="#5a627a">2021.12</text>
+        <text x="450" y="128" text-anchor="middle" fill="#1a1f33">B·$43.7M</text>
+        <text x="450" y="143" text-anchor="middle" fill="#5a627a" font-size="10.5">启明/源码</text>
+
+        <circle cx="540" cy="100" r="6" fill="#ffb454"/>
+        <text x="540" y="78" text-anchor="middle" fill="#5a627a">2023.04</text>
+        <text x="540" y="128" text-anchor="middle" fill="#1a1f33">华为哈勃</text>
+
+        <circle cx="620" cy="100" r="6" fill="#ffb454"/>
+        <text x="620" y="78" text-anchor="middle" fill="#5a627a">2023.08</text>
+        <text x="620" y="128" text-anchor="middle" fill="#1a1f33">~7亿元</text>
+
+        <circle cx="700" cy="100" r="8" fill="#ff6b81"/>
+        <text x="700" y="76" text-anchor="middle" fill="#5a627a">2025.12</text>
+        <text x="700" y="128" text-anchor="middle" fill="#1a1f33" font-weight="700">C·&gt;8亿</text>
+        <text x="700" y="143" text-anchor="middle" fill="#5a627a" font-size="10.5">投后&gt;60亿·独角兽</text>
+      </svg>
+      </div>
+      <figcaption>深势科技融资时间线（据公开报道整理；轮次命名各家口径略有出入）。</figcaption>
+    </figure>
+    <table>
+      <thead><tr><th>时间</th><th>轮次</th><th>金额</th><th>主要投资方</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr><td>2018</td><td>成立</td><td>—</td><td>孙伟杰、张林峰创立（北大元培同窗）</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2020-07</td><td>天使</td><td>未披露</td><td>百度风投领投，峰瑞资本等跟投</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2021-02</td><td>种子</td><td>数亿元（口径不一）</td><td>元璟资本领投，清流资本跟投</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2021-08</td><td>A 轮</td><td>未明确披露</td><td>高瓴创投领投，经纬中国、元璟跟投</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2021-12</td><td>B 轮</td><td>约 $43.7M</td><td>启明创投、源码资本领投，高瓴跟投</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2023-04</td><td>战略</td><td>未披露</td><td>华为哈勃（独家）</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2023-08</td><td>新一轮</td><td>约 7 亿元+（称当年国内 AI4S 最高单笔）</td><td>正心谷、中寰资本、MSA Capital、常春藤资本等</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2025-12</td><td>C 轮</td><td>超 8 亿元人民币</td><td>达晨财智、京国瑞基金、北京市人工智能产业投资基金、北京市医药健康产业投资基金、联想创投、元禾璞华等（光源资本任 FA）；<strong>投后估值超 60 亿元，跻身独角兽</strong></td><td><span class="src src-b">🟡</span></td></tr>
+      </tbody>
+    </table>
+    <p>融资节奏佐证「emerging→热」的阶段判断：2020–2021 快速连融（顶级美元/人民币 VC 抢筹）→ 2023 华为哈勃 + 国资入场（战略/产业属性增强）→ 2025-12 C 轮国资+产业资本主导、正式独角兽。<strong>注意口径差异：</strong>多篇报道称「累计融资数十亿元」「估值从 1 亿涨到数十亿」，但<strong>各轮具体金额与轮次命名各家不一致，本表只列能核到的、打架处并列标注，未擅自取一个数</strong>。<span class="src src-c">🔴</span> 营收/毛利官方未公开。赛道整体：2025 海外材料 AI 融资极热（CuspAI $100M A 轮、Periodic Labs $200M seed@$1B），与国内独角兽化同步。</p>
+  </section>
+
+  <!-- ⑤ 公司速览 -->
+  <section id="snapshot">
+    <h2><span class="n">⑤</span>公司速览</h2>
+    <table>
+      <tbody>
+        <tr><td>是什么 / 定位</td><td>全球 AI for Science 领导者、<strong>中国最早体系化做 AI4S 的平台型公司</strong>；脱胎于鄂维南院士领衔的<strong>北京科学智能研究院 AISI</strong>（2021-09 成立）。2018 年成立，总部北京，在上海/深圳/宜宾等设点。<span class="src src-a">🟢</span></td></tr>
+        <tr><td>产品</td><td><strong>开源底座：</strong><code>DeePMD-kit</code>（机器学习势函数，LGPLv3）、<code>DPA-1/2/3</code> 原子间势科学大模型、<code>Uni-Mol</code> 分子 3D 表示（含 Docking v2）、<code>Uni-Fold/Uni-RNA/Uni-SMART</code>，统一在 <code>DeepModeling</code> 开源社区。<br><strong>平台：</strong><strong>Bohrium 玻尔</strong>科学计算云平台（CPU/GPU 算力 + 模型 + Notebook + 课程/竞赛 + 玻尔空间站连接软硬件）、科学大模型体系「<strong>深势·宇知</strong>」、SciMaster 科研 agent。<br><strong>行业方案：</strong>Piloteye（电池设计自动化）、Hermite（药物计算设计）、RiDYMO（难成药靶标）。<span class="src src-a">🟢</span></td></tr>
+        <tr><td>团队</td><td>联合创始人 <strong>孙伟杰</strong>（CEO，北大本硕，曾任天使投资人）+ <strong>张林峰</strong>（普林斯顿博士，统计物理/分子模拟/ML；作为核心开发者的工作获 <strong>2020 ACM 戈登·贝尔奖</strong>——「在保持从头算精度下用 ML 把分子动力学推到 1 亿原子」）。两人为北大元培学院同窗、均 90 后。背靠鄂维南院士（中科院院士、AISI 院长、AI4S 旗手）。<span class="src src-b">🟡</span></td></tr>
+        <tr><td>商业模式</td><td>三层：① <strong>玻尔平台</strong>卖算力/软件/模型（云 + SaaS）；② <strong>行业解决方案</strong>（电池/制药/材料的项目制/合作）；③ <strong>开源生态</strong>（DeePMD/DeepModeling 不直接收费，但拉用户、立标准、做底座绑定）。本质是「AI4S 的安卓 + 算力云 + 行业交付」组合。<span class="src src-b">🟡</span>（具体营收结构未公开 <span class="src src-c">🔴</span>）</td></tr>
+        <tr><td>状态</td><td>未上市独角兽；2025-12 完成超 8 亿元 C 轮，投后估值超 60 亿元，累计融资数十亿元。<span class="src src-b">🟡</span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ⑥ 创业 idea 借鉴 -->
+  <section id="idea">
+    <h2><span class="n">⑥</span>创业 idea 借鉴（给想在中国 AI4S 创业的你）</h2>
+    <div class="callout insight">
+      <span class="label">Whitespace / 机会</span>
+      深势是<strong>平台型在位者</strong>，把「底座 + 算力 + 多行业」铺得很宽，但<strong>正因为宽，每条垂直线它都不可能重兵深耕</strong>。留给新进入者的空白集中在定位图右上「<strong>垂直行业 × 轻应用层 × 闭环交付</strong>」格：
+      <ul style="margin:8px 0">
+        <li><strong>某个深势没下重兵的细分</strong>：如固态电解质/某类正极/钠电材料、半导体光刻胶/封装材料、催化剂/分子筛、特定难成药靶点（PROTAC、变构、RNA 靶点）、香精香料/农药配方等——窄到平台型公司不愿专做、但客户付费意愿明确。</li>
+        <li><strong>站在深势开源 + 玻尔肩上</strong>：直接用 <code>DeePMD-kit</code>/<code>DPA</code>/<code>Uni-Mol</code>（开源、LGPL）+ 玻尔算力起步，<strong>不自建底座</strong>，把钱和人全压在「一个行业的数据飞轮 + 干湿闭环 + 工程化交付」上。</li>
+        <li><strong>卖「上层工具」给科研/工程师</strong>：深势平台偏全且重，市场缺<strong>轻、专、好用</strong>的细分工具（某类势模型的自动训练/微调 SaaS、模拟工作流编排、结果可视化与报告 agent、面向企业 R&D 的「计算外包 + 解读」）。</li>
+        <li><strong>出海</strong>：中国 AI4S 工具/势模型/算力性价比可打国际学术与中小企业市场（深势国际化尚浅）；英文化 + 海外云 + 合规即一条差异化路。</li>
+      </ul>
+    </div>
+    <h3>现有玩家共同短板（unmet needs）</h3>
+    <p>① <strong>「能算」≠「能交付业务结果」</strong>：多数 AI4S 公司给的是模型/平台/报告，而企业客户要的是「这个配方/这个分子能不能用、省多少时间和钱」——<strong>从工具到 outcome 的最后一公里普遍是痛点</strong>。② <strong>干湿闭环贵且慢</strong>：自建湿实验室（晶泰、Periodic 路线）极重资产；轻团队若能用「合作湿实验 + 计算主导」补上验证环，更敏捷。③ <strong>底座虽开源但落地门槛高</strong>：DeePMD/DPA 强但要会用、要调、要接业务，<strong>「开源底座 + 行业 know-how 的工程化封装」本身就是生意</strong>。④ <strong>制药一格已 crowded 且普遍亏损/在死亡谷</strong>，盲目挤进去性价比低。</p>
+    <h3>Why now（为什么现在值得做）</h3>
+    <p>① <strong>底座成熟到可复用</strong>：DeePMD/DPA/Uni-Mol/MACE/Meta OMat 等开源势模型 + 玻尔等算力云，<strong>第一次让小团队不必从零造底座</strong>。② <strong>巨头刚进场、标准未定</strong>（微软 MatterGen、谷歌 GNoME、Meta 开放模型）——拐点已到但赢家未现，垂直应用窗口期开着。③ <strong>政策与国资强力加持</strong>：北京 AI 产业基金、医药健康基金、华为哈勃都在投 AI4S，国资偏好「硬科技 + 产业落地」，对应用层创业是顺风。④ <strong>资本验证</strong>：2025 海内外材料 AI 集体大额融资，证明 LP 认这条赛道。</p>
+    <h3>可借鉴的打法 + 相邻机会</h3>
+    <ul>
+      <li><strong>borrowable（深势的打法可迁移）：</strong>（a）<strong>开源立标准 + 社区拉用户 + 平台变现</strong>的「安卓模式」——可在更窄的领域复刻（做某垂直的开源标准工具 + 商业版）；（b）<strong>学术血统背书</strong>（深势靠 AISI/院士/戈登贝尔）——绑定一个顶尖课题组做技术与信任的冷启动；（c）<strong>用平台/算力降低客户尝试门槛</strong>，再向行业方案上探。</li>
+      <li><strong>adjacent（相邻/衍生机会）：</strong>给 AI4S 做<strong>卖铲子</strong>——高质量科学数据标注/生成、模拟数据集、势模型 benchmark/评测、实验自动化中间件、科研 agent 工具链；或换商业模式做<strong>「计算 + 验证」按 outcome/里程碑收费</strong>的行业 CRO-like 服务。</li>
+    </ul>
+    <div class="callout warn">
+      <span class="label">风险（诚实给）</span>
+      ① <strong>巨头碾压</strong>：微软/谷歌/Meta 的开放模型 + 云，可能把「底座 + 通用材料发现」打成免费/低价，做底座或通用层九死一生。② <strong>在位者下沉</strong>：深势 + AISI 既出底座又做平台又做行业，你的细分若被证明大，它顺手就能覆盖。③ <strong>开源即双刃</strong>：你站在 DeePMD 肩上，别人也能——纯「会用开源」不构成护城河，<strong>护城河必须在数据/湿实验/行业渠道/交付</strong>。④ <strong>商业化未证实</strong>：整条赛道（含深势、晶泰）盈利模型都未跑通，AI 制药普遍亏损，<strong>现金流与回报周期长</strong>。⑤ <strong>资本密集 + 周期长</strong>：科学落地慢，需有耐心资本/国资支撑。
+    </div>
+  </section>
+
+  <!-- ⑦ 现实判断 -->
+  <section id="take">
+    <h2><span class="n">⑦</span>现实判断</h2>
+    <p>深势在「中国 AI4S 平台层」里基本是<strong>头部、且相对成熟的早行者</strong>：底座硬（DeePMD/DPA 有戈登贝尔背书、开源生态最强）、覆盖最全、有院士血统与国资+华为加持，独角兽地位与算力平台是真实壁垒。但<strong>「全栈宽战线」是它最大的甜也是最大的苦</strong>——每条垂直线都有更专注、（在制药上）已上市或重资产闭环的对手，且材料一线还要正面硬扛微软/谷歌/Meta 的开放模型与云；商业化（平台收入能否覆盖重研发）<strong>仍是全行业未证实的问号</strong>。对<strong>想创业的你</strong>：<strong>不要正面做「又一个 AI4S 平台/底座」</strong>（会被深势 + 巨头双向夹击），而应<strong>站在深势开源 DeePMD/DPA/Uni-Mol + 玻尔算力的肩上，选一个它没重兵的垂直行业，做「数据飞轮 + 干湿闭环 + 按 outcome 交付」的轻应用层</strong>——这是定位图右上那块相对空的格，也是赛道「emerging、底座已商品化」阶段最现实的切入点。</p>
+    <div class="callout warn">
+      <span class="label">使用提醒</span>
+      本页为对话式调研，信息主要来自公开来源并按等级标注；融资数额、客户、能力声明等以官方一手为准，
+      <strong>产品能力未必经独立验证</strong>（深势营收/毛利、各轮精确金额、竞品自述指标尤需谨慎），引用前请核对最新信息。
+    </div>
+  </section>
+
+  <!-- 出处 -->
+  <section id="src">
+    <h2>出处</h2>
+    <ul style="font-size:13.5px">
+      <li><span class="src src-a">🟢</span> 深势官网 <a href="https://www.dp.tech" target="_blank" rel="noopener">dp.tech</a> / <a href="https://www.dp.tech/en/about" target="_blank" rel="noopener">about</a>、玻尔 <a href="https://www.bohrium.com/intro" target="_blank" rel="noopener">bohrium.com</a>（产品矩阵、宇知体系）</li>
+      <li><span class="src src-a">🟢</span> 开源 <a href="https://github.com/deepmodeling/deepmd-kit" target="_blank" rel="noopener">github.com/deepmodeling/deepmd-kit</a>（~2k★，LGPLv3，含 DPA-1/2/3）、<a href="https://github.com/deepmodeling/Uni-Mol" target="_blank" rel="noopener">Uni-Mol</a></li>
+      <li><span class="src src-a">🟢</span> 官方 newsroom（PR Newswire）：<a href="https://www.prnewswire.com/news-releases/dp-technology-devday-2024-showcases-large-science-models-and-announces-open-science-initiative-302129805.html" target="_blank" rel="noopener">DevDay 2024 科学大模型/开放科学</a>、<a href="https://www.prnewswire.com/news-releases/dp-technology-open-sources-uni-mol-docking-v2-powerful-docking-engine-enabled-by-ai-302152573.html" target="_blank" rel="noopener">Uni-Mol Docking v2 开源</a></li>
+      <li><span class="src src-b">🟡</span> 融资：<a href="https://finance.sina.com.cn/tech/csj/2025-12-24/doc-inhcwxmm4453931.shtml" target="_blank" rel="noopener">新浪：C 轮超 8 亿、达晨/联想创投</a>、<a href="https://m.thepaper.cn/newsDetail_forward_32243844" target="_blank" rel="noopener">澎湃：两位 90 后又融 8 亿（投后&gt;60 亿、独角兽）</a>、<a href="https://www.pingwest.com/a/310184" target="_blank" rel="noopener">品玩：8 亿融资·AI4S「安卓系统」</a></li>
+      <li><span class="src src-b">🟡</span> 团队/背景：<a href="https://www.pingwest.com/a/294091" target="_blank" rel="noopener">品玩：对话张林峰</a>、<a href="https://www.qimingvc.com/cn/news/20220624-QMPortfolio-01" target="_blank" rel="noopener">启明创投：孙伟杰&张林峰</a>、<a href="https://www.21jingji.com/article/20230513/herald/4e0a2e01b6f296749eef07e27e9bf2cc.html" target="_blank" rel="noopener">21 经济：拿到华为投资</a>；AISI/鄂维南 <a href="https://www.qbitai.com/2022/06/35648.html" target="_blank" rel="noopener">量子位：科研「安卓模式」</a></li>
+      <li><span class="src src-b">🟡</span> 竞品：<a href="https://www.xtalpi.com" target="_blank" rel="noopener">晶泰 XtalPi 官网</a> / <a href="https://finance.sina.com.cn/jjxw/2025-04-08/doc-inesnfym6793999.shtml" target="_blank" rel="noopener">新浪：晶泰 2024 仍亏 15 亿</a>；<a href="https://www.microsoft.com/en-us/research/story/ai-meets-materials-discovery/" target="_blank" rel="noopener">Microsoft MatterGen</a>；<a href="https://medium.com/@CuspAI/securing-our-100m-series-a-to-revolutionise-materials-discovery-with-ai-e6705e8c8fd3" target="_blank" rel="noopener">CuspAI $100M A 轮</a>；<a href="https://fortune.com/2025/09/10/cuspai-raises-100-million-in-new-venture-capital-funding-ai-for-chemistry/" target="_blank" rel="noopener">Fortune：CuspAI</a>；Periodic Labs（$200M seed@$1B，a16z 领投，多家媒体报道）；<a href="https://www.schrodinger.com" target="_blank" rel="noopener">Schrödinger 官网</a>（SDGR）；<a href="https://www.biomap.com" target="_blank" rel="noopener">百图生科</a>、<a href="https://www.megarobo.tech" target="_blank" rel="noopener">镁伽</a></li>
+    </ul>
+  </section>
+
+  <footer class="foot">
+    公司竞争格局 / 赛道早期度调研笔记，仅作梳理；信息按来源分级、产品能力未必经独立验证，以官方一手信息为准 · 整理日期 2026-06-16
+  </footer>
+
+</article>
+</body>
+</html>
