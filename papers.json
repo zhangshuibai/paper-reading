@@ -57,6 +57,26 @@
     "path": "papers/2026-06-16-dp-technology/index.html"
   },
   {
+    "slug": "2026-06-16-xtalpi",
+    "title": "晶泰科技 XtalPi：竞争格局与赛道早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://www.xtalpi.com",
+    "code": "",
+    "date": "2026-06-16",
+    "published": "公司调研 2026",
+    "tldr": "量子物理+AI+机器人湿实验室做药物发现CRO，港股AI制药第一股、2025首次盈利(营收约8亿/净利约2.58亿)；赛道emerging→crowded，whitespace在垂直单病种/卖铲子/outcome-based细分CRO，但单客户(DoveTree)依赖是头号风险",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "startup-idea",
+      "drug-discovery",
+      "AI4S",
+      "china"
+    ],
+    "path": "papers/2026-06-16-xtalpi/index.html"
+  },
+  {
     "slug": "2026-06-15-agents-for-scientific-discovery",
     "title": "Agent 在科学发现里的应用（文献综述）",
     "authors": "—",
