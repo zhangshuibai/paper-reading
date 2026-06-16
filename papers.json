@@ -179,6 +179,27 @@
     "path": "papers/2026-06-16-ai-datacenter-cooling-materials/index.html"
   },
   {
+    "slug": "2026-06-16-micro1",
+    "title": "Micro1：AI 招聘与专家数据的竞争格局与早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://micro1.ai",
+    "code": "",
+    "date": "2026-06-16",
+    "published": "公司调研 2026",
+    "tldr": "用 AI 面试官 Zara 筛专家、给前沿 AI labs 供 RLHF/专家数据的 AI 招聘起家公司；赛道 emerging→快速 crowding、巨头环伺，体量小护城河弱；可借鉴垂直专家数据闭环 whitespace。",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "market-map",
+      "startup-idea",
+      "ai-data",
+      "ai-recruiting",
+      "china"
+    ],
+    "path": "papers/2026-06-16-micro1/index.html"
+  },
+  {
     "slug": "2026-06-15-agents-for-scientific-discovery",
     "title": "Agent 在科学发现里的应用（文献综述）",
     "authors": "—",

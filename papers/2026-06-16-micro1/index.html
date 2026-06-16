@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Micro1 · 竞争格局与赛道早期度调研</title>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --bad:#ff6b81; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --bad:#d23651; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;}
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:920px; margin:0 auto; padding:18px 22px 90px}
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:25px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)} .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap; line-height:2}
+  nav.toc a:hover{color:var(--accent)}
+  section{margin:38px 0}
+  h2{font-size:20px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:16.5px; margin:22px 0 8px}
+  p{margin:12px 0} ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)} strong{color:var(--text)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.88em}
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:13px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:9px 10px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  figure{margin:24px 0; text-align:center}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+  .svgwrap{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 8px}
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+  .src{font-size:10.5px; padding:0 6px; border-radius:999px; white-space:nowrap; vertical-align:middle}
+  .src-a{background:rgba(67,197,158,.18); color:var(--ok)}
+  .src-b{background:rgba(255,180,84,.18); color:var(--warn)}
+  .src-c{background:rgba(255,107,129,.18); color:var(--bad)}
+  .legend{font-size:12px; color:var(--muted); margin:6px 0 0}
+  .verdict{display:inline-block; font-weight:700; padding:3px 12px; border-radius:999px; font-size:14px}
+  .v-nascent{background:rgba(122,162,255,.18); color:var(--accent)}
+  .v-emerging{background:rgba(67,197,158,.18); color:var(--ok)}
+  .v-crowded{background:rgba(255,180,84,.18); color:var(--warn)}
+  .v-mature{background:rgba(255,107,129,.18); color:var(--bad)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">AI 招聘 / AI 面试</span>
+      <span class="chip">AI 训练数据 / RLHF</span>
+      <span class="chip">竞争格局</span>
+      <span class="chip">赛道早期度</span>
+      <span class="chip">创业 idea</span>
+    </div>
+    <h1>Micro1：AI 招聘与专家数据的竞争格局与早期度调研</h1>
+    <p class="orig-title">micro1.ai — 用 AI 面试官（Zara）筛选专家，给前沿 AI labs 供 RLHF / 专家数据；赛道 emerging 但拥挤化极快、巨头环伺</p>
+    <dl class="meta-grid">
+      <dt>对象</dt><dd><a href="https://micro1.ai" target="_blank" rel="noopener">https://micro1.ai</a></dd>
+      <dt>赛道</dt><dd>AI 招聘 / AI 面试（automated interviewing）×「专家数据供给（expert data / RLHF for AI labs）」的结合体</dd>
+      <dt>整理</dt><dd>对话调研笔记；信息来自公开检索，按来源分级标注，产品能力未必经独立验证</dd>
+      <dt>日期</dt><dd>2026-06-16</dd>
+    </dl>
+    <p class="legend">来源等级：<span class="src src-a">🟢 一手</span> 官网/SEC/官方 ·
+      <span class="src src-b">🟡 二手</span> 媒体/数据库 ·
+      <span class="src src-c">🔴 自述/未证实</span> 营销口径或未独立验证</p>
+  </header>
+
+  <div class="tldr">
+    <b>一句话</b> — Micro1 是一家用自研 AI 面试官 <strong>Zara</strong> 大规模筛选 PhD / 资深工程师等专家、再把这些专家供给给 OpenAI、Microsoft 等前沿 AI labs 做 <strong>RLHF / post-training 数据标注与 eval</strong> 的公司；它本质走的是「AI 招聘起家 → 转向专家数据供给」的同一条路（和 Mercor 几乎重叠）。赛道判断 <span class="verdict v-emerging">emerging → 快速 crowding</span>：专家数据 + RLHF 是 2024–2026 最火的 AI 卖水赛道，但玩家迅速变多（Scale、Surge、Mercor、Turing、Snorkel、Handshake AI），头部估值已到 $10B–$25B 量级，<strong>Micro1 体量与信息都偏小、护城河（Zara 面试技术）易被复制</strong>。可借鉴点：把「AI 面试 → 专家供给」做成<strong>垂直闭环</strong>（先用 AI 面试低成本攒下某个高门槛专业领域的专家池，再独家供给该领域的数据/eval），是中小玩家避开与巨头正面拼规模的 whitespace。<br><span class="legend">⚠️ Micro1 较新、信息少且口径打架，本文营收/估值数字全部并列标来源与时间；用户提供的联合创始人 Sujay Kotamraju 在公开来源中未能独立核实，见 ⑤。</span>
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#market">① 赛道地图 + 早期度</a>
+    <a href="#matrix">② 竞品对照矩阵</a>
+    <a href="#map">③ 定位图</a>
+    <a href="#funding">④ 融资 timeline</a>
+    <a href="#snapshot">⑤ 公司速览</a>
+    <a href="#idea">⑥ 创业 idea 借鉴</a>
+    <a href="#cn">⑦ 中国对标</a>
+    <a href="#take">⑧ 现实判断</a>
+    <a href="#src">出处</a>
+  </nav>
+
+  <!-- ① 赛道与早期度 -->
+  <section id="market">
+    <h2><span class="n">①</span>赛道地图 + 早期度判断</h2>
+    <p>Micro1 横跨两个相邻赛道，理解它必须先把两条线分开看：</p>
+    <ul>
+      <li><strong>赛道 A — AI 招聘 / AI 面试（automated interviewing）：</strong>用 AI agent 自动对候选人做异步技术面试、打分、防作弊，替代人类初筛。Micro1 的入口产品 <strong>Zara</strong> 就在这里——号称能用 20+ 语言面试、每天处理上千候选人 <span class="src src-b">🟡</span>。这个赛道本身已相当拥挤（HireVue 2004 年就在做视频面试，Karat 做技术面试外包，国内一堆 AI 面试官）。</li>
+      <li><strong>赛道 B — 专家数据 / RLHF 供给（expert data for AI labs）：</strong>给 OpenAI、Anthropic、Google、Microsoft 等前沿 labs 提供「人类专家」来做 post-training 标注、RLHF、模型评测（eval）。这是 2024–2026 AI 圈最火的「卖水」生意。Micro1 真正赚钱、营收暴涨的是这一块。</li>
+    </ul>
+    <p>Micro1 的打法 = <strong>用赛道 A 的 AI 面试技术，低成本筛出赛道 B 需要的高门槛专家（professors、MD、PhD、senior engineers），再把专家供给 labs</strong>。这条「AI 招聘 → 专家数据」的路径，和 Mercor 几乎是同一个剧本（Mercor 也是 AI 招聘起家、几个月内 pivot 到给 labs 供专家）<span class="src src-b">🟡</span>。所以 Micro1 的主战场实质是<strong>赛道 B（专家数据 / RLHF）</strong>，赛道 A 是它的获客与壁垒来源。下面的早期度判断以主战场 B 为锚。</p>
+
+    <h3>玩家分群（四象限别漏）</h3>
+    <ul>
+      <li><strong>现有巨头 / 规模化数据厂：</strong>Scale AI（Meta 2025 年 6 月以 ~$14.3B 拿下约 49% 股权 <span class="src src-b">🟡</span>，估值从 ~$2B 跳到 ~$10B 量级）、Surge AI（自举无 VC、传 2025 年寻求融资估值 $15B–$25B 量级 <span class="src src-b">🟡</span>）。</li>
+      <li><strong>垂直 / 同代际创业公司：</strong><strong>Mercor</strong>（最直接对标，2025 年 10 月 $350M C 轮、估值 $10B <span class="src src-b">🟡</span>）、Turing（Series E $111M, 2025-03，累计 ~$326M <span class="src src-b">🟡</span>）、Snorkel AI（programmatic labeling + eval，Series D $100M / 估值 $1.3B, 2025-05 <span class="src src-b">🟡</span>）、<strong>Micro1 本身</strong>。</li>
+      <li><strong>大厂 / 相邻平台顺手做：</strong>Handshake（校招平台）2025 年 1 月起做 <strong>Handshake AI</strong>，靠庞大学生/专家池切入，传 2026-04 已带来近 $1B AI 训练年化营收 <span class="src src-b">🟡</span>；以及 labs 自建标注团队（OpenAI、Anthropic 内部都有自有标注/eval 队伍）。</li>
+      <li><strong>开源 / 自助 SaaS 替代：</strong>Labelbox、SuperAnnotate、Label Studio（开源 + 自助 RLHF pipeline，按 seat / data credit 收费，让 labs 自己管专家、不付人力加价 <span class="src src-b">🟡</span>）。这是对「人力 marketplace 加价」模式的结构性威胁——labs 一旦想内化就走自助工具。</li>
+    </ul>
+
+    <div class="callout insight">
+      <span class="label">早期度判断</span>
+      <span class="verdict v-emerging">emerging</span> ，但<strong>正以极快速度向 crowded 迁移</strong>
+      （nascent 萌芽 / emerging 新兴 / crowded 拥挤 / mature 成熟）<br><br>
+      <strong>判断信号：</strong>
+      ① <strong>玩家数量与新增速度</strong>——「专家级 RLHF / 数据」从 2024 年才成为独立品类，但 18 个月内已挤进 Scale、Surge、Mercor、Turing、Snorkel、Handshake AI、Micro1 等多家，新增极快，是 emerging 偏 crowding 的典型信号。
+      ② <strong>融资热度爆炸</strong>——Mercor 一年从 $2B 跳到 $10B、Surge 传 $25B、Scale 被 Meta $14B 注资，资本极度拥挤，是赛道「已被验证、正在抢座」的标志（不再 nascent）。
+      ③ <strong>巨头已进场</strong>——Meta 通过 Scale、Handshake 自带流量入场，labs 自建团队，巨头在场 = 提示赛道在向 mature 端拉。
+      ④ <strong>开源/自助替代存在</strong>——Labelbox / Label Studio 等让 labs 可内化，压缩纯 marketplace 加价空间。
+      ⑤ <strong>尚无公认 benchmark / 标准</strong>——「专家数据质量」如何度量仍混乱，这一点还停留在 emerging（谁的专家更好没有公认标尺，给差异化留了口子）。
+      <br><br>综合：<strong>赛道 B 整体 emerging→crowded；而「AI 面试 + 垂直专家数据闭环」这个具体结合点仍 emerging（玩家少、Mercor/Micro1 在试）</strong>。Micro1 自身因体量小、信息少、护城河易复制，<strong>在这个拥挤赛道里偏「后发小玩家」定位</strong>。
+    </div>
+  </section>
+
+  <!-- ② 竞品矩阵 -->
+  <section id="matrix">
+    <h2><span class="n">②</span>竞品对照矩阵</h2>
+    <p>选了 7 个最能拉开差距的维度：<strong>起家路径</strong>（AI 招聘 vs 数据出身）、<strong>数据/服务类型</strong>、<strong>主要客户</strong>、<strong>规模 & 估值 & 融资</strong>、<strong>AI 面试技术壁垒</strong>、<strong>专家供给方式</strong>、<strong>是否做 eval</strong>。数字口径各家时间不一，已逐格标来源与时间；估值/营收差异大处全部并列，不替任何一方美化。</p>
+    <table>
+      <thead><tr>
+        <th>玩家</th>
+        <th>起家路径</th>
+        <th>数据 / 服务类型</th>
+        <th>主要客户</th>
+        <th>规模 · 估值 · 融资</th>
+        <th>AI 面试技术壁垒</th>
+        <th>专家供给</th>
+        <th>做 eval?</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Micro1（本篇）</strong></td>
+          <td><strong>AI 招聘起家</strong>（Zara 面试）→ 转专家数据 <span class="src src-b">🟡</span></td>
+          <td>专家级 post-training 标注 / RLHF / eval <span class="src src-c">🔴自述</span></td>
+          <td>Microsoft、传 OpenAI/Google（曾）、多家 Fortune 100 <span class="src src-b">🟡</span></td>
+          <td>估值 $500M（2025-09 A 轮 $35M）<span class="src src-b">🟡</span>；ARR 口径打架：$50M(09)/$100M(12)/官网称 run rate &gt;$200M~$300M <span class="src src-c">🔴</span></td>
+          <td><strong>Zara</strong>：核心卖点，多语言异步面试 + 防作弊 <span class="src src-c">🔴</span>（技术细节未独立验证）</td>
+          <td>AI 面试筛 top 1% 专家，全球 90+ 国结算 <span class="src src-c">🔴</span></td>
+          <td>称做 evals <span class="src src-c">🔴</span></td>
+        </tr>
+        <tr>
+          <td>Mercor</td>
+          <td><strong>AI 招聘起家</strong>→ 数月内 pivot 专家数据 <span class="src src-b">🟡</span></td>
+          <td>专家 RLHF / 标注（coding、医、法、研究）<span class="src src-b">🟡</span></td>
+          <td>多家前沿 labs <span class="src src-b">🟡</span></td>
+          <td>估值 $10B（2025-10 C 轮 $350M）<span class="src src-b">🟡</span>；传年化 ~$35M(24末)→~$500M run rate(25末) <span class="src src-b">🟡</span></td>
+          <td>有自研 AI 匹配/面试 <span class="src src-b">🟡</span></td>
+          <td>marketplace 撮合 PhD/律师/研究者 <span class="src src-b">🟡</span></td>
+          <td>是 <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Scale AI</td>
+          <td>数据标注起家（2016）<span class="src src-b">🟡</span></td>
+          <td>全栈数据标注 + RLHF + eval，垂直整合 <span class="src src-b">🟡</span></td>
+          <td>Meta（49% 股权）、车企、政府、labs <span class="src src-b">🟡</span></td>
+          <td>估值 ~$10B 量级；Meta 2025-06 注资 ~$14.3B 拿约 49% <span class="src src-b">🟡</span></td>
+          <td>以 ops/平台为主，非 AI 面试导向 <span class="src src-b">🟡</span></td>
+          <td>大规模承包工 + 部分专家 <span class="src src-b">🟡</span></td>
+          <td>是 <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Surge AI</td>
+          <td>RLHF 数据起家（自举无 VC）<span class="src src-b">🟡</span></td>
+          <td>高质量 RLHF / 偏好数据，Anthropic 重度用 <span class="src src-b">🟡</span></td>
+          <td>Anthropic 等前沿 labs <span class="src src-b">🟡</span></td>
+          <td>传 2025 寻求融资，估值口径 $15B–$25B 不一 <span class="src src-b">🟡</span>；传营收 &gt;$1B <span class="src src-c">🔴</span></td>
+          <td>无公开 AI 面试产品 <span class="src src-b">🟡</span></td>
+          <td>自有标注大军 <span class="src src-b">🟡</span></td>
+          <td>是 <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Turing</td>
+          <td>AI 招聘/远程工程师起家 → 转 AI 训练数据 <span class="src src-b">🟡</span></td>
+          <td>coding 为主的训练数据 + 工程交付 <span class="src src-b">🟡</span></td>
+          <td>前沿 labs + 企业 <span class="src src-b">🟡</span></td>
+          <td>Series E $111M(2025-03)，累计 ~$326M <span class="src src-b">🟡</span></td>
+          <td>有工程师匹配/评测 <span class="src src-b">🟡</span></td>
+          <td>全球工程师网络 <span class="src src-b">🟡</span></td>
+          <td>部分 <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Snorkel AI</td>
+          <td>programmatic labeling（Stanford 研究血统）<span class="src src-b">🟡</span></td>
+          <td>程序化/弱监督标注 + eval 平台（SaaS 偏重）<span class="src src-b">🟡</span></td>
+          <td>企业 + labs <span class="src src-b">🟡</span></td>
+          <td>估值 $1.3B（Series D $100M, 2025-05），累计 ~$238M <span class="src src-b">🟡</span></td>
+          <td>无 AI 面试，靠算法降人力 <span class="src src-b">🟡</span></td>
+          <td>少依赖人力（程序化为主）<span class="src src-b">🟡</span></td>
+          <td>是（eval 是卖点）<span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>HireVue</td>
+          <td>AI 视频面试起家（2004）<span class="src src-b">🟡</span></td>
+          <td><strong>纯 AI 面试 / 测评</strong>，不供 AI 数据 <span class="src src-b">🟡</span></td>
+          <td>Goldman、Unilever、Hilton 等 Fortune 500 <span class="src src-b">🟡</span></td>
+          <td>未找到 2025 营收/估值；套餐 $35K–$75K 起 <span class="src src-b">🟡</span></td>
+          <td><strong>老牌面试技术</strong>（视频 + CodeVue 技术测评）<span class="src src-b">🟡</span></td>
+          <td>不供专家（只做雇主初筛）<span class="src src-b">🟡</span></td>
+          <td>否 <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Karat</td>
+          <td>技术面试外包起家（2014）<span class="src src-b">🟡</span></td>
+          <td>代企业做首轮技术面试，不供 AI 数据 <span class="src src-b">🟡</span></td>
+          <td>招技术岗的企业 <span class="src src-b">🟡</span></td>
+          <td>累计融资 ~$169M；2025 估值未找到 <span class="src src-b">🟡</span></td>
+          <td>「人 + AI」技术面试流程 <span class="src src-b">🟡</span></td>
+          <td>不供专家（面试服务）<span class="src src-b">🟡</span></td>
+          <td>否 <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Handshake AI</td>
+          <td>校招平台（Handshake）顺手做 <span class="src src-b">🟡</span></td>
+          <td>2025-01 起切 AI 训练数据 <span class="src src-b">🟡</span></td>
+          <td>前沿 labs <span class="src src-b">🟡</span></td>
+          <td>母公司 2022 估值 ~$3.3B；传 AI 业务 2026-04 近 $1B 年化 <span class="src src-b">🟡</span></td>
+          <td>无独立 AI 面试卖点，靠庞大学生/专家池 <span class="src src-b">🟡</span></td>
+          <td>自带海量校园/专家供给 <span class="src src-b">🟡</span></td>
+          <td>部分 <span class="src src-b">🟡</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>读矩阵：</strong>（1）<strong>和 Micro1 真正贴身的是 Mercor</strong>——同样「AI 招聘起家 → 专家数据」、同样靠自研面试/匹配筛专家，但 Mercor 估值已 $10B、营收 run rate 量级大一个数量级，Micro1 是同剧本的<strong>晚一拍小一号版本</strong>。（2）Scale / Surge 是规模与资本巨兽，Micro1 在规模上完全不对位，只能打「专家质量 / 垂直」差异化。（3）<strong>Micro1 唯一可讲的独特壁垒是 Zara（AI 面试技术）</strong>——但 HireVue/Karat 证明 AI 面试本身不稀缺，Mercor 也有匹配 AI，所以这条护城河<strong>窄且易被复制</strong>，且 Zara 的技术细节全是 🔴 自述、未独立验证。（4）同质化已经很重：大家都在抢同一批 labs 客户、同一批 PhD 专家，差异主要在规模和某个垂直领域的专家深度。</p>
+  </section>
+
+  <!-- ③ 定位图 -->
+  <section id="map">
+    <h2><span class="n">③</span>定位图（whitespace 在哪）</h2>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 640 420" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12">
+        <line x1="40" y1="210" x2="600" y2="210" stroke="#b9c2e0" stroke-width="1.5"/>
+        <line x1="320" y1="24" x2="320" y2="392" stroke="#b9c2e0" stroke-width="1.5"/>
+        <text x="600" y="226" text-anchor="end" fill="#5a627a">垂直 / 专家深度 →</text>
+        <text x="40" y="226" fill="#5a627a">← 规模化 / 通用承包</text>
+        <text x="326" y="32" fill="#5a627a">AI 面试 / 自动筛选驱动 ↑</text>
+        <text x="326" y="388" fill="#5a627a">人力 ops / 自助工具驱动 ↓</text>
+
+        <circle cx="150" cy="290" r="7" fill="#9aa3bd"/><text x="162" y="294" fill="#1a1f33">Scale AI</text>
+        <circle cx="400" cy="300" r="7" fill="#9aa3bd"/><text x="412" y="304" fill="#1a1f33">Surge AI</text>
+        <circle cx="180" cy="150" r="7" fill="#9aa3bd"/><text x="192" y="154" fill="#1a1f33">Snorkel（程序化）</text>
+        <circle cx="300" cy="325" r="7" fill="#9aa3bd"/><text x="206" y="343" fill="#1a1f33">Handshake AI</text>
+        <circle cx="430" cy="245" r="7" fill="#9aa3bd"/><text x="442" y="249" fill="#1a1f33">Turing</text>
+        <circle cx="150" cy="70" r="7" fill="#cbd2e8"/><text x="162" y="74" fill="#5a627a">HireVue / Karat（纯面试，不供数据）</text>
+        <circle cx="470" cy="120" r="8" fill="#6b4cff"/><text x="482" y="124" fill="#1a1f33">Mercor</text>
+        <circle cx="430" cy="95" r="9" fill="#3a66ff"/><text x="300" y="86" fill="#3a66ff" font-weight="700">Micro1</text>
+
+        <rect x="520" y="48" width="104" height="72" rx="8" fill="none" stroke="#138a6e" stroke-dasharray="5 4"/>
+        <text x="572" y="40" text-anchor="middle" fill="#138a6e" font-weight="700">whitespace</text>
+        <text x="572" y="78" text-anchor="middle" fill="#138a6e">单一高门槛</text>
+        <text x="572" y="94" text-anchor="middle" fill="#138a6e">垂直 + AI 面试</text>
+        <text x="572" y="110" text-anchor="middle" fill="#138a6e">闭环</text>
+      </svg>
+      </div>
+      <figcaption>定位图（本调研重绘）。横轴：规模化通用 ↔ 垂直专家深度；纵轴：AI 面试/自动筛选驱动 ↔ 人力 ops/自助工具驱动。Micro1 与 Mercor 同处「右上：垂直专家 + AI 面试驱动」象限且高度重叠；右上极角的 <strong>单一高门槛垂直领域闭环（如只做 medical / 只做 quant finance 的专家数据）</strong>仍是相对空白。</figcaption>
+    </figure>
+  </section>
+
+  <!-- ④ 融资 timeline -->
+  <section id="funding">
+    <h2><span class="n">④</span>融资 timeline</h2>
+    <p>Micro1 轮次很少（早期公司，诚实标）。公开可核的只有早期小额轮 + 2025-09 的 Series A；早期轮次的日期/金额各数据库口径略有出入，以二手报道为准。</p>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 720 170" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12.5">
+        <line x1="70" y1="80" x2="650" y2="80" stroke="#b9c2e0" stroke-width="2"/>
+        <circle cx="100" cy="80" r="6" fill="#3a66ff"/>
+        <text x="100" y="60" text-anchor="middle" fill="#5a627a">2022-04</text>
+        <text x="100" y="105" text-anchor="middle" fill="#1a1f33">成立</text>
+        <text x="100" y="120" text-anchor="middle" fill="#5a627a">（Palo Alto）</text>
+        <circle cx="300" cy="80" r="6" fill="#6b4cff"/>
+        <text x="300" y="60" text-anchor="middle" fill="#5a627a">2023–2024</text>
+        <text x="300" y="105" text-anchor="middle" fill="#1a1f33">早期轮 ~$6.6M</text>
+        <text x="300" y="120" text-anchor="middle" fill="#5a627a">含 pre-seed/种子</text>
+        <text x="300" y="135" text-anchor="middle" fill="#5a627a">Companyon 等</text>
+        <circle cx="560" cy="80" r="8" fill="#3a66ff"/>
+        <text x="560" y="58" text-anchor="middle" fill="#5a627a">2025-09</text>
+        <text x="560" y="105" text-anchor="middle" fill="#1a1f33" font-weight="700">Series A $35M</text>
+        <text x="560" y="120" text-anchor="middle" fill="#5a627a">估值 $500M</text>
+        <text x="560" y="135" text-anchor="middle" fill="#5a627a">领投 01 Advisors</text>
+      </svg>
+      </div>
+      <figcaption>Micro1 融资时间线（据公开报道整理）。早期轮口径不一，已合并表示。</figcaption>
+    </figure>
+    <table>
+      <thead><tr><th>时间</th><th>事件 / 轮次</th><th>金额</th><th>投资方 / 备注</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr><td>2022-04</td><td>公司成立</td><td>—</td><td>创始人 Ali Ansari（UC Berkeley，2022 毕业，math+CS）；总部 Palo Alto / West Hills, CA（口径不一）</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2023–2024</td><td>pre-seed / 早期轮（合并口径）</td><td>累计 ~$6.6M（含 $3.3M pre-seed + $3.3M）</td><td>Companyon Ventures 等；曾报道一笔 $3.3M 投资对应 ~$30M 估值</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2025-09</td><td><strong>Series A</strong></td><td><strong>$35M</strong></td><td>领投 <strong>01 Advisors</strong>（Dick Costolo / Adam Bain，前 Twitter CEO/COO）；董事会加入 Adam Bain、Joshua Browder；估值 <strong>$500M</strong></td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>（汇总）</td><td>累计融资</td><td>口径约 $41.6M / 4 轮 / 20 投资人（数据库口径）</td><td>各库可能含可转债/SAFE 折算，仅供参考</td><td><span class="src src-b">🟡</span> / <span class="src src-c">🔴</span></td></tr>
+      </tbody>
+    </table>
+    <div class="callout note">
+      <span class="label">营收 / 估值口径打架（重要）</span>
+      Micro1 的 ARR 数字在不同时间点与来源间差异极大，<strong>全部并列，不取一个</strong>：
+      <ul>
+        <li>2025 年初：~<strong>$7M</strong> ARR <span class="src src-b">🟡</span>（TechCrunch 引创始人）</li>
+        <li>2025-09（A 轮时）：<strong>$50M</strong> ARR <span class="src src-b">🟡</span></li>
+        <li>2025-12：创始人称跨过 <strong>$100M</strong> ARR <span class="src src-c">🔴自述</span>（媒体转述创始人口径）</li>
+        <li>官网 / 分析机构页面：称 run rate &gt; <strong>$200M</strong>，乃至 2026-04 第三方推算 <strong>~$300M</strong> 年化 <span class="src src-c">🔴</span>（未独立审计）</li>
+      </ul>
+      这种「一年内从 $7M 蹿到 $100M+」的曲线与整个专家数据赛道 2025 年的爆发一致，但<strong>均为创始人/第三方口径，无独立财务验证</strong>，且 ARR 在该赛道常含一次性大单，含金量需打折看。
+    </div>
+    <p><strong>赛道整体融资热度：</strong>专家数据 / RLHF 是 2025 年最热的 AI「卖水」赛道之一——Mercor 一年估值翻 5 倍到 $10B、Surge 传 $25B、Scale 被 Meta $14B 注资。资本高度拥挤本身既是机会（需求真实）也是风险（巨头融资弹药碾压）。</p>
+  </section>
+
+  <!-- ⑤ 公司速览 -->
+  <section id="snapshot">
+    <h2><span class="n">⑤</span>公司速览</h2>
+    <table>
+      <tbody>
+        <tr><td>是什么 / 定位</td><td>用 AI 面试官 Zara 大规模筛选专家、再把专家供给前沿 AI labs 做 post-training / RLHF / eval 数据的公司。<strong>本质是「AI 招聘 → 专家数据供给」</strong>，与 Mercor 同剧本。<span class="src src-b">🟡</span></td></tr>
+        <tr><td>产品</td><td><strong>Zara</strong>——AI recruiter / AI 面试官：多语言异步技术面试、自动打分、防作弊，号称每天处理上千候选人、筛 top 1%。<span class="src src-c">🔴自述</span> 另有给 labs 的专家供给/标注交付流程。本身不训练大模型，调用现成模型。<span class="src src-b">🟡</span></td></tr>
+        <tr><td>团队</td><td>创始人 &amp; CEO <strong>Ali Ansari</strong>（UC Berkeley，math+CS，2022 毕业；多处报道称年仅 24；本科期间做软件外包 agency「moontek」并自建 AI 筛选工具，演化成 Micro1）<span class="src src-b">🟡</span>。<br><strong>⚠️ 关于联合创始人：</strong>用户提供的 <strong>Sujay Kotamraju</strong> 在本次公开检索（官网团队页、Crunchbase、Tracxn、媒体报道）中<strong>未能独立核实</strong>——公开来源普遍只把 Ali Ansari 列为 founder/CEO，未见该姓名作为 co-founder 出现。<strong>未找到，存疑待证</strong>，不作肯定陈述。<span class="src src-c">🔴</span></td></tr>
+        <tr><td>商业模式</td><td>B2B marketplace / 服务：向 labs 收专家人力费并加价，承担 vetting、QA、合规、全球 90+ 国结算；专家时薪报道达 ~$300–$400/小时、兼职 15–20 小时/周。<span class="src src-c">🔴</span></td></tr>
+        <tr><td>客户</td><td>Microsoft（创始人明确点名）<span class="src src-b">🟡</span>；传曾与 OpenAI、Google 合作 <span class="src src-c">🔴</span>；多家 Fortune 100 <span class="src src-b">🟡</span>。客户高度集中于少数大 labs 是结构性风险。</td></tr>
+        <tr><td>状态</td><td>成立 2022，2025-09 完成 $35M Series A、估值 $500M；营收口径暴涨但未经独立审计。相对 Mercor/Scale/Surge <strong>体量小、信息少、偏后发小玩家</strong>。<span class="src src-b">🟡</span></td></tr>
+      </tbody>
+    </table>
+    <div class="callout warn">
+      <span class="label">能核实的有限（早期公司诚实声明）</span>
+      Micro1 较新、一手披露少：<strong>能稳定核到的是创始人背景、$35M/$500M 的 A 轮、Microsoft 客户、Zara 这个产品的存在</strong>；而 ARR 数字、客户名单细节、Zara 的真实技术壁垒、联合创始人构成<strong>多为创始人或第三方口径、未独立验证</strong>。本文据此判档与给建议，引用前请核最新一手信息。
+    </div>
+  </section>
+
+  <!-- ⑥ 创业 idea 借鉴 -->
+  <section id="idea">
+    <h2><span class="n">⑥</span>创业 idea 借鉴</h2>
+    <div class="callout insight">
+      <span class="label">Whitespace / 机会</span>
+      <strong>「AI 面试 + 单一高门槛垂直专家数据」的闭环</strong>。现在 Mercor/Micro1 都在做「泛专家」供给，正面和 Scale/Surge 拼规模注定吃亏。空位在于：<strong>只死磕一个高壁垒、监管/知识门槛极高的垂直领域</strong>（如临床医学、量化金融、芯片/EDA、特定法域的法律、稀有语种），用自动化 AI 面试在该领域低成本攒下别人攒不动的专家池，再把该领域的训练数据 + eval <strong>独家供给</strong>给需要它的 labs。规模上不与巨头对位，但在那一格里做到最深，labs 绕不开你。
+    </div>
+    <h3>现有玩家共同短板（unmet needs）</h3>
+    <p>① <strong>专家质量无公认度量</strong>——大家都说自己专家更好，但没有标尺；谁能给出可验证的「专家质量 benchmark / 审计」，就能把信任变成壁垒。② <strong>合规与 IP/隐私黑箱</strong>——labs 越来越在意数据来源合规、专家身份真实性、防作弊（AI 替考），这正是 Zara 想解决的，但行业整体仍薄弱。③ <strong>纯 marketplace 加价模式脆弱</strong>——labs 一旦想内化就转 Labelbox/Label Studio 自助工具；缺少让客户「离不开」的沉淀（专有领域知识库、长期专家关系）。④ <strong>专家端体验差</strong>——付款延迟、项目忽多忽少、平台混乱（Mercor/Scale 都有此类投诉），善待专家本身能成供给侧壁垒。</p>
+    <h3>Why now（为什么现在值得做）</h3>
+    <p>① <strong>post-training / RLHF / RL 环境成为模型能力主战场</strong>，labs 对「高质量人类专家判断」的需求 2024 起结构性爆发；② <strong>合成数据见顶</strong>，难领域仍离不开真人专家；③ <strong>AI 面试技术成熟</strong>（LLM 让自动面试/打分成本骤降），使「低成本筛海量专家」第一次可行；④ <strong>Scale 被 Meta 收编后中立性受质疑</strong>，OpenAI/Google 等纷纷找替代供应商，给新玩家腾出客户窗口（Micro1/Mercor/Handshake 的暴涨都踩在这个拐点上）。</p>
+    <h3>可借鉴的打法 + 相邻机会</h3>
+    <ul>
+      <li><strong>borrowable：</strong>「<strong>用自研 AI 面试做获客与供给侧筛选</strong>」——把招聘产品（Zara）当成获取并质控专家的引擎，再把专家变成数据生意。这套「招聘工具 → 数据供给」的飞轮可迁移到任何需要稀缺专业人力的领域（不止 AI labs：如专业咨询、医疗远程、垂直外包）。</li>
+      <li><strong>adjacent：</strong>（a）把 Zara 这类 AI 面试官单独做成 <strong>SaaS 卖给企业 HR</strong>（直接对位 HireVue/Karat，但更 LLM-native）；（b）做<strong>「专家质量审计 / 数据可信度」第三方层</strong>，给 labs 当裁判；（c）做<strong>专家侧的「经纪/工会」</strong>，帮 PhD 专家在多个平台间获得更好报酬与稳定项目（解决供给侧痛点）；（d）<strong>RL 环境 / agent 评测</strong>的垂直专家供给（下一波需求）。</li>
+    </ul>
+    <div class="callout warn">
+      <span class="label">风险（诚实给）</span>
+      ① <strong>巨头/头部碾压</strong>——Scale（Meta 弹药）、Surge（$1B+ 营收）、Mercor（$10B 估值）在规模、资本、客户关系上全面领先，Micro1 体量小、晚一拍；② <strong>护城河弱</strong>——Zara 这类 AI 面试技术不稀缺（HireVue/Karat/Mercor 都有），易被复制，是窄护城河；③ <strong>AI 招聘合规争议</strong>——AI 自动面试/打分面临公平性、歧视、隐私、各地监管（如纽约 AEDT、欧盟 AI Act 把招聘 AI 列高风险）压力，可能拖累 Zara 的扩张；④ <strong>客户集中</strong>——营收高度依赖少数大 labs，单客户流失即重创，且 labs 自建团队随时内化；⑤ <strong>ARR 含金量</strong>——专家数据生意 ARR 常含一次性大单，「$100M+」需打折看；⑥ <strong>合成数据替代</strong>——若难领域也能合成，人力供给的长期价值被削。
+    </div>
+  </section>
+
+  <!-- ⑦ 中国对标 -->
+  <section id="cn">
+    <h2><span class="n">⑦</span>中国对标（AI 招聘 / AI 面试 + 专家数据）</h2>
+    <p>把 Micro1 的两条线分别映射到中国，判断「AI 招聘转 AI 数据」在中国的可行性与 whitespace。</p>
+    <h3>中国 AI 招聘 / AI 面试玩家（对位 Zara / HireVue）</h3>
+    <ul>
+      <li><strong>近屿智能「AI 得贤招聘官」</strong>——号称 L5 级 AIGC 面试系统，宣称在三星中国、招商银行、西门子等场景可在招聘决策中替代人类面试官 <span class="src src-c">🔴自述</span>，是国内最贴近「自主 AI 面试官」定位的玩家。</li>
+      <li><strong>牛客 AI 面试</strong>、<strong>智联「AI 易面」</strong>、<strong>猎聘·Doris</strong>、<strong>海纳 AI 面试官</strong>——主流 AI 视频/异步面试产品，多用于校招、蓝领、销售、客服等高量岗位 <span class="src src-b">🟡</span>。报道称 AI 视频面试已占中国在线招聘市场 ~31.8%、企业 AI 面试量同比大增 <span class="src src-b">🟡</span>。</li>
+      <li><strong>用友大易</strong>——偏大规模招聘管理 + 智能人才识别，面向大企业 <span class="src src-b">🟡</span>。</li>
+      <li><strong>BOSS 直聘</strong>——自研招聘行业大模型「南北阁」，把 AI 嵌入匹配/沟通，平台流量巨大 <span class="src src-b">🟡</span>。</li>
+    </ul>
+    <h3>中国「专家数据 / 标注」玩家（对位赛道 B）</h3>
+    <p>中国数据标注产业庞大但以<strong>规模化、政企/自动驾驶/通用标注</strong>为主（海天瑞声、数据堂，以及百度、阿里、京东等的众包/数据服务），整体偏「Scale 式规模化」，<strong>「高门槛专家级 RLHF（PhD/MD/资深工程师做 post-training）」这一层在中国仍较薄、尚未跑出明显的 Mercor/Micro1 式专门玩家</strong> <span class="src src-c">🔴推断</span>（公开信息有限，存疑）。大模型厂商（字节、阿里、智谱、月之暗面等）的专家级 RLHF 更多<strong>内部自建</strong>。</p>
+    <div class="callout insight">
+      <span class="label">可行性 + whitespace（中国）</span>
+      ① <strong>「AI 招聘 → AI 数据」在中国可行性中等偏谨慎</strong>：AI 面试侧已很卷（玩家多、被求职者吐槽刷屏、合规与公平性争议大），单纯做 Zara 式 AI 面试难差异化；② 但<strong>「高门槛专家级 RLHF 供给」在中国是相对空白</strong>——大模型公司多、对专家判断需求真实，却缺少独立的、能跨厂商供给的「专家数据中台」，且各厂更倾向自建；③ <strong>whitespace</strong>：做<strong>面向中国大模型厂商的垂直专家数据 + eval 供给</strong>（医疗、法律、金融、理工科），用 AI 面试低成本筛国内 PhD/专家；或反向，<strong>把中国充沛的专家供给接到海外 labs</strong>（语言/合规/数据出境是门槛也是壁垒）。④ 风险：数据出境合规（《数据安全法》《个保法》）、大厂自建挤压、AI 招聘公平性监管收紧。</div>
+  </section>
+
+  <!-- ⑧ 现实判断 -->
+  <section id="take">
+    <h2><span class="n">⑧</span>现实判断</h2>
+    <p>Micro1 踩中了 2025 年最热的拐点（专家数据 / RLHF 需求爆发 + Scale 被 Meta 收编后客户外溢），营收曲线确实漂亮，$35M/$500M 的 A 轮和 Microsoft 客户也都能核到。但放进格局里看，它的处境是<strong>「正确赛道里的后发小玩家」</strong>：和它同剧本的 Mercor 已是 $10B、营收量级大一个数量级，上面还压着 Scale、Surge 两座资本与规模巨兽，旁边 Handshake AI 靠自带流量切入。Micro1 唯一的独特叙事是 Zara（AI 面试技术），但这条护城河窄、易复制、且关键数据多为未验证的自述。</p>
+    <p><strong>它能不能挤进去？</strong>赛道 emerging→crowded 意味着「需求真、但座位在被快速抢占」。Micro1 若想立住，大概率不能继续和巨头拼泛专家规模，而要往<strong>某个高门槛垂直领域的专家深度 + 可验证的专家质量/合规</strong>收窄——这恰是 ③ 定位图右上角那块 whitespace。对想借鉴的创业者：真正可迁移的是「<strong>用 AI 面试当引擎、把稀缺专业人力变成独家数据供给</strong>」的飞轮，以及「<strong>单一垂直做深</strong>」避开与巨头正面拼规模的打法；而非复制一个又一个泛专家 marketplace。</p>
+    <div class="callout warn">
+      <span class="label">使用提醒</span>
+      本页为对话式调研，信息主要来自公开来源并按等级标注；融资数额、客户、ARR、能力声明等以官方一手为准，<strong>Micro1 的 ARR 数字与 Zara 技术壁垒未经独立验证、口径打架已全部并列，联合创始人 Sujay Kotamraju 未能在公开来源核实</strong>，引用前请核对最新信息。
+    </div>
+  </section>
+
+  <!-- 出处 -->
+  <section id="src">
+    <h2>出处</h2>
+    <ul style="font-size:13.5px">
+      <li><a href="https://micro1.ai" target="_blank" rel="noopener">官网 micro1.ai</a> · <a href="https://www.micro1.ai/ali-ansari" target="_blank" rel="noopener">创始人页</a> · <a href="https://www.micro1.ai/series-a" target="_blank" rel="noopener">Series A 公告</a> · <a href="https://www.micro1.ai/zara/ai-labs" target="_blank" rel="noopener">Zara for AI labs</a> <span class="src src-a">🟢</span>/<span class="src src-c">🔴自述</span></li>
+      <li><a href="https://techcrunch.com/2025/09/12/micro1-a-competitor-to-scale-ai-raises-funds-at-500m-valuation/" target="_blank" rel="noopener">TechCrunch：Micro1 $35M Series A @ $500M（2025-09）</a> <span class="src src-b">🟡</span></li>
+      <li><a href="https://techcrunch.com/2025/12/04/micro1-a-scale-ai-competitor-touts-crossing-100m-arr" target="_blank" rel="noopener">TechCrunch：Micro1 称跨过 $100M ARR（2025-12）</a> <span class="src src-b">🟡</span>（ARR 为创始人口径 <span class="src src-c">🔴</span>）</li>
+      <li><a href="https://www.dailycal.org/news/city/local-businesses/uc-berkeley-alum-raises-35m-for-ai-startup-valued-at-500m/article_f5180b6d-809d-4d9f-ad34-51c8211383eb.html" target="_blank" rel="noopener">The Daily Californian：创始人背景 / 成立时间 / 专家时薪</a> <span class="src src-b">🟡</span></li>
+      <li><a href="https://sacra.com/c/micro1/" target="_blank" rel="noopener">Sacra：Micro1 商业模式 / 营收口径 / 竞品</a> <span class="src src-b">🟡</span>（含 run rate &gt;$200M/$300M 推算 <span class="src src-c">🔴</span>）</li>
+      <li><a href="https://tracxn.com/d/companies/micro1/__H_aTg9qBaehhkggOnodojnoWUBhBkH3yh6Ku3KPpCdE" target="_blank" rel="noopener">Tracxn：Micro1 公司/融资概况</a>（页面 403 受限，仅取搜索摘要）<span class="src src-b">🟡</span></li>
+      <li><a href="https://www.cnbc.com/2025/10/27/ai-hiring-startup-mercor-funding.html" target="_blank" rel="noopener">CNBC：Mercor $350M C 轮 @ $10B（2025-10）</a> <span class="src src-b">🟡</span></li>
+      <li><a href="https://techcrunch.com/2025/02/20/mercor-an-ai-recruiting-startup-founded-by-21-year-olds-raises-100m-at-2b-valuation" target="_blank" rel="noopener">TechCrunch：Mercor 招聘起家 / pivot 数据</a> <span class="src src-b">🟡</span></li>
+      <li><a href="https://sacra.com/c/surge-ai/" target="_blank" rel="noopener">Sacra：Surge AI</a> · <a href="https://getlatka.com/companies/snorkel-ai" target="_blank" rel="noopener">Snorkel AI 估值/融资</a> · <a href="https://sacra.com/c/handshake/" target="_blank" rel="noopener">Handshake AI</a> <span class="src src-b">🟡</span></li>
+      <li><a href="https://www.techtarget.com/searchhrsoftware/definition/HireVue" target="_blank" rel="noopener">HireVue 概况</a> · <a href="https://karat.com/" target="_blank" rel="noopener">Karat</a> <span class="src src-b">🟡</span></li>
+      <li>中国 AI 面试 / 招聘：<a href="https://www.mokahr.com/academy/hrd/202503/2/" target="_blank" rel="noopener">智能招聘软件对比（含近屿智能/牛客/海纳/用友大易）</a> · <a href="https://www.newrank.cn/article/detail/24790" target="_blank" rel="noopener">AI 面试普及报道</a> <span class="src src-b">🟡</span>/<span class="src src-c">🔴</span></li>
+    </ul>
+  </section>
+
+  <footer class="foot">
+    公司竞争格局 / 赛道早期度调研笔记，仅作梳理；信息按来源分级、产品能力未必经独立验证，以官方一手信息为准 · 整理日期 2026-06-16
+  </footer>
+
+</article>
+</body>
+</html>
