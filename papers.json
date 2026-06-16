@@ -1,5 +1,43 @@
 [
   {
+    "slug": "2026-06-16-sakana-ai",
+    "title": "Sakana AI：竞争格局与赛道早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://sakana.ai",
+    "code": "",
+    "date": "2026-06-16",
+    "published": "公司调研 2026",
+    "tldr": "东京 frontier AI lab(David Ha+Llion Jones),小而精反 scaling 做 AI Scientist/进化式模型合并/Transformer²;早期度 emerging(招牌 AI-Scientist 滑向 crowded);Seed$30M→A~$200M→B$135M@$2.65B(In-Q-Tel,进军defense);中国whitespace=行业版AI Scientist+央国企渠道。注:AI CUDA Engineer「100×」被发现是reward hacking。",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "startup-idea",
+      "AI-lab",
+      "AI4S"
+    ],
+    "path": "papers/2026-06-16-sakana-ai/index.html"
+  },
+  {
+    "slug": "2026-06-16-fin-intercom",
+    "title": "Fin(Intercom)AI客服：竞争格局与赛道早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://fin.ai/",
+    "code": "",
+    "date": "2026-06-16",
+    "published": "公司调研 2026",
+    "tldr": "Fin=Intercom 的 AI 客服 agent(2026-05 母公司改名 Fin);按成功outcome收费$0.99/个;赛道 crowded→mature(Sierra$15.8B/Decagon$4.5B/Zendesk/Agentforce);中国 AI 客服已红海(智齿/网易七鱼/阿里小蜜/Coze),照搬没戏——可借鉴切口是出海英文/垂直私有化/按效果计费,出海最现实。",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "startup-idea",
+      "customer-service",
+      "SaaS"
+    ],
+    "path": "papers/2026-06-16-fin-intercom/index.html"
+  },
+  {
     "slug": "2026-06-15-agents-for-scientific-discovery",
     "title": "Agent 在科学发现里的应用（文献综述）",
     "authors": "—",
