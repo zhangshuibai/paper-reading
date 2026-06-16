@@ -77,6 +77,45 @@
     "path": "papers/2026-06-16-xtalpi/index.html"
   },
   {
+    "slug": "2026-06-16-ai4s-picks-and-shovels",
+    "title": "AI4S「卖铲子」机会扫描：给中国创业者的细分赛道地图",
+    "authors": "—",
+    "team": "机会扫描",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-16",
+    "published": "机会扫描 2026",
+    "tldr": "为 AI4S 做卖铲子的 6 个细分赛道扫描（科学数据/专家RLHF、模拟数据飞轮、模型评测即服务、实验室中间件 lab OS、科研 agent 工具链/协议、CRO-like 按 outcome 收费），每格标早期度与拥挤度，给出最值得先挖的 whitespace。",
+    "tags": [
+      "AI4S",
+      "startup-idea",
+      "competitive-landscape",
+      "picks-and-shovels",
+      "china"
+    ],
+    "path": "papers/2026-06-16-ai4s-picks-and-shovels/index.html"
+  },
+  {
+    "slug": "2026-06-16-insilico-medicine",
+    "title": "英矽智能 Insilico Medicine：AI 制药的竞争格局与赛道早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://insilico.com",
+    "code": "",
+    "date": "2026-06-16",
+    "published": "公司调研 2026",
+    "tldr": "端到端 AI 制药（靶点/生成化学/临床预测三平台 + 自研管线 ISM001-055/Rentosertib 治 IPF），赛道 emerging→crowded、AI 获批药全球未验证；可借鉴 whitespace 是单病种/单模态的轻资产垂直工具层。",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "market-map",
+      "startup-idea",
+      "ai-drug-discovery",
+      "china"
+    ],
+    "path": "papers/2026-06-16-insilico-medicine/index.html"
+  },
+  {
     "slug": "2026-06-15-agents-for-scientific-discovery",
     "title": "Agent 在科学发现里的应用（文献综述）",
     "authors": "—",
@@ -1344,24 +1383,5 @@
       "mcp",
       "agent"
     ]
-  },
-  {
-    "slug": "2026-06-16-ai4s-picks-and-shovels",
-    "title": "AI4S「卖铲子」机会扫描：给中国创业者的细分赛道地图",
-    "authors": "—",
-    "team": "机会扫描",
-    "arxiv": "",
-    "code": "",
-    "date": "2026-06-16",
-    "published": "机会扫描 2026",
-    "tldr": "为 AI4S 做卖铲子的 6 个细分赛道扫描（科学数据/专家RLHF、模拟数据飞轮、模型评测即服务、实验室中间件 lab OS、科研 agent 工具链/协议、CRO-like 按 outcome 收费），每格标早期度与拥挤度，给出最值得先挖的 whitespace。",
-    "tags": [
-      "AI4S",
-      "startup-idea",
-      "competitive-landscape",
-      "picks-and-shovels",
-      "china"
-    ],
-    "path": "papers/2026-06-16-ai4s-picks-and-shovels/index.html"
   }
 ]

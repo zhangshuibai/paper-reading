@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>英矽智能 Insilico Medicine · 竞争格局与赛道早期度调研</title>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --bad:#ff6b81; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --bad:#d23651; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;}
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:920px; margin:0 auto; padding:18px 22px 90px}
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:25px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)} .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap; line-height:2}
+  nav.toc a:hover{color:var(--accent)}
+  section{margin:38px 0}
+  h2{font-size:20px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:16.5px; margin:22px 0 8px}
+  p{margin:12px 0} ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)} strong{color:var(--text)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.88em}
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:13px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:9px 10px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  figure{margin:24px 0; text-align:center}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+  .svgwrap{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 8px}
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+  .src{font-size:10.5px; padding:0 6px; border-radius:999px; white-space:nowrap; vertical-align:middle}
+  .src-a{background:rgba(67,197,158,.18); color:var(--ok)}
+  .src-b{background:rgba(255,180,84,.18); color:var(--warn)}
+  .src-c{background:rgba(255,107,129,.18); color:var(--bad)}
+  .legend{font-size:12px; color:var(--muted); margin:6px 0 0}
+  .verdict{display:inline-block; font-weight:700; padding:3px 12px; border-radius:999px; font-size:14px}
+  .v-nascent{background:rgba(122,162,255,.18); color:var(--accent)}
+  .v-emerging{background:rgba(67,197,158,.18); color:var(--ok)}
+  .v-crowded{background:rgba(255,180,84,.18); color:var(--warn)}
+  .v-mature{background:rgba(255,107,129,.18); color:var(--bad)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">AI Drug Discovery</span>
+      <span class="chip">Biotech</span>
+      <span class="chip">China / Singapore</span>
+      <span class="chip">竞争格局</span>
+      <span class="chip">赛道早期度</span>
+      <span class="chip">创业 idea</span>
+    </div>
+    <h1>英矽智能 Insilico Medicine：竞争格局与赛道早期度调研</h1>
+    <p class="orig-title">insilico.com — 端到端 AI 制药 / asset-heavy 押管线 / 赛道 emerging→crowded / 可借鉴的「卖铲子」与垂直化 whitespace</p>
+    <dl class="meta-grid">
+      <dt>对象</dt><dd><a href="https://insilico.com" target="_blank" rel="noopener">https://insilico.com</a>（HKEX: 3696.HK，2025-12-30 上市）</dd>
+      <dt>赛道</dt><dd>AI-driven drug discovery（AI 驱动药物发现）— 端到端：靶点发现 + 生成化学分子设计 + 临床预测 + 自研管线</dd>
+      <dt>整理</dt><dd>对话调研笔记；信息来自公开检索，按来源分级标注，产品能力未必经独立验证</dd>
+      <dt>日期</dt><dd>2026-06-16</dd>
+    </dl>
+    <p class="legend">来源等级：<span class="src src-a">🟢 一手</span> 官网/招股书/Nature/官方 ·
+      <span class="src src-b">🟡 二手</span> 媒体/数据库/PR ·
+      <span class="src src-c">🔴 自述/未证实</span> 营销口径或未独立验证</p>
+  </header>
+
+  <div class="tldr">
+    <b>一句话</b> — 英矽智能（Insilico Medicine）做<strong>端到端 AI 制药</strong>，三大软件平台 PandaOmics（靶点）/ Chemistry42（生成化学）/ inClinico（临床预测）+ 自动化机器人实验室，商业模式两条腿：<strong>asset-heavy 自研管线</strong>（代表作 ISM001-055 / Rentosertib 治 IPF，全球首个由 generative AI 同时发现靶点又设计分子并进临床的代表案例，Phase IIa 数据 2025 年登 <em>Nature Medicine</em>）+ <strong>asset-light 软件授权与药企合作</strong>。赛道判 <span class="verdict v-crowded">emerging→crowded</span>：玩家多、融资曾极热、Google 系 Isomorphic 等巨头进场、AlphaFold/RDKit 等开源压低部分工具价值，但「AI 真做出获批新药」全球<strong>尚未验证</strong>、无公认赢家。可借鉴的最大 whitespace：<strong>单病种 / 单模态的垂直 AI biotech 或更便宜的「卖铲子」工具层</strong>，绕开英矽这种全平台 + 全管线的极重资本投入。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#bg">领域背景速补</a>
+    <a href="#market">① 赛道地图 + 早期度</a>
+    <a href="#matrix">② 竞品对照矩阵</a>
+    <a href="#map">③ 定位图</a>
+    <a href="#funding">④ 融资 timeline</a>
+    <a href="#snapshot">⑤ 公司速览</a>
+    <a href="#idea">⑥ 创业 idea 借鉴</a>
+    <a href="#take">⑦ 现实判断</a>
+    <a href="#src">出处</a>
+  </nav>
+
+  <!-- 领域背景速补 -->
+  <section id="bg">
+    <h2>领域背景速补（只懂 LLM 也能跟上）</h2>
+    <p>这篇涉及制药 / 生物医学，下面把关键术语用通俗中文讲清，假设你只懂 LLM、不懂药。</p>
+    <ul>
+      <li><strong>drug discovery（药物发现）</strong>：从「想治某种病」到「找到一个能成药的分子」的过程。传统上极慢极贵——业界常引「一款新药平均要 10+ 年、$10 亿+，且 90% 在临床阶段失败」。AI 制药的卖点就是<strong>把这条又长又贵的漏斗提速、提高成功率</strong>。<span class="src src-b">🟡 行业共识口径</span></li>
+      <li><strong>靶点 target（如 TNIK 这类蛋白/基因）</strong>：疾病机理里「药物要去摁住的那个开关」。选错靶点 = 后面全白做。英矽的 <strong>PandaOmics</strong> 就是用 AI 从海量组学（omics，即基因/蛋白/代谢等大数据）里挑靶点——类比 LLM 里的「检索 + 排序，找出最该下注的 token」。</li>
+      <li><strong>generative chemistry / 分子生成</strong>：给定一个靶点，让模型<strong>从零生成</strong>可能有效、好合成、毒性低的分子结构。技术上和 LLM「生成文本」同源（生成模型、强化学习、扩散等），只是把「词」换成「分子图/SMILES 字符串」。英矽的 <strong>Chemistry42</strong> 干这件事。</li>
+      <li><strong>临床试验 Phase I/II/III</strong>：药进人体后的三关。<strong>I 期</strong>看安全（健康人/少量病人），<strong>II 期</strong>初步看有没有效（如 IPF 病人肺功能 FVC 有没有改善），<strong>III 期</strong>大规模确证、是监管获批前最贵的一关。<strong>「II 期数据积极」远不等于「获批」</strong>——III 期翻车是常态，这点本篇反复强调。</li>
+      <li><strong>IPF（特发性肺纤维化）</strong>：一种肺组织逐渐结疤、不可逆、预后差的病，现有药很少、市场刚需大——所以是 AI 制药常选的「首发适应症」。英矽的明星分子 <strong>Rentosertib（ISM001-055）</strong>就治这个，靶点是 <strong>TNIK</strong> 激酶。</li>
+      <li><strong>AlphaFold</strong>：Google DeepMind 做的<strong>蛋白质结构预测</strong>开源模型，2024 年作者拿了诺贝尔化学奖。它把「预测蛋白长什么样」从难题变成<strong>近乎免费的公共品</strong>——这既是 AI 制药的底层东风，也<strong>压低了一部分结构预测类工具的商业价值</strong>（你卖的东西别人开源送）。</li>
+      <li><strong>asset-heavy vs asset-light（两条腿）</strong>：<strong>asset-heavy = 自己推自研管线</strong>（自己掏钱把药一路做到临床/上市，赌大但烧钱、周期长、单点失败风险高）；<strong>asset-light = 卖软件/卖服务/和大药企合作分成</strong>（现金流稳、轻资本，但天花板和议价权受限）。英矽<strong>两条腿都走</strong>，这是它和「纯卖软件」或「纯 biotech」公司的关键区别。</li>
+      <li><strong>CRO（合同研发组织，如药明康德 WuXi）</strong>：药企把研发外包给的「代工厂」。AI 制药公司常被拿来和 CRO 对比——区别在 CRO 卖人力/产能（重资产但传统），AI 制药卖「算法提效」。</li>
+    </ul>
+  </section>
+
+  <!-- ① 赛道与早期度 -->
+  <section id="market">
+    <h2><span class="n">①</span>赛道地图 + 早期度判断</h2>
+    <p>英矽属于 <strong>AI-driven drug discovery（AI 驱动药物发现）</strong>赛道，且是其中走「<strong>端到端 + 自研管线</strong>」最彻底的一类。这个赛道解决的需求很明确：制药研发<strong>太慢、太贵、失败率太高</strong>，用 AI 在「选靶点 → 设计分子 → 预测临床」三处提速降本。但它有个致命特征——<strong>验证周期极长</strong>：软件再快，药也要走完 10 年临床才知道 AI 到底有没有用，目前<strong>全球还没有一款「AI 发现的药」拿到正式上市批准</strong>。<span class="src src-b">🟡 截至 2026-06 公开信息</span></p>
+    <h3>玩家分群（四象限）</h3>
+    <ul>
+      <li><strong>现有巨头 / 已上市平台：</strong>Recursion Pharmaceuticals（已并购 Exscientia，Nasdaq 上市，phenomics+化学全栈）<span class="src src-b">🟡</span>、Schrödinger（物理计算起家，Nasdaq:SDGR，市值约 $1.0–1.4B）<span class="src src-b">🟡</span>、晶泰科技 XtalPi（HKEX:2228，AI+量子+机器人 CRO，市值约 HK$300 亿量级）<span class="src src-b">🟡</span>、以及英矽自己（HKEX:3696，2025-12-30 上市）。</li>
+      <li><strong>垂直创业公司：</strong>Relay Therapeutics（蛋白动力学/精准肿瘤）、Genesis Therapeutics、Generate Biomedicines（生成蛋白/抗体）、深势科技 DP Technology（AI4S 底座 + 制药）等——多按「单一技术模态或单一治疗领域」切入。<span class="src src-b">🟡</span></li>
+      <li><strong>大厂顺手做：</strong>Google/Alphabet 系 <strong>Isomorphic Labs</strong>（DeepMind 拆分，2025-03 融 $600M，与 Eli Lilly、Novartis 签合计近 $30 亿合作，正备战首批临床）<span class="src src-b">🟡</span>；以及辉瑞、罗氏、礼来等<strong>大药企的内部 AI 团队</strong>（既是潜在客户也是潜在自研对手）。</li>
+      <li><strong>开源 / 免费替代（最易被忽视）：</strong><strong>AlphaFold</strong>（结构预测，开源 + 诺奖光环）、<strong>RDKit</strong>（化学信息学事实标准，免费）、各类开源生成模型/分子库——它们把「一部分工具能力」变成公共品，<strong>直接压低纯工具型玩家的定价权与护城河</strong>。</li>
+    </ul>
+    <div class="callout insight">
+      <span class="label">早期度判断</span>
+      <span class="verdict v-crowded">emerging → crowded</span>
+      （nascent 萌芽 / emerging 新兴 / crowded 拥挤 / mature 成熟）<br><br>
+      <strong>判断信号：</strong>
+      ① <strong>玩家多且仍在增</strong>——已上市的就有英矽、晶泰、Recursion、Schrödinger 数家，背后还有一长串垂直创业公司，「拥挤」信号明显；
+      ② <strong>融资曾极热但已分化</strong>——英矽累计融资超 $10 亿、Isomorphic 单轮 $600M，但 Recursion 在 2025 砍掉多条管线、Schrödinger 市值缩水，<strong>资本从「狂热撒钱」转向「看真实临床/营收」</strong>；
+      ③ <strong>巨头明确进场</strong>——Google 系 Isomorphic + 大药企内部 AI，提高了天花板与对手段位；
+      ④ <strong>开源/免费替代已存在</strong>（AlphaFold、RDKit），压低部分工具价值；
+      ⑤ <strong>客户认知成型但「终极证明」缺失</strong>——「AI 能帮忙」已被广泛接受，但<strong>没有任何一款 AI 发现的药正式获批</strong>，没有公认赢家、没有公认 benchmark，所以判 <strong>emerging 向 crowded 过渡</strong>：不是萌芽（玩家已很多），也远未成熟（核心价值未被临床终局验证）。
+    </div>
+  </section>
+
+  <!-- ② 竞品矩阵 -->
+  <section id="matrix">
+    <h2><span class="n">②</span>竞品对照矩阵</h2>
+    <p>选了 7 个对这个赛道最有区分度的维度：<strong>商业模式（管线 asset-heavy vs 软件 asset-light）</strong>、<strong>平台技术覆盖（靶点/生成化学/临床预测）</strong>、<strong>最高临床阶段</strong>、<strong>融资&估值/市值</strong>、<strong>上市状态</strong>、<strong>验证程度（有无 AI 药进临床/获批）</strong>、<strong>数据与机器人闭环</strong>。这几维直接决定「谁离真正赚钱更近、谁的护城河更硬」。指标口径与时间各异，已逐格标来源。</p>
+    <table>
+      <thead><tr>
+        <th>玩家</th>
+        <th>商业模式</th>
+        <th>平台技术覆盖</th>
+        <th>最高临床阶段</th>
+        <th>融资 / 市值</th>
+        <th>上市</th>
+        <th>验证程度</th>
+        <th>数据/机器人闭环</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>英矽 Insilico（本篇）</strong></td>
+          <td><strong>两条腿：自研管线(重) + 软件授权(轻)</strong> <span class="src src-a">🟢</span></td>
+          <td><strong>全栈：靶点(PandaOmics)+生成化学(Chemistry42)+临床预测(inClinico)</strong> <span class="src src-a">🟢</span></td>
+          <td>Phase II（Rentosertib/IPF，IIa 完成）<span class="src src-a">🟢</span></td>
+          <td>累计融资超 $10.5 亿；IPO 募 HK$22.8 亿 <span class="src src-b">🟡</span></td>
+          <td><strong>HKEX:3696（2025-12-30）</strong> <span class="src src-a">🟢</span></td>
+          <td>有 AI 药进 II 期 + IIa 登 Nature Medicine；<strong>未获批</strong> <span class="src src-a">🟢</span></td>
+          <td>有苏州自动化机器人实验室 <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Recursion（含 Exscientia）</td>
+          <td>管线为主 + 部分平台授权 <span class="src src-b">🟡</span></td>
+          <td>phenomics 表型筛 + 精准化学 <span class="src src-b">🟡</span></td>
+          <td>多条临床，2025 砍掉多条管线 <span class="src src-b">🟡</span></td>
+          <td>已上市；曾高估值后回落 <span class="src src-b">🟡</span></td>
+          <td>Nasdaq:RXRX <span class="src src-b">🟡</span></td>
+          <td>多药进临床；<strong>未获批</strong> <span class="src src-b">🟡</span></td>
+          <td>自有高通量自动化实验室（强项）<span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Isomorphic Labs</td>
+          <td>软件/合作为主（asset-light）<span class="src src-b">🟡</span></td>
+          <td>AlphaFold 3 结构 + 分子设计 <span class="src src-b">🟡</span></td>
+          <td>备战首批临床（尚未给药）<span class="src src-b">🟡</span></td>
+          <td>2025-03 融 $600M；Alphabet 背书 <span class="src src-b">🟡</span></td>
+          <td>未上市（Alphabet 子公司）<span class="src src-b">🟡</span></td>
+          <td>与 Lilly/Novartis 合作近 $30 亿；药未进临床 <span class="src src-b">🟡</span></td>
+          <td>偏算法/结构，自动化湿实验较弱 <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Schrödinger</td>
+          <td>软件授权(轻) + 自研管线(轻) <span class="src src-b">🟡</span></td>
+          <td>物理基计算化学（FEP 等）<span class="src src-b">🟡</span></td>
+          <td>合作分子已进 Phase III（如 TAK-279）<span class="src src-b">🟡</span></td>
+          <td>市值约 $1.0–1.4B（口径异）<span class="src src-b">🟡</span></td>
+          <td>Nasdaq:SDGR <span class="src src-b">🟡</span></td>
+          <td>软件被大药企广泛用；自研药未获批 <span class="src src-b">🟡</span></td>
+          <td>偏物理计算，机器人闭环弱 <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>晶泰 XtalPi</td>
+          <td>AI-CRO：算法+机器人对外服务(轻) <span class="src src-b">🟡</span></td>
+          <td>量子物理+AI+晶型/分子设计 <span class="src src-b">🟡</span></td>
+          <td>多为合作研发，自研管线少 <span class="src src-b">🟡</span></td>
+          <td>市值约 HK$300 亿量级 <span class="src src-b">🟡</span></td>
+          <td>HKEX:2228（首个 18C 上市）<span class="src src-b">🟡</span></td>
+          <td>大量药企合作（含 Lilly $2.5 亿）<span class="src src-b">🟡</span></td>
+          <td><strong>大规模自动化机器人实验室（强项）</strong> <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>深势 DP Tech</td>
+          <td>AI4S 底座 + 制药+材料(轻) <span class="src src-b">🟡</span></td>
+          <td>分子模拟/大原子模型为主 <span class="src src-b">🟡</span></td>
+          <td>制药管线尚早 <span class="src src-b">🟡</span></td>
+          <td>未上市，VC 融资 <span class="src src-b">🟡</span></td>
+          <td>未上市 <span class="src src-b">🟡</span></td>
+          <td>偏科学计算平台，临床验证未到 <span class="src src-b">🟡</span></td>
+          <td>有计算+部分自动化 <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>药明康德 WuXi（参照系）</td>
+          <td>传统 CRO/CDMO（重资产卖产能）<span class="src src-b">🟡</span></td>
+          <td>非 AI-native，AI 为辅助 <span class="src src-b">🟡</span></td>
+          <td>服务全临床阶段（替客户）<span class="src src-b">🟡</span></td>
+          <td>千亿级营收/市值体量 <span class="src src-b">🟡</span></td>
+          <td>A+H 上市 <span class="src src-b">🟡</span></td>
+          <td>支撑无数获批药（非「AI 发现」）<span class="src src-b">🟡</span></td>
+          <td>全球最大实验/产能网络 <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>AlphaFold / RDKit（开源参照）</td>
+          <td>免费/开源（无商业模式）<span class="src src-a">🟢</span></td>
+          <td>结构预测 / 化学信息学 <span class="src src-a">🟢</span></td>
+          <td>不做药（仅工具）<span class="src src-a">🟢</span></td>
+          <td>免费 <span class="src src-a">🟢</span></td>
+          <td>—</td>
+          <td>是底层公共品，压低工具定价 <span class="src src-a">🟢</span></td>
+          <td>无（纯算法/库）<span class="src src-a">🟢</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>读矩阵：</strong>英矽的差异化在<strong>「全栈三平台 + 两条腿 + 已有 AI 药进 II 期并登 Nature Medicine」</strong>——在「验证程度」这一最关键维度上，它和 Recursion 同属第一梯队（有药进临床），且<strong>临床数据的同行评议曝光度（Nature Medicine）领先</strong>。但同质化也很明显：Isomorphic 用 Alphabet 的钱和算法段位压人，晶泰/Recursion 的机器人闭环更重，Schrödinger 的合作分子已进 III 期。<strong>没有谁拿到「获批」这张终极牌</strong>——这既是英矽的相对优势窗口，也是整条赛道悬而未决的最大问号。</p>
+  </section>
+
+  <!-- ③ 定位图 -->
+  <section id="map">
+    <h2><span class="n">③</span>定位图（whitespace 在哪）</h2>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 640 400" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12">
+        <!-- 轴 -->
+        <line x1="40" y1="200" x2="600" y2="200" stroke="#b9c2e0" stroke-width="1.5"/>
+        <line x1="320" y1="24" x2="320" y2="372" stroke="#b9c2e0" stroke-width="1.5"/>
+        <!-- 轴标签：X = asset-light 软件 ↔ asset-heavy 自研管线；Y = 单点垂直 ↔ 端到端全栈 -->
+        <text x="600" y="216" text-anchor="end" fill="#5a627a">asset-heavy 自研管线 →</text>
+        <text x="40" y="216" fill="#5a627a">← asset-light 软件/服务</text>
+        <text x="326" y="34" fill="#5a627a">端到端全栈 ↑</text>
+        <text x="326" y="366" fill="#5a627a">单点/垂直 ↓</text>
+        <!-- whitespace 高亮区：左下（轻资产 + 垂直/单点） -->
+        <rect x="44" y="204" width="272" height="164" fill="rgba(67,197,158,.10)" stroke="rgba(67,197,158,.5)" stroke-dasharray="5 4"/>
+        <text x="56" y="330" fill="#138a6e" font-size="11.5" font-weight="700">WHITESPACE：</text>
+        <text x="56" y="346" fill="#138a6e" font-size="11">垂直单病种 / 单模态的</text>
+        <text x="56" y="361" fill="#138a6e" font-size="11">轻资产「卖铲子」工具</text>
+        <!-- 玩家点 -->
+        <!-- 英矽：重资产 + 全栈（右上） -->
+        <circle cx="470" cy="80" r="9" fill="#6b4cff"/>
+        <text x="484" y="84" fill="#1a1f33" font-weight="700">Insilico 英矽</text>
+        <!-- Recursion：偏重 + 全栈 -->
+        <circle cx="430" cy="120" r="7" fill="#3a66ff"/>
+        <text x="442" y="124" fill="#1a1f33">Recursion</text>
+        <!-- 晶泰 XtalPi：偏轻(CRO) + 全栈偏上 -->
+        <circle cx="250" cy="110" r="7" fill="#3a66ff"/>
+        <text x="150" y="114" fill="#1a1f33">XtalPi 晶泰</text>
+        <!-- Isomorphic：轻 + 全栈算法 -->
+        <circle cx="210" cy="90" r="7" fill="#3a66ff"/>
+        <text x="120" y="80" fill="#1a1f33">Isomorphic</text>
+        <!-- Schrödinger：轻偏中 + 单点(物理) -->
+        <circle cx="240" cy="250" r="7" fill="#3a66ff"/>
+        <text x="252" y="254" fill="#1a1f33">Schrödinger</text>
+        <!-- 深势 DP Tech：轻 + 中部 -->
+        <circle cx="180" cy="170" r="7" fill="#3a66ff"/>
+        <text x="80" y="174" fill="#1a1f33">DP Tech 深势</text>
+        <!-- AlphaFold/RDKit：极轻 + 单点工具 -->
+        <circle cx="90" cy="300" r="7" fill="#9aa3bd"/>
+        <text x="102" y="304" fill="#5a627a">AlphaFold/RDKit</text>
+        <!-- 大药企内部AI：重 + 全栈 -->
+        <circle cx="510" cy="150" r="7" fill="#9aa3bd"/>
+        <text x="406" y="168" fill="#5a627a">大药企内部 AI</text>
+      </svg>
+      </div>
+      <figcaption>定位图（本调研重绘）。X 轴：商业模式从「卖软件/服务」到「自研管线」；Y 轴：技术从「单点垂直」到「端到端全栈」。英矽稳坐<strong>右上（最重、最全）</strong>；<strong>左下绿色虚线区——「垂直单病种 / 单模态 + 轻资产工具」几乎没人占，是最现实的创业 whitespace。</strong></figcaption>
+    </figure>
+  </section>
+
+  <!-- ④ 融资 timeline -->
+  <section id="funding">
+    <h2><span class="n">④</span>融资 timeline</h2>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 720 200" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12">
+        <line x1="50" y1="100" x2="680" y2="100" stroke="#b9c2e0" stroke-width="2"/>
+        <!-- 2014 成立 -->
+        <circle cx="60" cy="100" r="6" fill="#9aa3bd"/>
+        <text x="60" y="78" text-anchor="middle" fill="#5a627a" font-weight="700">2014</text>
+        <text x="60" y="124" text-anchor="middle" fill="#5a627a" font-size="11">成立</text>
+        <!-- 2018 A -->
+        <circle cx="150" cy="100" r="6" fill="#3a66ff"/>
+        <text x="150" y="78" text-anchor="middle" fill="#1a1f33" font-weight="700">2018 A</text>
+        <text x="150" y="124" text-anchor="middle" fill="#5a627a" font-size="11">$6M</text>
+        <!-- 2019 B -->
+        <circle cx="245" cy="100" r="6" fill="#3a66ff"/>
+        <text x="245" y="78" text-anchor="middle" fill="#1a1f33" font-weight="700">2019 B</text>
+        <text x="245" y="124" text-anchor="middle" fill="#5a627a" font-size="11">$37M · Qiming</text>
+        <!-- 2021 C -->
+        <circle cx="360" cy="100" r="8" fill="#6b4cff"/>
+        <text x="360" y="76" text-anchor="middle" fill="#1a1f33" font-weight="700">2021 C</text>
+        <text x="360" y="124" text-anchor="middle" fill="#5a627a" font-size="11">$255M · Warburg Pincus</text>
+        <!-- 2022 D -->
+        <circle cx="490" cy="100" r="6" fill="#3a66ff"/>
+        <text x="490" y="78" text-anchor="middle" fill="#1a1f33" font-weight="700">2022 D</text>
+        <text x="490" y="124" text-anchor="middle" fill="#5a627a" font-size="11">~$95M · Prosperity7</text>
+        <!-- 2025 E -->
+        <circle cx="590" cy="100" r="6" fill="#3a66ff"/>
+        <text x="590" y="78" text-anchor="middle" fill="#1a1f33" font-weight="700">2025 E</text>
+        <text x="590" y="124" text-anchor="middle" fill="#5a627a" font-size="11">$123M · Value Partners</text>
+        <!-- 2025-12 IPO -->
+        <circle cx="668" cy="100" r="8" fill="#138a6e"/>
+        <text x="668" y="76" text-anchor="middle" fill="#138a6e" font-weight="700">2025.12</text>
+        <text x="668" y="150" text-anchor="middle" fill="#138a6e" font-size="11">IPO HK$22.8 亿</text>
+        <text x="668" y="164" text-anchor="middle" fill="#138a6e" font-size="11">HKEX:3696</text>
+      </svg>
+      </div>
+      <figcaption>英矽智能融资时间线（据公开报道整理）。累计私募融资超 $10.5 亿；2025-12-30 港股上市为终点节点。</figcaption>
+    </figure>
+    <table>
+      <thead><tr><th>时间</th><th>事件 / 轮次</th><th>金额</th><th>领投 / 关键投资方</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr><td>2014</td><td>公司成立</td><td>—</td><td>创始人 Alex Zhavoronkov 等</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2018-06</td><td>Series A</td><td>$6M</td><td>—</td><td><span class="src src-b">🟡</span> Crunchbase</td></tr>
+        <tr><td>2019-09</td><td>Series B</td><td>$37M</td><td>Qiming Venture Partners（启明）；Lilly Asia、Sinovation、Baidu Ventures 等跟投</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2021</td><td>Series C（+C+ 约 $15M，2022）</td><td>$255M</td><td>Warburg Pincus（华平）领投</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2022</td><td>Series D（含追加）</td><td>合计约 $95M</td><td>第二部分由 Prosperity7（Aramco 风投）领投</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2025（3月起，6月收口）</td><td>Series E（超额认购，由 $110M 增至）</td><td>$123M（估值跨 $10 亿+）</td><td>Value Partners 领投；Prosperity7 等跟投</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2025-12-30</td><td><strong>HKEX 主板 IPO（首个 Ch.8.05 上市的 AI 制药）</strong></td><td>募资 HK$22.77 亿（约 $293M）</td><td>15 家基石：Lilly、Tencent、Temasek、Schroders、E Fund、Taikang 等</td><td><span class="src src-a">🟢</span> 官方PR</td></tr>
+      </tbody>
+    </table>
+    <p><strong>融资节奏佐证阶段：</strong>2021 年 $255M 的 C 轮是赛道<strong>资本狂热顶点</strong>的缩影；此后单轮规模回落（D ~$95M、E $123M），最终靠 <strong>IPO 而非继续巨额私募</strong>退出补血——这条曲线正是「emerging→crowded、资本从狂热转理性」的微观写照。IPO 前<strong>三次递表（2023-06 至 2025-05）均失效后才在 2025-12 成功上市</strong>，说明二级市场对 AI 制药「故事」已转为审慎。<span class="src src-b">🟡</span> 赛道整体：Isomorphic 单轮 $600M、晶泰已上市、Recursion 砍管线——热度仍在但开始分化淘汰。</p>
+  </section>
+
+  <!-- ⑤ 公司速览 -->
+  <section id="snapshot">
+    <h2><span class="n">⑤</span>公司速览</h2>
+    <table>
+      <tbody>
+        <tr><td>是什么 / 定位</td><td>端到端 AI 制药公司：用 generative AI + 自动化贯穿「靶点发现 → 分子设计 → 临床预测」全流程，同时<strong>对外授权软件</strong>并<strong>自研推进管线</strong>。2014 年成立，总部新加坡，研发主力在上海/苏州/香港/美国。<span class="src src-a">🟢</span></td></tr>
+        <tr><td>产品（三大平台）</td><td><strong>PandaOmics</strong>（AI 靶点发现，挖组学找疾病靶点）·<strong>Chemistry42</strong>（生成化学，从零设计分子，对外可 SaaS 授权）·<strong>inClinico</strong>（用 AI 预测临床试验成败概率）；外加<strong>苏州自动化机器人实验室</strong>形成 lab-in-the-loop 闭环。<span class="src src-a">🟢</span>/<span class="src src-b">🟡</span></td></tr>
+        <tr><td>明星管线</td><td><strong>Rentosertib（ISM001-055）</strong>：TNIK 抑制剂治 IPF，被称「全球首个由 generative AI 同时发现靶点 + 设计分子并进入临床」的代表案例；<strong>Phase IIa（GENESIS-IPF，71 例，中国 22 中心）数据 2025-06 登 Nature Medicine</strong>，60mg 组 FVC 较安慰剂改善（+98.4mL vs −20.3mL）。<strong>注意：这是 IIa 早期阳性信号，样本小、尚需更大规模确证，远非获批。</strong><span class="src src-a">🟢</span></td></tr>
+        <tr><td>管线规模</td><td>招股书口径「30+ 程序」，其中<strong>10 项已获 IND、7 项在活跃临床</strong>，至少 5 个 AI 设计分子进入临床阶段。<span class="src src-a">🟢</span>（前述「30+」多家媒体亦引 <span class="src src-b">🟡</span>）</td></tr>
+        <tr><td>团队</td><td>创始人/CEO <strong>Alex Zhavoronkov</strong>（生物医学+计算机复合背景，Johns Hopkins，生成 AI 分子设计早期推动者，发表 160+ 论文）；联席 CEO/CSO <strong>Feng Ren（任峰）</strong>（哈佛有机化学博士，GSK 11 年小分子研发、Medicilon CRO 背景）——<strong>「AI 算法 + 真药化学家」双核</strong>是其 research 血统关键。<span class="src src-a">🟢</span>/<span class="src src-b">🟡</span></td></tr>
+        <tr><td>商业模式</td><td><strong>两条腿</strong>：① asset-heavy 自研管线（自掏研发、赌临床/上市或对外授权 license-out）；② asset-light 软件与合作（Chemistry42 SaaS、与大药企的发现合作收里程碑/服务费）。<span class="src src-a">🟢</span></td></tr>
+        <tr><td>状态</td><td><strong>已上市</strong>（HKEX:3696，2025-12-30，募 HK$22.8 亿，年内最大港股 biotech IPO）；累计私募融资超 $10.5 亿。临床阶段公司，<strong>尚无获批产品、尚未盈利</strong>。<span class="src src-a">🟢</span>/<span class="src src-b">🟡</span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ⑥ 创业 idea 借鉴 -->
+  <section id="idea">
+    <h2><span class="n">⑥</span>创业 idea 借鉴</h2>
+    <div class="callout insight">
+      <span class="label">Whitespace / 机会</span>
+      定位图<strong>左下角</strong>——「<strong>单一病种 / 单一技术模态 + 轻资产工具</strong>」几乎没人专注占。英矽、Recursion 拼的是「全平台 + 全管线」的<strong>极重资本</strong>玩法（累计烧十亿美元级），中小团队不可能正面硬刚。但<strong>把一条窄缝做深</strong>——例如「只做某类难成药靶点的生成化学」「只做某个适应症（如某类纤维化/罕见病）的端到端」「只做临床试验预测这一件事」——是普通创业者真能切入的空位。
+    </div>
+    <h3>现有玩家共同短板（unmet needs）</h3>
+    <p>① <strong>工具贵且黑箱</strong>：Chemistry42、Schrödinger 等多为闭源高价企业级授权，中小 biotech / 学术实验室用不起，而 AlphaFold/RDKit 又只解决一部分——「<strong>便宜、可信、可解释、面向中小客户</strong>」的生成化学/ADMET 预测工具是缺口。② <strong>临床预测仍是营销话术多于产品</strong>：inClinico 这类「预测试验成败」概念诱人但独立验证少，做成一个<strong>透明、可回测、按项目付费</strong>的独立工具有空间。③ <strong>机器人实验室是孤岛</strong>：每家自建一套自动化湿实验室，调度/数据标准/复现各搞各的——缺<strong>中间件层</strong>。</p>
+    <h3>Why now（为什么现在值得做）</h3>
+    <p>AlphaFold 拿诺奖把<strong>结构预测变成免费公共品</strong>、开源生成模型成熟、云算力下降，让「<strong>小团队也能搭出可用的分子设计/预测栈</strong>」成为可能；同时英矽 IIa 登 Nature Medicine <strong>把「AI 能帮上忙」的认知拉到主流</strong>，药企付费意愿上升——技术门槛降 + 客户认知升，正是工具层和垂直应用的窗口。但窗口另一面是「<strong>终极证明（获批）仍缺位</strong>」，意味着别去赌「我能比英矽更快做出获批药」，而要赌「卖铲子 / 提效」。</p>
+    <h3>可借鉴的打法 + 相邻机会</h3>
+    <ul>
+      <li><strong>borrowable①「卖铲子」轻资产工具：</strong>学英矽 Chemistry42 把生成化学/靶点能力产品化，但<strong>做得更垂直、更便宜、甚至开源+服务</strong>，面向被巨头忽视的中小 biotech 与学术市场。Why-now 充分；<strong>风险</strong>：AlphaFold/RDKit 等开源压价、护城河薄。</li>
+      <li><strong>borrowable②单病种/单模态垂直 AI biotech：</strong>绕开「全平台全管线」，只押一个适应症做端到端（像英矽用 IPF 当首发，但你只做这一个）。<strong>风险</strong>：仍是 asset-heavy，烧钱长周期、单点临床失败即归零、监管重。</li>
+      <li><strong>adjacent③ lab-in-the-loop 中间件：</strong>不自建机器人实验室，而做<strong>机器人实验室的调度/数据/复现中间层</strong>（卖给所有自建实验室的公司）——避开重资产、吃赛道整体增长。<strong>风险</strong>：客户少且各自标准割裂，需求碎片化、销售周期长。</li>
+      <li><strong>adjacent④临床试验预测作为独立工具：</strong>把 inClinico 方向做成<strong>透明、可回测、独立第三方</strong>的临床成败/患者富集预测 SaaS，卖给 biotech 和投资人。<strong>风险</strong>：预测准确性极难独立验证，信任建立慢、易被质疑是「占卜」。</li>
+    </ul>
+    <div class="callout warn">
+      <span class="label">风险（诚实给）</span>
+      <strong>赛道已 emerging→crowded</strong>：玩家多、巨头（Google 系 Isomorphic + 大药企内部 AI）压顶。<strong>开源免费替代（AlphaFold/RDKit）持续压低工具型护城河。</strong>自研管线路线<strong>资本极密集、周期 10 年级、单点临床失败风险高、监管严</strong>——中小团队几乎无法复制英矽的全栈重投入。最致命的是<strong>整条赛道「AI 真做出获批药」尚未被验证</strong>：你押的是一个全球还没人证明跑得通的终局。务必选「卖铲子/提效」而非「赌获批」，并对烧钱与长周期有清醒预期。
+    </div>
+  </section>
+
+  <!-- ⑦ 现实判断 -->
+  <section id="take">
+    <h2><span class="n">⑦</span>现实判断</h2>
+    <p>英矽是 <strong>AI4S 新势力里 asset-heavy 押管线的代表</strong>：和药明康德 WuXi（传统 CRO，重资产卖产能/服务，靠无数已获批药撑营收）、晶泰 XtalPi（AI-CRO 平台，机器人闭环强、偏对外服务）、以及 AI4S「卖铲子」软件层，构成一组清晰对照——<strong>英矽最大的赌注在「自己的药能不能成」，这既是它最大的上行，也是最大的软肋</strong>。它的相对优势：三平台全栈 + 已有 AI 药进 II 期 + 临床数据登 Nature Medicine（同行评议曝光度领先）+ 已 IPO 补血。软肋：<strong>尚无获批产品、尚未盈利、烧钱凶、单点临床失败即重创</strong>，且 Isomorphic 用 Alphabet 的钱和算法段位、晶泰/Recursion 用机器人闭环各自施压。</p>
+    <p>对「在中国找 AI 制药 idea」的你：<strong>这条赛道不空、也未成熟——是「中段拥挤、终局未定」。</strong>正面复制英矽（全平台+全管线）几乎不可行（资本与时间门槛太高）；现实的切入是<strong>左下角的轻资产垂直工具 / 单病种垂直 / 中间件 / 临床预测</strong>，吃「技术门槛降 + 认知升」的 why-now，但要清醒：<strong>护城河靠开源被持续侵蚀，且整条赛道的「获批」终极证明仍缺位</strong>，别把「II 期积极」当成「这条路已通」。</p>
+    <div class="callout warn">
+      <span class="label">使用提醒</span>
+      本页为对话式调研，信息主要来自公开来源并按等级标注；融资数额、客户、能力声明等以官方一手为准，
+      <strong>产品能力未必经独立验证</strong>，引用前请核对最新信息。融资轮次金额多为二手数据库/媒体口径，可能与官方招股书略有出入；临床数据为 IIa 早期结果，<strong>不等于获批</strong>。
+    </div>
+  </section>
+
+  <!-- 出处 -->
+  <section id="src">
+    <h2>出处</h2>
+    <ul style="font-size:13.5px">
+      <li><span class="src src-a">🟢</span> <a href="https://insilico.com" target="_blank" rel="noopener">官网 insilico.com</a>（平台 PandaOmics/Chemistry42/inClinico、pipeline 页）</li>
+      <li><span class="src src-a">🟢</span> <a href="https://www.prnewswire.com/news-releases/insilico-medicine-lists-on-hong-kong-stock-exchange-showing-ai-drug-discovery-momentum-with-2025s-largest-hong-kong-biotech-ipo-302650606.html" target="_blank" rel="noopener">官方 PR：HKEX 上市（3696.HK，2025-12-30，募 HK$22.77 亿，30+ 程序/10 IND/7 临床、15 基石投资方）</a></li>
+      <li><span class="src src-a">🟢</span> <a href="https://www.prnewswire.com/news-releases/insilico-medicine-announces-nature-medicine-publication-of-phase-iia-results-evaluating-rentosertib-the-novel-tnik-inhibitor-for-idiopathic-pulmonary-fibrosis-ipf-discovered-and-designed-with-a-pioneering-ai-approach-302472070.html" target="_blank" rel="noopener">官方 PR / Nature Medicine：Rentosertib IPF Phase IIa 结果（FVC +98.4mL vs −20.3mL）</a></li>
+      <li><span class="src src-b">🟡</span> <a href="https://www.biopharmatrend.com/news/insilico-medicine-completes-oversubscribed-series-e-bringing-total-funding-to-123-million-1293/" target="_blank" rel="noopener">Series E $123M、累计融资超 $10.5 亿（BioPharmaTrend）</a></li>
+      <li><span class="src src-b">🟡</span> <a href="https://www.caproasia.com/2025/06/17/united-states-hong-kong-biotech-company-insilico-medicine-raised-123-million-in-series-e-funding-at-1-billion-valuation-increased-series-e-funding-round-from-110-million-announced-in-2025-march/" target="_blank" rel="noopener">Series E 估值 $10 亿+、由 $110M 增至 $123M（Caproasia）</a></li>
+      <li><span class="src src-b">🟡</span> <a href="https://www.crunchbase.com/funding_round/insilico-medicine-series-a--d96399b2" target="_blank" rel="noopener">Crunchbase：Series A $6M / B $37M（Qiming）</a> · Series C $255M（Warburg Pincus, 2021）· Series D ~$95M（含 Prosperity7）</li>
+      <li><span class="src src-b">🟡</span> <a href="https://www.biopharmatrend.com/news/ai-drug-developer-insilico-medicine-files-for-hong-kong-ipo-aims-to-raise-292m-1436/" target="_blank" rel="noopener">港股 IPO 进程与多次递表（2023-06 至 2025-05 三次失效后成功）</a></li>
+      <li><span class="src src-b">🟡</span> <a href="https://techcrunch.com/2025/03/31/alphabets-ai-drug-discovery-platform-isomorphic-labs-raises-600m-from-thrive/" target="_blank" rel="noopener">Isomorphic Labs 2025-03 融 $600M（TechCrunch）</a> · 与 Lilly/Novartis 合作近 $30 亿</li>
+      <li><span class="src src-b">🟡</span> <a href="https://www.drugdiscoverytrends.com/recursion-and-exscientia-merge-in-688-m-deal-to-create-consolidated-ai-driven-drug-discovery-platform/" target="_blank" rel="noopener">Recursion 并购 Exscientia（$688M）；2025 砍管线</a></li>
+      <li><span class="src src-b">🟡</span> <a href="https://en.xtalpi.com/xtalpi-debuts-on-hkex-main-board-as-first-18c-listing-pioneering-ai-robotics-innovation/" target="_blank" rel="noopener">晶泰 XtalPi（HKEX:2228，首个 18C 上市，市值约 HK$300 亿量级）</a></li>
+      <li><span class="src src-b">🟡</span> <a href="https://companiesmarketcap.com/schrodinger/marketcap/" target="_blank" rel="noopener">Schrödinger（Nasdaq:SDGR）市值约 $1.0–1.4B（口径异）</a></li>
+      <li><span class="src src-b">🟡</span> <a href="https://www.sciencedirect.com/science/article/abs/pii/S0031699725075118" target="_blank" rel="noopener">2025 AI 制药平台 landscape 综述（Pharmacological Reviews）</a></li>
+      <li><span class="src src-b">🟡</span> <a href="https://en.wikipedia.org/wiki/Insilico_Medicine" target="_blank" rel="noopener">创始人 Alex Zhavoronkov / 联席 CEO Feng Ren 背景</a></li>
+    </ul>
+  </section>
+
+  <footer class="foot">
+    公司竞争格局 / 赛道早期度调研笔记，仅作梳理；信息按来源分级、产品能力未必经独立验证，以官方一手信息为准 · 整理日期 2026-06-16
+  </footer>
+
+</article>
+</body>
+</html>
