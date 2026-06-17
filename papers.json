@@ -1,5 +1,25 @@
 [
   {
+    "slug": "2605.17172-openjarvis-on-device-personal-ai",
+    "title": "OpenJarvis：把整套 Personal AI 搬上本地设备（LLM-guided spec search）",
+    "authors": "Jon Saad-Falcon, Avanika Narayan, Robby Manihani, et al.",
+    "team": "Stanford University; Lambda Labs",
+    "arxiv": "https://arxiv.org/abs/2605.17172",
+    "code": "https://github.com/openjarvis/openjarvis",
+    "date": "2026-06-17",
+    "published": "arXiv 2026",
+    "tldr": "把 personal AI 系统抽象成跨五个 primitive 的 typed spec，用 frontier 云模型在搜索期改写、本地推理期零云调用；本地 spec 平均仅差云 3.2 pp，但 API 成本降约 800×、延迟降 4×。",
+    "tags": [
+      "on-device LLM",
+      "personal AI",
+      "agent",
+      "local-cloud",
+      "spec search",
+      "distillation"
+    ],
+    "path": "papers/2605.17172-openjarvis-on-device-personal-ai/index.html"
+  },
+  {
     "slug": "2026-06-16-sakana-ai",
     "title": "Sakana AI：竞争格局与赛道早期度调研",
     "authors": "—",
@@ -198,6 +218,132 @@
       "china"
     ],
     "path": "papers/2026-06-16-micro1/index.html"
+  },
+  {
+    "slug": "2026-06-16-snorkel-ai",
+    "title": "Snorkel AI：programmatic labeling 与 AI 评测的竞争格局与早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://snorkel.ai",
+    "code": "",
+    "date": "2026-06-16",
+    "published": "公司调研 2026",
+    "tldr": "Stanford 衍生、以 programmatic labeling/弱监督起家的 AI 数据公司，2025 转向专家数据+模型评测（Series D $100M@$1.3B）；赛道整体 crowded 但 programmatic+垂直 eval 切口仍 emerging，中国 whitespace 显著。",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "market-map",
+      "startup-idea",
+      "ai-data",
+      "data-labeling",
+      "china"
+    ],
+    "path": "papers/2026-06-16-snorkel-ai/index.html"
+  },
+  {
+    "slug": "2026-06-16-scientific-agent-infra",
+    "title": "科学 agent 基础设施深挖：仪器 MCP 协议层 × agent 评测即服务",
+    "authors": "—",
+    "team": "机会扫描",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-16",
+    "published": "机会扫描 2026",
+    "tldr": "深挖AI4S卖铲子两格:①科学仪器MCP/agent-to-instrument协议层(让agent真驱动移液机器人/HPLC/电镜)——判nascent,标准林立未统一(SiLA2/OPC-UA LADS/Allotrope),MCP真接仪器案例屈指可数(LBNL TEM Agent/InstrMCP),LAP(arXiv2606.03755)与上海AI Lab的SCP两个agent-to-instrument协议刚提出;②科学agent评测即服务——科研专用benchmark全是学术开源几乎无人商业化(judnascent),对比通用eval已crowded(Scale$29B/Mercor$10B/LMArena)。结论:A格更适合中国早期创业(付费方在中国+政策助力国产替代+商业模式可借鉴ECL/Ginkgo),B格付费方不明宜作A格嵌入能力。可借鉴:Emerald Cloud Lab/Ginkgo/Strateos/Opentrons/PyLabRobot。",
+    "tags": [
+      "AI4S",
+      "startup-idea",
+      "competitive-landscape",
+      "mcp",
+      "agent-eval",
+      "lab-automation",
+      "china"
+    ],
+    "path": "papers/2026-06-16-scientific-agent-infra/index.html"
+  },
+  {
+    "slug": "2026-06-16-turing",
+    "title": "Turing：从开发者人才平台到 AI 训练数据的竞争格局与早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://www.turing.com",
+    "code": "",
+    "date": "2026-06-16",
+    "published": "公司调研 2026",
+    "tldr": "起家远程开发者人才平台、2022 后转向给 frontier labs 供 coding/reasoning/RLHF 训练数据（2025 估值 $2.2B）；赛道判 crowded（专家 coding/agent 数据细分仍 emerging）；可借鉴 whitespace：把全球开发者供给池做成垂直 agent 轨迹数据护城河。",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "market-map",
+      "startup-idea",
+      "ai-data",
+      "coding-data",
+      "china"
+    ],
+    "path": "papers/2026-06-16-turing/index.html"
+  },
+  {
+    "slug": "2026-06-16-mercor",
+    "title": "Mercor：AI 专家数据市场的竞争格局与早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://mercor.com",
+    "code": "",
+    "date": "2026-06-16",
+    "published": "公司调研 2026",
+    "tldr": "AI驱动的专家数据市场:用20分钟AI面试筛医生/律师/PhD/工程师接入OpenAI/Anthropic等frontier labs做高端标注与eval;创始人Brendan Foody/Adarsh Hiremath/Surya Midha(22岁Thiel Fellow);Seed$3.6M→A~$32M→B$100M@$2B→C$350M@$10B(2025-10,Felicis领);ARR口径打架(传$450-500M@2025-09/$1.5B@2026-05,多为gross,take-rate30-40%);早期度emerging→crowded(Surge$25B/Scale$29B/Micro1/Handshake同质化升温);中国whitespace=出海接单+垂直医疗法律专家+AI面试工具层(大厂已自建晓天睿士/Xpert)。",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "market-map",
+      "startup-idea",
+      "ai-data",
+      "rlhf",
+      "china"
+    ],
+    "path": "papers/2026-06-16-mercor/index.html"
+  },
+  {
+    "slug": "2606.03755-lap-agent-to-instrument",
+    "title": "LAP: An Agent-to-Instrument Protocol for Autonomous Science",
+    "authors": "Linwu Zhu, Liqiang Gao, Yan Chen, Dan Zhu, Jian Huang",
+    "team": "Shiyanjia Lab",
+    "arxiv": "https://arxiv.org/abs/2606.03755",
+    "code": "",
+    "date": "2026-06-16",
+    "published": "arXiv 2026",
+    "tldr": "把 agentic 生态的第三条边 agent-to-instrument 标准化的协议设计：用 InstrumentCard、独占预约、绑定参数哈希的安全围栏 token、和强制带单位/标定/不确定度的 MeasurementResult 四原语，补上 MCP/A2A 没覆盖的「agent 驱动物理仪器」那条边；封装而非取代 SiLA 2/OPC-UA。仅 v0.1 设计规范，尚无开源实现。",
+    "tags": [
+      "agent",
+      "mcp",
+      "lab-automation",
+      "autonomous-science",
+      "AI4S",
+      "protocol",
+      "A2A"
+    ],
+    "path": "papers/2606.03755-lap-agent-to-instrument/index.html"
+  },
+  {
+    "slug": "2026-06-16-surge-ai",
+    "title": "Surge AI：RLHF 专家数据赛道的竞争格局与早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://www.surgehq.ai",
+    "code": "",
+    "date": "2026-06-16",
+    "published": "公司调研 2026",
+    "tldr": "纯 bootstrap、零 VC 做到 2024 传 ~$1.2B 营收反超 Scale 的 RLHF/专家数据公司；赛道判 crowded（高端仍有空），whitespace 在垂直专家 eval/RL 环境数据。",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "market-map",
+      "startup-idea",
+      "ai-data",
+      "rlhf",
+      "china"
+    ],
+    "path": "papers/2026-06-16-surge-ai/index.html"
   },
   {
     "slug": "2026-06-15-agents-for-scientific-discovery",
@@ -1467,131 +1613,5 @@
       "mcp",
       "agent"
     ]
-  },
-  {
-    "slug": "2026-06-16-snorkel-ai",
-    "title": "Snorkel AI：programmatic labeling 与 AI 评测的竞争格局与早期度调研",
-    "authors": "—",
-    "team": "公司调研",
-    "arxiv": "https://snorkel.ai",
-    "code": "",
-    "date": "2026-06-16",
-    "published": "公司调研 2026",
-    "tldr": "Stanford 衍生、以 programmatic labeling/弱监督起家的 AI 数据公司，2025 转向专家数据+模型评测（Series D $100M@$1.3B）；赛道整体 crowded 但 programmatic+垂直 eval 切口仍 emerging，中国 whitespace 显著。",
-    "tags": [
-      "company",
-      "competitive-landscape",
-      "market-map",
-      "startup-idea",
-      "ai-data",
-      "data-labeling",
-      "china"
-    ],
-    "path": "papers/2026-06-16-snorkel-ai/index.html"
-  },
-  {
-    "slug": "2026-06-16-scientific-agent-infra",
-    "title": "科学 agent 基础设施深挖：仪器 MCP 协议层 × agent 评测即服务",
-    "authors": "—",
-    "team": "机会扫描",
-    "arxiv": "",
-    "code": "",
-    "date": "2026-06-16",
-    "published": "机会扫描 2026",
-    "tldr": "深挖AI4S卖铲子两格:①科学仪器MCP/agent-to-instrument协议层(让agent真驱动移液机器人/HPLC/电镜)——判nascent,标准林立未统一(SiLA2/OPC-UA LADS/Allotrope),MCP真接仪器案例屈指可数(LBNL TEM Agent/InstrMCP),LAP(arXiv2606.03755)与上海AI Lab的SCP两个agent-to-instrument协议刚提出;②科学agent评测即服务——科研专用benchmark全是学术开源几乎无人商业化(judnascent),对比通用eval已crowded(Scale$29B/Mercor$10B/LMArena)。结论:A格更适合中国早期创业(付费方在中国+政策助力国产替代+商业模式可借鉴ECL/Ginkgo),B格付费方不明宜作A格嵌入能力。可借鉴:Emerald Cloud Lab/Ginkgo/Strateos/Opentrons/PyLabRobot。",
-    "tags": [
-      "AI4S",
-      "startup-idea",
-      "competitive-landscape",
-      "mcp",
-      "agent-eval",
-      "lab-automation",
-      "china"
-    ],
-    "path": "papers/2026-06-16-scientific-agent-infra/index.html"
-  },
-  {
-    "slug": "2026-06-16-turing",
-    "title": "Turing：从开发者人才平台到 AI 训练数据的竞争格局与早期度调研",
-    "authors": "—",
-    "team": "公司调研",
-    "arxiv": "https://www.turing.com",
-    "code": "",
-    "date": "2026-06-16",
-    "published": "公司调研 2026",
-    "tldr": "起家远程开发者人才平台、2022 后转向给 frontier labs 供 coding/reasoning/RLHF 训练数据（2025 估值 $2.2B）；赛道判 crowded（专家 coding/agent 数据细分仍 emerging）；可借鉴 whitespace：把全球开发者供给池做成垂直 agent 轨迹数据护城河。",
-    "tags": [
-      "company",
-      "competitive-landscape",
-      "market-map",
-      "startup-idea",
-      "ai-data",
-      "coding-data",
-      "china"
-    ],
-    "path": "papers/2026-06-16-turing/index.html"
-  },
-  {
-    "slug": "2026-06-16-mercor",
-    "title": "Mercor：AI 专家数据市场的竞争格局与早期度调研",
-    "authors": "—",
-    "team": "公司调研",
-    "arxiv": "https://mercor.com",
-    "code": "",
-    "date": "2026-06-16",
-    "published": "公司调研 2026",
-    "tldr": "AI驱动的专家数据市场:用20分钟AI面试筛医生/律师/PhD/工程师接入OpenAI/Anthropic等frontier labs做高端标注与eval;创始人Brendan Foody/Adarsh Hiremath/Surya Midha(22岁Thiel Fellow);Seed$3.6M→A~$32M→B$100M@$2B→C$350M@$10B(2025-10,Felicis领);ARR口径打架(传$450-500M@2025-09/$1.5B@2026-05,多为gross,take-rate30-40%);早期度emerging→crowded(Surge$25B/Scale$29B/Micro1/Handshake同质化升温);中国whitespace=出海接单+垂直医疗法律专家+AI面试工具层(大厂已自建晓天睿士/Xpert)。",
-    "tags": [
-      "company",
-      "competitive-landscape",
-      "market-map",
-      "startup-idea",
-      "ai-data",
-      "rlhf",
-      "china"
-    ],
-    "path": "papers/2026-06-16-mercor/index.html"
-  },
-  {
-    "slug": "2606.03755-lap-agent-to-instrument",
-    "title": "LAP: An Agent-to-Instrument Protocol for Autonomous Science",
-    "authors": "Linwu Zhu, Liqiang Gao, Yan Chen, Dan Zhu, Jian Huang",
-    "team": "Shiyanjia Lab",
-    "arxiv": "https://arxiv.org/abs/2606.03755",
-    "code": "",
-    "date": "2026-06-16",
-    "published": "arXiv 2026",
-    "tldr": "把 agentic 生态的第三条边 agent-to-instrument 标准化的协议设计：用 InstrumentCard、独占预约、绑定参数哈希的安全围栏 token、和强制带单位/标定/不确定度的 MeasurementResult 四原语，补上 MCP/A2A 没覆盖的「agent 驱动物理仪器」那条边；封装而非取代 SiLA 2/OPC-UA。仅 v0.1 设计规范，尚无开源实现。",
-    "tags": [
-      "agent",
-      "mcp",
-      "lab-automation",
-      "autonomous-science",
-      "AI4S",
-      "protocol",
-      "A2A"
-    ],
-    "path": "papers/2606.03755-lap-agent-to-instrument/index.html"
-  },
-  {
-    "slug": "2026-06-16-surge-ai",
-    "title": "Surge AI：RLHF 专家数据赛道的竞争格局与早期度调研",
-    "authors": "—",
-    "team": "公司调研",
-    "arxiv": "https://www.surgehq.ai",
-    "code": "",
-    "date": "2026-06-16",
-    "published": "公司调研 2026",
-    "tldr": "纯 bootstrap、零 VC 做到 2024 传 ~$1.2B 营收反超 Scale 的 RLHF/专家数据公司；赛道判 crowded（高端仍有空），whitespace 在垂直专家 eval/RL 环境数据。",
-    "tags": [
-      "company",
-      "competitive-landscape",
-      "market-map",
-      "startup-idea",
-      "ai-data",
-      "rlhf",
-      "china"
-    ],
-    "path": "papers/2026-06-16-surge-ai/index.html"
   }
 ]

@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OpenJarvis：把 Personal AI 整套搬上本地设备 · 论文解读</title>
+
+<script>
+  window.MathJax = {
+    tex:{inlineMath:[['$','$'],['\\(','\\)']], displayMath:[['$$','$$'],['\\[','\\]']]},
+    svg:{fontCache:'global'}
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;
+  }
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:880px; margin:0 auto; padding:18px 22px 90px}
+
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:27px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)}
+  .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .meta-grid a:hover{text-decoration:underline}
+
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap}
+  nav.toc a:hover{color:var(--accent)}
+
+  section{margin:38px 0}
+  h2{font-size:21px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:17px; margin:24px 0 8px}
+  p{margin:12px 0}
+  ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.9em}
+  strong{color:var(--text)}
+
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:14px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:10px 12px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  .yes{color:var(--ok); font-weight:600}
+  .no{color:var(--muted)}
+
+  figure{margin:24px 0; text-align:center}
+  figure img{max-width:100%; height:auto; border:1px solid var(--line); border-radius:10px; background:#fff}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+
+  blockquote{border-left:3px solid var(--line); margin:14px 0; padding:2px 16px; color:var(--muted)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+  .mjx-container{overflow-x:auto; overflow-y:hidden}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">on-device LLM</span>
+      <span class="chip">personal AI</span>
+      <span class="chip">agent</span>
+      <span class="chip">local-cloud</span>
+      <span class="chip">spec search</span>
+      <span class="chip">distillation</span>
+    </div>
+    <h1>OpenJarvis：把整套 Personal AI 搬上本地设备，用 cloud 模型在「搜索期」改写 spec、本地「推理期」零云调用</h1>
+    <p class="orig-title">Personal AI, On Personal Devices (OpenJarvis)</p>
+    <dl class="meta-grid">
+      <dt>作者</dt><dd>Jon Saad-Falcon*、Avanika Narayan*、Robby Manihani、Tanvir Bhathal、Herumb Shandilya、Hakki Orhun Akengin、Gabriel Bo、Andrew Park、Matthew Hart、Caia Costello、Chuan Li、Christopher Ré、Azalia Mirhoseini（*共同一作）</dd>
+      <dt>团队 / 机构</dt><dd>Stanford University；Lambda Labs</dd>
+      <dt>原文链接</dt><dd><a href="https://arxiv.org/abs/2605.17172" target="_blank" rel="noopener">https://arxiv.org/abs/2605.17172</a></dd>
+      <dt>发表 / 年份</dt><dd>arXiv:2605.17172v1 [cs.LG]，Preprint，2026-05-16</dd>
+      <dt>解读日期</dt><dd>2026-06-17</dd>
+    </dl>
+  </header>
+
+  <div class="tldr">
+    <b>TL;DR</b> — 现在的 personal AI（如 OpenClaw、Hermes Agent）几乎把每条带着你私人数据的 query 都发给云端 frontier 模型，又贵又不私密；可你又不能简单地「把云模型换成本地模型」——直接拿 Qwen3.5-9B 顶替 Claude Opus 4.6，PinchBench / GAIA 上准确率掉 25–39 pp。本文提出 <b>OpenJarvis</b>：把一套 personal AI 系统抽象成一个跨五个 primitive（Intelligence / Engine / Agents / Tools&amp;Memory / Learning）的 typed <b>spec</b>，让整套 stack 端到端可优化、可度量（accuracy / cost / latency）。配套的 <b>LLM-guided spec search</b> 让 frontier 云模型只在「搜索期」读 trace、跨四个 primitive 提改写建议、由 held-out gate 把关只接受不退步的改动；优化完的 spec <b>推理期完全跑在本地、零云调用</b>。结果：本地 spec 在 8 个 benchmark 里 4 个追平/超过云，平均只差最佳云 baseline 3.2 pp，但 marginal API 成本降约 800×、端到端延迟降 4×；spec search 把云-本地差距再缩小 13–32 pp，且优化成本比单 primitive 方法低 7–11×。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#opensource">① 开源贡献</a>
+    <a href="#motivation">② 动机与贡献</a>
+    <a href="#method">③ 方法</a>
+    <a href="#evaluation">④ 实验评估</a>
+    <a href="#insight">⑤ 洞见</a>
+  </nav>
+
+  <!-- ============================ ① 开源贡献 ============================ -->
+  <section id="opensource">
+    <h2><span class="n">①</span>开源贡献 Open-source Artifacts</h2>
+    <p>论文在首页给出了代码仓库与项目主页两个链接。截至解读日（2026-06-17）核实：<strong>项目主页可访问</strong>（GitHub Pages 文档站），但论文标注的 GitHub 代码仓库 <code>github.com/openjarvis/openjarvis</code> 在解读当日返回 <strong>404（未能访问/尚未公开）</strong>。本文用到的若干 benchmark 本身是已有的第三方开源资源（其链接见原文参考文献），而 OpenJarvis 自己的训练/搜索 harness 是否随仓库一并开源、采用何种许可证，<strong>因仓库未能打开而无法核实</strong>。下表只标注实际核实到的状态。</p>
+    <table>
+      <thead><tr><th>类型</th><th>是否开源</th><th>内容 / 链接</th></tr></thead>
+      <tbody>
+        <tr><td>代码 Code</td><td class="no">论文声称 / 解读日 404 未核实到</td><td><a href="https://github.com/openjarvis/openjarvis" target="_blank" rel="noopener">github.com/openjarvis/openjarvis</a>（首页标注的官方仓库；解读当日返回 404，未能确认内容与许可证）</td></tr>
+        <tr><td>项目主页 / Demo</td><td class="yes">✔ 可访问</td><td><a href="https://open-jarvis.github.io/OpenJarvis/" target="_blank" rel="noopener">open-jarvis.github.io/OpenJarvis/</a>（文档站；自述为「composable, on-device AI」研究框架，含 browser / 桌面 app / Python SDK / CLI 的 quickstart 与架构文档）</td></tr>
+        <tr><td>模型权重 Weights</td><td class="no">✘ 未发布</td><td>本文使用既有 open-weight 家族（Qwen3.5、Gemma4、Granite、Nemotron 等），并不发布新权重；LLM-guided spec search 产出的是「优化后的 spec + 本地 student 的训练触发」，论文未声明单独发布权重</td></tr>
+        <tr><td>数据集 Dataset</td><td class="no">✘ 未发布新数据</td><td>评测/训练用的是既有公开资源（如 GeneralThoughtArchive、MMLU-Pro、GAIA、τ-bench 等已有 benchmark），本文未声称发布新数据集</td></tr>
+        <tr><td>环境 / Benchmark</td><td class="no">复用第三方</td><td>8 个评测 benchmark 均为已有开源工作（ToolCall-15、PinchBench、LiveCodeBench、τ-Bench V2、τ²-Bench Telecom、GAIA、LiveResearchBench、DeepResearchBench），各自链接见原文参考文献</td></tr>
+      </tbody>
+    </table>
+    <div class="callout warn">
+      <span class="label">核实说明</span>
+      论文首页明确写有代码与主页两个链接，本文也大量描述了框架实现细节（Appendix A）。但「论文声称将开源」与「当下真的能 clone 到」是两回事——解读当日仓库 URL 返回 404，因此<strong>不对代码可用性与许可证做任何断言</strong>；若日后仓库公开，以仓库 README 为准。
+    </div>
+  </section>
+
+  <!-- ============================ ② 动机与贡献 ============================ -->
+  <section id="motivation">
+    <h2><span class="n">②</span>研究动机与贡献 Motivation &amp; Contribution</h2>
+
+    <h3>背景与问题：personal AI 几乎全靠云，但「换本地模型」会整套崩</h3>
+    <p>所谓 <strong>personal AI stack</strong>（论文举例 OpenClaw、Hermes Agent 等）已成为日常写作、研究、coding、日程管理的中枢。问题是它们「很少是本地或私密的」：几乎每条 query（常常裹挟着你的私人数据）都被路由到云端 frontier 模型。这带来四个具体痛点——每年上千美元的 API/订阅开销、私人数据上传第三方服务器、必须联网、以及用户对所依赖模型「没有 ownership」；外加单 token 能耗比本地执行高出几个数量级。</p>
+    <p>与此同时硬件这边已经成熟：消费级加速器配合 FP8 量化已经能跑 1B–128B 的 open-weight 模型，而 Qwen3.5、Gemma4 这类家族在 personal AI 任务上只落后 frontier 云模型 6–12 个月（不是几年）。可现实里本地模型仍被困在「调调语气、补补文本」的 trivial 任务上。</p>
+    <p>最自然的想法是「原地换模型」：把现有 stack 里的云模型直接替成本地模型。本文一上来就证明这条路不通——保持 OpenClaw / Hermes Agent 其余部分不变，仅把 Claude Opus 4.6 换成 Qwen3.5-9B，PinchBench / GAIA 上准确率<strong>暴跌 25–39 pp</strong>。作者归因于两点：</p>
+    <ul>
+      <li><strong>替换会击穿「单体式」stack（substitution breaks monolithic stacks）。</strong>现有 stack 把 agent prompt、tool description、memory 配置、runtime 设置全部「焊死」进框架，并且是围绕那个特定云模型协同设计的。换一个本地模型，等于同时把这些全部打破。</li>
+      <li><strong>单 primitive 优化会到顶（single-primitive optimization plateaus）。</strong>这些被捆绑的组件里，无需改源码就能调的只有 prompt。把 SOTA prompt optimizer（GEPA、DSPy）只作用在换进来的本地模型上、其余固定，仅能补上 5 pp 的云-本地差距。一次只优化一个 primitive，给不出 model / prompt / tools / runtime 之间「协同改动」所需要的那种联动。</li>
+    </ul>
+
+    <h3>本文的切入点：把整套 stack 解耦成一个可优化的 typed spec</h3>
+    <p>核心 insight 很朴素：<strong>每个本地模型都需要把周围那套 agent 系统围着它重新配置一遍</strong>；既然如此，就把这套「重新配置」显式化、可优化化。OpenJarvis 把 personal AI 系统拆成五个带类型接口与 registry 的 primitive，组合进一个叫 <strong>spec</strong> 的 typed 配置对象——spec 把 stack 的每个组件都暴露成「一个可优化对象里的一个自由度」，于是整套 stack 第一次能在 accuracy / cost / latency 上被端到端地优化与度量。</p>
+
+    <h3>核心贡献</h3>
+    <ol>
+      <li><strong>提出 OpenJarvis 架构与 spec 抽象。</strong>把 personal AI 系统拆成五个 typed primitive（Intelligence、Engine、Agents、Tools&amp;Memory、Learning），组合进一个可版本化、可分享、可在标准 benchmark 上评测、可端到端优化的 spec。</li>
+      <li><strong>提出 LLM-guided spec search。</strong>一种 local–cloud 协作搜索：frontier 云模型在「搜索期」读 trace、跨四个可编辑 primitive 提改写建议，held-out gate 只接受不退步的改动；产出的 spec「推理期完全跑在本地、零云调用」。它把云-本地差距再缩小 <strong>13–32 pp</strong>，且优化成本比单 primitive baseline 低 <strong>7–11×</strong>。</li>
+      <li><strong>跨 8 个 personal AI benchmark 的系统分析。</strong>证明本地 spec 在 marginal API cost 与 latency 上是 Pareto 最优（约 <strong>800×</strong> 更低 marginal API 成本、<strong>4×</strong> 更低端到端延迟），并把「proposer 选择」与「可编辑面（move space）」各自对收益的贡献拆开。</li>
+    </ol>
+  </section>
+
+  <!-- ============================ ③ 方法 ============================ -->
+  <section id="method">
+    <h2><span class="n">③</span>方法 Method</h2>
+    <p>OpenJarvis 由三部分组成：<strong>spec 抽象</strong>（§3.1）、<strong>联合 accuracy–efficiency 评测</strong>（§3.2）、<strong>LLM-guided spec search</strong>（§3.3）。下面先看全局图，再逐块拆。</p>
+
+    <figure>
+      <img src="figures/openjarvis_overview.png" alt="OpenJarvis 总览">
+      <figcaption>图 1：OpenJarvis 总览。（左）五个可组合 primitive 通过一个 declarative spec 组合，spec 可分享、评测、端到端优化；（中）本地 spec（绿）与 3 个云 baseline（蓝）的 accuracy-efficiency 联合评测，本地配置逼近最佳云模型 3.2 pp 以内、marginal API 成本约低 800×；（右）LLM-guided spec search 用 frontier 云模型当「反思型 proposer」：teacher 诊断失败→跨整个 spec 提改写→held-out gate 只接受不退步的改动，配合本地 student 训练把剩余差距再缩 13–32 pp。（出处：原文 Figure 1）</figcaption>
+    </figure>
+
+    <h3>3.1 五个 primitive 与 spec 抽象</h3>
+    <p>OpenJarvis 把一套 personal AI stack 拆成五个独立自由度，每个都是「现有部署系统里本就可以独立配置」的一类选择：</p>
+    <ul>
+      <li><strong>Intelligence</strong>：语言模型本身（架构 + 权重）与生成参数。例：选 Qwen3.5-9B 还是 Qwen3.5-122B。</li>
+      <li><strong>Engine</strong>：推理 runtime、硬件执行路径、batching、quantization、cache 设置。例：用 vLLM 还是 Ollama。</li>
+      <li><strong>Agents</strong>：reasoning loop、prompt、tool-use policy。例：ReAct 还是 CodeAct。</li>
+      <li><strong>Tools &amp; Memory</strong>：外部接口、retrieval、持久化用户状态。例：filesystem / web search / MCP server。</li>
+      <li><strong>Learning</strong>：从 trace 更新 spec 的 optimizer。它在结构上与前四者不同——<strong>它是用来优化其余四者的那个 primitive</strong>，可以是 weight-only optimizer（LoRA）、prompt optimizer（DSPy），也可以是本文的 LLM-guided spec search。</li>
+    </ul>
+    <p>关键设计是把「在真实部署里本来就彼此独立」的选择分开：Intelligence 与 Engine 把「选模型」和「选 runtime」分开；Agents 与 Tools 把「reasoning loop」和「它调用的接口」分开。五者组合进 spec——一个 <strong>typed 配置对象</strong>，可被版本化、分享、在标准 benchmark 上评测、端到端优化（原文给出对应的 TOML 序列化形式，见 Appendix A.1 / Figure 9）。</p>
+
+    <figure>
+      <img src="figures/openjarvis_architecture.png" alt="OpenJarvis 架构">
+      <figcaption>图 2：OpenJarvis 架构。五个可组合 primitive 把「模型选择 / 推理 runtime / agent 逻辑 / 数据集成 / 本地学习」解耦成可独立替换的层；一个 spec 把五者组合成 declarative 配置，可分享、评测、端到端优化。（出处：原文 Figure 2）</figcaption>
+    </figure>
+
+    <div class="callout note">
+      <span class="label">spec 的形式（原文 Figure 3）</span>
+      一个 spec 写成 <code>S := { Intelligence:(model,params,quant), Engine:(backend,batch,kv_cache), Agent:(loop,prompts,tool_strategy), Tools:(set,descriptions,memory), Learning:(optimizer,reward,gate) }</code>。妙处在于：<strong>所有 optimizer 共用同一个 optimize 签名，只是各自限制能编辑哪些 field</strong>——LoRA 只改 Intelligence 权重；DSPy / GEPA 只改 Agent prompt；LLM-guided spec search 则联合编辑 Intelligence、Engine、Agents、Tools&amp;Memory 四者。一次编辑可以跨 primitive（例如「同时改写一个 tool description 并针对改写后的 prompt 更新权重」），这是单 primitive optimizer 天然表达不出来的。
+    </div>
+
+    <h3>3.2 评测：以「完整 spec」为单位、每条 query 记五个量</h3>
+    <p>本文评测的不是孤立模型，而是<strong>完整 spec</strong>。一个 instrumented wrapper 对每条 query 记录五个量：<strong>accuracy、energy、latency、power、dollar cost</strong>。其中 accuracy 视 benchmark 而定为 exact match 或 LLM-judge 胜率；energy 对本地硬件经厂商 API 实测、对云 baseline 按已有工作估计；latency 是端到端 wall-clock；power = energy/latency；dollar cost 是按 token 的 API 计费 + 工具费，<strong>本地推理记为 $0 marginal API 成本</strong>，硬件与电费单列。这样本地与云配置就能放在同一组坐标轴上比较，暴露出 accuracy-only benchmark 与单轴效率工具看不到的 Pareto 结构。</p>
+
+    <h3>3.3 LLM-guided spec search：cloud 出搜索期智力，local 跑推理期</h3>
+    <p>这是全文的方法核心。它在 spec 的 primitive field 上搜索：每个 spec 就是一份完整的本地 AI 配置，改它的 field 就定义了搜索空间。这个 loop 被刻意设计成 <strong>local–cloud 分工</strong>：</p>
+    <ul>
+      <li><strong>frontier 云模型负责「搜索期」</strong>——它擅长读 trace、对「跨多个 primitive 的协同改动」做推理，于是由它来提改写建议；</li>
+      <li><strong>本地硬件负责「推理期」</strong>——它擅长以低延迟、零 marginal API 成本跑出最终配置。</li>
+    </ul>
+    <p>每一轮搜索 session 重复四步（<strong>diagnose → plan/propose → execute → repeat</strong>）：</p>
+    <ol>
+      <li><strong>Diagnose（诊断）：</strong>frontier 模型读 student 当前 spec 的可见 trace，把「共享同一失败模式」的 trace 聚成 <strong>failure cluster</strong>，每个 cluster 标注 student vs teacher 成功率，并配一句自然语言的技能差描述（例：「student 在需要日历查询的多跳问题上失败，因为它没调用 calendar 工具」）。</li>
+      <li><strong>Plan / Propose（提改写）：</strong>针对某个 cluster，frontier 模型跨 Intelligence、Engine、Agents、Tools&amp;Memory 四者提候选改写。Intelligence 改 = 改模型参数或训练触发；Engine 改 = 改 runtime/serving；Agent 改 = 改 prompt/reasoning loop/verification；Tools&amp;Memory 改 = 改工具可用性/工具描述/memory 配置。</li>
+      <li><strong>Execute + Gate（执行 + 把关）：</strong>每个候选 spec 在 held-out 例子上评测，由 <strong>gate</strong> 决定取舍——<em>只接受「让目标 cluster 变好、且任何其它 cluster 退步不超过 ε」的改动</em>（默认 ε=1%，对权重/prompt/工具描述/memory/runtime 一视同仁）。</li>
+      <li><strong>Repeat：</strong>接受的改动成为下一轮的新 spec，拒绝的回滚。当 gate 分数连续 k 个 session 停滞（默认 k=5）或预算耗尽时停止。</li>
+    </ol>
+
+    <div class="callout note">
+      <span class="label">Gate 判据（原文公式）</span>
+      记 $G(S)$ 为 spec $S$ 的 held-out gate 分数，$G_c(S)$ 为限制在 failure cluster $c$ 上的分数。对一条针对 cluster $c$ 的编辑 $e$，令 $S' = \mathrm{apply}(S,e)$，<strong>当且仅当</strong>下式成立才接受：
+      $$ G_c(S') > G_c(S)\quad\text{且}\quad G_{c'}(S') \ge G_{c'}(S) - \epsilon\;\;\forall\, c' \ne c. $$
+      即「目标 cluster 必须真的变好，其余每个 cluster 退步都不能超过容忍 $\epsilon$」。这一条规则统一作用于 Intelligence 权重、Agent prompt、Tool 描述、Memory 配置、Engine/runtime——这正是「同一个 optimize 签名、不同 optimizer 只是限制编辑哪些 field」的体现。
+    </div>
+
+    <p>当某条改动确实涉及 <strong>Intelligence 训练</strong>（即要更新本地 student 权重）时，作者额外给一个 composite reward，在 GRPO 训练里给每个候选回答 $y$（对 query $q$）打分：</p>
+    $$ R(q,y) = \alpha R_{\mathrm{acc}}(q,y) - \beta \hat E(q,y) - \gamma \hat L(q,y) - \delta \hat C(q,y). $$
+    <p>其中 $R_{\mathrm{acc}}$ 是准确率项，$\hat E/\hat L/\hat C$ 分别是归一化后的 energy / latency / cost 惩罚，默认权重 $(\alpha,\beta,\gamma,\delta)=(0.5,0.1,0.1,0.3)$。<strong>这个 reward 只在「某条 Intelligence 编辑内部」的训练时用来给回答打分；spec 整体好坏仍由上面的 gate 评判。</strong></p>
+
+    <div class="callout note">
+      <span class="label">什么跑在哪里（What runs where）</span>
+      推理期：优化后的 spec 在本地跑模型推理与 agent 执行；当某条 Intelligence 编辑触发 student 训练时，<strong>训练也在本地跑</strong>。teacher（frontier 云模型）只提供诊断、改写建议与标签，<strong>不参与推理期的模型调用</strong>；headline 的本地配置里「cloud-as-tool」是关闭的。换言之，能力是「搜索期从 cloud 流向 local、并固化进 spec」，之后就留在本地——最终本地 spec 在推理期做<strong>零次云调用</strong>。
+    </div>
+
+    <h3>三种优化范式的对比（原文 Algorithm 1/2/3）</h3>
+    <p>作者把要比较的三种 spec 优化方式摆在一起：</p>
+    <ul>
+      <li><strong>LLM-guided spec search（Algorithm 1）</strong>：贪心、带 gate 的跨 primitive 编辑（本文方法）。</li>
+      <li><strong>Evolutionary spec search（Algorithm 2）</strong>：维护并合并一个候选 spec 种群，从 Pareto frontier 采样、做 reflective mutation（对标 GEPA 的进化机制），move space 同样是四 primitive。</li>
+      <li><strong>Single-component optimizer（Algorithm 3）</strong>：一次只改一个 primitive（如只改 Intelligence 或只改 Agent），无法利用 primitive 之间的耦合。</li>
+    </ul>
+    <p>这一组对比把两条轴分开：<strong>谁来 propose（proposer 轴）</strong> 与 <strong>能改几个 primitive（move-space 轴）</strong>——后面 §4.4 的消融正是沿这两轴展开。</p>
+  </section>
+
+  <!-- ============================ ④ 实验评估 ============================ -->
+  <section id="evaluation">
+    <h2><span class="n">④</span>实验评估 Evaluation</h2>
+
+    <h3>评测设置</h3>
+    <ul>
+      <li><strong>规模：</strong>8 个 benchmark、4 个家族里的 11 个本地模型、3 个云 baseline、7 种硬件平台；共 508 个任务；agentic benchmark 每任务 2 小时超时；所有结果取 5 次独立运行均值；除 benchmark 自带确定性评分外，统一用 GPT-5-mini 当 judge。</li>
+      <li><strong>8 个 benchmark（各考察什么）：</strong>
+        <strong>ToolCall-15 (TC15)</strong>—单轮 tool-calling 准确率（15 个固定场景、确定性评分）；
+        <strong>PinchBench (PB)</strong>—端到端 agent 任务完成（23 个跨日程/邮件/研究/coding 的真实任务，自动检查 + LLM judge；原是 OpenClaw 生态的 canonical benchmark）；
+        <strong>LiveCodeBench (LCB, v6)</strong>—防污染的竞赛编程；
+        <strong>τ-Bench V2 (TauB)</strong>—多轮客服对话（航空/零售域 100 任务，按数据库状态评分）；
+        <strong>τ²-Bench Telecom (TBTel)</strong>—双控电信域（agent 与 user 都改共享环境，40 任务）；
+        <strong>GAIA</strong>—通用 AI 助手（50 题，需 web 检索 + 多步推理 + 工具）；
+        <strong>LiveResearchBench (LRB, v4)</strong>—深度研究（100 专家任务，DeepEval checklist 评分）；
+        <strong>DeepResearchBench (DRB)</strong>—PhD 级深度研究（跨 22 域，评 80 任务子集）。
+      </li>
+      <li><strong>对比基线：</strong>云端 frontier 模型（headline 用 Claude Opus 4.6）；prompt-only 优化器（DSPy/SIMBA、prompt-only GEPA）；weight-only 优化器（SFT、LoRA）；以及 evolutionary spec search 与 random-from-catalog 两个同 move-space 的 proposer。</li>
+      <li><strong>指标：</strong>accuracy（exact match 或 LLM-judge 胜率，越高越好）、marginal API cost（$/query，越低越好）、end-to-end latency（越低越好），外加 energy/power。</li>
+    </ul>
+
+    <h3>结果一：spec 把「换本地模型」的暴跌救回大半（固定 Intelligence）</h3>
+    <p>Table 1 做了一个「可移植性三角」对照：对 OpenClaw 与 Hermes Agent 两个生产框架，各跑三种条件——(a) 默认 + 云模型、(b) 默认 + Qwen3.5-9B、(c) OpenJarvis spec（Intelligence 固定为 Qwen3.5-9B，<strong>只优化 Engine / Agent / Tools&amp;Memory</strong>）。所有 ∆ 相对 (a) 报。</p>
+    <table>
+      <thead><tr><th>框架 / 条件</th><th>PinchBench Acc.</th><th>∆ vs (a)</th><th>GAIA Acc.</th><th>∆ vs (a)</th></tr></thead>
+      <tbody>
+        <tr><td>OpenClaw (a) 默认 + 云模型</td><td>96.0</td><td>Ref.</td><td>58.0</td><td>Ref.</td></tr>
+        <tr><td>OpenClaw (b) 默认 + Qwen3.5-9B</td><td>62.3</td><td>−33.7</td><td>19.2</td><td>−38.8</td></tr>
+        <tr><td><strong>OpenClaw (c) OpenJarvis + Qwen3.5-9B</strong></td><td><strong>88.4</strong></td><td><strong>−7.6</strong></td><td><strong>41.5</strong></td><td><strong>−16.5</strong></td></tr>
+        <tr><td>Hermes (a) 默认 + 云模型</td><td>93.5</td><td>Ref.</td><td>55.1</td><td>Ref.</td></tr>
+        <tr><td>Hermes (b) 默认 + Qwen3.5-9B</td><td>68.7</td><td>−24.8</td><td>22.4</td><td>−32.7</td></tr>
+        <tr><td><strong>Hermes (c) OpenJarvis + Qwen3.5-9B</strong></td><td><strong>87.9</strong></td><td><strong>−5.6</strong></td><td><strong>40.8</strong></td><td><strong>−14.3</strong></td></tr>
+      </tbody>
+    </table>
+    <p>读法：直接换本地模型 (a)→(b) 掉 24.8–38.8 pp；用同一个本地模型、但套上 OpenJarvis spec 后 (c)，<strong>残余差距只剩 5.6–16.5 pp</strong>。也就是 spec 在 Intelligence 不变的前提下，补回了 PinchBench 约 77%、GAIA 约 56–57% 的暴跌。作者强调这说明<strong>暴跌是「架构性」的、不是「能力性」的</strong>——OpenClaw / Hermes 把 prompt、工具描述、memory、runtime、模型专属输出预期全焊死在那个云模型周围，spec 把这些假设暴露成 typed slot 才得以重定向。GAIA 救回得少，是因为它的深推理需求超出 9B 模型上限、再怎么配也补不齐。</p>
+
+    <h3>结果二：本地最佳 spec 平均只差云 3.2 pp，但成本/延迟碾压</h3>
+    <p>跨全部本地 spec，最好的单一本地 spec <strong>Qwen3.5-122B 平均 80.3% accuracy，仅差 Claude Opus 4.6（83.5%）3.2 pp</strong>；在 per-benchmark 层面，本地最佳模型在 <strong>8 个里 4 个追平/超过云</strong>（ToolCall-15、PinchBench、LiveCodeBench、τ-Bench V2），剩余差距集中在 GAIA、τ²-Bench Telecom、DeepResearchBench。效率上：Qwen3.5-122B 每 query 约「千分之一美分」级，对 Claude Opus 4.6 的 $0.009，给出约 <strong>800× 更低 marginal API 成本</strong>（只换来 3.2 pp accuracy 让步）；端到端完成完整 agentic 工作流约快 <strong>4×</strong>（不过单轮 prompt 因云端 time-to-first-token 优化反而可能利好云）。本地配置因此构成 accuracy–cost / accuracy–latency 的 Pareto frontier。</p>
+
+    <figure>
+      <img src="figures/accuracy_vs_efficiency.png" alt="accuracy-efficiency frontier">
+      <figcaption>图 3：Accuracy-efficiency frontier。本地配置（绿）逼近最佳云 accuracy 3.2 pp 以内，同时 marginal API 成本约低 800×、端到端延迟约低 4×。（出处：原文 Figure 5）</figcaption>
+    </figure>
+
+    <h3>结果三：LLM-guided spec search 再缩 13–32 pp、且优化更便宜</h3>
+    <p>对剩下的「推理/研究密集型」任务，spec search 上场。在 PinchBench / LiveCodeBench / LiveResearchBench 上，每个 student–teacher 组合都优于未优化 spec；最强的 search-优化 Qwen3.5-9B student 达到 <strong>PinchBench 100.0%、LiveCodeBench 83.0%、LiveResearchBench 91.0%</strong>。在全 8-benchmark 套件上，<strong>各 student 模型平均增益 13.1–31.5 pp</strong>。和单 primitive baseline 比：prompt-only baseline 平均只加 4.1–5.2 pp，LoRA 是最强的单 primitive baseline，而 spec search 比 LoRA 再多 1.1–8.8 pp、比 prompt-only GEPA 多 5.0–18.8 pp，<strong>且优化成本低 7.1–10.9×</strong>。成本优势来自 gate：被拒的编辑不会触发完整训练，被接受的编辑跨 session 复利累积。</p>
+
+    <figure>
+      <img src="figures/spec_level_distillation.png" alt="spec search 提升本地 spec">
+      <figcaption>图 4：LLM-guided spec search 提升本地 spec。每个 student–teacher 组合都在三个 benchmark 上优于未优化 spec；最强 search-优化 Qwen3.5-9B student 达 PinchBench 100.0% / LiveCodeBench 83.0% / LiveResearchBench 91.0%。（出处：原文 Figure 6）</figcaption>
+    </figure>
+
+    <h3>消融：proposer 与 move space 两条轴各自起作用</h3>
+    <p>这是全文最关键的拆解（原文 Figure 8）：</p>
+    <ul>
+      <li><strong>proposer 轴（同样四 primitive move space）：</strong>LLM proposer 达 83.0–100.0%，而 evolutionary spec search 为 73.0–94.5%（差 5.5–18.0 pp，平均 10.0 pp）、random-from-catalog 为 69.0–92.5%（差 7.5–21.0 pp，平均 14.0 pp）。说明「edit catalog + gate」本身不解释收益，<strong>「先诊断再提改写」的反思 loop 才是关键</strong>。</li>
+      <li><strong>move-space 轴（固定 LLM proposer）：</strong>从「只可改 1 个 primitive」扩到「全部 4 个」，<strong>accuracy 多加 5.5–16.5 pp、latency 加速多 2.65–3.45×</strong>。反过来把本应独立的 primitive 对「合并」，accuracy 掉 2.8–9.7 pp、加速掉 1.09–1.95×。</li>
+      <li><strong>两条轴缺一不可：</strong>LLM teacher 需要四 primitive 的 spec 才能到 83.0–100.0%，四 primitive 的 spec 也需要 LLM teacher 才能榨出该 move space 的全部增益。</li>
+    </ul>
+
+    <h3>optimizer 到底学到了什么</h3>
+    <p>一个有意思的分布性发现：被接受的编辑<strong>并不集中在 Intelligence 权重上</strong>——权重更新只占被接受编辑的 16–44%，其余分散在 Engine / Agent / Tool field。而且「主导 primitive」会随任务结构变化：code 任务里 Intelligence 编辑主导（LiveCodeBench 44%）、客服/agentic 任务里 Agent 编辑主导（PB/TauB/TBTel 41–45%）、tool-calling/研究任务里 Tool 编辑主导（TC15/GAIA/DRB/LRB 39–47%）。在 per-failure 层面，teacher 会把每类诊断映射到对应 primitive：retrieval 失败→多给 Tool 编辑、reasoning 失败→多给 Intelligence 编辑、control-flow 失败→多给 Agent 编辑、效率受限失败→多给 Engine 编辑。<strong>这解释了为何没有任何单一 primitive 能逼近联合搜索的天花板</strong>：有用的干预取决于失败模式，许多失败需要跨多个 primitive 的协同改动。</p>
+
+    <figure>
+      <img src="figures/edit_type_allocation_graph.png" alt="编辑类型在 primitive 上的分配">
+      <figcaption>图 5：被接受编辑在四个可编辑 primitive 上的分配。权重更新只占 16–44%，主导 primitive 随任务结构（code / 客服 / 研究）而变。（出处：原文 Figure 10 / Appendix C.5）</figcaption>
+    </figure>
+  </section>
+
+  <!-- ============================ ⑤ 洞见 ============================ -->
+  <section id="insight">
+    <h2><span class="n">⑤</span>洞见 Insights</h2>
+    <div class="callout insight">
+      <span class="label">Insight 1 · 本地 personal AI 不是「换个模型」，而是「围着本地模型重配整套 stack」</span>
+      最反直觉、也是全文立论起点：直接把云模型替成本地模型会暴跌 25–39 pp，但这<strong>主要是架构问题不是能力问题</strong>——同一个 Qwen3.5-9B，只要把 Engine/Agent/Tools 重定向（Intelligence 都不用动），就能补回 56–77% 的暴跌。结论：本地化的瓶颈常常不在「模型不够强」，而在「周围那套 stack 是焊死在云模型上的」。
+    </div>
+    <div class="callout insight">
+      <span class="label">Insight 2 · 把「能力」和「成本属性」在时间轴上分离：cloud 出搜索期智力，local 跑推理期</span>
+      LLM-guided spec search 的精髓是一种 local–cloud 的「时间分工」：frontier 模型的能力优势在<strong>搜索期</strong>（读 trace、跨 primitive 协同推理）最值钱，本地硬件的延迟/成本/ownership 优势在<strong>推理期</strong>最值钱。能力通过「被优化的 spec」从 cloud 单向流向 local 并固化下来，推理期零云调用。这套「用强模型当离线 proposer、把成果蒸馏进可本地运行的配置」的范式，可迁移到很多「想要本地部署但又不想牺牲质量」的场景。
+    </div>
+    <div class="callout insight">
+      <span class="label">Insight 3 · 把整套 stack 变成一个 typed、可优化对象，单一 gate 规则统辖异构编辑</span>
+      spec 抽象让「改 prompt」「改工具描述」「改 runtime」「改权重」都变成同一个可优化对象上的编辑，并被同一条 gate 规则（目标 cluster 变好、其余退步 ≤ε）统一把关。这既让跨 primitive 的协同改动可表达（单 primitive 方法表达不出），又靠 gate「拒绝即不触发完整训练」省下 7–11× 的优化成本。
+    </div>
+
+    <h3>局限与未来</h3>
+    <p>作者诚实列出的局限：（1）统计精度——每个配置只跑 5 次；（2）可能的 <strong>judge 偏差</strong>——多数 benchmark 用 GPT-5-mini 当 LLM judge；（3）<strong>只在单机评测</strong>（single-machine evaluation only）。此外 GAIA / τ²-Bench Telecom / DeepResearchBench 这类深推理/深研究任务上，本地模型即便经 spec search 也仍有残余差距（部分受限于本地模型本身的能力上限）。作者另做了四类稳健性扰动（reward 权重变体、search-seed 方差、random-restart、proposer 对比），变动均小于 headline 效应。隐私/释放安全等更广影响在 Appendix E 讨论：搜索期只传输「合规的 trace」，且按其估算，在每天 100 query 的使用强度下，proposer 的摊销成本在六个月内降到每 query 低于 $0.001。</p>
+
+    <h3>与相关工作的关系（基于本文自身论述）</h3>
+    <p>本文把现有生态描述成「碎片化」：personal AI 框架（OpenClaw、Hermes Agent、LangChain、CrewAI 等）把 Agents/Tools 做成可配置层，却把 Intelligence/Engine/Learning 绑死在特定云模型上；本地推理工具（Ollama、llama.cpp、LM Studio、vLLM、SGLang 等）把 Engine/Intelligence 做成可配置层，却不提供 Agents/Tools/Learning；优化方法（LoRA/QLoRA/GRPO 改 Intelligence，DSPy/GEPA/ACE 改 Agents）一次只动一个 primitive；评测工具（Zeus、AI Energy Score、MLCommons）只测一个 primitive 的一根轴。LLM-guided spec search 把方向扩展到「四个可编辑 primitive + Learning 当 optimizer 槽」，因此<strong>与单 primitive 方法互补而非替代</strong>——它操作的正是这些方法会去编辑的同一个 spec。它也和 Minions、Advisor Models 这类「推理时 local-cloud 协作」不同：后者不持久更新任何 primitive，而 spec search 把改动固化进 spec；和 OpenClaw-RL（最接近的持续本地学习工作）相比，后者只在云端 loop 里更新 Intelligence 权重，本文则跨四个 primitive 联合优化。</p>
+
+    <div class="callout warn">
+      <span class="label">阅读提示 · 关于文中出现的模型/系统名</span>
+      本文是一篇 2026-05 的 preprint，正文与参考文献里出现了大量近未来时间线的模型与系统名（如 Claude Opus 4.6、GPT-5.4 / GPT-5-mini、Gemini 3.1 Pro、Qwen3.5、Gemma4、OpenClaw、Hermes Agent 等）。本解读一律按论文原文转述这些名称与数字，<strong>不对它们在解读日（2026-06）之外的真实存在性做额外背书</strong>；论文自身用到的第三方 benchmark（GAIA、τ-bench、LiveCodeBench、MMLU-Pro 等）则是已有的开源工作。
+    </div>
+  </section>
+
+  <footer class="foot">
+    本页为 <code>paper-reading</code> skill 生成的阅读笔记，仅作辅助，细节以
+    <a href="https://arxiv.org/abs/2605.17172" target="_blank" rel="noopener">原文</a> 为准 · 解读日期 2026-06-17
+  </footer>
+
+</article>
+</body>
+</html>
