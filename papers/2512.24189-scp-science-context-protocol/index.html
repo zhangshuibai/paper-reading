@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Science Context Protocol (SCP) · 论文解读</title>
+
+<script>
+  window.MathJax = {
+    tex:{inlineMath:[['$','$'],['\\(','\\)']], displayMath:[['$$','$$'],['\\[','\\]']]},
+    svg:{fontCache:'global'}
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;
+  }
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:880px; margin:0 auto; padding:18px 22px 90px}
+
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:27px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)}
+  .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .meta-grid a:hover{text-decoration:underline}
+
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap; line-height:2}
+  nav.toc a:hover{color:var(--accent)}
+
+  section{margin:38px 0}
+  h2{font-size:21px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:17px; margin:24px 0 8px}
+  p{margin:12px 0}
+  ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.9em}
+  strong{color:var(--text)}
+
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:14px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:10px 12px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  .yes{color:var(--ok); font-weight:600}
+  .no{color:var(--muted)}
+
+  figure{margin:24px 0; text-align:center}
+  figure img{max-width:100%; height:auto; border:1px solid var(--line); border-radius:10px; background:#fff}
+  figure svg{max-width:100%; height:auto}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+
+  blockquote{border-left:3px solid var(--line); margin:14px 0; padding:2px 16px; color:var(--muted)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+  .mjx-container{overflow-x:auto; overflow-y:hidden}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">protocol</span>
+      <span class="chip">MCP</span>
+      <span class="chip">autonomous science</span>
+      <span class="chip">lab-automation</span>
+      <span class="chip">AI4S</span>
+      <span class="chip">multi-agent</span>
+      <span class="chip">Shanghai AI Lab</span>
+    </div>
+    <h1>Science Context Protocol (SCP)：给科学 agent 装上一层「实验编排协议」</h1>
+    <p class="orig-title">SCP: Accelerating Discovery with a Global Web of Autonomous Scientific Agents</p>
+    <dl class="meta-grid">
+      <dt>作者</dt><dd>Yankai Jiang*, Wenjie Lou*, Lilong Wang*, Zhenyu Tang, Shiyang Feng, Jiaxuan Lu, Haoran Sun, Yaning Pan, Shuang Gu, Haoyang Su, Feng Liu, Wangxu Wei, Pan Tan, Dongzhan Zhou, Fenghua Ling, Cheng Tan, Bo Zhang, Xiaosong Wang, Lei Bai, Bowen Zhou（共 20 人，* 为共同一作）</dd>
+      <dt>团队 / 机构</dt><dd>Shanghai Artificial Intelligence Laboratory（上海人工智能实验室，SAIL / InternScience）</dd>
+      <dt>原文链接</dt><dd><a href="https://arxiv.org/abs/2512.24189" target="_blank" rel="noopener">arxiv.org/abs/2512.24189</a></dd>
+      <dt>代码 / Spec</dt><dd><a href="https://github.com/InternScience/scp" target="_blank" rel="noopener">github.com/InternScience/scp</a>（Apache-2.0）</dd>
+      <dt>发表 / 年份</dt><dd>arXiv 2025（Technical Report，提交于 2025-12-30）</dd>
+      <dt>解读日期</dt><dd>2026-06-17</dd>
+    </dl>
+  </header>
+
+  <div class="tldr">
+    <b>TL;DR</b> — SCP（Science Context Protocol）是上海 AI Lab 提出的一套<strong>面向科学 agent 的开放协议 + 服务架构</strong>，目标是把「让 AI 接科学仪器/工具/数据」这件事标准化。它<strong>构建在 MCP（Model Context Protocol）之上</strong>，但额外补了四样东西：<strong>(1) 第一类公民的「实验上下文」</strong>（持久 experiment ID、dry/wet/hybrid 类型、目标、provenance）、<strong>(2) 一个中心化的 SCP Hub</strong>（负责服务注册、智能编排、OAuth2.1 鉴权、实验生命周期管理）、<strong>(3) 多 agent 编排</strong>、<strong>(4) 把湿实验室仪器也抽象成「工具」</strong>。基于 SCP 他们搭了 Intern-Discovery 平台，号称接入了 <strong>1,600+ 工具资源</strong>。成熟度上：spec、Python 参考实现、技能库、Docker 都开源了，但论文<strong>只有四个定性的 case study、没有量化 benchmark</strong>，更像一份「协议提案 + 平台公告」而非实证研究。与同期的 <strong>LAP（agent-to-instrument 协议）</strong>形成鲜明对照：SCP 走<strong>中心化 Hub + 编排</strong>，LAP 走<strong>去中心化 peer-to-peer + 物理安全原语</strong>。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#background">⓪ 领域背景速补</a>
+    <a href="#opensource">① 开源贡献</a>
+    <a href="#motivation">② 动机与贡献</a>
+    <a href="#method">③ 方法 / 架构</a>
+    <a href="#evaluation">④ 落地与评估</a>
+    <a href="#insight">⑤ 洞见与局限</a>
+  </nav>
+
+  <!-- ============================ ⓪ 领域背景速补 ============================ -->
+  <section id="background">
+    <h2><span class="n">⓪</span>领域背景速补（写给只懂 LLM/agent、不懂实验室自动化的人）</h2>
+    <p>这篇论文的「难」不在 ML，而在<strong>它要把 AI agent 接到真实的科研世界</strong>——又是数据库、又是计算模型、又是会动的机器人和真实试剂。下面先把几个关键概念讲清楚，否则很难看懂 SCP 在跟谁较劲。</p>
+
+    <h3>autonomous science / self-driving lab（自动驾驶实验室）是什么</h3>
+    <p>这是过去几年 AI for Science（AI4S）里最热的方向之一：让一套系统<strong>自己提出假设 → 设计实验 → 操作仪器做实验 → 读结果 → 调整下一轮</strong>，把人从「闭环实验」里解放出来。论文里反复引用的几个标杆：</p>
+    <ul>
+      <li><strong>A-Lab</strong>（材料合成）：连续运行 17 天，自主合成了目标 58 个无机化合物中的 41 个——一个完全无人值守的「自动炼丹炉」。</li>
+      <li><strong>ChemCrow / Coscientist</strong>：给 LLM 配上十几个化学专用工具，让它自己规划并执行有机合成。</li>
+      <li><strong>OriGene</strong>（生物，文中拼作 Origene）、<strong>EarthLink</strong>（地球科学）、<strong>InternAgent</strong>（多 agent 科研编排）、<strong>Agent Laboratory / Kosmos</strong>（端到端科研流水线）。</li>
+    </ul>
+    <p>这些系统都很强，但论文的核心吐槽是：<strong>每一个都是「定制化、深度耦合、换个实验室就跑不动」的烟囱</strong>。没有一层公共的协议，让不同实验室、不同工具、不同 agent 能互相对话。SCP 想做的就是这层「协议地基」。</p>
+
+    <h3>为什么「让 agent 接科学仪器/上下文」特别难</h3>
+    <ul>
+      <li><strong>异构（heterogeneous）资源</strong>：一个实验可能要同时调用云端数据库、本地 GPU 上的模型、远程 HPC 集群的仿真、以及实验室里一台真实的移液机器人。它们的接口、单位、协议天差地别。</li>
+      <li><strong>dry-wet 混合</strong>：dry = 干实验（纯计算/仿真），wet = 湿实验（真实试剂、真实仪器）。湿实验有<strong>物理副作用、不可逆、有安全风险、要排他占用设备</strong>，这和「调一个无状态 API」完全是两码事。</li>
+      <li><strong>需要持久上下文 + provenance</strong>：科学讲究可复现。每一步「做了什么、用了什么参数、谁批准的」都得记下来，否则结果没法被同行信任或重跑。</li>
+      <li><strong>跨机构权限</strong>：A 实验室的 agent 想用 B 实验室的仪器，得有鉴权、配额、数据边界——不能谁都随便调别人的质谱仪。</li>
+    </ul>
+
+    <h3>读懂 SCP 必须先认识的几个协议（它的「参照系」）</h3>
+    <table>
+      <thead><tr><th>协议</th><th>是什么</th><th>和 SCP 的关系</th></tr></thead>
+      <tbody>
+        <tr><td><strong>MCP</strong>（Model Context Protocol）</td><td>Anthropic 2024 年提出的开放标准，定义 LLM/agent 如何用统一的 client-server、JSON-RPC 方式调用外部工具与数据源。已成事实标准。</td><td><strong>SCP 的地基</strong>。SCP 自称「在 MCP 之上」，沿用它的 client-server 消息模型，再往上加科学专用的语法。</td></tr>
+        <tr><td><strong>A2A</strong>（Agent-to-Agent）</td><td>Google 提出的 agent 之间直接通信的协议，补 MCP「只管 agent↔工具、不管 agent↔agent」的空缺。</td><td>SCP 把多 agent 协调收进 Hub 来做，相当于用「中心编排」替代 A2A 的「点对点对话」。</td></tr>
+        <tr><td><strong>LAP</strong>（Agent-to-Instrument Protocol，<a href="https://arxiv.org/abs/2606.03755" target="_blank" rel="noopener">arXiv 2606.03755</a>）</td><td>同期另一套「agent 接仪器」协议，走<strong>去中心化 peer-to-peer</strong>，引入 InstrumentCard（签名的能力+物理上限描述）、reservation（排他占用）、safety-fence（危险操作需操作员令牌）、MeasurementResult（带物理单位/校准/不确定度的结果 schema）四个物理世界原语。</td><td><strong>SCP 最直接的对照组</strong>。两者解决同一类问题但哲学相反：SCP=中心化 Hub+编排，LAP=去中心化+物理安全原语（详见 ⑤）。</td></tr>
+        <tr><td><strong>SiLA 2 / OPC-UA</strong></td><td>实验室自动化与工业控制领域的<strong>既有工业标准</strong>：SiLA 2 用于实验室仪器互联（基于 gRPC），OPC-UA 用于工业设备数据交换。</td><td>本文未直接对标这两者；它们代表「传统仪器标准化」的路线，SCP 是「LLM-agent 时代」的新一层抽象，理论上可以在 SCP server 内部去封装 SiLA/OPC-UA 设备。</td></tr>
+      </tbody>
+    </table>
+    <p class="callout note"><span class="label">一句话定位</span>如果说 <strong>MCP 是「agent 的 USB 接口」</strong>，那 SCP 想当的是<strong>「科学实验的操作系统调度器 + 设备驱动层」</strong>：不光定义怎么插工具，还定义怎么<em>编排一整个实验、记账、管权限、驱动真实仪器</em>。</p>
+  </section>
+
+  <!-- ============================ ① 开源贡献 ============================ -->
+  <section id="opensource">
+    <h2><span class="n">①</span>开源贡献 Open-source Artifacts</h2>
+    <p>SCP 是<strong>真开源</strong>（Apache-2.0），仓库 <code>InternScience/scp</code> 同时含 spec、Python 参考实现、技能库、Docker 部署与中英文文档。但要注意：开源的是<strong>协议 + 平台代码 + 技能封装</strong>，<strong>没有</strong>权重/数据集/可量化的 benchmark——它本质是基础设施而非模型。下表为解读日（2026-06-17）核实结果。</p>
+    <table>
+      <thead><tr><th>类型</th><th>是否开源</th><th>内容 / 链接</th></tr></thead>
+      <tbody>
+        <tr><td>协议 Spec + 参考实现</td><td class="yes">✔</td><td><a href="https://github.com/InternScience/scp" target="_blank" rel="noopener">github.com/InternScience/scp</a> — Apache-2.0。含 <code>src/scp/</code> Python 包、<code>pyproject.toml</code>、<code>docker/</code> 部署、<code>docs/</code>、中文手册 <code>SCP中文手册.md</code>。</td></tr>
+        <tr><td>技能库 Skills</td><td class="yes">✔</td><td>仓库 <code>skills/</code> 目录：README 称 ~206 个科学技能、跨 8 个领域，附可运行 Python 与测试；另有 <code>tutorial for skills.md</code>。</td></tr>
+        <tr><td>工具生态平台</td><td class="no">部分（托管）</td><td>Intern-Discovery 平台号称 <strong>1,600+ 工具资源</strong>；通过托管的 SCP Hub「SCP Square」<a href="https://scphub.intern-ai.org.cn" target="_blank" rel="noopener">scphub.intern-ai.org.cn</a> 接入。属于<strong>在线托管服务</strong>，不是一个可全量下载的工具压缩包。</td></tr>
+        <tr><td>模型权重 Weights</td><td class="no">✘</td><td>不适用：SCP 是协议/编排层，自身不含训练好的模型权重（依赖外部 LLM 作 planner）。</td></tr>
+        <tr><td>数据集 Dataset</td><td class="no">✘</td><td>未发布数据集。</td></tr>
+        <tr><td>量化 Benchmark</td><td class="no">✘</td><td><strong>未提供</strong>。论文只有 4 个定性 case study，无标准化评测/对比数字（见 ④）。</td></tr>
+      </tbody>
+    </table>
+    <p class="callout warn"><span class="label">核实备注</span>GitHub 页脚一度显示「MIT license」，但仓库内 <code>LICENSE</code> 文件与文档一致为 <strong>Apache-2.0</strong>，以 LICENSE 文件为准。论文末尾明确给出 spec + reference implementation 链接，已核实可访问。</p>
+  </section>
+
+  <!-- ============================ ② 动机与贡献 ============================ -->
+  <section id="motivation">
+    <h2><span class="n">②</span>研究动机与贡献 Motivation &amp; Contribution</h2>
+
+    <h3>背景与问题</h3>
+    <p>autonomous science 正从「单点 demo」走向「基础设施」：A-Lab、ChemCrow、OriGene、InternAgent 这些系统证明了 AI 能闭环做科研。但论文一针见血地指出它们的<strong>共同病根</strong>——每个系统都是<strong>bespoke（定制）、tightly coupled（深度耦合到某个实验室/工作流）、hard-wired（硬连到特定工具）</strong>的烟囱：</p>
+    <ul>
+      <li>对数据仓库、仿真代码、仪器都暴露 <strong>ad-hoc（临时拼凑）接口</strong>，组件没法复用、工作流没法跨机构复现；</li>
+      <li>缺一层公共协议，让 AI scientist、agent、面向人的应用能在<strong>一个共享、持久、安全的「科学上下文」</strong>下，统一访问模型/数据/仪器；</li>
+      <li>已有的工具注册表/编排框架都停在<strong>「单个应用」</strong>层级，没有<strong>协议级</strong>的上下文与生命周期抽象；</li>
+      <li>现成标准（明确点名 <strong>MCP</strong>）解决不了：跨平台共享上下文、管理进行中实验的状态、强制数据访问/权限边界。</li>
+    </ul>
+
+    <h3>本文的切入点</h3>
+    <p>作者的核心判断是：<strong>问题不在「缺工具」，而在「缺协议地基」</strong>。所以不去再造一个更强的科学 agent，而是去定义一层<strong>协议 + 配套服务架构</strong>，把「描述资源、调用资源、编排实验、记账鉴权」标准化，让现有的一切（工具、模型、数据、仪器、甚至别的 agent）都变成可被发现、可被调用、可被组合的「SCP Server」。一句话：<strong>不卷模型，卷接口与编排</strong>。</p>
+
+    <h3>核心贡献（论文自述的「两大支柱 + 四项扩展」）</h3>
+    <ol>
+      <li><strong>支柱一 · 统一资源集成（Unified Resource Integration）</strong>：一套通用 spec 来「描述 + 调用」科学资源——软件工具、模型、数据集、物理仪器一视同仁，都用同一套 JSON schema 暴露能力、参数、副作用、安全要求。让 agent 能跨平台、跨机构地 discover / call / compose。</li>
+      <li><strong>支柱二 · 编排式实验生命周期管理（Orchestrated Experiment Lifecycle）</strong>：配一套安全服务架构 = 中心化 <strong>SCP Hub</strong> + 联邦式 <strong>SCP Servers</strong>，管理实验全生命周期（注册 → 规划 → 执行 → 监控 → 归档），强制细粒度鉴权（OAuth2.1），并维护可追溯的端到端工作流。</li>
+      <li><strong>相对 MCP 的四项扩展</strong>：① 更丰富的<strong>实验元数据</strong>（持久 experiment ID、dry/wet/hybrid 类型、目标、数据 URI）；② <strong>中心化 Hub 作为全局注册表</strong>（而非纯 P2P）；③ <strong>智能工作流编排</strong>（在 agent API 之上加一层 experiment-flow API，从高层目标自动合成 top-k 多步方案）；④ <strong>湿实验室设备集成</strong>（标准化设备驱动与能力描述，让真实仪器像计算工具一样可调）。</li>
+      <li><strong>落地平台</strong>：基于 SCP 搭建 Intern-Discovery，整合 1,600+ 工具（生物 45.9% / 物理 21.1% / 化学 11.6% / 力学材料 8.7% / 数学 8.0% / 信息科学 4.6%），并开源 spec 与参考实现。</li>
+    </ol>
+  </section>
+
+  <!-- ============================ ③ 方法 / 架构 ============================ -->
+  <section id="method">
+    <h2><span class="n">③</span>方法 / 架构 Method &amp; Architecture</h2>
+    <p>SCP 采用<strong>「hub-and-spoke（轮辐式）」架构</strong>：一个中心 <strong>SCP Hub</strong> 协调一群分布式 <strong>SCP Servers（边缘节点）</strong> 和面向用户的 <strong>SCP Clients</strong>，再加上辅助的消息与存储组件。下图是原文的整体定位图：把人类研究者、AI scientist agents、各种 discovery 应用，统一连到由 wet-lab 仪器 / 数据库 / 知识库 / LLM 与专用模型组成的资源池上。</p>
+
+    <figure>
+      <img src="figures/fig1_overview.png" alt="SCP 总览">
+      <figcaption>原文 Figure 1：SCP 总览。左侧是消费方（人类研究者、AI scientist、discovery 应用、工作流 runner），右侧是被封装成 SCP Server 的资源（湿实验室仪器、数据库、领域知识库、LLM/专用模型/工具），中间由 SCP Hub 串起，对外承诺「快速假设迭代 / 可复现实验 / 干湿闭环自动化 / 可复用智能 agent 工作流 / 跨机构协作」五项收益。</figcaption>
+    </figure>
+
+    <h3>三类核心组件</h3>
+
+    <h4>SCP Hub —— 系统的「大脑」与协议权威</h4>
+    <p>Hub 维护工具/数据/agent/仪器的<strong>全局注册表</strong>，负责服务发现、任务派发与追踪，并实现协议级安全治理。它远不止「转发请求」，内嵌一套<strong>智能编排层</strong>：</p>
+    <ul>
+      <li><strong>意图解析 → 候选方案</strong>：用 AI 模型把自然语言指令翻译成若干「候选任务图」（涉及工具、数据集、agent、干/湿操作）；</li>
+      <li><strong>方案排序</strong>：结合当前环境（可用工具/仪器、数据就绪度、用户权限、资源预算）对候选方案打分，给出 <strong>top-k 可执行计划</strong>，并附上依赖结构、预估延迟、成本、实验风险等「决策理由」，交给人或更高层 AI scientist 挑选；</li>
+      <li><strong>编译成 workflow spec</strong>：选定方案被编译成一张细粒度的 <strong>JSON 任务图</strong>，每个节点 = 一次具体操作（清洗数据 / 跑仿真 / 执行模型 / 驱动移液机器人），标注 tool ID、输入参数、预期输出、对前序步骤的依赖。这张 JSON 既是 agent↔Server↔仪器之间的<strong>合同</strong>，也是「计划了什么」的<strong>权威记录</strong>，会被版本化存进 experiment memory，支持回放、跨次比较、审计；</li>
+      <li><strong>执行—监控—校验—回滚闭环</strong>：按依赖顺序派发每一步、回收状态与结果；对数据步做 schema/合理性校验，对物理步检查设备确认与传感器读数；一旦异常（反复报错、输出不一致、资源异常消耗）就触发异常策略——告警、暂停/中止下游、必要时安全回滚。这种 rollback 在多步干湿工作流里尤其关键，因为早期错误会污染后续测量。</li>
+    </ul>
+    <p>此外 Hub 内置 <strong>AI governance 模块</strong>做冲突检测与资源预测，在工作流过度占用仪器/数据/算力时提前预警；并通过 <strong>OAuth2.1</strong> 做实验与用户级的鉴权授权。</p>
+
+    <h4>SCP Servers —— 边缘节点</h4>
+    <p>每个 Server 管理某个环境（实验室 / 数据中心 / 云账号）里的本地资源：仪器、领域模型、数据库、数据处理流水线、乃至更高层的 agent。它把这些资源<strong>注册成 SCP tool</strong>、用统一 spec 暴露能力与参数 schema、执行本地访问控制。启动时自动向一个或多个 Hub 注册自己导出的工具，并持续上报设备状态/模型就绪度/资源利用率供全局调度。用户也可通过 Intern-Discovery 把自己的 Server 提交进平台统管。</p>
+
+    <h4>SCP Clients —— 面向人/agent 的接口层</h4>
+    <p>Client 负责对 Hub 鉴权、拉取「当前用户权限+项目上下文下可见」的工具/agent/数据/仪器清单，并提供实验设计与执行界面（简单场景给 catalog 直调，复杂场景给图形/编程式的工作流构建器）。每次调用都携带用户凭证 + experiment ID，使 Hub 能做细粒度访问控制并把动作归因到具体用户/agent——<strong>安全与 provenance 始终集中在 Hub，可审计</strong>。</p>
+
+    <p>下图是原文给出的架构图（已从 PDF 重裁，便于阅读）：顶部是多个 Client，中间 Hub 列出它承担的职能（实验注册 / 工具注册 / 实验管理 / 鉴权管理 / 任务分派 / 高级规划 / 内容安全），底部是各 Server 分别托管数据库、实验工具、agent、实验室设备。</p>
+
+    <figure>
+      <img src="figures/fig2_architecture.png" alt="SCP 架构图">
+      <figcaption>原文 Figure 2：SCP 架构总览。Hub（中层）在 Client（上）与各类 edge server（下，对接仪器/数据库/AI 模型/工具）之间居中协调，管理实验上下文、规划与任务调度；每个 edge server 向 Hub 注册设备/服务、执行任务并实时回流结果。</figcaption>
+    </figure>
+
+    <h3>重绘：组件关系（自绘 SVG）</h3>
+    <p>把上面文字凝练成一张「谁连谁、Hub 做什么」的示意图：</p>
+    <figure>
+      <svg viewBox="0 0 860 470" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif">
+        <defs>
+          <marker id="arrA" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+            <path d="M0,0 L7,3 L0,6 Z" fill="#7aa2ff"/>
+          </marker>
+        </defs>
+        <!-- Clients -->
+        <rect x="40" y="20" width="780" height="74" rx="12" fill="#1d2138" stroke="#2a2f4a"/>
+        <text x="58" y="42" fill="#9aa3bd" font-size="12">SCP Clients（人类研究者 / AI scientist agent / discovery 应用）</text>
+        <rect x="70" y="52" width="150" height="30" rx="8" fill="#232842" stroke="#3a66ff"/><text x="145" y="71" fill="#c7cdec" font-size="12" text-anchor="middle">Client · 实验设计</text>
+        <rect x="245" y="52" width="150" height="30" rx="8" fill="#232842" stroke="#3a66ff"/><text x="320" y="71" fill="#c7cdec" font-size="12" text-anchor="middle">Client · 监控面板</text>
+        <rect x="500" y="52" width="180" height="30" rx="8" fill="#232842" stroke="#3a66ff"/><text x="590" y="71" fill="#c7cdec" font-size="12" text-anchor="middle">每次调用带 凭证+experiment ID</text>
+
+        <!-- Hub -->
+        <rect x="150" y="150" width="560" height="118" rx="14" fill="#171a2b" stroke="#7aa2ff" stroke-width="2"/>
+        <text x="430" y="174" fill="#7aa2ff" font-size="15" font-weight="700" text-anchor="middle">SCP Hub（中心编排 + 协议权威）</text>
+        <rect x="170" y="188" width="155" height="28" rx="7" fill="#1d2138" stroke="#2a2f4a"/><text x="247" y="206" fill="#e8eaf2" font-size="11.5" text-anchor="middle">全局注册表 / 服务发现</text>
+        <rect x="338" y="188" width="155" height="28" rx="7" fill="#1d2138" stroke="#2a2f4a"/><text x="415" y="206" fill="#e8eaf2" font-size="11.5" text-anchor="middle">智能编排 (top-k 计划)</text>
+        <rect x="506" y="188" width="185" height="28" rx="7" fill="#1d2138" stroke="#2a2f4a"/><text x="598" y="206" fill="#e8eaf2" font-size="11.5" text-anchor="middle">OAuth2.1 鉴权 / governance</text>
+        <rect x="170" y="224" width="240" height="28" rx="7" fill="#1d2138" stroke="#2a2f4a"/><text x="290" y="242" fill="#e8eaf2" font-size="11.5" text-anchor="middle">实验生命周期：注册→规划→执行→监控→归档</text>
+        <rect x="423" y="224" width="268" height="28" rx="7" fill="#1d2138" stroke="#2a2f4a"/><text x="557" y="242" fill="#e8eaf2" font-size="11.5" text-anchor="middle">experiment memory（JSON 任务图 + provenance）</text>
+
+        <!-- Servers -->
+        <rect x="40" y="330" width="780" height="116" rx="12" fill="#1d2138" stroke="#2a2f4a"/>
+        <text x="58" y="352" fill="#9aa3bd" font-size="12">SCP Servers（边缘节点，启动时向 Hub 自动注册导出的工具）</text>
+        <rect x="70" y="366" width="160" height="60" rx="9" fill="#232842" stroke="#43c59e"/><text x="150" y="392" fill="#c7cdec" font-size="12" text-anchor="middle">数据库 / 知识库</text><text x="150" y="410" fill="#9aa3bd" font-size="10.5" text-anchor="middle">UniProt·PDB·NCBI…</text>
+        <rect x="250" y="366" width="160" height="60" rx="9" fill="#232842" stroke="#43c59e"/><text x="330" y="392" fill="#c7cdec" font-size="12" text-anchor="middle">计算工具 / 模型</text><text x="330" y="410" fill="#9aa3bd" font-size="10.5" text-anchor="middle">仿真·docking·LLM</text>
+        <rect x="430" y="366" width="160" height="60" rx="9" fill="#232842" stroke="#43c59e"/><text x="510" y="392" fill="#c7cdec" font-size="12" text-anchor="middle">领域 agents</text><text x="510" y="410" fill="#9aa3bd" font-size="10.5" text-anchor="middle">规划·分析·假设</text>
+        <rect x="610" y="366" width="180" height="60" rx="9" fill="#232842" stroke="#ffb454"/><text x="700" y="392" fill="#c7cdec" font-size="12" text-anchor="middle">湿实验室设备</text><text x="700" y="410" fill="#9aa3bd" font-size="10.5" text-anchor="middle">移液机器人·HPLC·热循环仪</text>
+
+        <!-- arrows -->
+        <line x1="430" y1="94" x2="430" y2="148" stroke="#7aa2ff" stroke-width="2" marker-end="url(#arrA)"/>
+        <text x="442" y="124" fill="#9aa3bd" font-size="10.5">意图 / 计划选择</text>
+        <line x1="290" y1="268" x2="290" y2="364" stroke="#7aa2ff" stroke-width="2" marker-end="url(#arrA)"/>
+        <line x1="510" y1="268" x2="510" y2="364" stroke="#7aa2ff" stroke-width="2" marker-end="url(#arrA)"/>
+        <text x="300" y="312" fill="#9aa3bd" font-size="10.5">派发任务 / 回流结果（dispatch–monitor–validate–rollback）</text>
+      </svg>
+      <figcaption>自绘示意：Client 把带凭证+experiment ID 的请求交给 Hub；Hub 在全局注册表上做编排、产出 JSON 任务图、按依赖派发给各 Server，并把执行状态/结果汇回，全程记进 experiment memory。</figcaption>
+    </figure>
+
+    <h3>一次实验的交互时序（自绘 SVG）</h3>
+    <p>论文把「用 SCP 做一次实验」拆成 5 个阶段：查询设计 → 规划生成 → 选择编排 → 设备执行 → 反馈迭代。下面用时序图重绘这条主链路：</p>
+    <figure>
+      <svg viewBox="0 0 860 430" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif">
+        <defs>
+          <marker id="arrB" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9b8cff"/></marker>
+        </defs>
+        <!-- lifelines -->
+        <g font-size="12.5" text-anchor="middle">
+          <rect x="40"  y="20" width="150" height="34" rx="8" fill="#232842" stroke="#3a66ff"/><text x="115" y="42" fill="#c7cdec">研究者 / AI scientist</text>
+          <rect x="320" y="20" width="120" height="34" rx="8" fill="#171a2b" stroke="#7aa2ff"/><text x="380" y="42" fill="#7aa2ff" font-weight="700">SCP Hub</text>
+          <rect x="540" y="20" width="120" height="34" rx="8" fill="#232842" stroke="#43c59e"/><text x="600" y="42" fill="#c7cdec">计算 Server</text>
+          <rect x="700" y="20" width="120" height="34" rx="8" fill="#232842" stroke="#ffb454"/><text x="760" y="42" fill="#c7cdec">湿实验 Server</text>
+        </g>
+        <line x1="115" y1="54" x2="115" y2="400" stroke="#2a2f4a"/>
+        <line x1="380" y1="54" x2="380" y2="400" stroke="#2a2f4a"/>
+        <line x1="600" y1="54" x2="600" y2="400" stroke="#2a2f4a"/>
+        <line x1="760" y1="54" x2="760" y2="400" stroke="#2a2f4a"/>
+
+        <g font-size="11" fill="#cdd3ee">
+          <line x1="115" y1="86" x2="378" y2="86" stroke="#9b8cff" stroke-width="1.6" marker-end="url(#arrB)"/>
+          <text x="120" y="80">① 自然语言目标 + 元数据（建立 experiment context）</text>
+
+          <line x1="380" y1="124" x2="380" y2="124"/>
+          <rect x="300" y="112" width="160" height="24" rx="6" fill="#1d2138" stroke="#2a2f4a"/><text x="380" y="128" text-anchor="middle" fill="#e8eaf2">② 解析意图，生成 top-3 JSON 计划</text>
+
+          <line x1="378" y1="162" x2="116" y2="162" stroke="#9b8cff" stroke-width="1.6" marker-end="url(#arrB)"/>
+          <text x="120" y="156">候选方案（含延迟/成本/风险理由）</text>
+
+          <line x1="115" y1="198" x2="378" y2="198" stroke="#9b8cff" stroke-width="1.6" marker-end="url(#arrB)"/>
+          <text x="120" y="192">③ 选定/编辑方案 → 确认执行</text>
+
+          <line x1="380" y1="234" x2="598" y2="234" stroke="#9b8cff" stroke-width="1.6" marker-end="url(#arrB)"/>
+          <text x="388" y="228">④a 派发干实验步骤（按依赖）</text>
+          <line x1="598" y1="262" x2="382" y2="262" stroke="#43c59e" stroke-width="1.4" marker-end="url(#arrB)"/>
+          <text x="388" y="256" fill="#9aa3bd">流式回传结果 + schema 校验</text>
+
+          <line x1="380" y1="298" x2="758" y2="298" stroke="#9b8cff" stroke-width="1.6" marker-end="url(#arrB)"/>
+          <text x="388" y="292">④b 派发湿实验步骤（驱动仪器）</text>
+          <line x1="758" y1="326" x2="382" y2="326" stroke="#ffb454" stroke-width="1.4" marker-end="url(#arrB)"/>
+          <text x="388" y="320" fill="#9aa3bd">设备确认 + 传感器读数（异常则告警/回滚）</text>
+
+          <line x1="378" y1="364" x2="116" y2="364" stroke="#9b8cff" stroke-width="1.6" marker-end="url(#arrB)"/>
+          <text x="120" y="358">⑤ 汇总结果 + provenance；可由 agent 自适应调下一轮</text>
+        </g>
+      </svg>
+      <figcaption>自绘时序：SCP 一次实验的主链路。Hub 全程持有 experiment context，干/湿步骤都被它统一编排、校验、记账；湿实验的回路里多了「设备确认 + 异常回滚」这层物理安全考量。</figcaption>
+    </figure>
+
+    <div class="callout note">
+      <span class="label">实现要点</span>
+      <ul style="margin:6px 0">
+        <li><strong>协议契约是一张 JSON 任务图</strong>：节点=操作，边=依赖；它同时是执行合同与可复现记录，被版本化存档。这是 SCP 相对 MCP「无状态单次调用」最实质的差异。</li>
+        <li><strong>湿实验当一等公民</strong>：SCP 定义标准化「设备驱动 + 厂商无关接口」（类比操作系统里的仪器驱动），让 thermocycler / HPLC / 机械臂能像计算工具一样被计划里直接调用，Hub 与 edge server 负责翻译成具体设备命令。</li>
+        <li><strong>开发者扩展方式</strong>：写 adapter/driver 把仪器或软件包到 SCP 协议后面（子类化 device 接口或用装饰器把函数注册成 tool action），部署到 edge server 即自动向 Hub 注册——不用动核心。仓库 <code>skills/</code> 提供了这类封装的范式与测试。</li>
+        <li><strong>planner 依赖外部 LLM</strong>：智能编排里的「意图解析 / 计划合成」靠 LLM-based planner 完成，SCP 本身不绑定具体模型。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============================ ④ 落地与评估 ============================ -->
+  <section id="evaluation">
+    <h2><span class="n">④</span>落地与评估 Evaluation</h2>
+    <p class="callout warn"><span class="label">先说成熟度</span>这是一份 <strong>Technical Report</strong>，<strong>没有量化 benchmark、没有与 baseline 的对比数字、没有跑分</strong>。「评估」由一个工具生态统计 + 四个<strong>定性 case study</strong> 构成——它在证明「这套协议能把多种资源串起来跑通」，而非「比某基线好多少」。读的时候请把它当「能力演示」而非「实证比较」。</p>
+
+    <h3>工具生态（Intern-Discovery）</h3>
+    <p>基于 SCP 搭建的平台整合了 <strong>1,600+ 工具</strong>，覆盖生物/化学数据库检索（UniProt、InterPro、PDB、NCBI）、结构与序列处理、分子建模、数据预处理、数值计算、ML 推理等。分布如下：</p>
+    <figure>
+      <img src="figures/fig3_dist.png" alt="工具分布">
+      <figcaption>原文 Figure 3：Intern-Discovery 工具分布。左=学科（生物 45.9% / 物理 21.1% / 化学 11.6% / 力学材料 8.7% / 数学 8.0% / 信息科学 4.6%）；右=功能（计算工具 39.1% / 数据库 33.8% / 模型服务 13.3% / 湿实验操作 7.7% / 文献检索 6.1%）。可见目前以「干实验 + 数据库」为主，湿实验操作仅约 7.7%。</figcaption>
+    </figure>
+
+    <h3>四个 Case Study（定性）</h3>
+    <table>
+      <thead><tr><th>#</th><th>场景</th><th>展示了什么</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>自动化实验方案设计与执行</td><td>研究者给高层目标（如「设计并跑 PCR 验证基因敲除」）→ Hub 编排 → Thoth Server 生成结构化 JSON 协议（试剂/用量/时序）→ Thoth-OP Server 拆成原子操作并生成设备命令序列 → 派发到仪器 API。展示「目标 → 协议 → 执行」全自动串联。</td></tr>
+        <tr><td>2</td><td>从 PDF 复现已有实验方案</td><td>上传一篇论文方法段/实验 SOP 的 PDF → Hub 路由到 Thoth 做协议理解 → 把自由文本解析成标准化 JSON protocol 对象（含目标、材料、各步动作/参数/依赖），即便文档是叙述性/异构排版。展示「文献 → 可执行协议」。</td></tr>
+        <tr><td>3</td><td>AI 驱动的分子筛选与对接（docking）</td><td>端到端小分子流程：跨多个 SCP 工具完成筛选 + 分子对接。展示纯干实验（computational）的多工具编排。</td></tr>
+        <tr><td>4</td><td>荧光蛋白工程的干湿一体（dry-wet）</td><td>紧耦合的干湿工作流：计算设计 + 湿实验验证联动。展示 SCP 把 in-silico 设计与真实实验闭合成一条工作流。</td></tr>
+      </tbody>
+    </table>
+    <p>这些 case 共同想说明：无论一步由机器人、AI 模型还是数据流水线执行，在 SCP 里都以<strong>一致方式被调用、被同一 experiment context 追踪</strong>，从而降低集成开销、提升可复现性。但<strong>没有报告成功率、耗时、误差、与人工/基线的对比</strong>，所以「到底省了多少、对了多少」论文没给答案。</p>
+
+    <h3>与 MCP 的对比（论文 Discussion 节，定性论证）</h3>
+    <table>
+      <thead><tr><th>维度</th><th>MCP 的不足（作者论点）</th><th>SCP 的应对</th></tr></thead>
+      <tbody>
+        <tr><td>协议标准化/上下文</td><td>只标准化基础交互（文件 I/O、函数调用），把交互当孤立消息，无「完整实验」表示，易碎片化</td><td>内建 JSON 实验 schema：每个实验带 ID、研究者、dry/wet/hybrid 类型、目标、步骤——全生态对协议「同一种理解」</td></tr>
+        <tr><td>高通量实验</td><td>每次调用无状态、无上下文，跑 100 个实验要外部调度与人工追踪，无原生「实验队列」</td><td>把整条 workflow 当一等对象（带 experiment ID + 持久上下文），可一次提交一批、统一记录与聚合结果</td></tr>
+        <tr><td>多 agent 编排</td><td>面向消息、非原生多 agent，只管 agent↔工具，不管 agent↔agent（需 A2A 补），易退化成点对点散乱对话</td><td>Hub 作为中心 orchestrator：分解目标→派子任务→跟踪依赖与完成状态，支持条件分支/迭代</td></tr>
+        <tr><td>湿实验室设备</td><td>没把实验硬件当设计目标，每台仪器要定制 adapter，无通用「lab action」格式，常退化成「AI 出文本协议、人去手工做」</td><td>定义标准化设备驱动 + 厂商无关接口，让 thermocycler/HPLC/机械臂在计划里像计算工具一样可调</td></tr>
+      </tbody>
+    </table>
+    <p class="callout note"><span class="label">一句话总结这张表</span>论文自己的措辞很到位：<strong>「MCP 提供底层的消息管道（the messaging pipes），SCP 在其上加了一层科学实验的语法（a higher-level grammar）」</strong>。注意这是<strong>定性论证</strong>，没有受控实验去量化「SCP 比 MCP-only 快/省多少」。</p>
+  </section>
+
+  <!-- ============================ ⑤ 洞见与局限 ============================ -->
+  <section id="insight">
+    <h2><span class="n">⑤</span>洞见与局限 Insights &amp; Limitations</h2>
+    <div class="callout insight">
+      <span class="label">Insight</span>
+      <ul style="margin:6px 0">
+        <li><strong>科学 agent 的瓶颈正从「模型/工具」上移到「协议/编排」。</strong>SCP 的赌注是：与其再造一个更强的科学 agent，不如定义一层让所有资源可互操作的协议——这与「不卷模型、卷接口」的判断一致，也呼应了 MCP 在通用 agent 领域走通的路径。</li>
+        <li><strong>「experiment context」是把 MCP 搬进科学的关键缺口。</strong>MCP 的调用是无状态、无记忆的；而科学的灵魂是<em>可复现 + provenance</em>。SCP 把「一整个实验」做成持久、版本化、可审计的一等对象（一张 JSON 任务图），这是它最有迁移价值的设计——任何想做「领域版 MCP」的人都该先想清楚自己领域的「持久上下文」长什么样。</li>
+        <li><strong>中心化是把双刃剑。</strong>Hub 带来全局编排、统一鉴权、可审计的 provenance（这些在跨机构科研里确实刚需），但也引入<em>单点信任 / 单点故障 / 治理集中</em>。这正是它与去中心化路线最本质的哲学分歧。</li>
+      </ul>
+    </div>
+
+    <h3>局限与未来</h3>
+    <ul>
+      <li><strong>只有 spec + 定性 demo，缺实证。</strong>没有量化 benchmark、成功率、与 baseline 的对比，无法判断 SCP 相对 MCP-only 到底带来多少实际收益，也没有压力/规模化测试数据。</li>
+      <li><strong>湿实验占比仍低（约 7.7%）。</strong>尽管「湿实验一等公民」是核心卖点，平台目前实际仍以数据库+计算工具为主；真实仪器接入的广度、稳定性、安全边界尚未充分展示。</li>
+      <li><strong>中心化的代价未充分讨论。</strong>论文几乎没正面回应「Hub 单点故障 / 谁来运营这个全球 Hub / 跨机构信任如何建立」这类治理与可用性问题。</li>
+      <li><strong>安全机制偏「访问控制」，缺「物理安全」原语。</strong>SCP 有 OAuth2.1 + governance + 内容安全，但对比 LAP，它没有像 InstrumentCard（物理上限）、safety-fence（危险操作的操作员令牌握手）、带不确定度/校准的 MeasurementResult 这类<strong>面向物理世界的细粒度安全/计量原语</strong>——而这些恰恰是真实湿实验最要命的地方。</li>
+    </ul>
+
+    <h3>与相关工作的关系（重点：SCP vs LAP）</h3>
+    <p>SCP 把自己定位为 A-Lab / ChemCrow / OriGene / InternAgent / Agent Laboratory 这些「单点科学 agent 系统」之上的<strong>通用协议地基</strong>：那些是「应用」，SCP 是「协议」。而最值得对照的同期工作是 <strong>LAP（Agent-to-Instrument Protocol，<a href="https://arxiv.org/abs/2606.03755" target="_blank" rel="noopener">arXiv 2606.03755</a>）</strong>——两者解决同一类问题（让 agent 安全地接科学资源），但哲学几乎相反：</p>
+    <table>
+      <thead><tr><th>维度</th><th>SCP（本文 · 上海 AI Lab）</th><th>LAP（agent-to-instrument）</th></tr></thead>
+      <tbody>
+        <tr><td>拓扑</td><td><strong>中心化 hub-and-spoke</strong>：Hub 是协议权威+编排大脑</td><td><strong>去中心化 peer-to-peer</strong>（承袭 A2A 的 discovery-first），每个实验室是自己仪器的唯一权威</td></tr>
+        <tr><td>主打抽象</td><td>experiment context + JSON 任务图 + 实验生命周期编排</td><td>四个物理世界原语：InstrumentCard / reservation / safety-fence / MeasurementResult</td></tr>
+        <tr><td>安全模型</td><td>集中式 OAuth2.1 鉴权 + Hub governance + 内容安全</td><td>分布式：签名能力卡、排他占用锁、危险操作的操作员令牌握手</td></tr>
+        <tr><td>物理单位 / 计量</td><td>未强调（结果格式较通用）</td><td><strong>一等公民</strong>：结果带物理单位、校准锚点、不确定度</td></tr>
+        <tr><td>实现 / 落地</td><td><strong>有</strong>：开源参考实现 + 1,600+ 工具的 Intern-Discovery 平台</td><td>论文未明确给出参考实现（偏协议设计）</td></tr>
+        <tr><td>谁管「独占/物理风险」</td><td>靠 Hub 的冲突检测 + 资源预测（集中式预警）</td><td>靠 reservation 锁 + safety-fence 握手（协议原语层面强制）</td></tr>
+      </tbody>
+    </table>
+    <p>粗略归纳：<strong>LAP 更去中心化、更重「物理世界安全/计量原语」；SCP 更中心化、更重「编排 + 实验生命周期 + 规模化平台落地」。</strong>在「谁有实现」上 SCP 占优（开源 + 1,600+ 工具平台），在「谁把物理单位/独占/危险操作管得更细」上 LAP 设计得更专。两者更像互补而非替代——可以想象一个 SCP Hub 内部用类 LAP 的原语去管真实仪器那一段。</p>
+
+    <div class="callout note">
+      <span class="label">对创业的启示（点到即止）</span>
+      「科学仪器版 MCP」正在成为一条真实赛道：MCP 把「agent↔工具」标准化跑通后，<strong>autonomous science 需要的是更上一层的「实验语法 + 仪器驱动 + provenance」</strong>。SCP（中心化平台）与 LAP（去中心化协议）代表两种押注。创业角度的 whitespace 可能在中间地带：<strong>给真实湿实验室做「即插即用的 SCP/MCP server + 设备驱动 + 计量/安全合规层」</strong>——谁先把「一台真仪器 5 分钟接入 agent 生态、且带可审计的 provenance 与安全围栏」做成标准化产品，谁就卡住了这条价值链最难复制的环节。注意护城河不在协议本身（协议会趋同/开源），而在<strong>设备适配的长尾覆盖 + 合规/安全 + 运营信任</strong>。</p>
+    </div>
+  </section>
+
+  <footer class="foot">
+    本页为 <code>paper-reading</code> skill 生成的阅读笔记，仅作辅助，细节以
+    <a href="https://arxiv.org/abs/2512.24189" target="_blank" rel="noopener">原文</a> 为准 · 解读日期 2026-06-17
+  </footer>
+
+</article>
+</body>
+</html>

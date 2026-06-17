@@ -20,6 +20,27 @@
     "path": "papers/2605.17172-openjarvis-on-device-personal-ai/index.html"
   },
   {
+    "slug": "2512.24189-scp-science-context-protocol",
+    "title": "Science Context Protocol (SCP): Accelerating Discovery with a Global Web of Autonomous Scientific Agents",
+    "authors": "Yankai Jiang, Wenjie Lou, Lilong Wang, et al. (20 authors)",
+    "team": "Shanghai AI Lab (上海人工智能实验室 / InternScience)",
+    "arxiv": "https://arxiv.org/abs/2512.24189",
+    "code": "https://github.com/InternScience/scp",
+    "date": "2026-06-17",
+    "published": "arXiv 2025",
+    "tldr": "上海 AI Lab 面向科学 agent 的开放协议：在 MCP 之上加 experiment context、中心化 Hub 编排、多 agent 协调与湿实验室设备集成；开源 spec+参考实现+1600+工具平台，但仅有定性 case study、无量化 benchmark。",
+    "tags": [
+      "agent",
+      "mcp",
+      "lab-automation",
+      "autonomous-science",
+      "AI4S",
+      "protocol",
+      "multi-agent"
+    ],
+    "path": "papers/2512.24189-scp-science-context-protocol/index.html"
+  },
+  {
     "slug": "2026-06-16-sakana-ai",
     "title": "Sakana AI：竞争格局与赛道早期度调研",
     "authors": "—",
