@@ -1673,5 +1673,24 @@
       "mcp",
       "agent"
     ]
+  },
+  {
+    "slug": "2026-06-17-intc",
+    "title": "Intel（INTC）：基本面 / 估值 / 是否值得买入",
+    "authors": "—",
+    "team": "股票调研",
+    "arxiv": "https://www.intc.com",
+    "code": "",
+    "date": "2026-06-21",
+    "published": "股票调研 2026",
+    "tldr": "x86 老霸主的困境反转：产品端被 AMD/ARM 蚕食、AI 几乎缺席输给 NVIDIA，却豪赌 Intel Foundry 反转抢 TSMC 生意、巨额 capex 烧钱致 FCF 连年为负；靠美国政府入股约10%+SoftBank输血续命、分红已砍；股价在政府背书+agentic CPU叙事下暴涨至≈34(市值≈72B)、已超分析师共识甚至Citi 30目标价——故事真但估值透支，评级减持/回避(Reduce→Avoid)。非投资建议。",
+    "tags": [
+      "stock",
+      "equity-research",
+      "valuation",
+      "semiconductors",
+      "foundry"
+    ],
+    "path": "papers/2026-06-17-intc/index.html"
   }
 ]

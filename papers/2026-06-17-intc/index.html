@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Intel（INTC）· 基本面 / 估值 / 是否值得买入</title>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --bad:#ff6b81; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --bad:#d23651; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;}
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:920px; margin:0 auto; padding:18px 22px 90px}
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:25px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)} .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap; line-height:2}
+  nav.toc a:hover{color:var(--accent)}
+  section{margin:38px 0}
+  h2{font-size:20px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:16.5px; margin:22px 0 8px}
+  p{margin:12px 0} ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)} strong{color:var(--text)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.88em}
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:13px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:9px 10px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  .num{font-variant-numeric:tabular-nums; text-align:right}
+  figure{margin:24px 0; text-align:center}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+  .svgwrap{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 8px}
+  @media (prefers-color-scheme: light){ .svgwrap{background:#fbfcff} }
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.bull{border-left:4px solid var(--ok)} .callout.bull .label{color:var(--ok)}
+  .callout.bear{border-left:4px solid var(--bad)} .callout.bear .label{color:var(--bad)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+  .src{font-size:10.5px; padding:0 6px; border-radius:999px; white-space:nowrap; vertical-align:middle}
+  .src-a{background:rgba(67,197,158,.18); color:var(--ok)}
+  .src-b{background:rgba(255,180,84,.18); color:var(--warn)}
+  .src-c{background:rgba(255,107,129,.18); color:var(--bad)}
+  .legend{font-size:12px; color:var(--muted); margin:6px 0 0}
+  .rating{display:inline-block; font-weight:800; padding:4px 16px; border-radius:999px; font-size:16px; letter-spacing:.5px}
+  .r-buy{background:rgba(67,197,158,.20); color:var(--ok)}
+  .r-accumulate{background:rgba(122,162,255,.20); color:var(--accent)}
+  .r-hold{background:rgba(255,180,84,.20); color:var(--warn)}
+  .r-reduce{background:rgba(255,140,90,.20); color:#e07a3a}
+  .r-avoid{background:rgba(255,107,129,.20); color:var(--bad)}
+  .kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin:16px 0}
+  .kpi{background:var(--panel2); border:1px solid var(--line); border-radius:10px; padding:10px 12px}
+  .kpi .k{font-size:12px; color:var(--muted)} .kpi .v{font-size:18px; font-weight:700; margin-top:2px}
+  .disclaimer{background:rgba(255,180,84,.10); border:1px solid var(--warn); border-radius:12px;
+              padding:14px 18px; margin:26px 0; font-size:13.5px; color:var(--text)}
+  .disclaimer b{color:var(--warn)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">半导体</span>
+      <span class="chip">IDM / Foundry</span>
+      <span class="chip">困境反转 Turnaround</span>
+      <span class="chip">股票调研</span>
+      <span class="chip">估值</span>
+      <span class="chip">基本面</span>
+    </div>
+    <h1>Intel（INTC）：基本面 / 估值 / 是否值得买入</h1>
+    <p class="orig-title">NASDAQ: INTC · 半导体（CPU / 数据中心 / 晶圆代工）· 一个「产品端被蚕食 + AI 缺席、却豪赌 Foundry 反转」的高风险困境反转（turnaround）+ 政府背书的政策股，且股价已大幅领先基本面</p>
+    <dl class="meta-grid">
+      <dt>代码</dt><dd>INTC（NASDAQ）</dd>
+      <dt>行业</dt><dd>半导体：x86 CPU（PC / 服务器）、晶圆代工（Intel Foundry）、AI 加速器（Gaudi）</dd>
+      <dt>资料来源</dt><dd>SEC EDGAR 申报（CIK 50863）/ 公司 IR / 公开报道，按来源分级标注；<a href="https://www.intc.com" target="_blank" rel="noopener">一手入口（intc.com）</a></dd>
+      <dt>数据截至</dt><dd>财务数据截至 <strong>FY2025 10-K（财年止 2025-12-27）+ Q1 2026 10-Q（季度止 2026-03-28，2026-04-24 申报）</strong>；股价/市值截至 <strong>约 2026-06-21（≈$134，盘中创历史新高 $135.48）</strong></dd>
+      <dt>整理日期</dt><dd>2026-06-21</dd>
+    </dl>
+    <p class="legend">来源等级：<span class="src src-a">🟢 一手</span> SEC/IR/电话会 ·
+      <span class="src src-b">🟡 二手</span> 分析师/媒体/数据终端 ·
+      <span class="src src-c">🔴 指引/自述/未证实</span> 管理层 guidance 或未独立验证</p>
+  </header>
+
+  <div class="tldr">
+    <b>评级</b> — <span class="rating r-reduce">减持 / 回避（Reduce → Avoid）</span>
+    （买入 Buy / 增持 Accumulate / 持有 Hold / 减持 Reduce / 回避 Avoid）<br>
+    <p style="margin:10px 0 0">Intel 是 x86 CPU 老霸主，靠卖 PC/服务器芯片（<strong>Client Computing</strong> + <strong>Data Center & AI</strong>）赚钱，同时自建晶圆厂、豪赌把 <strong>Intel Foundry（代工）</strong> 做成能抢 TSMC 生意的第二曲线。
+    现状是「<strong>产品端被 AMD/ARM 蚕食、AI 加速器几乎缺席（GPU 输给 NVIDIA）、Foundry 巨亏烧现金</strong>」三线承压：FY2024 净亏 <strong>$18.8B</strong> <span class="src src-a">🟢</span>、FY2025 仍 GAAP 微亏 <strong>−$0.27B</strong>，Q1 2026 又因 <strong>$4.07B 重组费用</strong>转为净亏 <strong>−$3.7B</strong> <span class="src src-a">🟢</span>；公司已于 2024Q4 <strong>砍掉分红</strong>。
+    转机点是：换帅（Lip-Bu Tan）、<strong>美国政府以 $8.9B 入股拿下约 10%（433.3M 股 @ $20.47）</strong>+ <strong>SoftBank $2B</strong> 注资 <span class="src src-b">🟡</span>，18A 制程量产、卖掉 51% Altera 回血。
+    但关键矛盾是 <strong>估值</strong>：股价在政府背书 + 「agentic CPU」叙事下从 $20 区间暴涨到 <strong>≈$134（市值 ≈$672B）</strong>，<strong>已远超分析师共识均价（≈$90s）甚至 Citi 最激进的 $130 目标价</strong> <span class="src src-b">🟡</span>。这意味着市场已把「Foundry 反转成功 + CPU 复兴」当成既定事实定价，而基本面（GAAP 仍亏、外部代工客户验证额只有季度 $174M、净债 ≈$28B）远未兑现。本篇判断：<strong>故事可能是真的，但当前价格透支太多</strong>，不构成投资建议。</p>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi"><div class="k">市值 Market Cap（≈2026-06）</div><div class="v">≈$672B <span class="src src-b">🟡</span></div></div>
+    <div class="kpi"><div class="k">营收 TTM（≈FY2025）</div><div class="v">≈$52.9B <span class="src src-a">🟢</span></div></div>
+    <div class="kpi"><div class="k">现金 / 净债（Q1'26）</div><div class="v">$17.2B / 净债≈$28B <span class="src src-a">🟢</span></div></div>
+    <div class="kpi"><div class="k">EV/Sales（≈P/S）</div><div class="v">≈13× / ≈12.7× <span class="src src-b">🟡</span></div></div>
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#bg">⓪ 领域背景速补</a>
+    <a href="#what">① 公司是什么</a>
+    <a href="#peers">② 行业与竞争对手</a>
+    <a href="#fin">③ 财务体检</a>
+    <a href="#val">④ 估值</a>
+    <a href="#thesis">⑤ 多空论点</a>
+    <a href="#catalyst">⑥ 催化剂 timeline</a>
+    <a href="#risk">⑦ 风险因素</a>
+    <a href="#ownership">⑧ 股权 / 机构 / 做空</a>
+    <a href="#verdict">⑨ 投资判断</a>
+    <a href="#src">出处</a>
+  </nav>
+
+  <!-- ⓪ 领域背景速补 -->
+  <section id="bg">
+    <h2><span class="n">⓪</span>领域背景速补（给只懂 LLM/ML、不懂半导体制造的读者）</h2>
+    <p>读 Intel 之前，必须先搞懂半导体行业的几个核心概念，否则看不懂它的「核心矛盾」。下面用通俗中文解释，术语保留英文。</p>
+
+    <h3>IDM vs Fabless + Foundry：两种活法</h3>
+    <ul>
+      <li><strong>IDM（Integrated Device Manufacturer，整合元件制造商）</strong>：<strong>自己设计芯片 + 自己建厂造芯片</strong>，一条龙。Intel 是典型 IDM。好处：设计和制造协同、供应链自主、利润链条全吃；坏处：<strong>建一座先进晶圆厂动辄上百亿美元、capex 是无底洞</strong>，一旦制程落后就两头挨打。</li>
+      <li><strong>Fabless（无晶圆厂）</strong>：只设计芯片，把制造外包出去。NVIDIA、AMD、Apple、高通都是 fabless——它们画好图纸，交给代工厂去造。轻资产、不用扛建厂的钱。</li>
+      <li><strong>Foundry（晶圆代工厂）</strong>：<strong>专门替别人造芯片</strong>的工厂，自己不卖品牌芯片。<strong>TSMC（台积电）是全球代工霸主</strong>，NVIDIA/AMD/Apple 的高端芯片几乎都在 TSMC 造。代工是个规模 + 良率 + 制程领先度决定一切的生意：客户多 → 摊薄巨额 capex → 良率爬升 → 更赚钱 → 再投钱保持领先，是个正反馈飞轮。</li>
+    </ul>
+    <p>类比 LLM：IDM 像「自己买卡、自建数据中心、还自己训模型」；fabless 像「只训模型、算力全租云」；foundry 就是那个「云厂商」——专门卖算力（制造产能）给别人。</p>
+
+    <h3>Process node（制程节点）：芯片的「工艺代差」</h3>
+    <p>所谓 <strong>「制程」/「节点」</strong>（如 Intel <strong>18A</strong>、<strong>14A</strong>，TSMC <strong>N2</strong>）大致衡量晶体管的尺寸/密度/能效——<strong>数字/代号越先进，同样面积能塞更多晶体管、更省电、性能更强</strong>。制程领先约等于「拳头硬」：谁的最先进节点先量产、良率先达标，谁就能拿到 Apple/NVIDIA 这种顶级客户的大单。
+    Intel 过去十年最大的滑铁卢就是<strong>制程掉队</strong>——10nm/7nm 一再难产，被 TSMC 反超一到两代，这是它一切麻烦的根源。如今 Intel 押注 <strong>18A</strong>（已于 2025 年进入量产，但良率/成本据报道要到 2026 年底才达标 <span class="src src-b">🟡</span>）和下一代 <strong>14A</strong> 去追平甚至反超 TSMC 的 <strong>N2</strong>。「18A 是否真能与 N2 同台竞争」是整个反转故事的技术命门。</p>
+
+    <h3>IDM 2.0 战略 & Intel Foundry：为什么「自己造芯片」既是护城河也是吞钱黑洞</h3>
+    <p>Intel 前 CEO Pat Gelsinger 在 2021 年提出 <strong>「IDM 2.0」</strong>：在继续自造的基础上，<strong>把自家晶圆厂开放给外部客户代工</strong>，成立 <strong>Intel Foundry（早期叫 IFS）</strong>，目标是抢 TSMC 的生意、并争取做「美国本土先进制程」的战略供给。逻辑很美：x86 装机量 + 政府想要本土产能 + 巨额 capex 可以靠外部客户摊薄。
+    但<strong>现实极其残酷</strong>：先进晶圆厂要先砸几百亿美元建好、再慢慢爬良率、还要说服 NVIDIA/Apple 这些客户「敢把命脉交给一个曾经制程难产、且本身也是竞争对手（自己也卖 CPU）的工厂」。所以 Foundry 在拿到足够外部订单、良率达标之前，就是个<strong>持续巨额亏损、吞噬现金流的黑洞</strong>——这正是 Intel 现在 FCF 为负、烧钱的核心原因（见 ③ 财务体检）。这就是「护城河 vs 黑洞」的一体两面。</p>
+
+    <div class="callout note">
+      <span class="label">一句话抓住核心矛盾</span>
+      Intel 同时在打三场硬仗：<strong>(1) 产品端</strong>守 x86 CPU 份额（被 AMD 抢服务器、被 ARM/高通抢 PC）；<strong>(2) AI 端</strong>追 NVIDIA（Gaudi 加速器市占近乎可忽略）；<strong>(3) 制造端</strong>用 Foundry 追 TSMC（要先烧钱建产能 + 爬良率 + 拉外部客户）。三场仗都在烧钱，而 AI 这场几乎已经输了。它现在最大的底牌，是<strong>美国政府把它当成「本土先进制程」的战略资产、直接入股 + 给钱</strong>。
+    </div>
+  </section>
+
+  <!-- ① 公司是什么 -->
+  <section id="what">
+    <h2><span class="n">①</span>公司是什么：使命 / 愿景 / 商业模式</h2>
+    <h3>Mission / Vision</h3>
+    <p>Intel 的自述使命大致是「create world-changing technology that improves the life of every person on the planet」，愿景的现实落点是：<strong>重夺制程领导力（process leadership）、把美国/西方变回先进半导体制造重镇、并成为全球第二大代工厂（foundry）</strong> <span class="src src-c">🔴</span>。翻译成投资语言：Intel 想从「制程掉队、被 TSMC 和 NVIDIA 双线压制的旧霸主」转身为「<strong>同时卖芯片（产品）+ 卖产能（代工）的美国战略级 IDM</strong>」。这是一个典型的、对执行极度敏感的 <strong>turnaround（困境反转）</strong> 故事。</p>
+
+    <h3>怎么赚钱（business model）</h3>
+    <p>Intel 按以下口径披露业务（Q1 2026 10-Q <span class="src src-a">🟢</span>）：</p>
+    <ul>
+      <li><strong>Intel Products（产品端，真正赚钱的部分）</strong>，含两个报告分部：
+        <ul>
+          <li><strong>Client Computing Group（CCG，PC CPU）</strong>：卖给 PC OEM 的 x86 处理器，是现金牛。Q1 2026 营收 <strong>$7.73B</strong>、经营利润 <strong>+$2.52B</strong>（经营利润率 ≈33%）<span class="src src-a">🟢</span>。</li>
+          <li><strong>Data Center & AI（DCAI，服务器 CPU Xeon + AI 加速器 Gaudi）</strong>：卖给云厂商/企业的服务器芯片。Q1 2026 营收 <strong>$5.05B</strong>（YoY +22%）、经营利润 <strong>+$1.54B</strong> <span class="src src-a">🟢</span>。注意：这块的增长主要来自 Xeon 服务器 CPU，而非 AI 加速器——<strong>Intel 在数据中心 AI（GPU）赛道上对 NVIDIA 几乎缺席</strong>。</li>
+        </ul>
+      </li>
+      <li><strong>Intel Foundry（代工，烧钱的部分）</strong>：替内外部客户造晶圆。Q1 2026 分部营收 <strong>$5.42B</strong>，但<strong>绝大部分是「内部」给自家 Intel Products 造芯片的 intersegment 收入</strong>；真正来自<strong>外部客户的第三方代工/封测收入只有 $174M</strong>（去年同期 $31M）<span class="src src-a">🟢</span>。该分部 Q1 2026 经营<strong>亏损 −$2.44B</strong> <span class="src src-a">🟢</span>。这是理解 Intel 的关键：<strong>Foundry 名义营收很大，但外部商业化几乎刚起步，且持续巨亏。</strong></li>
+      <li><strong>All Other（含 Mobileye 自动驾驶、IMS，以及已于 2025-09-12 出表的 Altera FPGA 等）</strong>：Q1 2026 营收 $628M、经营利润 +$102M <span class="src src-a">🟢</span>。Intel 仍持有 Mobileye 多数股权、Altera 49% 权益——这些是 SOTP 估值里的「隐藏资产」。</li>
+    </ul>
+    <p>合并口径 Q1 2026 总营收 <strong>$13.58B</strong>（YoY +7%），但合并经营仍<strong>亏损 −$3.14B</strong>——<strong>产品端赚的钱（CCG+DCAI 合计经营利润 +$4.06B）被 Foundry 亏损（−$2.44B）和未分摊的公司费用（−$5.08B，其中 $4.07B 是重组费用）吃光还有余。</strong> <span class="src src-a">🟢</span></p>
+  </section>
+
+  <!-- ② 行业与竞争对手 -->
+  <section id="peers">
+    <h2><span class="n">②</span>行业与竞争对手</h2>
+    <p>Intel 同时身处<strong>两个不同的战场</strong>：在「卖芯片」战场上对手是 AMD（CPU）、NVIDIA（AI/GPU）、ARM 阵营/高通（PC）；在「卖产能（代工）」战场上对手是 TSMC、Samsung Foundry。我选了 7 个决定性维度对照——重点看 Intel 在 <strong>AI 卡位</strong>与<strong>制程领先度</strong>这两条线上是否双双落后。</p>
+    <table>
+      <thead><tr>
+        <th>公司</th>
+        <th>营收规模（近一年）</th>
+        <th>增长</th>
+        <th>毛利率</th>
+        <th>制程/AI 卡位</th>
+        <th>代工外部客户</th>
+        <th>估值倍数</th>
+      </tr></thead>
+      <tbody>
+        <tr><td><strong>Intel（INTC，本篇）</strong></td>
+          <td>≈$52.9B（FY25）<span class="src src-a">🟢</span></td>
+          <td>≈0%（停滞/微降）<span class="src src-a">🟢</span></td>
+          <td>≈35% GAAP（曾 60%+）<span class="src src-a">🟢</span></td>
+          <td><strong>双线落后</strong>：18A 追 TSMC N2；AI 加速器近乎缺席 <span class="src src-b">🟡</span></td>
+          <td>刚起步，外部代工季 $174M <span class="src src-a">🟢</span></td>
+          <td>P/S≈12.7×、GAAP 亏损无 P/E <span class="src src-b">🟡</span></td></tr>
+        <tr><td>AMD</td>
+          <td>市值 ≈$685B（中期）<span class="src src-b">🟡</span></td>
+          <td>高（数据中心驱动，~34%）<span class="src src-b">🟡</span></td>
+          <td>≈55%（non-GAAP）<span class="src src-b">🟡</span></td>
+          <td>在 CPU/GPU 都在抢份额；fabless，靠 TSMC 代工 <span class="src src-b">🟡</span></td>
+          <td>—（fabless，自身是代工客户）</td>
+          <td>forward P/E ≈58× <span class="src src-b">🟡</span></td></tr>
+        <tr><td>NVIDIA</td>
+          <td>AI 数据中心霸主 <span class="src src-b">🟡</span></td>
+          <td>极高 <span class="src src-b">🟡</span></td>
+          <td>极高（业内最高利润率）<span class="src src-b">🟡</span></td>
+          <td><strong>AI/GPU 训练护城河，Intel 完败于此</strong> <span class="src src-b">🟡</span></td>
+          <td>—（fabless，TSMC 大客户）</td>
+          <td>trailing P/E ≈32× <span class="src src-b">🟡</span></td></tr>
+        <tr><td>TSMC（TSM）</td>
+          <td>2026 营收指引同比 &gt;30% <span class="src src-b">🟡</span></td>
+          <td>高（AI 代工驱动）<span class="src src-b">🟡</span></td>
+          <td>≈66%（Q1'26）<span class="src src-b">🟡</span></td>
+          <td><strong>代工霸主，N2 量产；Intel Foundry 要挑战的对象</strong> <span class="src src-b">🟡</span></td>
+          <td>NVIDIA/Apple/AMD 等全行业 <span class="src src-b">🟡</span></td>
+          <td>—</td></tr>
+        <tr><td>ARM 阵营 / 高通（Qualcomm）</td>
+          <td>—</td>
+          <td>PC 端渗透上升 <span class="src src-b">🟡</span></td>
+          <td>—</td>
+          <td>ARM 架构 PC（Snapdragon X）侵蚀 x86 客户端 <span class="src src-b">🟡</span></td>
+          <td>—（fabless）</td>
+          <td>—</td></tr>
+        <tr><td>Samsung Foundry</td>
+          <td>—</td>
+          <td>—</td>
+          <td>—</td>
+          <td>先进制程第三，落后 TSMC <span class="src src-b">🟡</span></td>
+          <td>有外部客户但份额远小于 TSMC <span class="src src-b">🟡</span></td>
+          <td>—</td></tr>
+      </tbody>
+    </table>
+    <p><strong>读矩阵：</strong>Intel 的卡位是「营收规模仍大、但增长停滞、毛利率从昔日 60%+ 崩到 ~35%」；它在两条最值钱的赛道上<strong>各有一个不可战胜的对手</strong>——AI 是 NVIDIA、代工是 TSMC——而在自己的基本盘 x86 CPU 上，又被 AMD（服务器/PC）和 ARM 阵营（PC）持续蚕食。它唯一的差异化叙事是「<strong>美国本土先进制程 + 政府战略支持</strong>」，这更像是<strong>政策/地缘红利</strong>而非纯市场竞争力。最大的威胁来自：(1) 18A/14A 若达不到 N2 水准，代工故事直接证伪；(2) AI 持续缺席，DCAI 增长难持续。</p>
+    <p class="legend">注：AMD/NVDA/TSMC 的市值、倍数、毛利率为二手数据终端/媒体口径（🟡），随股价波动，仅供量级对照，非精确同期同口径。</p>
+  </section>
+
+  <!-- ③ 财务体检 -->
+  <section id="fin">
+    <h2><span class="n">③</span>财务体检</h2>
+    <p>一句话定调：<strong>营收停滞、毛利率从历史 60%+ 崩到 ~35%、GAAP 持续亏损、FCF 因 Foundry 巨额 capex 长期为负、净债约 $28B、且已砍掉分红</strong>——典型「<strong>盈利恶化 + 烧钱 + 现金压力</strong>」的反转期财务画像。亮点是 FY2025 相对 FY2024 大幅减亏、capex 已显著收敛。下列数字均回到 SEC 申报（GAAP 口径）<span class="src src-a">🟢</span>。</p>
+
+    <h3>关键三表（GAAP，单位 $M，按 SEC XBRL）</h3>
+    <table>
+      <thead><tr><th>指标（GAAP）</th><th class="num">FY2024</th><th class="num">FY2025</th><th class="num">Q1 2026</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr><td>营收 Revenue</td><td class="num">53,101</td><td class="num">52,853</td><td class="num">13,577</td><td><span class="src src-a">🟢</span> 10-K/10-Q</td></tr>
+        <tr><td>毛利 / 毛利率 Gross margin</td><td class="num">17,345 / 32.7%</td><td class="num">18,375 / 34.8%</td><td class="num">5,347 / 39.4%</td><td><span class="src src-a">🟢</span></td></tr>
+        <tr><td>经营利润 Operating income</td><td class="num">−11,678</td><td class="num">−2,214</td><td class="num">−3,136</td><td><span class="src src-a">🟢</span></td></tr>
+        <tr><td>净利 Net income（含少数股东前）</td><td class="num">−18,756</td><td class="num">−267</td><td class="num">−3,728</td><td><span class="src src-a">🟢</span></td></tr>
+        <tr><td>摊薄 EPS Diluted</td><td class="num">−4.38</td><td class="num">−0.06</td><td class="num">−0.73</td><td><span class="src src-a">🟢</span></td></tr>
+        <tr><td>经营现金流 CFO</td><td class="num">8,288</td><td class="num">9,697</td><td class="num">1,096</td><td><span class="src src-a">🟢</span></td></tr>
+        <tr><td>资本开支 Capex（PP&amp;E）</td><td class="num">23,944</td><td class="num">14,646</td><td class="num">3,636</td><td><span class="src src-a">🟢</span></td></tr>
+        <tr><td><strong>自由现金流 FCF（CFO−Capex）</strong></td><td class="num"><strong>−15,656</strong></td><td class="num"><strong>−4,949</strong></td><td class="num"><strong>−2,540</strong></td><td><span class="src src-a">🟢</span> 推算</td></tr>
+        <tr><td>现金及等价物 Cash</td><td class="num">8,249</td><td class="num">14,265</td><td class="num">17,247</td><td><span class="src src-a">🟢</span></td></tr>
+        <tr><td>长期债务（非流动）</td><td class="num">46,282</td><td class="num">44,086</td><td class="num">43,027</td><td><span class="src src-a">🟢</span></td></tr>
+        <tr><td>股东权益（归母）</td><td class="num">99,270</td><td class="num">114,281</td><td class="num">111,394</td><td><span class="src src-a">🟢</span></td></tr>
+        <tr><td>摊薄股数 Diluted shares（M）</td><td class="num">4,280</td><td class="num">4,530</td><td class="num">5,083</td><td><span class="src src-a">🟢</span></td></tr>
+      </tbody>
+    </table>
+    <p class="legend">口径说明：均为 GAAP。Intel 同时披露 non-GAAP（如 Q1 2026 non-GAAP 经营利润 ≈$1.7B、non-GAAP 净利 ≈$1.5B <span class="src src-c">🔴 管理层口径</span>），non-GAAP 主要剔除重组、股权激励、收购摊销等——<strong>GAAP 与 non-GAAP 在此差异巨大</strong>（Q1 2026 GAAP 净亏 −$3.7B 含 $4.07B 重组费用），看 Intel 务必区分。</p>
+
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 680 320" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="11.5">
+        <text x="20" y="20" font-size="13" font-weight="700" fill="#222">季度营收（柱，$B）与 GAAP 毛利率（折线，%）</text>
+        <line x1="56" y1="250" x2="650" y2="250" stroke="#b9c2e0" stroke-width="1.5"/>
+        <line x1="56" y1="40" x2="56" y2="250" stroke="#b9c2e0" stroke-width="1.5"/>
+        <text x="50" y="250" text-anchor="end" fill="#888">0</text>
+        <text x="50" y="198" text-anchor="end" fill="#888">8</text>
+        <text x="50" y="146" text-anchor="end" fill="#888">16</text>
+        <text x="658" y="250" text-anchor="start" fill="#c0392b">20%</text>
+        <text x="658" y="146" text-anchor="start" fill="#c0392b">40%</text>
+        <rect x="86" y="168" width="58" height="82" fill="#7aa2ff" opacity=".85"/>
+        <text x="115" y="263" text-anchor="middle" fill="#555">Q1'25</text>
+        <text x="115" y="160" text-anchor="middle" fill="#3a66ff" font-size="10.5">12.7</text>
+        <rect x="196" y="166" width="58" height="84" fill="#7aa2ff" opacity=".85"/>
+        <text x="225" y="263" text-anchor="middle" fill="#555">Q2'25</text>
+        <text x="225" y="158" text-anchor="middle" fill="#3a66ff" font-size="10.5">12.9</text>
+        <rect x="306" y="161" width="58" height="89" fill="#7aa2ff" opacity=".85"/>
+        <text x="335" y="263" text-anchor="middle" fill="#555">Q3'25</text>
+        <text x="335" y="153" text-anchor="middle" fill="#3a66ff" font-size="10.5">13.7</text>
+        <rect x="416" y="161" width="58" height="89" fill="#7aa2ff" opacity=".85"/>
+        <text x="445" y="263" text-anchor="middle" fill="#555">Q4'25</text>
+        <text x="445" y="153" text-anchor="middle" fill="#3a66ff" font-size="10.5">13.7</text>
+        <rect x="526" y="162" width="58" height="88" fill="#9b8cff" opacity=".9"/>
+        <text x="555" y="263" text-anchor="middle" fill="#555">Q1'26</text>
+        <text x="555" y="154" text-anchor="middle" fill="#6b4cff" font-size="10.5">13.6</text>
+        <polyline points="115,162 225,211 335,155 445,166 555,149" fill="none" stroke="#c0392b" stroke-width="2.5"/>
+        <circle cx="115" cy="162" r="3.5" fill="#c0392b"/><text x="115" y="135" text-anchor="middle" fill="#c0392b" font-size="10">36.9%</text>
+        <circle cx="225" cy="211" r="3.5" fill="#c0392b"/><text x="225" y="228" text-anchor="middle" fill="#c0392b" font-size="10">27.5%</text>
+        <circle cx="335" cy="155" r="3.5" fill="#c0392b"/><text x="335" y="135" text-anchor="middle" fill="#c0392b" font-size="10">38.2%</text>
+        <circle cx="445" cy="166" r="3.5" fill="#c0392b"/>
+        <circle cx="555" cy="149" r="3.5" fill="#c0392b"/><text x="555" y="135" text-anchor="middle" fill="#c0392b" font-size="10">39.4%</text>
+        <text x="350" y="300" text-anchor="middle" fill="#888" font-size="11">营收企稳在 $13–14B 区间；毛利率从 ~37% 区间小幅回升，但仍远低于历史 60%+</text>
+      </svg>
+      </div>
+      <figcaption>季度营收与 GAAP 毛利率（本调研据 SEC 10-K/10-Q XBRL 重绘）。注：Q2'25 毛利率被一次性项目拖累。</figcaption>
+    </figure>
+
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 680 400" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="11.5">
+        <text x="20" y="20" font-size="13" font-weight="700" fill="#222">Capex 吞噬现金流：CFO vs Capex vs FCF（年度，$B）</text>
+        <line x1="56" y1="200" x2="650" y2="200" stroke="#b9c2e0" stroke-width="1.5"/>
+        <line x1="56" y1="40" x2="56" y2="390" stroke="#b9c2e0" stroke-width="1.5"/>
+        <text x="50" y="60" text-anchor="end" fill="#888">+20</text>
+        <text x="50" y="130" text-anchor="end" fill="#888">+10</text>
+        <text x="50" y="204" text-anchor="end" fill="#888">0</text>
+        <text x="50" y="270" text-anchor="end" fill="#888">−10</text>
+        <rect x="120" y="142" width="36" height="58" fill="#43c59e" opacity=".9"/><text x="138" y="135" text-anchor="middle" fill="#138a6e" font-size="10">8.3</text>
+        <rect x="160" y="200" width="36" height="168" fill="#ff6b81" opacity=".5"/><text x="178" y="382" text-anchor="middle" fill="#d23651" font-size="9">capex 23.9</text>
+        <rect x="200" y="200" width="36" height="110" fill="#d23651" opacity=".95"/><text x="218" y="324" text-anchor="middle" fill="#d23651" font-size="10">FCF −15.7</text>
+        <text x="178" y="312" text-anchor="middle" fill="#555" font-size="11">FY2024</text>
+        <rect x="320" y="132" width="36" height="68" fill="#43c59e" opacity=".9"/><text x="338" y="125" text-anchor="middle" fill="#138a6e" font-size="10">9.7</text>
+        <rect x="360" y="200" width="36" height="103" fill="#ff6b81" opacity=".5"/><text x="378" y="318" text-anchor="middle" fill="#d23651" font-size="9">capex 14.6</text>
+        <rect x="400" y="200" width="36" height="35" fill="#d23651" opacity=".95"/><text x="418" y="250" text-anchor="middle" fill="#d23651" font-size="10">FCF −4.9</text>
+        <text x="378" y="285" text-anchor="middle" fill="#555" font-size="11">FY2025</text>
+        <rect x="520" y="192" width="36" height="8" fill="#43c59e" opacity=".9"/><text x="538" y="185" text-anchor="middle" fill="#138a6e" font-size="10">1.1</text>
+        <rect x="560" y="200" width="36" height="26" fill="#ff6b81" opacity=".5"/><text x="578" y="240" text-anchor="middle" fill="#d23651" font-size="9">capex 3.6</text>
+        <rect x="600" y="200" width="36" height="18" fill="#d23651" opacity=".95"/><text x="618" y="232" text-anchor="middle" fill="#d23651" font-size="10">−2.5</text>
+        <text x="578" y="285" text-anchor="middle" fill="#555" font-size="11">Q1'26</text>
+        <text x="350" y="40" text-anchor="middle" fill="#888" font-size="11">绿=经营现金流CFO，浅红=资本开支capex，深红=自由现金流FCF（均为负）</text>
+      </svg>
+      </div>
+      <figcaption>Foundry 巨额 capex 是 FCF 为负的核心拖累；FY2025 capex 较 FY2024 收敛约 $9B、FCF 大幅减亏，但仍深陷负值（本调研据 SEC 申报重绘）。</figcaption>
+    </figure>
+
+    <h3>盈利质量 / 现金压力 / 摊薄（成熟公司视角）</h3>
+    <ul>
+      <li><strong>盈利恶化但已减亏</strong>：FY2024 是灾难年（经营亏 −$11.7B、净亏 −$18.8B，含大额减值）；FY2025 大幅收窄到经营 −$2.2B、净亏仅 −$0.27B；但 Q1 2026 又因 <strong>$4.07B 重组费用</strong>重回净亏 −$3.7B <span class="src src-a">🟢</span>。<strong>剔除一次性项目（non-GAAP）公司已接近盈亏平衡，但 GAAP 仍在亏。</strong></li>
+      <li><strong>FCF 长期为负、靠卖资产/举债/稀释补现金</strong>：FY2024 FCF −$15.7B、FY2025 −$4.9B、Q1 2026 −$2.5B <span class="src src-a">🟢</span>。现金从 $8.2B 升到 $17.2B，<strong>不是靠经营赚来的</strong>，而是靠 <strong>卖 51% Altera（约 $3.3B 现金）、政府 $8.9B 入股、SoftBank $2B</strong> 等外部输血。</li>
+      <li><strong>净债约 $28B</strong>：长期债务（非流动）≈$43B + 流动到期约 $2.5B ≈ 总债 $45.5B，减现金 $17.2B → <strong>净债 ≈$28B</strong> <span class="src src-a">🟢</span>。债务负担可控但不轻，且利息支出蚕食本就微薄的利润。</li>
+      <li><strong>明显摊薄</strong>：摊薄股数从 FY2024 的 ≈4.28B 升至 Q1 2026 的 ≈5.08B（约 +19%）<span class="src src-a">🟢</span>——主要来自<strong>政府入股（433.3M 新股）+ SoftBank</strong> 等股权融资。<strong>政府/战略投资者用「打折价（$20.47/股）」换股，对老股东是真金白银的稀释。</strong></li>
+      <li><strong>分红已砍</strong>：FY2025 全年派息 $0（最后一次分红在 2024Q3）<span class="src src-a">🟢</span>——这是公司保现金、过冬的明确信号，也意味着「收息党」逻辑彻底失效。</li>
+    </ul>
+  </section>
+
+  <!-- ④ 估值 -->
+  <section id="val">
+    <h2><span class="n">④</span>估值</h2>
+    <p>Intel GAAP 盈利为负或接近零，<strong>P/E 基本失效</strong>，更合适的框架是 <strong>P/B、EV/Sales、以及 SOTP（分部加总：产品业务 + Foundry + Mobileye/Altera 持股）</strong>。但本篇估值最重要的结论是一个<strong>时点观察</strong>：在政府入股 + 「agentic CPU」叙事下，股价已从 2025 年的 $20 区间暴涨到 <strong>≈$134（市值 ≈$672B）</strong>，<strong>显著高于卖方分析师共识均价（约 $90s）甚至高于 Citi 最激进的 $130 目标价</strong> <span class="src src-b">🟡</span>。换言之，<strong>市场已把反转成功提前、且超额地定价了。</strong></p>
+
+    <h3>倍数对比（vs 同业 / vs 自身历史）</h3>
+    <table>
+      <thead><tr><th>倍数</th><th>INTC</th><th>同业 / 历史参照</th><th>口径</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr><td>P/S（市值/营收）</td><td>≈12.7×（$672B/$52.9B）</td><td>历史多在 2–4×；AMD 等成长股更高但有增长支撑</td><td>trailing，FY25 营收</td><td><span class="src src-b">🟡</span> 推算</td></tr>
+        <tr><td>EV/Sales（含净债）</td><td>≈13.2×（EV≈$700B/$52.9B）</td><td>对一个 0% 增长、GAAP 亏损的公司，<strong>异常高</strong></td><td>trailing</td><td><span class="src src-b">🟡</span> 推算</td></tr>
+        <tr><td>P/E</td><td>GAAP 亏损 → 无意义；non-GAAP 也极高</td><td>—</td><td>—</td><td><span class="src src-a">🟢</span></td></tr>
+        <tr><td>P/B（市值/股东权益）</td><td>≈5.9×（$672B/$114B）</td><td>历史多在 1–3×；<strong>对一个 ROE 为负的公司，5.9× 极贵</strong></td><td>FY25 权益</td><td><span class="src src-b">🟡</span> 推算</td></tr>
+      </tbody>
+    </table>
+    <p class="legend">关键观察：以「营收停滞 + GAAP 亏损 + ROE 为负」的基本面，<strong>P/S ≈12.7×、P/B ≈5.9× 属于把它当成高增长股/反转成功来定价</strong>。这些倍数只有在「Foundry 反转兑现 + 利润率大幅回升 + AI/代工营收放量」的假设下才说得通——而这些都还<strong>没在财报里出现</strong>。</p>
+
+    <h3>情景估值（给区间 + 写清假设，不给单点）</h3>
+    <p>下表以「Foundry 反转 × 18A/14A 外部客户 × capex 收敛 × 政府支持 × 利润率回升」为关键变量，给出粗框架区间（非精确目标价，假设不确定性极大）：</p>
+    <table>
+      <thead><tr><th>情景</th><th>关键假设</th><th>隐含市值 / 每股（粗略）</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Bull</strong></td><td>18A/14A 良率达标且<strong>拿到 1–2 个重量级外部代工客户</strong>；DCAI/AI 持续放量；毛利率回到 45%+、恢复正 FCF；政府/CHIPS 持续输血；SOTP 中 Foundry 被独立估值。市场愿给「成长型代工」溢价。</td><td>市值可支撑 ≈$130–160+/股（即当前价附近或略高，但<strong>需要叙事完全兑现</strong>）<span class="src src-c">🔴</span></td></tr>
+        <tr><td><strong>Base</strong></td><td>产品端守住 x86 现金牛、缓慢减亏；Foundry 持续亏损但收窄、外部客户验证缓慢；GAAP 在盈亏平衡线附近徘徊；估值向「停滞型半导体 + 政策溢价」回归（P/S ~4–6×）。</td><td>市值 ≈$210–320B → ≈$42–63/股 <span class="src src-c">🔴</span></td></tr>
+        <tr><td><strong>Bear</strong></td><td>18A/14A 不及 N2、外部代工持续无验证 → 代工故事证伪；AI 持续缺席；x86 份额继续流失、毛利率再下台阶；继续烧钱靠举债/稀释。回到「价值陷阱」估值（P/B ~1.5–2×、P/S ~2–3×）。</td><td>市值 ≈$110–180B → ≈$22–36/股 <span class="src src-c">🔴</span></td></tr>
+      </tbody>
+    </table>
+    <p class="legend">估值对<strong>「Foundry 外部客户是否真实验证」</strong>和<strong>「18A/14A 制程是否追平 TSMC N2」</strong>这两个假设最敏感——两者决定 Foundry 是被当成「成长资产」还是「无底洞」。强调：以上为情景框架，<strong>每股区间含极大不确定性，不是预测股价</strong>。当前 ≈$134 已位于甚至高于 Bull 情景上沿，意味着<strong>风险收益比偏向不利</strong>。</p>
+  </section>
+
+  <!-- ⑤ 多空论点 -->
+  <section id="thesis">
+    <h2><span class="n">⑤</span>多空论点（都写到最强）</h2>
+    <div class="callout bull">
+      <span class="label">Bull thesis 看多（最强版本）</span>
+      <ul style="margin:6px 0">
+        <li><strong>深度价值 + 政府战略支持</strong>：美国把 Intel 当成「本土先进制程」不可失去的战略资产，已直接 <strong>$8.9B 入股拿约 10%</strong> + DoD Secure Enclave + CHIPS 资金 <span class="src src-b">🟡</span>；SoftBank 也注资 $2B。这相当于给了一张<strong>「大而不能倒」的政策底牌</strong>，破产/出清风险被显著降低。</li>
+        <li><strong>18A 制程若成 = 反转引擎</strong>：18A 已于 2025 年进入量产、Panther Lake（首款 18A 客户端芯片）上市 <span class="src src-b">🟡</span>。若良率/成本在 2026 年底达标、14A 再追平 N2，Intel 就同时拥有「自家产品成本下降 + 对外代工接单」两个引擎，且坐享<strong>美国本土制造的地缘红利</strong>。</li>
+        <li><strong>x86 装机量 + agentic CPU 需求</strong>：x86 在 PC/服务器有庞大存量；Citi 提出 <strong>「agentic CPU」</strong> 框架——AI agent 的 orchestration/inference 大量吃 CPU，server CPU TAM 到 2030 年化 ~35% 增至 ≈$1320 亿 <span class="src src-c">🔴 卖方预测、利益相关</span>。DCAI Q1'26 +22% 给了这套叙事一点早期证据。</li>
+        <li><strong>资产 SOTP 低估</strong>：产品业务（CCG+DCAI 已盈利）+ Foundry 期权 + Mobileye 多数股权 + Altera 49% 权益，分部加总可能高于市场对「合并亏损公司」的简单估值。</li>
+        <li><strong>减亏拐点已现</strong>：FY2025 净亏从 −$18.8B 收窄到 −$0.27B、capex 收敛 ~$9B、毛利率小幅回升——<strong>最坏的时候可能已过去</strong>。</li>
+      </ul>
+    </div>
+    <div class="callout bear">
+      <span class="label">Bear thesis 看空（最强版本）</span>
+      <ul style="margin:6px 0">
+        <li><strong>估值已严重透支</strong>：股价 ≈$134、市值 ≈$672B，<strong>P/S ≈12.7×、P/B ≈5.9×，却对应 0% 增长 + GAAP 亏损 + 负 ROE</strong>。已<strong>高于分析师共识均价（~$90s）甚至 Citi 的 $130</strong> <span class="src src-b">🟡</span>。市场把反转成功当既定事实定价，一旦兑现不及预期，回撤空间巨大。</li>
+        <li><strong>Foundry 是无底洞、外部客户未验证</strong>：Q1'26 Foundry 经营亏 −$2.44B，<strong>外部第三方代工收入仅 $174M/季</strong> <span class="src src-a">🟢</span>——这是整个反转故事最关键、却最薄弱的一环。没有重量级外部客户签约放量之前，「Intel 能挑战 TSMC」只是叙事。</li>
+        <li><strong>AI 几乎缺席</strong>：数据中心 AI（GPU/加速器）被 NVIDIA 完胜，Gaudi 市占近乎可忽略。DCAI 的增长主要靠 Xeon 服务器 CPU，而<strong>整个行业的资本正涌向 GPU 而非 CPU</strong>，Intel 在最大的增量蛋糕上没有份额。</li>
+        <li><strong>产品份额持续流失</strong>：服务器/PC CPU 被 AMD 蚕食，PC 端又面临 ARM/高通新威胁；x86 长期面临架构性侵蚀。</li>
+        <li><strong>现金流为负、靠稀释/举债/卖资产续命</strong>：FCF 连年为负，现金增长全靠卖 Altera、政府/SoftBank 注资；股本已稀释 ~19%；分红已砍。<strong>这是「靠融资续命」而非「靠经营造血」的财务结构。</strong></li>
+        <li><strong>治理动荡 + 制程代差难追</strong>：近年 CEO 更迭、大规模裁员重组（Q1'26 $4.07B 重组费用）；TSMC 在制程与客户生态上的领先是<strong>多年积累的飞轮</strong>，追平的难度被市场低估。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ⑥ 催化剂 timeline -->
+  <section id="catalyst">
+    <h2><span class="n">⑥</span>催化剂 &amp; timeline</h2>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 720 200" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12">
+        <line x1="50" y1="100" x2="680" y2="100" stroke="#b9c2e0" stroke-width="2"/>
+        <circle cx="95" cy="100" r="6" fill="#7aa2ff"/>
+        <text x="95" y="70" text-anchor="middle" fill="#3a66ff" font-size="11">2026 季报</text>
+        <text x="95" y="128" text-anchor="middle" fill="#555" font-size="10">Q2/Q3 业绩</text>
+        <text x="95" y="142" text-anchor="middle" fill="#555" font-size="10">毛利率/亏损</text>
+        <circle cx="240" cy="100" r="6" fill="#9b8cff"/>
+        <text x="240" y="70" text-anchor="middle" fill="#6b4cff" font-size="11">2026 H2</text>
+        <text x="240" y="128" text-anchor="middle" fill="#555" font-size="10">18A 良率/成本</text>
+        <text x="240" y="142" text-anchor="middle" fill="#555" font-size="10">是否达标(年底)</text>
+        <circle cx="385" cy="100" r="6" fill="#43c59e"/>
+        <text x="385" y="70" text-anchor="middle" fill="#138a6e" font-size="11">关键证伪点</text>
+        <text x="385" y="128" text-anchor="middle" fill="#555" font-size="10">重量级外部</text>
+        <text x="385" y="142" text-anchor="middle" fill="#555" font-size="10">代工客户签约?</text>
+        <circle cx="530" cy="100" r="6" fill="#ffb454"/>
+        <text x="530" y="70" text-anchor="middle" fill="#b3701a" font-size="11">Foundry 结构</text>
+        <text x="530" y="128" text-anchor="middle" fill="#555" font-size="10">是否分拆/</text>
+        <text x="530" y="142" text-anchor="middle" fill="#555" font-size="10">独立子公司</text>
+        <circle cx="650" cy="100" r="6" fill="#ff6b81"/>
+        <text x="650" y="70" text-anchor="middle" fill="#d23651" font-size="11">14A & 政府</text>
+        <text x="650" y="128" text-anchor="middle" fill="#555" font-size="10">14A 客户进展</text>
+        <text x="650" y="142" text-anchor="middle" fill="#555" font-size="10">政府后续动作</text>
+        <text x="360" y="185" text-anchor="middle" fill="#888" font-size="10.5">未来 6–24 个月可验证节点（日期含不确定性，据公开信息整理）</text>
+      </svg>
+      </div>
+      <figcaption>关键催化剂时间线。<strong>最关键的单一节点是「Foundry 能否拿到重量级外部客户」</strong>——这是反转故事的成败试金石。</figcaption>
+    </figure>
+    <ul>
+      <li><strong>季度业绩（持续）</strong>：每季看 GAAP 是否转正、毛利率是否持续回升、Foundry 亏损是否收窄、DCAI 增长能否延续。<span class="src src-a">🟢</span></li>
+      <li><strong>18A 良率/成本（2026 年底）</strong>：据报道 18A 成本达标要到 2026 年底——这是产品端成本与代工竞争力的关键 <span class="src src-b">🟡</span>。</li>
+      <li><strong>外部代工客户签约（最关键，时点不定）</strong>：若签下重量级 fabless 客户（如某大厂把部分产能放给 Intel 18A/14A），代工故事从「叙事」变「事实」；反之持续无验证则证伪。<span class="src src-b">🟡</span></li>
+      <li><strong>Foundry 结构性动作</strong>：是否进一步分拆/独立子公司、是否引入外部战略投资者——影响 SOTP 估值释放。<span class="src src-b">🟡</span>/<span class="src src-c">🔴 部分为传闻</span></li>
+      <li><strong>14A 进展 + 政府后续</strong>：14A 是「为外部客户从头设计」的节点；政府/CHIPS 的后续资金与持股动作。<span class="src src-b">🟡</span></li>
+    </ul>
+  </section>
+
+  <!-- ⑦ 风险因素 -->
+  <section id="risk">
+    <h2><span class="n">⑦</span>风险因素（10-K 提炼，按重要性）</h2>
+    <ul>
+      <li><strong>制程/技术执行风险（最致命）</strong>：18A/14A 若良率、性能、成本达不到 TSMC N2 水准，<strong>产品竞争力与代工故事同时崩塌</strong>。Intel 过去十年制程一再难产，这是结构性风险。<span class="src src-a">🟢 10-K Risk Factors</span></li>
+      <li><strong>Foundry 商业化与巨额 capex 风险</strong>：先进产能需要先砸钱、再爬良率、再拉客户；外部客户验证缓慢，<strong>持续巨亏吞噬 FCF</strong>，需要持续融资。<span class="src src-a">🟢</span></li>
+      <li><strong>竞争与份额流失</strong>：AMD（CPU）、NVIDIA（AI）、ARM/高通（PC）多线夹击；AI 加速器赛道几乎缺席。<span class="src src-a">🟢</span></li>
+      <li><strong>流动性 / 资本结构风险</strong>：FCF 为负、净债 ≈$28B、依赖卖资产/举债/股权融资；进一步稀释或债务压力。<span class="src src-a">🟢</span></li>
+      <li><strong>政府/地缘与政策依赖风险</strong>：政府持股 ≈10% 是一把双刃剑——既是支持，也带来<strong>政治干预、利益冲突、政策反复</strong>的不确定性；出口管制、地缘（如对华业务）也是变量。<span class="src src-a">🟢</span> / <span class="src src-b">🟡</span></li>
+      <li><strong>治理与重组执行风险</strong>：CEO 更迭、大规模裁员与重组，组织动荡可能影响执行；重组费用持续冲击 GAAP 盈利。<span class="src src-a">🟢</span></li>
+      <li><strong>估值/情绪反转风险</strong>：当前股价对反转成功定价充分，<strong>任何一个证伪信号都可能引发剧烈回撤</strong>。<span class="src src-b">🟡</span></li>
+    </ul>
+  </section>
+
+  <!-- ⑧ 股权 / 机构 / 做空 -->
+  <section id="ownership">
+    <h2><span class="n">⑧</span>股权 / 内部人 / 机构 / short interest</h2>
+    <table>
+      <tbody>
+        <tr><td>美国政府持股（重大）</td><td><strong>约 10%</strong>：以 $8.9B 购入 <strong>433.3M 股 @ $20.47</strong>（资金来自 CHIPS 未发放部分 $5.7B + DoD Secure Enclave $3.2B）<span class="src src-b">🟡</span>。注意：当前股价 ≈$134，政府这笔成本 $20.47 的浮盈巨大，也意味着<strong>未来政府减持是潜在抛压来源</strong>。</td></tr>
+        <tr><td>SoftBank 投资</td><td>$2B 注资 Intel <span class="src src-b">🟡</span>（2025 年）。</td></tr>
+        <tr><td>机构持股</td><td>以大型指数/共同基金为主（Vanguard、BlackRock 等指数巨头通常为前列）；具体最新比例<strong>未在本次核实窗口内单独核实精确数字</strong>。<span class="src src-b">🟡</span></td></tr>
+        <tr><td>近期股本变化（摊薄）</td><td>摊薄股数从 FY2024 ≈4.28B → Q1 2026 ≈5.08B（约 +19%）<span class="src src-a">🟢</span>，主因政府入股 + SoftBank 等股权融资 + 卖资产相关安排。</td></tr>
+        <tr><td>Short interest</td><td>约 <strong>135M 股</strong>、占流通约 <strong>2.69%</strong>、days-to-cover ≈1.08 天（近期数据）<span class="src src-b">🟡</span>——<strong>空头仓位很轻，无明显逼空（short squeeze）逻辑</strong>。</td></tr>
+        <tr><td>分红</td><td><strong>已暂停</strong>：FY2025 全年派息 $0（最后一次 2024Q3）<span class="src src-a">🟢</span>。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ⑨ 投资判断 -->
+  <section id="verdict">
+    <h2><span class="n">⑨</span>投资判断</h2>
+    <div class="callout insight">
+      <span class="label">评级与理由</span>
+      <span class="rating r-reduce">减持 / 回避（Reduce → Avoid，基于当前 ≈$134 价位）</span><br><br>
+      <p style="margin:8px 0"><strong>核心逻辑：</strong>这是一个<strong>真实存在转机、但当前价格已严重透支转机</strong>的标的。turnaround 的<strong>故事</strong>（政府背书、18A 量产、减亏拐点、agentic CPU 需求）是真的、值得尊重；但<strong>基本面</strong>（GAAP 仍亏、FCF 为负、外部代工客户验证额仅季 $174M、净债 ≈$28B、股本稀释 19%）<strong>远未兑现</strong>，而股价已从 $20 区间暴涨到 ≈$134，<strong>超过分析师共识均价甚至 Citi 最激进的 $130</strong>。在这个价位，多空的<strong>风险收益比偏向不利</strong>：上行需要叙事完美兑现，下行只需一个证伪信号。</p>
+      <strong>适合谁：</strong>这是一个<strong>期权型 / 反转型、对执行极度敏感的高风险标的</strong>。若以「押 Foundry 期权 + 政府战略支持」为论点，应在<strong>显著低于当前价（更接近 Base/Bear 区间、留足安全边际）</strong>时小仓位参与，而非在历史高点追入。<strong>不适合保守/收息/低波动偏好（分红已砍、盈利为负）。</strong><br><br>
+      <strong>前提假设（看多者需要相信）：</strong>(1) 18A/14A 真能追平 TSMC N2；(2) Foundry 能签下重量级外部客户、把名义营收变成真实第三方代工放量；(3) GAAP 盈利与正 FCF 在可见将来兑现；(4) 政府支持持续且不带来负面干预。<br><br>
+      <strong>Thesis-breaker（什么会推翻当前「偏空于估值」的判断）：</strong>若 <strong>Foundry 真正签下并放量一个重量级外部客户</strong>、或 <strong>18A/14A 被独立验证达到 N2 水准且 GAAP 转正、FCF 转正</strong>——那么「成长型代工」的估值溢价就站得住，应转为更积极。反之，<strong>若 Foundry 持续无外部验证、毛利率再下台阶、继续靠稀释/举债续命</strong>，则向 Bear 情景收敛。
+    </div>
+  </section>
+
+  <!-- 免责声明（必带，勿删） -->
+  <div class="disclaimer">
+    <b>⚠️ 免责声明 · 非投资建议</b><br>
+    本调研为公开信息的整理与分析，<strong>不构成投资建议</strong>，亦非任何证券买卖的要约或招揽。数据可能有误或过时，
+    请以公司官方 SEC 申报 / IR 披露为准并自行独立核实。作者不对依据本文做出的任何投资决策负责。投资有风险，入市需谨慎。
+  </div>
+
+  <!-- 出处 -->
+  <section id="src">
+    <h2>出处</h2>
+    <ul style="font-size:13.5px">
+      <li><a href="https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000050863&type=10-K&dateb=&owner=include&count=40" target="_blank" rel="noopener">SEC EDGAR — Intel Corp（CIK 50863）申报清单</a> <span class="src src-a">🟢</span></li>
+      <li>FY2025 10-K（财年止 2025-12-27，2026-01-23 申报，accession 0000050863-26-000011）<span class="src src-a">🟢</span></li>
+      <li>Q1 2026 10-Q（季度止 2026-03-28，2026-04-24 申报，accession 0000050863-26-000079）——分部营收/经营利润、外部代工 $174M、重组费用 $4.07B 等 <span class="src src-a">🟢</span></li>
+      <li>SEC XBRL companyfacts（CIK 50863）——营收/毛利/经营利润/净利/EPS/CFO/capex/现金/债务/股本/分红 <span class="src src-a">🟢</span></li>
+      <li><a href="https://www.intc.com" target="_blank" rel="noopener">Intel Investor Relations（intc.com）</a> <span class="src src-a">🟢</span></li>
+      <li><a href="https://www.cnbc.com/2025/08/22/intel-goverment-equity-stake.html" target="_blank" rel="noopener">CNBC — 美国政府入股 Intel 约 10%（$8.9B / 433.3M 股 @ $20.47）</a> <span class="src src-b">🟡</span></li>
+      <li><a href="https://www.tomshardware.com/tech-industry/intel-sells-51-percent-of-altera-fpga-business-to-silver-lake-for-usd4-46-billion" target="_blank" rel="noopener">Tom's Hardware — Intel 出售 51% Altera 给 Silver Lake（估值 $8.75B）</a> <span class="src src-b">🟡</span></li>
+      <li><a href="https://247wallst.com/investing/2026/05/18/citi-hikes-intel-price-target-to-130-the-agentic-cpu-boom-reshapes-the-story/" target="_blank" rel="noopener">24/7 Wall St. — Citi（Atif Malik）2026-05-18 上调目标价 $95→$130、Buy、agentic CPU TAM</a> <span class="src src-c">🔴 卖方、利益相关</span></li>
+      <li><a href="https://www.tomshardware.com/pc-components/cpus/intels-18a-production-starts-before-tsmcs-competing-n2-tech-heres-how-the-two-process-nodes-compare" target="_blank" rel="noopener">Tom's Hardware — Intel 18A 量产与 TSMC N2 对比</a> <span class="src src-b">🟡</span></li>
+      <li><a href="https://www.marketbeat.com/stocks/NASDAQ/INTC/short-interest/" target="_blank" rel="noopener">MarketBeat — INTC short interest（≈2.69% 流通、days-to-cover ≈1.08）</a> <span class="src src-b">🟡</span></li>
+      <li>股价/市值（≈$134、市值 ≈$672B、2026-06-18 创历史新高 $135.48）— Yahoo Finance / stockanalysis.com 等数据终端 <span class="src src-b">🟡</span></li>
+    </ul>
+  </section>
+
+  <footer class="foot">
+    股票基本面 / 估值调研笔记，<strong>非投资建议</strong>；信息按来源分级、以官方申报为准 · 财务数据截至 FY2025 10-K + Q1 2026 10-Q（2026-03-28）· 股价截至 ≈2026-06-21 · 整理日期 2026-06-21
+  </footer>
+
+</article>
+</body>
+</html>
