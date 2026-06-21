@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 填写: 页面标题 = 公司名（TICKER） · 基本面/估值/是否值得买入 -->
+<title>{{COMPANY}}（{{TICKER}}）· 基本面 / 估值 / 是否值得买入</title>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --bad:#ff6b81; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --bad:#d23651; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;}
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:920px; margin:0 auto; padding:18px 22px 90px}
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:25px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)} .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap; line-height:2}
+  nav.toc a:hover{color:var(--accent)}
+  section{margin:38px 0}
+  h2{font-size:20px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:16.5px; margin:22px 0 8px}
+  p{margin:12px 0} ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)} strong{color:var(--text)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.88em}
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:13px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:9px 10px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  .num{font-variant-numeric:tabular-nums; text-align:right}
+  figure{margin:24px 0; text-align:center}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+  .svgwrap{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 8px}
+  @media (prefers-color-scheme: light){ .svgwrap{background:#fbfcff} }
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.bull{border-left:4px solid var(--ok)} .callout.bull .label{color:var(--ok)}
+  .callout.bear{border-left:4px solid var(--bad)} .callout.bear .label{color:var(--bad)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+  /* 来源等级 badge */
+  .src{font-size:10.5px; padding:0 6px; border-radius:999px; white-space:nowrap; vertical-align:middle}
+  .src-a{background:rgba(67,197,158,.18); color:var(--ok)}      /* 🟢 一手 SEC/IR */
+  .src-b{background:rgba(255,180,84,.18); color:var(--warn)}    /* 🟡 二手 分析师/媒体 */
+  .src-c{background:rgba(255,107,129,.18); color:var(--bad)}    /* 🔴 指引/自述/未证实 */
+  .legend{font-size:12px; color:var(--muted); margin:6px 0 0}
+  /* 投资评级 badge */
+  .rating{display:inline-block; font-weight:800; padding:4px 16px; border-radius:999px; font-size:16px; letter-spacing:.5px}
+  .r-buy{background:rgba(67,197,158,.20); color:var(--ok)}
+  .r-accumulate{background:rgba(122,162,255,.20); color:var(--accent)}
+  .r-hold{background:rgba(255,180,84,.20); color:var(--warn)}
+  .r-reduce{background:rgba(255,140,90,.20); color:#e07a3a}
+  .r-avoid{background:rgba(255,107,129,.20); color:var(--bad)}
+  .kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin:16px 0}
+  .kpi{background:var(--panel2); border:1px solid var(--line); border-radius:10px; padding:10px 12px}
+  .kpi .k{font-size:12px; color:var(--muted)} .kpi .v{font-size:18px; font-weight:700; margin-top:2px}
+  .disclaimer{background:rgba(255,180,84,.10); border:1px solid var(--warn); border-radius:12px;
+              padding:14px 18px; margin:26px 0; font-size:13.5px; color:var(--text)}
+  .disclaimer b{color:var(--warn)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <!-- 填写: 行业/主题标签，如 <span class="chip">卫星通信</span> -->
+      {{TAG_CHIPS}}
+      <span class="chip">股票调研</span>
+      <span class="chip">估值</span>
+      <span class="chip">基本面</span>
+    </div>
+    <h1>{{COMPANY}}（{{TICKER}}）：基本面 / 估值 / 是否值得买入</h1>
+    <p class="orig-title"><!-- 填写: 副标题，如 交易所 · 行业 · 一句话画像（pre-revenue 叙事股 / 成长股…） -->{{SUBTITLE}}</p>
+    <dl class="meta-grid">
+      <dt>代码</dt><dd>{{TICKER}}（{{EXCHANGE}}）</dd>
+      <dt>行业</dt><dd>{{SECTOR}}</dd>
+      <dt>资料来源</dt><dd>SEC EDGAR 申报 / 公司 IR / 公开报道，按来源分级标注；<a href="{{IR_OR_EDGAR}}" target="_blank" rel="noopener">一手入口</a></dd>
+      <dt>数据截至</dt><dd><!-- 填写: 最新季报/股价的日期，强调时效 -->{{AS_OF}}</dd>
+      <dt>整理日期</dt><dd>{{DATE}}</dd>
+    </dl>
+    <p class="legend">来源等级：<span class="src src-a">🟢 一手</span> SEC/IR/电话会 ·
+      <span class="src src-b">🟡 二手</span> 分析师/媒体/数据终端 ·
+      <span class="src src-c">🔴 指引/自述/未证实</span> 管理层 guidance 或未独立验证</p>
+  </header>
+
+  <div class="tldr">
+    <!-- 填写: 评级 + 3~5 句：它干嘛 + 阶段 + 最关键的多空点 + 情景区间 -->
+    <b>评级</b> — <span class="rating r-hold">{{RATING}}</span>
+    （买入 Buy / 增持 Accumulate / 持有 Hold / 减持 Reduce / 回避 Avoid）<br>
+    {{TLDR}}
+  </div>
+
+  <!-- 关键快照 KPI（按公司阶段选填；pre-revenue 用 现金/季度烧钱/runway/稀释股数 等） -->
+  <div class="kpis">
+    <div class="kpi"><div class="k">市值 Market Cap</div><div class="v"><!-- 填写 -->—</div></div>
+    <div class="kpi"><div class="k"><!-- 营收 TTM / 现金 Cash --></div><div class="v">—</div></div>
+    <div class="kpi"><div class="k"><!-- 现金 runway / 净现金 --></div><div class="v">—</div></div>
+    <div class="kpi"><div class="k"><!-- 关键倍数 P/S / EV/Sales --></div><div class="v">—</div></div>
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#what">① 公司是什么</a>
+    <a href="#peers">② 行业与竞争对手</a>
+    <a href="#fin">③ 财务体检</a>
+    <a href="#val">④ 估值</a>
+    <a href="#thesis">⑤ 多空论点</a>
+    <a href="#catalyst">⑥ 催化剂 timeline</a>
+    <a href="#risk">⑦ 风险因素</a>
+    <a href="#ownership">⑧ 股权 / 机构 / 做空</a>
+    <a href="#verdict">⑨ 投资判断</a>
+    <a href="#src">出处</a>
+  </nav>
+
+  <!-- ① 公司是什么 -->
+  <section id="what">
+    <h2><span class="n">①</span>公司是什么：使命 / 愿景 / 商业模式</h2>
+    <h3>Mission / Vision</h3>
+    <p><!-- 填写: 公司自述的使命与愿景（标🔴/🟢），用一两句翻译成「它到底想做成什么」 --></p>
+    <h3>怎么赚钱（business model）</h3>
+    <p><!-- 填写: 收入来源、谁付费、单位经济、目前是否已商业化；pre-revenue 就说清「现在没收入，靠什么兑现」 --></p>
+  </section>
+
+  <!-- ② 行业与竞争对手 -->
+  <section id="peers">
+    <h2><span class="n">②</span>行业与竞争对手</h2>
+    <p><!-- 填写: 行业格局一句话 + 选了哪几个对比维度、为什么决定性 --></p>
+    <table>
+      <thead><tr>
+        <th>公司</th>
+        <th><!-- 维度1: 规模/营收 --></th><th><!-- 维度2: 增长 --></th>
+        <th><!-- 维度3: 盈利/现金 --></th><th><!-- 维度4: 壁垒/卡位 --></th>
+        <th><!-- 维度5: 估值倍数 --></th>
+      </tr></thead>
+      <tbody>
+        <tr><td><strong>{{COMPANY}}（本篇）</strong></td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+        <tr><td>竞品 A</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+        <tr><td>竞品 B</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+      </tbody>
+    </table>
+    <p><!-- 填写: 读矩阵——它的卡位/差异化、最大威胁来自谁 --></p>
+  </section>
+
+  <!-- ③ 财务体检 -->
+  <section id="fin">
+    <h2><span class="n">③</span>财务体检</h2>
+    <p><!-- 填写: 一句话定调（健康 / 烧钱 / 高杠杆…）。所有数字标🟢一手优先，口径写清 GAAP/non-GAAP、财年。 --></p>
+
+    <h3>关键三表（最近若干期）</h3>
+    <table>
+      <thead><tr><th>指标</th><th class="num"><!-- 期1 --></th><th class="num"><!-- 期2 --></th><th class="num"><!-- 期3 --></th><th>来源</th></tr></thead>
+      <tbody>
+        <tr><td>营收 Revenue</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td><span class="src src-a">🟢</span></td></tr>
+        <tr><td>毛利率 / 经营利润</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td>—</td></tr>
+        <tr><td>净利 / EPS</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td>—</td></tr>
+        <tr><td>经营现金流 / FCF</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td>—</td></tr>
+        <tr><td>现金及等价物</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td>—</td></tr>
+        <tr><td>债务 / 净现金</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td>—</td></tr>
+        <tr><td>稀释股数 Diluted shares</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td>—</td></tr>
+      </tbody>
+    </table>
+
+    <figure>
+      <div class="svgwrap">
+      <!-- 填写: 内联 SVG 趋势图——有营收画营收+利润率；pre-revenue 画 现金余额 vs 季度烧钱 + 稀释股数膨胀 -->
+      <svg viewBox="0 0 680 300" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12">
+        <line x1="56" y1="250" x2="650" y2="250" stroke="#b9c2e0" stroke-width="1.5"/>
+        <line x1="56" y1="30" x2="56" y2="250" stroke="#b9c2e0" stroke-width="1.5"/>
+        <!-- 柱/折线 + 轴标签 + 数据标注 -->
+      </svg>
+      </div>
+      <figcaption>关键财务趋势（本调研据 SEC 申报重绘）。</figcaption>
+    </figure>
+
+    <h3>现金 runway / 摊薄（pre-revenue 重点；成熟公司可换成盈利质量）</h3>
+    <p><!-- 填写: 现金 ÷ 季度净烧钱 = 几个季度 runway；股本逐期膨胀幅度；warrant/期权/可转债 潜在摊薄。 --></p>
+  </section>
+
+  <!-- ④ 估值 -->
+  <section id="val">
+    <h2><span class="n">④</span>估值</h2>
+    <h3>倍数对比（vs 同业 / vs 自身历史）</h3>
+    <table>
+      <thead><tr><th>倍数</th><th>{{TICKER}}</th><th>同业中位</th><th>口径</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr><td>P/S（或 EV/Sales）</td><td>—</td><td>—</td><td><!-- forward/trailing --></td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>P/E（或 EV/EBITDA）</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+        <tr><td>P/B / P/FCF</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+      </tbody>
+    </table>
+    <h3>情景估值（给区间 + 写清假设，不给单点）</h3>
+    <table>
+      <thead><tr><th>情景</th><th>关键假设</th><th>隐含市值 / 每股</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Bull</strong></td><td><!-- 收入兑现/利润率/渗透率/摊薄 --></td><td>—</td></tr>
+        <tr><td><strong>Base</strong></td><td>—</td><td>—</td></tr>
+        <tr><td><strong>Bear</strong></td><td>—</td><td>—</td></tr>
+      </tbody>
+    </table>
+    <p class="legend"><!-- 填写: 估值对哪个假设最敏感；强调不确定性 --></p>
+  </section>
+
+  <!-- ⑤ 多空论点 -->
+  <section id="thesis">
+    <h2><span class="n">⑤</span>多空论点（都写到最强）</h2>
+    <div class="callout bull">
+      <span class="label">Bull thesis 看多</span>
+      <!-- 填写: 最有说服力的看多逻辑 —— TAM / 卡位 / 技术领先 / 拐点 / 催化剂 -->
+    </div>
+    <div class="callout bear">
+      <span class="label">Bear thesis 看空</span>
+      <!-- 填写: 最致命的看空逻辑 —— 摊薄 / 执行 / 竞争 / 监管 / 现金枯竭 / 估值透支 / 会计红旗 -->
+    </div>
+  </section>
+
+  <!-- ⑥ 催化剂 timeline -->
+  <section id="catalyst">
+    <h2><span class="n">⑥</span>催化剂 &amp; timeline</h2>
+    <figure>
+      <div class="svgwrap">
+      <!-- 填写: 内联 SVG 横向时间线，标未来 6~24 个月可验证节点（财报/发射/审批/融资/解禁） -->
+      <svg viewBox="0 0 720 150" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12.5">
+        <line x1="60" y1="75" x2="660" y2="75" stroke="#b9c2e0" stroke-width="2"/>
+        <!-- 节点：<circle>+日期+事件 -->
+      </svg>
+      </div>
+      <figcaption>关键催化剂时间线（据公开信息整理；日期含不确定性）。</figcaption>
+    </figure>
+  </section>
+
+  <!-- ⑦ 风险因素 -->
+  <section id="risk">
+    <h2><span class="n">⑦</span>风险因素（10-K 提炼，按重要性）</h2>
+    <ul>
+      <li><strong><!-- 风险1 标题 --></strong>：<!-- 填写 --> <span class="src src-a">🟢</span></li>
+      <li><strong><!-- 风险2 --></strong>：<!-- 填写 --></li>
+      <li><strong><!-- 风险3 --></strong>：<!-- 填写 --></li>
+    </ul>
+  </section>
+
+  <!-- ⑧ 股权 / 机构 / 做空 -->
+  <section id="ownership">
+    <h2><span class="n">⑧</span>股权 / 内部人 / 机构 / short interest</h2>
+    <table>
+      <tbody>
+        <tr><td>内部人 / 创始人持股</td><td><!-- 填写 --></td></tr>
+        <tr><td>机构持股</td><td><!-- 填写 --></td></tr>
+        <tr><td>近期内部人买卖</td><td><!-- 填写 --></td></tr>
+        <tr><td>Short interest</td><td><!-- 填写 --></td></tr>
+        <tr><td>近期融资 / ATM / 可转债 / warrant</td><td><!-- 填写: 摊薄来源 --></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ⑨ 投资判断 -->
+  <section id="verdict">
+    <h2><span class="n">⑨</span>投资判断</h2>
+    <div class="callout insight">
+      <span class="label">评级与理由</span>
+      <span class="rating r-hold">{{RATING}}</span><br><br>
+      <strong>适合谁：</strong><!-- 填写: 风险偏好 + 时间维度（投机/成长/价值；短/中/长线） --><br>
+      <strong>前提假设：</strong><!-- 填写: 这个评级成立的关键假设 --><br>
+      <strong>Thesis-breaker（什么会推翻）：</strong><!-- 填写: 出现什么信号就该改判 -->
+    </div>
+  </section>
+
+  <!-- 免责声明（必带，勿删） -->
+  <div class="disclaimer">
+    <b>⚠️ 免责声明 · 非投资建议</b><br>
+    本调研为公开信息的整理与分析，<strong>不构成投资建议</strong>，亦非任何证券买卖的要约或招揽。数据可能有误或过时，
+    请以公司官方 SEC 申报 / IR 披露为准并自行独立核实。作者不对依据本文做出的任何投资决策负责。投资有风险，入市需谨慎。
+  </div>
+
+  <!-- 出处 -->
+  <section id="src">
+    <h2>出处</h2>
+    <ul style="font-size:13.5px">
+      <li><a href="{{IR_OR_EDGAR}}" target="_blank" rel="noopener">SEC EDGAR / 公司 IR</a></li>
+      <!-- 填写: 10-K/10-Q/8-K 具体链接、电话会、分析师/媒体来源，按🟢🟡🔴注明 -->
+    </ul>
+  </section>
+
+  <footer class="foot">
+    股票基本面 / 估值调研笔记，<strong>非投资建议</strong>；信息按来源分级、以官方申报为准 · 数据截至 {{AS_OF}} · 整理日期 {{DATE}}
+  </footer>
+
+</article>
+</body>
+</html>
