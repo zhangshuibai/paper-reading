@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AST SpaceMobile（ASTS）· 基本面 / 估值 / 是否值得买入</title>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --bad:#ff6b81; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --bad:#d23651; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;}
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:920px; margin:0 auto; padding:18px 22px 90px}
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:25px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)} .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap; line-height:2}
+  nav.toc a:hover{color:var(--accent)}
+  section{margin:38px 0}
+  h2{font-size:20px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:16.5px; margin:22px 0 8px}
+  p{margin:12px 0} ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)} strong{color:var(--text)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.88em}
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:13px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:9px 10px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  .num{font-variant-numeric:tabular-nums; text-align:right}
+  figure{margin:24px 0; text-align:center}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+  .svgwrap{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 8px}
+  @media (prefers-color-scheme: light){ .svgwrap{background:#fbfcff} }
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.bull{border-left:4px solid var(--ok)} .callout.bull .label{color:var(--ok)}
+  .callout.bear{border-left:4px solid var(--bad)} .callout.bear .label{color:var(--bad)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+  .src{font-size:10.5px; padding:0 6px; border-radius:999px; white-space:nowrap; vertical-align:middle}
+  .src-a{background:rgba(67,197,158,.18); color:var(--ok)}
+  .src-b{background:rgba(255,180,84,.18); color:var(--warn)}
+  .src-c{background:rgba(255,107,129,.18); color:var(--bad)}
+  .legend{font-size:12px; color:var(--muted); margin:6px 0 0}
+  .rating{display:inline-block; font-weight:800; padding:4px 16px; border-radius:999px; font-size:16px; letter-spacing:.5px}
+  .r-buy{background:rgba(67,197,158,.20); color:var(--ok)}
+  .r-accumulate{background:rgba(122,162,255,.20); color:var(--accent)}
+  .r-hold{background:rgba(255,180,84,.20); color:var(--warn)}
+  .r-reduce{background:rgba(255,140,90,.20); color:#e07a3a}
+  .r-avoid{background:rgba(255,107,129,.20); color:var(--bad)}
+  .kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin:16px 0}
+  .kpi{background:var(--panel2); border:1px solid var(--line); border-radius:10px; padding:10px 12px}
+  .kpi .k{font-size:12px; color:var(--muted)} .kpi .v{font-size:18px; font-weight:700; margin-top:2px}
+  .disclaimer{background:rgba(255,180,84,.10); border:1px solid var(--warn); border-radius:12px;
+              padding:14px 18px; margin:26px 0; font-size:13.5px; color:var(--text)}
+  .disclaimer b{color:var(--warn)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">卫星通信</span>
+      <span class="chip">direct-to-cell</span>
+      <span class="chip">LEO 低轨</span>
+      <span class="chip">pre-revenue 叙事股</span>
+      <span class="chip">股票调研</span>
+      <span class="chip">估值</span>
+      <span class="chip">基本面</span>
+    </div>
+    <h1>AST SpaceMobile（ASTS）：基本面 / 估值 / 是否值得买入</h1>
+    <p class="orig-title">NASDAQ:ASTS · 卫星直连普通手机（direct-to-cell）· 典型「巨大 TAM 叙事 vs 持续巨额烧钱与无限摊薄」的高波动主题成长股</p>
+    <dl class="meta-grid">
+      <dt>代码</dt><dd>ASTS（NASDAQ）</dd>
+      <dt>行业</dt><dd>卫星通信 / 太空基础设施（satellite direct-to-device, D2D）</dd>
+      <dt>资料来源</dt><dd>SEC EDGAR 申报（10-Q / 8-K）/ 公司 IR / 公开报道，按来源分级标注；<a href="https://investors.ast-science.com" target="_blank" rel="noopener">公司 IR 入口</a> · <a href="https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=1780312&type=10-Q" target="_blank" rel="noopener">EDGAR (CIK 1780312)</a></dd>
+      <dt>数据截至</dt><dd>财务＝<strong>2026 Q1 10-Q（季度截止 2026-03-31）</strong>；股价＝2026-06-18 收盘约 <strong>$80.66</strong>；其他公开数据截至 2026-06-21</dd>
+      <dt>整理日期</dt><dd>2026-06-21</dd>
+    </dl>
+    <p class="legend">来源等级：<span class="src src-a">🟢 一手</span> SEC/IR/电话会 ·
+      <span class="src src-b">🟡 二手</span> 分析师/媒体/数据终端 ·
+      <span class="src src-c">🔴 指引/自述/未证实</span> 管理层 guidance 或未独立验证</p>
+  </header>
+
+  <div class="tldr">
+    <b>评级</b> — <span class="rating r-hold">持有 / 投机仓 Hold（仅小仓位、能承受归零者）</span><br>
+    AST SpaceMobile 想用一批<strong>巨型低轨相控阵卫星（BlueBird）</strong>，让<strong>普通未改装手机</strong>直接连卫星上网/通话，绕开地面基站盲区——这是它和 Globalstar/Iridium「专用卫星电话」的本质区别。叙事极性感：TAM 巨大、AT&amp;T/Verizon/Vodafone/Google/Rakuten 同时是股东+客户、是<strong>唯一直连未改装手机的上市纯标的</strong>。但基本面几乎全是负面：2026 Q1 仅 <strong>$14.7M</strong> 营收（多为设备/政府一次性），净亏 <strong>$191M</strong>（归属普通股东，GAAP），季度经营烧钱 <strong>$48M</strong> 叠加 <strong>$262M+</strong> capex，靠 <strong>$3.0B 现金 + $3.0B 可转债</strong> 撑场，股本逐季膨胀（Class A 已近 3 亿股 + 7800 万 Class C）。<strong>最强多头点：</strong>终局 TAM＝全球 30 亿+ 手机用户的盲区覆盖，先发+频谱+运营商绑定。<strong>最致命空头点：</strong>需要几十~248 颗卫星才有连续覆盖、发射与执行风险叠加<strong>无限摊薄</strong>，且最大对手 <strong>Starlink Direct to Cell</strong>（已和 T-Mobile 商用、资源碾压）非上市但烧不死。估值 ~$29B 市值对一个营收近零的公司＝<strong>纯叙事定价</strong>，对假设极度敏感。
+  </div>
+
+  <div class="kpis">
+    <div class="kpi"><div class="k">市值 Market Cap</div><div class="v">≈ $29B <span class="src src-b">🟡</span></div></div>
+    <div class="kpi"><div class="k">现金及等价物 (3/31/26)</div><div class="v">$3.03B <span class="src src-a">🟢</span></div></div>
+    <div class="kpi"><div class="k">季度经营烧钱 (Q1'26)</div><div class="v">$48M <span class="src src-a">🟢</span></div></div>
+    <div class="kpi"><div class="k">TTM 营收 ≈</div><div class="v">~$25M（叙事，非主线）<span class="src src-b">🟡</span></div></div>
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#bg">领域背景速补</a>
+    <a href="#what">① 公司是什么</a>
+    <a href="#peers">② 行业与竞争对手</a>
+    <a href="#fin">③ 财务体检</a>
+    <a href="#val">④ 估值</a>
+    <a href="#thesis">⑤ 多空论点</a>
+    <a href="#catalyst">⑥ 催化剂 timeline</a>
+    <a href="#risk">⑦ 风险因素</a>
+    <a href="#ownership">⑧ 股权 / 机构 / 做空</a>
+    <a href="#verdict">⑨ 投资判断</a>
+    <a href="#src">出处</a>
+  </nav>
+
+  <!-- 领域背景速补 -->
+  <section id="bg">
+    <h2><span class="n">⓿</span>领域背景速补（给只懂 LLM/ML、不懂卫星通信的读者）</h2>
+    <p>这家公司不在 AI 赛道，要看懂它必须先补几个卫星通信概念。下面把关键术语第一次出现就讲清「是什么、为什么难、和这篇有什么关系」。</p>
+    <ul>
+      <li><strong>LEO 低轨卫星（Low Earth Orbit）</strong>：轨道高度约 300–2000 km 的卫星。对照传统通信卫星 GEO（地球同步轨道，约 35786 km）：GEO 一颗就覆盖大半个地球但延迟高（信号来回 ~0.5 秒）、信号弱；LEO 离地近、延迟低、信号强，<strong>代价是单颗覆盖面积小、且相对地面高速移动</strong>，所以必须发<strong>几十到几千颗组成「星座（constellation）」</strong>才能连续覆盖一个区域。这就是为什么 ASTS「现在只有十来颗」时还无法提供 24 小时不间断服务——它需要先把星座堆起来，这正是它烧钱与执行风险的核心来源。</li>
+      <li><strong>direct-to-cell（卫星直连手机，又叫 D2D / direct-to-device）</strong>：让你手里<strong>没有任何改装的普通 4G/5G 手机</strong>直接连卫星。对照<strong>传统卫星电话</strong>（Iridium、海事卫星）：那些要专用粗天线手持机、又贵又笨。direct-to-cell 的「圣杯」是普通手机不换、不加装备就能在沙漠/海上/山区收到信号。难点在于：手机的天线和发射功率极小，卫星却在几百公里外高速飞过，要在这种链路预算（link budget）下闭合通信，<strong>卫星必须把天线做到极大、灵敏度极高</strong>——这正是 ASTS 的技术赌注。</li>
+      <li><strong>相控阵天线（phased array）</strong>：由成千上万个小天线单元组成的大平板，通过电子调相把波束「指」向地面某个区域，而不靠机械转动。ASTS 的 BlueBird Block 2 单颗通信阵列约 <strong>2400 平方英尺（~223 ㎡，比篮球场半场还大）</strong>，是迄今商业上最大的在轨通信阵列之一——「天线越大、越能补偿普通手机的弱信号」就是它能直连手机的物理基础，也是为什么它的卫星又大又贵又难发射。</li>
+      <li><strong>BlueBird 卫星</strong>：ASTS 的卫星产品线。<strong>Block 1</strong>（早期型号，含首批商用 BlueBird 6）面积较小、容量低；<strong>Block 2</strong>（新一代，单颗阵列约 2400 平方英尺、速度约为 Block 1 两倍）才是构成商用星座的主力。卫星编号你会在催化剂节看到（BB7 经 Blue Origin New Glenn 发射、BB8/9/10 经 SpaceX Falcon 9 于 2026-06-17 发射）。</li>
+      <li><strong>频谱（spectrum）与 MNO 运营商合作</strong>：无线通信要用特定频段，频谱是稀缺牌照资源。ASTS 的玩法是<strong>「借用运营商的地面频谱」</strong>——它和 AT&amp;T、Verizon、Vodafone 等移动网络运营商（MNO, Mobile Network Operator）合作，在这些运营商的授权频段上提供「天上的基站」，作为地面网络的补充覆盖（FCC 把这叫 <strong>SCS, Supplemental Coverage from Space</strong>）。它还想自己拿频谱：2025 年和破产的 Ligado 谈了一笔 L-band 频谱长租（详见催化剂）。<strong>对投资者的含义</strong>：运营商既是客户（分成收入）又是股东，绑定深，但「分成模式能赚多少」尚未被验证。</li>
+      <li><strong>与 Starlink Direct to Cell 的区别</strong>：SpaceX 的 Starlink 也做 direct-to-cell，已和 T-Mobile 在美国商用（T-Satellite）。两条路线的关键差异：<strong>Starlink</strong> 用大量<strong>小卫星</strong>，目前主打<strong>短信/低带宽</strong>、借助其已建成的庞大星座和自有火箭（发射成本极低）；<strong>ASTS</strong> 用<strong>少量超大卫星</strong>，主打<strong>更高带宽（语音/数据/类宽带）</strong>，但星座尚未建成、要靠外购发射。一句话：<strong>ASTS 在「单星能力」上更激进，Starlink 在「星座规模＋发射成本＋商用进度」上碾压</strong>。这是看 ASTS 绕不开的最大竞争变量。</li>
+    </ul>
+    <div class="callout note">
+      <span class="label">一句话定调</span>
+      ASTS 卖的不是「现在的收入」，而是<strong>「未来用大卫星直连全球普通手机」这个期权</strong>。判断它值不值得买，本质是判断：星座能否按期建成、运营商分成能否兑现成真金白银、以及在 Starlink 面前能否守住差异化——而这一切要靠<strong>不断增发股票和发债</strong>来续命。
+    </div>
+  </section>
+
+  <!-- ① 公司是什么 -->
+  <section id="what">
+    <h2><span class="n">①</span>公司是什么：使命 / 愿景 / 商业模式</h2>
+    <h3>Mission / Vision</h3>
+    <p>AST SpaceMobile（总部 Texas Midland，创始人兼 CEO/董事长 <strong>Abel Avellan</strong>）的自述使命是<strong>「消除全球移动通信盲区（end mobile connectivity gaps）」</strong>，构建首个<strong>天基蜂窝宽带网络，让普通未改装手机在地面无信号处直接连卫星</strong> <span class="src src-c">🔴（公司自述）</span>。翻译成大白话：把「手机基站」搬上天，作为运营商地面网络的补充覆盖（SCS）。</p>
+    <h3>怎么赚钱（business model）</h3>
+    <p>商业模式是 <strong>B2B2C 的批发/分成</strong>：ASTS 不直接面向消费者卖号卡，而是和 MNO 运营商签协议，运营商把「卫星覆盖」作为增值功能卖给自己的用户，ASTS 与运营商<strong>分成（revenue share）</strong>，外加可能的服务/设备/政府收入。截至目前公司称已和近 <strong>60 家 MNO</strong>、覆盖 <strong>30 亿+ 潜在用户</strong>达成各种协议 <span class="src src-c">🔴</span>。<strong>关键提醒（别把 MOU 当收入）：</strong></p>
+    <table>
+      <thead><tr><th>合作方</th><th>关系性质（核实后）</th><th>等级</th></tr></thead>
+      <tbody>
+        <tr><td><strong>AT&amp;T</strong></td><td>已签<strong>有约束力的商用 D2D 协议（约 6 年，延续至 ~2030）</strong>，既是客户也曾参与战略投资</td><td><span class="src src-a">🟢</span> 协议</td></tr>
+        <tr><td><strong>Verizon</strong></td><td>2025-10 签<strong>definitive commercial agreement</strong>（覆盖美国本土），含此前 <strong>$100M</strong> 投资/承诺；目标 2026 起服务</td><td><span class="src src-a">🟢</span> 协议+投资</td></tr>
+        <tr><td><strong>Vodafone</strong></td><td>长期合作伙伴 + <strong>战略股权投资</strong>（2024）+ 早期 Series B 领投</td><td><span class="src src-a">🟢</span> 股权+协议</td></tr>
+        <tr><td><strong>Google (Alphabet)</strong></td><td>2024 战略<strong>股权投资</strong> + 技术合作（产品/工程层面）</td><td><span class="src src-a">🟢</span> 股权</td></tr>
+        <tr><td><strong>Rakuten</strong></td><td>早期主要投资人/合作方（日本市场）</td><td><span class="src src-a">🟢</span> 股权+协议</td></tr>
+        <tr><td><strong>American Tower</strong></td><td>早期投资人 / 基础设施合作伙伴</td><td><span class="src src-a">🟢</span> 股权</td></tr>
+      </tbody>
+    </table>
+    <p class="legend">注意：「近 60 家 MNO、30 亿用户」大多是<strong>框架协议 / MOU 级别</strong>，绝大部分<strong>尚未转化为经常性收入</strong>；上表只列了关系较实的几家。把「潜在覆盖用户」当成已实现营收，是这只股票最常见的误读。</p>
+    <p><strong>当前现实</strong>：公司仍处 <strong>pre-revenue（实质无经常性营收）</strong>阶段——2026 Q1 那 $14.7M 营收主要是<strong>给运营商卖网关设备（gateway）+ 政府服务</strong>等一次性/早期收入，<strong>不是消费者订阅分成</strong> <span class="src src-a">🟢 10-Q</span>。真正的「直连手机订阅分成」要等星座建到能连续覆盖才放量。</p>
+  </section>
+
+  <!-- ② 行业与竞争对手 -->
+  <section id="peers">
+    <h2><span class="n">②</span>行业与竞争对手</h2>
+    <p>赛道＝<strong>satellite direct-to-device（D2D / direct-to-cell）</strong>，2024–2026 从实验走向早期商用，玩家分两派：<strong>「直连普通手机」派</strong>（ASTS、Starlink/SpaceX、Lynk、AST 的运营商联盟）和<strong>「专用设备/窄带 SOS」派</strong>（Globalstar+Apple、Iridium）。我选的对比维度＝<strong>是否直连未改装手机 · 在轨/星座进度 · MNO 卡位 · 营收与现金 · 上市与可投资性 · 估值</strong>——这几条直接决定谁能活到终局、谁能被买到。</p>
+    <table>
+      <thead><tr>
+        <th>公司</th>
+        <th>直连未改装手机？/ 技术路线</th><th>卫星进度（在轨）</th>
+        <th>MNO / 客户卡位</th><th>营收·现金</th>
+        <th>上市 / 估值</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>AST SpaceMobile（ASTS）本篇</strong></td>
+          <td><strong>是</strong>，超大相控阵直连普通手机，主打语音/数据/宽带</td>
+          <td>约 <strong>10 颗</strong> BlueBird 已发（BB6 Block1 运行 + Block2 陆续上），<strong>2026 目标 ~45 颗</strong>，FCC 批 248 <span class="src src-a">🟢/🔴指引</span></td>
+          <td>AT&amp;T/Verizon 已签商用约 + Vodafone/Google/Rakuten 股东 <span class="src src-a">🟢</span></td>
+          <td>营收近零；现金 <strong>$3.0B</strong>、债 <strong>$3.0B</strong> <span class="src src-a">🟢</span></td>
+          <td>NASDAQ，市值 <strong>~$29B</strong>，纯叙事定价 <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td><strong>Starlink Direct to Cell（SpaceX，非上市）</strong></td>
+          <td>是，但用海量小卫星，<strong>当前主打短信/窄带</strong>，宽带渐进</td>
+          <td>已部署<strong>数百颗 D2C 卫星</strong>，借自有 Falcon9/Starship<strong>发射成本碾压</strong> <span class="src src-b">🟡</span></td>
+          <td><strong>T-Mobile 美国已商用（T-Satellite）</strong>+ 全球数十家运营商 <span class="src src-b">🟡</span></td>
+          <td>SpaceX 整体收入巨大、资金雄厚 <span class="src src-b">🟡</span></td>
+          <td><strong>不可直接投资</strong>（私有）；最大威胁</td>
+        </tr>
+        <tr>
+          <td>Lynk Global</td>
+          <td>是，小卫星「太空基站」，窄带短信为主</td>
+          <td>少量在轨，规模远小 <span class="src src-b">🟡</span></td>
+          <td>多国小运营商，卡位弱于 ASTS/Starlink</td>
+          <td>规模小、融资弱 <span class="src src-b">🟡</span></td>
+          <td>SPAC 路径波折；可投资性弱</td>
+        </tr>
+        <tr>
+          <td>Globalstar（GSAT）</td>
+          <td><strong>否</strong>（需 Apple 集成的特定芯片/功能，非任意手机）</td>
+          <td>有在轨星座，服务 Apple Emergency SOS</td>
+          <td><strong>Apple 独家级</strong>绑定（iPhone SOS/Find My）<span class="src src-a">🟢</span></td>
+          <td>TTM 营收 <strong>~$0.27B</strong>（有真实收入）<span class="src src-b">🟡</span></td>
+          <td>NASDAQ，市值 <strong>~$9.4B</strong> <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Iridium（IRDM）</td>
+          <td>否，专用设备/IoT 窄带为主</td>
+          <td>成熟全球星座（已建成）</td>
+          <td>政府/海事/IoT，稳定但非大众手机</td>
+          <td><strong>已盈利</strong>：Q1'26 营收 <strong>$219M</strong>、净利 <strong>$21.6M</strong> <span class="src src-a">🟢</span></td>
+          <td>NASDAQ，传统现金流型 <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>传统 GEO（Viasat / EchoStar 等）</td>
+          <td>否，地球同步大卫星、宽带/广播</td>
+          <td>少数 GEO 大卫星</td>
+          <td>固定宽带/航空，非直连手机</td>
+          <td>有营收但高杠杆 <span class="src src-b">🟡</span></td>
+          <td>上市但路线不同</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>读矩阵：</strong>ASTS 的差异化＝<strong>「唯一上市的、押注直连普通手机宽带（非仅窄带 SOS）的纯标的」</strong>——这正是它叙事溢价的来源。但最大威胁来自<strong>非上市的 Starlink</strong>：Starlink 星座已成、发射几乎零边际成本、且已在美国（T-Mobile）落地商用，只是当前带宽较低。竞争胜负取决于：ASTS 能否在 Starlink 把带宽追上来之前，用「单星大带宽 + 运营商深度绑定」建成可用星座并兑现分成。<strong>诚实地说：论资源与执行确定性，Starlink 碾压；论可投资的纯标的与单星能力，ASTS 独一份。</strong></p>
+  </section>
+
+  <!-- ③ 财务体检 -->
+  <section id="fin">
+    <h2><span class="n">③</span>财务体检（pre-revenue：主线是现金 / 烧钱 / 摊薄，不是利润）</h2>
+    <p>定调：<strong>典型「重资产、巨额烧钱、靠融资续命」的星座建设期公司</strong>。看它别看利润表的「营收/净利」，要看<strong>现金能撑几个季度、股本以多快速度膨胀、capex 节奏</strong>。下列三表关键行回到 <strong>2026 Q1 10-Q（截止 2026-03-31）</strong>原文，单位均为美元。</p>
+
+    <h3>关键三表（2026 Q1 10-Q，GAAP）</h3>
+    <table>
+      <thead><tr><th>指标（截止/期间 2026-03-31）</th><th class="num">数值</th><th>口径 / 说明</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr><td>总营收 Revenue</td><td class="num">$14.735M</td><td>主要为网关设备 + 政府服务，<strong>非订阅分成</strong>；去年同期仅 $0.7M</td><td><span class="src src-a">🟢</span></td></tr>
+        <tr><td>总营业费用 Operating expenses</td><td class="num">$164.147M</td><td>研发/工程+SG&amp;A+折旧等</td><td><span class="src src-a">🟢</span></td></tr>
+        <tr><td>净亏损（含少数股东前）</td><td class="num">$(249.581)M</td><td>含可转债等非经营项；多类股权结构下分摊</td><td><span class="src src-a">🟢</span></td></tr>
+        <tr><td><strong>净亏损（归属普通股东）</strong></td><td class="num"><strong>$(191.012)M</strong></td><td>Class C/少数权益分摊后</td><td><span class="src src-a">🟢</span></td></tr>
+        <tr><td>每股亏损 EPS（基本=稀释）</td><td class="num">$(0.66)</td><td>GAAP</td><td><span class="src src-a">🟢</span></td></tr>
+        <tr><td>经营活动现金流（净烧钱）</td><td class="num">$(48.058)M</td><td>单季经营性现金消耗</td><td><span class="src src-a">🟢</span></td></tr>
+        <tr><td>资本开支 capex（PP&amp;E）</td><td class="num">~$261.6M</td><td>主要为 Block 2 卫星直接材料/人工 + 厂房产线</td><td><span class="src src-a">🟢</span></td></tr>
+        <tr><td>＋ 频谱 / Ligado 预付</td><td class="num">~$117.7M</td><td>频谱相关投入（非 PP&amp;E）</td><td><span class="src src-a">🟢</span></td></tr>
+        <tr><td><strong>现金及等价物</strong></td><td class="num"><strong>$3,029.591M</strong></td><td>含受限现金合计公司称 <strong>~$3.5B</strong></td><td><span class="src src-a">🟢</span></td></tr>
+        <tr><td>长期债务（毛额，主要可转债）</td><td class="num">$3,024.1M</td><td>多笔 2.0%/2.25%/2.375%/4.25% 可转债 → <strong>净现金近乎打平</strong></td><td><span class="src src-a">🟢</span></td></tr>
+        <tr><td>累计赤字 Accumulated deficit</td><td class="num">$(1,022.697)M</td><td>注：因 Up-C 结构，大量历史亏损分摊至非控股权益，账面赤字偏小</td><td><span class="src src-a">🟢</span></td></tr>
+        <tr><td>股东权益 Total equity</td><td class="num">$2,660.828M</td><td></td><td><span class="src src-a">🟢</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3>股本结构与稀释股数（截止 2026-03-31）</h3>
+    <table>
+      <thead><tr><th>股本</th><th class="num">股数</th><th>说明</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr><td>Class A（经济+1票/股）</td><td class="num">298,454,029</td><td>公众流通主体</td><td><span class="src src-a">🟢</span></td></tr>
+        <tr><td>Class B</td><td class="num">11,215,111</td><td>合作方/早期投资人投票股</td><td><span class="src src-a">🟢</span></td></tr>
+        <tr><td>Class C（10票/股，无经济权）</td><td class="num">78,163,078</td><td><strong>创始人 Avellan 超级投票权</strong>，对应等量 AST 业务单元（可 1:1 换 A 股）</td><td><span class="src src-a">🟢</span></td></tr>
+        <tr><td>可转债潜在新增 A 股（合计）</td><td class="num">≈ 30M+</td><td>2.0%/2.25%/2.375%/4.25% 各档转股；2.25%（2036）转股价 ~$116.30</td><td><span class="src src-a">🟢</span></td></tr>
+      </tbody>
+    </table>
+
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 700 320" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12">
+        <text x="350" y="20" text-anchor="middle" font-size="13" font-weight="700" fill="#1a1f33">Class A 流通股数逐步膨胀（摊薄趋势，单位：百万股）</text>
+        <line x1="60" y1="270" x2="660" y2="270" stroke="#b9c2e0" stroke-width="1.5"/>
+        <line x1="60" y1="50" x2="60" y2="270" stroke="#b9c2e0" stroke-width="1.5"/>
+        <text x="52" y="274" text-anchor="end" fill="#5a627a">0</text>
+        <text x="52" y="200" text-anchor="end" fill="#5a627a">100</text>
+        <text x="52" y="130" text-anchor="end" fill="#5a627a">200</text>
+        <text x="52" y="60" text-anchor="end" fill="#5a627a">300</text>
+        <g fill="#7aa2ff">
+          <rect x="90"  y="207" width="55" height="63"/>
+          <rect x="185" y="193" width="55" height="77"/>
+          <rect x="280" y="165" width="55" height="105"/>
+          <rect x="375" y="109" width="55" height="161"/>
+          <rect x="470" y="81"  width="55" height="189"/>
+          <rect x="565" y="61"  width="55" height="209"/>
+        </g>
+        <g fill="#1a1f33" text-anchor="middle" font-size="11">
+          <text x="117" y="200">~90</text>
+          <text x="212" y="186">~110</text>
+          <text x="307" y="158">~150</text>
+          <text x="402" y="102">~230</text>
+          <text x="497" y="74">~270</text>
+          <text x="592" y="54">298</text>
+        </g>
+        <g fill="#5a627a" text-anchor="middle">
+          <text x="117" y="286">2021</text>
+          <text x="212" y="286">2023</text>
+          <text x="307" y="286">2024中</text>
+          <text x="402" y="286">2024末</text>
+          <text x="497" y="286">2025</text>
+          <text x="592" y="286">Q1'26</text>
+        </g>
+      </svg>
+      </div>
+      <figcaption>Class A 流通股数趋势（本调研据公司历次申报近似重绘；逐年大幅增发是核心摊薄风险，早期数值为约数，精确值以各期申报为准 <span class="src src-a">🟢</span>/<span class="src src-b">🟡</span>）。</figcaption>
+    </figure>
+
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 700 300" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12">
+        <text x="350" y="20" text-anchor="middle" font-size="13" font-weight="700" fill="#1a1f33">现金 vs. 单季资金消耗（Q1'26，单位：百万美元）</text>
+        <line x1="60" y1="250" x2="660" y2="250" stroke="#b9c2e0" stroke-width="1.5"/>
+        <rect x="110" y="60" width="120" height="190" fill="#43c59e"/>
+        <text x="170" y="50" text-anchor="middle" fill="#1a1f33" font-weight="700">现金 $3,030M</text>
+        <rect x="330" y="225" width="120" height="25" fill="#ff6b81"/>
+        <text x="390" y="218" text-anchor="middle" fill="#1a1f33">经营烧钱 $48M</text>
+        <rect x="330" y="113" width="120" height="112" fill="#ffb454"/>
+        <text x="390" y="105" text-anchor="middle" fill="#1a1f33">capex+频谱 ~$379M</text>
+        <text x="390" y="170" text-anchor="middle" fill="#1a1f33" font-size="11">合计季度</text>
+        <text x="390" y="184" text-anchor="middle" fill="#1a1f33" font-size="11">现金流出 ~$427M</text>
+        <rect x="500" y="120" width="150" height="60" fill="none" stroke="#5a627a" stroke-dasharray="4" rx="6"/>
+        <text x="575" y="140" text-anchor="middle" fill="#1a1f33" font-size="11">含 capex 的总消耗</text>
+        <text x="575" y="158" text-anchor="middle" fill="#1a1f33" font-size="11">≈ 7 个季度 runway</text>
+        <text x="575" y="174" text-anchor="middle" fill="#5a627a" font-size="10">（不计新融资）</text>
+        <text x="170" y="270" text-anchor="middle" fill="#5a627a">现金储备</text>
+        <text x="390" y="270" text-anchor="middle" fill="#5a627a">单季资金消耗</text>
+      </svg>
+      </div>
+      <figcaption>现金 runway 框算：经营烧钱仅 $48M/季，但叠加卫星 capex + 频谱投入后单季总现金消耗约 $427M。按此节奏现金约可撑 ~7 个季度（不计新增融资 / ATM）；管理层会持续融资，故实际 runway 取决于资本市场窗口（本调研据 10-Q 重绘 <span class="src src-a">🟢</span>）。</figcaption>
+    </figure>
+
+    <h3>现金 runway / 摊薄结论</h3>
+    <ul>
+      <li><strong>纯经营烧钱不大（$48M/季）</strong>，但<strong>真正吃钱的是卫星 capex</strong>：Q1'26 capex ~$262M + 频谱 ~$118M，公司全年 capex 指引升至 <strong>$575M–$650M</strong> <span class="src src-c">🔴 指引</span>（注：与单季 capex 推算口径可能不同，以申报为准）。</li>
+      <li><strong>现金充裕但非无限</strong>：$3.0B 现金对一个营收近零、年 capex 数亿、还要还可转债利息的公司，按当前节奏框算约 <strong>1.5–2 年</strong>可见度——之后<strong>必然继续融资</strong>，这就是摊薄的根源。</li>
+      <li><strong>摊薄是这只股票的第一性风险</strong>：Class A 从 ~90M（2021）膨胀到 ~298M（Q1'26）；2026 年还在用<strong>ATM 增发 + 注册直接发行（如以 $96.92 卖 633万股）+ 可转债</strong>同时融资。可转债转股价（如 2.25% 档 $116.30）一旦股价上行也会带来稀释。「股价涨→更易增发→稀释→需更高估值兑现」是一个自我强化但脆弱的循环。</li>
+    </ul>
+  </section>
+
+  <!-- ④ 估值 -->
+  <section id="val">
+    <h2><span class="n">④</span>估值（pre-revenue：给情景区间，不给单点目标价）</h2>
+    <h3>倍数对比（提醒：营收近零 → 传统倍数几乎无意义）</h3>
+    <table>
+      <thead><tr><th>倍数</th><th>ASTS</th><th>同业参照</th><th>口径</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr><td>P/S（trailing）</td><td><strong>~1000×+（无意义）</strong></td><td>GSAT ~35×、IRDM ~6×</td><td>市值/TTM 营收</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>EV/(远期预期收入)</td><td><strong>极高（看你信哪个远期假设）</strong></td><td>—</td><td>forward，<strong>市场预期非事实</strong></td><td><span class="src src-c">🔴</span></td></tr>
+        <tr><td>P/E / P/FCF</td><td>N/A（亏损、负 FCF）</td><td>IRDM 有正 P/E</td><td>trailing GAAP</td><td><span class="src src-a">🟢</span></td></tr>
+      </tbody>
+    </table>
+    <p class="legend">ASTS ~$29B 市值 ÷ 约 $25M TTM 营收 ＝ 上千倍 P/S，<strong>说明传统倍数对它毫无定价能力</strong>；估值完全由「未来星座建成后的分成收入预期 × 兑现概率」驱动。下面用粗框架给情景区间。</p>
+
+    <h3>情景估值（框架：星座建成时间 × 覆盖用户/MNO 分成收入 × 摊薄后股数 × 兑现概率）</h3>
+    <table>
+      <thead><tr><th>情景</th><th>关键假设</th><th>隐含市值 / 每股区间（粗框，含巨大不确定性）</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Bull</strong></td><td>2027–2028 建成可用星座；与 AT&amp;T/Verizon 等分成放量，终局年收入达数十亿美元并被市场以高倍 forward 给值；摊薄可控；Starlink 未抢走核心运营商</td><td><strong>显著高于当前</strong>（可对应 $150–$250+/股区间）——前提是「分成兑现 + 摊薄不失控」同时成立</td></tr>
+        <tr><td><strong>Base</strong></td><td>星座建设延后 1–2 年、部分运营商商用但分成收入慢于预期；持续增发摊薄；竞争压价</td><td><strong>大致围绕当前 $80 上下宽幅震荡</strong>（$60–$110），高波动、消息驱动</td></tr>
+        <tr><td><strong>Bear</strong></td><td>发射/技术挫折或资金窗口关闭被迫贱价增发；Starlink 抢下关键运营商；分成模式经济性被证伪；监管/频谱受阻</td><td><strong>大幅下杀</strong>（$20–$40，甚至更低；极端情形趋零）</td></tr>
+      </tbody>
+    </table>
+    <p class="legend"><strong>对假设极度敏感：</strong>估值几乎全部押在「星座能否按期建成」和「运营商分成能否变成真金白银」两个尚未验证的变量上。上述区间是<strong>情景框架而非预测</strong>，任何单点目标价对这种公司都是虚假精度。卖方目标价（约 $74–$81 区间、共识 Hold <span class="src src-b">🟡</span>）也只是当前叙事的快照，会随每次发射/融资剧烈变动。</p>
+  </section>
+
+  <!-- ⑤ 多空论点 -->
+  <section id="thesis">
+    <h2><span class="n">⑤</span>多空论点（都写到最强）</h2>
+    <div class="callout bull">
+      <span class="label">Bull thesis 看多（最强版本）</span>
+      <ul>
+        <li><strong>TAM 巨大且无可争议</strong>：全球数十亿手机用户 + 海量地面盲区，「让普通手机随处有信号」是真实刚需，终局市场以千亿美元计。</li>
+        <li><strong>唯一可投资的「直连未改装手机宽带」纯标的</strong>：Starlink 私有、Lynk 弱、GSAT/IRDM 是窄带 SOS——想在公开市场押注「大卫星直连手机」这条最激进路线，ASTS 几乎是唯一选择。</li>
+        <li><strong>运营商+巨头同时是股东和客户</strong>：AT&amp;T/Verizon 已签有约束力商用协议，Vodafone/Google/Rakuten/American Tower 持股——这种深度绑定是别人难复制的护城河与背书。</li>
+        <li><strong>频谱与专利卡位</strong>：借运营商地面频谱（SCS）+ 自有 Ligado L-band 长租（待 FCC）+ 大量直连手机专利，构成技术与牌照壁垒。</li>
+        <li><strong>先发与单星能力</strong>：Block 2 单星阵列全球最大，单星带宽远超对手小卫星，理论上少量卫星即可提供更高质量服务。</li>
+      </ul>
+    </div>
+    <div class="callout bear">
+      <span class="label">Bear thesis 看空（最强版本）</span>
+      <ul>
+        <li><strong>无限摊薄（第一性风险）</strong>：营收近零却要建几十~上百颗卫星，<strong>只能不断增发股票+发可转债</strong>；Class A 三年从 ~90M 膨胀到 ~298M，未来还会更多。即便业务成功，<strong>每股价值也可能被稀释殆尽</strong>。</li>
+        <li><strong>星座要规模化才有意义 + 发射风险</strong>：现在十来颗只能间歇覆盖，连续商用需几十~248 颗；每次发射都有失败/延期风险，<strong>执行链条极长</strong>。</li>
+        <li><strong>Starlink 碾压式威胁</strong>：SpaceX 星座已成、发射近零边际成本、已和 T-Mobile 美国商用——一旦其带宽追上来，ASTS 的「单星大带宽」差异化可能被规模与成本优势抹平。</li>
+        <li><strong>收入分成模式未验证</strong>：和近 60 家 MNO 的「30 亿用户」绝大多数是 MOU，<strong>分成单位经济、付费意愿、ARPU 全是问号</strong>，至今无经常性订阅收入证明。</li>
+        <li><strong>监管/频谱不确定</strong>：Ligado 频谱待 FCC 批（且有分析师质疑其价值）、SCS 规则与各国牌照仍在演进。</li>
+        <li><strong>估值远超基本面</strong>：~$29B 市值定价的是「一切顺利的终局」，留给执行失误的容错极小，<strong>叙事一旦受挫回撤可达 50%+</strong>（52 周已在 $36–$134 间剧烈波动）。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ⑥ 催化剂 timeline -->
+  <section id="catalyst">
+    <h2><span class="n">⑥</span>催化剂 &amp; timeline（未来 6–24 个月可验证节点）</h2>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 720 220" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12">
+        <line x1="50" y1="110" x2="690" y2="110" stroke="#b9c2e0" stroke-width="2"/>
+        <g>
+          <circle cx="90" cy="110" r="7" fill="#43c59e"/>
+          <text x="90" y="92" text-anchor="middle" fill="#1a1f33" font-size="11">2026-06-17</text>
+          <text x="90" y="135" text-anchor="middle" fill="#5a627a" font-size="10">BB8/9/10 已发</text>
+          <text x="90" y="148" text-anchor="middle" fill="#5a627a" font-size="10">(Falcon 9)</text>
+        </g>
+        <g>
+          <circle cx="230" cy="110" r="7" fill="#7aa2ff"/>
+          <text x="230" y="92" text-anchor="middle" fill="#1a1f33" font-size="11">2026 下半年</text>
+          <text x="230" y="135" text-anchor="middle" fill="#5a627a" font-size="10">后续 BlueBird</text>
+          <text x="230" y="148" text-anchor="middle" fill="#5a627a" font-size="10">批次发射(目标~45)</text>
+        </g>
+        <g>
+          <circle cx="370" cy="110" r="7" fill="#7aa2ff"/>
+          <text x="370" y="92" text-anchor="middle" fill="#1a1f33" font-size="11">2026 内</text>
+          <text x="370" y="135" text-anchor="middle" fill="#5a627a" font-size="10">AT&amp;T/Verizon</text>
+          <text x="370" y="148" text-anchor="middle" fill="#5a627a" font-size="10">美国初步服务上线</text>
+        </g>
+        <g>
+          <circle cx="510" cy="110" r="7" fill="#ffb454"/>
+          <text x="510" y="92" text-anchor="middle" fill="#1a1f33" font-size="11">待定</text>
+          <text x="510" y="135" text-anchor="middle" fill="#5a627a" font-size="10">FCC 批 Ligado</text>
+          <text x="510" y="148" text-anchor="middle" fill="#5a627a" font-size="10">频谱 / 融资事件</text>
+        </g>
+        <g>
+          <circle cx="650" cy="110" r="7" fill="#ff6b81"/>
+          <text x="650" y="92" text-anchor="middle" fill="#1a1f33" font-size="11">2027–2028</text>
+          <text x="650" y="135" text-anchor="middle" fill="#5a627a" font-size="10">连续覆盖+分成</text>
+          <text x="650" y="148" text-anchor="middle" fill="#5a627a" font-size="10">收入放量(关键验证)</text>
+        </g>
+        <text x="370" y="195" text-anchor="middle" fill="#5a627a" font-size="11">每个季度的 10-Q（现金/股本/capex）+ 每次发射成败 = 高频可验证信号</text>
+      </svg>
+      </div>
+      <figcaption>关键催化剂时间线（据公司公告/8-K 与公开报道整理；未来日期含不确定性，以官方申报为准）。绿＝已发生，蓝＝计划中，黄＝待监管/融资，红＝终极验证点。</figcaption>
+    </figure>
+    <ul>
+      <li><strong>已发生：</strong>2026-06-17 BlueBird 8/9/10 经 Falcon 9 发射（Block 2）；此前 BB7 经 Blue Origin New Glenn（2026-04）<span class="src src-a">🟢</span>。</li>
+      <li><strong>近期（6–12 月）：</strong>后续 BlueBird 批次发射（目标 2026 内 ~45 颗 <span class="src src-c">🔴 指引</span>）、AT&amp;T/Verizon 美国初步/间歇性服务上线、每季 10-Q 看现金与摊薄。</li>
+      <li><strong>中期（12–24 月）：</strong>FCC 对 Ligado 频谱裁决、可能的新一轮 ATM/可转债融资、连续覆盖与<strong>首次有意义的订阅分成收入</strong>（终极验证点）。</li>
+    </ul>
+  </section>
+
+  <!-- ⑦ 风险因素 -->
+  <section id="risk">
+    <h2><span class="n">⑦</span>风险因素（10-K/10-Q 提炼，按重要性）</h2>
+    <ul>
+      <li><strong>持续巨额亏损与资金依赖</strong>：公司明确披露<strong>历史持续经营亏损、未来仍需大量外部融资</strong>建设星座，无法保证能以可接受条件融到 <span class="src src-a">🟢</span>。</li>
+      <li><strong>摊薄风险</strong>：增发普通股、可转债转股、warrant/期权行权将<strong>稀释现有股东</strong> <span class="src src-a">🟢</span>。</li>
+      <li><strong>技术与发射执行</strong>：卫星制造、发射、在轨运行均有失败/延期风险，单次事故可重创进度与股价 <span class="src src-a">🟢</span>。</li>
+      <li><strong>商业化未验证</strong>：尚无大规模经常性收入，<strong>MNO 分成模式、用户付费意愿、单位经济未经证明</strong> <span class="src src-a">🟢</span>。</li>
+      <li><strong>竞争</strong>：Starlink 等资源雄厚对手在 direct-to-cell 抢跑，可能压价或抢走运营商 <span class="src src-a">🟢</span>。</li>
+      <li><strong>监管/频谱</strong>：依赖 FCC 及各国监管对 SCS、频谱（含 Ligado L-band）的批准，结果不确定 <span class="src src-a">🟢</span>。</li>
+      <li><strong>控制权集中（关键人）</strong>：创始人 Avellan 借 Class C 超级投票权掌握多数表决权，<strong>少数股东话语权弱</strong>，且对其个人高度依赖 <span class="src src-a">🟢</span>。</li>
+      <li><strong>客户/合作集中</strong>：少数大运营商关系对前景影响重大，任一关系生变冲击巨大 <span class="src src-a">🟢</span>。</li>
+    </ul>
+  </section>
+
+  <!-- ⑧ 股权 / 机构 / 做空 -->
+  <section id="ownership">
+    <h2><span class="n">⑧</span>股权 / 内部人 / 机构 / short interest</h2>
+    <table>
+      <tbody>
+        <tr><td>创始人 / CEO Abel Avellan 持股</td><td>持 <strong>78,163,078</strong> AST 业务单元（可 1:1 换 A 股）+ 等量 Class C；经济权益约 <strong>20%</strong>，但凭 Class C（10 票/股）掌握约 <strong>71.6%–75% 投票权</strong> → 公司为 Nasdaq「controlled company」<span class="src src-a">🟢</span></td></tr>
+        <tr><td>机构持股</td><td>约 <strong>42%</strong>（含主动+被动基金）；内部人/关联约 47%、散户约 11% <span class="src src-b">🟡</span></td></tr>
+        <tr><td>近期内部人买卖</td><td>Avellan 据报<strong>未减持核心仓位</strong>（曾于 2024-11 对约 3% 做 collar 对冲）；$0 现金薪酬、无大额套现 <span class="src src-b">🟡</span></td></tr>
+        <tr><td>Short interest（做空）</td><td>约 <strong>5400 万股做空 ≈ 流通盘 18%</strong>（截至 2026-04-30）、days-to-cover ~3.2；<strong>历来高做空 + 高波动，易现 squeeze 也易暴跌</strong> <span class="src src-b">🟡</span></td></tr>
+        <tr><td>近期融资 / ATM / 可转债（摊薄来源）</td><td>2026-02 发 <strong>$1.075B 的 2.25% 可转债（2036，转股价 ~$116.30）</strong>；同期以 <strong>$96.92</strong> 注册直接发行约 <strong>633万 A 股</strong>用于回购/置换 2.375%、4.25% 老可转债；并有 <strong>ATM</strong> 持续增发额度 <span class="src src-a">🟢</span></td></tr>
+      </tbody>
+    </table>
+    <p class="legend"><strong>读法：</strong>创始人掌控力极强（双刃：执行连贯 vs 少数股东弱势）；机构参与度高、做空比例高 → 股价对消息极敏感、双向暴动；融资工具齐全意味着<strong>摊薄会持续、但短期内资金链断裂概率低</strong>。</p>
+  </section>
+
+  <!-- ⑨ 投资判断 -->
+  <section id="verdict">
+    <h2><span class="n">⑨</span>投资判断</h2>
+    <div class="callout insight">
+      <span class="label">评级与理由</span>
+      <span class="rating r-hold">持有 / 投机仓 Hold</span>（在 Buy / Accumulate / Hold / Reduce / Avoid 中取 Hold，并强调「仅作高风险投机仓」）<br><br>
+      <strong>一句话：</strong>这是一只<strong>「巨大 TAM 期权 × 持续巨额烧钱与无限摊薄」的纯叙事股</strong>。基本面（营收/利润/现金流）几乎全是负面，唯一的多头逻辑是「终局想象空间 + 唯一上市纯标的 + 运营商绑定」。在 ~$29B 市值上，价格已 price-in 大量未兑现的成功。<br><br>
+      <strong>适合谁：</strong>只适合<strong>能承受本金归零、风险偏好极高</strong>的投资者，作为<strong>主题成长/投机组合里的小仓位（position sizing 是第一纪律）</strong>，时间维度需 2–3 年以上、且能忍受 50%+ 回撤与剧烈波动。<strong>不适合</strong>追求确定现金流、估值锚或低波动的投资者。<br><br>
+      <strong>前提假设（评级成立的条件）：</strong>① 星座按计划推进（2026 ~45 颗、后续向连续覆盖）；② 资本市场窗口持续开放、能以不太离谱的价格融资；③ AT&amp;T/Verizon 商用如期落地并开始产生分成；④ Starlink 未在短期抢走核心运营商。<br><br>
+      <strong>Thesis-breaker（出现即应改判）：</strong>
+      <ul>
+        <li><strong>转看空/减持：</strong>关键发射连续失败或重大延期；被迫在低位贱价大额增发（融资窗口关闭信号）；某核心运营商（尤其 AT&amp;T/Verizon）倒向 Starlink；多个季度 10-Q 显示现金消耗超预期而无新融资。</li>
+        <li><strong>转更积极（Accumulate）：</strong>连续覆盖按期实现且<strong>出现首次有意义的订阅分成收入</strong>、单位经济被证实；Ligado 频谱获 FCC 批准；摊薄速度明显放缓。</li>
+      </ul>
+      <strong>不喊单</strong>：本节是分析框架，不是买卖指令。
+    </div>
+  </section>
+
+  <!-- 免责声明（必带，勿删） -->
+  <div class="disclaimer">
+    <b>⚠️ 免责声明 · 非投资建议</b><br>
+    本调研为公开信息的整理与分析，<strong>不构成投资建议</strong>，亦非任何证券买卖的要约或招揽。数据可能有误或过时，
+    请以公司官方 SEC 申报 / IR 披露为准并自行独立核实。作者不对依据本文做出的任何投资决策负责。投资有风险，入市需谨慎。
+  </div>
+
+  <!-- 出处 -->
+  <section id="src">
+    <h2>出处</h2>
+    <ul style="font-size:13.5px">
+      <li><span class="src src-a">🟢</span> SEC EDGAR · AST SpaceMobile（CIK 1780312）：<a href="https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=1780312&type=10-Q" target="_blank" rel="noopener">10-Q 列表</a> · 2026 Q1 10-Q（截止 2026-03-31，营收/净亏/现金/债务/股本/累计赤字）</li>
+      <li><span class="src src-a">🟢</span> 公司 IR / 8-K 业绩与发射公告：<a href="https://investors.ast-science.com" target="_blank" rel="noopener">investors.ast-science.com</a>（Q1'26 业绩、经营烧钱 $48M、capex、$3.5B 现金、BlueBird 8/9/10 发射）</li>
+      <li><span class="src src-a">🟢</span> 8-K / 424B5 / FWP：2026-02 的 $1.075B 2.25% 可转债（2036）、注册直接发行（$96.92×6.34M 股）、老可转债回购/置换；Schedule 13D/A：Avellan 持股与投票权</li>
+      <li><span class="src src-b">🟡</span> 市值/股价/52周区间/做空：MarketBeat、Nasdaq、Fintel、stockanalysis.com（ASTS 收盘 ~$80.66 @2026-06-18；市值 ~$29B；做空 ~18% 流通盘 @2026-04-30；卖方共识 Hold）</li>
+      <li><span class="src src-b">🟡</span> 竞品数据：Iridium（IRDM）Q1'26 8-K（营收 $219M、净利 $21.6M）；Globalstar（GSAT）TTM 营收 ~$0.27B、市值 ~$9.4B；Starlink/T-Mobile direct-to-cell 商用进展（媒体报道）</li>
+      <li><span class="src src-a">🟢</span>/<span class="src src-b">🟡</span> 合作与频谱：AT&amp;T 6 年 D2D 协议、Verizon 2025-10 definitive commercial agreement（含 $100M）、Google/Vodafone 2024 战略投资（BusinessWire/8-K）；Ligado L-band 频谱长租（$550M + ~$80M/年，待 FCC，SpaceNews/Via Satellite 报道）</li>
+      <li><span class="src src-c">🔴</span> 管理层指引/自述：2026 ~45 颗在轨目标、全年 capex $575–650M 指引、近 60 家 MNO/30 亿用户 TAM 宣称、终局收入想象（均为未独立验证的 guidance/自述）</li>
+    </ul>
+    <p class="legend">数字打架时已并列并标口径与日期；核不到处标「未披露/未找到」。所有财务关键行回到 2026 Q1 10-Q 原文核对。</p>
+  </section>
+
+  <footer class="foot">
+    股票基本面 / 估值调研笔记，<strong>非投资建议</strong>；信息按来源分级、以官方申报为准 · 数据截至 2026 Q1 10-Q（截止 2026-03-31）/ 股价 2026-06-18 · 整理日期 2026-06-21
+  </footer>
+
+</article>
+</body>
+</html>

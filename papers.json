@@ -1,5 +1,25 @@
 [
   {
+    "slug": "2026-06-17-asts",
+    "title": "AST SpaceMobile（ASTS）：基本面 / 估值 / 是否值得买入",
+    "authors": "—",
+    "team": "股票调研",
+    "arxiv": "https://investors.ast-science.com",
+    "code": "",
+    "date": "2026-06-21",
+    "published": "股票调研 2026",
+    "tldr": "卫星直连普通手机的 pre-revenue 叙事股：评级 持有/投机仓(仅小仓位)；最强多头=全球盲区 TAM 巨大+唯一上市纯标的+AT&T/Verizon/Google 绑定，最致命空头=持续巨额烧钱与无限摊薄+Starlink 碾压。",
+    "tags": [
+      "stock",
+      "equity-research",
+      "valuation",
+      "satellite",
+      "space",
+      "china"
+    ],
+    "path": "papers/2026-06-17-asts/index.html"
+  },
+  {
     "slug": "2605.17172-openjarvis-on-device-personal-ai",
     "title": "OpenJarvis：把整套 Personal AI 搬上本地设备（LLM-guided spec search）",
     "authors": "Jon Saad-Falcon, Avanika Narayan, Robby Manihani, et al.",
