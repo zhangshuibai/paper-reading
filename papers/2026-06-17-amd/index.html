@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AMD（Advanced Micro Devices）· 基本面 / 估值 / 是否值得买入</title>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --bad:#ff6b81; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --bad:#d23651; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;}
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:920px; margin:0 auto; padding:18px 22px 90px}
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:25px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)} .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap; line-height:2}
+  nav.toc a:hover{color:var(--accent)}
+  section{margin:38px 0}
+  h2{font-size:20px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:16.5px; margin:22px 0 8px}
+  p{margin:12px 0} ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)} strong{color:var(--text)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.88em}
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:13px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:9px 10px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  .num{font-variant-numeric:tabular-nums; text-align:right}
+  figure{margin:24px 0; text-align:center}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+  .svgwrap{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 8px}
+  @media (prefers-color-scheme: light){ .svgwrap{background:#fbfcff} }
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.bull{border-left:4px solid var(--ok)} .callout.bull .label{color:var(--ok)}
+  .callout.bear{border-left:4px solid var(--bad)} .callout.bear .label{color:var(--bad)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+  .src{font-size:10.5px; padding:0 6px; border-radius:999px; white-space:nowrap; vertical-align:middle}
+  .src-a{background:rgba(67,197,158,.18); color:var(--ok)}
+  .src-b{background:rgba(255,180,84,.18); color:var(--warn)}
+  .src-c{background:rgba(255,107,129,.18); color:var(--bad)}
+  .legend{font-size:12px; color:var(--muted); margin:6px 0 0}
+  .rating{display:inline-block; font-weight:800; padding:4px 16px; border-radius:999px; font-size:16px; letter-spacing:.5px}
+  .r-buy{background:rgba(67,197,158,.20); color:var(--ok)}
+  .r-accumulate{background:rgba(122,162,255,.20); color:var(--accent)}
+  .r-hold{background:rgba(255,180,84,.20); color:var(--warn)}
+  .r-reduce{background:rgba(255,140,90,.20); color:#e07a3a}
+  .r-avoid{background:rgba(255,107,129,.20); color:var(--bad)}
+  .kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin:16px 0}
+  .kpi{background:var(--panel2); border:1px solid var(--line); border-radius:10px; padding:10px 12px}
+  .kpi .k{font-size:12px; color:var(--muted)} .kpi .v{font-size:18px; font-weight:700; margin-top:2px}
+  .disclaimer{background:rgba(255,180,84,.10); border:1px solid var(--warn); border-radius:12px;
+              padding:14px 18px; margin:26px 0; font-size:13.5px; color:var(--text)}
+  .disclaimer b{color:var(--warn)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">半导体</span>
+      <span class="chip">AI 算力</span>
+      <span class="chip">数据中心 GPU</span>
+      <span class="chip">股票调研</span>
+      <span class="chip">估值</span>
+      <span class="chip">基本面</span>
+    </div>
+    <h1>AMD（Advanced Micro Devices）：基本面 / 估值 / 是否值得买入</h1>
+    <p class="orig-title">NASDAQ: AMD · 半导体 / AI 加速器 · 有真实营收的大盘成长股——「Data Center 第二增长引擎」叙事驱动的高估值成长股</p>
+    <dl class="meta-grid">
+      <dt>代码</dt><dd>AMD（NASDAQ）</dd>
+      <dt>行业</dt><dd>半导体（CPU / GPU / FPGA / AI 加速器）</dd>
+      <dt>资料来源</dt><dd>SEC EDGAR 申报（CIK 2488）/ 公司 IR / 公开报道，按来源分级标注；<a href="https://ir.amd.com" target="_blank" rel="noopener">一手入口 ir.amd.com</a></dd>
+      <dt>数据截至</dt><dd>财务＝FY2026 Q1（财季截至 2026-03-28，5/5 发布）+ FY2025 10-K（截至 2025-12-27）；股价/估值＝2026-06-18 收盘 $537.37</dd>
+      <dt>整理日期</dt><dd>2026-06-21</dd>
+    </dl>
+    <p class="legend">来源等级：<span class="src src-a">🟢 一手</span> SEC/IR/电话会 ·
+      <span class="src src-b">🟡 二手</span> 分析师/媒体/数据终端 ·
+      <span class="src src-c">🔴 指引/自述/未证实</span> 管理层 guidance 或未独立验证</p>
+  </header>
+
+  <div class="tldr">
+    <b>评级</b> — <span class="rating r-hold">持有 Hold</span>
+    （买入 Buy / 增持 Accumulate / 持有 Hold / 减持 Reduce / 回避 Avoid）<br>
+    AMD 已从「PC CPU 公司」蜕变为「Data Center 双引擎（EPYC 服务器 CPU + Instinct AI GPU）」公司：FY2025 营收 $346 亿（+34%），Data Center 板块 $166 亿、已是最大板块；FY2026 Q1 营收 $102.5 亿（+38%），Data Center $57.8 亿（+57%）。<b>多头核心</b>是数据中心 GPU 成为可信的第二增长引擎——手握 <b>OpenAI（2025-10）</b>与 <b>Meta（2026-02）两笔各 6GW、各含 1.6 亿股 warrant 的协议</b>，MI450 自 2026H2 起爬坡，花旗据此上调至 Buy / 目标价 $575 <span class="src src-c">🔴卖方</span>。<b>最致命的空头</b>是 <b>NVIDIA 的 CUDA 生态护城河 + 71% 毛利率的碾压</b>：AMD GPU 毛利率结构性低于 NVDA、ROCm 软件仍在追赶，且当前 ~179x trailing / ~62x forward P/E 已 price-in 大量尚未兑现的 AI 营收。<b>结论</b>：基本面真实且加速，但估值已把「MI450/大客户全兑现」当成既成事实——<b>给愿意承担高波动、看多 3 年 AI 算力的成长投资者「持有/逢回调分批」，不追高。</b>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi"><div class="k">市值 Market Cap</div><div class="v">~$876B <span class="src src-b">🟡</span></div></div>
+    <div class="kpi"><div class="k">营收（FY2025 全年）</div><div class="v">$346 亿 <span class="src src-a">🟢</span></div></div>
+    <div class="kpi"><div class="k">数据中心占比（Q1'26）</div><div class="v">~56% <span class="src src-a">🟢</span></div></div>
+    <div class="kpi"><div class="k">Forward P/E</div><div class="v">~62x <span class="src src-b">🟡</span></div></div>
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#what">① 公司是什么</a>
+    <a href="#peers">② 行业与竞争对手</a>
+    <a href="#fin">③ 财务体检</a>
+    <a href="#val">④ 估值</a>
+    <a href="#thesis">⑤ 多空论点</a>
+    <a href="#catalyst">⑥ 催化剂 timeline</a>
+    <a href="#risk">⑦ 风险因素</a>
+    <a href="#ownership">⑧ 股权 / 机构 / 做空</a>
+    <a href="#verdict">⑨ 投资判断</a>
+    <a href="#src">出处</a>
+  </nav>
+
+  <!-- ① 公司是什么 -->
+  <section id="what">
+    <h2><span class="n">①</span>公司是什么：使命 / 愿景 / 商业模式</h2>
+    <h3>Mission / Vision</h3>
+    <p>AMD 是一家无晶圆厂（fabless）半导体设计公司，自述使命是「打造端到端的高性能与自适应计算引擎，推动 AI、数据中心、PC 与边缘计算」<span class="src src-c">🔴</span>。CEO Dr. Lisa Su 在 FY2026 Q1 电话会中明确：「<strong>Data Center 现在是我们营收与利润增长的首要驱动力</strong>」<span class="src src-a">🟢</span>——这句话是理解今天 AMD 的关键：它已不再是那个「便宜的 Intel 替代品」，而是把全部叙事押在 <strong>AI 数据中心算力</strong> 上的成长股。</p>
+
+    <h3>怎么赚钱（business model）：四大板块</h3>
+    <p>AMD 设计芯片、外包给 <strong>TSMC（台积电）</strong> 代工，卖给云厂商、服务器 OEM、PC 厂商和工业客户。FY2025 营收按四个 reportable segment 拆分 <span class="src src-a">🟢 10-K</span>：</p>
+    <ul>
+      <li><strong>Data Center（数据中心，$166 亿 / 48%）</strong>——增长与故事核心。两条腿：<strong>EPYC 服务器 CPU</strong>（持续从 Intel 抢服务器份额）+ <strong>Instinct MI 系列 GPU</strong>（AI 训练/推理加速器，正面硬刚 NVIDIA）。</li>
+      <li><strong>Client（PC 处理器，$106 亿 / 31%）</strong>——Ryzen 桌面/笔记本 CPU。</li>
+      <li><strong>Gaming（游戏，$39 亿 / 11%）</strong>——主机半定制芯片（PS5/Xbox）+ Radeon 显卡；处于主机周期尾部、同比承压。</li>
+      <li><strong>Embedded（嵌入式，$35 亿 / 10%）</strong>——2022 年 ~$490 亿收购 <strong>Xilinx</strong> 带来的 FPGA / 自适应 SoC，工业/通信/汽车客户，高毛利但近年周期性疲软。</li>
+    </ul>
+    <p>单位经济：整体 GAAP 毛利率 FY2025 约 50%、Q1'26 升至 53%；non-GAAP 52%→55%。GPU（Instinct）的毛利率结构性低于公司均值、更显著低于 NVIDIA 的 ~71%，是估值上的关键扣分项（详见 ③④）。</p>
+  </section>
+
+  <!-- ② 行业与竞争对手 -->
+  <section id="peers">
+    <h2><span class="n">②</span>行业与竞争对手</h2>
+    <p>AI 算力是当下半导体最大的钱池，玩家分三类：<strong>商用 GPU</strong>（NVIDIA 绝对霸主、AMD 第二）、<strong>服务器/PC CPU</strong>（AMD vs Intel）、<strong>定制 ASIC/XPU</strong>（Broadcom、Marvell 帮云厂商自研加速器，分流通用 GPU 份额）。所有人都依赖 TSMC 先进制程——这是全行业共同的单点风险。下面挑 7 个决定性维度对照（目标公司加粗）：</p>
+    <table>
+      <thead><tr>
+        <th>公司</th>
+        <th>营收规模</th><th>增长</th>
+        <th>毛利率</th><th>AI 加速器卡位</th>
+        <th>护城河</th><th>估值倍数</th>
+      </tr></thead>
+      <tbody>
+        <tr><td><strong>AMD（本篇）</strong></td>
+          <td>FY25 $346 亿 <span class="src src-a">🟢</span></td>
+          <td>+34% YoY；Q1'26 +38%</td>
+          <td>GAAP 50%→53%（Q1'26）</td>
+          <td>GPU 第二名（Instinct MI350/MI450），CPU 服务器份额持续抢 Intel</td>
+          <td>x86 双供应商之一 + ROCm（追赶中）</td>
+          <td>~62x fwd P/E；EV/Sales ~23x <span class="src src-b">🟡</span></td></tr>
+        <tr><td><strong>NVIDIA（NVDA）</strong></td>
+          <td>FY26 $2,159 亿 <span class="src src-a">🟢</span></td>
+          <td>+65% YoY（FY26）</td>
+          <td>GAAP ~71%（碾压）</td>
+          <td>GPU 绝对霸主，Data Center 季度 $62B（Q4FY26）</td>
+          <td><strong>CUDA 生态（行业最深护城河）</strong></td>
+          <td>~31x fwd P/E <span class="src src-b">🟡</span></td></tr>
+        <tr><td>Intel（INTC）</td>
+          <td>FY25 $529 亿 <span class="src src-a">🟢</span></td>
+          <td>~持平；Q1'26 +7%</td>
+          <td>低、Foundry 巨亏（年 ~$25 亿经营亏）</td>
+          <td>AI GPU 缺席主流；服务器 CPU 份额被 AMD 蚕食</td>
+          <td>x86 + 自有晶圆厂（双刃剑）</td>
+          <td>亏损，看 P/B / SOTP</td></tr>
+        <tr><td>Broadcom（AVGO）</td>
+          <td>AI 半导体季度 ~$65 亿（Q4FY25，+74%）<span class="src src-b">🟡</span></td>
+          <td>AI 高增长</td>
+          <td>高（含软件）</td>
+          <td><strong>定制 XPU/ASIC 龙头</strong>，绑定多家超大规模客户</td>
+          <td>客户定制 + 网络芯片 + VMware 软件</td>
+          <td>~34x fwd P/E <span class="src src-b">🟡</span></td></tr>
+        <tr><td>Marvell（MRVL）</td>
+          <td>季度 ~$19 亿（+63% YoY）<span class="src src-b">🟡</span></td>
+          <td>AI XPU 高增长</td>
+          <td>non-GAAP ~60%</td>
+          <td>定制 AI silicon + 光互连，hyperscaler 客户</td>
+          <td>定制 ASIC + 互连 IP</td>
+          <td>~24x fwd P/E <span class="src src-b">🟡</span></td></tr>
+      </tbody>
+    </table>
+    <p><strong>读矩阵：</strong>AMD 的卡位是「<strong>唯一一家同时在服务器 CPU（抢 Intel）和 AI GPU（追 NVIDIA）两条战线都有真实放量的厂商</strong>」。CPU 侧它是赢家、对 Intel 形成持续份额压制；GPU 侧它是清晰的「第二名」，靠开放生态（ROCm vs CUDA）和大客户（OpenAI/Meta）分流 NVIDIA 的需求外溢。<strong>最大威胁来自两个方向</strong>：① NVIDIA——CUDA 生态、71% 毛利率、Blackwell/Rubin 节奏，是 AMD GPU 故事最大的天花板；② Broadcom/Marvell 的定制 ASIC——它们帮云厂商「自研」加速器，可能在通用 GPU 之外分走一块本属于 AMD/NVDA 的蛋糕。</p>
+    <div class="callout note">
+      <span class="label">诚实标注：AMD 最大软肋 = NVIDIA 的 CUDA 生态</span>
+      NVIDIA 二十年积累的 CUDA 软件栈（库、框架、开发者习惯）是 AI 训练事实标准。AMD 的 ROCm 在快速追赶、且开放（云厂商出于「不想被单一供应商锁死」的动机愿意扶持 AMD），但「软件成熟度 + 开发者迁移成本」仍是 AMD GPU 难以拿到 NVIDIA 级毛利率与份额的根本原因。
+    </div>
+  </section>
+
+  <!-- ③ 财务体检 -->
+  <section id="fin">
+    <h2><span class="n">③</span>财务体检</h2>
+    <p>定调：<strong>健康且加速的盈利成长股</strong>——不是 pre-revenue 叙事股。资产负债表稳健（净现金 ~$9B、债务极低）、自由现金流强劲。关注点不在「会不会倒」，而在「<strong>增长质量</strong>」：数据中心 GPU 能否持续放量、毛利率能否随高端 GPU 占比提升。所有数字优先取 SEC 申报，口径标注 GAAP/non-GAAP 与财季。</p>
+
+    <h3>关键三表（近三期，单位：百万美元，除 EPS / 股数）</h3>
+    <table>
+      <thead><tr><th>指标</th><th class="num">FY2024（全年）</th><th class="num">FY2025（全年，截至 12/27）</th><th class="num">FY2026 Q1（截至 3/28）</th><th>来源 / 口径</th></tr></thead>
+      <tbody>
+        <tr><td>营收 Revenue</td><td class="num">25,785</td><td class="num">34,639</td><td class="num">10,253</td><td><span class="src src-a">🟢</span> 10-K/8-K</td></tr>
+        <tr><td>GAAP 毛利率</td><td class="num">~49%</td><td class="num">50%</td><td class="num">53%</td><td><span class="src src-a">🟢</span></td></tr>
+        <tr><td>non-GAAP 毛利率</td><td class="num">~53%</td><td class="num">52%</td><td class="num">55%</td><td><span class="src src-a">🟢</span> non-GAAP</td></tr>
+        <tr><td>GAAP 经营利润</td><td class="num">~1,900</td><td class="num">3,694</td><td class="num">1,476</td><td><span class="src src-a">🟢</span></td></tr>
+        <tr><td>GAAP 净利</td><td class="num">1,641</td><td class="num">4,335</td><td class="num">1,383</td><td><span class="src src-a">🟢</span></td></tr>
+        <tr><td>non-GAAP 净利</td><td class="num">—</td><td class="num">6,831</td><td class="num">2,265</td><td><span class="src src-a">🟢</span> non-GAAP</td></tr>
+        <tr><td>GAAP 摊薄 EPS</td><td class="num">1.00</td><td class="num">2.65</td><td class="num">0.84</td><td><span class="src src-a">🟢</span></td></tr>
+        <tr><td>non-GAAP 摊薄 EPS</td><td class="num">—</td><td class="num">4.17</td><td class="num">1.37</td><td><span class="src src-a">🟢</span> non-GAAP</td></tr>
+        <tr><td>经营现金流</td><td class="num">—</td><td class="num">6,493</td><td class="num">2,955</td><td><span class="src src-a">🟢</span></td></tr>
+        <tr><td>自由现金流 FCF</td><td class="num">—</td><td class="num">5,519</td><td class="num">2,566</td><td><span class="src src-a">🟢</span></td></tr>
+        <tr><td>现金及短期投资</td><td class="num">—</td><td class="num">10,552</td><td class="num">12,347</td><td><span class="src src-a">🟢</span></td></tr>
+        <tr><td>总债务</td><td class="num">—</td><td class="num">3,222</td><td class="num">3,224</td><td><span class="src src-a">🟢</span> 净现金 ~+$9B</td></tr>
+        <tr><td>摊薄股数（百万）</td><td class="num">~1,620</td><td class="num">1,636</td><td class="num">1,650</td><td><span class="src src-a">🟢</span></td></tr>
+      </tbody>
+    </table>
+    <p class="legend">注：FY2024 部分行（经营利润/净利）受巨额 Xilinx 收购摊销影响、GAAP 数偏低；FY2024 营收 $258 亿、净利 $16.4 亿为公司公布对照值 <span class="src src-a">🟢</span>。FY2026 Q1 各项 YoY：营收 +38%、GAAP 净利 +95%、GAAP EPS +91%、non-GAAP EPS +43%。</p>
+
+    <h3>板块拆分（FY2025 vs FY2024，营收 / 经营利润，百万美元）</h3>
+    <table>
+      <thead><tr><th>板块</th><th class="num">FY25 营收</th><th class="num">FY24 营收</th><th class="num">YoY</th><th class="num">FY25 经营利润</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Data Center</strong></td><td class="num">16,635</td><td class="num">12,579</td><td class="num">+32%</td><td class="num">3,603</td><td>EPYC + Instinct，故事核心</td></tr>
+        <tr><td>Client</td><td class="num">10,640</td><td class="num">—</td><td class="num">—</td><td class="num" rowspan="2" style="vertical-align:middle">2,855（合计）</td><td>Ryzen PC CPU，Q1'26 +26%</td></tr>
+        <tr><td>Gaming</td><td class="num">3,910</td><td class="num">—</td><td class="num">—</td><td>主机周期尾部，承压</td></tr>
+        <tr><td>Embedded</td><td class="num">3,454</td><td class="num">3,557</td><td class="num">-3%</td><td class="num">1,243</td><td>Xilinx FPGA，周期疲软</td></tr>
+      </tbody>
+    </table>
+    <p class="legend">FY2025 起 AMD 将 Client 与 Gaming 合并披露经营利润（$2,855M）。FY2024 Client&amp;Gaming 合计营收 $9,649M、经营利润 $1,187M <span class="src src-a">🟢</span>。</p>
+
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 700 320" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12">
+        <line x1="60" y1="260" x2="660" y2="260" stroke="#b9c2e0" stroke-width="1.5"/>
+        <line x1="60" y1="30" x2="60" y2="260" stroke="#b9c2e0" stroke-width="1.5"/>
+        <text x="60" y="20" fill="#5a627a" text-anchor="middle">单季营收（亿美元）</text>
+        <g fill="#9aa3bd" text-anchor="end">
+          <text x="54" y="264">0</text>
+          <text x="54" y="207">30</text>
+          <text x="54" y="150">60</text>
+          <text x="54" y="93">90</text>
+          <text x="54" y="36">120</text>
+        </g>
+        <line x1="60" y1="203" x2="660" y2="203" stroke="#e6e9f2" stroke-width="1" stroke-dasharray="3 4"/>
+        <line x1="60" y1="146" x2="660" y2="146" stroke="#e6e9f2" stroke-width="1" stroke-dasharray="3 4"/>
+        <line x1="60" y1="89" x2="660" y2="89" stroke="#e6e9f2" stroke-width="1" stroke-dasharray="3 4"/>
+        <g>
+          <rect x="95" y="119" width="40" height="141" fill="#cfe0ff"/>
+          <rect x="95" y="190" width="40" height="70" fill="#3a66ff"/>
+          <text x="115" y="113" text-anchor="middle" fill="#5a627a">7.44</text>
+          <text x="115" y="278" text-anchor="middle" fill="#5a627a">Q1'25</text>
+          <rect x="215" y="114" width="40" height="146" fill="#cfe0ff"/>
+          <rect x="215" y="187" width="40" height="73" fill="#3a66ff"/>
+          <text x="235" y="108" text-anchor="middle" fill="#5a627a">7.69</text>
+          <text x="235" y="278" text-anchor="middle" fill="#5a627a">Q2'25</text>
+          <rect x="335" y="84" width="40" height="176" fill="#cfe0ff"/>
+          <rect x="335" y="178" width="40" height="82" fill="#3a66ff"/>
+          <text x="355" y="78" text-anchor="middle" fill="#5a627a">9.25</text>
+          <text x="355" y="278" text-anchor="middle" fill="#5a627a">Q3'25</text>
+          <rect x="455" y="65" width="40" height="195" fill="#cfe0ff"/>
+          <rect x="455" y="168" width="40" height="92" fill="#3a66ff"/>
+          <text x="475" y="59" text-anchor="middle" fill="#5a627a">10.27</text>
+          <text x="475" y="278" text-anchor="middle" fill="#5a627a">Q4'25</text>
+          <rect x="575" y="65" width="40" height="195" fill="#cfe0ff"/>
+          <rect x="575" y="150" width="40" height="110" fill="#3a66ff"/>
+          <text x="595" y="59" text-anchor="middle" fill="#5a627a">10.25</text>
+          <text x="595" y="278" text-anchor="middle" fill="#5a627a">Q1'26</text>
+        </g>
+        <rect x="420" y="22" width="14" height="14" fill="#cfe0ff"/><text x="439" y="33" fill="#5a627a">其他板块</text>
+        <rect x="540" y="22" width="14" height="14" fill="#3a66ff"/><text x="559" y="33" fill="#5a627a">Data Center</text>
+      </svg>
+      </div>
+      <figcaption>单季营收与 Data Center 占比趋势（本调研据 AMD SEC 申报/财报重绘；Q4'25 的 DC 拆分为据全年值推算，约值）。Data Center 占比从 Q1'25 ~50% 升至 Q1'26 的 ~56%。</figcaption>
+    </figure>
+
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 700 260" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12">
+        <line x1="60" y1="210" x2="660" y2="210" stroke="#b9c2e0" stroke-width="1.5"/>
+        <line x1="60" y1="30" x2="60" y2="210" stroke="#b9c2e0" stroke-width="1.5"/>
+        <text x="60" y="20" fill="#5a627a" text-anchor="middle">毛利率 %</text>
+        <g fill="#9aa3bd" text-anchor="end">
+          <text x="54" y="214">40</text><text x="54" y="164">45</text>
+          <text x="54" y="114">50</text><text x="54" y="64">55</text><text x="54" y="34">58</text>
+        </g>
+        <polyline fill="none" stroke="#3a66ff" stroke-width="2.5"
+          points="120,120 270,110 420,90 540,70 620,80"/>
+        <polyline fill="none" stroke="#43c59e" stroke-width="2.5" stroke-dasharray="5 4"
+          points="120,80 270,90 420,70 540,40 620,60"/>
+        <g fill="#5a627a" text-anchor="middle">
+          <text x="120" y="228">FY24</text><text x="270" y="228">FY25</text>
+          <text x="420" y="228">Q3'25</text><text x="540" y="228">Q4'25</text><text x="620" y="228">Q1'26</text>
+        </g>
+        <circle cx="620" cy="80" r="3" fill="#3a66ff"/><text x="635" y="84" fill="#3a66ff">53</text>
+        <circle cx="620" cy="60" r="3" fill="#43c59e"/><text x="635" y="56" fill="#138a6e">55</text>
+        <rect x="430" y="25" width="14" height="3" fill="#3a66ff"/><text x="449" y="29" fill="#5a627a">GAAP</text>
+        <rect x="540" y="25" width="14" height="3" fill="#43c59e"/><text x="559" y="29" fill="#5a627a">non-GAAP</text>
+      </svg>
+      </div>
+      <figcaption>毛利率趋势（本调研据 AMD 财报重绘）。Q2'25 曾因 MI308 出口管制计提 ~$8 亿存货减值压低毛利率（图中略去）；剔除后趋势向上，Q2'26 指引 non-GAAP ~56%。</figcaption>
+    </figure>
+
+    <h3>盈利质量 / 现金（成熟公司视角，替代 runway）</h3>
+    <p>AMD <strong>不缺钱</strong>：现金及短期投资 $123 亿、总债务仅 $32 亿、<strong>净现金 ~$90 亿</strong>，FY2025 FCF $55 亿、Q1'26 单季 FCF $25.7 亿。资产负债表健康，没有摊薄生存压力。真正的「质量」拷问在两点：① <strong>GAAP 与 non-GAAP 差距大</strong>（FY25 non-GAAP 净利 $68 亿 vs GAAP $43 亿，差额主要是 Xilinx 收购相关的无形资产摊销与股权激励），看估值时务必区分口径；② <strong>warrant 稀释</strong>——OpenAI + Meta 两笔协议各授予最多 1.6 亿股 warrant，若全部 vest 合计最多 ~3.2 亿股，相对当前 ~16.3 亿股是 <strong>~20% 的潜在长期稀释</strong>（按里程碑与股价目标分批 vest、且换来的是巨额 GPU 订单——是「用股权换收入」的战略性稀释，但仍是真实摊薄）。</p>
+  </section>
+
+  <!-- ④ 估值 -->
+  <section id="val">
+    <h2><span class="n">④</span>估值</h2>
+    <p>一句话：<strong>AMD 现在按「AI 成长股」定价，不是按「半导体周期股」定价。</strong>截至 2026-06-18 收盘 $537.37、市值 ~$876B，过去 52 周 +323%。</p>
+    <h3>倍数对比（vs 同业 / vs 自身历史，2026-06-18 前后）</h3>
+    <table>
+      <thead><tr><th>倍数</th><th>AMD</th><th>NVDA</th><th>同业参照</th><th>口径</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr><td>Forward P/E</td><td>~62x</td><td>~31x</td><td>AVGO ~34x / MRVL ~24x</td><td>forward, non-GAAP</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>Trailing P/E</td><td>~179x</td><td>—</td><td>—</td><td>trailing GAAP（被低 GAAP 净利拉高）</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>P/S（trailing）</td><td>~23x</td><td>—</td><td>—</td><td>trailing</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>Forward P/S / EV/Sales</td><td>~16x / ~23x</td><td>—</td><td>AVGO ~17x fwd S</td><td>forward / trailing</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>EV/EBITDA</td><td>~117x</td><td>—</td><td>—</td><td>trailing</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>P/FCF</td><td>~102x</td><td>—</td><td>—</td><td>trailing</td><td><span class="src src-b">🟡</span></td></tr>
+      </tbody>
+    </table>
+    <p class="legend">读数：AMD 的 forward P/E（~62x）<strong>显著高于 NVIDIA（~31x）</strong>——市场愿为 AMD 付更高倍数，正是在押「GPU 第二增长引擎兑现 → 增速更快 → 倍数合理」。但这也意味着 <strong>NVDA 反而更「便宜」</strong>，AMD 的估值溢价完全建立在「未来 MI450/大客户全兑现」之上，容错空间小。</p>
+
+    <h3>情景估值（给区间 + 写清假设，不给单点）</h3>
+    <p>以 FY2027 non-GAAP EPS 为锚（卖方对 2027 非常分歧）。当前 ~16.3 亿股、warrant 稀释暂按部分计入。</p>
+    <table>
+      <thead><tr><th>情景</th><th>关键假设</th><th>隐含每股区间</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Bull</strong></td><td>MI450 顺利量产、OpenAI+Meta 各 1GW 如期爬坡、2027 AI GPU 营收冲 ~$300+ 亿 <span class="src src-c">🔴卖方</span>、毛利率随高端占比升、市场维持 50–60x forward 倍数</td><td>~$575–650+（花旗 $575 即此档 <span class="src src-c">🔴</span>）</td></tr>
+        <tr><td><strong>Base</strong></td><td>Data Center 双引擎延续 ~30–40% 增长、GPU 放量但毛利率仍低于 NVDA、倍数随成长成熟回落至 ~35–45x forward</td><td>~$430–530（多家卖方均值 $430–488 落此档 <span class="src src-b">🟡</span>）</td></tr>
+        <tr><td><strong>Bear</strong></td><td>MI450 延期/良率问题、大客户爬坡慢于预期、NVDA Rubin 抢回需求、ASIC 分流、AI 资本开支降温、倍数压缩至 ~20–25x forward + EPS 下修</td><td>~$250–340</td></tr>
+      </tbody>
+    </table>
+    <p class="legend">最敏感变量：<strong>① 数据中心 GPU 营收的兑现度</strong>（MI450/Meta 是不是「已签订单」还是「预期」）、<strong>② GPU 毛利率</strong>、<strong>③ 市场给的 forward 倍数</strong>。三者任意一项不及预期，从 Bull 到 Bear 的跨度极大——这正是高估值成长股的特征，强调假设的高度不确定性，区间不构成目标价。</p>
+  </section>
+
+  <!-- ⑤ 多空论点 -->
+  <section id="thesis">
+    <h2><span class="n">⑤</span>多空论点（都写到最强）</h2>
+    <div class="callout bull">
+      <span class="label">Bull thesis 看多</span>
+      <ul>
+        <li><strong>数据中心 GPU 已是可信的第二增长引擎</strong>：Q1'26 Data Center $57.8 亿（+57%），占总营收 ~56%，且<strong>同时拿到 OpenAI（6GW，2025-10）和 Meta（6GW，2026-02）两笔超大客户协议</strong>，MI450 自 2026H2 起爬坡——这是从「单一 GPU 故事」变成「多家顶级客户背书」的质变。<span class="src src-a">🟢 8-K/IR</span></li>
+        <li><strong>EPYC 持续从 Intel 抢服务器 CPU 份额</strong>：CPU 侧 AMD 是明确赢家，Intel 自身承认误判数据中心 CPU 需求、Foundry 持续巨亏，AMD 份额仍在上行。</li>
+        <li><strong>开放生态的「反 NVIDIA 锁定」需求</strong>：云厂商不想被单一供应商垄断，有动机扶持 AMD 作为第二供应商；ROCm 在快速追赶。</li>
+        <li><strong>估值相对增速不算疯</strong>：forward PEG（按 non-GAAP）~1.2，低于部分卖方给的板块中位；若 2027 AI 营收兑现，~62x forward 会被增长「消化」。<span class="src src-b">🟡</span></li>
+        <li><strong>资产负债表干净</strong>：净现金 ~$90 亿、强 FCF，可持续投入研发/回购，无生存风险。</li>
+      </ul>
+    </div>
+    <div class="callout bear">
+      <span class="label">Bear thesis 看空</span>
+      <ul>
+        <li><strong>NVIDIA 的 CUDA 生态 + 71% 毛利率是结构性碾压</strong>：AMD GPU 毛利率结构性低于 NVDA，软件迁移成本让 AMD 难拿到 NVDA 级份额/定价；NVDA Blackwell→Rubin 的节奏可能持续吃掉增量需求。这是 AMD 故事最根本的天花板。</li>
+        <li><strong>估值已 price-in 大量未兑现的 AI 营收</strong>：~179x trailing / ~62x forward、EV/Sales ~23x——市场把「MI450/大客户全兑现」当成既成事实，<strong>任何爬坡延期/良率问题都可能触发剧烈回撤</strong>。</li>
+        <li><strong>定制 ASIC（AVGO/MRVL）分流</strong>：超大规模客户自研 XPU 可能在通用 GPU 之外切走份额，长期压制 AMD/NVDA 的 TAM。</li>
+        <li><strong>客户与代工集中</strong>：增长高度依赖少数超大客户（OpenAI/Meta）+ 全部先进制程依赖 TSMC（地缘单点）。warrant 还带来最多 ~3.2 亿股（~20%）潜在长期稀释。</li>
+        <li><strong>周期性 + 政策风险</strong>：半导体本身有周期；MI308 已因美国对华出口管制计提 ~$8 亿减值（Q2'25），中国市场政策反复是真实利润扰动。</li>
+        <li><strong>「已签 vs 预期」要分清</strong>：Meta/OpenAI 协议是<strong>多年框架 + 按里程碑 vest 的 warrant</strong>，不是锁定的硬订单收入；花旗 $330 亿/2027、$508 亿/2028 GPU 营收是<strong>卖方预测</strong>，利益相关，须打折看。<span class="src src-c">🔴</span></li>
+      </ul>
+    </div>
+    <div class="callout warn">
+      <span class="label">花旗报告作为多头数据点（🔴 卖方、利益相关）</span>
+      花旗分析师 Atif Malik 于 <strong>2026-06-12 将 AMD 由 Neutral 上调至 Buy、目标价 $460→$575</strong> <span class="src src-c">🔴</span>。核心逻辑是把 Meta 6GW 合作（custom MI450）按「每 GW ≈ $150 亿营收」直接折算，并据此把 <strong>2027 AI GPU 营收上调至 ~$330 亿、2028 ~$508 亿</strong>，用 sum-of-the-parts 把数据中心 GPU 业务单独估到 ~$281/股。<strong>务必当作「最乐观一档假设」看</strong>：这是卖方预测、利益相关，且把「框架协议/warrant」近似当成确定营收；与 ④ 的 Bull 情景同源，<strong>不构成基本面已兑现的证据</strong>。
+    </div>
+  </section>
+
+  <!-- ⑥ 催化剂 timeline -->
+  <section id="catalyst">
+    <h2><span class="n">⑥</span>催化剂 &amp; timeline</h2>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 740 180" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12">
+        <line x1="50" y1="90" x2="700" y2="90" stroke="#b9c2e0" stroke-width="2"/>
+        <g>
+          <circle cx="110" cy="90" r="6" fill="#3a66ff"/>
+          <text x="110" y="62" text-anchor="middle" fill="#5a627a">2026 Q2 财报</text>
+          <text x="110" y="116" text-anchor="middle" fill="#9aa3bd">~8月·指引$11.2B</text>
+        </g>
+        <g>
+          <circle cx="280" cy="90" r="7" fill="#43c59e"/>
+          <text x="280" y="50" text-anchor="middle" fill="#138a6e" font-weight="700">2026 H2</text>
+          <text x="280" y="66" text-anchor="middle" fill="#5a627a">MI450 量产爬坡</text>
+          <text x="280" y="116" text-anchor="middle" fill="#9aa3bd">OpenAI/Meta 首 1GW 起量</text>
+        </g>
+        <g>
+          <circle cx="450" cy="90" r="6" fill="#3a66ff"/>
+          <text x="450" y="62" text-anchor="middle" fill="#5a627a">2026 Q3/Q4 财报</text>
+          <text x="450" y="116" text-anchor="middle" fill="#9aa3bd">看 GPU 实际放量 vs 指引</text>
+        </g>
+        <g>
+          <circle cx="610" cy="90" r="7" fill="#9b8cff"/>
+          <text x="610" y="50" text-anchor="middle" fill="#6b4cff" font-weight="700">2027</text>
+          <text x="610" y="66" text-anchor="middle" fill="#5a627a">Meta 1GW→多GW</text>
+          <text x="610" y="116" text-anchor="middle" fill="#9aa3bd">warrant 首批 vest / 2027 AI 营收验证</text>
+        </g>
+      </svg>
+      </div>
+      <figcaption>关键催化剂时间线（据公开信息整理；日期含不确定性，绿色＝最关键验证点）。</figcaption>
+    </figure>
+    <ul>
+      <li><strong>每季财报</strong>：Data Center 营收与 GPU 放量是否兑现指引（Q2'26 指引 ~$11.2B、non-GAAP 毛利率 ~56%）。<span class="src src-a">🟢</span></li>
+      <li><strong>MI400/MI450 量产与良率</strong>（2026H2）：故事兑现的第一道闸门——延期/良率是最直接的 thesis-breaker。<span class="src src-c">🔴 指引</span></li>
+      <li><strong>OpenAI / Meta 首个 1GW 爬坡</strong>（2026H2→2027）：把「框架/warrant」转成真实营收的验证。</li>
+      <li><strong>warrant 里程碑 vesting</strong>：首批 vest 既是利好信号（订单兑现），也是摊薄落地。</li>
+      <li><strong>新品发布 / NVDA Rubin 节奏</strong>：竞争格局变化。</li>
+    </ul>
+  </section>
+
+  <!-- ⑦ 风险因素 -->
+  <section id="risk">
+    <h2><span class="n">⑦</span>风险因素（10-K 提炼，按重要性）</h2>
+    <ul>
+      <li><strong>竞争 / NVIDIA 主导</strong>：AI 加速器市场被 NVIDIA 凭 CUDA 生态主导，AMD 在软件成熟度、份额与定价上处于追赶位；若 ROCm 生态扩张不及预期，GPU 增长与毛利率均受限。<span class="src src-a">🟢 10-K</span></li>
+      <li><strong>客户集中</strong>：增长越来越依赖少数超大规模 AI 客户（OpenAI、Meta、主要云厂商）；任一大客户削减资本开支或转向自研 ASIC，都会显著冲击预期。<span class="src src-a">🟢</span></li>
+      <li><strong>对 TSMC 的代工依赖</strong>：先进制程几乎全部外包给 TSMC，产能、价格与台湾地缘风险是全行业共同的单点。<span class="src src-a">🟢</span></li>
+      <li><strong>出口管制 / 中国市场</strong>：美国对华先进 AI 芯片出口管制已造成实际损失——MI308 在 FY2025 Q2 计提约 $8 亿存货及相关减值；政策反复直接扰动利润与可寻址市场。<span class="src src-a">🟢</span></li>
+      <li><strong>warrant 稀释</strong>：OpenAI + Meta 协议各授予最多 1.6 亿股 warrant（合计最多 ~3.2 亿股、~20%），按里程碑/股价目标 vest，长期摊薄真实存在。<span class="src src-a">🟢 8-K</span></li>
+      <li><strong>周期性与高估值错配</strong>：半导体需求有周期，而当前估值（~62x forward / ~23x EV/Sales）已计入持续高增长，AI 资本开支若降温，估值与盈利可能同时下修（戴维斯双杀风险）。<span class="src src-b">🟡</span></li>
+      <li><strong>整合与无形资产</strong>：Xilinx（及后续并购）带来大额摊销，GAAP 盈利被压低、GAAP/non-GAAP 差距大。<span class="src src-a">🟢</span></li>
+    </ul>
+  </section>
+
+  <!-- ⑧ 股权 / 机构 / 做空 -->
+  <section id="ownership">
+    <h2><span class="n">⑧</span>股权 / 内部人 / 机构 / short interest</h2>
+    <table>
+      <tbody>
+        <tr><td>内部人 / CEO 持股</td><td>CEO Dr. Lisa Su 个人持股约 287 万股（2026-06-10 前后，约 $15 亿）；公司无单一创始人/家族控股，属典型分散持股大盘股 <span class="src src-b">🟡</span></td></tr>
+        <tr><td>机构持股</td><td>约 <strong>71%</strong> 由机构持有（Vanguard / BlackRock 等被动巨头领衔）<span class="src src-b">🟡</span></td></tr>
+        <tr><td>近期内部人买卖</td><td>过去一年高管以<strong>卖出为主</strong>（含 Lisa Su 2026-06-10 卖出 12.5 万股；近一年累计净卖出、0 买入），多为常规减持/税务，但方向是卖 <span class="src src-b">🟡</span></td></tr>
+        <tr><td>Short interest</td><td>约 4,400 万股、占流通约 <strong>2.7%</strong>——偏低，没有明显逼空或集中做空信号 <span class="src src-b">🟡</span></td></tr>
+        <tr><td>近期融资 / warrant 摊薄</td><td>无明显股权融资压力（净现金公司）；主要摊薄来自 <strong>OpenAI + Meta 各 1.6 亿股 performance warrant</strong>（合计最多 ~3.2 亿股，按里程碑分批 vest，OpenAI 一笔行权价极低 ~$0.01）<span class="src src-a">🟢 8-K</span></td></tr>
+      </tbody>
+    </table>
+    <p class="legend">卖方情绪整体偏多：多家聚合显示「Strong Buy」共识、平均目标价约 $430–488 区间（口径与样本不同而异）<span class="src src-b">🟡</span>；花旗 $575 属偏高一档 <span class="src src-c">🔴</span>。注意共识目标价多<strong>低于</strong>当前股价 $537，意味着「价格已跑在多数分析师目标之前」。</p>
+  </section>
+
+  <!-- ⑨ 投资判断 -->
+  <section id="verdict">
+    <h2><span class="n">⑨</span>投资判断</h2>
+    <div class="callout insight">
+      <span class="label">评级与理由</span>
+      <span class="rating r-hold">持有 Hold</span>（逢回调可分批增持，不追高）<br><br>
+      <strong>理由：</strong>基本面是真实且在加速的——Data Center 已成第一大板块、GPU 第二引擎从「故事」变成「有 OpenAI/Meta 背书」，资产负债表干净、FCF 强。但<strong>当前估值（~62x forward / ~179x trailing / ~23x EV/Sales）已把「MI450 + 两大客户全兑现」当成既成事实</strong>，且共识目标价多低于现价、内部人在卖、NVIDIA 的 CUDA + 71% 毛利率护城河未被撼动。风险收益在此价位偏中性：上行靠 Bull 假设兑现，下行空间在执行/估值错配时不小。<br><br>
+      <strong>适合谁：</strong>能承受高波动、看多未来 2–3 年 AI 算力扩张、愿意把 AMD 作为「第二供应商 beta」配置的成长型投资者；<strong>不适合</strong>追求安全边际的价值投资者或短线追高者。建议「<strong>逢明显回调分批建仓</strong>」而非现价一把梭。<br><br>
+      <strong>前提假设：</strong>① MI450 2026H2 如期量产且良率可控；② OpenAI/Meta 首个 1GW 按计划爬坡、把框架/warrant 转成真实营收；③ GPU 毛利率随高端占比改善；④ AI 资本开支景气不在 12–24 个月内逆转。<br><br>
+      <strong>Thesis-breaker（什么会推翻）：</strong>MI450 量产延期或良率暴雷 · 大客户削减/推迟订单或转向自研 ASIC · NVDA Rubin 重新拉开代差 · AI 资本开支周期见顶 · 连续季报 Data Center 不及指引 · 中国出口管制进一步收紧。任一出现，应从「持有」下调。
+    </div>
+  </section>
+
+  <!-- 免责声明（必带，勿删） -->
+  <div class="disclaimer">
+    <b>⚠️ 免责声明 · 非投资建议</b><br>
+    本调研为公开信息的整理与分析，<strong>不构成投资建议</strong>，亦非任何证券买卖的要约或招揽。数据可能有误或过时，
+    请以公司官方 SEC 申报 / IR 披露为准并自行独立核实。作者不对依据本文做出的任何投资决策负责。投资有风险，入市需谨慎。
+  </div>
+
+  <!-- 出处 -->
+  <section id="src">
+    <h2>出处</h2>
+    <ul style="font-size:13.5px">
+      <li><span class="src src-a">🟢</span> SEC EDGAR · AMD（CIK 0000002488）申报入口：<a href="https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000002488&type=10-K" target="_blank" rel="noopener">10-K / 10-Q / 8-K 列表</a></li>
+      <li><span class="src src-a">🟢</span> FY2025 10-K（截至 2025-12-27）：<a href="https://www.sec.gov/Archives/edgar/data/2488/000000248826000021/amd-20251227.htm" target="_blank" rel="noopener">amd-20251227.htm</a></li>
+      <li><span class="src src-a">🟢</span> FY2025 Q4&全年财报新闻稿（IR）：<a href="https://ir.amd.com/news-events/press-releases/detail/1276/amd-reports-fourth-quarter-and-full-year-2025-financial-results" target="_blank" rel="noopener">ir.amd.com/.../1276</a></li>
+      <li><span class="src src-a">🟢</span> FY2026 Q1 财报新闻稿（截至 2026-03-28，5/5 发布）：<a href="https://ir.amd.com/news-events/press-releases/detail/1284/amd-reports-first-quarter-2026-financial-results" target="_blank" rel="noopener">ir.amd.com/.../1284</a> · <a href="https://www.amd.com/en/newsroom/press-releases/2026-5-5-amd-reports-first-quarter-2026-financial-results.html" target="_blank" rel="noopener">amd.com newsroom</a> · <a href="https://www.sec.gov/Archives/edgar/data/0000002488/000000248826000072/q12026991.htm" target="_blank" rel="noopener">8-K exhibit 99.1</a></li>
+      <li><span class="src src-a">🟢</span> AMD–Meta 6GW 合作（2026-02-24，含 1.6 亿股 warrant）：<a href="https://ir.amd.com/news-events/press-releases/detail/1279/amd-and-meta-announce-expanded-strategic-partnership-to-deploy-6-gigawatts-of-amd-gpus" target="_blank" rel="noopener">IR 新闻稿</a> · <a href="https://www.sec.gov/Archives/edgar/data/0000002488/000000248826000045/pressreleasedatedfebruary2.htm" target="_blank" rel="noopener">8-K</a></li>
+      <li><span class="src src-a">🟢</span> AMD–OpenAI 6GW 合作（2025-10-06，1.6 亿股 warrant、$0.01 行权价、最高 vest 股价目标 $600）：<a href="https://ir.amd.com/news-events/press-releases/detail/1260/amd-and-openai-announce-strategic-partnership-to-deploy-6-gigawatts-of-amd-gpus" target="_blank" rel="noopener">IR 新闻稿</a> · <a href="https://www.sec.gov/Archives/edgar/data/0000002488/000119312525230895/d28189d8k.htm" target="_blank" rel="noopener">8-K</a></li>
+      <li><span class="src src-b">🟡</span> 估值/统计（股价 $537.37 @2026-06-18、市值/倍数）：<a href="https://stockanalysis.com/stocks/amd/statistics/" target="_blank" rel="noopener">stockanalysis.com/stocks/amd</a></li>
+      <li><span class="src src-c">🔴</span> 花旗 Atif Malik 上调 Buy / 目标价 $575（2026-06-12，卖方、利益相关）：<a href="https://www.thestreet.com/investing/stocks/citi-resets-amd-stock-price-target-on-key-move" target="_blank" rel="noopener">TheStreet</a> · <a href="https://finance.yahoo.com/markets/stocks/articles/citi-upgrades-amd-stock-buy-163920457.html" target="_blank" rel="noopener">Yahoo Finance</a></li>
+      <li><span class="src src-b">🟡</span> 竞品财务（NVDA FY26 $215.9B / Intel FY25 $52.9B / AVGO / MRVL）：各公司 IR/8-K 与媒体汇总（NVIDIA newsroom、Intel IR、futurumgroup 等）</li>
+      <li><span class="src src-b">🟡</span> Short interest（~2.7%）/ 机构持股（~71%）/ 分析师共识：MarketBeat、gurufocus、stockanalysis 等聚合（口径互异，已就低标注）</li>
+    </ul>
+  </section>
+
+  <footer class="foot">
+    股票基本面 / 估值调研笔记，<strong>非投资建议</strong>；信息按来源分级、以官方申报为准 · 数据截至 财务 FY2026 Q1（2026-03-28）/ 股价 2026-06-18 · 整理日期 2026-06-21
+  </footer>
+
+</article>
+</body>
+</html>
