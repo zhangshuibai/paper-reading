@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>E2B · 竞争格局与赛道早期度调研</title>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --bad:#ff6b81; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --bad:#d23651; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;}
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:920px; margin:0 auto; padding:18px 22px 90px}
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:25px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)} .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap; line-height:2}
+  nav.toc a:hover{color:var(--accent)}
+  section{margin:38px 0}
+  h2{font-size:20px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:16.5px; margin:22px 0 8px}
+  p{margin:12px 0} ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)} strong{color:var(--text)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.88em}
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:13px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:9px 10px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  figure{margin:24px 0; text-align:center}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+  .svgwrap{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 8px}
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+  .src{font-size:10.5px; padding:0 6px; border-radius:999px; white-space:nowrap; vertical-align:middle}
+  .src-a{background:rgba(67,197,158,.18); color:var(--ok)}
+  .src-b{background:rgba(255,180,84,.18); color:var(--warn)}
+  .src-c{background:rgba(255,107,129,.18); color:var(--bad)}
+  .legend{font-size:12px; color:var(--muted); margin:6px 0 0}
+  .verdict{display:inline-block; font-weight:700; padding:3px 12px; border-radius:999px; font-size:14px}
+  .v-nascent{background:rgba(122,162,255,.18); color:var(--accent)}
+  .v-emerging{background:rgba(67,197,158,.18); color:var(--ok)}
+  .v-crowded{background:rgba(255,180,84,.18); color:var(--warn)}
+  .v-mature{background:rgba(255,107,129,.18); color:var(--bad)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">AI Agent Infra</span>
+      <span class="chip">Code Sandbox</span>
+      <span class="chip">卖铲子</span>
+      <span class="chip">竞争格局</span>
+      <span class="chip">赛道早期度</span>
+      <span class="chip">创业 idea</span>
+    </div>
+    <h1>E2B：AI agent 代码沙箱赛道的竞争格局与早期度调研</h1>
+    <p class="orig-title">e2b.dev — 给 AI agent 跑代码的 secure cloud sandbox / runtime（YC 出身，开源 SDK + 托管云）；赛道是否早期、谁是最大威胁、有无可借鉴 whitespace</p>
+    <dl class="meta-grid">
+      <dt>对象</dt><dd><a href="https://e2b.dev" target="_blank" rel="noopener">https://e2b.dev</a> · <a href="https://github.com/e2b-dev" target="_blank" rel="noopener">github.com/e2b-dev</a></dd>
+      <dt>赛道</dt><dd>AI agent code execution / cloud sandbox infrastructure（给 agent 安全跑代码、数据分析、computer-use 的隔离 runtime）</dd>
+      <dt>整理</dt><dd>对话调研笔记；信息来自公开检索，按来源分级标注，产品能力未必经独立验证</dd>
+      <dt>日期</dt><dd>2026-06-21</dd>
+    </dl>
+    <p class="legend">来源等级：<span class="src src-a">🟢 一手</span> 官网/SEC/官方 ·
+      <span class="src src-b">🟡 二手</span> 媒体/数据库 ·
+      <span class="src src-c">🔴 自述/未证实</span> 营销口径或未独立验证</p>
+  </header>
+
+  <div class="tldr">
+    <b>一句话</b> — <strong>E2B</strong>（公司主体 FoundryLabs / E2B，e2b.dev）做的是「给 AI agent 跑代码的安全云沙箱」：开源 SDK（Python/JS）+ 托管云 + self-host，底层用 <strong>Firecracker microVM</strong>，~80–200ms 秒级启动、强隔离，让 LLM 安全执行生成的代码、装包、读写文件、联网——典型用在 code interpreter、data analysis agent、coding agent、computer-use。赛道判 <span class="verdict v-emerging">emerging → 快速 crowded</span>：2024–2025 资本与玩家集中涌入（Modal、Daytona、Morph、Runloop、Vercel Sandbox、Fly.io Sprites、Northflank…），且 <strong>Cloudflare 2026 已 GA 自家 Sandboxes</strong>——巨头进场是拥挤化的强信号。<strong>最大威胁不是同行而是上游</strong>：大模型厂自带 code execution（OpenAI Code Interpreter、各家内置）+ Cloudflare/Vercel 顺手做。可借鉴 whitespace：<strong>面向中国信创/私有化部署的 agent 沙箱</strong>（数据不出域、国产 CPU/OS 适配），以及 <strong>computer-use / GUI 沙箱</strong>这一更高价值的垂直层。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#market">① 赛道地图 + 早期度</a>
+    <a href="#matrix">② 竞品对照矩阵</a>
+    <a href="#map">③ 定位图</a>
+    <a href="#funding">④ 融资 timeline</a>
+    <a href="#snapshot">⑤ 公司速览</a>
+    <a href="#adoption">⑥ 开源与采用度</a>
+    <a href="#cn">⑦ 中国对标</a>
+    <a href="#idea">⑧ 创业 idea 借鉴</a>
+    <a href="#take">⑨ 现实判断</a>
+    <a href="#src">出处</a>
+  </nav>
+
+  <div class="callout note">
+    <span class="label">消歧</span>
+    本篇说的 <strong>E2B</strong> 是 <a href="https://e2b.dev" target="_blank" rel="noopener">e2b.dev</a>——AI agent 的代码执行 sandbox / runtime，YC / 捷克裔创始人、开源 SDK，公司法人主体在融资文件里常写作 <strong>FoundryLabs, Inc.</strong>（品牌 E2B，意为 "environment to business"）。<strong>不是</strong>其它同名「E2B」（如药物警戒数据标准 ICH E2B(R3)、各类 B2B/电商缩写、生物学名词）。文中如再遇歧义会就地点明。<span class="src src-b">🟡</span>
+  </div>
+
+  <!-- ① 赛道与早期度 -->
+  <section id="market">
+    <h2><span class="n">①</span>赛道地图 + 早期度判断</h2>
+    <p>E2B 属于 <strong>「agent infra / 卖铲子」</strong>层里的一个细分：<strong>code execution sandbox / agent runtime</strong>。需求来自一个很硬的现实——LLM / agent 会生成代码并想真的「跑起来」（做数据分析、调试、装依赖、写文件、点浏览器），但你<strong>不能把模型生成的、不可信的代码直接丢进自己的生产环境</strong>跑。于是需要一个秒级启动、强隔离、用完即弃、可联网可持久化的「一次性电脑」。E2B 把这件事打包成 SDK + 云：<code>sbx = Sandbox()</code> 一行起一个隔离 Linux 环境，跑完销毁。<span class="src src-a">🟢</span></p>
+    <h3>玩家分群（四象限别漏）</h3>
+    <ul>
+      <li><strong>现有巨头 / 上游平台：</strong><strong>Cloudflare</strong>（2026 年 Sandboxes GA + Dynamic Workers 用 V8 isolate 跑 agent 代码）、<strong>Vercel</strong>（Vercel Sandbox，beta，Firecracker）、<strong>AWS</strong>（Firecracker 的原主、Lambda/Fargate 可自建）。这些平台「顺手做」就是 E2B 最危险的方向。<span class="src src-b">🟡</span></li>
+      <li><strong>垂直创业公司（直接竞品）：</strong><strong>Modal</strong>（serverless + Sandboxes，唯一沙箱内带 GPU）、<strong>Daytona</strong>（主打最快冷启动）、<strong>Morph</strong>（Infinibranch，VM 分叉/并行探索）、<strong>Runloop</strong>（Devboxes，面向 coding agent / 评测）、<strong>Northflank</strong>、<strong>Blaxel</strong>、<strong>Fly.io Sprites</strong>（2026 年 1 月发布）、<strong>Coder</strong>。<span class="src src-b">🟡</span></li>
+      <li><strong>大模型厂自带 code execution（最大替代威胁）：</strong><strong>OpenAI Code Interpreter / Advanced Data Analysis</strong>、各大模型厂（Anthropic、Google 等）内置的 code-tool / agent runtime——对终端开发者而言「闭环自带」往往就够用，根本不需要再外采沙箱。<span class="src src-b">🟡</span></li>
+      <li><strong>开源 / 免费替代（最易被忽视）：</strong><strong>E2B 自己就是开源的</strong>（Apache-2.0），所以「自建」门槛被它亲手拉低——团队可以拿 <strong>Firecracker</strong> / <strong>gVisor</strong> / <strong>Docker + Kata Containers</strong> 自己搭；还有 <strong>Replit</strong>、<strong>CodeSandbox</strong> 等通用云 IDE/沙箱可改造。<span class="src src-b">🟡</span></li>
+    </ul>
+    <div class="callout insight">
+      <span class="label">早期度判断</span>
+      <span class="verdict v-emerging">emerging → 正快速 crowded</span>
+      （nascent 萌芽 / emerging 新兴 / crowded 拥挤 / mature 成熟）<br><br>
+      <strong>判断信号：</strong>
+      ① <strong>玩家数量与新增速度</strong>——18 个月内冒出十几家专门做 agent 沙箱的公司，2026 年仍有新玩家（Fly.io Sprites 1 月发布）<span class="src src-b">🟡</span>；
+      ② <strong>融资热度</strong>——E2B Series A $21M、Daytona Series A $24M（传 $125M 估值）、Modal Series B $87M（$1.1B 估值，传 2026 年谈 $2.5B），资本明显在押这一层<span class="src src-b">🟡</span>；
+      ③ <strong>巨头是否进场</strong>——<strong>已进场</strong>：Cloudflare 2026 年 Sandboxes GA、Vercel 出 Sandbox、AWS 持有 Firecracker，这是赛道从 emerging 滑向 crowded 的最强信号<span class="src src-b">🟡</span>；
+      ④ <strong>开源 / 免费替代</strong>——存在且强（E2B 本身开源 + Firecracker/gVisor 自建）；
+      ⑤ <strong>客户认知</strong>——已成型（Manus / Perplexity / Mistral 等知名 agent 都在用沙箱），但「用谁家」远未固化；
+      ⑥ <strong>公认 benchmark / 标准</strong>——尚无统一标准，各家自报冷启动/隔离/计费口径打架（见下表注意事项）。
+      <br><br>综合：<strong>需求真实且爆发（agent / coding agent 起飞 → 执行层刚需），但供给端 18 个月就挤满，且巨头已下场——窗口正在快速关闭</strong>。
+    </div>
+  </section>
+
+  <!-- ② 竞品矩阵 -->
+  <section id="matrix">
+    <h2><span class="n">②</span>竞品对照矩阵</h2>
+    <p>选 7 个对这个赛道最有决定性的维度：<strong>开源/闭源</strong>（决定自建门槛与信任）、<strong>隔离技术</strong>（microVM 强隔离 vs 容器/isolate，决定安全与冷启动的权衡）、<strong>启动延迟</strong>（agent 循环里每步都在等，极敏感）、<strong>持久化/状态</strong>（pause-resume / snapshot / fork，决定能不能跑长任务）、<strong>computer-use 支持</strong>（GUI/桌面沙箱，高价值场景）、<strong>自托管</strong>（决定能不能进信创/私有化）、<strong>融资规模</strong>（耐力）。各家自报口径不一，已尽量标来源；冷启动数字尤其是营销樱桃挑选，谨慎对待。</p>
+    <table>
+      <thead><tr>
+        <th>玩家</th>
+        <th>开源</th>
+        <th>隔离技术</th>
+        <th>启动延迟<br>(自报)</th>
+        <th>持久化/状态</th>
+        <th>computer-use</th>
+        <th>自托管</th>
+        <th>融资</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>E2B（本篇）</strong></td>
+          <td><strong>是</strong>，Apache-2.0 <span class="src src-a">🟢</span></td>
+          <td>Firecracker microVM <span class="src src-b">🟡</span></td>
+          <td>同区 ~80–200ms <span class="src src-c">🔴自述</span></td>
+          <td>pause/resume（保内存）+ snapshot；单沙箱可跑 24h <span class="src src-a">🟢</span></td>
+          <td>有 Desktop / computer-use sandbox <span class="src src-a">🟢</span></td>
+          <td>是（Terraform，AWS/GCP/Azure）<span class="src src-a">🟢</span></td>
+          <td>$32–35M（A 轮 $21M）<span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Modal</td>
+          <td>闭源（SDK 开源）<span class="src src-b">🟡</span></td>
+          <td>gVisor 容器，沙箱内可带 <strong>GPU</strong> <span class="src src-b">🟡</span></td>
+          <td>亚秒级 <span class="src src-c">🔴自述</span></td>
+          <td>Sandboxes 临时为主 <span class="src src-b">🟡</span></td>
+          <td>非主打 <span class="src src-b">🟡</span></td>
+          <td>否（纯托管）<span class="src src-b">🟡</span></td>
+          <td><strong>$111M</strong>（B 轮 $87M，$1.1B 估值）<span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Daytona</td>
+          <td>部分开源 <span class="src src-b">🟡</span></td>
+          <td>Docker 容器 <span class="src src-b">🟡</span></td>
+          <td>主打最快，自称 sub-90ms（优化 27ms）<span class="src src-c">🔴自述</span></td>
+          <td>persistent-first，snapshot <span class="src src-b">🟡</span></td>
+          <td>非主打 <span class="src src-b">🟡</span></td>
+          <td>是 <span class="src src-b">🟡</span></td>
+          <td>$24M Series A（传 $125M 估值）<span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Morph</td>
+          <td>闭源 <span class="src src-b">🟡</span></td>
+          <td>microVM <span class="src src-b">🟡</span></td>
+          <td>fork/restore VM &lt;250ms <span class="src src-c">🔴自述</span></td>
+          <td><strong>Infinibranch</strong>：snapshot/branch/fork &lt;250ms <span class="src src-b">🟡</span></td>
+          <td>非主打 <span class="src src-b">🟡</span></td>
+          <td>否 <span class="src src-b">🟡</span></td>
+          <td>未披露 <span class="src src-c">🔴</span></td>
+        </tr>
+        <tr>
+          <td>Runloop</td>
+          <td>闭源 <span class="src src-b">🟡</span></td>
+          <td>microVM（Devboxes）<span class="src src-b">🟡</span></td>
+          <td>未披露统一口径 <span class="src src-c">🔴</span></td>
+          <td>persistent + snapshot；面向 coding agent/评测 <span class="src src-b">🟡</span></td>
+          <td>非主打 <span class="src src-b">🟡</span></td>
+          <td>否 <span class="src src-b">🟡</span></td>
+          <td>$7M seed（2025-07）<span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Cloudflare Sandboxes</td>
+          <td>SDK 开源 <span class="src src-b">🟡</span></td>
+          <td>容器 + Dynamic Workers(V8 isolate) <span class="src src-b">🟡</span></td>
+          <td>isolate 极快、容器较慢 <span class="src src-c">🔴自述</span></td>
+          <td>persistent isolated env（2026 GA）<span class="src src-b">🟡</span></td>
+          <td>容器内可装 <span class="src src-b">🟡</span></td>
+          <td>否（绑 Cloudflare）<span class="src src-b">🟡</span></td>
+          <td>巨头自有资金 <span class="src src-a">🟢</span></td>
+        </tr>
+        <tr>
+          <td>Vercel Sandbox</td>
+          <td>闭源 <span class="src src-b">🟡</span></td>
+          <td>Firecracker microVM <span class="src src-b">🟡</span></td>
+          <td>未披露统一口径 <span class="src src-c">🔴</span></td>
+          <td>临时为主，按 active CPU 计费 <span class="src src-b">🟡</span></td>
+          <td>非主打 <span class="src src-b">🟡</span></td>
+          <td>否（绑 Vercel）<span class="src src-b">🟡</span></td>
+          <td>巨头自有资金 <span class="src src-a">🟢</span></td>
+        </tr>
+        <tr>
+          <td>大模型厂自带<br>(OpenAI Code Interpreter 等)</td>
+          <td>否 <span class="src src-b">🟡</span></td>
+          <td>各家自有沙箱（不披露）<span class="src src-c">🔴</span></td>
+          <td>对用户透明 <span class="src src-b">🟡</span></td>
+          <td>会话级，绑模型 <span class="src src-b">🟡</span></td>
+          <td>部分有（computer-use）<span class="src src-b">🟡</span></td>
+          <td>否 <span class="src src-b">🟡</span></td>
+          <td>母公司体量 <span class="src src-a">🟢</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>读矩阵：</strong>E2B 的差异化在三点——<strong>开源 + microVM 强隔离 + 自托管</strong>三件套同时具备，加上较早把 <strong>computer-use / Desktop 沙箱</strong>做出来，且采用面最广（Manus/Perplexity/Mistral 等都用）。但<strong>同质化已很严重</strong>：microVM 路线被 Vercel、Fly.io、Runloop、Morph 复制；冷启动这条「卷点」被 Daytona、Blaxel 卷到几十毫秒；GPU 这条 Modal 独占；钱最多的是 Modal（$1.1B 估值）。E2B 的真正护城河不在某个技术指标，而在<strong>开源生态 + 先发的开发者心智 + 企业自托管能力</strong>——但这三样都不抗「上游平台顺手做」。</p>
+  </section>
+
+  <!-- ③ 定位图 -->
+  <section id="map">
+    <h2><span class="n">③</span>定位图（whitespace 在哪）</h2>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 640 400" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12">
+        <line x1="40" y1="200" x2="600" y2="200" stroke="#b9c2e0" stroke-width="1.5"/>
+        <line x1="320" y1="24" x2="320" y2="372" stroke="#b9c2e0" stroke-width="1.5"/>
+        <text x="598" y="218" text-anchor="end" fill="#5a627a">开源 / 可自托管 →</text>
+        <text x="42" y="218" fill="#5a627a">← 闭源 / 绑平台</text>
+        <text x="326" y="34" fill="#5a627a">↑ 垂直：为 agent 沙箱专门设计</text>
+        <text x="326" y="366" fill="#5a627a">↓ 通用云 / 顺手做</text>
+        <rect x="470" y="40" width="120" height="84" fill="#7aa2ff" opacity="0.10"/>
+        <text x="530" y="64" text-anchor="middle" fill="#3a66ff" font-size="11">whitespace:</text>
+        <text x="530" y="80" text-anchor="middle" fill="#3a66ff" font-size="11">信创/私有化</text>
+        <text x="530" y="96" text-anchor="middle" fill="#3a66ff" font-size="11">+ GUI/computer-use</text>
+        <text x="530" y="112" text-anchor="middle" fill="#3a66ff" font-size="11">垂直沙箱</text>
+        <circle cx="430" cy="95" r="7" fill="#3a66ff"/>
+        <text x="430" y="84" text-anchor="middle" fill="#1a1f33" font-weight="700">E2B</text>
+        <circle cx="400" cy="135" r="6" fill="#6b4cff"/>
+        <text x="400" y="124" text-anchor="middle" fill="#36406b">Daytona</text>
+        <circle cx="245" cy="110" r="6" fill="#6b4cff"/>
+        <text x="245" y="100" text-anchor="middle" fill="#36406b">Runloop</text>
+        <circle cx="210" cy="138" r="6" fill="#6b4cff"/>
+        <text x="210" y="156" text-anchor="middle" fill="#36406b">Morph</text>
+        <circle cx="230" cy="250" r="7" fill="#6b4cff"/>
+        <text x="230" y="270" text-anchor="middle" fill="#36406b">Modal</text>
+        <circle cx="180" cy="180" r="6" fill="#b3701a"/>
+        <text x="180" y="170" text-anchor="middle" fill="#b3701a">Vercel SB</text>
+        <circle cx="150" cy="290" r="7" fill="#d23651"/>
+        <text x="150" y="310" text-anchor="middle" fill="#d23651">Cloudflare</text>
+        <circle cx="450" cy="150" r="6" fill="#6b4cff"/>
+        <text x="458" y="140" text-anchor="middle" fill="#36406b">Fly Sprites</text>
+        <circle cx="120" cy="330" r="7" fill="#d23651"/>
+        <text x="120" y="350" text-anchor="middle" fill="#d23651">模型厂自带</text>
+        <circle cx="525" cy="270" r="6" fill="#138a6e"/>
+        <text x="525" y="290" text-anchor="middle" fill="#138a6e">自建 Firecracker</text>
+      </svg>
+      </div>
+      <figcaption>定位图（本调研重绘）。X 轴 = 闭源绑平台 ↔ 开源可自托管，Y 轴 = 通用云顺手做 ↔ 为 agent 沙箱垂直设计。E2B 占住「开源 + 垂直」右上格；<strong>真正的空位在更右上角</strong>：把「可私有化/信创合规」与「GUI/computer-use 垂直沙箱」叠加——目前没人专门占。左下角红点（Cloudflare / 模型厂自带）是从「通用顺手做」方向压过来的最大威胁。</figcaption>
+    </figure>
+  </section>
+
+  <!-- ④ 融资 timeline -->
+  <section id="funding">
+    <h2><span class="n">④</span>融资 timeline</h2>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 720 170" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12.5">
+        <line x1="70" y1="80" x2="660" y2="80" stroke="#b9c2e0" stroke-width="2"/>
+        <circle cx="110" cy="80" r="7" fill="#7aa2ff"/>
+        <text x="110" y="56" text-anchor="middle" fill="#5a627a">2023.03</text>
+        <text x="110" y="108" text-anchor="middle" fill="#1a1f33" font-weight="700">成立</text>
+        <text x="110" y="126" text-anchor="middle" fill="#5a627a">YC / 捷克裔</text>
+        <circle cx="330" cy="80" r="8" fill="#43c59e"/>
+        <text x="330" y="50" text-anchor="middle" fill="#5a627a">2024.10（公布）</text>
+        <text x="330" y="108" text-anchor="middle" fill="#1a1f33" font-weight="700">Seed $11.5M</text>
+        <text x="330" y="126" text-anchor="middle" fill="#5a627a">Decibel 领投</text>
+        <text x="330" y="142" text-anchor="middle" fill="#5a627a">Kaya/Sunflower/Pareto</text>
+        <circle cx="600" cy="80" r="9" fill="#3a66ff"/>
+        <text x="600" y="50" text-anchor="middle" fill="#5a627a">2025.07.28</text>
+        <text x="600" y="108" text-anchor="middle" fill="#1a1f33" font-weight="700">Series A $21M</text>
+        <text x="600" y="126" text-anchor="middle" fill="#5a627a">Insight Partners 领投</text>
+        <text x="600" y="142" text-anchor="middle" fill="#5a627a">累计 ~$32–35M</text>
+      </svg>
+      </div>
+      <figcaption>E2B 融资时间线（据公开报道整理）。注：Seed 的「时间」各源打架——多数媒体按 <strong>2024-10-18 公布</strong>，少数源写 <strong>2023-09 完成</strong>（很可能是「完成 vs 公布」之差）；此处以公布日为主、并列标注。</figcaption>
+    </figure>
+    <table>
+      <thead><tr><th>时间</th><th>事件 / 轮次</th><th>金额</th><th>投资方</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr><td>2023-03</td><td>公司成立（FoundryLabs / E2B）；做过前身产品 DevBook，GPT-3.5 后转 agent 沙箱</td><td>—</td><td>创始人 Vasek Mlejnsky(CEO)、Tomas Valenta(CTO)</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2024-10-18 公布<br>（部分源记 2023-09 完成）</td><td>Seed</td><td><strong>$11.5M</strong></td><td>Decibel Partners 领投；Kaya VC、Sunflower Capital、Pareto + 天使</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2025-07-28</td><td>Series A</td><td><strong>$21M</strong></td><td>Insight Partners 领投；Decibel、Sunflower、Kaya + 天使（前 Docker CEO Scott Johnston）</td><td><span class="src src-a">🟢</span>官方 blog / <span class="src src-b">🟡</span></td></tr>
+        <tr><td>累计</td><td>—</td><td><strong>~$32–35M</strong>（官方 blog 写「累计 $32M」；部分数据库写 $35M，口径差异）</td><td>—</td><td><span class="src src-a">🟢</span>/<span class="src src-b">🟡</span></td></tr>
+      </tbody>
+    </table>
+    <p><strong>融资节奏佐证阶段：</strong>Seed→A 单轮都在十几到二十几 M，估值未官方披露（数据库口径不一，不强行取一个）。横向看赛道整体融资热度高——同期 Daytona $24M Series A、Modal $87M Series B（$1.1B 估值，传 2026 年谈 $2.5B）、Runloop $7M seed——<strong>钱在往这一层涌，但 E2B 的弹药量明显小于 Modal</strong>，这在「跟巨头/重资本对手拼云成本与销售」时是结构性软肋。</p>
+  </section>
+
+  <!-- ⑤ 公司速览 -->
+  <section id="snapshot">
+    <h2><span class="n">⑤</span>公司速览</h2>
+    <table>
+      <tbody>
+        <tr><td>是什么 / 定位</td><td>开源的 secure cloud sandbox / runtime，让 LLM/agent 安全执行生成的代码。官网现自我定位为「The Enterprise AI Agent Cloud」。<span class="src src-a">🟢</span></td></tr>
+        <tr><td>产品</td><td>① <strong>开源 SDK</strong>（Python / JS-TS），一行起一个隔离 Linux 沙箱；② <strong>托管云</strong>（按用量秒级计费）；③ <strong>self-host</strong>（Terraform，AWS/GCP/Azure）；④ <strong>Desktop / computer-use sandbox</strong>（GUI 自动化）；⑤ 模板生态（预置环境）。底层 Firecracker microVM，自报同区 ~80–200ms 启动、单沙箱最长 24h。<span class="src src-a">🟢</span></td></tr>
+        <tr><td>团队</td><td>捷克裔联创、儿时好友：<strong>Vasek Mlejnsky</strong>（CEO）、<strong>Tomas Valenta</strong>（CTO）。前身产品 DevBook（云端开发/沙箱），GPT-3.5 出现后基于已有沙箱技术转做 agent code execution。YC 出身。<span class="src src-b">🟡</span></td></tr>
+        <tr><td>商业模式</td><td>开源 SDK 引流 → 托管云按用量计费（per-second：~$0.0504/vCPU-hr、$0.0162/GiB-hr；Hobby 免费送 $100 额度、≤20 并发；Pro $150/月、≤100 并发可扩到 1,100）+ 企业 self-host/合约。<span class="src src-a">🟢</span></td></tr>
+        <tr><td>状态</td><td>Series A 后（2025-07），累计 ~$32–35M；自述「88% 的 Fortune 100 已注册、过半 Fortune 500 在用、自去年 10 月起累计数亿次沙箱会话」——<strong>注意「注册」≠「付费在用」，这些采用数字为公司自述</strong>。<span class="src src-c">🔴自述</span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ⑥ 开源与采用度 -->
+  <section id="adoption">
+    <h2><span class="n">⑥</span>开源与采用度（深科技关键）</h2>
+    <ul>
+      <li><strong>主仓库：</strong><a href="https://github.com/e2b-dev/E2B" target="_blank" rel="noopener">github.com/e2b-dev/E2B</a>，<strong>~12.7k stars / ~937 forks</strong>（2026-06 直接抓取）<span class="src src-a">🟢</span>。注：早前的二手汇总写 ~8.9k，应为旧快照；以仓库当前数为准。许可证 <strong>Apache-2.0</strong>（宽松、利于商用与自建）。<span class="src src-a">🟢</span></li>
+      <li><strong>SDK：</strong>官方 Python 与 JavaScript/TypeScript SDK，可接入任意 LLM/agent 框架。<span class="src src-a">🟢</span></li>
+      <li><strong>computer-use：</strong>有 Desktop / computer-use sandbox（让 agent 操作图形界面、浏览器），是比纯 code interpreter 更高价值的一层。<span class="src src-a">🟢</span></li>
+      <li><strong>真实采用证据（区分一手/自述）：</strong>官方 case study 写 <strong>Perplexity</strong>（Pro 用户的 Advanced Data Analysis 一周内基于 E2B 上线）、<strong>Manus</strong>（用 E2B 给 agent 配「虚拟电脑」跑多语言工具链）<span class="src src-a">🟢</span>官方博客；另列 Mistral、HuggingFace、LMArena、Gumloop 等<span class="src src-c">🔴自述</span>。「88% Fortune 100 已注册 / 数亿次沙箱会话」均为<strong>公司自述</strong>，无独立审计，谨慎引用。<span class="src src-c">🔴自述</span></li>
+    </ul>
+    <div class="callout note">
+      <span class="label">口径提醒</span>
+      采用度数字最易注水：「注册/试用」「Fortune 100 签约」「数亿次会话」都来自官方营销口径，<strong>未经独立验证</strong>。能交叉到一手的只有 Perplexity / Manus 两个具名 case study（且仍是 E2B 自家博客）。GitHub stars（~12.7k）是少数可独立核验的硬指标。
+    </div>
+  </section>
+
+  <!-- ⑦ 中国对标 -->
+  <section id="cn">
+    <h2><span class="n">⑦</span>中国对标：agent 代码沙箱在中国可行吗</h2>
+    <p>中国做「agent 代码执行 / 函数计算 / 云端隔离沙箱」的力量，主要不是独立创业公司，而是<strong>三朵云顺手把这层做进自己的 serverless / 容器产品</strong>，外加各 coding agent 厂自建沙箱：</p>
+    <ul>
+      <li><strong>阿里云</strong>（动作最齐）：<strong>函数计算 FC</strong> 推出 <strong>AIO 沙箱</strong>（统一云端隔离环境，预装 puppeteer / playwright 做浏览器 + 代码执行）、<strong>Sandbox Agent &amp; Skills</strong>（公测）、<strong>AgentRun</strong>（基于 Serverless FC 的 agentic 沙箱）；容器计算服务 <strong>ACS</strong> 的 <strong>Agent Sandbox</strong> 直接对标 E2B——号称 <strong>MicroVM 级隔离 + 内存级休眠/唤醒 + Checkpoint 克隆 + 每分钟弹 15K 沙箱</strong>。这是最像 E2B 的国产路线，且天然绑「百炼」大模型平台。<span class="src src-b">🟡</span></li>
+      <li><strong>火山引擎 / 腾讯云 SCF</strong>：均有 serverless 函数计算可承载 agent 代码执行，但本次检索未找到与 E2B 同等定位、单独打「agent sandbox」品牌的一手页面——记为<strong>未找到明确对标产品</strong>（不代表没有）。<span class="src src-c">🔴</span></li>
+      <li><strong>coding agent 自建沙箱：</strong>国内 coding/agent 产品（各家 AI IDE、agent 平台）多自建执行环境，而非外采——这压缩了独立沙箱创业公司的空间。<span class="src src-c">🔴</span></li>
+      <li><strong>E2B 国产开源替代：</strong>未检索到一个广泛采用、专门对标 E2B 的国产开源沙箱项目；团队更多直接基于 <strong>Firecracker / gVisor / Kata</strong> 自建。<span class="src src-c">🔴</span></li>
+    </ul>
+    <div class="callout insight">
+      <span class="label">中国可行性 + whitespace</span>
+      「独立 agent 沙箱公司」在中国可行性<strong>偏弱</strong>：三朵云（尤其阿里云 ACS Agent Sandbox / FC AIO）已把这层做进自家 PaaS，并绑大模型平台，独立创业者很难在通用沙箱上竞争。<strong>但有两块明确 whitespace</strong>：① <strong>信创 / 私有化部署</strong>——金融、政务、国企要求数据不出域、适配国产 CPU(鲲鹏/海光)与 OS(麒麟/欧拉)，公有云沙箱进不去，这块需要可私有化、可信创认证的 agent 沙箱；② <strong>垂直场景沙箱</strong>——把代码沙箱与具体行业工作流（金融研报、数据分析、RPA/computer-use）打包成开箱即用方案，而不是卖底层 runtime。
+    </div>
+  </section>
+
+  <!-- ⑧ 创业 idea 借鉴 -->
+  <section id="idea">
+    <h2><span class="n">⑧</span>创业 idea 借鉴</h2>
+    <div class="callout insight">
+      <span class="label">Whitespace / 机会</span>
+      定位图右上角的复合空位：<strong>「可私有化/信创合规」× 「GUI/computer-use 垂直沙箱」</strong>。通用代码沙箱已被挤满且巨头下场，但<strong>「数据不出域的 agent 沙箱」</strong>（信创/私有化）与<strong>「专为 computer-use / GUI 自动化设计、带状态可分叉的沙箱」</strong>这两格，现有玩家都没专门占——前者是合规护城河，后者是更高价值的执行层。
+    </div>
+    <h3>现有玩家共同短板（unmet needs）</h3>
+    <ul>
+      <li><strong>云成本透传、毛利薄：</strong>所有沙箱公司本质是在云上加一层，毛利被底层云成本压；缺乏「比自建明显更省」的硬理由时，大客户会自建。</li>
+      <li><strong>口径混乱、缺标准：</strong>冷启动/隔离/计费各家自报、无公认 benchmark，买家难比较——谁先做出可信第三方 benchmark / 兼容标准，谁就能定义这个市场。</li>
+      <li><strong>合规/私有化是缺口：</strong>主流玩家以公有托管为主，受监管行业（金融/政务/医疗）落地难。</li>
+      <li><strong>computer-use 仍粗糙：</strong>GUI 沙箱的稳定性、可观测、可回放、可分叉仍不成熟。</li>
+    </ul>
+    <h3>Why now（为什么现在值得做）</h3>
+    <p><strong>coding agent / agentic 应用爆发 → 执行层成刚需</strong>：agent 从「会说」走向「会做」，每一步「做」都要一个安全可弃的执行环境。叠加 Firecracker/gVisor 等开源隔离技术成熟、秒级 microVM 成为标配、按秒计费的云原生计费模型可行——这是「为什么是 2024–2026」。但<strong>窗口正在关闭</strong>（巨头已进场），所以 why-now 也意味着「要么垂直、要么合规，别再做一个通用沙箱」。</p>
+    <h3>可借鉴的打法 + 相邻机会</h3>
+    <ul>
+      <li><strong>borrowable：</strong>① <strong>开源 SDK 引流 + 托管云变现</strong>的经典 PLG 打法（开源拉开发者心智，云端按用量收钱）；② 用<strong>具名旗舰客户 case study</strong>（Perplexity 一周上线、Manus 虚拟电脑）做信任背书，比堆 logo 更有说服力；③ 把「难的基础设施（microVM 隔离）封成一行 API」的产品化思路。</li>
+      <li><strong>adjacent：</strong>① <strong>信创/私有化 agent 沙箱</strong>（中国 whitespace，合规即护城河）；② <strong>computer-use / GUI 垂直沙箱</strong>（更高价值、更难被模型厂顺手做）；③ <strong>沙箱可观测/评测层</strong>（给所有沙箱做 benchmark / trace / 回放，吃「标准缺失」红利，且不与底层云直接拼成本）；④ <strong>垂直行业沙箱</strong>（金融数据分析、生信、BI——把 runtime + 行业数据/工具打包）。</li>
+    </ul>
+    <div class="callout warn">
+      <span class="label">风险（诚实给）</span>
+      ① <strong>大模型厂自带 code execution 是最大替代威胁</strong>——开发者用闭环自带的就够，外采沙箱的需求被上游吃掉；② <strong>Cloudflare / Vercel / AWS 顺手做</strong>——已 GA，绑平台分发，价格可补贴；③ <strong>开源自建</strong>——E2B 自己开源 + Firecracker 现成，大客户自建门槛低；④ <strong>毛利被云成本压</strong>，资本密集，而 E2B 弹药($32–35M)远少于 Modal($111M)；⑤ <strong>赛道 18 个月就拥挤、同质化严重</strong>，差异化窗口短。
+    </div>
+  </section>
+
+  <!-- ⑨ 现实判断 -->
+  <section id="take">
+    <h2><span class="n">⑨</span>现实判断</h2>
+    <p>E2B 是这条赛道里<strong>定位最清晰、开发者心智最强、采用面最广</strong>的独立玩家之一：开源 + microVM + 自托管 + computer-use 的组合在直接竞品里相对完整，Perplexity / Manus 等具名案例是真实采用信号。<strong>胜算</strong>在于「开源生态 + 企业 self-host」能吃到「不想被锁进 Cloudflare/Vercel、又要合规自托管」的客户。但<strong>软肋很硬</strong>：① 技术指标无一项绝对领先（冷启动被 Daytona 卷、GPU 被 Modal 占、计费各家趋同）；② 弹药量明显小于 Modal；③ 最大威胁来自上游——模型厂自带执行 + Cloudflare/Vercel 顺手做，二者都能绕过它。<strong>赛道判 emerging→快速 crowded</strong>：需求真、玩家多、巨头已下场，对新进入者意味着<strong>别再做通用沙箱，要么往合规/信创（私有化）走，要么往垂直 computer-use/行业沙箱走</strong>。</p>
+    <div class="callout warn">
+      <span class="label">使用提醒</span>
+      本页为对话式调研，信息主要来自公开来源并按等级标注；融资数额、客户、能力声明等以官方一手为准，
+      <strong>产品能力与采用数字（88% Fortune 100、数亿次会话等）多为公司自述、未经独立验证</strong>，引用前请核对最新信息。
+    </div>
+  </section>
+
+  <!-- 出处 -->
+  <section id="src">
+    <h2>出处</h2>
+    <ul style="font-size:13.5px">
+      <li><a href="https://e2b.dev" target="_blank" rel="noopener">E2B 官网</a> / <a href="https://e2b.dev/pricing" target="_blank" rel="noopener">Pricing</a> / <a href="https://e2b.dev/docs" target="_blank" rel="noopener">Docs</a> <span class="src src-a">🟢一手</span></li>
+      <li><a href="https://github.com/e2b-dev/E2B" target="_blank" rel="noopener">github.com/e2b-dev/E2B</a>（stars/forks/license，直接抓取）<span class="src src-a">🟢一手</span></li>
+      <li><a href="https://e2b.dev/blog/series-a" target="_blank" rel="noopener">E2B Blog: We Raised $21M（Series A 官方稿，含采用数字）</a> <span class="src src-a">🟢一手</span></li>
+      <li><a href="https://e2b.dev/blog/how-manus-uses-e2b-to-provide-agents-with-virtual-computers" target="_blank" rel="noopener">E2B Blog: How Manus uses E2B</a> / <a href="https://e2b.dev/blog/how-perplexity-implemented-advanced-data-analysis-for-pro-users-in-1-week" target="_blank" rel="noopener">How Perplexity used E2B</a> <span class="src src-a">🟢一手(自家case)</span></li>
+      <li><a href="https://www.insightpartners.com/ideas/e2b-raises-a-21m-series-a-to-offer-cloud-for-ai-agents-to-fortune-100/" target="_blank" rel="noopener">Insight Partners: E2B $21M Series A</a> / <a href="https://siliconangle.com/2025/07/28/e2b-shares-vision-sandboxed-cloud-environments-every-ai-agent-raising-21m-funding/" target="_blank" rel="noopener">SiliconANGLE</a> <span class="src src-b">🟡二手</span></li>
+      <li><a href="https://en.ain.ua/2024/10/18/e2b-raises-11m-in-seed-funding/" target="_blank" rel="noopener">AIN: E2B $11.5M Seed（2024-10-18 公布）</a> / <a href="https://nordic9.com/news/e2b-with-a-115m-seed-round-backed-by-kaya-vc-decibel-pareto-and-angel-investors/" target="_blank" rel="noopener">Nordic9</a> / <a href="https://www.vestbee.com/insights/articles/e2-b-raises-11-5-m" target="_blank" rel="noopener">Vestbee</a> <span class="src src-b">🟡二手</span></li>
+      <li>竞品对照：<a href="https://www.superagent.sh/blog/ai-code-sandbox-benchmark-2026" target="_blank" rel="noopener">Superagent Benchmark 2026</a> / <a href="https://betterstack.com/community/comparisons/best-sandbox-runners/" target="_blank" rel="noopener">Better Stack</a> / <a href="https://blaxel.ai/blog/sandboxes-for-coding-agents-comparison" target="_blank" rel="noopener">Blaxel</a> / <a href="https://northflank.com/blog/best-sandbox-runners" target="_blank" rel="noopener">Northflank</a> / <a href="https://modal.com/blog/top-code-agent-sandbox-products" target="_blank" rel="noopener">Modal</a> <span class="src src-b">🟡二手（含各家自报口径）</span></li>
+      <li>竞品融资：<a href="https://modal.com/blog/announcing-our-series-b" target="_blank" rel="noopener">Modal $87M Series B</a> / <a href="https://www.daytona.io/dotfiles/daytona-raises-24m-series-a-to-give-every-agent-a-computer" target="_blank" rel="noopener">Daytona $24M Series A</a> / Runloop $7M seed <span class="src src-a">🟢/</span><span class="src src-b">🟡</span></li>
+      <li>巨头进场：<a href="https://www.cloudflare.com/products/sandboxes/" target="_blank" rel="noopener">Cloudflare Sandboxes</a> / <a href="https://www.infoq.com/news/2026/04/cloudflare-sandboxes-ga/" target="_blank" rel="noopener">InfoQ: Cloudflare Sandboxes GA</a> / <a href="https://blog.cloudflare.com/dynamic-workers/" target="_blank" rel="noopener">CF Dynamic Workers</a> <span class="src src-a">🟢/</span><span class="src src-b">🟡</span></li>
+      <li>中国对标：<a href="https://help.aliyun.com/zh/cs/user-guide/agent-sandbox/" target="_blank" rel="noopener">阿里云 ACS Agent Sandbox</a> / <a href="https://help.aliyun.com/zh/functioncompute/fc/aio-sandbox" target="_blank" rel="noopener">函数计算 FC AIO 沙箱</a> <span class="src src-a">🟢一手(厂商文档)</span></li>
+    </ul>
+  </section>
+
+  <footer class="foot">
+    公司竞争格局 / 赛道早期度调研笔记，仅作梳理；信息按来源分级、产品能力未必经独立验证，以官方一手信息为准 · 整理日期 2026-06-21
+  </footer>
+
+</article>
+</body>
+</html>

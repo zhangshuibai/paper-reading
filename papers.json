@@ -39,6 +39,46 @@
     "path": "papers/2026-06-17-amd/index.html"
   },
   {
+    "slug": "2026-06-17-intc",
+    "title": "Intel（INTC）：基本面 / 估值 / 是否值得买入",
+    "authors": "—",
+    "team": "股票调研",
+    "arxiv": "https://www.intc.com",
+    "code": "",
+    "date": "2026-06-21",
+    "published": "股票调研 2026",
+    "tldr": "x86 老霸主的困境反转：产品端被 AMD/ARM 蚕食、AI 几乎缺席输给 NVIDIA，却豪赌 Intel Foundry 反转抢 TSMC 生意、巨额 capex 烧钱致 FCF 连年为负；靠美国政府入股约10%+SoftBank输血续命、分红已砍；股价在政府背书+agentic CPU叙事下暴涨至≈34(市值≈72B)、已超分析师共识甚至Citi 30目标价——故事真但估值透支，评级减持/回避(Reduce→Avoid)。非投资建议。",
+    "tags": [
+      "stock",
+      "equity-research",
+      "valuation",
+      "semiconductors",
+      "foundry"
+    ],
+    "path": "papers/2026-06-17-intc/index.html"
+  },
+  {
+    "slug": "2026-06-17-e2b",
+    "title": "E2B：AI agent 代码沙箱赛道的竞争格局与早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://e2b.dev",
+    "code": "https://github.com/e2b-dev",
+    "date": "2026-06-21",
+    "published": "公司调研 2026",
+    "tldr": "E2B 是给 AI agent 跑代码的开源 secure sandbox（Firecracker microVM 秒级启动，SDK+托管云+self-host）；赛道 emerging→快速 crowded，最大威胁是大模型厂自带 code execution 与 Cloudflare/Vercel 顺手做，一个可借鉴 whitespace 是信创/私有化的 agent 沙箱。",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "market-map",
+      "startup-idea",
+      "agent-infra",
+      "sandbox",
+      "china"
+    ],
+    "path": "papers/2026-06-17-e2b/index.html"
+  },
+  {
     "slug": "2605.17172-openjarvis-on-device-personal-ai",
     "title": "OpenJarvis：把整套 Personal AI 搬上本地设备（LLM-guided spec search）",
     "authors": "Jon Saad-Falcon, Avanika Narayan, Robby Manihani, et al.",
@@ -1673,24 +1713,5 @@
       "mcp",
       "agent"
     ]
-  },
-  {
-    "slug": "2026-06-17-intc",
-    "title": "Intel（INTC）：基本面 / 估值 / 是否值得买入",
-    "authors": "—",
-    "team": "股票调研",
-    "arxiv": "https://www.intc.com",
-    "code": "",
-    "date": "2026-06-21",
-    "published": "股票调研 2026",
-    "tldr": "x86 老霸主的困境反转：产品端被 AMD/ARM 蚕食、AI 几乎缺席输给 NVIDIA，却豪赌 Intel Foundry 反转抢 TSMC 生意、巨额 capex 烧钱致 FCF 连年为负；靠美国政府入股约10%+SoftBank输血续命、分红已砍；股价在政府背书+agentic CPU叙事下暴涨至≈34(市值≈72B)、已超分析师共识甚至Citi 30目标价——故事真但估值透支，评级减持/回避(Reduce→Avoid)。非投资建议。",
-    "tags": [
-      "stock",
-      "equity-research",
-      "valuation",
-      "semiconductors",
-      "foundry"
-    ],
-    "path": "papers/2026-06-17-intc/index.html"
   }
 ]
