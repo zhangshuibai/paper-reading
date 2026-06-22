@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI 集群供应链科普 · 动画讲解版（12 幕自动播放）</title>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --bad:#ff6b81; --shadow:0 8px 30px rgba(0,0,0,.35);
+    --layerOff:#232842; --layerOffText:#5b6488; --layerOn:#2b376b; --layerOnEdge:#7aa2ff;
+    --stageGrad1:#141831; --stageGrad2:#10132a;
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --bad:#d23651; --shadow:0 8px 24px rgba(20,30,80,.08);
+      --layerOff:#e9edf8; --layerOffText:#9aa1ba; --layerOn:#dbe5ff; --layerOnEdge:#3a66ff;
+      --stageGrad1:#eef2fc; --stageGrad2:#f6f8ff;
+    }
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.6; font-size:16px;}
+  a{color:var(--accent)}
+  .back{display:inline-block; margin:14px 0 0 16px; color:var(--muted); text-decoration:none; font-size:13px}
+  .back:hover{color:var(--accent)}
+  .wrap{max-width:1080px; margin:0 auto; padding:6px 16px 40px}
+  .titlebar{display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; margin:6px 0 10px}
+  .titlebar h1{font-size:18px; margin:0; font-weight:700}
+  .titlebar .sub{color:var(--muted); font-size:12.5px}
+  .titlebar .full{margin-left:auto; font-size:12.5px}
+
+  /* progress + counter */
+  .progresswrap{display:flex; align-items:center; gap:10px; margin:6px 0 12px}
+  .progress{flex:1; height:6px; background:var(--panel2); border-radius:999px; overflow:hidden; border:1px solid var(--line)}
+  .progress .bar{height:100%; width:0%; background:linear-gradient(90deg,var(--accent),var(--accent2)); transition:width .25s linear}
+  .counter{font-size:12.5px; color:var(--muted); white-space:nowrap; min-width:74px; text-align:right}
+
+  /* stage layout: SVG stack on left, scene copy on right */
+  .stage{display:grid; grid-template-columns:248px 1fr; gap:18px;
+    background:radial-gradient(120% 120% at 80% 0%,var(--stageGrad1),var(--stageGrad2));
+    border:1px solid var(--line); border-radius:16px; box-shadow:var(--shadow);
+    padding:18px; min-height:430px; position:relative; overflow:hidden}
+  .stacktitle{font-size:11px; letter-spacing:.5px; color:var(--muted); text-transform:uppercase; margin:0 0 8px}
+  .svgcol{display:flex; flex-direction:column}
+  svg.stack{width:100%; height:auto; display:block}
+  /* layer rects animate via fill + opacity */
+  .layer rect{transition:fill .5s ease, stroke .5s ease, opacity .5s ease}
+  .layer text{transition:fill .5s ease, opacity .5s ease; font-size:11px; font-weight:600;
+    font-family:inherit; -webkit-user-select:none; user-select:none}
+  .layer .lnum{font-size:9.5px; font-weight:700}
+  .layer.off rect{fill:var(--layerOff); stroke:var(--line); opacity:.5}
+  .layer.off text{fill:var(--layerOffText); opacity:.55}
+  .layer.on rect{fill:var(--layerOn); stroke:var(--layerOnEdge); stroke-width:2; opacity:1}
+  .layer.on text{fill:var(--text); opacity:1}
+  .layer.on rect.glow{filter:drop-shadow(0 0 7px var(--layerOnEdge))}
+  .flowarrow{opacity:.45}
+
+  .scenecol{position:relative; min-height:380px}
+  .scene{position:absolute; inset:0; opacity:0; transform:translateY(14px);
+    transition:opacity .55s ease, transform .55s ease; pointer-events:none; display:flex; flex-direction:column; justify-content:center}
+  .scene.active{opacity:1; transform:translateY(0); pointer-events:auto}
+  .scene .kicker{font-size:12px; letter-spacing:.6px; text-transform:uppercase; color:var(--accent); font-weight:700; margin:0 0 6px}
+  .scene h2{font-size:clamp(22px,3.4vw,32px); line-height:1.18; margin:0 0 14px; font-weight:800}
+  .scene .narr{font-size:clamp(15px,2vw,18px); color:var(--text); margin:0 0 4px; max-width:46ch}
+  .scene .narr p{margin:8px 0}
+  .scene .narr .em{color:var(--accent2); font-weight:700}
+  .scene .narr .danger{color:var(--bad); font-weight:700}
+  .chips{display:flex; gap:7px; flex-wrap:wrap; margin:16px 0 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12.5px; padding:4px 11px; border-radius:999px;
+    border:1px solid var(--line); opacity:0; transform:translateX(-10px);
+    transition:opacity .4s ease, transform .4s ease; white-space:nowrap}
+  .scene.active .chip{opacity:1; transform:translateX(0)}
+  .scene.active .chip:nth-child(1){transition-delay:.20s}
+  .scene.active .chip:nth-child(2){transition-delay:.32s}
+  .scene.active .chip:nth-child(3){transition-delay:.44s}
+  .scene.active .chip:nth-child(4){transition-delay:.56s}
+  .scene.active .chip:nth-child(5){transition-delay:.68s}
+  .scene.active .chip:nth-child(6){transition-delay:.80s}
+  .chip b{color:var(--accent); font-weight:700}
+  .scene .note{margin-top:14px; font-size:12.5px; color:var(--muted); max-width:48ch}
+
+  /* big number / chokepoint emphasis used in some scenes */
+  .lockrow{display:flex; gap:10px; flex-wrap:wrap; margin-top:14px}
+  .lock{background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--bad);
+    border-radius:10px; padding:8px 12px; font-size:13px; max-width:230px}
+  .lock b{color:var(--bad)}
+
+  .disc-scene h2{color:var(--bad)}
+  .disc-box{background:var(--panel); border:1px solid var(--bad); border-radius:14px; padding:16px 18px; max-width:52ch}
+  .disc-box p{margin:8px 0; font-size:14px}
+
+  /* controls */
+  .controls{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:14px 0 0;
+    background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:10px 12px; box-shadow:var(--shadow)}
+  .controls button{background:var(--panel2); color:var(--text); border:1px solid var(--line);
+    border-radius:10px; padding:8px 12px; font-size:15px; cursor:pointer; line-height:1; transition:background .2s,border-color .2s}
+  .controls button:hover{border-color:var(--accent); color:var(--accent)}
+  .controls button:active{transform:translateY(1px)}
+  .controls button.primary{background:var(--accent); color:#fff; border-color:var(--accent); min-width:46px}
+  .controls button.primary:hover{filter:brightness(1.08); color:#fff}
+  .controls button[aria-pressed="true"]{border-color:var(--accent); color:var(--accent); background:var(--panel2)}
+  .controls button:disabled{opacity:.4; cursor:not-allowed}
+  .controls .spacer{flex:1; min-width:6px}
+  .controls .hint{font-size:11.5px; color:var(--muted)}
+  .toast{font-size:11.5px; color:var(--warn); margin-left:4px}
+
+  footer{margin-top:26px; padding-top:14px; border-top:1px solid var(--line); color:var(--muted); font-size:12.5px}
+  footer a{color:var(--accent)}
+
+  @media (max-width:760px){
+    .stage{grid-template-columns:1fr; min-height:0}
+    .svgcol{order:2; max-width:300px; margin:6px auto 0}
+    .scenecol{order:1; min-height:300px}
+    .scene{position:relative; inset:auto}
+    .scene:not(.active){display:none}
+    .titlebar .full{margin-left:0; width:100%}
+    .controls{position:sticky; bottom:8px}
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important; animation:none !important}
+    .scene{opacity:1; transform:none}
+    .scene:not(.active){display:none}
+    .chip{opacity:1; transform:none}
+  }
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<div class="wrap">
+
+  <div class="titlebar">
+    <h1>AI 集群供应链科普 · 动画讲解版</h1>
+    <span class="sub">从一句 prompt 到一座数据中心 · 12 幕逐层点亮</span>
+    <span class="full">想看完整图文版 → <a href="../2026-06-17-ai-cluster-supply-chain/">../2026-06-17-ai-cluster-supply-chain/</a></span>
+  </div>
+
+  <div class="progresswrap">
+    <div class="progress"><div class="bar" id="bar"></div></div>
+    <div class="counter" id="counter">第 1 / 12 幕</div>
+  </div>
+
+  <div class="stage">
+    <div class="svgcol">
+      <p class="stacktitle">供应链 9 层（用户侧 → 上游）</p>
+      <!-- 9-layer vertical stack; layer 1 = buyer side on top, layer 9 = raw material at bottom -->
+      <svg class="stack" viewBox="0 0 230 470" role="img" aria-label="AI 集群供应链 9 层栈">
+        <defs></defs>
+        <!-- downward flow arrow on the left margin -->
+        <g class="flowarrow" stroke="var(--muted)" stroke-width="1.4" fill="none">
+          <line x1="8" y1="14" x2="8" y2="452"/>
+          <polyline points="4,446 8,454 12,446"/>
+        </g>
+        <!-- layers, top(1) -> bottom(9) -->
+        <g class="layer" data-layer="1">
+          <rect x="22" y="6" width="200" height="44" rx="9"></rect>
+          <text class="lnum" x="32" y="22">①</text>
+          <text x="32" y="35">应用 / 模型 / 云</text>
+        </g>
+        <g class="layer" data-layer="2">
+          <rect x="22" y="56" width="200" height="44" rx="9"></rect>
+          <text class="lnum" x="32" y="72">②</text>
+          <text x="32" y="85">AI 加速芯片</text>
+        </g>
+        <g class="layer" data-layer="3">
+          <rect x="22" y="106" width="200" height="44" rx="9"></rect>
+          <text class="lnum" x="32" y="122">③</text>
+          <text x="32" y="135">HBM 高带宽内存</text>
+        </g>
+        <g class="layer" data-layer="4">
+          <rect x="22" y="156" width="200" height="44" rx="9"></rect>
+          <text class="lnum" x="32" y="172">④</text>
+          <text x="32" y="185">先进封装 + 代工</text>
+        </g>
+        <g class="layer" data-layer="5">
+          <rect x="22" y="206" width="200" height="44" rx="9"></rect>
+          <text class="lnum" x="32" y="222">⑤</text>
+          <text x="32" y="235">半导体设备</text>
+        </g>
+        <g class="layer" data-layer="6">
+          <rect x="22" y="256" width="200" height="44" rx="9"></rect>
+          <text class="lnum" x="32" y="272">⑥</text>
+          <text x="32" y="285">网络 / 互连 / 光</text>
+        </g>
+        <g class="layer" data-layer="7">
+          <rect x="22" y="306" width="200" height="44" rx="9"></rect>
+          <text class="lnum" x="32" y="322">⑦</text>
+          <text x="32" y="335">衬底 / 外延片</text>
+        </g>
+        <g class="layer" data-layer="8">
+          <rect x="22" y="356" width="200" height="44" rx="9"></rect>
+          <text class="lnum" x="32" y="372">⑧</text>
+          <text x="32" y="385">电力 &amp; 散热</text>
+        </g>
+        <g class="layer" data-layer="9">
+          <rect x="22" y="406" width="200" height="44" rx="9"></rect>
+          <text class="lnum" x="32" y="422">⑨</text>
+          <text x="32" y="435">上游原材料</text>
+        </g>
+      </svg>
+    </div>
+
+    <div class="scenecol" id="scenecol"><!-- scenes injected by JS --></div>
+  </div>
+
+  <div class="controls" role="group" aria-label="播放控制">
+    <button id="prev" title="上一幕 (←)" aria-label="上一幕">⏮</button>
+    <button id="play" class="primary" title="播放 / 暂停 (空格)" aria-label="播放或暂停">⏯</button>
+    <button id="next" title="下一幕 (→)" aria-label="下一幕">⏭</button>
+    <button id="replay" title="从头重播" aria-label="重播">🔁</button>
+    <button id="tts" aria-pressed="false" title="朗读当前旁白" aria-label="朗读开关">🔊 朗读</button>
+    <span class="toast" id="toast"></span>
+    <span class="spacer"></span>
+    <span class="hint">空格 播放/暂停 · ← → 切幕 · 每幕约 9 秒</span>
+  </div>
+
+  <footer>
+    硬件科普 · 2026  — 把 AI 集群供应链做成自动播放的动画讲解。配套 <a href="./script.md">script.md</a> 是 timed 配音脚本，可喂 AI 视频工具生成 MP4。
+    完整图文版见 <a href="../2026-06-17-ai-cluster-supply-chain/">这里</a>。<br>
+    本页仅为科普，所有 ticker 仅用于说明产业链位置，<strong style="color:var(--bad)">非投资建议</strong>，不构成买卖推荐。
+  </footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---- scene data: narration (HTML allowed) + chips (ticker) + highlighted layers ----
+  var SCENES = [
+    {
+      kicker:"开场",
+      title:"一句话，怎么变成一座数据中心？",
+      layers:[],
+      narr:'<p>你在手机上打一行字，AI 几秒就回你一段话。</p>'+
+           '<p>这背后，是一条横跨<span class="em">十几个国家、上百家公司</span>的超长供应链。</p>'+
+           '<p>我们从你这一侧出发，一层层往上游挖，看看每一层<span class="em">是谁在卖什么、谁卡谁的脖子</span>。一共 9 层。</p>',
+      chips:[],
+      note:"硬件小白友好版：术语都讲人话。下面每个 ticker 只为标出它在链条里的位置。"
+    },
+    {
+      kicker:"第 1 层 · 最靠近你",
+      title:"应用 / 模型 / 云：花钱的人在这儿",
+      layers:[1],
+      narr:'<p>最上面是<span class="em">买单的人</span>：微软、谷歌、亚马逊、Meta 这些「超大云厂商」(hyperscaler)，砸钱建数据中心。</p>'+
+           '<p>还有一批<span class="em">「算力二房东」</span>(neocloud)——自己买一堆显卡，再按小时租给别人，比如 CoreWeave。</p>'+
+           '<p>他们的钱（capex），就是后面 8 层所有人的饭。</p>',
+      chips:[
+        {t:"MSFT",d:"微软"},{t:"GOOGL",d:"谷歌"},{t:"AMZN",d:"亚马逊"},{t:"META",d:"Meta"},
+        {t:"CRWV",d:"CoreWeave"},{t:"NBIS",d:"Nebius"},{t:"IREN",d:"IREN"}
+      ],
+      note:"类比：hyperscaler 是大房东自建自用，neocloud 是二房东买卡转租。"
+    },
+    {
+      kicker:"第 2 层 · 大脑",
+      title:"AI 加速芯片：真正干活的「大脑」",
+      layers:[2],
+      narr:'<p>AI 算力的核心是<span class="em">GPU</span>——一种擅长「同时算一大堆数」的芯片。NVIDIA 一家独大，AMD 在追，Intel 做 CPU 当配角。</p>'+
+           '<p>大客户嫌买 GPU 太贵，就自己设计专用芯片(<span class="em">ASIC</span>)，幕后操刀的是博通、Marvell。</p>'+
+           '<p>NVIDIA 最深的护城河叫 <span class="em">CUDA</span>：一套用了十几年的软件生态，换别家就得重写代码，所以很难逃。</p>',
+      chips:[
+        {t:"NVDA",d:"英伟达"},{t:"AMD",d:"AMD"},{t:"INTC",d:"Intel"},
+        {t:"AVGO",d:"博通ASIC"},{t:"MRVL",d:"Marvell"}
+      ],
+      note:"GPU=通用算力大脑；ASIC=为某个活儿定制的专用脑；CUDA=绑住程序员的软件生态。"
+    },
+    {
+      kicker:"第 3 层 · 记忆",
+      title:"HBM：贴着大脑的「超快记忆条」",
+      layers:[3],
+      narr:'<p>GPU 算得再快，也得有地方快速存数据。<span class="em">HBM</span>（高带宽内存）就是把多层内存芯片叠起来、紧贴 GPU，喂数据特别快。</p>'+
+           '<p>全世界能量产 HBM 的只有<span class="em">三家</span>：SK 海力士、三星、美光。供不应求。</p>'+
+           '<p>旁边还有存大文件的闪存(NAND)。</p>',
+      chips:[
+        {t:"SK Hynix",d:"海力士"},{t:"Samsung",d:"三星"},{t:"MU",d:"美光"},{t:"SNDK",d:"闪迪/NAND"}
+      ],
+      note:"类比：GPU 是大脑，HBM 是贴在大脑边、读写飞快的草稿纸；全球只有三家会做。"
+    },
+    {
+      kicker:"第 4 层 · 组装与制造",
+      title:"先进封装 + 代工：把芯片「拼起来、造出来」",
+      layers:[4],
+      narr:'<p>GPU 和 HBM 要在一小块基板上严丝合缝拼到一起，这道工艺叫<span class="em">先进封装</span>。台积电的 <span class="em">CoWoS</span> 是行业标准——产能长期吃紧，是个著名卡点。</p>'+
+           '<p>而芯片本身的「印刷」(代工)也主要靠台积电，三星、中芯在追。封装环节还有日月光(ASE)。</p>',
+      chips:[
+        {t:"TSM",d:"台积电/CoWoS"},{t:"Samsung",d:"三星代工"},{t:"中芯",d:"SMIC"},{t:"ASE",d:"日月光封装"}
+      ],
+      note:"CoWoS=把大脑和记忆条焊在同一块底板上的高级工艺，台积电是主要产能瓶颈。"
+    },
+    {
+      kicker:"第 5 层 · 造芯片的机器",
+      title:"半导体设备：没有这些机器，啥都造不出",
+      layers:[5],
+      narr:'<p>造芯片要用一屋子顶级机器。最关键的是<span class="em">光刻机</span>——荷兰 ASML 的 <span class="em">EUV（极紫外）光刻机全球独此一家</span>，一台几亿美元，先进芯片绕不开。</p>'+
+           '<p>还有刻蚀、薄膜、量测等设备：应用材料、泛林、科磊、东京电子分食。</p>',
+      chips:[
+        {t:"ASML",d:"EUV独家"},{t:"AMAT",d:"应用材料"},{t:"LRCX",d:"泛林"},{t:"KLAC",d:"科磊"},{t:"东京电子",d:"TEL"}
+      ],
+      note:"EUV 光刻机：造先进芯片的「独门印钞机」，全世界只有 ASML 一家能造。"
+    },
+    {
+      kicker:"第 6 层 · 让芯片互相说话",
+      title:"网络 / 光互连：上万张卡得连成一个大脑",
+      layers:[6],
+      narr:'<p>一个 AI 集群有成千上万张 GPU，它们必须高速互相通信，否则各算各的没用。</p>'+
+           '<p>连接靠<span class="em">交换芯片</span>(博通 Tomahawk、Marvell)和<span class="em">光模块</span>——把电信号变成光、用光纤传，跑得又快又省电。</p>'+
+           '<p>更前沿的 <span class="em">CPO</span>(把光直接做进芯片)、外置 CW 激光器也在起量。</p>',
+      chips:[
+        {t:"COHR",d:"Coherent光"},{t:"LITE",d:"Lumentum"},{t:"AAOI",d:"光模块"},
+        {t:"300308.SZ",d:"中际旭创"},{t:"SIVE",d:"CW激光"}
+      ],
+      note:"光模块=把电信号翻译成光、用光纤在机柜间高速传数据的「翻译插头」。"
+    },
+    {
+      kicker:"第 7 层 · 芯片的「地基」",
+      title:"衬底 / 外延：光芯片长在什么地基上",
+      layers:[7],
+      narr:'<p>上一层那些光器件，不是长在普通硅片上，而是长在特殊的<span class="em">化合物半导体衬底</span>上，比如 <span class="em">InP（磷化铟）</span>。</p>'+
+           '<p>InP 衬底全球只有<span class="em">少数几家</span>能稳定供：AXT、住友等；上面再「长」一层薄膜叫外延片(IQE)。</p>'+
+           '<p>越往上游，玩家越少、越隐形，却越关键。</p>',
+      chips:[
+        {t:"AXTI",d:"AXT/InP衬底"},{t:"Sumitomo",d:"住友"},{t:"IQE",d:"外延片"},{t:"TSEM",d:"化合物半导体"}
+      ],
+      note:"衬底=芯片生长的「地基晶圆」；InP 是光通信用的特种地基，供应商极少。"
+    },
+    {
+      kicker:"第 8 层 · 喂电与降温",
+      title:"电力 & 散热：AI 是真的「电老虎」",
+      layers:[8],
+      narr:'<p>这么多 GPU 一开机，吃电像个小城市。供电设备(Vertiv、Eaton)、新一代 <span class="em">800V 直流</span>架构成了刚需。</p>'+
+           '<p>电从哪来？发电公用事业公司直接受益，比如 Vistra、Constellation。</p>'+
+           '<p>芯片太热，风扇不够用，开始上<span class="em">液冷</span>——用液体直接给芯片降温。</p>',
+      chips:[
+        {t:"VRT",d:"Vertiv供电散热"},{t:"ETN",d:"Eaton"},{t:"VST",d:"Vistra电力"},{t:"CEG",d:"Constellation"}
+      ],
+      note:"算力 = 电力 + 散热。建数据中心越来越像在抢电、抢冷却。"
+    },
+    {
+      kicker:"第 9 层 · 最最上游",
+      title:"上游原材料：一切的源头",
+      layers:[9],
+      narr:'<p>挖到最底层，是最朴素的材料：做晶圆的<span class="em">硅片</span>（信越、SUMCO），刻蚀要用的<span class="em">特种气体</span>（如 WF₆），还有铜、光纤这些金属与玻璃。</p>'+
+           '<p>它们便宜、不起眼，但断一种，上面 8 层全得停。</p>',
+      chips:[
+        {t:"信越/SUMCO",d:"硅片"},{t:"093370.KS",d:"Foosung特气"},{t:"铜·光纤",d:"金属玻璃"}
+      ],
+      note:"越上游越像「原材料命门」：东西不贵，但卡一下，整条链都喘不过气。"
+    },
+    {
+      kicker:"总结 · 谁卡谁脖子",
+      title:"全链最硬的几个「卡脖子点」",
+      layers:[1,2,3,4,5,6,7,8,9],
+      narr:'<p>一句话看懂这条链的命门——<span class="em">越往上游，越是少数玩家说了算</span>：</p>',
+      chips:[],
+      locks:[
+        '<b>EUV 光刻机</b> = ASML 全球独家',
+        '<b>CoWoS 先进封装</b> = 台积电是主要产能瓶颈',
+        '<b>HBM 内存</b> = 全球仅 3 家（海力士/三星/美光）',
+        '<b>InP 衬底</b> = 仅少数几家能稳定供'
+      ],
+      note:"钱从最上面（云厂商 capex）往下流，瓶颈却在最上游。看懂卡点，就看懂了这条链。"
+    },
+    {
+      kicker:"完 · 重要声明",
+      title:"非投资建议",
+      layers:[],
+      disclaimer:true,
+      narr:'',
+      discBox:[
+        '本片只是<strong>硬件科普</strong>：帮你看懂 AI 集群供应链长什么样、每层是谁。',
+        '片中出现的所有 ticker（如 NVDA、TSM、ASML、AXTI…）<strong>仅用于标注产业链位置</strong>，不是推荐买卖任何一只股票。',
+        '部分数字做了模糊化处理或标「约」，可能过时或有误；请以公司公告、招股书等一手资料为准。',
+        '<strong>本页不构成任何投资建议</strong>。投资有风险，决策请自行研究并咨询持牌专业人士。'
+      ],
+      chips:[],
+      note:""
+    }
+  ];
+
+  var DEFAULT_DUR = 9000; // ms per scene default
+  var scenecol = document.getElementById('scenecol');
+  var bar = document.getElementById('bar');
+  var counter = document.getElementById('counter');
+  var btnPrev = document.getElementById('prev');
+  var btnPlay = document.getElementById('play');
+  var btnNext = document.getElementById('next');
+  var btnReplay = document.getElementById('replay');
+  var btnTTS = document.getElementById('tts');
+  var toast = document.getElementById('toast');
+  var layerEls = {};
+  document.querySelectorAll('.layer').forEach(function(g){
+    layerEls[g.getAttribute('data-layer')] = g;
+  });
+
+  // ---- build scene DOM ----
+  SCENES.forEach(function(s, i){
+    var d = document.createElement('div');
+    d.className = 'scene' + (s.disclaimer ? ' disc-scene' : '');
+    d.setAttribute('data-i', i);
+    var html = '';
+    html += '<p class="kicker">'+s.kicker+'</p>';
+    html += '<h2>'+s.title+'</h2>';
+    if(s.disclaimer){
+      html += '<div class="disc-box">';
+      s.discBox.forEach(function(p){ html += '<p>'+p+'</p>'; });
+      html += '</div>';
+    } else {
+      html += '<div class="narr">'+s.narr+'</div>';
+      if(s.locks){
+        html += '<div class="lockrow">';
+        s.locks.forEach(function(l){ html += '<div class="lock">'+l+'</div>'; });
+        html += '</div>';
+      }
+      if(s.chips && s.chips.length){
+        html += '<div class="chips">';
+        s.chips.forEach(function(c){
+          html += '<span class="chip"><b>'+c.t+'</b> '+c.d+'</span>';
+        });
+        html += '</div>';
+      }
+    }
+    if(s.note){ html += '<p class="note">'+s.note+'</p>'; }
+    d.innerHTML = html;
+    scenecol.appendChild(d);
+  });
+  var sceneEls = Array.prototype.slice.call(scenecol.querySelectorAll('.scene'));
+
+  // ---- plain narration text for TTS (strip tags) ----
+  function narrText(s){
+    var tmp = document.createElement('div');
+    if(s.disclaimer){ tmp.innerHTML = s.title + '。' + s.discBox.join('。'); }
+    else {
+      tmp.innerHTML = s.title + '。' + (s.narr||'');
+      if(s.locks){ tmp.innerHTML += '。' + s.locks.join('。'); }
+    }
+    return (tmp.textContent || tmp.innerText || '').replace(/\s+/g,' ').trim();
+  }
+
+  // ---- state ----
+  var idx = 0;
+  var playing = false;
+  var timer = null;
+  var ttsOn = false;
+  var ttsSupported = ('speechSynthesis' in window) && ('SpeechSynthesisUtterance' in window);
+  var zhVoice = null;
+
+  if(!ttsSupported){
+    btnTTS.disabled = true;
+    btnTTS.title = '当前浏览器不支持朗读，可看字幕';
+  } else {
+    var pickVoice = function(){
+      var vs = window.speechSynthesis.getVoices() || [];
+      zhVoice = vs.filter(function(v){ return /zh[-_]?CN/i.test(v.lang); })[0]
+             || vs.filter(function(v){ return /^zh/i.test(v.lang); })[0]
+             || null;
+    };
+    pickVoice();
+    if(window.speechSynthesis.onvoiceschanged !== undefined){
+      window.speechSynthesis.onvoiceschanged = pickVoice;
+    }
+  }
+
+  function showToast(msg){
+    toast.textContent = msg || '';
+    if(msg){ setTimeout(function(){ if(toast.textContent===msg) toast.textContent=''; }, 3200); }
+  }
+
+  // ---- rendering ----
+  function setLayers(active){
+    var hasActive = active && active.length;
+    var set = {};
+    (active||[]).forEach(function(n){ set[n]=true; });
+    for(var k in layerEls){
+      var g = layerEls[k];
+      if(!hasActive){
+        g.classList.remove('off'); g.classList.remove('on');
+        g.querySelector('rect').classList.remove('glow');
+      } else if(set[k]){
+        g.classList.add('on'); g.classList.remove('off');
+        g.querySelector('rect').classList.add('glow');
+      } else {
+        g.classList.add('off'); g.classList.remove('on');
+        g.querySelector('rect').classList.remove('glow');
+      }
+    }
+  }
+
+  function render(){
+    sceneEls.forEach(function(el, i){ el.classList.toggle('active', i===idx); });
+    setLayers(SCENES[idx].layers);
+    counter.textContent = '第 ' + (idx+1) + ' / ' + SCENES.length + ' 幕';
+    bar.style.width = (idx / (SCENES.length-1) * 100) + '%';
+  }
+
+  function durFor(s){ return s.dur || DEFAULT_DUR; }
+  function clearTimer(){ if(timer){ clearTimeout(timer); timer=null; } }
+  function stopTTS(){ if(ttsSupported){ try{ window.speechSynthesis.cancel(); }catch(e){} } }
+
+  // ---- navigation ----
+  function go(i){
+    clearTimer(); stopTTS();
+    idx = Math.max(0, Math.min(SCENES.length-1, i));
+    render();
+    if(playing){ runScene(); }
+  }
+  function next(){
+    if(idx >= SCENES.length-1){ setPlaying(false); return; }
+    go(idx+1);
+  }
+  function prev(){ go(idx-1); }
+  function fwd(){ go(idx >= SCENES.length-1 ? idx : idx+1); }
+
+  // play current scene: TTS-driven advance, or timed advance
+  function runScene(){
+    clearTimer(); stopTTS();
+    var s = SCENES[idx];
+    var advanced = false;
+    function advanceOnce(){
+      if(advanced) return; advanced = true;
+      if(playing) next();
+    }
+    if(ttsOn && ttsSupported){
+      var txt = narrText(s);
+      var u = new SpeechSynthesisUtterance(txt);
+      u.lang = 'zh-CN';
+      if(zhVoice) u.voice = zhVoice;
+      u.rate = 1.0; u.pitch = 1.0;
+      var safety = durFor(s) + Math.min(16000, txt.length*200);
+      var safetyTimer = setTimeout(advanceOnce, safety);
+      u.onend = function(){ clearTimeout(safetyTimer); advanceOnce(); };
+      u.onerror = function(){ clearTimeout(safetyTimer); timer = setTimeout(advanceOnce, durFor(s)); };
+      try{ window.speechSynthesis.speak(u); }
+      catch(e){ timer = setTimeout(advanceOnce, durFor(s)); }
+    } else {
+      timer = setTimeout(advanceOnce, durFor(s));
+    }
+  }
+
+  function setPlaying(on){
+    playing = on;
+    btnPlay.textContent = on ? '⏸' : '▶';
+    btnPlay.setAttribute('aria-label', on ? '暂停' : '播放');
+    if(on){
+      if(idx >= SCENES.length-1){ idx = 0; render(); }
+      runScene();
+    } else {
+      clearTimer(); stopTTS();
+    }
+  }
+  function togglePlay(){ setPlaying(!playing); }
+
+  // ---- TTS toggle ----
+  function toggleTTS(){
+    if(!ttsSupported){ showToast('当前浏览器不支持朗读，可看字幕'); return; }
+    ttsOn = !ttsOn;
+    btnTTS.setAttribute('aria-pressed', ttsOn ? 'true':'false');
+    btnTTS.textContent = ttsOn ? '🔊 朗读 开' : '🔊 朗读';
+    if(ttsOn){
+      if(!zhVoice) showToast('未找到中文语音，将用默认嗓音朗读');
+      if(playing){ runScene(); }
+      else {
+        stopTTS();
+        var u = new SpeechSynthesisUtterance(narrText(SCENES[idx]));
+        u.lang='zh-CN'; if(zhVoice) u.voice=zhVoice;
+        try{ window.speechSynthesis.speak(u); }catch(e){}
+      }
+    } else {
+      stopTTS();
+    }
+  }
+
+  // ---- wire controls ----
+  btnPrev.addEventListener('click', prev);
+  btnNext.addEventListener('click', fwd);
+  btnPlay.addEventListener('click', togglePlay);
+  btnReplay.addEventListener('click', function(){ idx=0; render(); setPlaying(true); });
+  btnTTS.addEventListener('click', toggleTTS);
+
+  // keyboard
+  document.addEventListener('keydown', function(e){
+    if(e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+    if(e.code==='Space' || e.key===' '){ e.preventDefault(); togglePlay(); }
+    else if(e.key==='ArrowRight'){ e.preventDefault(); fwd(); }
+    else if(e.key==='ArrowLeft'){ e.preventDefault(); prev(); }
+  });
+
+  // pause speech/timer when tab hidden
+  window.addEventListener('beforeunload', stopTTS);
+  document.addEventListener('visibilitychange', function(){
+    if(document.hidden){ clearTimer(); stopTTS(); }
+  });
+
+  // ---- init ----
+  render();
+  btnPlay.textContent = '▶';
+  setPlaying(true); // autoplay (no audio -> allowed)
+
+})();
+</script>
+</body>
+</html>
