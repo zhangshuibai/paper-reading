@@ -143,6 +143,27 @@
     "path": "papers/2026-06-17-ai-cluster-architecture/index.html"
   },
   {
+    "slug": "2026-06-17-palantir",
+    "title": "Palantir：数据决策 / AIP 平台的竞争格局与赛道调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://www.palantir.com",
+    "code": "",
+    "date": "2026-06-22",
+    "published": "公司调研 2026",
+    "tldr": "政企大数据集成+ontology+AIP把LLM接进可执行决策、靠FDE重交付落地；底层数据平台已mature但「LLM/agent接ontology做可执行决策」仍emerging；最大威胁是Databricks/Snowflake+AWS/MS/Google超大厂自带AI、软肋是FDE重交付难规模化；一个whitespace=垂直行业轻量ontology+AIP并用AI agent替代部分FDE去够中腰部客户",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "market-map",
+      "startup-idea",
+      "data-platform",
+      "ai-ops",
+      "china"
+    ],
+    "path": "papers/2026-06-17-palantir/index.html"
+  },
+  {
     "slug": "2026-06-17-asts",
     "title": "AST SpaceMobile（ASTS）：基本面 / 估值 / 是否值得买入",
     "authors": "—",

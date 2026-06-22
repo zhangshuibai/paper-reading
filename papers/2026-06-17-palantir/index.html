@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Palantir · 数据决策 / AIP 平台的竞争格局与赛道调研</title>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --bad:#ff6b81; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --bad:#d23651; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;}
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:920px; margin:0 auto; padding:18px 22px 90px}
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:25px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)} .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap; line-height:2}
+  nav.toc a:hover{color:var(--accent)}
+  section{margin:38px 0}
+  h2{font-size:20px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:16.5px; margin:22px 0 8px}
+  p{margin:12px 0} ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)} strong{color:var(--text)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.88em}
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:13px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:9px 10px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  figure{margin:24px 0; text-align:center}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+  .svgwrap{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 8px}
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+  .src{font-size:10.5px; padding:0 6px; border-radius:999px; white-space:nowrap; vertical-align:middle}
+  .src-a{background:rgba(67,197,158,.18); color:var(--ok)}
+  .src-b{background:rgba(255,180,84,.18); color:var(--warn)}
+  .src-c{background:rgba(255,107,129,.18); color:var(--bad)}
+  .legend{font-size:12px; color:var(--muted); margin:6px 0 0}
+  .verdict{display:inline-block; font-weight:700; padding:3px 12px; border-radius:999px; font-size:14px}
+  .v-nascent{background:rgba(122,162,255,.18); color:var(--accent)}
+  .v-emerging{background:rgba(67,197,158,.18); color:var(--ok)}
+  .v-crowded{background:rgba(255,180,84,.18); color:var(--warn)}
+  .v-mature{background:rgba(255,107,129,.18); color:var(--bad)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">Data Platform</span>
+      <span class="chip">AI Ops / Decision Intelligence</span>
+      <span class="chip">Gov / Defense Tech</span>
+      <span class="chip">China #cn</span>
+      <span class="chip">竞争格局</span>
+      <span class="chip">赛道早期度</span>
+      <span class="chip">创业 idea</span>
+    </div>
+    <h1>Palantir：数据决策 / AIP 平台的竞争格局与赛道调研</h1>
+    <p class="orig-title">palantir.com（NYSE: PLTR）— 企业/政府大数据集成 + ontology + 把 LLM 接进决策 / 是否早期 / 可借鉴 idea</p>
+    <dl class="meta-grid">
+      <dt>对象</dt><dd><a href="https://www.palantir.com" target="_blank" rel="noopener">https://www.palantir.com</a></dd>
+      <dt>赛道</dt><dd>企业/政府大数据集成 + 运营决策 + AI 应用平台（data integration / ontology / decision intelligence / AI ops）</dd>
+      <dt>整理</dt><dd>对话调研笔记；信息来自公开检索，按来源分级标注，产品能力未必经独立验证</dd>
+      <dt>日期</dt><dd>2026-06-22</dd>
+    </dl>
+    <p class="legend">来源等级：<span class="src src-a">🟢 一手</span> 官网/SEC/IR/官方 ·
+      <span class="src src-b">🟡 二手</span> 媒体/数据库/分析师 ·
+      <span class="src src-c">🔴 自述/未证实</span> 营销口径或未独立验证</p>
+  </header>
+
+  <div class="tldr">
+    <b>一句话</b> — Palantir 卖的不是 BI/数仓，而是一套<strong>「ontology（本体）+ 把数据接到真实决策与行动」</strong>的运营操作系统：政府线 <strong>Gotham</strong>、商业线 <strong>Foundry</strong>、近两年主打的 <strong>AIP</strong> 把 LLM/agent 接进企业数据与流程，靠 <strong>forward-deployed engineer（FDE）重交付</strong>打法落地。赛道整体（数据平台）已 <strong>mature</strong>，但「<strong>LLM/agent 接进企业 ontology 做可执行决策</strong>」这个新形态仍 <strong>emerging</strong>。最大威胁不是同行小厂，而是 <strong>Databricks/Snowflake + AWS/Microsoft/Google 超大厂自带 AI</strong>；最大软肋是 <strong>FDE 重交付难规模化</strong>。一个 whitespace：<strong>垂直行业的「轻量版 ontology + AIP」+ 用 AI agent 替代部分 FDE 交付</strong>，去够 Palantir 够不着的中腰部企业。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#market">① 赛道地图 + 早期度</a>
+    <a href="#matrix">② 竞品对照矩阵</a>
+    <a href="#map">③ 定位图</a>
+    <a href="#funding">④ 融资/营收 timeline</a>
+    <a href="#snapshot">⑤ 公司速览</a>
+    <a href="#cn">⑥ 中国对标</a>
+    <a href="#idea">⑦ 创业 idea 借鉴</a>
+    <a href="#take">⑧ 现实判断</a>
+    <a href="#src">出处</a>
+  </nav>
+
+  <!-- ① 赛道与早期度 -->
+  <section id="market">
+    <h2><span class="n">①</span>赛道地图 + 早期度判断</h2>
+    <p>Palantir 所在赛道可拆成两层。<strong>底层是「企业/政府大数据集成与运营平台」</strong>——把散落在 ERP、CRM、传感器、情报源里的异构数据汇到一处、建模、可视化、驱动操作。这层已经被大厂和成熟玩家占满（数仓/lakehouse/BI），属<strong>成熟赛道</strong>。<strong>上层是 Palantir 的差异化叙事：ontology（本体）</strong>——不只是把数据存起来查询，而是建一个「对象 + 关系 + 行动（action）」的语义层，把数据直接接到真实世界的决策与执行（派单、调度、拦截、审批），并在 2023 年后用 <strong>AIP</strong> 把 LLM/agent 嵌进这个 ontology，让模型在受控的企业上下文里「动手做事」而非只聊天。这层是<strong>新兴形态</strong>。</p>
+
+    <h3>玩家分群（四象限别漏）</h3>
+    <ul>
+      <li><strong>现有巨头 / 直接替代：</strong><strong>Databricks</strong>（lakehouse + Agent Bricks/Genie，估值 $134B、run-rate $5.4B <span class="src src-b">🟡</span>）、<strong>Snowflake</strong>（AI Data Cloud，消费计费 <span class="src src-b">🟡</span>）——数据底座的最大替代，正从「数仓」向「AI 应用层」上攻。</li>
+      <li><strong>垂直创业公司 / 相邻：</strong><strong>C3.ai</strong>（卖成品 AI 应用，FY2025 营收 $389M <span class="src src-a">🟢</span>）、<strong>Scale AI</strong>（数据标注 + 政府/国防 AI）、<strong>Anduril</strong>（Lattice OS，抢国防预算与心智，估值 $61B <span class="src src-b">🟡</span>）。</li>
+      <li><strong>大厂顺手做：</strong><strong>Microsoft</strong>（Fabric / Azure + Copilot）、<strong>Google Cloud</strong>（BigQuery / Vertex / Gemini）、<strong>AWS</strong>（Bedrock / SageMaker / 数据湖全家桶）——把 AI 当云的增值件白送，是「平台被绕过」的结构性威胁。</li>
+      <li><strong>系统集成商 / 服务：</strong><strong>Booz Allen、SAIC、Accenture、Deloitte</strong> 等——在政企交付侧既是渠道伙伴也是替代（「我们自己用现代数据栈给你搭」）。</li>
+      <li><strong>开源 / 自建（最易被忽视）：</strong>现代数据栈 <strong>dbt + Spark + Airflow + 各 BI（Looker/Power BI/Tableau）</strong> + 企业自建 LLM 应用（LangChain/向量库/自托管开源模型）——大企业「自己拼」一套能覆盖 Palantir 相当部分价值，且无 license 锁定。</li>
+    </ul>
+
+    <div class="callout insight">
+      <span class="label">早期度判断</span>
+      <span class="verdict v-mature">mature（底层数据平台）</span> &nbsp;+&nbsp; <span class="verdict v-emerging">emerging（LLM/agent 接 ontology 做可执行决策）</span><br><br>
+      <strong>判断信号：</strong>① 玩家众多且巨头全部进场（AWS/MS/Google + Databricks/Snowflake），数据集成/BI 这层早已红海 → 成熟；② 但「把 LLM agent 接进企业语义层、让它在受控上下文里执行操作」尚无公认 benchmark/标准、客户认知刚成型、各家叙事打架（ontology vs lakehouse vs copilot）→ 新兴；③ 融资/资本热度极高（Databricks 一年内 Series K→L、估值 $100B→$134B <span class="src src-b">🟡</span>；Anduril $61B <span class="src src-b">🟡</span>），说明资本认为「AI×企业数据×决策/国防」仍有大空间；④ Palantir 自身 US 商业 +133% YoY <span class="src src-a">🟢</span> 的爆发，是「AIP 拐点」的强信号——需求侧刚被 LLM 点燃。</div>
+  </section>
+
+  <!-- ② 竞品矩阵 -->
+  <section id="matrix">
+    <h2><span class="n">②</span>竞品对照矩阵</h2>
+    <p>选了 8 个对这个赛道最有区分度的维度：<strong>产品形态 · 技术叙事 · 目标客户 · 交付模式 · 商业模式 · 数据/壁垒 · AI/LLM 集成 · 上市/规模</strong>。这些维度恰好能把「平台 vs 集成 vs 应用」「ontology vs lakehouse/数仓」「FDE 重交付 vs 自助 SaaS」拉开。指标口径不一时标来源等级。</p>
+    <table>
+      <thead><tr>
+        <th>玩家</th><th>产品形态</th><th>技术叙事</th><th>目标客户</th><th>交付模式</th><th>商业模式</th><th>数据/壁垒</th><th>AI/LLM 集成</th><th>上市/规模</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Palantir（本篇）</strong></td>
+          <td>端到端平台（Gotham/Foundry/AIP/Apollo）</td>
+          <td><strong>ontology + 数据接决策/行动</strong></td>
+          <td>政府/国防 + 大型企业</td>
+          <td><strong>FDE 重交付</strong>（驻场建模）</td>
+          <td>平台订阅 + 交付，多年期合同</td>
+          <td>客户数据建模 + 深度嵌入工作流的切换成本</td>
+          <td>AIP 把 LLM/agent 接进 ontology，2026/03 推 AI FDE agent <span class="src src-a">🟢</span></td>
+          <td>NYSE 2020；市值 ~$308B、FY25 营收 $4.48B <span class="src src-a">🟢</span></td>
+        </tr>
+        <tr>
+          <td>Databricks</td>
+          <td>数据/AI 平台（lakehouse）</td>
+          <td>lakehouse + 开放格式 + Agent Bricks</td>
+          <td>数据工程/科学团队、企业</td>
+          <td>自助 SaaS + 伙伴生态</td>
+          <td>消费计费（compute/DBU）</td>
+          <td>开放生态 + 数据/模型工作负载黏性</td>
+          <td>Mosaic/Agent Bricks、Genie、Lakebase（agent DB）<span class="src src-b">🟡</span></td>
+          <td>未上市；估值 $134B、run-rate $5.4B（+65% YoY）<span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Snowflake</td>
+          <td>云数仓 → AI Data Cloud</td>
+          <td>数仓/数据共享 + Cortex AI</td>
+          <td>企业数据/分析团队</td>
+          <td>自助 SaaS</td>
+          <td>消费计费</td>
+          <td>数据云网络 + 数据共享</td>
+          <td>Cortex（托管 LLM/检索）<span class="src src-b">🟡</span></td>
+          <td>NYSE；产品营收单季 ~$1.09B（+32% YoY，Q2'25 口径）<span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Microsoft / Google / AWS</td>
+          <td>全栈云 + 数据 + Copilot/Gemini/Bedrock</td>
+          <td>「全在我云里，AI 白送」</td>
+          <td>几乎所有企业</td>
+          <td>自助 + 庞大伙伴/集成商网络</td>
+          <td>云消费 + 订阅</td>
+          <td>云锁定 + 全家桶 + 分销</td>
+          <td>原生且默认集成，分发优势碾压</td>
+          <td>三家均超大市值科技巨头</td>
+        </tr>
+        <tr>
+          <td>C3.ai</td>
+          <td>成品行业 AI 应用</td>
+          <td>「企业 AI 应用」（预建模型）</td>
+          <td>能源/制造/国防等行业</td>
+          <td>应用 + 云伙伴渠道（MS/AWS/GCP）</td>
+          <td>订阅/消费</td>
+          <td>行业模型库 + 伙伴渠道</td>
+          <td>生成式 AI 应用，generative AI 营收 +100%+ <span class="src src-a">🟢</span></td>
+          <td>NYSE；FY2025 营收 $389M（+25%）<span class="src src-a">🟢</span></td>
+        </tr>
+        <tr>
+          <td>Anduril</td>
+          <td>自主作战系统 + Lattice OS</td>
+          <td>硬件无关的自主系统操作系统</td>
+          <td>美/盟军国防（偏自主系统）</td>
+          <td>产品 + 国防采购</td>
+          <td>硬件 + 软件 + 多年合同</td>
+          <td>硬件一体化 + 国防准入</td>
+          <td>Lattice 偏自主系统编排，非通用数据决策 <span class="src src-b">🟡</span></td>
+          <td>未上市；估值 $61B，2025 backlog &gt;$8B <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>系统集成商<br>(Booz Allen / SAIC / Accenture)</td>
+          <td>咨询 + 定制集成</td>
+          <td>「按你需求搭」无强技术叙事</td>
+          <td>政府/大企业</td>
+          <td>人力重交付（与 FDE 类似但无自有平台）</td>
+          <td>人天/项目制</td>
+          <td>客户关系 + 政企准入</td>
+          <td>接第三方/开源模型，非自有平台</td>
+          <td>多为上市大型服务商</td>
+        </tr>
+        <tr>
+          <td>开源 / 自建栈<br>(dbt+Spark+BI+自建 LLM)</td>
+          <td>拼装的现代数据栈 + 自建 AI 应用</td>
+          <td>无统一叙事，按需组合</td>
+          <td>有工程能力的企业</td>
+          <td>自建/自维护</td>
+          <td>免费/低 license + 自有人力</td>
+          <td>无锁定（也无现成壁垒）</td>
+          <td>LangChain/向量库/自托管开源模型</td>
+          <td>无主体；社区/各厂商混合</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>读矩阵：</strong>Palantir 的真差异化在两格——<strong>「ontology 把数据接到可执行行动」</strong>与<strong>「FDE 重交付」</strong>，这让它在「数据很乱、决策要落地、容错低」的政府/国防/大型工业场景里很强，竞品大多停在「存好查好、给个 copilot」。但它的软肋同样写在矩阵里：<strong>交付模式那一列只有它（和集成商）是重人力</strong>——难规模化、毛利与扩张速度受限；而<strong>数据/壁垒那一列，超大厂的「云锁定 + 默认分发」是它绕不过的结构性压制</strong>。同质化最严重的是底层数据集成（人人能做），最不同质化的是「LLM agent × 企业语义层 × 受控执行」这层——也正是它当前增长的来源。</p>
+  </section>
+
+  <!-- ③ 定位图 -->
+  <section id="map">
+    <h2><span class="n">③</span>定位图（whitespace 在哪）</h2>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 660 420" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12">
+        <line x1="40" y1="210" x2="620" y2="210" stroke="#b9c2e0" stroke-width="1.5"/>
+        <line x1="330" y1="20" x2="330" y2="400" stroke="#b9c2e0" stroke-width="1.5"/>
+        <text x="618" y="226" text-anchor="end" fill="#5a627a">重交付 / FDE 驻场 →</text>
+        <text x="42" y="226" fill="#5a627a">← 自助 SaaS / 产品化</text>
+        <text x="336" y="28" fill="#5a627a">↑ 平台 + 接决策/行动（ontology）</text>
+        <text x="336" y="394" fill="#5a627a">↓ 存储/查询/BI 或成品应用</text>
+
+        <circle cx="470" cy="80" r="9" fill="#3a66ff"/>
+        <text x="484" y="84" fill="#1a1f33" font-weight="700">Palantir</text>
+
+        <circle cx="200" cy="120" r="7" fill="#6b4cff"/>
+        <text x="150" y="110" fill="#5a627a">Databricks</text>
+
+        <circle cx="180" cy="300" r="7" fill="#6b4cff"/>
+        <text x="120" y="304" fill="#5a627a">Snowflake</text>
+
+        <circle cx="140" cy="250" r="7" fill="#9aa3bd"/>
+        <text x="78" y="244" fill="#5a627a">MS/Google/AWS</text>
+
+        <circle cx="250" cy="350" r="7" fill="#9aa3bd"/>
+        <text x="262" y="354" fill="#5a627a">C3.ai（成品应用）</text>
+
+        <circle cx="520" cy="150" r="7" fill="#9aa3bd"/>
+        <text x="430" y="142" fill="#5a627a">Anduril（自主系统）</text>
+
+        <circle cx="560" cy="290" r="7" fill="#9aa3bd"/>
+        <text x="470" y="294" fill="#5a627a">SI 集成商</text>
+
+        <circle cx="120" cy="360" r="7" fill="#9aa3bd"/>
+        <text x="40" y="364" fill="#5a627a">开源/自建栈</text>
+
+        <rect x="380" y="60" width="160" height="110" fill="rgba(67,197,158,.10)" stroke="#43c59e" stroke-dasharray="5 4"/>
+        <text x="460" y="52" text-anchor="middle" fill="#138a6e" font-weight="700">whitespace</text>
+        <text x="460" y="188" text-anchor="middle" fill="#138a6e" font-size="11">垂直行业「轻量 ontology+AIP」</text>
+        <text x="460" y="203" text-anchor="middle" fill="#138a6e" font-size="11">+ AI agent 替代部分 FDE</text>
+      </svg>
+      </div>
+      <figcaption>定位图（本调研重绘）。两轴：横=交付模式（自助↔重交付）、纵=产品深度（存储/BI/应用↔平台+接行动的 ontology）。Palantir 独占「右上 = 重交付的可执行平台」；whitespace 在「<strong>高产品深度但更轻交付</strong>」——用 AI agent 把 FDE 的活做掉一部分，去够中腰部客户。</figcaption>
+    </figure>
+  </section>
+
+  <!-- ④ 融资/营收 timeline -->
+  <section id="funding">
+    <h2><span class="n">④</span>融资 / 营收 timeline</h2>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 760 200" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="11.5">
+        <line x1="50" y1="100" x2="720" y2="100" stroke="#b9c2e0" stroke-width="2"/>
+
+        <circle cx="60" cy="100" r="6" fill="#3a66ff"/>
+        <text x="60" y="80" text-anchor="middle" fill="#5a627a">2003</text>
+        <text x="60" y="128" text-anchor="middle" fill="#1a1f33">成立</text>
+        <text x="60" y="143" text-anchor="middle" fill="#5a627a" font-size="10">Thiel/Karp 等</text>
+
+        <circle cx="150" cy="100" r="6" fill="#6b4cff"/>
+        <text x="150" y="80" text-anchor="middle" fill="#5a627a">2004–05</text>
+        <text x="150" y="128" text-anchor="middle" fill="#1a1f33">In-Q-Tel</text>
+        <text x="150" y="143" text-anchor="middle" fill="#5a627a" font-size="10">CIA 风投入局</text>
+
+        <circle cx="270" cy="100" r="6" fill="#6b4cff"/>
+        <text x="270" y="80" text-anchor="middle" fill="#5a627a">2013</text>
+        <text x="270" y="128" text-anchor="middle" fill="#1a1f33">~$9B 估值</text>
+        <text x="270" y="143" text-anchor="middle" fill="#5a627a" font-size="10">$107.5M 轮</text>
+
+        <circle cx="390" cy="100" r="6" fill="#6b4cff"/>
+        <text x="390" y="80" text-anchor="middle" fill="#5a627a">2015</text>
+        <text x="390" y="128" text-anchor="middle" fill="#1a1f33">~$20B 估值</text>
+        <text x="390" y="143" text-anchor="middle" fill="#5a627a" font-size="10">$880M 轮</text>
+
+        <circle cx="520" cy="100" r="7" fill="#3a66ff"/>
+        <text x="520" y="80" text-anchor="middle" fill="#5a627a">2020-09</text>
+        <text x="520" y="128" text-anchor="middle" fill="#1a1f33" font-weight="700">DPO 直接上市</text>
+        <text x="520" y="143" text-anchor="middle" fill="#5a627a" font-size="10">NYSE: PLTR</text>
+
+        <circle cx="630" cy="100" r="6" fill="#138a6e"/>
+        <text x="630" y="80" text-anchor="middle" fill="#5a627a">2023</text>
+        <text x="630" y="128" text-anchor="middle" fill="#1a1f33">AIP 发布</text>
+        <text x="630" y="143" text-anchor="middle" fill="#5a627a" font-size="10">LLM 接入</text>
+
+        <circle cx="710" cy="100" r="6" fill="#138a6e"/>
+        <text x="710" y="80" text-anchor="middle" fill="#5a627a">2025–26</text>
+        <text x="710" y="128" text-anchor="middle" fill="#1a1f33">营收爆发</text>
+        <text x="710" y="143" text-anchor="middle" fill="#5a627a" font-size="10">US 商业拐点</text>
+      </svg>
+      </div>
+      <figcaption>Palantir 关键节点（融资为私募期；上市后转为营收口径）。私募轮估值来自 Wikipedia/Forbes 等公开报道 <span class="src src-b">🟡</span>；上市/营收口径来自 SEC/IR <span class="src src-a">🟢</span>。</figcaption>
+    </figure>
+    <table>
+      <thead><tr><th>时间</th><th>事件 / 轮次</th><th>金额 / 估值</th><th>投资方 / 备注</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr><td>2003</td><td>成立</td><td>Thiel 自掏种子（报道口径不一，约 $30M / 早期 $2M）</td><td>Peter Thiel、Alex Karp、Stephen Cohen、Joe Lonsdale、Nathan Gettings</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2004–05</td><td>早期机构投资</td><td>未披露</td><td>In-Q-Tel（CIA 风投）；Founders Fund</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2013</td><td>私募轮</td><td>+$107.5M，估值 ~$9B</td><td>Forbes 称当时硅谷最值钱私营科技公司之一</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2014</td><td>私募轮</td><td>+$50M，估值 ~$15B</td><td>—</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2015</td><td>私募轮</td><td>+$880M，估值 ~$20B</td><td>—</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2020-09-30</td><td><strong>DPO 直接上市</strong></td><td>开盘市值区间约 $22–30B（预期）</td><td>NYSE: PLTR，直接上市（非传统 IPO 募资）</td><td><span class="src src-a">🟢</span></td></tr>
+        <tr><td>2023</td><td>AIP 发布</td><td>—</td><td>把 LLM 接进 Foundry/ontology</td><td><span class="src src-a">🟢</span></td></tr>
+        <tr><td>2025 FY</td><td>全年营收</td><td>$4.475B（+56% YoY）；政府 $2.40B / 商业 $2.07B；净利率 36%</td><td>US 商业 +109% 至 $1.5B；US 商业客户 571（Q4）</td><td><span class="src src-a">🟢</span></td></tr>
+        <tr><td>2026 Q1</td><td>单季</td><td>营收 $1.633B（+85%）；US +104%、US 商业 $595M（+133%）、US 政府 $687M（+84%）；Rule of 40 = 145%；客户 1,007</td><td>206 单 ≥$1M；TCV $2.41B（+61%）；上调全年指引至 +71%</td><td><span class="src src-a">🟢</span></td></tr>
+        <tr><td>2026-06</td><td>市值（参考）</td><td>~$308B</td><td>约 4,429 名员工（2025-12-31）</td><td><span class="src src-b">🟡</span></td></tr>
+      </tbody>
+    </table>
+    <p><strong>用节奏佐证阶段：</strong>私募期估值 17 年从种子涨到 ~$20B 但增长不算快（重交付、政府订单慢）；真正的拐点是 <strong>2023 AIP + 2025–26 US 商业爆发</strong>——这说明赛道的「新增量」是 LLM 把「数据接决策」的门槛和需求一起点燃了。赛道整体融资热度极高（Databricks 一年内估值 $100B→$134B、Anduril $61B <span class="src src-b">🟡</span>），资本仍重注「AI×企业数据×决策/国防」。</p>
+  </section>
+
+  <!-- ⑤ 公司速览 -->
+  <section id="snapshot">
+    <h2><span class="n">⑤</span>公司速览</h2>
+    <table>
+      <tbody>
+        <tr><td>是什么 / 定位</td><td>政府/企业的大数据集成 + 运营决策 + AI 应用平台；卖「ontology + 把数据接到真实决策/行动」而非纯 BI/数仓 <span class="src src-a">🟢</span></td></tr>
+        <tr><td>产品</td><td><strong>Gotham</strong>（政府/国防/情报多源数据分析）· <strong>Foundry</strong>（商业数据运营平台，含 ontology）· <strong>AIP</strong>（把 LLM/agent 接进 ontology 与流程，2023 发布；2026/03 推 AI FDE agent）· <strong>Apollo</strong>（跨云/本地/涉密环境的持续部署）<span class="src src-a">🟢</span></td></tr>
+        <tr><td>团队</td><td>2003 由 Peter Thiel（PayPal/Founders Fund）、Alex Karp（CEO，Stanford 法学背景）、Stephen Cohen、Joe Lonsdale、Nathan Gettings 共同创立；起家于为情报界做 Gotham <span class="src src-b">🟡</span></td></tr>
+        <tr><td>商业模式</td><td>两条线：<strong>政府</strong>（多年期合同、国防/情报）+ <strong>商业</strong>（Foundry/AIP 订阅 + 交付）；近年增长由<strong>美国商业 AIP</strong>拉动（US 商业 Q1'26 +133% YoY）<span class="src src-a">🟢</span></td></tr>
+        <tr><td>规模 / 状态</td><td>NYSE 2020 上市；FY2025 营收 $4.475B（+56%）、<strong>GAAP 盈利</strong>（净利率 36%）；Rule of 40 = 145%（Q1'26）；市值 ~$308B、约 4,429 员工 <span class="src src-a">🟢</span>/<span class="src src-b">🟡</span></td></tr>
+      </tbody>
+    </table>
+    <div class="callout note">
+      <span class="label">财报口径核实</span>
+      营收/客户/盈利数据来自 SEC 8-K 季报与媒体转述的官方新闻稿 <span class="src src-a">🟢</span>/<span class="src src-b">🟡</span>。其中：<strong>FY2025 营收 $4.475B（+56%）、政府 $2.40B、商业 $2.07B、净利率 36%</strong>；<strong>Q1'26 营收 $1.633B（+85%）、总客户 1,007、Rule of 40 = 145%</strong>。市值与员工数为第三方数据库口径，随行情/时点变化，引用前请核对最新 IR。「Rule of 40 = 145%」「净利率 36%」均为公司/媒体口径，量级与多源一致。
+    </div>
+  </section>
+
+  <!-- ⑥ 中国对标 -->
+  <section id="cn">
+    <h2><span class="n">⑥</span>中国对标（政企大数据决策 / AI 中台）</h2>
+    <p>中国做「政企大数据决策 / AI 中台」的玩家与 Palantir 形似神不同。共性是「把政企的数据汇起来 + 上层做分析/决策/AI 应用 + 重交付」；差异在<strong>政企关系、国产化/信创要求、以及更偏「项目制集成」而非「自有平台高毛利订阅」</strong>。</p>
+    <table>
+      <thead><tr><th>玩家</th><th>定位</th><th>与 Palantir 的对应</th><th>规模 / 备注</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr><td><strong>第四范式 4Paradigm</strong>（6682.HK）</td><td>决策类 AI 平台（先知 Sage）+ 行业大模型 SageGPT</td><td>最接近 Foundry/AIP 的「平台」叙事</td><td>2024 营收 RMB5.26B（+25.1%）；Sage 平台占 69.9%；年亏损收窄至 RMB269M；2023 港股上市 <span class="src src-b">🟡</span></td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td><strong>明略科技 MiningLamp</strong></td><td>多模态 AI + 大数据，营销/公安/工业决策分析</td><td>偏 Gotham 式「关系/线索分析」</td><td>未上市；公安/政企场景较深 <span class="src src-c">🔴</span> 自述</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td><strong>星环科技 Transwarp</strong>（688031.SH）</td><td>大数据基础软件 + 数据库 + 数据平台，信创自主</td><td>偏 Databricks/数据底座一侧</td><td>科创板上市；强调国产化 <span class="src src-b">🟡</span></td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td><strong>海致科技</strong></td><td>图计算 / 知识图谱 + 政企数据决策</td><td>图谱接近 ontology「对象+关系」的一半</td><td>未上市；公安/金融图谱 <span class="src src-c">🔴</span> 自述</td><td><span class="src src-c">🔴</span></td></tr>
+        <tr><td><strong>东方国信</strong>（300166.SZ）</td><td>电信/工业大数据 + 行业解决方案</td><td>偏行业集成 + BI</td><td>A 股上市；项目制为主 <span class="src src-b">🟡</span></td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>政务大数据 / 军工信息化集成商</td><td>各地政务云、军工信息化集成</td><td>对应 SI 集成商 + 部分 Gotham 场景</td><td>高度依赖关系与资质，碎片化</td><td><span class="src src-c">🔴</span></td></tr>
+      </tbody>
+    </table>
+    <p><strong>「Palantir 模式」在中国的落地形态判断：</strong>① <strong>更偏交付制、更碎片化</strong>——政企采购重关系、重定制、重信创，难复制 Palantir「自有平台 + 高毛利订阅」的飞轮，多数玩家毛利与盈利性弱于 Palantir（4Paradigm 仍亏损但在收窄 <span class="src src-b">🟡</span>）；② <strong>国产化/信创是双刃</strong>——给了本土玩家护城河（外资平台进不来），但也把市场切碎、价格战、回款慢；③ <strong>ontology「接决策/行动」这层最薄</strong>——多数停在数据汇聚 + BI + 图谱，真正「LLM agent 在受控企业上下文里执行操作」的标杆产品尚未出现。<strong>whitespace（中国）</strong>：做一个真正「轻量 ontology + AIP + 信创合规」的垂直行业 agent 产品，把项目制交付用 AI 降本、再产品化复制，是 Palantir 中国对标里仍空着的格子。</p>
+  </section>
+
+  <!-- ⑦ 创业 idea 借鉴 -->
+  <section id="idea">
+    <h2><span class="n">⑦</span>创业 idea 借鉴</h2>
+    <div class="callout insight">
+      <span class="label">Whitespace / 机会</span>
+      <strong>垂直行业的「ontology + AIP」轻量版 + 用 AI agent 替代部分 FDE 交付。</strong> Palantir 强在「重交付的可执行平台」，但 FDE 太贵、起步合同太大，<strong>把中腰部企业（够不着 Palantir 报价/交付门槛的客户）整片留空</strong>。在某个垂直行业（如医疗供应链、制造排产、保险理赔、能源调度）把「对象+关系+action」的 ontology 做成预置模板，再用 LLM agent 自动完成大半数据接入与建模（即 Palantir 自己也在做的 AI FDE 方向），用更轻的交付去够这片客户。
+    </div>
+    <h3>现有玩家共同短板（unmet needs）</h3>
+    <p>① <strong>落地太贵太慢</strong>：Palantir 靠 FDE 重交付，起步成本与周期把中小客户挡在门外；集成商更贵且无平台复用。② <strong>大厂 copilot/数仓「只存好查好、不接行动」</strong>：从「看到洞察」到「真在系统里执行操作」之间有断层，缺一个受控、可审计的「数据→决策→行动」闭环。③ <strong>开源自建栈门槛高</strong>：需要强工程团队，多数行业客户拼不出来也维护不动。④ <strong>政企/合规场景的可信 agent 缺标准</strong>：谁来保证 LLM 在敏感数据上「只做被授权的事」。</p>
+    <h3>Why now（为什么现在值得做）</h3>
+    <p>LLM 让「把自然语言意图翻译成对数据/系统的受控操作」第一次变得可行——这正是把「数据接决策」的门槛大幅拉低的技术拐点。Palantir 自己的 US 商业 +133% YoY 与 2026/03 推出 AI FDE agent，都是「需求侧刚被点燃、供给侧刚能做」的双重信号。AI 也让<strong>重交付这件事本身可以被 agent 降本</strong>——过去必须驻场建模的活，现在可由 agent 完成相当一部分，使「Palantir 式深度」与「SaaS 式轻交付」第一次有机会兼得。</p>
+    <h3>可借鉴的打法 + 相邻机会</h3>
+    <ul>
+      <li><strong>borrowable：</strong>(a) <strong>ontology 优先</strong>——先把客户业务建成「对象+关系+action」语义层，再让 AI 在上面跑，比直接「数据 + chatbot」黏性高得多；(b) <strong>从一个高容错敏感的垂直场景切入</strong>（Palantir 从情报界起家），在那里把可信/可审计的执行闭环打磨成标杆，再横向复制；(c) <strong>先重交付建信任、再产品化降本</strong>的两段式 GTM。</li>
+      <li><strong>adjacent：</strong>(a) 给现代数据栈/Databricks 上面做一层「ontology + agent 执行」中间件（不跟底座竞争、寄生其上）；(b) 专做「AI FDE」工具——把驻场工程师的活做成 agent 产品，卖给所有想做 Palantir 式落地但请不起 FDE 的公司/集成商；(c) 行业垂直版「决策 OS」（医疗/制造/保险/能源各一），把合规与行业 ontology 预置好。</li>
+    </ul>
+    <div class="callout warn">
+      <span class="label">风险（诚实给）</span>
+      ① <strong>巨头碾压</strong>：AWS/Microsoft/Google 把 AI 当云增值件白送，Databricks/Snowflake 从数据底座上攻，轻量玩家随时被「顺手做掉」。② <strong>重交付难扩</strong>——你想用 AI 降本，但 Palantir 也在做 AI FDE，可能用规模与数据反向碾压你的轻量切口。③ <strong>政企销售周期长、回款慢、重关系/资质</strong>，烧钱久；中国还叠加信创与价格战。④ <strong>数据合规与安全</strong>：在敏感数据上跑 agent，一次事故就可能终结信任。⑤ <strong>「可执行决策」尚无公认 benchmark/标准</strong>——既是机会也意味着客户教育成本高、ROI 难证明。
+    </div>
+  </section>
+
+  <!-- ⑧ 现实判断 -->
+  <section id="take">
+    <h2><span class="n">⑧</span>现实判断</h2>
+    <p>Palantir 当下的胜算很实：它把「ontology + 接到真实决策/行动 + FDE 重交付」做成了竞品难一夜复制的组合，政府/国防的多年期合同 + 美国商业 AIP 爆发让它<strong>同时高增长又 GAAP 盈利（Rule of 40 = 145%）</strong>，这是大多数对手做不到的。它真正的软肋有三条：<strong>(1) FDE 重交付难规模化</strong>——增长越快、人力越紧，毛利与扩张受制（它自己在用 AI FDE 解，但这恰好也会被创业者借用）；<strong>(2) 超大厂的结构性压制</strong>——云锁定 + 默认分发让「平台被绕过」的风险长期存在，Databricks/Snowflake 又从底座上攻；<strong>(3) 估值与叙事的预期透支</strong>——市值 ~$308B、P/S 极高（2026 年内股价一度回撤 <span class="src src-b">🟡</span>），任何增速放缓都会被放大。对创业者，最现实的读法是：<strong>不要正面打平台，去占它够不着的「中腰部 + 垂直 + 轻交付」格子，用 AI agent 把交付成本打下来</strong>——那是矩阵里目前空着、且 why-now 成立的一格。</p>
+    <div class="callout warn">
+      <span class="label">使用提醒</span>
+      本页为对话式调研，信息主要来自公开来源并按等级标注；融资数额、客户、能力声明等以官方一手为准，
+      <strong>产品能力未必经独立验证</strong>，竞品/对标指标口径与时点各异，引用前请核对最新信息。市值/股价/员工数随时变化。
+    </div>
+  </section>
+
+  <!-- 出处 -->
+  <section id="src">
+    <h2>出处</h2>
+    <ul style="font-size:13.5px">
+      <li><a href="https://www.palantir.com" target="_blank" rel="noopener">Palantir 官网</a> <span class="src src-a">🟢</span></li>
+      <li><a href="https://www.palantir.com/docs/foundry/architecture-center/platforms" target="_blank" rel="noopener">Palantir Docs — AIP, Foundry, and Apollo</a> <span class="src src-a">🟢</span></li>
+      <li><a href="https://www.palantir.com/docs/foundry/ai-fde/overview" target="_blank" rel="noopener">Palantir Docs — AI FDE Overview（2026/03 GA）</a> <span class="src src-a">🟢</span></li>
+      <li><a href="https://www.sec.gov/Archives/edgar/data/0001321655/000132165526000026/a2026q1ex991pressrelease.htm" target="_blank" rel="noopener">SEC 8-K — Q1 2026 Press Release</a> <span class="src src-a">🟢</span></li>
+      <li><a href="https://www.sec.gov/Archives/edgar/data/0001321655/000132165526000011/pltr-20251231.htm" target="_blank" rel="noopener">SEC 10-K — FY2025</a> <span class="src src-a">🟢</span></li>
+      <li><a href="https://www.sec.gov/Archives/edgar/data/0001321655/000132165526000004/a2025q4ex991earningsrelease.htm" target="_blank" rel="noopener">SEC 8-K — Q4 2025 Earnings Release</a> <span class="src src-a">🟢</span></li>
+      <li><a href="https://www.businesswire.com/news/home/20260503338048/en/" target="_blank" rel="noopener">BusinessWire — Palantir Q1 2026 Results（新闻稿转述）</a> <span class="src src-b">🟡</span></li>
+      <li><a href="https://www.investing.com/news/company-news/palantir-q1-2026-slides-us-revenue-tops-100-growth-rule-of-40-hits-145-93CH-4657648" target="_blank" rel="noopener">Investing.com — Q1 2026 slides（Rule of 40 = 145%）</a> <span class="src src-b">🟡</span></li>
+      <li><a href="https://en.wikipedia.org/wiki/Palantir_Technologies" target="_blank" rel="noopener">Wikipedia — Palantir Technologies（融资史/创始人）</a> <span class="src src-b">🟡</span></li>
+      <li><a href="https://www.databricks.com/company/newsroom/press-releases/databricks-grows-65-yoy-surpasses-5-4-billion-revenue-run-rate" target="_blank" rel="noopener">Databricks Newsroom — $5.4B run-rate / Series L $134B</a> <span class="src src-b">🟡</span></li>
+      <li><a href="https://www.sec.gov/Archives/edgar/data/0001577526/000162828025028158/ex991-fy25xq4earnings.htm" target="_blank" rel="noopener">SEC 8-K — C3.ai FY2025 Q4 Earnings</a> <span class="src src-a">🟢</span></li>
+      <li><a href="https://augment.market/pulse/anduril-at-61b-and-defense-techs-2026-reset" target="_blank" rel="noopener">Augment — Anduril $61B / backlog</a> <span class="src src-b">🟡</span></li>
+      <li><a href="https://www.theglobeandmail.com/investing/markets/markets-news/ACN%20Newswire/31672187/fourth-paradigm-announces-2024-annual-results/" target="_blank" rel="noopener">4Paradigm 2024 Annual Results（RMB5.26B）</a> <span class="src src-b">🟡</span></li>
+      <li><a href="https://en.wikipedia.org/wiki/4Paradigm" target="_blank" rel="noopener">Wikipedia — 4Paradigm（6682.HK）</a> <span class="src src-b">🟡</span></li>
+      <li><a href="https://companiesmarketcap.com/palantir/marketcap/" target="_blank" rel="noopener">companiesmarketcap — Palantir 市值（~$308B，时点参考）</a> <span class="src src-b">🟡</span></li>
+      <li><a href="https://www.macrotrends.net/stocks/charts/PLTR/palantir-technologies/number-of-employees" target="_blank" rel="noopener">Macrotrends — Palantir 员工数（4,429，2025-12）</a> <span class="src src-b">🟡</span></li>
+    </ul>
+  </section>
+
+  <footer class="foot">
+    公司竞争格局 / 赛道早期度调研笔记，仅作梳理；信息按来源分级、产品能力未必经独立验证，以官方一手信息为准 · 整理日期 2026-06-22
+  </footer>
+
+</article>
+</body>
+</html>
