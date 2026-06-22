@@ -124,6 +124,25 @@
     "path": "papers/2026-06-17-ai-cluster-supply-chain/index.html"
   },
   {
+    "slug": "2026-06-17-ai-cluster-architecture",
+    "title": "AI 集群技术架构关系图：各模块如何连接与协作（数据流动画）",
+    "authors": "—",
+    "team": "硬件科普",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-22",
+    "published": "硬件科普 2026",
+    "tldr": "从技术角度讲AI集群各模块如何连接与通信:按封装内(计算↔HBM/破内存墙)、节点内scale-up(NVLink把多卡黏成一块大GPU)、跨柜scale-out(NIC→光模块→交换机/IB或RoCE,spine-leaf,以GB200 NVL72举例)、存储与电力散热四个尺度组织,配一步训练的数据流动画(读batch→进HBM→前向→反向→域内NVLink聚合→跨柜光网络all-reduce→更新)讲清为什么互联带宽/延迟才是集群效率瓶颈(通信墙);面向硬件小白,内联SVG交互关系图+四尺度切换+自动浅深主题",
+    "tags": [
+      "ai-infra",
+      "hardware",
+      "architecture",
+      "interconnect",
+      "explainer"
+    ],
+    "path": "papers/2026-06-17-ai-cluster-architecture/index.html"
+  },
+  {
     "slug": "2026-06-17-asts",
     "title": "AST SpaceMobile（ASTS）：基本面 / 估值 / 是否值得买入",
     "authors": "—",
