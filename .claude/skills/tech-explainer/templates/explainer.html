@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 填写: 标题 = 系统名 · 关系图与数据流动画 -->
+<title>{{TITLE}} · 关系图与数据流动画</title>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --bad:#ff6b81; --shadow:0 8px 30px rgba(0,0,0,.35);
+    --node:#1d2138; --nodeStroke:#3a4170; --lit:#ffd166;
+    /* 边的分类着色（按需改语义，如 铜/光/总线 或 同步/异步/控制） */
+    --k1:#7aa2ff; --k2:#43c59e; --k3:#ffb454; --k4:#ff6b81;
+    --svgbg:#0c0f1a;
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --bad:#d23651; --shadow:0 8px 24px rgba(20,30,80,.08);
+      --node:#ffffff; --nodeStroke:#c7cdec; --lit:#d98a00; --svgbg:#fbfcff;
+      --k1:#3a66ff; --k2:#138a6e; --k3:#b3701a; --k4:#d23651;
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);line-height:1.75;font-size:16px;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;}
+  a{color:var(--accent)} strong{color:var(--text)}
+  .back{display:inline-block;margin:22px 0 0 22px;color:var(--muted);text-decoration:none;font-size:14px}
+  article{max-width:980px;margin:0 auto;padding:18px 22px 90px}
+  header.head{border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:8px}
+  h1{font-size:25px;line-height:1.35;margin:14px 0 6px}
+  .sub{color:var(--muted);font-size:15px;margin:0 0 14px}
+  .legend{font-size:12px;color:var(--muted);margin:6px 0 0}
+  .src{font-size:10.5px;padding:0 6px;border-radius:999px;white-space:nowrap;vertical-align:middle}
+  .src-a{background:rgba(67,197,158,.18);color:var(--ok)} .src-b{background:rgba(255,180,84,.18);color:var(--warn)} .src-c{background:rgba(255,107,129,.18);color:var(--bad)}
+  .tldr{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:12px;padding:14px 18px;margin:20px 0;box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+  nav.toc{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px 18px;margin:8px 0 26px;font-size:14px}
+  nav.toc a{color:var(--text);text-decoration:none;margin-right:16px;white-space:nowrap;line-height:2}
+  section{margin:34px 0}
+  h2{font-size:20px;margin:0 0 12px;padding-top:8px;border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent);font-weight:700;margin-right:8px}
+  h3{font-size:16.5px;margin:20px 0 8px}
+  p{margin:12px 0} ul,ol{padding-left:22px} li{margin:6px 0}
+  code{background:var(--panel2);padding:1.5px 6px;border-radius:6px;font-size:.88em}
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:13.5px;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  th,td{border-bottom:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:top}
+  th{background:var(--panel2);color:var(--muted);font-weight:600} tr:last-child td{border-bottom:none}
+  .callout{border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin:18px 0;background:var(--panel)}
+  .callout .label{font-size:12px;letter-spacing:.5px;font-weight:700;text-transform:uppercase;display:block;margin-bottom:4px;color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+  /* ---- 交互关系图 ---- */
+  .viz{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin:14px 0}
+  .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+  .tab{cursor:pointer;border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:6px 14px;border-radius:999px;font-size:13.5px}
+  .tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .stage{display:grid;grid-template-columns:1fr 260px;gap:12px}
+  @media (max-width:720px){ .stage{grid-template-columns:1fr} }
+  .svgwrap{background:var(--svgbg);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  svg.diagram{display:block;width:100%;height:auto}
+  .nd-node{cursor:pointer}
+  .nd-node rect{fill:var(--node);stroke:var(--nodeStroke);stroke-width:1.5;rx:9}
+  .nd-node text{fill:var(--text);font-size:12.5px;font-weight:600}
+  .nd-node.sel rect{stroke:var(--accent);stroke-width:2.5}
+  .nd-edge{stroke-width:2;fill:none;opacity:.85}
+  .nd-edge.k1{stroke:var(--k1)} .nd-edge.k2{stroke:var(--k2)} .nd-edge.k3{stroke:var(--k3)} .nd-edge.k4{stroke:var(--k4)}
+  .nd-edge.lit{stroke:var(--lit);stroke-width:4;opacity:1}
+  .nd-edgelabel{fill:var(--muted);font-size:10.5px}
+  .pulse{fill:var(--lit)}
+  @media (prefers-reduced-motion:reduce){ .pulse{display:none!important} }
+  .panel{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:13.5px;min-height:120px}
+  .panel h4{margin:0 0 6px;font-size:14.5px;color:var(--accent)}
+  .panel .conn{margin:8px 0 0;padding-left:18px} .panel .conn li{margin:3px 0;color:var(--muted)}
+  .panel .hint{color:var(--muted)}
+  .controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
+  .btn{cursor:pointer;border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:6px 12px;border-radius:8px;font-size:13.5px}
+  .btn:hover{border-color:var(--accent)}
+  .cap{font-size:13.5px;color:var(--text);margin-top:8px;min-height:1.6em}
+  .cap b{color:var(--accent)}
+  .edgekey{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:8px}
+  .edgekey i{display:inline-block;width:22px;height:0;border-top:3px solid;vertical-align:middle;margin-right:5px}
+  footer.foot{margin-top:54px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+  <header class="head">
+    <h1>{{TITLE}}</h1>
+    <p class="sub"><!-- 填写: 副标题，一句话点明这是哪个系统的关系图/数据流讲解 -->{{SUBTITLE}}</p>
+    <p class="legend">来源等级：<span class="src src-a">🟢 一手</span> 官方/规范/论文 ·
+      <span class="src src-b">🟡 二手</span> 媒体/分析 · <span class="src src-c">🔴 自述/未证实</span>；
+      数字多为「约/数量级/视版本」。</p>
+  </header>
+
+  <div class="tldr"><b>一句话</b> — <!-- 填写: 这是什么系统 + 关系图能看到什么 + 一个关键洞察 -->{{TLDR}}</div>
+
+  <nav class="toc">
+    <a href="#primer">领域背景速补</a>
+    <a href="#viz">交互关系图 + 数据流</a>
+    <a href="#compare">连接对比</a>
+    <a href="#model">心智模型</a>
+    <a href="#deps">依赖与相互制约</a>
+    <a href="#more">延伸阅读 / 出处</a>
+  </nav>
+
+  <!-- 领域背景速补（非 LLM 领域必带；纯软件/LLM 系统可删） -->
+  <section id="primer">
+    <h2><span class="n">①</span>领域背景速补</h2>
+    <p><!-- 填写: 用通俗中文讲清本系统关键术语（是什么/为什么难/与本篇关系），打类比 --></p>
+  </section>
+
+  <!-- 交互关系图 -->
+  <section id="viz">
+    <h2><span class="n">②</span>交互关系图 + 数据流</h2>
+    <p class="legend">点节点看「是什么 / 连谁 / 为什么」；点 ▶ 看一次<!-- 填写:代表性流程 -->的逐步数据流。</p>
+    <div class="viz">
+      <div class="tabs" id="tabs"><!-- 引擎按 MODEL.views 自动生成 --></div>
+      <div class="stage">
+        <div class="svgwrap"><svg class="diagram" id="diagram" preserveAspectRatio="xMidYMid meet" role="img" aria-label="系统关系图"></svg></div>
+        <div class="panel" id="nodeinfo"><span class="hint">点击或聚焦任一节点查看详情。</span></div>
+      </div>
+      <div class="edgekey" id="edgekey"><!-- 引擎按 kinds 生成图例 --></div>
+      <div class="controls">
+        <button class="btn" id="playBtn">▶ 播放数据流</button>
+        <button class="btn" id="stepBtn">单步 ›</button>
+        <button class="btn" id="resetBtn">↺ 复位</button>
+        <span class="cap" id="cap"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 连接对比 -->
+  <section id="compare">
+    <h2><span class="n">③</span>连接 / 接口对比</h2>
+    <table>
+      <thead><tr><th>连接</th><th><!-- 介质/协议 --></th><th><!-- 带宽/速率量级 --></th><th><!-- 延迟/距离 --></th><th>作用</th></tr></thead>
+      <tbody>
+        <tr><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 心智模型 -->
+  <section id="model">
+    <h2><span class="n">④</span>给小白的心智模型</h2>
+    <p><!-- 填写: 用贴切类比把整套关系讲成一个生活化画面 --></p>
+  </section>
+
+  <!-- 依赖与相互制约（深入） -->
+  <section id="deps">
+    <h2><span class="n">⑤</span>依赖与相互制约（深入）</h2>
+    <p><!-- 填写: 谁靠什么接口连谁、谁的能力卡住谁 --></p>
+    <div class="callout warn"><span class="label">相互制约因果链</span>
+      <!-- 填写: A 卡 B → B 卡 C …… 把约束串成一条链，说明每一步「想更大/更快」会撞哪堵墙 -->
+    </div>
+  </section>
+
+  <!-- 延伸阅读 / 出处 -->
+  <section id="more">
+    <h2>延伸阅读 / 出处</h2>
+    <ul style="font-size:13.5px">
+      <!-- 填写: 相对链接到 repo 内相关篇 ../<slug>/ ；外部来源按🟢🟡🔴 -->
+    </ul>
+  </section>
+
+  <footer class="foot">技术科普 · 关系图为示意（非穷尽），数字多为数量级/视版本，关键事实按来源分级 · {{DATE}}</footer>
+</article>
+
+<script>
+/* ===========================================================================
+   填写区：把系统建模成数据。引擎会据此渲染关系图、节点详情、视图切换、流程动画。
+   - views[].nodes[]: {id, label, x, y, desc}   坐标用 viewBox 单位(0..w, 0..h)
+   - views[].edges[]: {id, from, to, label?, kind:'k1'|'k2'|'k3'|'k4'}
+   - kinds: 边分类的图例文字（如 {k1:'铜/电', k2:'光', k3:'总线', k4:'供电'}）
+   - flow: {view:'<viewId>', steps:[{edges:['e1','e2'], cap:'字幕(可含<b>)'}]}
+   =========================================================================== */
+const MODEL = {
+  kinds: { k1:"<!-- 类别1 -->", k2:"<!-- 类别2 -->", k3:"<!-- 类别3 -->", k4:"<!-- 类别4 -->" },
+  views: [
+    { id:"v1", label:"<!-- 视图1名 -->", w:760, h:420,
+      nodes:[
+        { id:"a", label:"模块A", x:130, y:120, desc:"<!-- 是什么/作用 -->" },
+        { id:"b", label:"模块B", x:430, y:120, desc:"<!-- 是什么/作用 -->" },
+        { id:"c", label:"模块C", x:430, y:300, desc:"<!-- 是什么/作用 -->" }
+      ],
+      edges:[
+        { id:"e1", from:"a", to:"b", label:"<!-- 标注 -->", kind:"k1" },
+        { id:"e2", from:"b", to:"c", label:"<!-- 标注 -->", kind:"k2" }
+      ]
+    }
+    /* 可加更多视图(尺度/层级) */
+  ],
+  flow: { view:"v1", steps:[
+    { edges:["e1"], cap:"<b>1.</b> <!-- 这一步发生什么 -->" },
+    { edges:["e2"], cap:"<b>2.</b> <!-- …… -->" }
+  ]}
+};
+
+/* ===================== 引擎（一般无需改动） ===================== */
+(function(){
+  const SVGNS="http://www.w3.org/2000/svg";
+  const diagram=document.getElementById('diagram');
+  const tabsEl=document.getElementById('tabs');
+  const infoEl=document.getElementById('nodeinfo');
+  const capEl=document.getElementById('cap');
+  const edgekeyEl=document.getElementById('edgekey');
+  let curView=MODEL.views[0], sel=null, flowIdx=-1, timer=null;
+
+  function el(tag,attrs,kids){ const e=document.createElementNS(SVGNS,tag);
+    for(const k in (attrs||{})) e.setAttribute(k,attrs[k]);
+    (kids||[]).forEach(c=>e.appendChild(c)); return e; }
+  function nodeById(v,id){ return v.nodes.find(n=>n.id===id); }
+
+  function renderTabs(){
+    tabsEl.innerHTML='';
+    if(MODEL.views.length<2){ tabsEl.style.display='none'; return; }
+    MODEL.views.forEach(v=>{
+      const b=document.createElement('button'); b.className='tab'+(v===curView?' active':''); b.textContent=v.label;
+      b.onclick=()=>{ curView=v; sel=null; stopFlow(); render(); };
+      tabsEl.appendChild(b);
+    });
+  }
+  function renderEdgeKey(){
+    edgekeyEl.innerHTML='';
+    Object.keys(MODEL.kinds||{}).forEach(k=>{
+      const txt=MODEL.kinds[k]; if(!txt) return;
+      const s=document.createElement('span'); s.innerHTML='<i style="border-color:var(--'+k+')"></i>'+txt; edgekeyEl.appendChild(s);
+    });
+  }
+  function render(){
+    renderTabs();
+    const v=curView; diagram.setAttribute('viewBox','0 0 '+v.w+' '+v.h);
+    diagram.innerHTML='';
+    // edges first
+    v.edges.forEach(ed=>{
+      const a=nodeById(v,ed.from), b=nodeById(v,ed.to); if(!a||!b) return;
+      const line=el('line',{x1:a.x,y1:a.y,x2:b.x,y2:b.y,class:'nd-edge '+(ed.kind||'k1'),'data-edge':ed.id});
+      diagram.appendChild(line);
+      if(ed.label){ const mx=(a.x+b.x)/2, my=(a.y+b.y)/2-4;
+        const t=el('text',{x:mx,y:my,'text-anchor':'middle',class:'nd-edgelabel'}); t.textContent=ed.label; diagram.appendChild(t); }
+    });
+    // nodes
+    v.nodes.forEach(n=>{
+      const w=Math.max(58, n.label.length*14+24), h=34;
+      const g=el('g',{class:'nd-node'+(sel===n.id?' sel':''),'data-node':n.id,tabindex:'0',role:'button','aria-label':n.label});
+      g.appendChild(el('rect',{x:n.x-w/2,y:n.y-h/2,width:w,height:h,rx:9}));
+      const t=el('text',{x:n.x,y:n.y+4,'text-anchor':'middle'}); t.textContent=n.label; g.appendChild(t);
+      const pick=()=>{ sel=n.id; showInfo(n); document.querySelectorAll('.nd-node').forEach(x=>x.classList.remove('sel')); g.classList.add('sel'); };
+      g.addEventListener('click',pick); g.addEventListener('mouseenter',()=>showInfo(n)); g.addEventListener('focus',pick);
+      diagram.appendChild(g);
+    });
+    applyLit();
+  }
+  function showInfo(n){
+    const v=curView;
+    const conns=v.edges.filter(e=>e.from===n.id||e.to===n.id).map(e=>{
+      const other=nodeById(v, e.from===n.id?e.to:e.from);
+      return '<li>'+(other?other.label:'?')+(e.label?'（'+e.label+'）':'')+'</li>';
+    }).join('');
+    infoEl.innerHTML='<h4>'+n.label+'</h4><div>'+(n.desc||'')+'</div>'+(conns?'<div style="margin-top:6px;color:var(--text)">连接：</div><ul class="conn">'+conns+'</ul>':'');
+  }
+  function applyLit(){
+    document.querySelectorAll('.nd-edge').forEach(e=>e.classList.remove('lit'));
+    if(flowIdx<0||!MODEL.flow) return;
+    const step=MODEL.flow.steps[flowIdx]; if(!step) return;
+    (step.edges||[]).forEach(id=>{ const e=diagram.querySelector('[data-edge="'+id+'"]'); if(e) e.classList.add('lit'); });
+  }
+  function gotoStep(i){
+    if(!MODEL.flow){ return; }
+    if(curView.id!==MODEL.flow.view){ curView=MODEL.views.find(v=>v.id===MODEL.flow.view)||curView; render(); }
+    const n=MODEL.flow.steps.length; flowIdx=((i%n)+n)%n;
+    applyLit(); capEl.innerHTML=MODEL.flow.steps[flowIdx].cap||'';
+  }
+  function stopFlow(){ if(timer){clearInterval(timer);timer=null;} document.getElementById('playBtn').textContent='▶ 播放数据流'; }
+  function play(){
+    if(!MODEL.flow) return;
+    if(timer){ stopFlow(); return; }
+    document.getElementById('playBtn').textContent='⏸ 暂停';
+    if(flowIdx<0) gotoStep(0);
+    const reduce=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+    timer=setInterval(()=>{ gotoStep(flowIdx+1); }, reduce?2600:2000);
+  }
+  document.getElementById('playBtn').onclick=play;
+  document.getElementById('stepBtn').onclick=()=>{ stopFlow(); gotoStep(flowIdx+1); };
+  document.getElementById('resetBtn').onclick=()=>{ stopFlow(); flowIdx=-1; applyLit(); capEl.innerHTML=''; };
+  document.addEventListener('keydown',e=>{
+    if(e.target&&/INPUT|TEXTAREA/.test(e.target.tagName)) return;
+    if(e.key===' '){ e.preventDefault(); play(); }
+    else if(e.key==='ArrowRight'){ stopFlow(); gotoStep(flowIdx+1); }
+    else if(e.key==='ArrowLeft'){ stopFlow(); gotoStep(flowIdx-1); }
+  });
+  renderEdgeKey(); render();
+})();
+</script>
+</body>
+</html>
