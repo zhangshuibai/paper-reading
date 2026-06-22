@@ -1,5 +1,26 @@
 [
   {
+    "slug": "2026-06-17-ppio",
+    "title": "PPIO 派欧云：AI 推理算力云的竞争格局与早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://ppio.com",
+    "code": "",
+    "date": "2026-06-22",
+    "published": "公司调研 2026",
+    "tldr": "分布式边缘云转型的AI推理算力云(按token/卡时卖开源大模型推理+租GPU);赛道emerging→已crowded价格血战;最大威胁是大厂(火山/阿里/腾讯)自带推理碾毛利;whitespace在分布式聚合闲置算力压成本+信创私有化推理",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "market-map",
+      "startup-idea",
+      "ai-infra",
+      "gpu-cloud",
+      "china"
+    ],
+    "path": "papers/2026-06-17-ppio/index.html"
+  },
+  {
     "slug": "2026-06-17-asts",
     "title": "AST SpaceMobile（ASTS）：基本面 / 估值 / 是否值得买入",
     "authors": "—",

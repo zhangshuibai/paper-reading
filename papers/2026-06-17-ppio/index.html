@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PPIO 派欧云 · 竞争格局与赛道早期度调研</title>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --bad:#ff6b81; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --bad:#d23651; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;}
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:920px; margin:0 auto; padding:18px 22px 90px}
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:25px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)} .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap; line-height:2}
+  nav.toc a:hover{color:var(--accent)}
+  section{margin:38px 0}
+  h2{font-size:20px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:16.5px; margin:22px 0 8px}
+  p{margin:12px 0} ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)} strong{color:var(--text)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.88em}
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:13px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:9px 10px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  figure{margin:24px 0; text-align:center}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+  .svgwrap{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 8px}
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+  .src{font-size:10.5px; padding:0 6px; border-radius:999px; white-space:nowrap; vertical-align:middle}
+  .src-a{background:rgba(67,197,158,.18); color:var(--ok)}
+  .src-b{background:rgba(255,180,84,.18); color:var(--warn)}
+  .src-c{background:rgba(255,107,129,.18); color:var(--bad)}
+  .legend{font-size:12px; color:var(--muted); margin:6px 0 0}
+  .verdict{display:inline-block; font-weight:700; padding:3px 12px; border-radius:999px; font-size:14px}
+  .v-nascent{background:rgba(122,162,255,.18); color:var(--accent)}
+  .v-emerging{background:rgba(67,197,158,.18); color:var(--ok)}
+  .v-crowded{background:rgba(255,180,84,.18); color:var(--warn)}
+  .v-mature{background:rgba(255,107,129,.18); color:var(--bad)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">AI Infra</span>
+      <span class="chip">GPU 云</span>
+      <span class="chip">推理 API</span>
+      <span class="chip">分布式算力</span>
+      <span class="chip">竞争格局</span>
+      <span class="chip">赛道早期度</span>
+      <span class="chip">创业 idea</span>
+    </div>
+    <h1>PPIO 派欧云：AI 推理算力云的竞争格局与早期度调研</h1>
+    <p class="orig-title">ppio.com / ppio.cn — 分布式边缘云 → AI 推理 / GPU serverless 算力云 / 赛道是否早期 / 可借鉴 idea</p>
+    <dl class="meta-grid">
+      <dt>对象</dt><dd><a href="https://ppio.com" target="_blank" rel="noopener">https://ppio.com</a> · <a href="https://ppio.cn" target="_blank" rel="noopener">ppio.cn</a>（曾用 ppinfra.com / 派欧算力云）</dd>
+      <dt>主体</dt><dd>PPLabs Technology Ltd.（上海派欧云计算 / 派早科技系）；创始人 <strong>姚欣 Yao Xin</strong>（PPTV/PPLive 创始人）、<strong>王闻宇 Wang Wenyu</strong>（前 PPTV 首席架构师）</dd>
+      <dt>赛道</dt><dd>AI inference cloud / GPU 算力云 / serverless 推理（按 token 或卡时调用开源大模型 + 租 GPU）——AI infra 层</dd>
+      <dt>整理</dt><dd>对话调研笔记；信息来自公开检索，按来源分级标注，产品能力未必经独立验证</dd>
+      <dt>日期</dt><dd>2026-06-22</dd>
+    </dl>
+    <p class="legend">来源等级：<span class="src src-a">🟢 一手</span> 官网/招股书/官方 ·
+      <span class="src src-b">🟡 二手</span> 媒体/数据库 ·
+      <span class="src src-c">🔴 自述/未证实</span> 营销口径或未独立验证</p>
+  </header>
+
+  <div class="tldr">
+    <b>一句话</b> — PPIO 派欧云本是中国最大的<strong>独立分布式边缘云（边缘 CDN / 算力共享）</strong>玩家，2024 年起把同一张「全国节点 + 闲置 GPU 聚合」的网络改造成 <strong>AI 推理算力云</strong>：对开发者按 token 卖开源大模型推理 API（DeepSeek/Qwen/Kimi/GLM 等），按卡时租 GPU 容器 / Serverless GPU（4090 低至 ¥0.99/卡时<span class="src src-c">🔴</span>）。AI 云收入 2024→2025 涨超 10 倍但占比仍仅约 15%，日均 token 从 2025-12 的 2710 亿冲到 2026-04 的 1.03 万亿<span class="src src-a">🟢招股书</span>。赛道判 <strong>emerging → 已快速 crowded（价格血战）</strong>：国内硅基流动 / 无问芯穹 / 火山引擎 + 国际 Together/Fireworks/DeepInfra 一大堆，<strong>最大威胁是大厂（火山/阿里/腾讯）自带推理 + 价格战碾毛利</strong>。可借鉴 whitespace：<strong>「分布式聚合闲置算力压成本」+ 信创私有化推理</strong>——但分布式的 SLA/时延短板能否扛住企业级负载，仍是未证伪的赌注。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#market">① 赛道地图 + 早期度</a>
+    <a href="#matrix">② 竞品对照矩阵</a>
+    <a href="#map">③ 定位图</a>
+    <a href="#funding">④ 融资 timeline</a>
+    <a href="#snapshot">⑤ 公司速览</a>
+    <a href="#bench">⑥ 国际对标 / Benchmarks</a>
+    <a href="#idea">⑦ 创业 idea 借鉴</a>
+    <a href="#take">⑧ 现实判断</a>
+    <a href="#src">出处</a>
+  </nav>
+
+  <!-- 消歧 -->
+  <div class="callout note">
+    <span class="label">消歧</span>
+    本篇指 <strong>PPIO 派欧云</strong>（创始人姚欣，PPTV 创始人；上海/深圳，主体 PPLabs Technology / 上海派欧云计算），从「分布式边缘云」转型「AI 推理算力云」的公司。<strong>不是</strong>其它技术语境里同名的「PPIO」（如某些异步 I/O 库 / 缩写）。本文两段叙事要分清：<strong>早期＝分布式边缘云（边缘 CDN / 边缘算力共享，公司营收主力）</strong>；<strong>现在主推＝AI 推理 / GPU serverless 云（增速快但仍是小头）</strong>。另注：海外有一家同样做「模型 API + GPU + Serverless + Agent Sandbox」、产品形态高度神似的 <strong>Novita AI</strong>（旧金山），其与 PPIO 是否同源未在公开资料证实，本文按<strong>独立竞品</strong>处理并标注存疑。
+  </div>
+
+  <!-- ① 赛道与早期度 -->
+  <section id="market">
+    <h2><span class="n">①</span>赛道地图 + 早期度判断</h2>
+    <p>PPIO 现在主打的赛道是 <strong>AI inference cloud（AI 推理算力云）</strong>：把 GPU 算力打包成两种形态卖给开发者/企业——<strong>(a) 模型 API</strong>（托管 DeepSeek、Qwen、Kimi、GLM、MiniMax、Vidu 等开源/第三方模型，按 token 计费，OpenAI / Anthropic API 兼容）<span class="src src-a">🟢官网</span>；<strong>(b) GPU 租用 / Serverless GPU</strong>（H100/H800/H20 SXM 容器、4090 SPOT、弹性扩缩，按卡时计费）<span class="src src-a">🟢官网</span>。它解决的需求：开源模型爆发后，无数开发者想「不自建机房、不囤卡」就调用大模型推理，或临时租 GPU 跑微调/批量推理——这层介于「裸 GPU（IaaS）」和「模型厂商自家 API」之间，是典型 AI infra 中间层。</p>
+
+    <h3>玩家分群（四象限别漏）</h3>
+    <ul>
+      <li><strong>现有巨头（云大厂 + 算力供应商）：</strong>火山引擎、阿里云百炼、腾讯云、华为云、百度智能云——都自带模型推理 API + GPU 租用，<strong>资金/算力/客户全占</strong>；以及上游 CoreWeave / Lambda 这类 GPU 超大规模租赁商（PPIO 在 GPU 租用维度的「重资产对标」）。<span class="src src-b">🟡</span></li>
+      <li><strong>垂直创业公司（与 PPIO 同层直接竞品）：</strong>国内 <strong>硅基流动 SiliconFlow、无问芯穹 Infini-AI、潞晨/潞晨云、共绩算力、UCloud 优刻得</strong>；国际 <strong>Together AI、Fireworks AI、Replicate、DeepInfra、Novita AI、Anyscale、Modal、Baseten、RunPod</strong>——清一色「开源模型推理 API + serverless GPU」，产品形态高度同质。<span class="src src-b">🟡</span></li>
+      <li><strong>大厂顺手做（最大威胁）：</strong>同上的火山/阿里/腾讯，凭自有算力把 token 单价压到「赔本引流」，靠云生态绑定。DeepSeek 出圈后各大厂第一时间上线官方推理，挤压第三方聚合者的存在意义。<span class="src src-b">🟡</span></li>
+      <li><strong>开源 / 免费替代：</strong>vLLM / SGLang / TGI 等开源推理引擎 + 自租裸 GPU，让有能力的团队完全绕开 API 厂商；以及模型厂商（DeepSeek/Qwen 官方）自营的低价 API、OpenRouter 这类聚合路由器。这层是「为什么很多人最终不付费给中间商」的根因。<span class="src src-b">🟡</span></li>
+    </ul>
+
+    <div class="callout insight">
+      <span class="label">早期度判断</span>
+      <span class="verdict v-crowded">emerging → 已快速 crowded（价格血战）</span>
+      （nascent 萌芽 / emerging 新兴 / crowded 拥挤 / mature 成熟）<br><br>
+      <strong>判断信号：</strong>
+      ① <strong>玩家数量爆炸</strong>——2024–2026 中外几十家「推理 API / GPU 云」同时起量，第三方对比站（Infrabase 列 70+ provider）已成行业；产品同质（都是 OpenAI 兼容端点 + 开源模型 + 卡时租用）。
+      ② <strong>价格战是主旋律</strong>——DeepInfra/Together/Fireworks 互相压价 25–33%；国内更狠，PPIO 自报 LLM API 低至 ¥0.22/M tokens、4090 ¥0.99/卡时<span class="src src-c">🔴</span>，硅基流动/无问芯穹长期免费额度 + 促销。毛利被打薄是公开事实（PPIO 整体毛利率 2024 仅约 12.3%<span class="src src-b">🟡</span>）。
+      ③ <strong>巨头已全面进场</strong>——这是从 emerging 滑向 crowded 的决定性信号：云大厂把推理当云生态入口，不靠它单独赚钱。
+      ④ <strong>开源/免费替代成熟</strong>——vLLM/SGLang 让自建门槛大降，模型厂商自营 API 直接绕开中间商。
+      <br>综合：<strong>需求侧（推理需求）确实在指数级起量（PPIO token 量 4 个月涨近 4 倍），但供给侧极度拥挤、同质、价格血战</strong>——典型「需求爆发但已红海化」的 infra 赛道。
+    </div>
+  </section>
+
+  <!-- ② 竞品矩阵 -->
+  <section id="matrix">
+    <h2><span class="n">②</span>竞品对照矩阵</h2>
+    <p>选 7 个对这个赛道最有区分度的维度：<strong>产品形态</strong>（推理 API / GPU 租用 / serverless 谁全）、<strong>计费</strong>（token vs 卡时）、<strong>模型覆盖</strong>、<strong>算力来源</strong>（自建集中 vs 聚合分布式——PPIO 的差异化卖点）、<strong>价格定位</strong>、<strong>合规/信创</strong>（国内大客户的硬门槛）、<strong>规模 &amp; 融资</strong>。口径不一处已标来源；闭源/未披露处如实标注，不用空白冒充劣势。</p>
+    <table>
+      <thead><tr>
+        <th>玩家</th>
+        <th>产品形态</th>
+        <th>计费</th>
+        <th>模型覆盖</th>
+        <th>算力来源</th>
+        <th>价格定位</th>
+        <th>合规/信创</th>
+        <th>规模 &amp; 融资</th>
+      </tr></thead>
+      <tbody>
+        <tr><td><strong>PPIO 派欧云（本篇）</strong></td>
+          <td>API + GPU 容器 + Serverless GPU + Agent Sandbox<span class="src src-a">🟢</span></td>
+          <td>token + 卡时（SPOT 5 折）<span class="src src-a">🟢</span></td>
+          <td>DeepSeek/Qwen/Kimi/GLM/MiniMax/Vidu 等（数十款）<span class="src src-a">🟢</span></td>
+          <td><strong>聚合分布式</strong>：4,800+ 节点、闲置 GPU + 自建<span class="src src-c">🔴</span></td>
+          <td>极低（¥0.22/M tok、4090 ¥0.99/卡时）<span class="src src-c">🔴</span></td>
+          <td>国内主体、边缘节点下沉县域；信创私有化主打<span class="src src-c">🔴</span></td>
+          <td>5 轮、累计约 5 亿元、投后估值 46.9 亿<span class="src src-b">🟡</span>；冲港股</td></tr>
+        <tr><td>硅基流动 SiliconFlow</td>
+          <td>推理 API 为主（聚合 + 标准化）<span class="src src-b">🟡</span></td>
+          <td>token（按量、无月费）<span class="src src-b">🟡</span></td>
+          <td>极广（国内外主流 + 大量免费模型）<span class="src src-b">🟡</span></td>
+          <td>第三方算力 + 自研推理优化（PD 分离/投机解码）<span class="src src-b">🟡</span></td>
+          <td>低、免费额度多<span class="src src-b">🟡</span></td>
+          <td>国内主体<span class="src src-b">🟡</span></td>
+          <td>已成头部推理 API 平台；多轮融资<span class="src src-b">🟡</span></td></tr>
+        <tr><td>无问芯穹 Infini-AI</td>
+          <td>智算云（训练+推理一站式）、M×N 异构中间层<span class="src src-b">🟡</span></td>
+          <td>token + 算力<span class="src src-b">🟡</span></td>
+          <td>主流大模型<span class="src src-b">🟡</span></td>
+          <td><strong>多元异构国产芯片统一调度</strong>（长三角接入 1.2 万 P）<span class="src src-b">🟡</span></td>
+          <td>促销低价（¥19.9 起）<span class="src src-b">🟡</span></td>
+          <td><strong>国产算力调度为核心卖点</strong>，国资入局<span class="src src-b">🟡</span></td>
+          <td>清华系；累计融资约 15 亿元、赛道估值最高<span class="src src-b">🟡</span></td></tr>
+        <tr><td>火山引擎 / 阿里百炼 / 腾讯云（大厂）</td>
+          <td>API + GPU + 全栈云<span class="src src-b">🟡</span></td>
+          <td>token + 卡时<span class="src src-b">🟡</span></td>
+          <td>自研 + 开源全覆盖<span class="src src-b">🟡</span></td>
+          <td><strong>自建超大规模数据中心</strong><span class="src src-b">🟡</span></td>
+          <td>赔本引流、价格战发起者<span class="src src-b">🟡</span></td>
+          <td>合规/信创资质齐全<span class="src src-b">🟡</span></td>
+          <td>巨头，资金/算力/客户全占<span class="src src-b">🟡</span></td></tr>
+        <tr><td>Together AI / Fireworks AI（国际）</td>
+          <td>推理 API + serverless + 微调 + 专用 GPU<span class="src src-b">🟡</span></td>
+          <td>token + 卡时<span class="src src-b">🟡</span></td>
+          <td>开源模型广，OpenAI 兼容<span class="src src-b">🟡</span></td>
+          <td>自建/租用 GPU 集群（集中式）<span class="src src-b">🟡</span></td>
+          <td>中（Fireworks 偏速度溢价）<span class="src src-b">🟡</span></td>
+          <td>美国，无信创需求<span class="src src-b">🟡</span></td>
+          <td>独角兽级，融资数亿美元<span class="src src-b">🟡</span></td></tr>
+        <tr><td>DeepInfra / Novita AI（国际）</td>
+          <td>API + serverless GPU（Novita 另有 Agent Sandbox）<span class="src src-b">🟡</span></td>
+          <td>token + 卡时<span class="src src-b">🟡</span></td>
+          <td>开源模型广（200+）<span class="src src-b">🟡</span></td>
+          <td>集中式 GPU 池<span class="src src-b">🟡</span></td>
+          <td><strong>价格屠夫</strong>（DeepInfra 全网最低之一）<span class="src src-b">🟡</span></td>
+          <td>美国<span class="src src-b">🟡</span></td>
+          <td>创业公司，估值未充分披露<span class="src src-c">🔴</span></td></tr>
+        <tr><td>RunPod / Lambda / CoreWeave（GPU 租赁）</td>
+          <td>主打 GPU 租用 / 裸金属（推理 API 弱）<span class="src src-b">🟡</span></td>
+          <td>卡时<span class="src src-b">🟡</span></td>
+          <td>不托管模型（自部署）<span class="src src-b">🟡</span></td>
+          <td>自建大规模 GPU（CoreWeave 重资产）<span class="src src-b">🟡</span></td>
+          <td>卡时竞争<span class="src src-b">🟡</span></td>
+          <td>美国<span class="src src-b">🟡</span></td>
+          <td>CoreWeave 已上市；Lambda 巨额融资<span class="src src-b">🟡</span></td></tr>
+      </tbody>
+    </table>
+    <p><strong>读矩阵：</strong>产品形态这一列几乎所有人都打钩——「OpenAI 兼容 API + 开源模型 + 卡时租 GPU + serverless」已是行业标配，<strong>同质化极严重</strong>。真正能拉开差距的只剩两列：<strong>算力来源</strong>和<strong>合规/信创</strong>。PPIO 的差异化叙事全押在「<strong>聚合分布式（4,800+ 节点、闲置 GPU）→ 成本更低</strong>」+「<strong>国内主体、边缘下沉、信创私有化</strong>」。但「分布式更便宜」目前是 PPIO 自述<span class="src src-c">🔴</span>，未见独立验证；而在「国产算力调度」这个故事上，无问芯穹的叙事更硬核（直接做 M×N 异构芯片中间层 + 国资背书）。价格上，国内被大厂和硅基流动的免费额度夹击，国际有 DeepInfra 这种价格屠夫——<strong>谁都没有可持续的价格护城河</strong>。</p>
+  </section>
+
+  <!-- ③ 定位图 -->
+  <section id="map">
+    <h2><span class="n">③</span>定位图（whitespace 在哪）</h2>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 640 400" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12">
+        <line x1="40" y1="200" x2="600" y2="200" stroke="#b9c2e0" stroke-width="1.5"/>
+        <line x1="320" y1="20" x2="320" y2="380" stroke="#b9c2e0" stroke-width="1.5"/>
+        <text x="598" y="218" text-anchor="end" fill="#5a627a">算力：分布式聚合 →</text>
+        <text x="42" y="218" fill="#5a627a">← 集中式自建</text>
+        <text x="326" y="30" fill="#5a627a">↑ 全栈通用云（绑生态）</text>
+        <text x="326" y="372" fill="#5a627a">↓ 纯推理 / 算力专精</text>
+        <circle cx="170" cy="80" r="6" fill="#ff6b81"/><text x="180" y="84" fill="#1a1f33">火山/阿里/腾讯云</text>
+        <circle cx="150" cy="120" r="6" fill="#ff6b81"/><text x="160" y="124" fill="#1a1f33">CoreWeave/Lambda</text>
+        <circle cx="200" cy="265" r="6" fill="#7aa2ff"/><text x="210" y="269" fill="#1a1f33">Together/Fireworks</text>
+        <circle cx="175" cy="320" r="6" fill="#7aa2ff"/><text x="185" y="324" fill="#1a1f33">DeepInfra/Novita</text>
+        <circle cx="230" cy="225" r="6" fill="#7aa2ff"/><text x="240" y="229" fill="#1a1f33">RunPod</text>
+        <circle cx="245" cy="300" r="6" fill="#43c59e"/><text x="255" y="304" fill="#1a1f33">硅基流动</text>
+        <circle cx="430" cy="135" r="6" fill="#43c59e"/><text x="440" y="139" fill="#1a1f33">无问芯穹（国产异构调度）</text>
+        <circle cx="470" cy="285" r="9" fill="#9b8cff" stroke="#fff" stroke-width="2"/><text x="482" y="289" fill="#1a1f33" font-weight="700">PPIO 派欧云</text>
+        <rect x="380" y="320" width="210" height="48" rx="8" fill="none" stroke="#43c59e" stroke-dasharray="5 4"/>
+        <text x="486" y="340" text-anchor="middle" fill="#138a6e" font-size="11.5">whitespace：分布式聚合 ×</text>
+        <text x="486" y="356" text-anchor="middle" fill="#138a6e" font-size="11.5">垂直行业/信创私有化推理</text>
+      </svg>
+      </div>
+      <figcaption>定位图（本调研重绘）。横轴 = 算力来源（集中式自建 ↔ 分布式聚合），纵轴 = 全栈通用云 ↔ 纯推理/算力专精。绝大多数玩家挤在「集中式 × 专精」左下区；PPIO 与无问芯穹是少数往「分布式/异构聚合」右侧走的——右下角「分布式 × 垂直/信创私有化推理」仍相对空（whitespace），但也正因为分布式 SLA 难保证而风险最高。</figcaption>
+    </figure>
+  </section>
+
+  <!-- ④ 融资 timeline -->
+  <section id="funding">
+    <h2><span class="n">④</span>融资 timeline</h2>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 760 170" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12">
+        <line x1="50" y1="80" x2="710" y2="80" stroke="#b9c2e0" stroke-width="2"/>
+        <circle cx="70" cy="80" r="6" fill="#7aa2ff"/>
+        <text x="70" y="60" text-anchor="middle" fill="#1a1f33">2018</text>
+        <text x="70" y="105" text-anchor="middle" fill="#5a627a" font-size="11">成立</text>
+        <text x="70" y="119" text-anchor="middle" fill="#5a627a" font-size="11">边缘云</text>
+        <circle cx="180" cy="80" r="6" fill="#7aa2ff"/>
+        <text x="180" y="60" text-anchor="middle" fill="#1a1f33">天使</text>
+        <text x="180" y="105" text-anchor="middle" fill="#5a627a" font-size="11">¥6000万</text>
+        <text x="180" y="119" text-anchor="middle" fill="#5a627a" font-size="11">王小川等 19 人</text>
+        <circle cx="310" cy="80" r="6" fill="#7aa2ff"/>
+        <text x="310" y="60" text-anchor="middle" fill="#1a1f33">2021 Pre-A</text>
+        <text x="310" y="105" text-anchor="middle" fill="#5a627a" font-size="11">千万美元级</text>
+        <text x="310" y="119" text-anchor="middle" fill="#5a627a" font-size="11">蓝驰/沸点</text>
+        <circle cx="440" cy="80" r="6" fill="#7aa2ff"/>
+        <text x="440" y="60" text-anchor="middle" fill="#1a1f33">2021 A-1</text>
+        <text x="440" y="105" text-anchor="middle" fill="#5a627a" font-size="11">过亿元</text>
+        <text x="440" y="119" text-anchor="middle" fill="#5a627a" font-size="11">CCV 领投</text>
+        <circle cx="570" cy="80" r="6" fill="#7aa2ff"/>
+        <text x="570" y="60" text-anchor="middle" fill="#1a1f33">2022 A</text>
+        <text x="570" y="105" text-anchor="middle" fill="#5a627a" font-size="11">2.5 亿元</text>
+        <text x="570" y="119" text-anchor="middle" fill="#5a627a" font-size="11">磐霖/CCV</text>
+        <circle cx="690" cy="80" r="7" fill="#9b8cff"/>
+        <text x="690" y="60" text-anchor="middle" fill="#1a1f33" font-weight="700">2025 B / IPO</text>
+        <text x="690" y="105" text-anchor="middle" fill="#5a627a" font-size="11">估值 46.9 亿</text>
+        <text x="690" y="119" text-anchor="middle" fill="#5a627a" font-size="11">冲港股</text>
+      </svg>
+      </div>
+      <figcaption>PPIO 派欧云 融资时间线（据公开报道 / 招股书整理）。累计融资约 5 亿元，投后估值约 46.9 亿元（2025）。</figcaption>
+    </figure>
+    <table>
+      <thead><tr><th>时间</th><th>事件 / 轮次</th><th>金额</th><th>投资方</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr><td>2018</td><td>成立（边缘云计算）</td><td>—</td><td>姚欣、王闻宇（均华中科技大学校友）</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>—（早期）</td><td>天使轮</td><td>约 ¥6000 万</td><td>王小川、程浩（迅雷）、申元庆（前微软 Azure 中国）、唐彬森（元气森林）等 19 位行业创始人</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2021</td><td>Pre-A</td><td>千万美元级</td><td>蓝驰创投、沸点资本、华业天成、远望资本</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2021 末</td><td>A-1</td><td>过亿元</td><td>创世伙伴 CCV 领投，张江科投、磐霖资本，蓝驰/沸点跟投</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2022-05</td><td>A 轮</td><td>2.5 亿元（累计超 4 亿）</td><td>磐霖资本、CCV、张江科投、IMO Ventures，老股东跟投</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2025-04</td><td>B 轮（IPO 前最后一轮）</td><td>约 US$1100 万 + US$1000 万</td><td>Harvest Oriental、LCV Pathfinder 等</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2025-06 / 2026-06</td><td>港交所递表（首次失效后二次递表）</td><td>累计约 5 亿元；投后估值约 46.9 亿元</td><td>工银国际、申万宏源（联席保荐人）</td><td><span class="src src-a">🟢招股书</span> <span class="src src-b">🟡</span></td></tr>
+      </tbody>
+    </table>
+    <p>融资节奏佐证阶段判断：<strong>2018–2022 是「边缘云」故事</strong>（A 轮属边缘云领域大额），2024 起切「AI 推理算力云」蹭 DeepSeek 红利、2025–2026 直接冲 IPO 想做「AI infra 第一股」。注意金额口径在不同报道间略有出入（累计「约 5 亿」vs「超 4 亿」），已并列标注。<strong>赛道整体融资热度</strong>：同期无问芯穹累计约 15 亿、硅基流动多轮、国际 Together/Fireworks/Lambda 数亿美元级——资本对推理云仍热，但已开始分化（谁能证明毛利转正）。</p>
+  </section>
+
+  <!-- ⑤ 公司速览 -->
+  <section id="snapshot">
+    <h2><span class="n">⑤</span>公司速览</h2>
+    <table>
+      <tbody>
+        <tr><td>是什么 / 定位</td><td>中国最大的<strong>独立分布式云计算 / 边缘云</strong>服务商（按 2024 年收入计，独立边缘云第一，市占约 4.1%<span class="src src-b">🟡</span>），现转型 <strong>AI 推理算力云</strong>。主体 PPLabs Technology Ltd.<span class="src src-a">🟢招股书</span></td></tr>
+        <tr><td>产品</td><td>① 模型 API（DeepSeek/Qwen/Kimi/GLM/MiniMax/Vidu 等，token 计费，OpenAI/Anthropic 兼容）；② GPU 容器实例（H100/H800/H20 SXM）+ Serverless GPU（SPOT 5 折，4090 ¥0.99/卡时）；③ Agent Sandbox / Agent 托管<span class="src src-a">🟢官网</span></td></tr>
+        <tr><td>团队</td><td><strong>姚欣 Yao Xin</strong>（董事长/CEO）：2005 创办 PPTV/PPLive，2014 卖给苏宁后做投资人，连续创业者；<strong>王闻宇 Wang Wenyu</strong>（CTO，前 PPTV 首席架构师）；两人均华中科技大学校友。研发占比高（约 204 人中 138 人研发<span class="src src-b">🟡</span>，口径据 2024 招股书版本）</td></tr>
+        <tr><td>商业模式</td><td>边缘云（边缘 CDN / 算力共享，营收主力，2025 约占 84.5%）+ AI 云（token + 卡时，增速快但占比约 15%）。把异构、跨区域 GPU 转成低成本算力服务转售<span class="src src-a">🟢招股书</span></td></tr>
+        <tr><td>采用度（核实）</td><td>注册开发者：12,112（2023）→ 125,545（2024）→ 295,524（2025-05）→ <strong>574,000+（2026-04）</strong>；日均 token：0（2023 末）→ 2710 亿（2025-12）→ <strong>1.03 万亿（2026-04，4 个月涨近 4 倍）</strong>；算力节点 4,000–4,800+；官网自称 20+ 算力中心、覆盖 1,588 县<span class="src src-a">🟢招股书</span> <span class="src src-c">🔴官网口径</span></td></tr>
+        <tr><td>财务（招股书）</td><td>营收 2023/2024/2025 = <strong>3.58 / 5.58 / 7.70 亿元</strong>（CAGR≈46.6%）；净亏损 <strong>1.89 / 2.94 / 2.23 亿元</strong>（三年累计约 5.68 亿）；整体毛利率 2024 约 12.3%；AI 云收入 2024 约 1039 万 → 2025 约 1.19 亿（涨超 10 倍）。<span class="src src-a">🟢招股书</span></td></tr>
+        <tr><td>状态</td><td>成立 2018；5 轮融资、估值约 46.9 亿元；<strong>2025-06 首次递表（失效）→ 2026-06 二次递表港交所</strong>，工银国际/申万宏源保荐<span class="src src-a">🟢招股书</span> <span class="src src-b">🟡</span></td></tr>
+      </tbody>
+    </table>
+    <div class="callout note">
+      <span class="label">口径打架，已并列</span>
+      不同报道/不同版本招股书的数字有出入：<strong>营收</strong>有「2022:2.86 亿 / 2023:3.58 亿 / 2024:5.58 亿」（2025 版招股书）与「2023:3.58 / 2024:5.58 / 2025:7.70 亿」（2026 版）两套；<strong>净亏损</strong>同理（2025 版列 2022/2023/2024 = 0.85/1.89/2.94 亿，2026 版列 2023/2024/2025 = 1.89/2.94/2.23 亿）。<strong>累计融资</strong>「约 5 亿」vs「超 4 亿」。本文以最新 2026 版招股书口径为主、旧版并列，核不到处写「未披露」。<strong>「分布式更便宜 / 千倍降本」属公司自述</strong><span class="src src-c">🔴</span>，未见独立验证。
+    </div>
+  </section>
+
+  <!-- ⑥ 国际对标 -->
+  <section id="bench">
+    <h2><span class="n">⑥</span>国际对标 / Benchmarks</h2>
+    <p>PPIO 本身是中国公司，这节反过来看：<strong>它对标的海外玩家是谁、学了什么、差在哪、有什么中国特色优势。</strong></p>
+    <h3>它对标谁</h3>
+    <ul>
+      <li><strong>Together AI / Fireworks AI</strong>——「开源模型推理 API + serverless + 专用 GPU」这套产品范式的定义者，PPIO 的模型 API 形态基本是它们的中国版。</li>
+      <li><strong>DeepInfra / Novita AI</strong>——价格驱动的推理 API；尤其 <strong>Novita AI</strong> 的产品组合（Model API + GPU Instance + Serverless GPU + <strong>Agent Sandbox</strong>）与 PPIO 几乎一一对应（PPIO 也上了 Agent Sandbox），是最贴近的形态对标（两者是否同源未证实<span class="src src-c">🔴</span>）。</li>
+      <li><strong>RunPod / Lambda / CoreWeave</strong>——GPU 卡时租赁那一侧的对标，尤其 PPIO 的 GPU 容器/裸金属业务。</li>
+    </ul>
+    <h3>它学了什么</h3>
+    <ul>
+      <li><strong>OpenAI / Anthropic API 兼容</strong>：降低迁移成本（drop-in 替换），这是国际玩家的通用打法，PPIO 全盘照搬。</li>
+      <li><strong>token + 卡时双计费 + SPOT 竞价</strong>：与 Together/DeepInfra 的弹性定价同构。</li>
+      <li><strong>「价格 + 速度 + 覆盖」三档定位</strong>：国际市场已分化出价格屠夫（DeepInfra）、速度王（Fireworks）、覆盖王，PPIO 选的是「价格 + 国内合规」位。</li>
+    </ul>
+    <h3>差在哪 / 中国特色优势</h3>
+    <ul>
+      <li><strong>差距</strong>：国际头部（Together/Fireworks/CoreWeave）融资体量、自建算力规模、企业级 SLA 口碑更强；PPIO 的分布式架构被指<strong>时延偏高、SLA 不稳</strong><span class="src src-b">🟡评测口径</span>，这是企业级负载的硬伤。</li>
+      <li><strong>中国特色优势</strong>：① <strong>信创 / 合规 / 数据不出境</strong>——国际玩家进不来的护城河，私有化推理是国内大客户刚需；② <strong>分布式聚合 + 边缘下沉县域</strong>——理论上压成本、贴近端侧低时延（但「更便宜」仍自述待证）；③ <strong>国产算力替代</strong>背景下，绕开被管制的高端 GPU、用国产卡/闲置卡的故事更有政策顺风（不过这条无问芯穹讲得更硬）。</li>
+    </ul>
+  </section>
+
+  <!-- ⑦ 创业 idea 借鉴 -->
+  <section id="idea">
+    <h2><span class="n">⑦</span>创业 idea 借鉴</h2>
+    <div class="callout insight">
+      <span class="label">Whitespace / 机会</span>
+      ① <strong>分布式聚合闲置算力的成本优势</strong>——若能真把闲置/边缘 GPU 的成本打到集中式以下并保住可用性，是真护城河（PPIO 押注于此，但尚未独立证实）。② <strong>信创 / 私有化推理</strong>——国际玩家进不来、大厂又笨重的细分：给政企/金融/医疗做「数据不出域 + 国产卡 + 一键私有化部署开源模型推理」的垂直方案。③ <strong>垂直行业推理云</strong>——不做通用 API，而做某行业（法律/医疗/工业）调好的推理 + 工作流，避开纯 token 价格战。
+    </div>
+    <h3>现有玩家共同短板（unmet needs）</h3>
+    <p>① <strong>同质化 + 价格战 → 毛利薄</strong>：人人都是「OpenAI 兼容 API + 开源模型」，缺差异化，谁都不赚钱（PPIO 整体毛利率仅约 12%）。② <strong>分布式/聚合算力的 SLA、时延、稳定性</strong>是公认软肋——谁能在「便宜」和「稳」之间真正解决矛盾，就有机会。③ <strong>开发者从「能调用」到「调得好/调得省」之间缺工具</strong>（成本可观测、多 provider 路由、缓存、batch 优化）——OpenRouter 式的路由/优化层仍有空间。</p>
+    <h3>Why now（为什么现在值得做）</h3>
+    <p>① <strong>开源模型爆发</strong>（DeepSeek/Qwen/Kimi/GLM）让「托管别人的模型按 token 卖」成立；② <strong>推理需求指数级起量</strong>（PPIO token 量 4 个月涨近 4 倍）；③ <strong>国产算力替代 + 芯片管制</strong>催生「绕开高端 GPU、聚合国产/闲置算力」的政策顺风；④ 推理成本仍在快速下降，先卡位成本曲线的人有规模优势。</p>
+    <h3>可借鉴的打法 + 相邻机会</h3>
+    <ul>
+      <li><strong>borrowable：</strong>(a) 用一张已有的基础设施网络（PPIO 的边缘 CDN 节点）<strong>低成本切入新赛道</strong>——存量资产改造比从零建集中式机房省钱；(b) <strong>OpenAI/Anthropic API 兼容</strong>做 drop-in 降低迁移摩擦；(c) 蹭爆款开源模型（DeepSeek）出圈做增长，用免费额度/低价获客。</li>
+      <li><strong>adjacent：</strong>(a) <strong>推理成本可观测 / 多 provider 路由优化</strong>（FinOps for inference）；(b) <strong>端侧/边缘小模型推理</strong>（贴 PPIO 的县域下沉网络）；(c) <strong>Agent 运行时 / Sandbox</strong>（PPIO 与 Novita 都在加，但仍早期，垂直 Agent 基建有空间）；(d) <strong>国产卡推理优化引擎</strong>（无问芯穹的 M×N 路线）。</li>
+    </ul>
+    <div class="callout warn">
+      <span class="label">风险（诚实给）</span>
+      ① <strong>价格战碾毛利</strong>——大厂赔本引流、DeepInfra 式价格屠夫，第三方很难有可持续单价护城河。② <strong>大厂自带推理</strong>——火山/阿里/腾讯把推理当云入口，靠生态绑定，独立玩家的「存在意义」长期被质疑（最大威胁）。③ <strong>算力供给与芯片管制</strong>——高端 GPU 受限，供给和成本不可控。④ <strong>分布式质量 / SLA 难保证</strong>——便宜的代价是时延高、稳定性差，企业级负载未必买单；「分布式更便宜」尚是自述。⑤ <strong>转型期财务</strong>——AI 云仍亏、整体三年累亏约 5.68 亿，靠 IPO 输血。
+    </div>
+  </section>
+
+  <!-- ⑧ 现实判断 -->
+  <section id="take">
+    <h2><span class="n">⑧</span>现实判断</h2>
+    <p>PPIO 的胜算在于<strong>「存量边缘云网络 + 现金流业务（边缘 CDN，营收主力）」给它补血</strong>，比纯靠融资烧的推理 API 创业公司更抗打；且<strong>信创 / 国内合规 / 边缘下沉</strong>是国际玩家进不来的真实壁垒，IPO 后若拿到资本和「AI infra 第一股」标签，有机会在国内站住中部位置。</p>
+    <p>软肋同样明确：<strong>AI 推理云这一层已经从 emerging 滑向 crowded、且陷入价格血战</strong>，PPIO 的核心差异化叙事（分布式聚合更便宜）<strong>尚未被独立验证</strong>，而分布式天然的 SLA/时延短板正好戳中企业级负载的痛点；正面战场上有大厂（自带推理 + 赔本引流，最大威胁）、侧面有硅基流动（更轻的纯 API）和无问芯穹（更硬的国产异构调度故事）。它本质上是<strong>「用一张老网络打一个新红海」——需求是真的爆发，但能不能把规模转成毛利、把「便宜」转成「又便宜又稳」，是它 IPO 之后必须证明的事</strong>。对想入局者：别再做第 51 个「OpenAI 兼容推理 API」，机会在<strong>垂直行业推理云、信创私有化、或推理 FinOps/路由优化层</strong>这些价格战打不到的格子。</p>
+    <div class="callout warn">
+      <span class="label">使用提醒</span>
+      本页为对话式调研，信息主要来自公开来源（含港交所招股书）并按等级标注；融资数额、客户、token 量、算力规模、价格等以官方一手为准，
+      <strong>「分布式更便宜 / 千倍降本」等属公司自述、产品能力未必经独立验证</strong>，不同版本招股书与报道数字有出入已并列，引用前请核对最新信息。
+    </div>
+  </section>
+
+  <!-- 出处 -->
+  <section id="src">
+    <h2>出处</h2>
+    <ul style="font-size:13.5px">
+      <li><span class="src src-a">🟢</span> <a href="https://ppio.com" target="_blank" rel="noopener">PPIO 官网 ppio.com</a> / <a href="https://ppio.cn/pioneers" target="_blank" rel="noopener">ppio.cn 派欧算力云产品页</a> / <a href="https://ppinfra.com/about" target="_blank" rel="noopener">ppinfra.com/about</a>（产品、价格、规模自述口径）</li>
+      <li><span class="src src-a">🟢</span> <span class="src src-b">🟡</span> 港交所招股书相关报道（营收/亏损/token/开发者/估值）：<a href="https://www.tmtpost.com/7603452.html" target="_blank" rel="noopener">钛媒体「三年累亏 5.68 亿」</a> · <a href="https://xueqiu.com/2854806290/393901235" target="_blank" rel="noopener">雪球/IPO早知道「AI 云收入一年增超 10 倍」</a> · <a href="https://finance.sina.com.cn/roll/2025-10-20/doc-infupqvs0002171.shtml" target="_blank" rel="noopener">新浪「递交 IPO 招股书」</a> · <a href="https://www.jiemian.com/article/12946176.html" target="_blank" rel="noopener">界面「累计亏损超 5 亿闯关港股」</a></li>
+      <li><span class="src src-b">🟡</span> 创始人/背景 + 转型：<a href="https://www.qbitai.com/2024/09/189935.html" target="_blank" rel="noopener">量子位「PPTV 创始人姚欣 AI 再创业，分布式推理」</a> · <a href="https://www.qbitai.com/2025/06/301513.html" target="_blank" rel="noopener">量子位「华科校友冲刺 AI infra 第一股」</a> · <a href="https://zhidx.com/p/487426.html" target="_blank" rel="noopener">智东西「上海 GPU 云服务商冲刺港交所」</a></li>
+      <li><span class="src src-b">🟡</span> 融资历史：<a href="https://news.pedaily.cn/202205/493211.shtml" target="_blank" rel="noopener">投资界「2.5 亿 A 轮，累计超 4 亿」</a> · <a href="https://news.pedaily.cn/202112/482503.shtml" target="_blank" rel="noopener">投资界「亿元 A-1 轮 CCV 领投」</a> · <a href="https://cloud.ofweek.com/news/2021-05/ART-178800-12005-30500690.html" target="_blank" rel="noopener">OFweek「Pre-A 千万美元级」</a> · <a href="https://www.163.com/dy/article/KV22KDRN0519VPHD.html" target="_blank" rel="noopener">网易「王小川、申元庆参投，估值 46.9 亿」</a></li>
+      <li><span class="src src-b">🟡</span> 竞品 / 赛道：<a href="https://www.sohu.com/a/915483000_121956424" target="_blank" rel="noopener">搜狐「白山云/PPIO/硅基流动深度解析」</a> · <a href="https://siliconflow.cn/pricing" target="_blank" rel="noopener">硅基流动 定价</a> · <a href="https://www.ofweek.com/ai/2025-11/ART-201721-8120-30675045.html" target="_blank" rel="noopener">OFweek「无问芯穹累计吸金 15 亿」</a> · <a href="https://cloud.infini-ai.com/" target="_blank" rel="noopener">无问芯穹 官网</a></li>
+      <li><span class="src src-b">🟡</span> 国际对标：<a href="https://infrabase.ai/blog/ai-inference-api-providers-compared" target="_blank" rel="noopener">Infrabase「Inference API Providers Compared 2026」</a> · <a href="https://www.morphllm.com/comparisons/fireworks-vs-deepinfra" target="_blank" rel="noopener">Fireworks vs DeepInfra (2026)</a> · <a href="https://www.together.ai/serverless-inference" target="_blank" rel="noopener">Together AI Serverless</a> · <a href="https://novita.ai/" target="_blank" rel="noopener">Novita AI</a></li>
+    </ul>
+  </section>
+
+  <footer class="foot">
+    公司竞争格局 / 赛道早期度调研笔记，仅作梳理；信息按来源分级、产品能力未必经独立验证，以官方一手信息为准 · 整理日期 2026-06-22
+  </footer>
+
+</article>
+</body>
+</html>
