@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Roblox · UGC 游戏平台的竞争格局与赛道调研</title>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --bad:#ff6b81; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --bad:#d23651; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;}
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:920px; margin:0 auto; padding:18px 22px 90px}
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:25px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)} .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap; line-height:2}
+  nav.toc a:hover{color:var(--accent)}
+  section{margin:38px 0}
+  h2{font-size:20px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:16.5px; margin:22px 0 8px}
+  p{margin:12px 0} ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)} strong{color:var(--text)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.88em}
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:13px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:9px 10px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  figure{margin:24px 0; text-align:center}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+  .svgwrap{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 8px}
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+  .src{font-size:10.5px; padding:0 6px; border-radius:999px; white-space:nowrap; vertical-align:middle}
+  .src-a{background:rgba(67,197,158,.18); color:var(--ok)}
+  .src-b{background:rgba(255,180,84,.18); color:var(--warn)}
+  .src-c{background:rgba(255,107,129,.18); color:var(--bad)}
+  .legend{font-size:12px; color:var(--muted); margin:6px 0 0}
+  .verdict{display:inline-block; font-weight:700; padding:3px 12px; border-radius:999px; font-size:14px}
+  .v-nascent{background:rgba(122,162,255,.18); color:var(--accent)}
+  .v-emerging{background:rgba(67,197,158,.18); color:var(--ok)}
+  .v-crowded{background:rgba(255,180,84,.18); color:var(--warn)}
+  .v-mature{background:rgba(255,107,129,.18); color:var(--bad)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">UGC 游戏平台</span>
+      <span class="chip">创作者经济</span>
+      <span class="chip">AI 造游戏</span>
+      <span class="chip">China #cn</span>
+      <span class="chip">竞争格局</span>
+      <span class="chip">赛道早期度</span>
+      <span class="chip">创业 idea</span>
+    </div>
+    <h1>Roblox：UGC 游戏平台的竞争格局与赛道调研</h1>
+    <p class="orig-title">roblox.com / corp.roblox.com — UGC 游戏平台标杆 · 网络效应护城河 · 赛道整体 mature（内部 AI 创作 emerging）· 中国对标蛋仔派对</p>
+    <dl class="meta-grid">
+      <dt>对象</dt><dd><a href="https://corp.roblox.com" target="_blank" rel="noopener">corp.roblox.com</a>（Roblox Corporation, NYSE: RBLX）</dd>
+      <dt>赛道</dt><dd>UGC（用户生成内容）游戏 / 社交娱乐平台 + 创作者经济</dd>
+      <dt>整理</dt><dd>对话调研笔记；信息来自公开检索（含 SEC/官方财报），按来源分级标注，本篇走「竞争格局 / 赛道」视角而非股票估值</dd>
+      <dt>日期</dt><dd>2026-06-22</dd>
+    </dl>
+    <p class="legend">来源等级：<span class="src src-a">🟢 一手</span> 官网/SEC/官方 newsroom ·
+      <span class="src src-b">🟡 二手</span> 媒体/数据库 ·
+      <span class="src src-c">🔴 自述/未证实</span> 营销口径或未独立验证</p>
+  </header>
+
+  <div class="tldr">
+    <b>一句话</b> — Roblox 是 <strong>UGC 游戏平台的定义者</strong>：给玩家一套零成本工具造游戏（experiences），别人来玩；平台靠虚拟货币 <strong>Robux</strong> 内购抽成、并把分成通过 DevEx 提现给创作者，跑通了「玩家↔创作者双边网络效应」飞轮（2025 年营收 $4.9B、bookings $6.8B、全年均 DAU 1.27 亿、付给创作者超 $1.5B <span class="src src-a">🟢</span>）。它的 <strong>moat 是内容×玩家的双边网络效应 + 创作者工具链 + 跨平台 + 社交图谱</strong>——这是后来者最大的墙。<strong>赛道整体判 mature</strong>（巨头已定型、Roblox 已上市），但其内部「<strong>AI 零代码创作 / generative UGC</strong>」是 <strong>emerging</strong> 新变量，也正是 Rosebud AI、Astrocade 等新势力想颠覆它的点。<strong>中国最强对位是网易蛋仔派对</strong>（DAU/创作者各超 4000 万 <span class="src src-b">🟡</span>）。一个 whitespace：用 AI 把创作门槛彻底打掉、面向 <strong>年轻成人（17+）而非未成年人</strong>，绕开 Roblox 最沉重的安全监管包袱。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#market">① 赛道地图 + 早期度</a>
+    <a href="#matrix">② 竞品对照矩阵</a>
+    <a href="#map">③ 定位图</a>
+    <a href="#funding">④ 融资/营收 timeline</a>
+    <a href="#snapshot">⑤ 公司速览</a>
+    <a href="#ai">⑥ AI 战略</a>
+    <a href="#cn">⑦ 中国对标 #cn</a>
+    <a href="#idea">⑧ 创业 idea 借鉴</a>
+    <a href="#take">⑨ 现实判断</a>
+    <a href="#src">出处</a>
+  </nav>
+
+  <!-- ① 赛道与早期度 -->
+  <section id="market">
+    <h2><span class="n">①</span>赛道地图 + 早期度判断</h2>
+    <p>Roblox 属于 <strong>UGC 游戏 / 社交娱乐平台</strong> 赛道：它本身不是一款游戏，而是一个「<strong>给普通人造游戏的工具 + 分发这些游戏的商店 + 社交场</strong>」三合一的平台。需求侧解决的是「年轻人想和朋友一起玩点新鲜的、且玩不完」——平台上有数千万款由用户创作的 experiences，长尾内容永远刷不到底；供给侧解决的是「想做游戏但没钱没团队的创作者」——免费拿到引擎（Roblox Studio）、跨平台分发、内建支付与社交，做出来就有现成的上亿玩家池子。这两端互相喂养，就是它的核心飞轮。</p>
+
+    <div class="callout note">
+      <span class="label">核心飞轮（双边网络效应）</span>
+      <strong>更多玩家</strong>（1.27 亿全年均 DAU <span class="src src-a">🟢</span>）→ 创作者能赚到钱（2025 付出 &gt;$1.5B <span class="src src-a">🟢</span>）→ <strong>更多/更好的内容</strong>（数千万 experiences）→ 留住并吸引更多玩家。Robux 内购是把玩家消费转成创作者收入的「中间货币」，平台从中抽成——飞轮转得越快，平台抽水的绝对额越大。
+    </div>
+
+    <h3>玩家分群（四象限别漏）</h3>
+    <ul>
+      <li><strong>现有巨头 / 同类 UGC 平台：</strong>Roblox（本篇，定义者）、<strong>Fortnite / UEFN</strong>（Epic，把战术竞技平台化为创作平台）、<strong>Minecraft</strong>（微软，沙盒鼻祖 + Marketplace UGC）、<strong>网易蛋仔派对</strong>（中国最大 UGC 乐园）。</li>
+      <li><strong>垂直 / 中小创业公司：</strong><strong>Rec Room</strong>（社交 VR/UGC，曾估值 $3.5B，2026 关停 <span class="src src-b">🟡</span>）、<strong>Manticore Games / Core</strong>（PC 端 UGC 创作平台）、<strong>Overwolf</strong>（创作者变现/工具链）、迷你世界。</li>
+      <li><strong>大厂顺手做 / 分发渠道：</strong>腾讯（曾代理 Roblox 中国版「罗布乐思」、自有 UGC 尝试）、字节（抖音小游戏 + UGC 尝试）、Discord（Activities / 社交分发）、Apple/Google（应用商店分发与抽成话语权）。</li>
+      <li><strong>AI 造游戏新势力（新变量）：</strong><strong>Rosebud AI</strong>（vibe-coding 造 3D 游戏，Karpathy/Sutskever 等天使背书 <span class="src src-b">🟡</span>）、<strong>Astrocade</strong>（2026 融 $56M，Sequoia/Sea 领投，AI 社交造游戏 <span class="src src-b">🟡</span>）、<strong>Series AI</strong>、<strong>Hytopia</strong> 等——用 AI 把「写 Lua 脚本」降维成「打字描述」。</li>
+    </ul>
+
+    <div class="callout insight">
+      <span class="label">早期度判断</span>
+      赛道整体：<span class="verdict v-mature">mature 成熟</span>　｜　内部「AI 创作 / generative UGC」子赛道：<span class="verdict v-emerging">emerging 新兴</span><br><br>
+      <strong>判断信号（赛道 mature）：</strong>① 玩家认知早已成型，"Roblox" 几乎是品类代名词；② 巨头全部进场且定型（微软 Minecraft、Epic Fortnite、网易蛋仔），新增的是同质内卷而非空白开拓；③ Roblox 自身已上市（2021 直接上市），头部格局稳定；④ 增长引擎从「拉新」转向「老用户 aging-up + 提客单」，DAU 增速虽仍 35%（Q1'26 <span class="src src-a">🟢</span>）但靠涨年龄结构与时长，top-of-funnel 注册受安全合规拖累；⑤ 盈利性长期承压（仍净亏损），说明这是规模主导的成熟竞争，不是利润蓝海。<br><br>
+      <strong>判断信号（AI 子赛道 emerging）：</strong>① 大量新创业公司一年内涌现（Astrocade 8 个月做到 2000 万用户 <span class="src src-b">🟡</span>）；② 资本热（Sequoia/Sea/NVIDIA/Google 入局）；③ 巨头（Roblox 自己、Epic）刚开始内化，标准未定；④ 还没有公认 benchmark 说明「AI 造的游戏好不好玩」——这正是早期信号。
+    </div>
+  </section>
+
+  <!-- ② 竞品矩阵 -->
+  <section id="matrix">
+    <h2><span class="n">②</span>竞品对照矩阵</h2>
+    <p>选 8 个对这个赛道最具决定性的维度：<strong>内容供给规模</strong>（UGC 体量决定长尾深度）、<strong>创作门槛</strong>（脚本 vs 零代码 vs AI，决定供给侧天花板）、<strong>DAU/规模</strong>（网络效应的分母）、<strong>变现 / 创作者分成</strong>（飞轮的燃料）、<strong>年龄 / 受众</strong>（决定安全监管包袱）、<strong>AI 创作能力</strong>（新变量）、<strong>安全合规压力</strong>、<strong>平台开放度</strong>。数字口径不一处已并列标源。</p>
+    <table>
+      <thead><tr>
+        <th>玩家</th>
+        <th>内容供给 / UGC 规模</th>
+        <th>创作门槛</th>
+        <th>DAU / 规模</th>
+        <th>变现 · 创作者分成</th>
+        <th>年龄 / 受众</th>
+        <th>AI 创作</th>
+        <th>安全合规压力</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Roblox（本篇）</strong></td>
+          <td>数千万 experiences，长尾最深 <span class="src src-b">🟡</span></td>
+          <td>Lua 脚本 + Studio；AI 工具补强中</td>
+          <td><strong>1.32 亿 DAU</strong>（Q1'26，+35% <span class="src src-a">🟢</span>）</td>
+          <td>Robux 抽 ~30% 市场费；DevEx 提现；2025 付创作者 &gt;$1.5B <span class="src src-a">🟢</span></td>
+          <td>年轻为主但快速 aging-up，&gt;13 岁占多数，18+ 增速 &gt;50% <span class="src src-b">🟡</span></td>
+          <td>Cube 3D（开源）+ Assistant + 实时翻译/安全 <span class="src src-a">🟢</span></td>
+          <td><strong>极高</strong>：多州 AG 诉讼 + 强制年龄核验 <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Fortnite / UEFN（Epic）</td>
+          <td>岛屿/玩法数十万级，强 IP 联动</td>
+          <td>UEFN（Unreal 编辑器）门槛偏高、画质强</td>
+          <td>Fortnite 体量过亿（口径不一）<span class="src src-b">🟡</span></td>
+          <td>UEFN 累计付创作者 &gt;$9 亿；Creator Economy 2.0 直售可拿 ~74% 零售净额 <span class="src src-b">🟡</span></td>
+          <td>偏大龄、泛玩家</td>
+          <td>逐步引入</td>
+          <td>中</td>
+        </tr>
+        <tr>
+          <td>Minecraft（微软）</td>
+          <td>沙盒 + Marketplace UGC，模组生态庞大</td>
+          <td>搭积木式低，深度玩法需 mod/红石</td>
+          <td>月活过亿级（买断+订阅，非 DAU 口径）<span class="src src-b">🟡</span></td>
+          <td>Marketplace 分成 + 买断；变现弱于 Roblox</td>
+          <td>全龄</td>
+          <td>有限</td>
+          <td>中</td>
+        </tr>
+        <tr>
+          <td>网易蛋仔派对（China）</td>
+          <td>UGC 地图累计 &gt;1 亿张（2024.3）<span class="src src-b">🟡</span></td>
+          <td>蛋仔工坊，零代码拼图式低门槛</td>
+          <td>DAU / 创作者各 &gt;4000 万（峰值口径）<span class="src src-b">🟡</span></td>
+          <td>一年向创作者发 ~1 亿元人民币 <span class="src src-b">🟡</span></td>
+          <td>低龄为主，监管严（防沉迷）</td>
+          <td>已上 AIGC 工具 <span class="src src-b">🟡</span></td>
+          <td>高（中国未成年人监管）</td>
+        </tr>
+        <tr>
+          <td>Rec Room</td>
+          <td>社交房间 UGC，曾 1.5 亿累计用户 <span class="src src-b">🟡</span></td>
+          <td>VR/移动可视化创作</td>
+          <td><strong>2026.6 关停</strong>（盈利做不通）<span class="src src-b">🟡</span></td>
+          <td>UGC 分成，但成本长期压过收入 <span class="src src-b">🟡</span></td>
+          <td>偏青少年</td>
+          <td>有限</td>
+          <td>中</td>
+        </tr>
+        <tr>
+          <td>Astrocade（AI 新势力）</td>
+          <td>8 个月 &gt;7.5 万款游戏 <span class="src src-b">🟡</span></td>
+          <td><strong>AI 零代码</strong>（描述即生成）</td>
+          <td>8 个月 2000 万 engaged 用户 <span class="src src-b">🟡</span></td>
+          <td>$10M 创作者激励池（早期）<span class="src src-b">🟡</span></td>
+          <td>面向更泛/成人</td>
+          <td><strong>原生 AI</strong></td>
+          <td>低（新平台、待考验）</td>
+        </tr>
+        <tr>
+          <td>Rosebud AI（AI 新势力）</td>
+          <td>规模小、早期 <span class="src src-c">🔴</span></td>
+          <td><strong>vibe-coding</strong>，描述造 3D 游戏</td>
+          <td>早期、未披露 <span class="src src-c">🔴</span></td>
+          <td>内建变现/创作者社区（自述）<span class="src src-c">🔴</span></td>
+          <td>泛创作者</td>
+          <td><strong>原生 AI</strong></td>
+          <td>低</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>读矩阵：Roblox 在<strong>内容供给深度、DAU 规模、创作者变现绝对额</strong>三项遥遥领先——这正是网络效应的具体体现，也是后来者最难逾越的墙。它的相对软肋集中在<strong>创作门槛仍偏高（Lua 脚本）</strong>和<strong>安全合规压力极高（低龄用户 + 多州诉讼）</strong>——而 AI 新势力（Astrocade/Rosebud）恰好攻这两点：用 AI 抹平门槛、用「面向成人」绕开监管。但它们目前完全没有 Roblox 量级的玩家池与内容深度，「能不能把生成出来的东西变成有人持续玩的游戏」尚未被证明（这是 emerging 的核心存疑）。蛋仔在中国是 Roblox 模式最成功的本土对位，但出海与全球网络效应仍远不及 Roblox。</p>
+  </section>
+
+  <!-- ③ 定位图 -->
+  <section id="map">
+    <h2><span class="n">③</span>定位图（whitespace 在哪）</h2>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 640 400" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12">
+        <line x1="40" y1="200" x2="600" y2="200" stroke="#b9c2e0" stroke-width="1.5"/>
+        <line x1="320" y1="24" x2="320" y2="372" stroke="#b9c2e0" stroke-width="1.5"/>
+        <text x="598" y="218" text-anchor="end" fill="#5a627a">创作门槛低 → AI 零代码</text>
+        <text x="42" y="218" fill="#5a627a">创作门槛高（写脚本/引擎）</text>
+        <text x="326" y="34" fill="#5a627a">受众：低龄为主</text>
+        <text x="326" y="366" fill="#5a627a">受众：泛/成人</text>
+        <rect x="430" y="220" width="160" height="140" fill="#7aa2ff" opacity="0.10"/>
+        <text x="510" y="298" text-anchor="middle" fill="#3a66ff" font-size="11.5" opacity="0.85">whitespace：</text>
+        <text x="510" y="314" text-anchor="middle" fill="#3a66ff" font-size="11.5" opacity="0.85">AI 零代码 ×</text>
+        <text x="510" y="330" text-anchor="middle" fill="#3a66ff" font-size="11.5" opacity="0.85">年轻成人受众</text>
+        <circle cx="220" cy="150" r="9" fill="#3a66ff"/>
+        <text x="234" y="148" fill="#1a1f33" font-weight="700">Roblox</text>
+        <text x="234" y="163" fill="#5a627a" font-size="10.5">门槛偏高·低龄(向成人扩→)</text>
+        <circle cx="420" cy="120" r="8" fill="#138a6e"/>
+        <text x="404" y="108" text-anchor="end" fill="#1a1f33">蛋仔派对</text>
+        <circle cx="262" cy="178" r="7" fill="#6b4cff"/>
+        <text x="248" y="192" text-anchor="end" fill="#1a1f33">Minecraft</text>
+        <circle cx="150" cy="280" r="8" fill="#b3701a"/>
+        <text x="164" y="284" fill="#1a1f33">Fortnite/UEFN</text>
+        <circle cx="305" cy="150" r="6" fill="#9aa3bd"/>
+        <text x="292" y="138" text-anchor="end" fill="#9aa3bd">Rec Room(关停)</text>
+        <circle cx="520" cy="300" r="8" fill="#d23651"/>
+        <text x="506" y="304" text-anchor="end" fill="#1a1f33">Astrocade</text>
+        <circle cx="562" cy="250" r="7" fill="#d23651"/>
+        <text x="548" y="246" text-anchor="end" fill="#1a1f33">Rosebud AI</text>
+      </svg>
+      </div>
+      <figcaption>定位图（本调研重绘）。X 轴＝创作门槛（左高右低/AI），Y 轴＝受众年龄（上低龄下成人）。<strong>右下角「AI 零代码 × 年轻成人」是 Roblox 留出的最大 whitespace</strong>——Roblox 困在低龄受众与脚本门槛的历史包袱里，AI 新势力（Astrocade/Rosebud）正从右下角往里打。</figcaption>
+    </figure>
+  </section>
+
+  <!-- ④ 融资/营收 timeline -->
+  <section id="funding">
+    <h2><span class="n">④</span>融资 / 营收 timeline</h2>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 760 220" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12">
+        <line x1="50" y1="110" x2="720" y2="110" stroke="#b9c2e0" stroke-width="2"/>
+        <circle cx="70" cy="110" r="6" fill="#3a66ff"/>
+        <text x="70" y="92" text-anchor="middle" fill="#1a1f33" font-weight="700">2004</text>
+        <text x="70" y="138" text-anchor="middle" fill="#5a627a" font-size="10.5">成立</text>
+        <text x="70" y="152" text-anchor="middle" fill="#5a627a" font-size="10.5">Baszucki</text>
+        <circle cx="200" cy="110" r="6" fill="#3a66ff"/>
+        <text x="200" y="92" text-anchor="middle" fill="#1a1f33" font-weight="700">2017</text>
+        <text x="200" y="138" text-anchor="middle" fill="#5a627a" font-size="10.5">Series E</text>
+        <text x="200" y="152" text-anchor="middle" fill="#5a627a" font-size="10.5">$82M</text>
+        <circle cx="300" cy="110" r="6" fill="#3a66ff"/>
+        <text x="300" y="92" text-anchor="middle" fill="#1a1f33" font-weight="700">2018</text>
+        <text x="300" y="138" text-anchor="middle" fill="#5a627a" font-size="10.5">Series F</text>
+        <text x="300" y="152" text-anchor="middle" fill="#5a627a" font-size="10.5">$150M</text>
+        <circle cx="400" cy="110" r="6" fill="#3a66ff"/>
+        <text x="400" y="92" text-anchor="middle" fill="#1a1f33" font-weight="700">2020</text>
+        <text x="400" y="138" text-anchor="middle" fill="#5a627a" font-size="10.5">G $4B估值</text>
+        <text x="400" y="152" text-anchor="middle" fill="#5a627a" font-size="10.5">a16z/腾讯/Temasek</text>
+        <circle cx="500" cy="110" r="6" fill="#3a66ff"/>
+        <text x="500" y="92" text-anchor="middle" fill="#1a1f33" font-weight="700">2021.1</text>
+        <text x="500" y="138" text-anchor="middle" fill="#5a627a" font-size="10.5">H $520M</text>
+        <text x="500" y="152" text-anchor="middle" fill="#5a627a" font-size="10.5">$29.5B估值</text>
+        <circle cx="600" cy="110" r="7" fill="#d23651"/>
+        <text x="600" y="92" text-anchor="middle" fill="#1a1f33" font-weight="700">2021.3</text>
+        <text x="600" y="138" text-anchor="middle" fill="#d23651" font-size="10.5" font-weight="700">直接上市 DPO</text>
+        <text x="600" y="152" text-anchor="middle" fill="#5a627a" font-size="10.5">开盘 ~$42.6B</text>
+        <circle cx="690" cy="110" r="7" fill="#138a6e"/>
+        <text x="690" y="92" text-anchor="middle" fill="#1a1f33" font-weight="700">2025</text>
+        <text x="690" y="138" text-anchor="middle" fill="#138a6e" font-size="10.5">营收 $4.9B</text>
+        <text x="690" y="152" text-anchor="middle" fill="#5a627a" font-size="10.5">bookings $6.8B</text>
+      </svg>
+      </div>
+      <figcaption>Roblox 融资/营收时间线（据 SEC 与公开报道整理）。早期靠 friends &amp; family / 天使小额过桥，机构大额从 2017 Series E 起；2021 走<strong>直接上市（DPO）</strong>而非传统 IPO。</figcaption>
+    </figure>
+    <table>
+      <thead><tr><th>时间</th><th>事件 / 轮次</th><th>金额 / 估值</th><th>投资方</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr><td>2004</td><td>成立（Menlo Park）</td><td>—</td><td>David Baszucki &amp; Erik Cassel 创办</td><td><span class="src src-b">🟡</span> Wikipedia</td></tr>
+        <tr><td>2006-09</td><td>Roblox 正式上线</td><td>—</td><td>（前身 DynaBlocks，2005 改名 Roblox）</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2017-03</td><td>Series E</td><td>$82M</td><td>Meritech Capital、Index Ventures 领投</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2018-09</td><td>Series F</td><td>$150M</td><td>Tiger Global、Greylock 等</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2020-02</td><td>Series G</td><td>$150M @ $4B 估值</td><td>a16z、Tencent、Temasek</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2021-01</td><td>Series H</td><td>$520M @ $29.5B 估值</td><td>Altimeter、Dragoneer 等</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2021-03-10</td><td><strong>直接上市（DPO）</strong>，NYSE: RBLX</td><td>开盘市值 ~$42.6B</td><td>无承销融资（reference price $45）</td><td><span class="src src-a">🟢</span> SEC/<span class="src src-b">🟡</span></td></tr>
+        <tr><td>2025（FY）</td><td>全年财报</td><td>营收 $4.9B（+36%）/ bookings $6.8B（+55%）</td><td>全年均 DAU 1.27 亿；付创作者 &gt;$1.5B</td><td><span class="src src-a">🟢</span> SEC 8-K</td></tr>
+        <tr><td>2026-Q1</td><td>季度财报</td><td>营收 $1.442B（+39%）/ bookings $1.731B（+43%）</td><td>DAU 1.32 亿（+35%）；DevEx fees $423M（+50%）；净亏 $248M</td><td><span class="src src-a">🟢</span> SEC 8-K</td></tr>
+      </tbody>
+    </table>
+    <p>融资节奏佐证阶段判断：Roblox 早已走完私募融资周期、2021 上市，是赛道的<strong>成熟头部</strong>。值得注意：2026 公司<strong>下调全年指引</strong>（营收 $5.865–6.135B / bookings $7.33–7.6B，bookings 增速只 8–12%、自由现金流甚至同比转负 −22%~−6% <span class="src src-a">🟢</span>），主因是<strong>全球强制年龄核验</strong>压制了拉新与沟通、加上俄罗斯封禁——这正是「成熟平台被安全监管反噬增长」的典型信号。对照之下，AI 子赛道的 Astrocade 2026 才融 $56M Series A+B（Sequoia/Sea 领投 <span class="src src-b">🟡</span>），资本热度集中在新势力。</p>
+  </section>
+
+  <!-- ⑤ 公司速览 -->
+  <section id="snapshot">
+    <h2><span class="n">⑤</span>公司速览</h2>
+    <table>
+      <tbody>
+        <tr><td>是什么 / 定位</td><td>UGC 游戏 / 社交娱乐平台——「人们一起想象、创造、连接」的 immersive 平台；品类定义者 <span class="src src-a">🟢</span></td></tr>
+        <tr><td>产品</td><td><strong>玩家端 App</strong>（跨 PC/移动/主机/VR 的 experiences 商店与社交）+ <strong>Roblox Studio</strong>（免费创作引擎，Lua 脚本）+ <strong>Robux</strong>（虚拟货币）+ <strong>DevEx</strong>（创作者提现）+ AI 工具（Cube 3D / Assistant）</td></tr>
+        <tr><td>团队</td><td>联合创始人兼 CEO <strong>David Baszucki</strong>（2004 创办，前 Knowledge Revolution 创始人，工程师/教育软件背景）；联合创始人 Erik Cassel（已故）</td></tr>
+        <tr><td>商业模式</td><td>玩家用真钱买 <strong>Robux</strong> → 在 experiences 内购买道具/通行证 → 平台抽 ~30% 市场费、创作者拿 ~70% Earned Robux → 创作者通过 <strong>DevEx</strong>（约 $0.0038/Robux，2025-09 起 <span class="src src-b">🟡</span>）兑成美元。全流程算下来开发者到手约消费额的 25–35% <span class="src src-b">🟡</span>。平台收入＝玩家消费 − 付给创作者 − 应用商店抽成 − 基建成本</td></tr>
+        <tr><td>状态</td><td>已上市（NYSE: RBLX，2021 DPO）；2025 营收 $4.9B、bookings $6.8B、DAU 1.27 亿 <span class="src src-a">🟢</span>；<strong>长期净亏损</strong>（Q1'26 净亏 $248M <span class="src src-a">🟢</span>），靠经营性现金流与自由现金流为正支撑</td></tr>
+      </tbody>
+    </table>
+    <div class="callout warn">
+      <span class="label">moat 与软肋（诚实版）</span>
+      <strong>护城河：</strong>① <strong>双边网络效应</strong>（数千万内容 × 上亿玩家，互相锁定，是后来者最大的墙）；② <strong>创作者工具链 + 分成生态</strong>（DevEx 把「能赚到钱」做成正反馈）；③ <strong>跨平台</strong>（一个账号通吃 PC/移动/主机/VR）；④ <strong>社交图谱</strong>（朋友在哪玩家就在哪）；⑤ <strong>品牌</strong>（在低龄人群里＝品类代名词）。<br>
+      <strong>软肋：</strong>① <strong>安全 / 未成年人争议</strong>——多州 AG 诉讼、被指便利儿童性剥削，被迫上强制人脸年龄估计，反过来压增长；② <strong>变现效率</strong>——开发者实际到手仅消费额 25–35%，被批抽水过重；③ <strong>增长放缓 / 盈利性长期承压</strong>——2026 主动下调指引、自由现金流同比转负；④ <strong>创作门槛仍偏高</strong>（Lua 脚本），是 AI 新势力的攻击面。
+    </div>
+  </section>
+
+  <!-- ⑥ AI 战略 -->
+  <section id="ai">
+    <h2><span class="n">⑥</span>AI 战略：它把「AI 零代码创作」内化到哪一步了</h2>
+    <p>AI 既是 Roblox 自我升级的工具，也是新创业公司想颠覆它的切口——所以它的进度很关键。已核实的官方动作：</p>
+    <ul>
+      <li><strong>Roblox Cube（3D/4D 生成基座）</strong> <span class="src src-a">🟢</span>：2025-03 发布的核心 generative AI 系统，1.8B 参数、在 150 万 3D 资产上训练，首个能力是 <strong>text-to-3D mesh 生成</strong>（在 Studio 与 in-experience Lua API 内，几秒出 3D 资产）。<strong>已开源</strong>（GitHub <code>Roblox/cube</code> + HuggingFace），平台外也能用。Roblox 把它定位为未来所有 AI 工具的底座，目标做到「4D 创作」（理解物体/环境/人之间的交互与关系，自动生成可玩场景）。</li>
+      <li><strong>CubePart</strong> <span class="src src-a">🟢</span>：2026-05 推出，号称首个「开放词表、部件可控」的 3D mesh 生成框架——把 Cube 往「生成的东西可被精细编辑/标注」推进。</li>
+      <li><strong>Roblox Assistant</strong> <span class="src src-a">🟢</span>：Studio 内的对话式 AI 助手，帮创作者用自然语言生成/修改脚本与场景，降低 Lua 门槛。</li>
+      <li><strong>实时 AI 安全 / 翻译</strong> <span class="src src-a">🟢</span>：实时多语言聊天翻译、AI 内容审核与年龄估计（facial age estimation）——既是合规手段也是体验护城河。</li>
+    </ul>
+    <div class="callout insight">
+      <span class="label">判断</span>
+      Roblox 在「<strong>AI 生成 3D 资产</strong>」这一层做得很扎实（自研基座 + 开源 + 已落地 Studio），<strong>领先于多数新势力的底层能力</strong>。但它当前更多是「让现有创作者更快做资产/写脚本」，而非「让完全不会做游戏的人一句话生成一整款可玩游戏」——后者正是 Astrocade/Rosebud 押注的形态。换言之：<strong>Roblox 把 AI 当「给专业/半专业创作者的加速器」，新势力把 AI 当「让所有人 0 门槛造游戏的入口」。</strong>谁对，取决于「AI 一句话生成的游戏到底有没有人持续玩」——这个问题还没有答案，也正是该子赛道 emerging 的根源。Roblox 的优势是它把任何 AI 创作出来的内容，都能立刻丢进上亿玩家的分发网络里——这是新势力短期补不上的。
+    </div>
+  </section>
+
+  <!-- ⑦ 中国对标 -->
+  <section id="cn">
+    <h2><span class="n">⑦</span>中国对标 #cn：Roblox 模式在中国落地了吗</h2>
+    <h3>罗布乐思（Roblox 中国版）：腾讯代理史与现状</h3>
+    <p>Roblox 进中国走的是<strong>腾讯合资代理</strong>路线：2019 双方成立合资公司（Roblox 51% / Tencent 49% <span class="src src-b">🟡</span>），中国版「罗布乐思」2021-07-13 上线，但仅运营约 5 个月就于 2021-12-08 停服 <span class="src src-b">🟡</span>。停服核心原因：① 内容与国际版隔离 + 未成年人内容/防沉迷监管严，中国版只有几百款游戏 vs 国际版数百万 UGC，长尾深度根本起不来；② 跨境数据与内容审核合规难。2023-10 中国团队还有小幅裁员 <span class="src src-b">🟡</span>，至今未恢复，<strong>基本等于退出中国市场</strong>。这恰好印证：<strong>Roblox 模式的网络效应高度依赖「海量自由 UGC」，而这一前提在中国监管下被直接掐断。</strong></p>
+    <h3>网易蛋仔派对：中国最强本土对位</h3>
+    <p>真正在中国跑通 Roblox 飞轮的是 <strong>网易蛋仔派对（Eggy Party）</strong>——以「蛋仔工坊」零代码 UGC 为核心的派对游戏：DAU 与创作者数<strong>各超 4000 万</strong>（峰值口径，2024 春节 DAU 一度破 4000 万）、UGC 地图累计 <strong>&gt;1 亿张</strong>（2024-03）、一年向创作者发 <strong>~1 亿元人民币</strong> <span class="src src-b">🟡</span>。它的打法比 Roblox 更「中国化」：零代码拼图式创作门槛更低、强运营/节日版本、AIGC 工具已上线。其它对位还有<strong>迷你世界</strong>（更早的沙盒 UGC，但近年声量被蛋仔盖过）、米哈游/字节的零散 UGC 尝试。</p>
+    <div class="callout note">
+      <span class="label">中国落地差异与 whitespace</span>
+      ① 监管把「海量自由 UGC + 低龄用户」的组合变成高风险（防沉迷、内容审核、版号），<strong>纯 Roblox 国际化模式难落地</strong>，本土玩家必须更重运营、更早做合规与零代码；② 蛋仔证明了「UGC 派对」在中国能成，但<strong>变现深度与全球网络效应仍远不及 Roblox</strong>（人民币付费习惯 + 防沉迷限制客单）；③ whitespace：面向中国「年轻成人」的 UGC（绕开未成年人最严监管）、出海做全球 UGC（蛋仔/迷你世界的国际版仍是空白机会）、以及 AI 零代码×合规审核一体化的工具层。
+    </div>
+  </section>
+
+  <!-- ⑧ 创业 idea 借鉴 -->
+  <section id="idea">
+    <h2><span class="n">⑧</span>创业 idea 借鉴</h2>
+    <div class="callout insight">
+      <span class="label">Whitespace / 机会</span>
+      定位图右下角——<strong>「AI 零代码创作 × 年轻成人受众」</strong>的格子目前没有体量玩家占稳。Roblox 困在「脚本门槛 + 低龄受众 + 沉重安全监管」的历史包袱里；AI 新势力（Astrocade/Rosebud）门槛对了但还没量级。谁能同时做到「一句话造出有人玩的游戏」+「主打 17+ 成人社交而非儿童」+「自带分发与变现」，谁就吃到这块空白。
+    </div>
+    <h3>现有玩家共同短板（unmet needs）</h3>
+    <ul>
+      <li><strong>创作门槛仍高：</strong>Roblox 的 Lua、UEFN 的 Unreal 都不是普通人能上手的——「想做游戏的人」远多于「会写代码的人」，AI 抹平这条鸿沟是最大需求。</li>
+      <li><strong>创作者变现被抽水：</strong>开发者实际到手仅消费额 25–35%，对头部创作者吸引力够、对中长尾不够——更高分成/更直接变现（参考 Epic 的 Creator Economy 2.0 直售 ~74%）是痛点。</li>
+      <li><strong>安全 = 增长枷锁：</strong>低龄用户带来诉讼与强制年龄核验，反噬拉新——「天生面向成人」的平台没有这个包袱。</li>
+      <li><strong>盈利难：</strong>Rec Room（1.5 亿用户仍关停）证明「有用户≠能赚钱」，成本结构是行业级难题。</li>
+    </ul>
+    <h3>Why now（为什么现在值得做）</h3>
+    <p><strong>AIGC 拐点</strong>是核心 why-now：3D 生成（Roblox 自己都开源了 Cube）、代码生成、对话式创作同时成熟，使「描述即生成游戏」第一次在工程上可行；叠加 <strong>Roblox 自身因安全监管增长放缓、主动下调指引</strong>，给了「不背低龄包袱的新形态」一个时间窗。资本也在确认这个窗口（Astrocade 2026 融 $56M，Sequoia/Sea/NVIDIA/Google 入局）。</p>
+    <h3>可借鉴的打法 + 相邻机会</h3>
+    <ul>
+      <li><strong>borrowable：</strong>① <strong>双边飞轮 + 创作者分成</strong>这套机制本身可迁移到任何 UGC 品类——先用激励池（如 Astrocade $10M）冷启供给侧，再用内容吸玩家；② <strong>免费工具 + 内购抽成</strong>的商业模式；③ <strong>跨平台一个账号</strong>降低留存摩擦；④ Roblox 把 AI 基座开源（Cube）建生态——开源换开发者心智的打法可借。</li>
+      <li><strong>adjacent：</strong>① <strong>垂直品类 UGC</strong>——不做大而全，做某一类（如教育、健身、剧情/乙女、桌游）的 AI 造内容平台；② <strong>面向中国/亚洲年轻成人</strong>的合规 UGC（绕开未成年人最严监管）；③ <strong>给创作者的工具层</strong>（不做平台，做跨 Roblox/Fortnite/蛋仔的 AI 资产生成、变现、数据分析 SaaS，参考 Overwolf）；④ <strong>UGC 出海工具</strong>（帮中国 UGC 团队做全球版的合规+本地化）。</li>
+    </ul>
+    <div class="callout warn">
+      <span class="label">风险（诚实给）</span>
+      ① <strong>网络效应壁垒</strong>是后来者最大的墙——Roblox/蛋仔的玩家与内容池不是融资能买来的，新平台极易陷入「有 AI 工具但没人玩」的冷启动死亡谷；② <strong>大厂碾压</strong>——Roblox 自己在内化 AI（Cube 已开源且落地），Epic、微软、字节都可顺手做，AI 能力会被快速抄平，护城河不在模型而在分发；③ <strong>「AI 造的游戏好不好玩」未被证明</strong>——生成 ≠ 有人持续玩，留存是悬而未决的核心问号；④ <strong>安全监管</strong>——只要碰社交+未成年人就会撞上 Roblox 同款诉讼风暴；⑤ <strong>盈利难</strong>——Rec Room 的教训说明这条赛道的单位经济极难做正。
+    </div>
+  </section>
+
+  <!-- ⑨ 现实判断 -->
+  <section id="take">
+    <h2><span class="n">⑨</span>现实判断</h2>
+    <p>Roblox 在格局里的位置是<strong>「品类定义者 + 网络效应最深的成熟头部」</strong>：它的胜算来自任何对手都补不上的双边网络（数千万内容 × 1.3 亿 DAU × 创作者变现飞轮），这是它即便创作门槛偏高、即便抽水被骂、即便长期净亏损，仍稳坐头把交椅的原因。它真正的软肋有三：<strong>安全监管反噬增长</strong>（已在 2026 指引里兑现）、<strong>盈利性长期承压</strong>、<strong>创作门槛被 AI 攻击</strong>。</p>
+    <p>对想进场的创业者：<strong>正面硬刚 Roblox 的「大而全 UGC 平台」几乎没有胜算</strong>（网络效应墙 + 大厂会抄 AI）。机会在<strong>侧翼</strong>——AI 零代码 × 年轻成人、垂直品类、创作者工具层、UGC 出海。判断该子赛道为 <strong>emerging</strong>：玩家在快速涌现、资本在涌入，但「AI 造的游戏能不能留住人」这个 benchmark 级问题尚无定论——这既是风险也是机会窗。Roblox 自己的 AI（开源 Cube + Assistant）进度领先底层，但战略上仍把 AI 当「创作者加速器」而非「全民造游戏入口」，这个错位就是新势力的缝隙。</p>
+    <div class="callout warn">
+      <span class="label">使用提醒</span>
+      本页为对话式调研，信息主要来自公开来源并按等级标注；Roblox 营收/DAU/bookings/DevEx 等已尽量取 <strong>SEC 8-K 与官方 newsroom 一手口径</strong>，竞品（蛋仔、Astrocade 等）多为二手媒体口径、时间点与统计基准可能不一，已就高就低并标源。融资数额、能力声明等以官方一手为准，<strong>产品/AI 能力未必经独立验证</strong>，引用前请核对最新信息。本篇为竞争格局/赛道调研，非股票投资建议。
+    </div>
+  </section>
+
+  <!-- 出处 -->
+  <section id="src">
+    <h2>出处</h2>
+    <ul style="font-size:13.5px">
+      <li><span class="src src-a">🟢</span> <a href="https://corp.roblox.com" target="_blank" rel="noopener">Roblox 公司站 corp.roblox.com</a> / <a href="https://www.roblox.com" target="_blank" rel="noopener">roblox.com</a></li>
+      <li><span class="src src-a">🟢</span> SEC 8-K — Roblox Q1 2026 Earnings Shareholder Letter（营收 $1.442B、bookings $1.731B、DAU 1.32 亿、DevEx fees $423M、净亏 $248M、2026 指引）<a href="https://www.sec.gov/Archives/edgar/data/0001315098/000162828026028882/ex991-q12026earningsshar.htm" target="_blank" rel="noopener">SEC</a></li>
+      <li><span class="src src-b">🟡</span> StockTitan — RBLX Q1 2026 8-K 摘要（指引下调原因：年龄核验 + 俄罗斯封禁）<a href="https://www.stocktitan.net/sec-filings/RBLX/8-k-roblox-corp-reports-material-event-0de99499c617.html" target="_blank" rel="noopener">链接</a></li>
+      <li><span class="src src-a">🟢</span> SEC 8-K — Roblox FY2025 季度/年度 Shareholder Letters（2025 营收 $4.9B、bookings $6.8B、创作者 &gt;$1.5B）<a href="https://www.sec.gov/Archives/edgar/data/0001315098/000131509825000326/ex991-q32025shareholderl.htm" target="_blank" rel="noopener">Q3'25</a></li>
+      <li><span class="src src-a">🟢</span> Roblox Newsroom — Introducing Roblox Cube（生成式 AI 3D/4D 基座，2025-03）<a href="https://about.roblox.com/newsroom/2025/03/introducing-roblox-cube" target="_blank" rel="noopener">链接</a> / <a href="https://github.com/Roblox/cube/" target="_blank" rel="noopener">GitHub Roblox/cube</a></li>
+      <li><span class="src src-a">🟢</span> Roblox Newsroom — CubePart（部件可控 3D 生成，2026-05）<a href="https://about.roblox.com/newsroom/2026/05/cubepart-roblox-open-vocabulary-part-controllable-3d-generator" target="_blank" rel="noopener">链接</a> / Moving Beyond Self-Reported Age（年龄核验，2026-02）<a href="https://about.roblox.com/newsroom/2026/02/moving-beyond-self-reported-age" target="_blank" rel="noopener">链接</a></li>
+      <li><span class="src src-b">🟡</span> CNN / ABC / Texas·Florida AG — Roblox 儿童安全诉讼与强制人脸年龄估计 <a href="https://www.cnn.com/2025/11/18/tech/roblox-ai-age-verification-youth-safety" target="_blank" rel="noopener">CNN</a></li>
+      <li><span class="src src-b">🟡</span> Fortune / TechCrunch — Astrocade 融 $56M（Sequoia/Sea 领投，2026-05）<a href="https://fortune.com/2026/05/05/astrocade-raises-56-million-series-b-sequoia-video-games-platform-ali-amir-sadeghian/" target="_blank" rel="noopener">Fortune</a> / <a href="https://rosebud.ai/" target="_blank" rel="noopener">Rosebud AI</a></li>
+      <li><span class="src src-b">🟡</span> Fortnite — Creator Economy 2.0 / UEFN 直售 ~74%（Epic，2025）<a href="https://www.fortnite.com/news/introducing-the-creator-economy-2-0" target="_blank" rel="noopener">链接</a></li>
+      <li><span class="src src-b">🟡</span> TechCrunch / GeekWire — Rec Room 关停（曾估值 $3.5B，2026）<a href="https://techcrunch.com/2026/03/31/social-gaming-platform-rec-room-once-valued-at-3-5b-is-shutting-down/" target="_blank" rel="noopener">链接</a></li>
+      <li><span class="src src-b">🟡</span> GameLook / 网易官方 — 蛋仔派对 DAU/创作者 &gt;4000 万、UGC &gt;1 亿张、一年发创作者 ~1 亿元 <a href="http://www.gamelook.com.cn/2025/07/574899/" target="_blank" rel="noopener">链接</a></li>
+      <li><span class="src src-b">🟡</span> 知乎 / cnBeta — 罗布乐思中国版腾讯代理史与停服（2021）、中国区裁员（2023）<a href="https://www.cnbeta.com.tw/articles/game/1391891.htm" target="_blank" rel="noopener">链接</a></li>
+      <li><span class="src src-b">🟡</span> RoLearn / 开发者论坛 — Roblox 抽成 ~30% 市场费、DevEx $0.0038/Robux、开发者实得 ~25–35% <a href="https://rolearn.dev/insights/roblox-developer-revenue-share-2026/" target="_blank" rel="noopener">链接</a></li>
+      <li><span class="src src-b">🟡</span> Wikipedia — Roblox Corporation（创办史、各轮融资、2021 DPO 开盘 ~$42.6B）<a href="https://en.wikipedia.org/wiki/Roblox_Corporation" target="_blank" rel="noopener">链接</a></li>
+    </ul>
+  </section>
+
+  <footer class="foot">
+    公司竞争格局 / 赛道早期度调研笔记，仅作梳理；信息按来源分级、产品能力未必经独立验证，以官方一手信息为准 · 整理日期 2026-06-22
+  </footer>
+
+</article>
+</body>
+</html>

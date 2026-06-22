@@ -1776,5 +1776,26 @@
       "mcp",
       "agent"
     ]
+  },
+  {
+    "slug": "2026-06-17-roblox",
+    "title": "Roblox：UGC 游戏平台的竞争格局与赛道调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://corp.roblox.com",
+    "code": "",
+    "date": "2026-06-22",
+    "published": "公司调研 2026",
+    "tldr": "UGC游戏平台定义者(玩家造experiences+Robux内购抽成+DevEx创作者经济);护城河=内容×玩家双边网络效应;赛道整体mature(但内部AI零代码创作emerging);中国对标网易蛋仔派对;whitespace=AI零代码×年轻成人受众绕开未成年人监管",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "market-map",
+      "startup-idea",
+      "ugc",
+      "ai-games",
+      "china"
+    ],
+    "path": "papers/2026-06-17-roblox/index.html"
   }
 ]
