@@ -164,6 +164,26 @@
     "path": "papers/2026-06-17-palantir/index.html"
   },
   {
+    "slug": "2026-06-17-cpu-supply-chain",
+    "title": "CPU 供应链：从 ISA 到成品芯片，谁供给谁（关系图 + 数据流）",
+    "authors": "—",
+    "team": "技术科普",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-22",
+    "published": "技术科普 2026",
+    "tldr": "把CPU供应链做成交互关系图(ISA/EDA/IP→设计→代工→设备→材料→封测→成品),含一颗CPU诞生的数据流动画,讲清谁供给谁与EUV/EDA/光刻胶等卡点;非投资建议",
+    "tags": [
+      "explainer",
+      "interactive",
+      "diagram",
+      "semiconductors",
+      "supply-chain",
+      "cpu"
+    ],
+    "path": "papers/2026-06-17-cpu-supply-chain/index.html"
+  },
+  {
     "slug": "2026-06-17-asts",
     "title": "AST SpaceMobile（ASTS）：基本面 / 估值 / 是否值得买入",
     "authors": "—",

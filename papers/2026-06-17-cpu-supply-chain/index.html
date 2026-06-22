@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CPU 供应链：从 ISA 到成品芯片，谁供给谁 · 关系图与数据流动画</title>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --bad:#ff6b81; --shadow:0 8px 30px rgba(0,0,0,.35);
+    --node:#1d2138; --nodeStroke:#3a4170; --lit:#ffd166;
+    /* 边的分类着色：授权/设计交付/制造/设备材料供给 */
+    --k1:#7aa2ff; --k2:#9b8cff; --k3:#43c59e; --k4:#ffb454;
+    --svgbg:#0c0f1a;
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --bad:#d23651; --shadow:0 8px 24px rgba(20,30,80,.08);
+      --node:#ffffff; --nodeStroke:#c7cdec; --lit:#d98a00; --svgbg:#fbfcff;
+      --k1:#3a66ff; --k2:#6b4cff; --k3:#138a6e; --k4:#b3701a;
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);line-height:1.75;font-size:16px;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;}
+  a{color:var(--accent)} strong{color:var(--text)}
+  .back{display:inline-block;margin:22px 0 0 22px;color:var(--muted);text-decoration:none;font-size:14px}
+  article{max-width:980px;margin:0 auto;padding:18px 22px 90px}
+  header.head{border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:8px}
+  h1{font-size:25px;line-height:1.35;margin:14px 0 6px}
+  .sub{color:var(--muted);font-size:15px;margin:0 0 14px}
+  .legend{font-size:12px;color:var(--muted);margin:6px 0 0}
+  .src{font-size:10.5px;padding:0 6px;border-radius:999px;white-space:nowrap;vertical-align:middle}
+  .src-a{background:rgba(67,197,158,.18);color:var(--ok)} .src-b{background:rgba(255,180,84,.18);color:var(--warn)} .src-c{background:rgba(255,107,129,.18);color:var(--bad)}
+  .tldr{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:12px;padding:14px 18px;margin:20px 0;box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+  nav.toc{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px 18px;margin:8px 0 26px;font-size:14px}
+  nav.toc a{color:var(--text);text-decoration:none;margin-right:16px;white-space:nowrap;line-height:2}
+  section{margin:34px 0}
+  h2{font-size:20px;margin:0 0 12px;padding-top:8px;border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent);font-weight:700;margin-right:8px}
+  h3{font-size:16.5px;margin:20px 0 8px}
+  p{margin:12px 0} ul,ol{padding-left:22px} li{margin:6px 0}
+  code{background:var(--panel2);padding:1.5px 6px;border-radius:6px;font-size:.88em}
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:13.5px;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  th,td{border-bottom:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:top}
+  th{background:var(--panel2);color:var(--muted);font-weight:600} tr:last-child td{border-bottom:none}
+  .callout{border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin:18px 0;background:var(--panel)}
+  .callout .label{font-size:12px;letter-spacing:.5px;font-weight:700;text-transform:uppercase;display:block;margin-bottom:4px;color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+  .callout.note{border-left:4px solid var(--accent2)} .callout.note .label{color:var(--accent2)}
+  .terms{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+  @media (max-width:720px){ .terms{grid-template-columns:1fr} }
+  .term{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+  .term b{color:var(--accent)}
+  .term .en{color:var(--muted);font-size:12.5px;font-weight:400}
+  /* ---- 交互关系图 ---- */
+  .viz{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin:14px 0}
+  .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+  .tab{cursor:pointer;border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:6px 14px;border-radius:999px;font-size:13.5px}
+  .tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .stage{display:grid;grid-template-columns:1fr 270px;gap:12px}
+  @media (max-width:720px){ .stage{grid-template-columns:1fr} }
+  .svgwrap{background:var(--svgbg);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  svg.diagram{display:block;width:100%;height:auto}
+  .nd-node{cursor:pointer}
+  .nd-node rect{fill:var(--node);stroke:var(--nodeStroke);stroke-width:1.5;rx:9}
+  .nd-node text{fill:var(--text);font-size:12.5px;font-weight:600}
+  .nd-node.sel rect{stroke:var(--accent);stroke-width:2.5}
+  .nd-edge{stroke-width:2;fill:none;opacity:.85}
+  .nd-edge.k1{stroke:var(--k1)} .nd-edge.k2{stroke:var(--k2)} .nd-edge.k3{stroke:var(--k3)} .nd-edge.k4{stroke:var(--k4)}
+  .nd-edge.lit{stroke:var(--lit);stroke-width:4;opacity:1}
+  .nd-edgelabel{fill:var(--muted);font-size:10.5px}
+  .pulse{fill:var(--lit)}
+  @media (prefers-reduced-motion:reduce){ .pulse{display:none!important} }
+  .panel{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:13.5px;min-height:120px}
+  .panel h4{margin:0 0 6px;font-size:14.5px;color:var(--accent)}
+  .panel .conn{margin:8px 0 0;padding-left:18px} .panel .conn li{margin:3px 0;color:var(--muted)}
+  .panel .hint{color:var(--muted)}
+  .controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
+  .btn{cursor:pointer;border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:6px 12px;border-radius:8px;font-size:13.5px}
+  .btn:hover{border-color:var(--accent)}
+  .cap{font-size:13.5px;color:var(--text);margin-top:8px;min-height:1.6em}
+  .cap b{color:var(--accent)}
+  .edgekey{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:8px}
+  .edgekey i{display:inline-block;width:22px;height:0;border-top:3px solid;vertical-align:middle;margin-right:5px}
+  footer.foot{margin-top:54px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+  <header class="head">
+    <h1>CPU 供应链：从 ISA 到成品芯片，谁供给谁（关系图 + 数据流）</h1>
+    <p class="sub">把一颗 CPU 从「指令集 + 设计工具 + IP」到「代工 + 设备 + 材料 + 封测」再到成品出货的产业链，画成可点、可播的关系图。</p>
+    <p class="legend">来源等级：<span class="src src-a">🟢 一手</span> 官方/规范/论文 ·
+      <span class="src src-b">🟡 二手</span> 媒体/分析 · <span class="src src-c">🔴 自述/未证实</span>；
+      数字多为「约/数量级/视年份」，份额/制程会随时点变动，仅标代表公司/型号。</p>
+  </header>
+
+  <div class="tldr"><b>一句话</b> — 造一颗 CPU 不是一家公司的事：先拿 <b>ISA（指令集）</b> 定「这芯片说什么语言」、用 <b>EDA</b> 软件 + 买来的 <b>IP core</b> 把电路设计出来，再把版图交给 <b>foundry（晶圆代工厂）</b> 流片；代工厂靠 <b>ASML 的 EUV 光刻机</b> 等设备和日本主导的硅片/光刻胶等<b>材料</b>，用数百道工序在<b>晶圆</b>上做出芯片，最后送 <b>OSAT（封测厂）</b> 切割封装测试，成品才交给 PC/服务器 OEM 和云厂。这张图能看清「谁授权/谁制造/谁供给谁」，以及链条上几个把全行业卡死的咽喉：EUV（ASML 独家）、EDA 三巨头、光刻胶/硅片（日本）、先进封装 CoWoS（TSMC）。<i>本文仅标产业链位置，非投资建议、非背书。</i></div>
+
+  <nav class="toc">
+    <a href="#primer">领域背景速补</a>
+    <a href="#viz">交互关系图 + 数据流</a>
+    <a href="#compare">环节对比</a>
+    <a href="#model">心智模型</a>
+    <a href="#deps">依赖与相互制约</a>
+    <a href="#more">延伸阅读 / 出处</a>
+  </nav>
+
+  <!-- 领域背景速补 -->
+  <section id="primer">
+    <h2><span class="n">①</span>领域背景速补（半导体制造）</h2>
+    <p>这篇假设你只懂 LLM、不懂芯片制造。先把链条里反复出现的专名用大白话讲清——<b>它是什么、为什么关键、在链条哪一环</b>。术语保留英文，旁边给中文。</p>
+    <div class="terms">
+      <div class="term"><b>ISA</b> <span class="en">Instruction Set Architecture · 指令集架构</span><br>芯片能听懂的「机器语言词汇表」（加法、跳转、读内存怎么编码）。<b>关键在于：它定义生态</b>——同一 ISA 的软件能跨芯片跑。代表：<b>x86</b>（Intel/AMD 双寡头、封闭授权）、<b>Arm</b>（授权 IP 给别人用）、<b>RISC-V</b>（开放、免授权费）。类比：芯片说的「方言」，软件得用同一方言写。</div>
+      <div class="term"><b>IP core</b> <span class="en">知识产权核 · 可复用电路模块</span><br>别人设计好、可买来即用的电路积木（一个 CPU 核、一个 USB 控制器、一段内存接口）。<b>关键在于：没人从零造每个模块</b>，买 IP 拼起来更快。代表：Arm（卖 CPU 核 IP）、Synopsys、Cadence。类比：盖楼买现成的预制构件。</div>
+      <div class="term"><b>EDA</b> <span class="en">Electronic Design Automation · 电子设计自动化</span><br>设计芯片用的「专业 CAD 软件」：画电路、仿真验证、自动布局布线、检查能不能造。<b>关键在于：现代芯片几十亿到上千亿晶体管，没 EDA 根本画不出来</b>，且只有三家做得全。代表：Synopsys、Cadence、Siemens EDA；国产华大九天。类比：芯片设计师的 Photoshop+CAD+编译器全家桶。</div>
+      <div class="term"><b>fabless vs IDM</b> <span class="en">无厂模式 vs 垂直整合</span><br><b>fabless（无厂）</b>=只设计、把制造外包给代工厂（AMD、Apple、高通）；<b>IDM（垂直整合）</b>=自己既设计又有自己的厂（经典 Intel、过去的三星）。关键在于：建一座先进厂要几百亿美元，多数公司选 fabless。</div>
+      <div class="term"><b>foundry</b> <span class="en">晶圆代工厂</span><br>专门「替别人造芯片」的工厂，自己不设计产品。<b>关键在于：先进制程几乎被 TSMC 一家垄断</b>（约 70% 全球代工份额、Q2–Q3 2025 <span class="src src-b">🟡</span>）。代表：TSMC、Samsung、Intel Foundry、GlobalFoundries、中芯国际 SMIC。类比：芯片界的「来图代工」精密铸造厂。</div>
+      <div class="term"><b>tape-out / 流片</b> <span class="en">流片 · 设计定稿交付制造</span><br>设计全部完成、把最终版图「定稿交厂」开始造的那一刻。名字来自早年把数据存磁带送厂。<b>关键在于：流片一次先进制程要数千万到上亿美元，错了就是真金白银报废</b>，所以前面要反复验证。</div>
+      <div class="term"><b>wafer / 晶圆</b> <span class="en">晶圆 · 圆形硅片基底</span><br>一片高纯度单晶硅圆盘（常见直径 300mm），所有电路都在它表面一层层「印」出来，一片能切出几百到上千颗芯片（die）。类比：一张能同时印很多张「邮票」的母版。</div>
+      <div class="term"><b>lithography / EUV</b> <span class="en">光刻 · 极紫外光刻</span><br>用光把电路图案「印」到晶圆上的核心工序，决定线条能多细。<b>EUV（极紫外，13.5nm 波长）</b>是先进制程的关键，<b>全球只有 ASML 能造 EUV 光刻机</b>（约 100% EUV 份额 <span class="src src-b">🟡</span>，单台 DUV/EUV 价格从数千万到上亿美元，High-NA 约 3.5–4 亿美元、2025 Q4 首台交付 Intel <span class="src src-b">🟡</span>）。类比：用极细的光「笔」在硅上写电路，笔越细线越密。</div>
+      <div class="term"><b>node / 制程</b> <span class="en">工艺节点</span><br>「3nm / 5nm / 7nm」这类标签，粗略代表晶体管密度与代际（如今更像营销名而非真实尺寸）。<b>关键在于：越先进=越密=越省电越快，但越贵越难，且越靠 EUV</b>。先进 CPU、AI 芯片都抢最先进 node。</div>
+      <div class="term"><b>OSAT / 封测</b> <span class="en">Outsourced Assembly & Test · 委外封装测试</span><br>把晶圆切成单颗 die、装进有引脚/焊球的封装、测好坏的厂。<b>关键在于：AI 时代「先进封装」成了新咽喉</b>——把多颗 die 和内存拼在一起。代表：ASE 日月光、Amkor、长电 JCET；先进封装 <b>CoWoS</b> 由 TSMC 主导。类比：把芯片裸片「装盒打包贴标签」并质检出厂。</div>
+      <div class="term"><b>先进封装 / CoWoS</b> <span class="en">Advanced Packaging</span><br>不再只追求把单颗 die 做小，而是用硅「桥」把逻辑芯片和 <b>HBM 内存</b>并排拼在一块基板上高速通信。<b>关键在于：AI 芯片（GPU/加速器）严重依赖它，2025–26 产能被 NVIDIA 等订满、成 AI 供应瓶颈</b><span class="src src-b">🟡</span>。代表：TSMC CoWoS。</div>
+    </div>
+    <div class="callout note"><span class="label">本篇聚焦 / 边界</span>讲「一颗 CPU 怎么被设计与制造出来、链条上谁供给谁」。<b>未含</b>：整机/AI 集群组装、个股财务、HBM/DRAM 内存供应链细节（那些在延伸阅读里）。图为示意、非穷尽；公司仅代表该环节典型玩家，不是全部。</div>
+  </section>
+
+  <!-- 交互关系图 -->
+  <section id="viz">
+    <h2><span class="n">②</span>交互关系图 + 数据流</h2>
+    <p class="legend">点节点看「是什么 / 连谁 / 为什么这么连」；切换上方视图看「全链总览」或「一颗 CPU 的制造流程」；点 ▶ 看一次<b>「一颗 CPU 的诞生」</b>逐步数据流。边的方向均为<b>「供给方 → 接收方」</b>（授权/交付/制造/供货）。</p>
+    <div class="viz">
+      <div class="tabs" id="tabs"><!-- 引擎按 MODEL.views 自动生成 --></div>
+      <div class="stage">
+        <div class="svgwrap"><svg class="diagram" id="diagram" preserveAspectRatio="xMidYMid meet" role="img" aria-label="CPU 供应链关系图"></svg></div>
+        <div class="panel" id="nodeinfo"><span class="hint">点击或聚焦任一节点查看详情。</span></div>
+      </div>
+      <div class="edgekey" id="edgekey"><!-- 引擎按 kinds 生成图例 --></div>
+      <div class="controls">
+        <button class="btn" id="playBtn">▶ 播放数据流</button>
+        <button class="btn" id="stepBtn">单步 ›</button>
+        <button class="btn" id="resetBtn">↺ 复位</button>
+        <span class="cap" id="cap"></span>
+      </div>
+      <p class="legend" style="margin-top:10px">⚠ 图中出现的公司/股票代码（如 $TSM、$ASML、$INTC 等）<b>仅用于标注其在产业链的位置，非投资建议、非背书</b>。份额/制程/营收等数字按时点会变，已尽量标「约/视年份」与来源等级。</p>
+    </div>
+  </section>
+
+  <!-- 连接对比 -->
+  <section id="compare">
+    <h2><span class="n">③</span>各环节对比：集中度 · 卡点 · 地缘 · 国产化</h2>
+    <p>同一条链上各环节「有多少家玩家、卡不卡脖子、主要在哪国、中国国产替代到哪了」差别极大。下表横向对比（数字为数量级/视年份，<span class="src src-b">🟡</span> 综合媒体与分析）：</p>
+    <table>
+      <thead><tr><th>环节</th><th>集中度 / 卡点</th><th>代表玩家</th><th>地缘</th><th>国产化进度</th></tr></thead>
+      <tbody>
+        <tr><td><b>ISA 指令集</b></td><td>x86 双寡头封闭；Arm 授权制；RISC-V 开放</td><td>Intel/AMD（x86）、Arm、RISC-V 社区</td><td>美 / 英(Arm) / 开放</td><td>龙芯 LoongArch、申威自研 ISA；多家押注 RISC-V 绕开授权</td></tr>
+        <tr><td><b>EDA 工具</b></td><td>极高，三家几乎垄断全流程；先进节点几乎离不开</td><td>Synopsys、Cadence、Siemens EDA</td><td>美（含德国西门子）</td><td>华大九天、概伦等，成熟节点有进展，<b>先进节点全流程仍卡</b></td></tr>
+        <tr><td><b>IP core</b></td><td>CPU 核 IP 高度集中（Arm）；接口 IP 集中</td><td>Arm、Synopsys、Cadence</td><td>英 / 美</td><td>RISC-V 生态 + 自研核（华为、平头哥等）</td></tr>
+        <tr><td><b>CPU 设计</b></td><td>分散但高端集中；按 ISA 分阵营</td><td>Intel(IDM)、AMD、Apple、Qualcomm、Ampere；海思、龙芯、飞腾、兆芯、申威</td><td>美主导，中国多家</td><td>设计能力相对强，<b>受限于能流到哪家代工</b></td></tr>
+        <tr><td><b>晶圆代工 foundry</b></td><td><b>先进制程极度集中</b>（TSMC 约 70% 代工份额，Q2–Q3 2025）</td><td>TSMC、Samsung、Intel Foundry、GlobalFoundries、SMIC</td><td>台 / 韩 / 美；中国 SMIC</td><td>SMIC 用 DUV 多重曝光做到 7nm 级、传 5nm 级（N+3），但成本高、良率低、<b>无 EUV 难再下探</b></td></tr>
+        <tr><td><b>半导体设备</b></td><td><b>EUV=ASML 独家</b>（约 100% EUV）；刻蚀/沉积/量测各有寡头</td><td>ASML、Applied Materials、Lam、KLA、Tokyo Electron；中微 AMEC、北方华创</td><td>荷 / 美 / 日；中国追赶</td><td>刻蚀/清洗等部分国产化，<b>EUV 与高端量测/离子注入仍是硬卡点</b></td></tr>
+        <tr><td><b>材料</b></td><td>分散但多处单点高纯依赖（光刻胶、硅片）</td><td>硅片：信越/SUMCO/环球晶；光刻胶：JSR/TOK/信越；特气、CMP、photomask、靶材</td><td><b>日本主导多项</b></td><td>硅片/特气部分突破，<b>高端光刻胶（尤其 EUV 胶）仍依赖日本</b></td></tr>
+        <tr><td><b>封装测试 OSAT</b></td><td>传统封测分散；<b>先进封装（CoWoS）集中于 TSMC</b></td><td>ASE 日月光、Amkor、长电 JCET、通富、华天；CoWoS=TSMC</td><td>台 / 美 / 中</td><td>传统封测国产化高（长电/通富/华天体量大），<b>先进封装与 TSMC 有差距</b></td></tr>
+        <tr><td><b>成品 → 下游</b></td><td>OEM/云厂集中度中等</td><td>PC/服务器 OEM、云厂商、分销</td><td>全球</td><td>整机组装链国产化高</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 心智模型 -->
+  <section id="model">
+    <h2><span class="n">④</span>给小白的心智模型：把整条链想成「定制出一本书」</h2>
+    <p>把造一颗 CPU 想成<b>出版一本极其精密的「书」</b>：</p>
+    <ul>
+      <li><b>ISA = 这本书用哪种语言写</b>（中文/英文/世界语）——选了 x86 就只能让懂 x86 的「读者（软件）」读；选开放的 RISC-V 像选了无版权费的世界语。</li>
+      <li><b>EDA = 排版与校对软件</b>（Word + 拼写检查 + 印前检查）——没有它，几十亿字的「书」根本排不出来，且全行业就三套好用的软件。</li>
+      <li><b>IP core = 买来的现成章节/段落模板</b>——Arm 卖你写好的「核心章节」，你不用每段从零写。</li>
+      <li><b>foundry（代工厂）= 印刷厂</b>——你把排好的版（版图）送过去，它替你印；而全世界最精密的那台印刷机基本只有 TSMC 这一家开得最好。</li>
+      <li><b>设备/材料 = 印刷厂里的印刷机和油墨纸张</b>——最贵最关键的那台「印刷机」是 ASML 的 EUV，<b>全世界只有它一家造</b>；高级「油墨/相纸」（光刻胶、硅片）主要日本供。</li>
+      <li><b>tape-out（流片）= 「付印」按钮</b>——一按下去就开印，错字是按整批废品算钱的，所以前面拼命校对。</li>
+      <li><b>OSAT（封测）= 装订 + 质检 + 贴条码出库</b>——把印好的「书页（晶圆上的 die）」裁切、装订成册（封装）、检查合格再发给书店（OEM/云厂）。先进封装（CoWoS）像把好几本书精装合订成一套豪华版。</li>
+    </ul>
+    <p>一句话：<b>设计公司写稿、EDA 排版、Arm 卖章节、TSMC 印刷、ASML 提供印刷机、日本供油墨纸张、日月光/长电装订出库</b>——缺任何一环，书出不来。</p>
+  </section>
+
+  <!-- 依赖与相互制约（深入） -->
+  <section id="deps">
+    <h2><span class="n">⑤</span>依赖与相互制约（深入）：卡点为什么是卡点</h2>
+    <p>这条链最有意思的地方是<b>「谁的能力卡住谁」</b>。下面把几条因果链串清楚（数字视年份、<span class="src src-b">🟡</span> 为主，已尽量诚实标来源）。</p>
+
+    <h3>卡点一：EUV → 先进制程 → 谁能做最先进 CPU/AI 芯片</h3>
+    <p><b>EUV 光刻机全球只有 ASML 一家造</b>（约 100% EUV 份额 <span class="src src-b">🟡</span>）。没有 EUV，要做先进 node 就得用老一代 DUV「多重曝光」硬凑——更多道工序、更低良率、更高成本。于是因果链是：<b>ASML 是否供货 → 你能否拿到 EUV → 你能否量产最先进 node → 你能否造最强 CPU/AI 芯片</b>。TSMC 拿得到 EUV，所以坐稳先进制程；SMIC 拿不到，用 DUV 多重曝光做到 7nm 级、并传出 5nm 级（N+3）量产，但成本明显更高、良率受限、<b>难以持续向 3nm/2nm 下探</b>（<span class="src src-b">🟡</span> 综合 TechInsights/媒体）。</p>
+
+    <h3>卡点二：出口管制的「三道闸」——美(EDA) + 日(材料) + 荷(EUV)</h3>
+    <p>先进 CPU 的链条恰好被三国的咽喉环节卡住，构成出口管制可下手的三道闸：</p>
+    <div class="callout warn"><span class="label">相互制约因果链</span>
+      <b>① EDA 三巨头（美）</b>：Synopsys / Cadence / Siemens EDA 几乎垄断先进设计全流程 → 断供高端 EDA，先进芯片连「设计」都难完成。<br>
+      <b>② 高端材料（日）</b>：光刻胶（尤其 EUV 胶）、高纯硅片由日本主导 → 即便有机器，没「油墨纸张」也印不出。<br>
+      <b>③ EUV（荷·ASML 独家）</b>：先进节点离不开 EUV → 限制 EUV（及部分先进 DUV）出口，直接卡住最先进 node。<br>
+      三闸叠加 → <b>设计端（EDA）+ 制造端（EUV）+ 材料端（光刻胶/硅片）同时受限 → 最先进 CPU/AI 芯片产能被牢牢卡在少数地区</b>。
+    </div>
+
+    <h3>卡点三：ISA 生态门槛——封闭 vs 授权 vs 开放</h3>
+    <p>选哪种 ISA，决定了你的<b>生态与门槛</b>：<b>x86</b> 由 Intel/AMD 双寡头封闭把持，外人极难拿到授权（生态最成熟、但进不去）；<b>Arm</b> 走授权制，交钱拿 IP，门槛中等、生态广（手机/Apple Silicon/服务器都在用）；<b>RISC-V</b> 开放免授权费，门槛最低、最适合绕开授权与管制，但软件生态仍在成长。<b>因果链：选 ISA → 决定能否拿到现成 CPU 核 IP（Arm）/ 要不要自建生态（RISC-V）→ 决定产品上市速度与软件丰富度</b>。中国多家（龙芯 LoongArch、申威自研、平头哥押 RISC-V）正是想从 ISA 这一端绕开卡脖子。</p>
+
+    <h3>卡点四：先进封装 CoWoS → AI 芯片产能</h3>
+    <p>就算逻辑芯片造出来，AI 芯片还要靠<b>先进封装</b>把 GPU/加速器和 HBM 内存拼在一起，<b>CoWoS 由 TSMC 主导</b>。2025–2026 CoWoS 产能被 NVIDIA 等大量预订、基本「卖到 2026 年都满」（<span class="src src-b">🟡</span> 综合 CEO 表态/媒体；产能从 2024 年底约 3.5 万片/月扩到 2025 年底约 7.5 万片/月仍紧）。<b>因果链：CoWoS 产能 → AI 芯片出货量 → 整个 AI 算力供给的节奏</b>。这也是为什么先进封装被称作「AI 时代的新咽喉」。</p>
+
+    <h3>卡点五：中国国产替代卡在哪</h3>
+    <p>综合看，中国在<b>设计、成熟制程、传统封测</b>上已较强，但替代主要卡在三处：<b>EUV（拿不到 ASML）、高端 EDA（先进节点全流程）、高端设备/材料（高端量测、EUV 光刻胶等）</b>。结果是 SMIC 大致<b>困在 7nm 级附近</b>（向 5nm 级推进但成本/良率受限），先进 node 与海外差代际（<span class="src src-b">🟡</span>）。</p>
+  </section>
+
+  <!-- 延伸阅读 / 出处 -->
+  <section id="more">
+    <h2>延伸阅读 / 出处</h2>
+    <p>本 repo 内相关篇（角度不同，互为补充）：</p>
+    <ul style="font-size:13.5px">
+      <li><a href="../2026-06-17-ai-cluster-supply-chain/">AI 集群供应链</a> —— 那篇讲<b>把芯片组装成 AI 集群</b>的上下游（GPU/光模块/网络/电力等）；本篇往上游走一层，讲<b>CPU 这颗芯片本身怎么被设计与造出来</b>。</li>
+      <li><a href="../2026-06-17-ai-cluster-architecture/">AI 集群架构</a> —— 那篇讲<b>集群内部模块如何连接通信</b>（同样是关系图+数据流体裁）；本篇讲的是<b>制造产业链的「谁供给谁」</b>，不是机内拓扑。</li>
+      <li><a href="../2026-06-17-intc/">Intel ($INTC) 个股</a> —— 那篇是<b>个股投资视角</b>的 IDM 公司分析；本篇只标 Intel 在链条里「IDM（自己设计+自己代工）」的位置，非投资视角。</li>
+      <li><a href="../2026-06-17-amd/">AMD ($AMD) 个股</a> —— 那篇是<b>个股投资视角</b>；本篇只标 AMD 作为「fabless（设计外包给 TSMC）」的位置，非投资视角。</li>
+    </ul>
+    <p>外部来源（关键事实，<span class="src src-b">🟡</span> 二手为主，份额/数字视年份）：</p>
+    <ul style="font-size:13.5px">
+      <li><span class="src src-b">🟡</span> TSMC 约 70% 全球代工份额（Q2–Q3 2025）：Counterpoint/TrendForce 经媒体转述（NotebookCheck、Dataconomy 等，2025）。</li>
+      <li><span class="src src-b">🟡</span> ASML 约 100% EUV 份额、High-NA（EXE:5200）约 3.5–4 亿美元、2025 Q4 首台交付 Intel：行业分析与媒体（2025）。</li>
+      <li><span class="src src-b">🟡</span> SMIC 用 DUV 多重曝光做到 7nm 级、传 5nm 级（N+3）量产、成本/良率受限：TechInsights、TechPowerUp 等（2025）。</li>
+      <li><span class="src src-b">🟡</span> CoWoS 产能紧张、被 AI 客户订满、2024→2025 产能扩张：TSMC 管理层表态经媒体转述、DIGITIMES/CNBC 等（2025–2026）。</li>
+      <li><span class="src src-a">🟢</span> ISA / Arm 授权 / RISC-V 开放、EDA 三巨头、OSAT/CoWoS 等基础事实：各家官方文档与 RISC-V International 规范（定性，长期稳定）。</li>
+    </ul>
+    <p class="legend">提醒：本文为产业链科普，图与表均为<b>示意（非穷尽）</b>；所列公司/股票代码<b>仅标产业链位置，非投资建议、非背书</b>；精确份额/营收请以各公司财报与一手数据为准。</p>
+  </section>
+
+  <footer class="foot">技术科普 · 关系图为示意（非穷尽），数字多为数量级/视年份，关键事实按来源分级 · 非投资建议 · 2026-06-22</footer>
+</article>
+
+<script>
+/* ===========================================================================
+   数据：把 CPU 供应链建成关系图。边 = 「供给方 → 接收方」（授权/设计交付/制造/供货）。
+   - kinds: k1=授权(ISA/EDA/IP)  k2=设计交付(版图/流片)  k3=制造(代工/封测/出货)  k4=设备与材料供给
+   =========================================================================== */
+const MODEL = {
+  kinds: { k1:"授权（ISA / EDA / IP）", k2:"设计交付（版图 / 流片）", k3:"制造与出货（代工 / 封测）", k4:"设备与材料供给" },
+  views: [
+    /* ---------- 视图1：全链总览 ---------- */
+    { id:"overview", label:"全链总览", w:920, h:560,
+      nodes:[
+        { id:"isa",  label:"ISA 指令集",  x:120, y:70,  desc:"芯片的「机器语言词汇表」。x86（Intel/AMD 双寡头·封闭授权）、Arm（授权 IP·$ARM）、RISC-V（开放免授权费）。决定生态与进入门槛。仅标产业链位置，非投资建议。" },
+        { id:"eda",  label:"EDA 工具",    x:120, y:180, desc:"芯片设计的专业软件（画电路/仿真/布局布线/可造性检查）。Synopsys $SNPS、Cadence $CDNS、Siemens EDA 近乎垄断先进流程；国产华大九天追赶成熟节点。" },
+        { id:"ip",   label:"IP core",     x:120, y:290, desc:"可复用电路积木（CPU 核、接口控制器）。Arm（CPU 核 IP）、Synopsys、Cadence。设计公司买来拼装，不必从零造每个模块。" },
+        { id:"design", label:"CPU 设计",  x:430, y:180, desc:"把 ISA+EDA+IP 变成具体芯片版图。IDM：Intel $INTC（自己也有厂）；fabless：AMD $AMD、Apple(Arm 自研)、Qualcomm $QCOM、Ampere；国产 华为海思、龙芯(LoongArch)、飞腾、兆芯、申威。" },
+        { id:"foundry", label:"晶圆代工 foundry", x:660, y:180, desc:"替别人造芯片的厂。TSMC $TSM（约 70% 代工份额·Q2–Q3 2025·🟡）、Samsung、Intel Foundry、GlobalFoundries $GFS、中芯国际 SMIC（0981.HK）。先进制程高度集中。" },
+        { id:"equip", label:"半导体设备", x:660, y:60,  desc:"造芯片的机器。ASML $ASML（EUV 独家·约 100% EUV·🟡）、Applied Materials $AMAT、Lam $LRCX、KLA $KLAC、Tokyo Electron；国产 中微 AMEC、北方华创。EUV 是先进制程硬卡点。" },
+        { id:"mat",  label:"材料",        x:660, y:320, desc:"硅片（信越/SUMCO/环球晶 GlobalWafers）、光刻胶（JSR/TOK/信越·日本主导，尤其 EUV 胶）、特气、CMP、掩膜版 photomask、靶材。多处单点高纯依赖。" },
+        { id:"osat", label:"封装测试 OSAT", x:660, y:440, desc:"切割晶圆/封装/测试。ASE 日月光、Amkor $AMKR、长电 JCET、通富微电、华天；先进封装 CoWoS=TSMC（AI 芯片关键、产能紧）。" },
+        { id:"oem",  label:"成品 → OEM/云厂", x:430, y:440, desc:"封测出的成品 CPU 交给 PC/服务器 OEM、云厂商、分销，装进电脑/服务器/数据中心。" }
+      ],
+      edges:[
+        { id:"o_isa_design", from:"isa", to:"design", label:"授权 ISA", kind:"k1" },
+        { id:"o_eda_design", from:"eda", to:"design", label:"授权 EDA", kind:"k1" },
+        { id:"o_ip_design",  from:"ip",  to:"design", label:"授权 IP 核", kind:"k1" },
+        { id:"o_design_foundry", from:"design", to:"foundry", label:"交版图·流片", kind:"k2" },
+        { id:"o_equip_foundry",  from:"equip", to:"foundry", label:"供设备(EUV…)", kind:"k4" },
+        { id:"o_mat_foundry",    from:"mat", to:"foundry", label:"供硅片/光刻胶/气体", kind:"k4" },
+        { id:"o_foundry_osat",   from:"foundry", to:"osat", label:"出晶圆·送封测", kind:"k3" },
+        { id:"o_osat_oem",       from:"osat", to:"oem", label:"成品出货", kind:"k3" },
+        { id:"o_equip_mat",      from:"equip", to:"mat", label:"（设备/材料并供厂）", kind:"k4" }
+      ]
+    },
+    /* ---------- 视图2：一颗 CPU 的制造流程（更线性） ---------- */
+    { id:"flowview", label:"一颗 CPU 的制造流程", w:980, h:430,
+      nodes:[
+        { id:"rtl",   label:"设计 RTL→验证→物理设计", x:160, y:90,  desc:"用 EDA + IP 写电路（RTL 代码）、功能验证、做物理设计（布局布线/时序/可造性），产出最终版图。" },
+        { id:"tapeout", label:"tape-out 流片", x:160, y:230, desc:"设计定稿、把版图「付印」交给代工厂。一次先进流片要数千万到上亿美元，错了整批报废，所以前面反复验证。" },
+        { id:"mask",  label:"掩膜版 photomask", x:160, y:360, desc:"按版图做出每一光刻层的「母版/模板」，光刻时把图案投影到晶圆上。" },
+        { id:"fab",   label:"晶圆制造（光刻/刻蚀/沉积/离子注入·数百道）", x:520, y:360, desc:"在晶圆上一层层做出电路：光刻定形→刻蚀去料→沉积成膜→离子注入掺杂…重复数百道工序。先进层靠 EUV。" },
+        { id:"wtest", label:"晶圆测试 CP", x:830, y:360, desc:"晶圆级测试（CP/wafer sort），先筛掉坏 die，避免给坏 die 浪费封装成本。" },
+        { id:"dice",  label:"切割 dicing", x:830, y:230, desc:"把整片晶圆切成一颗颗独立的 die。" },
+        { id:"pkg",   label:"封装 packaging", x:830, y:90,  desc:"给 die 装上引脚/焊球与外壳保护；AI 芯片用先进封装（如 CoWoS）把多 die 与 HBM 拼合。" },
+        { id:"ftest", label:"成品测试 FT", x:520, y:90,  desc:"封装后整颗芯片最终测试（FT），按规格分级（频率/良率/品质）。" },
+        { id:"ship",  label:"出货 → OEM/云厂", x:520, y:230, desc:"合格成品出货给 PC/服务器 OEM、云厂商、分销。" }
+      ],
+      edges:[
+        { id:"f1", from:"rtl",   to:"tapeout", label:"定稿", kind:"k2" },
+        { id:"f2", from:"tapeout", to:"mask",  label:"做掩膜", kind:"k2" },
+        { id:"f3", from:"mask",  to:"fab",     label:"投入光刻", kind:"k3" },
+        { id:"f4", from:"fab",   to:"wtest",   label:"晶圆完工", kind:"k3" },
+        { id:"f5", from:"wtest", to:"dice",    label:"筛选后切割", kind:"k3" },
+        { id:"f6", from:"dice",  to:"pkg",     label:"好 die 封装", kind:"k3" },
+        { id:"f7", from:"pkg",   to:"ftest",   label:"成品测试", kind:"k3" },
+        { id:"f8", from:"ftest", to:"ship",    label:"合格出货", kind:"k3" }
+      ]
+    }
+  ],
+  flow: { view:"overview", steps:[
+    { edges:["o_isa_design","o_eda_design","o_ip_design"], cap:"<b>① 拿 ISA + EDA + IP</b> — 设计公司先选指令集(x86/Arm/RISC-V)，买 EDA 软件与 Arm/Synopsys 的 IP 核作为起点。" },
+    { edges:["o_design_foundry"], cap:"<b>② 做设计并流片</b> — 用 EDA+IP 画出版图、反复验证，然后 tape-out 把版图交给晶圆代工厂(如 TSMC)。" },
+    { edges:["o_equip_foundry","o_mat_foundry"], cap:"<b>③ 设备 + 材料就位</b> — 代工厂靠 ASML 的 EUV 等设备、日本主导的硅片/光刻胶/特气，才能开工。" },
+    { edges:["o_foundry_osat"], cap:"<b>④ 光刻等数百道工序 → 出晶圆 → 送封测</b> — 代工厂在晶圆上做出芯片，交给 OSAT 封测厂。" },
+    { edges:["o_osat_oem"], cap:"<b>⑤ 切割·封装·测试 → 成品出货</b> — 封测厂把 die 切割封装测好，成品 CPU 出货给 PC/服务器 OEM 与云厂。一颗 CPU 至此诞生。" }
+  ]}
+};
+
+/* ===================== 引擎（一般无需改动） ===================== */
+(function(){
+  const SVGNS="http://www.w3.org/2000/svg";
+  const diagram=document.getElementById('diagram');
+  const tabsEl=document.getElementById('tabs');
+  const infoEl=document.getElementById('nodeinfo');
+  const capEl=document.getElementById('cap');
+  const edgekeyEl=document.getElementById('edgekey');
+  let curView=MODEL.views[0], sel=null, flowIdx=-1, timer=null;
+
+  function el(tag,attrs,kids){ const e=document.createElementNS(SVGNS,tag);
+    for(const k in (attrs||{})) e.setAttribute(k,attrs[k]);
+    (kids||[]).forEach(c=>e.appendChild(c)); return e; }
+  function nodeById(v,id){ return v.nodes.find(n=>n.id===id); }
+
+  function renderTabs(){
+    tabsEl.innerHTML='';
+    if(MODEL.views.length<2){ tabsEl.style.display='none'; return; }
+    MODEL.views.forEach(v=>{
+      const b=document.createElement('button'); b.className='tab'+(v===curView?' active':''); b.textContent=v.label;
+      b.onclick=()=>{ curView=v; sel=null; stopFlow(); render(); };
+      tabsEl.appendChild(b);
+    });
+  }
+  function renderEdgeKey(){
+    edgekeyEl.innerHTML='';
+    Object.keys(MODEL.kinds||{}).forEach(k=>{
+      const txt=MODEL.kinds[k]; if(!txt) return;
+      const s=document.createElement('span'); s.innerHTML='<i style="border-color:var(--'+k+')"></i>'+txt; edgekeyEl.appendChild(s);
+    });
+  }
+  function render(){
+    renderTabs();
+    const v=curView; diagram.setAttribute('viewBox','0 0 '+v.w+' '+v.h);
+    diagram.innerHTML='';
+    // edges first
+    v.edges.forEach(ed=>{
+      const a=nodeById(v,ed.from), b=nodeById(v,ed.to); if(!a||!b) return;
+      const line=el('line',{x1:a.x,y1:a.y,x2:b.x,y2:b.y,class:'nd-edge '+(ed.kind||'k1'),'data-edge':ed.id});
+      diagram.appendChild(line);
+      if(ed.label){ const mx=(a.x+b.x)/2, my=(a.y+b.y)/2-4;
+        const t=el('text',{x:mx,y:my,'text-anchor':'middle',class:'nd-edgelabel'}); t.textContent=ed.label; diagram.appendChild(t); }
+    });
+    // nodes
+    v.nodes.forEach(n=>{
+      const w=Math.max(58, n.label.length*14+24), h=34;
+      const g=el('g',{class:'nd-node'+(sel===n.id?' sel':''),'data-node':n.id,tabindex:'0',role:'button','aria-label':n.label});
+      g.appendChild(el('rect',{x:n.x-w/2,y:n.y-h/2,width:w,height:h,rx:9}));
+      const t=el('text',{x:n.x,y:n.y+4,'text-anchor':'middle'}); t.textContent=n.label; g.appendChild(t);
+      const pick=()=>{ sel=n.id; showInfo(n); document.querySelectorAll('.nd-node').forEach(x=>x.classList.remove('sel')); g.classList.add('sel'); };
+      g.addEventListener('click',pick); g.addEventListener('mouseenter',()=>showInfo(n)); g.addEventListener('focus',pick);
+      diagram.appendChild(g);
+    });
+    applyLit();
+  }
+  function showInfo(n){
+    const v=curView;
+    const conns=v.edges.filter(e=>e.from===n.id||e.to===n.id).map(e=>{
+      const other=nodeById(v, e.from===n.id?e.to:e.from);
+      return '<li>'+(other?other.label:'?')+(e.label?'（'+e.label+'）':'')+'</li>';
+    }).join('');
+    infoEl.innerHTML='<h4>'+n.label+'</h4><div>'+(n.desc||'')+'</div>'+(conns?'<div style="margin-top:6px;color:var(--text)">连接：</div><ul class="conn">'+conns+'</ul>':'');
+  }
+  function applyLit(){
+    document.querySelectorAll('.nd-edge').forEach(e=>e.classList.remove('lit'));
+    if(flowIdx<0||!MODEL.flow) return;
+    const step=MODEL.flow.steps[flowIdx]; if(!step) return;
+    (step.edges||[]).forEach(id=>{ const e=diagram.querySelector('[data-edge="'+id+'"]'); if(e) e.classList.add('lit'); });
+  }
+  function gotoStep(i){
+    if(!MODEL.flow){ return; }
+    if(curView.id!==MODEL.flow.view){ curView=MODEL.views.find(v=>v.id===MODEL.flow.view)||curView; render(); }
+    const n=MODEL.flow.steps.length; flowIdx=((i%n)+n)%n;
+    applyLit(); capEl.innerHTML=MODEL.flow.steps[flowIdx].cap||'';
+  }
+  function stopFlow(){ if(timer){clearInterval(timer);timer=null;} document.getElementById('playBtn').textContent='▶ 播放数据流'; }
+  function play(){
+    if(!MODEL.flow) return;
+    if(timer){ stopFlow(); return; }
+    document.getElementById('playBtn').textContent='⏸ 暂停';
+    if(flowIdx<0) gotoStep(0);
+    const reduce=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+    timer=setInterval(()=>{ gotoStep(flowIdx+1); }, reduce?2600:2000);
+  }
+  document.getElementById('playBtn').onclick=play;
+  document.getElementById('stepBtn').onclick=()=>{ stopFlow(); gotoStep(flowIdx+1); };
+  document.getElementById('resetBtn').onclick=()=>{ stopFlow(); flowIdx=-1; applyLit(); capEl.innerHTML=''; };
+  document.addEventListener('keydown',e=>{
+    if(e.target&&/INPUT|TEXTAREA/.test(e.target.tagName)) return;
+    if(e.key===' '){ e.preventDefault(); play(); }
+    else if(e.key==='ArrowRight'){ stopFlow(); gotoStep(flowIdx+1); }
+    else if(e.key==='ArrowLeft'){ stopFlow(); gotoStep(flowIdx-1); }
+  });
+  renderEdgeKey(); render();
+})();
+</script>
+</body>
+</html>
