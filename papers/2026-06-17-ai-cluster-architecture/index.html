@@ -155,6 +155,7 @@
     <a href="#d">D 存储 & 电力散热</a>
     <a href="#flow">一步训练的数据流</a>
     <a href="#compare">三类连接对比</a>
+    <a href="#hw">🔩 硬件依赖与交互（深入）</a>
     <a href="#more">延伸阅读</a>
   </nav>
 
@@ -459,6 +460,136 @@
       </tbody>
     </table>
     <p style="font-size:13px; color:var(--muted)">注：表中具体数字按 GPU 代际（如不同代 NVLink、不同速率光模块）会明显变化，故只给数量级与相对关系；架构层面的「越内越快、越外越广」是稳定规律。</p>
+  </section>
+
+  <!-- ============ HARDWARE DEPENDENCY (DEEP) ============ -->
+  <section id="hw">
+    <h2><span class="n">🔩</span>硬件依赖与交互（深入）</h2>
+    <p>前面讲了「数据怎么流」。这一节往下钻一层，讲<strong>硬件之间到底靠什么物理接口连、信号在哪儿被转换、谁的能力会卡住谁</strong>。算法（all-reduce、并行策略）这里只在必要时一句话带过——本节关心的是<strong>电子和光子在铜与硅与光纤里怎么跑、被什么物理限制锁住</strong>。所有带宽/电流/距离/功率数字都按代际会变，下面一律用「约 / 数量级 / 视代际」，并尽量标代表型号。</p>
+
+    <h3>① 片内：GPU die ↔ HBM（靠 microbump + 硅 interposer）</h3>
+    <p>GPU die 和它旁边的几颗 <strong>HBM</strong> 不是用「导线焊」连的，而是各自底面长着成千上万个<strong>微凸点 microbump</strong>，一起压在一块<strong>硅中介层 interposer</strong> 上（这就是 <strong>CoWoS</strong>，Chip-on-Wafer-on-Substrate）。interposer 本身是一片硅，里面蚀刻了海量超短超宽的走线，把 die 的内存接口和 HBM 的接口对接起来。HBM 自己则是一摞内存：<strong>多片 DRAM die 垂直堆叠</strong>，靠<strong>TSV（Through-Silicon Via，硅通孔）</strong>把上下层打通，最底下还压一片 <strong>base logic die</strong> 做接口与缓冲（代表型号 <strong>HBM3e</strong>）。</p>
+    <div class="callout warn"><span class="label">谁卡住谁：interposer 面积 → 总线宽度 → 有效算力</span>
+      HBM 的超高带宽（数量级约 <strong>TB/s</strong>）来自「<strong>总线极宽</strong>」——一颗 HBM 对外是上千根数据线（千-bit 级位宽）。这么多线全要从 die 经 interposer 走线连出去，于是<strong>能贴几颗 HBM、总线能开多宽，被 interposer 的走线密度和物理面积直接卡死</strong>。interposer 越大越难造、良率越低，所以「想多塞 HBM 带宽」和「封装能做多大」是一对硬矛盾。这就是<strong>内存墙</strong>的物理根因：不是不想给更多带宽，是封装走线塞不下。
+    </div>
+
+    <h3>② 供电：VRM ↔ GPU（数百安培、近 1V）</h3>
+    <p>GPU 核心电压很低（数量级约 1V），但要的电流极大——单卡满载时核心电流可达<strong>数百安培</strong>量级。这么大的电流不可能从远处直接送，得靠<strong>板上 VRM（Voltage Regulator Module，多相电源）</strong>就近把 12V/48V 降到核心电压、并稳住瞬态。多相是因为单相扛不住这么大电流，得几相甚至几十相并起来分担、轮流供电。</p>
+    <div class="callout note"><span class="label">供电+散热是和算力「共设计」的</span>
+      单卡 <strong>TDP</strong>（热设计功耗，数量级从数百 W 到上千 W，视代际）本质<strong>不是芯片算力定的，而是供电能灌进去多少、散热能拔出来多少共同定的</strong>。VRM 的相数/铜面积、TIM 和冷板的散热能力，和 die 的算力是一起设计的——任何一头不够，另一头的纸面算力都用不出来。
+    </div>
+
+    <h3>③ 节点内：GPU↔GPU / GPU↔CPU / GPU↔NIC</h3>
+    <ul>
+      <li><strong>GPU ↔ GPU：NVLink SerDes → 铜走线/铜缆 → NVSwitch 芯片。</strong> GPU 上的 <strong>SerDes</strong>（串行器/解串器，把芯片内部的并行数据压成高速串行流发出去、收端再还原）把信号推上<strong>铜</strong>——PCB 铜走线或铜缆——汇到 <strong>NVSwitch</strong> 交换芯片，做到卡间全互联（代表 <strong>NVLink 5</strong>，约 200Gbps/lane 量级）。<strong>关键物理约束：铜在这么高的速率下衰减很快，可达距离只有几米</strong>，所以整个 NVLink 域被<strong>锁在一个机柜内</strong>。<strong>GB200 NVL72</strong> 就是把这个约束用满的典范：用一整套<strong>无源铜背板</strong>（数千根铜缆）把 72 张卡连成一个 NVLink 域——之所以用铜不用光，正是因为机柜内距离够短，铜更省电（省下约数十 kW 的光模块功耗）。<em>这也解释了「单块大 GPU 能多大」的上限：本质被铜的可达距离卡住。</em></li>
+      <li><strong>GPU ↔ CPU：PCIe（或 Grace-Hopper 式 C2C 一致性互联）。</strong> 通用路径是 <strong>PCIe</strong>（代表 <strong>Gen5/Gen6</strong>），带宽远低于 NVLink；新一代把 CPU 和 GPU 用<strong>C2C（chip-to-chip）一致性互联</strong>贴在一起（如 Grace-Hopper/Grace-Blackwell），让 CPU 内存和 GPU 显存「一致性可见」。CPU 的角色：<strong>编排调度、喂数据、管 NUMA</strong>（把内存按「离哪颗 CPU 近」分区，避免远端访问拖慢）。</li>
+      <li><strong>GPU ↔ NIC：GPUDirect RDMA。</strong> 这是节点内最关键的一个交互：网卡（NIC）可以<strong>直接读写 GPU 显存、绕过 CPU 和系统内存</strong>。靠的是 <strong>RDMA</strong>（远程直接内存访问）+ <strong>DMA</strong>（直接内存访问引擎），NIC 经 PCIe 直接对 GPU 的 HBM 搬数据。绕过 CPU 的意义：跨柜通信（如跨柜 all-reduce，此处一句带过）不必让数据先绕一圈 CPU 内存，省一次拷贝、降一截延迟。</li>
+    </ul>
+
+    <h3>④ 电 → 光 → 电：信号在哪儿被转换（重点）</h3>
+    <p>跨机柜那一跳，信号要经历一次<strong>电变光、再变回电</strong>。完整链路是：</p>
+    <div style="border:1px solid var(--line); border-radius:12px; background:var(--panel); padding:10px 8px 4px; margin:14px 0; overflow-x:auto">
+      <svg viewBox="0 0 880 200" role="img" aria-label="电到光再到电的信号转换链路图" style="display:block; width:100%; height:auto; min-width:560px">
+        <!-- copper segment background -->
+        <rect x="20" y="150" width="430" height="26" rx="6" fill="var(--copper)" opacity=".14"/>
+        <text x="235" y="168" text-anchor="middle" class="edgelbl" style="fill:var(--copper); font-size:11px">介质：铜（电信号，只能走几米）</text>
+        <!-- fiber segment background -->
+        <rect x="470" y="150" width="180" height="26" rx="6" fill="var(--optic)" opacity=".16"/>
+        <text x="560" y="168" text-anchor="middle" class="edgelbl" style="fill:var(--optic); font-size:11px">介质：光纤（光子，可走几十~几百米+）</text>
+        <rect x="668" y="150" width="192" height="26" rx="6" fill="var(--copper)" opacity=".14"/>
+        <text x="764" y="168" text-anchor="middle" class="edgelbl" style="fill:var(--copper); font-size:11px">介质：铜（电信号）</text>
+
+        <!-- nodes -->
+        <g>
+          <rect x="20" y="64" width="92" height="56" rx="8" fill="var(--node)" stroke="var(--copper)" stroke-width="1.6"/>
+          <text x="66" y="88" text-anchor="middle" class="nlabel" style="font-size:11.5px">NIC</text>
+          <text x="66" y="104" text-anchor="middle" class="nsub">电 SerDes</text>
+        </g>
+        <g>
+          <rect x="146" y="64" width="100" height="56" rx="8" fill="var(--node)" stroke="var(--nodeStroke)" stroke-width="1.6"/>
+          <text x="196" y="88" text-anchor="middle" class="nlabel" style="font-size:11.5px">DSP /</text>
+          <text x="196" y="104" text-anchor="middle" class="nsub">retimer 整形</text>
+        </g>
+        <g>
+          <rect x="280" y="64" width="120" height="56" rx="8" fill="var(--node)" stroke="var(--optic)" stroke-width="1.8"/>
+          <text x="340" y="86" text-anchor="middle" class="nlabel" style="font-size:11.5px">激光器 E/O</text>
+          <text x="340" y="102" text-anchor="middle" class="nsub">driver+EML/DML</text>
+        </g>
+        <g>
+          <ellipse cx="560" cy="92" rx="58" ry="30" fill="var(--node)" stroke="var(--optic)" stroke-width="1.6"/>
+          <text x="560" y="96" text-anchor="middle" class="nlabel" style="font-size:11.5px">光纤</text>
+        </g>
+        <g>
+          <rect x="668" y="64" width="120" height="56" rx="8" fill="var(--node)" stroke="var(--optic)" stroke-width="1.8"/>
+          <text x="728" y="86" text-anchor="middle" class="nlabel" style="font-size:11.5px">探测器 O/E</text>
+          <text x="728" y="102" text-anchor="middle" class="nsub">光电二极管</text>
+        </g>
+        <g>
+          <rect x="812" y="64" width="48" height="56" rx="8" fill="var(--node)" stroke="var(--copper)" stroke-width="1.6"/>
+          <text x="836" y="96" text-anchor="middle" class="nlabel" style="font-size:11px">电</text>
+        </g>
+
+        <!-- arrows -->
+        <defs>
+          <marker id="arrhw" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--muted)"/></marker>
+        </defs>
+        <line x1="112" y1="92" x2="142" y2="92" stroke="var(--copper)" stroke-width="3" marker-end="url(#arrhw)"/>
+        <line x1="246" y1="92" x2="276" y2="92" stroke="var(--copper)" stroke-width="3" marker-end="url(#arrhw)"/>
+        <line x1="400" y1="92" x2="498" y2="92" stroke="var(--optic)" stroke-width="3" marker-end="url(#arrhw)"/>
+        <line x1="618" y1="92" x2="664" y2="92" stroke="var(--optic)" stroke-width="3" marker-end="url(#arrhw)"/>
+        <line x1="788" y1="92" x2="808" y2="92" stroke="var(--copper)" stroke-width="3" marker-end="url(#arrhw)"/>
+        <text x="340" y="40" text-anchor="middle" class="edgelbl" style="font-size:10px">电→光（E/O）</text>
+        <text x="700" y="40" text-anchor="middle" class="edgelbl" style="font-size:10px">光→电（O/E）</text>
+      </svg>
+    </div>
+    <p>逐段拆：NIC 的<strong>电 SerDes</strong> 把数据推成高速电信号 → 经 <strong>retimer/DSP</strong> 把被铜走线衰减、抖动搞糊的波形重新整形（高速以太/IB 几乎必备）→ 进光模块里的 <strong>driver + 激光器</strong>，把电流的「有无/强弱」变成光的「有无/强弱」，这一步叫 <strong>E/O（电光转换）</strong>，激光器常见三种：<strong>EML</strong>（电吸收调制激光器，高速长距）、<strong>CW + 外调制器</strong>（连续光另调制，常见于相干/CPO）、<strong>DML</strong>（直接调制激光器，便宜短距）→ 光进<strong>光纤</strong>跑到对端 → 对端<strong>光电探测器</strong>把光变回电流（<strong>O/E，光电转换</strong>）→ 再经 DSP/SerDes 还原成数据。</p>
+    <div class="callout note"><span class="label">为什么非转光不可 + CPO 在省什么</span>
+      <strong>铜在高速（>100Gbps/lane 量级）下衰减极快，实际只能走几米</strong>；一旦要跨机柜（几十米以上），<strong>必须转光</strong>——光纤几乎不衰减、能跑很远。代价是每次 E/O+O/E 都<strong>烧功耗、加延迟、加一个会坏的器件</strong>。<strong>CPO（Co-Packaged Optics，共封装光学）</strong>的思路：把光引擎从「插在交换机面板上的可插拔模块」搬到<strong>紧贴交换 ASIC 或 GPU 芯片旁边</strong>，砍掉芯片到面板那段长长的高速电链路——电信号少走铜、早点变光，于是<strong>省功耗、降误码</strong>。这是当代「电链路太费电」逼出来的方向。
+    </div>
+
+    <h3>⑤ 交换机 ↔ 光模块 ↔ 集群规模（radix 决定能堆多大）</h3>
+    <p>一台交换机能连多少机器，由它中央那颗<strong>交换 ASIC</strong> 决定：ASIC 一圈对外的 <strong>SerDes 端口数</strong>（即 <strong>radix</strong>，基数/扇出）× 单端口速率（代表 <strong>1.6T</strong>/端口量级）= 这台交换机的总吞吐，也<strong>决定它能插多少个光模块</strong>。</p>
+    <div class="callout insight"><span class="label">radix 怎么一路卡到集群总规模</span>
+      在 <strong>spine-leaf</strong> 拓扑里，交换机 radix 越大，<strong>一层能直连的机器越多、要堆的层数越少</strong>。radix 不够就得加层，每加一层就多一跳延迟、多一批光模块和光纤。所以<strong>交换 ASIC 的 SerDes 数量和单端口速率，直接决定「不爆成本、不爆延迟」前提下集群能堆到多大</strong>。一句话：<strong>光模块是耗材，交换 radix 是天花板。</strong>
+    </div>
+
+    <h3>⑥ 存储 → GPU（GPUDirect Storage 绕过 CPU）</h3>
+    <p>喂数据这条链也有「绕过 CPU」的快路：<strong>NVMe SSD →（GPUDirect Storage, GDS）→ GPU 显存</strong>。传统路径是 SSD 先把数据搬进 CPU 的系统内存、再拷进 GPU 显存（两次搬运、CPU 当二传手）；GDS 让 NVMe 的 DMA 引擎<strong>直接把数据写进 GPU 的 HBM</strong>，省掉 CPU 内存这一跳。意义：训练/推理读海量数据时，<strong>不让 CPU 和系统内存带宽成为「喂不饱 GPU」的瓶颈</strong>。这和 ③ 里的 GPUDirect RDMA 是一对孪生思路——<strong>凡是大流量，尽量绕开 CPU 直达 GPU 显存</strong>。</p>
+
+    <h3>⑦ 物理外壳两条链：依赖的根</h3>
+    <p>所有上面的连接，最终都挂在两条物理链上——<strong>电进得来、热出得去</strong>。少一环，整柜就开不动。</p>
+    <table>
+      <thead><tr><th>链路</th><th>一环扣一环（从源头到芯片 / 从芯片到外界）</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>供电链</strong><br><span style="color:var(--warn)">电网 → GPU</span></td>
+          <td>市电电网 → <strong>UPS</strong>（不间断电源，断电时顶住）→ <strong>PDU</strong>（机柜配电单元）→ <strong>母线 busbar</strong>（一根大铜排，沿机柜垂直送电）→ 板上 <strong>VRM</strong>（多相降压到近 1V）→ <strong>GPU 核</strong>。趋势：用 <strong>800V DC</strong> 高压直流配电降低线损、减少铜用量；单柜功率推到 <strong>100kW+</strong> 量级。</td>
+        </tr>
+        <tr>
+          <td><strong>散热链</strong><br><span style="color:var(--optic)">die → 冷却塔</span></td>
+          <td>GPU die 发热 → <strong>TIM（导热界面材料）</strong>填平 die 与冷板间的微观空隙、把热导出 → <strong>冷板 cold plate</strong>（贴在芯片上、内部走冷却液）→ <strong>冷却液</strong>带走热 → <strong>CDU（Cooling Distribution Unit，冷量分配单元）</strong>做液-液换热、把热交给楼宇水 → <strong>楼宇水循环</strong> → <strong>冷却塔</strong>排到大气。</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="callout warn"><span class="label">为什么 &gt;100kW/柜必须液冷</span>
+      一柜上百千瓦，热全堆在几十张卡那么小的面积里——<strong>风冷的空气热容量太小、根本拔不走这么集中的热</strong>。液体的热容量比空气大好几个数量级，<strong>冷板/液冷</strong>才接得住。散热接不住，前面所有「贴得越近越快」的密集封装与铜互联就堆不起来——<strong>散热能力反过来卡住机柜能多密、卡能贴多近</strong>。
+    </div>
+
+    <h3>⑧ 「相互制约」总结：一环卡一环的因果链</h3>
+    <p>把上面的依赖串成一条链——每一项物理约束，都卡住了下一项「能做多大」。这就是为什么 AI 集群的设计是一场<strong>到处都是天花板的平衡术</strong>：</p>
+    <table>
+      <thead><tr><th>物理约束（瓶颈在哪）</th><th>→ 被它卡住的东西（决定了什么的上限）</th></tr></thead>
+      <tbody>
+        <tr><td><strong>HBM 带宽</strong>（喂数据多快）</td><td>→ 卡住 <strong>GPU 有效算力</strong>：Tensor Core 再快，喂不饱就空转（内存墙）</td></tr>
+        <tr><td><strong>interposer 面积 / 走线密度</strong></td><td>→ 卡住<strong>能贴几颗 HBM、总线多宽</strong> → 反过来卡住上面那条 HBM 带宽</td></tr>
+        <tr><td><strong>铜的可达距离（高速下几米）</strong></td><td>→ 卡住 <strong>NVLink 域大小</strong> → 卡住「<strong>单块大 GPU</strong>」能多大（NVL72 就是被铜距离定在「一柜」）</td></tr>
+        <tr><td><strong>供电 + 散热能力</strong></td><td>→ 卡住<strong>机柜密度（单柜功率/卡数）</strong> → 反过来卡住<strong>铜互联能多近多密</strong>（拉不近就更得转光）</td></tr>
+        <tr><td><strong>光模块功耗 / 交换 ASIC radix</strong></td><td>→ 卡住 <strong>spine-leaf 能堆多少层、集群总规模</strong>（不爆成本/延迟的前提下）</td></tr>
+      </tbody>
+    </table>
+    <div class="callout insight"><span class="label">一句话串起来</span>
+      <strong>带宽喂不饱算力 → 想把内存贴更近 → 封装面积卡住 → 想把更多卡黏成一块 → 铜距离卡住 → 想把卡堆更密拉更近 → 供电散热卡住 → 想用光跨更远连更多 → 光功耗与交换 radix 卡住。</strong>每一步「想更大/更快」，都撞上一堵物理墙——AI 集群的工程，就是在这一连串墙之间找当代最优解。
+    </div>
   </section>
 
   <!-- ============ MORE ============ -->
