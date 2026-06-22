@@ -42,6 +42,27 @@
     "path": "papers/2026-06-17-kobe/index.html"
   },
   {
+    "slug": "2026-06-17-ai-native-ugc-game-platform",
+    "title": "AI Native UGC 游戏平台：赛道竞争格局与早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-22",
+    "published": "公司调研 2026",
+    "tldr": "AI让玩家零代码造游戏的UGC平台赛道:传统UGC平台(Roblox/蛋仔/Fortnite)已mature/crowded,但AI原生零代码这一新形态仍emerging→nascent;最大威胁是Roblox/蛋仔的网络效应+大厂(腾讯GiiNEX)资源;whitespace在'AI零代码×开放平台'象限尚无跑通赢家;引子公司上海哇奥醒梦科技为stealth查无公开信息",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "market-map",
+      "startup-idea",
+      "ai-games",
+      "ugc",
+      "china"
+    ],
+    "path": "papers/2026-06-17-ai-native-ugc-game-platform/index.html"
+  },
+  {
     "slug": "2026-06-17-asts",
     "title": "AST SpaceMobile（ASTS）：基本面 / 估值 / 是否值得买入",
     "authors": "—",

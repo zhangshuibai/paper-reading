@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Native UGC 游戏平台 · 竞争格局与赛道早期度调研</title>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --bad:#ff6b81; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --bad:#d23651; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;}
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:920px; margin:0 auto; padding:18px 22px 90px}
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:25px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)} .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap; line-height:2}
+  nav.toc a:hover{color:var(--accent)}
+  section{margin:38px 0}
+  h2{font-size:20px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:16.5px; margin:22px 0 8px}
+  p{margin:12px 0} ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)} strong{color:var(--text)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.88em}
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:13px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:9px 10px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  figure{margin:24px 0; text-align:center}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+  .svgwrap{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 8px}
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+  .src{font-size:10.5px; padding:0 6px; border-radius:999px; white-space:nowrap; vertical-align:middle}
+  .src-a{background:rgba(67,197,158,.18); color:var(--ok)}
+  .src-b{background:rgba(255,180,84,.18); color:var(--warn)}
+  .src-c{background:rgba(255,107,129,.18); color:var(--bad)}
+  .legend{font-size:12px; color:var(--muted); margin:6px 0 0}
+  .verdict{display:inline-block; font-weight:700; padding:3px 12px; border-radius:999px; font-size:14px}
+  .v-nascent{background:rgba(122,162,255,.18); color:var(--accent)}
+  .v-emerging{background:rgba(67,197,158,.18); color:var(--ok)}
+  .v-crowded{background:rgba(255,180,84,.18); color:var(--warn)}
+  .v-mature{background:rgba(255,107,129,.18); color:var(--bad)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">AI Games</span>
+      <span class="chip">UGC</span>
+      <span class="chip">Generative Game</span>
+      <span class="chip">China</span>
+      <span class="chip">竞争格局</span>
+      <span class="chip">赛道早期度</span>
+      <span class="chip">创业 idea</span>
+    </div>
+    <h1>AI Native UGC 游戏平台：赛道竞争格局与早期度调研</h1>
+    <p class="orig-title">「AI for fun · 让玩家零代码用 AI 造游戏」——一条由 stealth 公司「上海哇奥醒梦科技」引出的赛道级调研：它多挤 / 多早 / 最大威胁是谁 / whitespace 在哪</p>
+    <dl class="meta-grid">
+      <dt>调研对象</dt><dd>「AI Native UGC 游戏平台」赛道（非单一公司；引子是 stealth 创业公司「上海哇奥醒梦科技」）</dd>
+      <dt>赛道</dt><dd>AI 大幅降低创作门槛、让普通玩家「零代码」共创游戏内容的 UGC 游戏平台</dd>
+      <dt>整理</dt><dd>对话调研笔记；信息来自公开检索，按来源分级标注，产品能力未必经独立验证</dd>
+      <dt>日期</dt><dd>2026-06-22</dd>
+    </dl>
+    <p class="legend">来源等级：<span class="src src-a">🟢 一手</span> 官网/SEC/官方 ·
+      <span class="src src-b">🟡 二手</span> 媒体/数据库 ·
+      <span class="src src-c">🔴 自述/未证实</span> 营销口径或未独立验证</p>
+  </header>
+
+  <div class="tldr">
+    <b>一句话</b> — 这是一条「用 AI 把<strong>造游戏的门槛压到零代码</strong>、让普通玩家也能凭一句 prompt 做出能玩、能分享的游戏」的赛道。把它拆两层看：<strong>传统 UGC 游戏平台</strong>（Roblox、网易蛋仔、Fortnite/UEFN、Minecraft）已经是 <span class="verdict v-mature">mature / crowded</span> 的红海，网络效应 + 大厂资源是任何新玩家最大的威胁；但「<strong>AI 原生、零代码 AI 造游戏</strong>」这个具体新形态仍处 <span class="verdict v-emerging">emerging → nascent</span>——创业公司（Rosebud AI、Astrocade、Series AI 等）拿到了钱，巨头（腾讯 GiiNEX、Roblox、Epic）在把 AI 塞进既有平台，生成式游戏 / world model（DeepMind Genie 3、Decart Oasis、World Labs Marble、Microsoft Muse）还多在 demo / research 阶段，<strong>玩家级大规模产品尚未跑通</strong>。最诱人的 whitespace 是「<strong>AI 零代码 × 开放平台</strong>」那一格——目前要么是「AI 但单游戏」（Astrocade、星海自走牌），要么是「开放平台但仍需学工具/脚本」（Roblox、蛋仔），<strong>两者同时做成且留存跑通的，还没有</strong>。引子公司「上海哇奥醒梦科技」本身查无公开融资 / 团队 / 产品信息，本文如实把它当成「赛道里的一个早期玩家」定位，<strong>不为它编造任何数据</strong>。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#terms">⓪ 术语速补</a>
+    <a href="#market">① 赛道地图 + 早期度</a>
+    <a href="#matrix">② 竞品对照矩阵</a>
+    <a href="#map">③ 定位图</a>
+    <a href="#funding">④ 赛道热度 timeline</a>
+    <a href="#snapshot">⑤ 引子公司速览</a>
+    <a href="#idea">⑥ 创业 idea 借鉴</a>
+    <a href="#take">⑦ 现实判断</a>
+    <a href="#src">出处</a>
+  </nav>
+
+  <!-- ⓪ 术语速补 -->
+  <section id="terms">
+    <h2><span class="n">⓪</span>术语速补（读者懂 LLM/agent，未必懂游戏行业）</h2>
+    <p>这条赛道横跨「游戏行业 + 生成式 AI」，先把游戏侧的几个关键词讲清，后面才好读：</p>
+    <ul>
+      <li><strong>UGC（User-Generated Content，玩家自造内容）</strong>——内容由<strong>玩家自己</strong>造，不是厂商造。对照 <strong>PGC</strong>（Professional / 厂商专业团队造，如传统 3A 大作）和 <strong>AIGC</strong>（AI 生成内容）。一句话：UGC 是「谁造」（玩家），AIGC 是「用什么造」（AI）——本赛道的核心命题就是「<strong>用 AIGC 工具去赋能 UGC</strong>」，即「AIGC + UGC」。</li>
+      <li><strong>UGC 游戏平台（Roblox 模式）</strong>——平台不自己做一款款游戏，而是<strong>给玩家一套创作工具</strong>，玩家做出小游戏后发布到平台，别的玩家来玩，创作者按热度/内购<strong>分成</strong>。平台靠「创作者越多→游戏越多→玩家越多→创作者收入越高」的<strong>双边网络效应</strong>滚雪球。代表：Roblox、网易《蛋仔派对》、Fortnite Creative / UEFN、Minecraft、Rec Room。类比 LLM 圈：像「游戏界的 App Store + 低代码平台」合体。</li>
+      <li><strong>AI Native（AI 原生）</strong>——产品从底层架构就是围绕 AI 能力设计，而不是在老产品上「加一个 AI 按钮」。本赛道语境下指：创作流程的核心就是「<strong>你说话 / 给意图，AI 帮你把游戏造出来</strong>」，AI 不是插件而是引擎。</li>
+      <li><strong>DAU（Daily Active Users，日活跃用户）</strong>——每天打开用一次的去重人数，是衡量平台规模与网络效应的核心硬指标（对照 MAU 月活）。本赛道的残酷之处：网络效应赢家通吃，DAU 不到临界规模的平台很难活。</li>
+      <li><strong>agentic NPC / generative agents（会自主行动的 AI 角色）</strong>——传统游戏里的 NPC（非玩家角色）走预设脚本、对话是写死的；agentic NPC 用 LLM 驱动，<strong>有记忆、有性格、有目标，能根据情境自主决策与对话</strong>。学术原型是斯坦福 2023 年的「AI 小镇 / Generative Agents」（25 个 AI 角色在小镇里自发社交、办派对）。商业化代表：Inworld AI、Convai。本赛道把它当成「让世界有活人感」的关键。</li>
+      <li><strong>generative game / world model（AI 实时生成可玩世界）</strong>——更激进的一档：不是 AI 帮你「拼出」一款用传统引擎跑的游戏，而是 <strong>AI 模型本身就是游戏</strong>——它逐帧预测「你按了这个键，下一帧画面长什么样」，实时生成一个可交互的世界。代表：DeepMind <strong>Genie 3</strong>（文字 prompt 生成可实时漫游的 720p/24fps 世界）、Decart <strong>Oasis</strong>（纯 AI 生成的 Minecraft 仿真）、Microsoft <strong>Muse / WHAM</strong>、World Labs <strong>Marble</strong>。目前多为 research preview / demo，离「能当成产品长期玩」还远。</li>
+      <li><strong>prompt-to-game</strong>——这条赛道创业公司最常用的口号：「输入一句话 → 产出一款能玩的游戏」。注意 prompt-to-game 与 world model 是<strong>两条技术路线</strong>：前者多是「AI 帮你生成资产/代码/逻辑，再用传统引擎跑」（更接地气、可控），后者是「模型直接生成画面」（更未来、但不可控、难做成正经游戏玩法）。</li>
+    </ul>
+    <div class="callout note">
+      <span class="label">一句话锚定</span>
+      本赛道 = 「<strong>AIGC（怎么造）× UGC 平台（谁造 + 网络效应）× 零代码（门槛多低）</strong>」三者的交集。三个词单独都不新，新的是把它们<strong>同时做成、且玩家留得住</strong>——这正是为什么它「概念热、产品早」。
+    </div>
+  </section>
+
+  <!-- ① 赛道与早期度 -->
+  <section id="market">
+    <h2><span class="n">①</span>赛道地图 + 早期度判断</h2>
+    <p>赛道定义：<strong>用 AI 大幅降低创作门槛、让普通玩家「零代码」共创游戏内容的 UGC 游戏平台</strong>。它区别于传统 UGC 平台（Roblox 要学 Lua 脚本、蛋仔要学低代码编辑器、UEFN 要学 Verse），主张「你不写代码、用 AI 工具/对话就能做游戏并分享、二创」。它也区别于「单机一款 AI 游戏」——强调的是<strong>平台</strong>（玩家造的内容互相消费、形成网络效应）。</p>
+
+    <h3>玩家分群（四象限别漏）</h3>
+    <ul>
+      <li><strong>现有 UGC 平台巨头（已 mature/crowded）：</strong><strong>Roblox（RBLX）</strong> Q1 2026 DAU 1.32 亿、2025 全年向创作者发出超 15 亿美元 <span class="src src-a">🟢 Roblox 财报/股东信</span>；<strong>网易《蛋仔派对》</strong>「5 亿注册、DAU 与创作者均破 4000 万、累计 UGC 地图破 1 亿张、每周新增百万级地图」<span class="src src-c">🔴 网易官方/媒体口径，多为累计或峰值数</span>；<strong>Epic Fortnite / UEFN</strong> 创作岛超 26 万、创作者占游玩时长 47%、累计向创作者付款破 10 亿美元 <span class="src src-b">🟡 Epic/媒体</span>；<strong>Minecraft（微软）</strong> MAU 约 2.1–2.2 亿 <span class="src src-b">🟡 第三方统计</span>；<strong>Rec Room</strong>（曾 35 亿美元估值）、<strong>Manticore/Core</strong>（"Roblox for adults"，曾融 1 亿美元）。</li>
+      <li><strong>AI 造游戏创业新势力（emerging）：</strong>国外 <strong>Astrocade</strong>（累计融资约 5600 万美元，Sea / Sequoia 等领投，主打「自然语言 → 可玩社交小游戏」）<span class="src src-b">🟡 媒体/Crunchbase</span>；<strong>Rosebud AI</strong>（「vibe coding 造 3D 游戏」，天使含 Karpathy、Sutskever）<span class="src src-b">🟡 媒体</span>；<strong>Series AI</strong>（Rune / Rad，AI 游戏工作室）、<strong>Hytopia</strong>、Spawn.co、各类 "prompt-to-game" 工具。国内 <strong>反舌鸟科技</strong>（AIGC 智能体驱动 UGC 游戏，已完成 A 轮）<span class="src src-b">🟡 36 氪</span>、<strong>游心雕龙《星海自走牌》</strong>（AI 捏卡，目标「创作成本为 0 的 AI UGC 游戏平台」）<span class="src src-b">🟡 游戏陀螺</span>、<strong>掌趣科技</strong>等上市游企的 AI+UGC 平台。</li>
+      <li><strong>大厂顺手做 / 生成式游戏研究（巨头在试）：</strong><strong>腾讯 GiiNEX</strong>（自研游戏 AI 引擎，AIGC 资产/3D 城市/剧情/关卡，UGC 工具已上线《元梦之星》，宣称建城效率提升百倍）<span class="src src-b">🟡 量子位/腾讯</span>；<strong>DeepMind Genie 3</strong>（2025-08 发布的 world model，文字生成可实时漫游世界；2026-01 以 Project Genie 对 Ultra 用户开放）<span class="src src-a">🟢 DeepMind 官方</span>；<strong>Decart Oasis</strong>（纯 AI 生成的 Minecraft，2024-10 公开）<span class="src src-b">🟡 TechCrunch</span>；<strong>World Labs Marble</strong>（Fei-Fei Li，2026 商用，文字/图生成可下载 3D 世界，累计融资约 12.3 亿美元）<span class="src src-b">🟡 TechCrunch</span>；<strong>Microsoft Muse / WHAM</strong>（首个 World and Human Action Model，开源权重，发表于 Nature）<span class="src src-a">🟢 微软/Xbox</span>；以及 Runway/Odyssey 等。米哈游创始人蔡浩宇的 <strong>Anuttacon</strong> 也在做 AI native game。</li>
+      <li><strong>开源 / 免费替代（最易被忽视的威胁）：</strong>开源游戏引擎（Godot 等）+ AI 编程助手（Cursor / Copilot / Claude）已经能让「会一点的人」AI 辅助造游戏；<strong>AI NPC SDK</strong>：Inworld AI（宣称累计融资约 5 亿美元）、Convai、Artificial Agency（融资 1600 万美元）提供即插即用的 agentic NPC；Microsoft Muse / WHAM 开放权重。这一层意味着「AI 造游戏的<strong>能力</strong>」正在快速商品化，平台方的真正壁垒越来越不在「能不能用 AI 造」，而在<strong>分发、网络效应与留存</strong>。</li>
+    </ul>
+
+    <div class="callout insight">
+      <span class="label">早期度判断（必须拆两层）</span>
+      <strong>第一层：传统 UGC 游戏平台</strong> <span class="verdict v-mature">mature / crowded</span> —— Roblox/蛋仔/Fortnite/Minecraft 已形成亿级 DAU 的双边网络效应与创作者经济，巨头主导、同质化，新进入者极难撼动。<br><br>
+      <strong>第二层：「AI 原生、零代码 AI 造游戏」这一具体新形态</strong> <span class="verdict v-emerging">emerging → nascent</span> —— 这才是本赛道的真问题所在。<br><br>
+      <strong>判断信号：</strong>
+      <ul style="margin-top:6px">
+        <li><strong>玩家数与新增速度：</strong>创业产品多在早期/beta，<strong>尚无一款 AI 原生 UGC 平台跑出亿级、甚至千万级稳定 DAU</strong>；对照 Roblox 1.32 亿 DAU，差几个数量级——典型「概念热、规模空」。</li>
+        <li><strong>融资热度/轮次：</strong>热但分散——Astrocade 累计约 5600 万、Inworld 宣称约 5 亿、World Labs 累计约 12.3 亿，钱主要流向「AI 能力层（NPC/world model）」与「单点工具」，<strong>真正押注「AI 原生 UGC 平台」整体的大额轮次还不多</strong>，多停在 seed / A 轮。</li>
+        <li><strong>巨头是否进场：</strong>已进，但<strong>方式是「往既有平台塞 AI」</strong>（Roblox AI 生成、腾讯 GiiNEX 进《元梦之星》、Epic UEFN），<strong>而非另起一个 AI 原生平台</strong>——这给创业公司留了「新形态」的窗口，但也意味着巨头随时能用网络效应收割。</li>
+        <li><strong>开源/免费替代：</strong>已大量存在（开源引擎 + AI 编程、开放权重的 NPC/world model）——说明<strong>「能力」不再稀缺</strong>，赛道竞争正快速转向分发与留存。</li>
+        <li><strong>客户认知/标准：</strong>未成型——「零代码 AI 造游戏」对普通玩家还是新鲜事，没有公认的产品范式，也没有公认 benchmark；生成式游戏仍偏 demo，玩法深度、可控性、留存都未验证。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ② 竞品矩阵 -->
+  <section id="matrix">
+    <h2><span class="n">②</span>竞品对照矩阵</h2>
+    <p>选这 7 个维度，是因为它们最能在这条赛道里拉开差距：<strong>创作门槛</strong>（决定 TAM 有多大）、<strong>AI 介入程度</strong>（AIGC 资产 / agentic NPC / 生成式世界，决定「AI 原生」成色）、<strong>平台 vs 单游戏</strong>（决定有没有网络效应）、<strong>规模/DAU</strong>（决定护城河）、<strong>商业模式</strong>、<strong>技术/网络效应壁垒</strong>、<strong>监管暴露</strong>。每格尽量带来源等级；规模数字口径混乱处并列并注明「累计/峰值/财报」。引子公司一行加粗。</p>
+    <table>
+      <thead><tr>
+        <th>玩家</th>
+        <th>创作门槛</th>
+        <th>AI 介入程度</th>
+        <th>平台 vs 单游戏</th>
+        <th>规模 / DAU</th>
+        <th>商业模式</th>
+        <th>壁垒 / 监管暴露</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>「哇奥醒梦」类早期玩家（本篇引子）</strong></td>
+          <td><strong>主张零代码（AI 工具造游戏）</strong> <span class="src src-c">🔴 自述</span></td>
+          <td><strong>三层全主张：agentic NPC + 多智能体「活」世界 + AI 原生 UGC</strong> <span class="src src-c">🔴 自述/未验证</span></td>
+          <td><strong>先做爆款 Main Game 引流 → 演变为平台</strong> <span class="src src-c">🔴 自述</span></td>
+          <td><strong>未披露（stealth，产品未上线）</strong></td>
+          <td><strong>未披露（推测创作者分成/内购）</strong></td>
+          <td><strong>无现成网络效应（最大软肋）；面向年轻成人以绕开未成年人监管</strong> <span class="src src-c">🔴 自述</span></td>
+        </tr>
+        <tr>
+          <td>Roblox</td>
+          <td>需学 Lua/Studio（在加 AI 生成）<span class="src src-b">🟡</span></td>
+          <td>AIGC 资产 + AI 助手（在补 agentic）<span class="src src-b">🟡</span></td>
+          <td>开放平台（标杆）<span class="src src-a">🟢</span></td>
+          <td>DAU 1.32 亿（Q1 2026）<span class="src src-a">🟢 财报</span></td>
+          <td>内购 Robux + 创作者分成（DevEx）<span class="src src-a">🟢</span></td>
+          <td>双边网络效应极强；未成年人占比高、监管压力大<span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>网易《蛋仔派对》</td>
+          <td>低代码编辑器 + 「万能生成器」AI<span class="src src-b">🟡</span></td>
+          <td>AIGC（文本生成地图，5300 万+ 用过万能生成器）<span class="src src-c">🔴 官方口径</span></td>
+          <td>平台（UGC 地图）+ 大 DAU 主游戏<span class="src src-b">🟡</span></td>
+          <td>注册 5 亿 / DAU 与创作者破 4000 万 / 地图破 1 亿张<span class="src src-c">🔴 累计·峰值口径混杂</span></td>
+          <td>内购 + 创作者激励<span class="src src-b">🟡</span></td>
+          <td>网络效应 + 网易资源；国内未成年人/版号监管最重<span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Epic Fortnite / UEFN</td>
+          <td>UEFN + Verse 脚本（有门槛）<span class="src src-b">🟡</span></td>
+          <td>主要 PGC 工具链，AI 介入有限<span class="src src-b">🟡</span></td>
+          <td>平台（创作岛 26 万+）<span class="src src-b">🟡</span></td>
+          <td>创作者占游玩 47%，累计付款破 10 亿美元<span class="src src-b">🟡</span></td>
+          <td>道具分成池 + 岛内 V-Bucks（2026 前 100% 分成）<span class="src src-b">🟡</span></td>
+          <td>Epic 生态 + UE 引擎绑定<span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Astrocade（创业）</td>
+          <td>零代码：自然语言 → 可玩小游戏<span class="src src-c">🔴 自述</span></td>
+          <td>AI agent 生成美术/玩法/音乐<span class="src src-c">🔴 自述</span></td>
+          <td>社交游戏平台（可 remix）<span class="src src-b">🟡</span></td>
+          <td>未披露稳定 DAU（早期）<span class="src src-b">🟡</span></td>
+          <td>未明确（推测内购/分成）<span class="src src-b">🟡</span></td>
+          <td>累计融资约 5600 万美元；无网络效应护城河<span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Rosebud AI（创业）</td>
+          <td>零代码「vibe coding」造 3D 游戏<span class="src src-c">🔴 自述</span></td>
+          <td>AI 生成代码/资产/世界<span class="src src-c">🔴 自述</span></td>
+          <td>创作工具 + 社区（偏工具）<span class="src src-b">🟡</span></td>
+          <td>未披露规模（早期）<span class="src src-b">🟡</span></td>
+          <td>未明确<span class="src src-b">🟡</span></td>
+          <td>天使含 Karpathy/Sutskever（信誉非护城河）<span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>腾讯 GiiNEX（大厂）</td>
+          <td>面向开发者 + UGC 工具（进《元梦之星》）<span class="src src-b">🟡</span></td>
+          <td>AIGC 资产 + 决策 AI + AI NPC<span class="src src-b">🟡 腾讯</span></td>
+          <td>引擎/能力层，赋能自家平台<span class="src src-b">🟡</span></td>
+          <td>自身非独立 DAU；借《元梦之星》分发<span class="src src-b">🟡</span></td>
+          <td>嵌入腾讯游戏生态<span class="src src-b">🟡</span></td>
+          <td>腾讯全栈资源 = 最大威胁；自带合规体系<span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>DeepMind Genie 3（research）</td>
+          <td>文字 prompt → 可漫游世界（非「造游戏」）<span class="src src-a">🟢</span></td>
+          <td>生成式世界（world model 最前沿）<span class="src src-a">🟢</span></td>
+          <td>research preview / Project Genie（非平台）<span class="src src-a">🟢</span></td>
+          <td>研究预览，小范围开放<span class="src src-a">🟢</span></td>
+          <td>暂无（Ultra 订阅试水）<span class="src src-a">🟢</span></td>
+          <td>Google 算力/研究壁垒；可控性、玩法、留存未验证<span class="src src-a">🟢</span></td>
+        </tr>
+        <tr>
+          <td>Inworld / Convai（NPC SDK）</td>
+          <td>面向开发者集成（非零代码玩家）<span class="src src-b">🟡</span></td>
+          <td>agentic NPC（记忆/性格/对话）<span class="src src-b">🟡</span></td>
+          <td>能力层 SDK（被集成）<span class="src src-b">🟡</span></td>
+          <td>Inworld 宣称累计融资约 5 亿美元<span class="src src-c">🔴 自述</span></td>
+          <td>API / 授权<span class="src src-b">🟡</span></td>
+          <td>把「会玩的 AI」商品化 = 削弱平台差异化<span class="src src-b">🟡</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>读矩阵：</strong>巨头强在「平台 + 亿级 DAU + 网络效应」，但 AI 原生成色弱（多是往老平台塞 AI）；创业新势力强在「零代码 + AI 原生」，但<strong>普遍卡在「单游戏/工具、无网络效应、无稳定 DAU」</strong>；研究/world model 强在「生成式世界」的技术上限，但<strong>离「能当产品长期玩的游戏」最远</strong>；NPC SDK 与开放权重则在把「会玩的 AI」这一能力<strong>商品化</strong>——这恰恰说明本赛道的差异化正从「AI 能力」转向「分发与留存」。引子公司「哇奥醒梦」把三层主张（会玩的 AI + 活世界 + 零代码平台）全许诺了，但<strong>每一格目前都是🔴自述/未验证</strong>，且唯独缺最关键的一格：网络效应与 DAU。</p>
+  </section>
+
+  <!-- ③ 定位图 -->
+  <section id="map">
+    <h2><span class="n">③</span>定位图（whitespace 在哪）</h2>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 660 420" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12">
+        <rect x="340" y="40" width="280" height="170" fill="#7aa2ff" opacity="0.10"/>
+        <text x="610" y="62" text-anchor="end" fill="#3a66ff" font-size="11.5" font-weight="700">whitespace</text>
+        <text x="610" y="78" text-anchor="end" fill="#5a627a" font-size="10.5">AI 零代码 × 开放平台</text>
+        <text x="610" y="92" text-anchor="end" fill="#5a627a" font-size="10.5">（尚无跑通赢家）</text>
+        <line x1="40" y1="210" x2="620" y2="210" stroke="#b9c2e0" stroke-width="1.5"/>
+        <line x1="340" y1="36" x2="340" y2="392" stroke="#b9c2e0" stroke-width="1.5"/>
+        <text x="618" y="228" text-anchor="end" fill="#5a627a">AI 零代码（说一句就造）→</text>
+        <text x="42" y="228" fill="#5a627a">← 传统工具 / 需学脚本</text>
+        <text x="346" y="34" fill="#5a627a">↑ 开放平台（网络效应）</text>
+        <text x="346" y="388" fill="#5a627a">↓ 单一游戏 / 工具</text>
+
+        <circle cx="150" cy="95" r="6" fill="#ff6b81"/><text x="160" y="99" fill="#1a1f33">Roblox</text>
+        <circle cx="120" cy="130" r="6" fill="#ff6b81"/><text x="130" y="134" fill="#1a1f33">蛋仔派对</text>
+        <circle cx="220" cy="115" r="6" fill="#ff6b81"/><text x="230" y="119" fill="#1a1f33">Fortnite/UEFN</text>
+        <circle cx="170" cy="160" r="6" fill="#ff6b81"/><text x="180" y="164" fill="#1a1f33">Minecraft</text>
+        <circle cx="250" cy="155" r="6" fill="#ff6b81"/><text x="258" y="159" fill="#1a1f33">Rec Room / Core</text>
+
+        <circle cx="470" cy="290" r="6" fill="#43c59e"/><text x="478" y="294" fill="#1a1f33">Astrocade</text>
+        <circle cx="520" cy="320" r="6" fill="#43c59e"/><text x="430" y="324" fill="#1a1f33" text-anchor="end">Rosebud AI</text>
+        <circle cx="555" cy="265" r="6" fill="#43c59e"/><text x="545" y="252" fill="#1a1f33" text-anchor="end">星海自走牌</text>
+        <circle cx="430" cy="345" r="6" fill="#43c59e"/><text x="438" y="349" fill="#1a1f33">Series AI</text>
+
+        <circle cx="595" cy="360" r="6" fill="#9b8cff"/><text x="585" y="375" fill="#1a1f33" text-anchor="end">Genie 3 / Oasis / Marble（research/demo）</text>
+
+        <circle cx="120" cy="310" r="6" fill="#ffb454"/><text x="130" y="314" fill="#1a1f33">Inworld / Convai（NPC SDK）</text>
+
+        <circle cx="300" cy="120" r="6" fill="#ffb454"/><text x="292" y="108" fill="#1a1f33" text-anchor="end">腾讯 GiiNEX→元梦之星</text>
+
+        <circle cx="470" cy="120" r="8" fill="none" stroke="#6b4cff" stroke-width="2" stroke-dasharray="4 3"/>
+        <circle cx="470" cy="120" r="3" fill="#6b4cff"/>
+        <text x="482" y="116" fill="#6b4cff" font-weight="700">哇奥醒梦</text>
+        <text x="482" y="131" fill="#5a627a" font-size="10.5">（自我定位，stealth 未验证）</text>
+      </svg>
+      </div>
+      <figcaption>定位图（本调研重绘）。横轴：传统工具/需学脚本 ↔ AI 零代码；纵轴：单一游戏/工具 ↔ 开放平台。<strong>右上「AI 零代码 × 开放平台」是 whitespace</strong>——巨头占左上（红，平台但需学工具）、创业新势力在右下（绿，AI 但偏单游戏/工具）、world model 在右下极端（紫，AI 极致但更非「可长期玩的平台」）。引子公司用虚线圈标在 whitespace，表示「<strong>它想占这格，但仅是自述、产品未上线、未验证</strong>」。</figcaption>
+    </figure>
+  </section>
+
+  <!-- ④ 赛道热度 timeline -->
+  <section id="funding">
+    <h2><span class="n">④</span>赛道热度 timeline（用代表性事件拼）</h2>
+    <p>引子公司无公开融资，故此处用<strong>赛道代表性玩家的融资/重大事件</strong>拼一条「赛道热度时间线」，看 AI 造游戏这股热度怎么起来的。</p>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 760 230" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12">
+        <line x1="50" y1="120" x2="720" y2="120" stroke="#b9c2e0" stroke-width="2"/>
+
+        <circle cx="80" cy="120" r="5" fill="#ff6b81"/>
+        <line x1="80" y1="120" x2="80" y2="78" stroke="#cbd2e6"/>
+        <text x="80" y="68" text-anchor="middle" fill="#5a627a">2021-03</text>
+        <text x="80" y="54" text-anchor="middle" fill="#1a1f33">Roblox 上市</text>
+
+        <circle cx="200" cy="120" r="5" fill="#ffb454"/>
+        <line x1="200" y1="120" x2="200" y2="158" stroke="#cbd2e6"/>
+        <text x="200" y="174" text-anchor="middle" fill="#5a627a">2023</text>
+        <text x="200" y="190" text-anchor="middle" fill="#1a1f33">蛋仔 UGC 破亿地图</text>
+        <text x="200" y="205" text-anchor="middle" fill="#1a1f33">+ 斯坦福 AI 小镇</text>
+
+        <circle cx="330" cy="120" r="5" fill="#ffb454"/>
+        <line x1="330" y1="120" x2="330" y2="80" stroke="#cbd2e6"/>
+        <text x="330" y="70" text-anchor="middle" fill="#5a627a">2024-03</text>
+        <text x="330" y="56" text-anchor="middle" fill="#1a1f33">腾讯 GiiNEX 发布</text>
+
+        <circle cx="440" cy="120" r="5" fill="#9b8cff"/>
+        <line x1="440" y1="120" x2="440" y2="158" stroke="#cbd2e6"/>
+        <text x="440" y="174" text-anchor="middle" fill="#5a627a">2024-10</text>
+        <text x="440" y="190" text-anchor="middle" fill="#1a1f33">Decart Oasis</text>
+        <text x="440" y="205" text-anchor="middle" fill="#1a1f33">(AI Minecraft)</text>
+
+        <circle cx="540" cy="120" r="5" fill="#9b8cff"/>
+        <line x1="540" y1="120" x2="540" y2="80" stroke="#cbd2e6"/>
+        <text x="540" y="70" text-anchor="middle" fill="#5a627a">2025-02</text>
+        <text x="540" y="56" text-anchor="middle" fill="#1a1f33">MS Muse/WHAM</text>
+
+        <circle cx="630" cy="120" r="5" fill="#7aa2ff"/>
+        <line x1="630" y1="120" x2="630" y2="158" stroke="#cbd2e6"/>
+        <text x="630" y="174" text-anchor="middle" fill="#5a627a">2025-08/11</text>
+        <text x="630" y="190" text-anchor="middle" fill="#1a1f33">Genie 3 / Marble</text>
+        <text x="630" y="205" text-anchor="middle" fill="#1a1f33">world model 爆发</text>
+
+        <circle cx="710" cy="120" r="5" fill="#43c59e"/>
+        <line x1="710" y1="120" x2="710" y2="80" stroke="#cbd2e6"/>
+        <text x="705" y="70" text-anchor="middle" fill="#5a627a">2026</text>
+        <text x="705" y="56" text-anchor="middle" fill="#1a1f33">Astrocade 累计~56M</text>
+        <text x="705" y="42" text-anchor="middle" fill="#1a1f33">/ Project Genie 公开</text>
+      </svg>
+      </div>
+      <figcaption>AI Native UGC 游戏赛道热度时间线（据公开报道整理；金额/口径见下表）。</figcaption>
+    </figure>
+    <table>
+      <thead><tr><th>时间</th><th>事件 / 玩家</th><th>金额 / 规模</th><th>意义</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr><td>2021-03</td><td>Roblox 直接上市（DPO）</td><td>上市后市值一度超 400 亿美元</td><td>UGC 平台模式被资本市场验证</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2023</td><td>网易《蛋仔派对》UGC 起量 / 斯坦福 Generative Agents</td><td>地图破 1 亿张；AI 小镇论文</td><td>UGC 网络效应 + agentic NPC 同年点火</td><td><span class="src src-b">🟡</span> / <span class="src src-a">🟢 论文</span></td></tr>
+        <tr><td>2024-03</td><td>腾讯发布 GiiNEX 游戏 AI 引擎</td><td>—（宣称建城效率提升百倍）</td><td>大厂把 AIGC 塞进自家 UGC 工具</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2024-10</td><td>Decart Oasis（AI 生成 Minecraft）</td><td>Decart 累计种子约 5300 万美元（21M+32M）</td><td>生成式游戏从 demo 进入公众视野</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2025-02</td><td>Microsoft Muse / WHAM（Nature）</td><td>开源权重</td><td>巨头给「世界+动作模型」背书</td><td><span class="src src-a">🟢</span></td></tr>
+        <tr><td>2025-08</td><td>DeepMind Genie 3 发布</td><td>research preview</td><td>world model 实时可交互的里程碑</td><td><span class="src src-a">🟢</span></td></tr>
+        <tr><td>2025-11 / 2026-02</td><td>World Labs 推出 Marble</td><td>World Labs 累计融资约 12.3 亿美元</td><td>生成式 3D 世界商业化提速</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2026-01</td><td>DeepMind 以 Project Genie 对 Ultra 用户开放</td><td>订阅试水（限美国 18+）</td><td>world model 从研究走向消费试用</td><td><span class="src src-a">🟢</span></td></tr>
+        <tr><td>2026-05</td><td>Astrocade 公布 A+B 轮（Sea / Sequoia 等）</td><td>累计约 5600 万美元（含早期 1200 万种子）</td><td>「AI 造社交小游戏」拿到大额下注</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>持续</td><td>Inworld（NPC，宣称累计~5 亿）、Convai、反舌鸟（A 轮）等</td><td>口径不一，见正文</td><td>能力层与国内创业并行加速</td><td><span class="src src-c">🔴 部分自述</span></td></tr>
+      </tbody>
+    </table>
+    <p><strong>读时间线：</strong>2021 验证 UGC 平台 → 2023 起 UGC 网络效应与 agentic NPC 同时点火 → 2024–2026 大厂（腾讯/微软/Google）与创业公司（Astrocade/Rosebud/World Labs）密集出招，<strong>热度明显在升</strong>；但注意：钱与里程碑大量集中在「<strong>能力层</strong>（world model / NPC）」与「<strong>单点工具/单游戏</strong>」，<strong>真正「AI 原生 UGC 平台」整体的大额融资与亿级 DAU 还没出现</strong>——这正是「emerging→nascent」的财务佐证。</p>
+  </section>
+
+  <!-- ⑤ 引子公司速览 -->
+  <section id="snapshot">
+    <h2><span class="n">⑤</span>引子公司速览（stealth，仅有方向）</h2>
+    <table>
+      <tbody>
+        <tr><td>是什么 / 定位</td><td>「上海哇奥醒梦科技」，自我介绍定位「<strong>AI for fun</strong>」「<strong>AI Native 的 UGC 游戏平台</strong>」 <span class="src src-c">🔴 自述</span></td></tr>
+        <tr><td>三层主张</td><td>① <strong>会玩的 AI</strong>（有「活人感」、有目标情绪、能自主行动的 agentic NPC）；② <strong>「活」的世界</strong>（多智能体动态编排剧情/任务，打破预设脚本）；③ <strong>AI 原生 UGC 平台</strong>（玩家零代码、用 AI 工具做游戏，可分享/二创） <span class="src src-c">🔴 自述/未验证</span></td></tr>
+        <tr><td>战略</td><td>两条腿：<strong>技术底层平台</strong> + <strong>先做大 DAU 的旗舰 Main Game 引流，再演变为平台</strong> <span class="src src-c">🔴 自述</span></td></tr>
+        <tr><td>受众</td><td>面向<strong>年轻成人</strong>（非未成年人） <span class="src src-c">🔴 自述</span></td></tr>
+        <tr><td>团队 / 融资</td><td><strong>查无可信公开信息</strong>——本次中英文多源检索（含游戏陀螺、36 氪、量子位等行业媒体）<strong>未找到该公司名下的团队背景、融资轮次或上线产品</strong>；与其名相近的「离职腾讯做 AI 游戏」报道经核实指向<strong>另一家公司</strong>（深圳·游心雕龙《星海自走牌》，创始人「太一」），<strong>不能等同</strong>。<span class="src src-c">🔴 未找到 / 未披露</span></td></tr>
+        <tr><td>状态</td><td><strong>stealth；仅有方向，产品实效未验证</strong>。本文将其作为「赛道里的一个早期玩家」定位，不为其编造任何数据。</td></tr>
+      </tbody>
+    </table>
+    <div class="callout warn">
+      <span class="label">诚实提醒</span>
+      关于「上海哇奥醒梦科技」的一切（定位、三层主张、战略、受众）<strong>均来自其自我介绍（🔴 自述）</strong>，本次公开检索<strong>无法独立核实其团队、融资与产品</strong>。请勿把它的愿景当成既成事实。
+    </div>
+  </section>
+
+  <!-- ⑥ 创业 idea 借鉴 -->
+  <section id="idea">
+    <h2><span class="n">⑥</span>创业 idea 借鉴</h2>
+    <div class="callout insight">
+      <span class="label">Whitespace / 机会</span>
+      定位图右上角——「<strong>AI 零代码 × 开放平台</strong>」——是目前<strong>谁都没真正占住</strong>的那一格：巨头有平台和网络效应但创作仍需学工具；创业公司有零代码 AI 但多停在「单游戏/工具、没网络效应」；world model 技术最炫但离「能长期玩的平台」最远。<strong>谁能率先把「说一句就造游戏」做到既好用、又能形成玩家互相消费内容的网络效应、且留得住人，谁就吃下这格。</strong>
+    </div>
+
+    <h3>现有玩家共同短板（unmet needs）</h3>
+    <ul>
+      <li><strong>「零代码 AI 造游戏」的真实可用性还没到拐点：</strong>creative 工具能产出 demo，但<strong>玩法深度、可控性、可玩性</strong>普遍不足——AI 生成的游戏「能跑」不等于「好玩、有人持续玩」。</li>
+      <li><strong>agentic NPC 缺「留存证据」：</strong>「会玩的 AI / 活世界」演示惊艳，但<strong>没有公开数据证明它能显著提升次留/长留</strong>；新鲜感过后是否还玩，未验证。</li>
+      <li><strong>生成式游戏 / world model 仍偏 demo：</strong>Genie 3、Oasis、Marble 上限高，但<strong>不可控、难做成有规则的正经玩法、算力贵</strong>，离消费级产品远。</li>
+      <li><strong>UGC + AIGC 的审核与版权是公认痛点：</strong>玩家用 AI 量产内容，<strong>侵权、违规、低质刷屏</strong>的治理成本陡增，现有平台都在摸索。</li>
+    </ul>
+
+    <h3>Why now（为什么现在值得做）</h3>
+    <ul>
+      <li><strong>能力拐点：</strong>LLM + 多模态 + agent + world model 同时成熟，「自然语言 → 资产/逻辑/NPC/世界」第一次有了工程可行性；NPC SDK、开放权重（Muse/WHAM）把能力商品化，创业门槛骤降。</li>
+      <li><strong>需求拐点：</strong>Roblox/蛋仔/Fortnite 已经把「玩家想当创作者」教育成主流心智，但<strong>仍有学习门槛</strong>——AI 正好补「最后一公里」。</li>
+      <li><strong>窗口拐点：</strong>巨头在「往老平台塞 AI」，<strong>尚未另起一个 AI 原生平台</strong>，给新形态留了短暂窗口。</li>
+    </ul>
+
+    <h3>可借鉴的打法 + 相邻机会</h3>
+    <ul>
+      <li><strong>borrowable：</strong>「<strong>先爆款 Main Game 引流、再演变为平台</strong>」是聪明的冷启动解法（先解决「平台没人」的鸡生蛋问题）——蛋仔正是「大 DAU 主游戏 + UGC 平台」双轮。面向<strong>年轻成人</strong>切入，可阶段性绕开国内最重的未成年人/防沉迷监管，也避开和巨头在低龄人群正面碰。</li>
+      <li><strong>adjacent：</strong>① 不做平台、只做「<strong>AI 造游戏的能力层/工具</strong>」卖给所有平台（像 Inworld 之于 NPC）；② 垂直化——只做某一品类（卡牌、剧情/互动叙事、社交派对小游戏）的 AI 零代码工具，先把一个品类的可用性做到拐点；③ 做 UGC+AIGC 的<strong>内容审核/版权治理中间件</strong>（赛道公共痛点）；④ 出海绕开国内版号，面向海外年轻成人。</li>
+    </ul>
+
+    <div class="callout warn">
+      <span class="label">风险（诚实给）</span>
+      <strong>① 大厂碾压：</strong>Roblox/蛋仔/Epic 的双边网络效应 + 大厂资源是最大威胁——它们随时能把 AI 塞进既有亿级 DAU 平台，新玩家的「AI 原生」优势可能被规模直接抹平。<strong>② 留存与变现未验证：</strong>「AI 造的游戏好玩吗、agentic NPC 能留住人吗」都还没有公开数据支撑。<strong>③ 生成式游戏仍早：</strong>world model 路线不可控、算力贵，短期难做成正经玩法。<strong>④ AIGC 版权与审核：</strong>UGC×AIGC 的侵权/违规治理是悬顶之剑。<strong>⑤ 国内监管：</strong>版号、未成年人防沉迷、UGC 内容审核（《网络游戏管理办法》草案趋严）——即便面向年轻成人，身份核验与内容合规仍是硬约束。<strong>⑥ 冷启动悖论：</strong>「先爆款后平台」听上去美，但做出一款真爆款本身就极难，且爆款团队未必擅长做平台。
+    </div>
+  </section>
+
+  <!-- ⑦ 现实判断 -->
+  <section id="take">
+    <h2><span class="n">⑦</span>现实判断</h2>
+    <p><strong>这条赛道值不值得切？</strong>值得「赌」、但要清醒。传统 UGC 平台这一层是 mature/crowded 的红海，正面硬刚巨头几乎没胜算；真正的机会在「AI 原生、零代码」这个 emerging→nascent 的<strong>新形态</strong>——它还没被任何人跑通，技术 why-now 成立，窗口真实存在，但「概念热、产品早、留存未证」三个字也同样真实。</p>
+    <p><strong>哪一格最可能突破？</strong>不是技术最炫的 world model（离产品最远），而是「<strong>AI 零代码 × 某个可玩品类 × 能滚起网络效应</strong>」的组合——更可能从「一款 AI 原生的爆款社交/UGC 游戏」长出平台，而非从「一个通用 prompt-to-game 工具」横切。换言之：<strong>留存 &gt; 炫技，分发 &gt; 能力</strong>。</p>
+    <p><strong>「哇奥醒梦」这类早期玩家的胜算与软肋？</strong>它的三层主张（会玩的 AI + 活世界 + 零代码平台）正好对准了 whitespace，方向不能说错；「先爆款后平台 + 面向年轻成人」的打法也合理。<strong>但软肋是结构性的：</strong>① 它目前是 stealth、零公开证据，唯一能核实的只有「方向」，产品/团队/融资<strong>一概未验证</strong>；② 它缺最关键的一格——<strong>网络效应与 DAU</strong>，而这恰是巨头的命门护城河；③ 它许诺的每一层（agentic NPC 留存、AI 造游戏好玩度、平台冷启动）都是赛道公认尚未跑通的难题，<strong>同时赌三件难事</strong>。最务实的判断：方向对、窗口在，但<strong>胜负完全取决于「能不能先做出一款真留得住人的爆款」</strong>——这件事的难度，和它愿景的性感程度成反比。</p>
+    <div class="callout warn">
+      <span class="label">使用提醒</span>
+      本页为对话式赛道调研，信息主要来自公开来源并按等级标注；融资数额、DAU、能力声明等口径混乱处已并列标注，<strong>引子公司「哇奥醒梦」的全部信息均为🔴自述、未独立验证</strong>，竞品规模数字（尤其🔴自述/累计/峰值口径）引用前请核对最新一手来源。
+    </div>
+  </section>
+
+  <!-- 出处 -->
+  <section id="src">
+    <h2>出处</h2>
+    <ul style="font-size:13.5px">
+      <li><span class="src src-a">🟢</span> Roblox Q1 2026 股东信 / 8-K（DAU 1.32 亿、创作者收入）：<a href="https://www.sec.gov/Archives/edgar/data/0001315098/000162828026028882/ex991-q12026earningsshar.htm" target="_blank" rel="noopener">SEC EDGAR</a></li>
+      <li><span class="src src-b">🟡</span> 网易《蛋仔派对》UGC/创作者数据（5 亿注册、DAU/创作者破 4000 万、地图破亿、万能生成器）：<a href="http://www.news.cn/digital/20240729/e9724a4e1dff4b9ba4a0c9a5fc4cf6f2/c.html" target="_blank" rel="noopener">新华网</a> · <a href="http://www.gamelook.com.cn/2023/10/528838/" target="_blank" rel="noopener">GameLook</a></li>
+      <li><span class="src src-b">🟡</span> Fortnite/UEFN 创作经济（26 万岛、占游玩 47%、付款破 10 亿）：<a href="https://respawn.outlookindia.com/gaming/gaming-news/epics-uefn-payouts-reached-1-billion-since-launch" target="_blank" rel="noopener">Outlook Respawn</a></li>
+      <li><span class="src src-b">🟡</span> Minecraft MAU ~2.1–2.2 亿：<a href="https://www.demandsage.com/minecraft-statistics/" target="_blank" rel="noopener">DemandSage</a></li>
+      <li><span class="src src-b">🟡</span> Astrocade 累计约 5600 万美元（A+B，Sea/Sequoia）：<a href="https://www.sci-tech-today.com/news/astrocade-raises-56m/" target="_blank" rel="noopener">Sci-Tech Today</a> · <a href="https://gamesbeat.com/astrocade-raises-12m-for-ai-based-social-gaming-platform/" target="_blank" rel="noopener">GamesBeat（12M 种子）</a></li>
+      <li><span class="src src-b">🟡</span> Rosebud AI（vibe coding 造 3D 游戏，天使 Karpathy/Sutskever）：<a href="https://rosebud.ai/" target="_blank" rel="noopener">官网</a></li>
+      <li><span class="src src-b">🟡</span> 腾讯 GiiNEX（游戏 AI 引擎、进《元梦之星》）：<a href="https://www.qbitai.com/2024/03/129590.html" target="_blank" rel="noopener">量子位</a> · <a href="https://giinex.tencent.com/" target="_blank" rel="noopener">GiiNEX 官网</a></li>
+      <li><span class="src src-a">🟢</span> DeepMind Genie 3 / Project Genie（2025-08 发布、2026-01 开放）：<a href="https://deepmind.google/blog/genie-3-a-new-frontier-for-world-models/" target="_blank" rel="noopener">DeepMind 官方</a> · <a href="https://blog.google/innovation-and-ai/models-and-research/google-deepmind/project-genie/" target="_blank" rel="noopener">Google 官方</a></li>
+      <li><span class="src src-b">🟡</span> Decart Oasis（AI 生成 Minecraft，2024-10）：<a href="https://techcrunch.com/2024/10/31/decarts-ai-simulates-a-real-time-playable-version-of-minecraft/" target="_blank" rel="noopener">TechCrunch</a></li>
+      <li><span class="src src-a">🟢</span> Microsoft Muse / WHAM（首个 World and Human Action Model，开源权重，Nature）：<a href="https://www.microsoft.com/en-us/research/blog/introducing-muse-our-first-generative-ai-model-designed-for-gameplay-ideation/" target="_blank" rel="noopener">Microsoft Research</a></li>
+      <li><span class="src src-b">🟡</span> World Labs / Marble（Fei-Fei Li，累计融资约 12.3 亿美元）：<a href="https://techcrunch.com/2025/11/12/fei-fei-lis-world-labs-speeds-up-the-world-model-race-with-marble-its-first-commercial-product/" target="_blank" rel="noopener">TechCrunch</a></li>
+      <li><span class="src src-b">🟡</span> Inworld AI（NPC，宣称累计~5 亿） / Artificial Agency（1600 万）：<a href="https://lsvp.com/stories/inworld-ai-npcs-character-engine/" target="_blank" rel="noopener">Lightspeed</a> · <a href="https://techcrunch.com/2024/07/18/artificial-agency-raises-video-game-npcs-ai/" target="_blank" rel="noopener">TechCrunch</a></li>
+      <li><span class="src src-b">🟡</span> Rec Room（35 亿估值）/ Manticore Core（1 亿融资，"Roblox for adults"）：<a href="https://www.pocketgamer.biz/news/77795/rec-room-raises-145-million-at-35-billion-valuation/" target="_blank" rel="noopener">PocketGamer.biz</a> · <a href="https://gameworldobserver.com/2021/04/01/manticore-games-raises-100-million-for-its-ugc-platform-dubbed-as-roblox-for-adults" target="_blank" rel="noopener">Game World Observer</a></li>
+      <li><span class="src src-b">🟡</span> 国内 AI+UGC 创业（反舌鸟 A 轮 / 游心雕龙《星海自走牌》/ Anuttacon）：<a href="https://www.36kr.com/p/3571720787884928" target="_blank" rel="noopener">36 氪</a> · <a href="https://www.youxituoluo.com/533209.html" target="_blank" rel="noopener">游戏陀螺</a></li>
+      <li><span class="src src-b">🟡</span> 国内游戏监管（版号 / 未成年人防沉迷 /《网络游戏管理办法》草案）：<a href="https://www.nppa.gov.cn/xxfb/ywdt/202412/t20241216_877443.html" target="_blank" rel="noopener">国家新闻出版署</a> · <a href="https://www.hankunlaw.com/portal/article/index/cid/8/id/13854.html" target="_blank" rel="noopener">汉坤律所解读</a></li>
+      <li><span class="src src-c">🔴</span> 「上海哇奥醒梦科技」定位 / 三层主张 / 战略 / 受众：均来自其自我介绍，本次公开检索未能独立核实其团队、融资与产品（未找到可信公开信息）。</li>
+    </ul>
+  </section>
+
+  <footer class="foot">
+    AI Native UGC 游戏平台赛道竞争格局 / 早期度调研笔记，仅作梳理；信息按来源分级、产品能力未必经独立验证，以官方一手信息为准 · 整理日期 2026-06-22
+  </footer>
+
+</article>
+</body>
+</html>
