@@ -113,9 +113,10 @@
     <a href="#map">③ 定位图</a>
     <a href="#funding">④ 融资 timeline</a>
     <a href="#snapshot">⑤ 公司速览</a>
-    <a href="#bench">⑥ 国际对标 / Benchmarks</a>
-    <a href="#idea">⑦ 创业 idea 借鉴</a>
-    <a href="#take">⑧ 现实判断</a>
+    <a href="#sandbox">⑥ Agent 沙箱 vs E2B</a>
+    <a href="#bench">⑦ 国际对标 / Benchmarks</a>
+    <a href="#idea">⑧ 创业 idea 借鉴</a>
+    <a href="#take">⑨ 现实判断</a>
     <a href="#src">出处</a>
   </nav>
 
@@ -327,9 +328,36 @@
     </div>
   </section>
 
-  <!-- ⑥ 国际对标 -->
+  <!-- ⑥ PPIO Agent 沙箱 vs E2B -->
+  <section id="sandbox">
+    <h2><span class="n">⑥</span>PPIO Agent 沙箱 vs E2B</h2>
+    <p>除了推理 API 与租卡，PPIO 还上线了 <strong>Agent 沙箱（Agent Sandbox）</strong>——给 AI agent 跑 AI 生成代码的安全隔离云沙箱，和 <a href="../2026-06-17-e2b/index.html">E2B</a> 是同一品类（agent code execution runtime）。最关键的一点：<strong>它兼容 E2B 协议</strong>，可以用任何支持 E2B 协议的 SDK 直接接 PPIO 沙箱，官方文档还给了 <strong>E2B Desktop（computer-use）/ Browser-use / OpenClaw</strong> 的接入指南。也就是说 PPIO 不只是「推理算力云」，而是在往 <strong>全栈 agent infra</strong>（推理 + 沙箱执行 + computer-use/浏览器）走，和 E2B、Cloudflare Sandbox 进了同一战场。</p>
+    <table>
+      <thead><tr><th>维度</th><th>E2B</th><th><strong>PPIO Agent 沙箱</strong></th></tr></thead>
+      <tbody>
+        <tr><td>主体 / 定位</td><td>FoundryLabs（美国，YC 出身）；开源 SDK + 托管云，<strong>定义了事实标准协议</strong> <span class="src src-a">🟢</span></td><td>PPIO 派欧云（中国）；推理算力云<strong>顺势加的沙箱产品</strong> <span class="src src-a">🟢官方文档</span></td></tr>
+        <tr><td>协议</td><td>E2B 协议（SDK 事实标准）</td><td><strong>兼容 E2B 协议</strong>——可用 E2B SDK 直接接入 <span class="src src-a">🟢</span></td></tr>
+        <tr><td>启动延迟</td><td>~80–200ms（自报）<span class="src src-c">🔴自述</span></td><td>&lt;200ms（自报）<span class="src src-c">🔴自述</span></td></tr>
+        <tr><td>计费</td><td>按秒（vCPU/内存）</td><td>按秒（vCPU/内存）<span class="src src-a">🟢</span></td></tr>
+        <tr><td>语言</td><td>Python / JS 为主</td><td>Python / JS / C++ 等 <span class="src src-a">🟢</span></td></tr>
+        <tr><td>pause/resume</td><td>支持（恢复文件系统+内存态）</td><td>支持（恢复文件系统+进程态）<span class="src src-a">🟢</span></td></tr>
+        <tr><td>computer-use / 浏览器</td><td>E2B Desktop（自家）</td><td>接入 E2B Desktop + Browser-use <span class="src src-a">🟢</span></td></tr>
+        <tr><td>开源</td><td>SDK 开源（Apache-2.0，~12.7k stars）</td><td>闭源服务（未见开源 SDK）</td></tr>
+        <tr><td>部署 / 合规</td><td>美国托管为主，self-host 可选</td><td><strong>中国境内节点，数据可不出境 / 对接信创私有化</strong>（结构性优势，具体私有化能力未见一手细节）<span class="src src-b">🟡推断</span></td></tr>
+        <tr><td>底层算力</td><td>集中式云</td><td>自有<strong>分布式聚合算力</strong>（潜在成本优势）<span class="src src-c">🔴自述</span></td></tr>
+      </tbody>
+    </table>
+    <div class="callout insight">
+      <span class="label">这意味着什么</span>
+      PPIO 用「<strong>兼容 E2B 协议</strong>」把自己做成了 E2B 的<strong>中国接入点 / 替代</strong>：海外用 E2B SDK 写的 agent，几乎零改造就能切到 PPIO 跑、把数据留在境内。这恰好命中 <a href="../2026-06-17-e2b/index.html">E2B 那篇</a>提的 whitespace——「<strong>面向中国信创 / 私有化的 agent 沙箱</strong>」，PPIO 已经在占这个位；而且它还能和自家推理 API、租卡形成「<strong>推理 + 执行 + computer-use</strong>」的全栈捆绑，这是纯沙箱玩家（E2B/Daytona/Morph）没有的协同。<br><br>
+      <strong>但别高估护城河</strong>：沙箱是开源可自建的薄层，E2B 协议兼容意味着<strong>迁移成本极低、双向可替换</strong>（既方便客户进来、也方便走掉）；大厂（火山/阿里/腾讯）同样能顺手做。PPIO 的真正筹码不在沙箱本身，而在「分布式算力是否真能把执行+推理的综合成本压下来」——这仍是未证伪的赌注。
+    </div>
+    <p class="legend">来源：PPIO 官方文档（Agent 沙箱总览 / E2B Desktop 接入 / Browser-use 接入）<span class="src src-a">🟢</span>；启动延迟等性能指标为各家自报<span class="src src-c">🔴</span>，口径不一未独立验证。</p>
+  </section>
+
+  <!-- ⑦ 国际对标 -->
   <section id="bench">
-    <h2><span class="n">⑥</span>国际对标 / Benchmarks</h2>
+    <h2><span class="n">⑦</span>国际对标 / Benchmarks</h2>
     <p>PPIO 本身是中国公司，这节反过来看：<strong>它对标的海外玩家是谁、学了什么、差在哪、有什么中国特色优势。</strong></p>
     <h3>它对标谁</h3>
     <ul>
@@ -352,7 +380,7 @@
 
   <!-- ⑦ 创业 idea 借鉴 -->
   <section id="idea">
-    <h2><span class="n">⑦</span>创业 idea 借鉴</h2>
+    <h2><span class="n">⑧</span>创业 idea 借鉴</h2>
     <div class="callout insight">
       <span class="label">Whitespace / 机会</span>
       ① <strong>分布式聚合闲置算力的成本优势</strong>——若能真把闲置/边缘 GPU 的成本打到集中式以下并保住可用性，是真护城河（PPIO 押注于此，但尚未独立证实）。② <strong>信创 / 私有化推理</strong>——国际玩家进不来、大厂又笨重的细分：给政企/金融/医疗做「数据不出域 + 国产卡 + 一键私有化部署开源模型推理」的垂直方案。③ <strong>垂直行业推理云</strong>——不做通用 API，而做某行业（法律/医疗/工业）调好的推理 + 工作流，避开纯 token 价格战。
@@ -374,7 +402,7 @@
 
   <!-- ⑧ 现实判断 -->
   <section id="take">
-    <h2><span class="n">⑧</span>现实判断</h2>
+    <h2><span class="n">⑨</span>现实判断</h2>
     <p>PPIO 的胜算在于<strong>「存量边缘云网络 + 现金流业务（边缘 CDN，营收主力）」给它补血</strong>，比纯靠融资烧的推理 API 创业公司更抗打；且<strong>信创 / 国内合规 / 边缘下沉</strong>是国际玩家进不来的真实壁垒，IPO 后若拿到资本和「AI infra 第一股」标签，有机会在国内站住中部位置。</p>
     <p>软肋同样明确：<strong>AI 推理云这一层已经从 emerging 滑向 crowded、且陷入价格血战</strong>，PPIO 的核心差异化叙事（分布式聚合更便宜）<strong>尚未被独立验证</strong>，而分布式天然的 SLA/时延短板正好戳中企业级负载的痛点；正面战场上有大厂（自带推理 + 赔本引流，最大威胁）、侧面有硅基流动（更轻的纯 API）和无问芯穹（更硬的国产异构调度故事）。它本质上是<strong>「用一张老网络打一个新红海」——需求是真的爆发，但能不能把规模转成毛利、把「便宜」转成「又便宜又稳」，是它 IPO 之后必须证明的事</strong>。对想入局者：别再做第 51 个「OpenAI 兼容推理 API」，机会在<strong>垂直行业推理云、信创私有化、或推理 FinOps/路由优化层</strong>这些价格战打不到的格子。</p>
     <div class="callout warn">
@@ -394,6 +422,7 @@
       <li><span class="src src-b">🟡</span> 融资历史：<a href="https://news.pedaily.cn/202205/493211.shtml" target="_blank" rel="noopener">投资界「2.5 亿 A 轮，累计超 4 亿」</a> · <a href="https://news.pedaily.cn/202112/482503.shtml" target="_blank" rel="noopener">投资界「亿元 A-1 轮 CCV 领投」</a> · <a href="https://cloud.ofweek.com/news/2021-05/ART-178800-12005-30500690.html" target="_blank" rel="noopener">OFweek「Pre-A 千万美元级」</a> · <a href="https://www.163.com/dy/article/KV22KDRN0519VPHD.html" target="_blank" rel="noopener">网易「王小川、申元庆参投，估值 46.9 亿」</a></li>
       <li><span class="src src-b">🟡</span> 竞品 / 赛道：<a href="https://www.sohu.com/a/915483000_121956424" target="_blank" rel="noopener">搜狐「白山云/PPIO/硅基流动深度解析」</a> · <a href="https://siliconflow.cn/pricing" target="_blank" rel="noopener">硅基流动 定价</a> · <a href="https://www.ofweek.com/ai/2025-11/ART-201721-8120-30675045.html" target="_blank" rel="noopener">OFweek「无问芯穹累计吸金 15 亿」</a> · <a href="https://cloud.infini-ai.com/" target="_blank" rel="noopener">无问芯穹 官网</a></li>
       <li><span class="src src-b">🟡</span> 国际对标：<a href="https://infrabase.ai/blog/ai-inference-api-providers-compared" target="_blank" rel="noopener">Infrabase「Inference API Providers Compared 2026」</a> · <a href="https://www.morphllm.com/comparisons/fireworks-vs-deepinfra" target="_blank" rel="noopener">Fireworks vs DeepInfra (2026)</a> · <a href="https://www.together.ai/serverless-inference" target="_blank" rel="noopener">Together AI Serverless</a> · <a href="https://novita.ai/" target="_blank" rel="noopener">Novita AI</a></li>
+      <li><span class="src src-a">🟢</span> Agent 沙箱 vs E2B：<a href="https://ppio.cn/docs/sandbox/overview" target="_blank" rel="noopener">PPIO 文档「Agent 沙箱服务总览」</a> · <a href="https://ppio.com/docs/sandbox/get-start" target="_blank" rel="noopener">「创建第一个 Agent 沙箱」</a> · <a href="https://ppio.com/docs/sandbox/integrate-e2b-desktop" target="_blank" rel="noopener">「E2B Desktop 接入 PPIO 沙箱」</a> · <a href="https://ppio.com/docs/sandbox/integrate-browser-use" target="_blank" rel="noopener">「Browser-use 接入」</a></li>
     </ul>
   </section>
 
