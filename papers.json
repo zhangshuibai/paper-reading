@@ -104,6 +104,26 @@
     "path": "papers/2026-06-17-ai-cluster-supply-chain-video/index.html"
   },
   {
+    "slug": "2026-06-17-ai-cluster-supply-chain",
+    "title": "AI 集群供应链全景：从一句 Prompt 到一座数据中心（含代表股票）",
+    "authors": "—",
+    "team": "硬件科普",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-22",
+    "published": "硬件科普 2026",
+    "tldr": "把AI集群从云/GPU/HBM/封装/设备/光互连/InP衬底/电力散热/原材料逐层拆开,每层讲人话+给代表股票ticker,讲清谁卡谁脖子(EUV=ASML独家/CoWoS=台积电/HBM三家/InP衬底三家);非投资建议",
+    "tags": [
+      "ai-infra",
+      "semiconductors",
+      "supply-chain",
+      "hardware",
+      "stocks",
+      "explainer"
+    ],
+    "path": "papers/2026-06-17-ai-cluster-supply-chain/index.html"
+  },
+  {
     "slug": "2026-06-17-asts",
     "title": "AST SpaceMobile（ASTS）：基本面 / 估值 / 是否值得买入",
     "authors": "—",

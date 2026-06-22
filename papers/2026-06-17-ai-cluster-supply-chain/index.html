@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI 集群供应链全景：从一句 Prompt 到一座数据中心（含代表股票）</title>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --bad:#ff6b81; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+    --svgbg:#141830; --svgline:#39406a; --svgtext:#dfe3f5; --svgmuted:#aab0d0;
+    --money:#ffcf5c;
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --bad:#d23651; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+      --svgbg:#eef1fb; --svgline:#c2cbe8; --svgtext:#1a1f33; --svgmuted:#5a627a;
+      --money:#b3701a;
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.7; font-size:16px;}
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:1040px; margin:0 auto; padding:18px 22px 90px}
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:25px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)} .meta-grid dd{margin:0}
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap; line-height:2}
+  nav.toc a:hover{color:var(--accent)}
+  section{margin:34px 0}
+  h2{font-size:20px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:16.5px; margin:22px 0 6px}
+  p{margin:11px 0} ul,ol{padding-left:22px} li{margin:5px 0}
+  a{color:var(--accent)} strong{color:var(--text)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.88em}
+  .tk{font-weight:700; color:var(--accent2); white-space:nowrap}
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:12.5px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:8px 9px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-word}
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+  .callout.danger{border-left:4px solid var(--bad); background:rgba(255,107,129,.06)} .callout.danger .label{color:var(--bad)}
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+  .seg{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:16px 0; background:var(--panel)}
+  .seg h3{margin-top:4px}
+  .src{font-size:10.5px;padding:0 5px;border-radius:999px; white-space:nowrap}
+  .src-a{background:rgba(67,197,158,.18);color:var(--ok)}.src-b{background:rgba(255,180,84,.18);color:var(--warn)}.src-c{background:rgba(255,107,129,.18);color:var(--bad)}
+  .figwrap{margin:20px 0; border:1px solid var(--line); border-radius:14px; background:var(--panel); padding:14px; box-shadow:var(--shadow)}
+  .figwrap svg{display:block; width:100%; height:auto}
+  .figcap{font-size:12.5px; color:var(--muted); margin-top:8px; text-align:center}
+  .kw{display:grid; grid-template-columns:max-content 1fr; gap:8px 14px; font-size:14px; margin:12px 0}
+  .kw dt{font-weight:700; color:var(--accent2)}
+  .kw dd{margin:0; color:var(--text)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+  .legend{display:flex; gap:14px; flex-wrap:wrap; font-size:12px; color:var(--muted); margin:8px 0}
+  .legend span{display:inline-flex; align-items:center; gap:5px}
+  .dot{width:10px;height:10px;border-radius:3px;display:inline-block}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">AI 基础设施</span><span class="chip">半导体供应链</span>
+      <span class="chip">硬件科普</span><span class="chip">代表股票地图</span><span class="chip">非投资建议</span>
+    </div>
+    <h1>AI 集群供应链全景：从一句 Prompt 到一座数据中心（含代表股票）</h1>
+    <p class="orig-title">你在 ChatGPT 里敲下一句话，背后要经过 9 层硬件、十几个国家、几百家公司才能给你回话。这篇把这条链一层层拆开，每层讲人话 + 给代表股票 ticker，告诉你<strong>钱花在哪、谁卡谁脖子</strong>。</p>
+    <dl class="meta-grid">
+      <dt>读者</dt><dd>只会用 ChatGPT、不懂芯片的硬件小白（懂一点点更好）</dd>
+      <dt>整理</dt><dd>产业科普 + 公开资料核实；股票/数字按来源分级（<span class="src src-a">🟢一手 SEC/IR/官方</span> / <span class="src src-b">🟡二手 媒体/分析师</span> / <span class="src src-c">🔴自述/未证实</span>），数字打架时并列 + 标年份</dd>
+      <dt>日期</dt><dd>2026-06-22</dd>
+    </dl>
+  </header>
+
+  <div class="callout danger">
+    <span class="label">⛔ 非投资建议（先看这个）</span>
+    本文是<strong>产业科普 + 供应链地图</strong>，不是荐股。文中每个环节给出的「代表股票」只是为了让你看懂「这一层由谁主导」，<strong>不构成任何买卖建议</strong>。市值、份额、营收等数字随时变化，且不同口径会打架——文中尽量标注年份与来源等级，但<strong>一切以公司官方申报（SEC / 投资者关系页 / 交易所公告）为准，请自行核实</strong>。投资有风险，盈亏自负。
+  </div>
+
+  <div class="tldr">
+    <b>一句话</b> — 你发一句 prompt，最下游是花钱的 <strong>hyperscaler（超大规模云厂，微软/谷歌/亚马逊/Meta）</strong>，他们 2026 年合计扔出<strong>万亿美元级 capex（资本开支）</strong>买算力；这笔钱像水一样从下游往上游一层层流：买 <strong>GPU（英伟达 <span class="tk">NVDA</span> 约 80% 份额）→ 配 HBM 高带宽内存（SK 海力士约 62%）→ 台积电 <span class="tk">TSM</span> 用 CoWoS 先进封装把它们焊成一块 → 这些机器靠 ASML <span class="tk">ASML</span> 独家的 EUV 光刻机造出来 → 上万张卡靠光模块（中际旭创/Coherent/Lumentum）连成一台超算 → 光模块里的激光要长在 InP 衬底（AXT <span class="tk">AXTI</span> 等三家垄断）上 → 最后整座数据中心卡在电（Vistra/Constellation）和热（液冷）。</strong> 真正的「卡脖子点」就那么几个：<strong>EUV = ASML 独家、CoWoS 封装 = 台积电、HBM = 三家、InP 衬底 = 三家、光刻胶/特气 = 日本</strong>。再说一遍：<strong>这是地图不是荐股</strong>。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#intro">0 · 从一句 Prompt 说起</a>
+    <a href="#map">主图 · 供应链栈</a>
+    <a href="#L1">1 · 应用/模型/云</a>
+    <a href="#L2">2 · AI 加速芯片</a>
+    <a href="#L3">3 · HBM 内存</a>
+    <a href="#L4">4 · 封装+代工</a>
+    <a href="#L5">5 · 半导体设备</a>
+    <a href="#L6">6 · 网络/光互连</a>
+    <a href="#L7">7 · 衬底/外延</a>
+    <a href="#L8">8 · 电力&散热</a>
+    <a href="#L9">9 · 上游原材料</a>
+    <a href="#optical">放大图 · 光互连子链</a>
+    <a href="#tbl">汇总表</a>
+    <a href="#money">钱怎么流 / 谁卡谁</a>
+    <a href="#kw">10 个关键词速查</a>
+    <a href="#more">延伸阅读</a>
+  </nav>
+
+  <!-- 0 -->
+  <section id="intro">
+    <h2><span class="n">0</span>从一句 Prompt 说起：AI 集群到底是啥</h2>
+    <p>你在 ChatGPT 输入框敲一句话、按回车，几秒钟出来一段回答。这背后不是「一台电脑」，而是一座<strong>装满了上万张芯片的厂房</strong>——业内叫 <strong>AI 集群（AI cluster）</strong>或 <strong>AI 数据中心 / AI factory（AI 工厂）</strong>。</p>
+    <p>打个比方：传统数据中心像一个「存东西、跑网站」的<strong>仓库</strong>；AI 集群更像一座<strong>炼钢厂</strong>——它的产品是「算力」，原料是「电」，核心设备是成千上万张昂贵的 AI 芯片，彼此用光纤高速连起来一起算一道题。一座这样的厂，造价动辄几十亿到上千亿美元，耗电相当于一座中型城市。</p>
+    <p>这篇文章干的事，就是把「<strong>你的一句 prompt → 一座 AI 工厂</strong>」这条链<strong>从用户端一路往上游扒到原材料</strong>，一共 9 层。每一层我都会回答三个问题：<strong>（1）它是什么（大白话）；（2）为什么关键 / 它卡在哪；（3）这一层由谁主导（代表股票）。</strong></p>
+    <div class="callout note">
+      <span class="label">怎么读这张地图</span>
+      记住一个方向感：<strong>越靠「下游」越靠近用户和钱（云厂买单），越靠「上游」越靠近沙子和机器（造芯片的原材料和设备）。</strong> 钱从下游往上游流；而「卡脖子」往往出现在<strong>上游某个只有一两家能做</strong>的环节——下游再有钱，也得排队等它供货。
+    </div>
+  </section>
+
+  <!-- 主图 -->
+  <section id="map">
+    <h2>主图 · 供应链栈：从用户到原材料的 9 层</h2>
+    <p>下面这张竖图，<strong>从上到下 = 从用户到原材料</strong>。右侧那条黄色箭头表示<strong>资本（capex）从下游万亿往上游流</strong>的方向。每层标了它在干嘛 + 代表股票。先扫一眼有个全局，后面再逐层展开。</p>
+    <div class="figwrap">
+      <svg viewBox="0 0 900 760" role="img" aria-label="AI 集群供应链九层栈示意图">
+        <defs>
+          <marker id="arrUp" markerWidth="12" markerHeight="12" refX="6" refY="2" orient="auto">
+            <path d="M6 0 L11 9 L1 9 Z" fill="var(--money)"/>
+          </marker>
+          <marker id="arrDn" markerWidth="10" markerHeight="10" refX="5" refY="8" orient="auto">
+            <path d="M5 10 L9 2 L1 2 Z" fill="var(--svgmuted)"/>
+          </marker>
+        </defs>
+        <rect x="0" y="0" width="900" height="760" fill="var(--svgbg)" rx="14"/>
+
+        <text x="40" y="60" fill="var(--svgmuted)" font-size="12" transform="rotate(-90 40 60)">下游 · 靠近用户和钱</text>
+        <text x="40" y="700" fill="var(--svgmuted)" font-size="12" transform="rotate(-90 40 700)">上游 · 靠近沙子和机器</text>
+
+        <g>
+          <rect x="70" y="36" width="700" height="68" rx="10" fill="var(--panel)" stroke="var(--svgline)"/>
+          <text x="88" y="62" fill="var(--svgtext)" font-size="15" font-weight="700">1 · 应用 / 模型 / 云（买单方）</text>
+          <text x="88" y="84" fill="var(--svgmuted)" font-size="12">Hyperscaler MSFT GOOGL AMZN META · Neocloud 算力出租 CRWV NBIS IREN</text>
+        </g>
+        <g>
+          <rect x="70" y="112" width="700" height="68" rx="10" fill="var(--panel)" stroke="var(--svgline)"/>
+          <text x="88" y="138" fill="var(--svgtext)" font-size="15" font-weight="700">2 · AI 加速芯片（算力的心脏）</text>
+          <text x="88" y="160" fill="var(--svgmuted)" font-size="12">GPU NVDA AMD · CPU INTC · 定制 ASIC/XPU AVGO MRVL · 国产 寒武纪/昇腾</text>
+        </g>
+        <g>
+          <rect x="70" y="188" width="700" height="60" rx="10" fill="var(--panel)" stroke="var(--svgline)"/>
+          <text x="88" y="214" fill="var(--svgtext)" font-size="15" font-weight="700">3 · HBM 高带宽内存（喂数据）</text>
+          <text x="88" y="234" fill="var(--svgmuted)" font-size="12">SK 海力士 000660.KS · 三星 · 美光 MU · NAND 闪存 SNDK</text>
+        </g>
+        <g>
+          <rect x="70" y="256" width="700" height="62" rx="10" fill="var(--panel)" stroke="var(--bad)" stroke-width="2"/>
+          <text x="88" y="282" fill="var(--svgtext)" font-size="15" font-weight="700">4 · 先进封装 + 代工 foundry　<tspan fill="var(--bad)">★卡点</tspan></text>
+          <text x="88" y="302" fill="var(--svgmuted)" font-size="12">台积电 TSM（CoWoS 封装）· 三星 · 中芯国际 · 封装厂 ASE</text>
+        </g>
+        <g>
+          <rect x="70" y="326" width="700" height="62" rx="10" fill="var(--panel)" stroke="var(--bad)" stroke-width="2"/>
+          <text x="88" y="352" fill="var(--svgtext)" font-size="15" font-weight="700">5 · 半导体设备（造芯片的机器）　<tspan fill="var(--bad)">★卡点</tspan></text>
+          <text x="88" y="372" fill="var(--svgmuted)" font-size="12">ASML（EUV 光刻 独家）· AMAT · LRCX · KLAC · 东京电子</text>
+        </g>
+        <g>
+          <rect x="70" y="396" width="700" height="62" rx="10" fill="var(--panel)" stroke="var(--svgline)"/>
+          <text x="88" y="422" fill="var(--svgtext)" font-size="15" font-weight="700">6 · 网络 / 光互连（把上万张卡连成一台超算）</text>
+          <text x="88" y="442" fill="var(--svgmuted)" font-size="12">交换芯片 AVGO MRVL · 光模块 COHR LITE AAOI 中际旭创 300308.SZ · CPO · CW 激光 SIVE</text>
+        </g>
+        <g>
+          <rect x="70" y="466" width="700" height="62" rx="10" fill="var(--panel)" stroke="var(--bad)" stroke-width="2"/>
+          <text x="88" y="492" fill="var(--svgtext)" font-size="15" font-weight="700">7 · 衬底 / 外延（最上游半导体材料）　<tspan fill="var(--bad)">★卡点</tspan></text>
+          <text x="88" y="512" fill="var(--svgmuted)" font-size="12">InP 衬底 AXTI Sumitomo JX · 外延片 IQE · 化合物半导体代工 TSEM</text>
+        </g>
+        <g>
+          <rect x="70" y="536" width="700" height="62" rx="10" fill="var(--panel)" stroke="var(--svgline)"/>
+          <text x="88" y="562" fill="var(--svgtext)" font-size="15" font-weight="700">8 · 电力 &amp; 散热（最后卡在电和热）</text>
+          <text x="88" y="582" fill="var(--svgmuted)" font-size="12">配电 VRT ETN（800V DC）· 电力 VST CEG TLN · 液冷/导热材料</text>
+        </g>
+        <g>
+          <rect x="70" y="606" width="700" height="62" rx="10" fill="var(--panel)" stroke="var(--svgline)"/>
+          <text x="88" y="632" fill="var(--svgtext)" font-size="15" font-weight="700">9 · 上游原材料（沙子那一端）</text>
+          <text x="88" y="652" fill="var(--svgmuted)" font-size="12">硅片 信越/SUMCO · 特气 WF₆ Foosung 093370.KS · 铜 / 光纤 / 稀有金属</text>
+        </g>
+
+        <line x1="800" y1="660" x2="800" y2="60" stroke="var(--money)" stroke-width="4" marker-end="url(#arrUp)"/>
+        <text x="824" y="380" fill="var(--money)" font-size="13" font-weight="700" transform="rotate(-90 824 380)">资本 / capex 万亿级往上游流</text>
+        <line x1="58" y1="100" x2="58" y2="640" stroke="var(--svgmuted)" stroke-width="2" stroke-dasharray="4 4" marker-end="url(#arrDn)"/>
+        <text x="38" y="380" fill="var(--svgmuted)" font-size="11" transform="rotate(-90 38 380)">实物 / 产品往下游交付</text>
+      </svg>
+      <div class="figcap">主图：AI 集群供应链 9 层栈。红框 = 真正的少数寡头「卡点」。黄箭头 = 钱往上游流；虚线 = 货往下游交付。</div>
+    </div>
+    <div class="legend">
+      <span><span class="dot" style="background:var(--bad)"></span>★卡点 = 真寡头/单一来源，下游再有钱也得排队</span>
+      <span><span class="dot" style="background:var(--money)"></span>capex 流向</span>
+    </div>
+  </section>
+
+  <!-- 1 -->
+  <section id="L1">
+    <h2><span class="n">1</span>应用 / 模型 / 云：谁在花钱买算力</h2>
+    <div class="seg">
+      <p><strong>是什么：</strong>这是离你最近的一层——你用的 ChatGPT、Gemini、Copilot 都跑在这。真正<strong>掏钱建 AI 工厂</strong>的有两类玩家：</p>
+      <ul>
+        <li><strong>Hyperscaler（超大规模云厂）</strong>：就是那几家又有云、又有钱、又自己训大模型的巨头——<span class="tk">MSFT</span>(微软,Nasdaq)、<span class="tk">GOOGL</span>(谷歌/Alphabet,Nasdaq)、<span class="tk">AMZN</span>(亚马逊 AWS,Nasdaq)、<span class="tk">META</span>(Meta,Nasdaq)。他们是整条链最下游的「水龙头」。注意：<strong>他们也在自研芯片</strong>（谷歌 TPU、亚马逊 Trainium），所以第 2 层里也有他们的影子。</li>
+        <li><strong>Neocloud（新云 / AI 算力出租）</strong>：一批专门「买一堆 GPU、再按小时租给别人」的新公司，只做 AI 算力、不做传统网站托管。代表：<span class="tk">CRWV</span>(CoreWeave,Nasdaq)、<span class="tk">NBIS</span>(Nebius,Nasdaq)、<span class="tk">IREN</span>(IREN,Nasdaq，前身是比特币矿企转型)；<strong>Lambda</strong>（未上市）也是知名玩家。</li>
+      </ul>
+      <p><strong>这一层有多大钱？</strong>微软单独一家 2026 日历年 capex 指引就高达约 <strong>$1900 亿</strong> <span class="src src-b">🟡</span>；几家 hyperscaler 加起来 2026 年 AI 相关 capex 是<strong>万亿美元量级</strong>。Neocloud 这边：CoreWeave 截至 2026 年 5 月当季营收约 $20.8 亿、积压订单（backlog）约 $994 亿、2026 capex 上限上调到约 $350 亿 <span class="src src-a">🟢</span>；Nebius 把 2026 年 capex 指引提到 $200–250 亿 <span class="src src-b">🟡</span>。</p>
+      <div class="callout note"><span class="label">为什么有了云厂还要 neocloud</span>
+      因为 GPU 太抢手、太贵，很多 AI 公司（甚至连云厂自己）都缺卡。Neocloud 的生意是「替你扛下买卡的天量资本开支、再租给你」。注意这里有个被反复讨论的<strong>「循环融资」隐忧</strong> <span class="src src-b">🟡</span>：英伟达投资 neocloud、neocloud 拿钱买英伟达的卡——景气时是飞轮，遇冷时是风险。</div>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section id="L2">
+    <h2><span class="n">2</span>AI 加速芯片：算力的心脏，以及那条叫 CUDA 的护城河</h2>
+    <div class="seg">
+      <p><strong>是什么：</strong>AI 算的本质是「海量矩阵乘法」。普通电脑的 <strong>CPU</strong>（中央处理器，像一个全能但只有几个核心的「项目经理」）干这个太慢；要用 <strong>GPU</strong>（图形处理器，原本为游戏画面而生，有成千上万个小核心，像一支「只会算简单题但人海战术」的大军）。GPU 就是 AI 集群的心脏。</p>
+      <h3>三类芯片，三种角色</h3>
+      <ul>
+        <li><strong>GPU（通用 AI 加速器）：</strong><span class="tk">NVDA</span>(英伟达,Nasdaq) 是绝对霸主，AI 加速器约 <strong>80% 份额（2026）</strong>，数据中心业务 FY2026 营收约 $1937 亿 <span class="src src-b">🟡</span>；<span class="tk">AMD</span>(超威,Nasdaq) 是第二供应商，Instinct GPU 2025 年估约 $70–80 亿营收、约 5–7% 份额 <span class="src src-b">🟡</span>。</li>
+        <li><strong>CPU：</strong>AI 服务器里 CPU 是「指挥官」（负责调度、跑系统），份额下降但仍必需。<span class="tk">INTC</span>(英特尔,Nasdaq) 是老牌厂商，但在 AI 加速这一仗里掉队明显。</li>
+        <li><strong>定制 ASIC / XPU（大厂的自研芯片）：</strong>这是近两年最大变量。<strong>ASIC = 专用集成电路</strong>，意思是「为某一种活儿量身定做的芯片」，不像 GPU 那么通用，但对自家活儿更省电更便宜。云厂想摆脱「全靠英伟达、还被它赚走大头」，就找 <span class="tk">AVGO</span>(博通,Nasdaq) 和 <span class="tk">MRVL</span>(美满/Marvell,Nasdaq) 帮自己设计芯片——谷歌 TPU、亚马逊 Trainium 背后都有他们。博通在「定制 ASIC 协同设计」市场约 <strong>80% 份额</strong>，博通+Marvell 合计约 <strong>95%</strong> <span class="src src-b">🟡</span>。</li>
+        <li><strong>国产（一句话带过）：</strong>寒武纪（A 股 688256.SH）、华为昇腾 Ascend（未单独上市，在华为体内）是国产 AI 芯片代表，受出口管制影响走自主路线。</li>
+      </ul>
+      <div class="callout insight"><span class="label">护城河 · CUDA 生态</span>
+      英伟达最深的壁垒不是硬件，而是 <strong>CUDA</strong>——它是英伟达 2007 年起就在搭的一套「让程序员能方便地用 GPU 算 AI」的软件平台和工具链。十几年下来，全世界几乎所有 AI 代码、框架、教程都默认跑在 CUDA 上。这意味着就算别家芯片便宜，你想换也要把软件全部重写、踩无数坑。<strong>这就是「软件锁死硬件」——别人卖芯片，英伟达卖的是一整个让人离不开的生态。</strong>这也是 ASIC 路线（用自家软件栈、不依赖 CUDA）被大厂重视的根本原因。</div>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section id="L3">
+    <h2><span class="n">3</span>HBM 高带宽内存：为什么 GPU 旁边要堆一圈「内存塔」</h2>
+    <div class="seg">
+      <p><strong>是什么：</strong>GPU 算得飞快，但它得先「读到数据」才能算。给它喂数据的就是<strong>内存</strong>。普通电脑用的内存（DDR）对 AI 来说带宽太窄，喂不饱 GPU，于是有了 <strong>HBM（High Bandwidth Memory，高带宽内存）</strong>——做法是把多层内存芯片<strong>像盖楼一样垂直堆叠</strong>起来、再紧贴 GPU 放，用超宽的「数据高速公路」喂料。你看英伟达 GPU 照片里中间一颗大芯片、周围围着几颗方块，那些方块就是 HBM。</p>
+      <p><strong>为什么紧缺：</strong>HBM 工艺极难（堆叠 + 极高良率要求），目前全球只有三家能量产，且<strong>产能被英伟达提前包了</strong>。2026 年份额：<strong>SK 海力士约 62%（韩国，000660.KS）</strong>、美光 <span class="tk">MU</span>(Micron,Nasdaq) 约 21%、三星约 17% <span class="src src-b">🟡</span>（不同口径有出入，整体 SK 海力士 50–62%、三星 17–40%、美光 5–21%）。SK 海力士还拿下了英伟达下一代 HBM4 约三分之二的订单 <span class="src src-b">🟡</span>，是这一层的「memory 霸主」。</p>
+      <p><strong>附带的 NAND：</strong>AI 集群也要存海量数据，用到 <strong>NAND 闪存</strong>（断电不丢数据的存储）。<span class="tk">SNDK</span>(SanDisk,Nasdaq) 是代表——它是西部数据（WDC）于 2025 年 2 月把闪存业务分拆出来独立上市的新公司，ticker 就是 SNDK <span class="src src-a">🟢</span>。</p>
+      <div class="callout warn"><span class="label">记住这层是「三家寡头」</span>
+      HBM = 真卡点之一。下游 GPU 卖得再好，HBM 就这三家供，谁拿到分配谁就能多出货。所以「HBM 紧不紧、谁拿到英伟达订单」是判断整条链景气的关键温度计。</div>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section id="L4">
+    <h2><span class="n">4</span>先进封装 + 代工 foundry：把 GPU 和 HBM「焊」在一起的少数玩家 <span class="src src-c">★卡点</span></h2>
+    <div class="seg">
+      <p>这一层其实是两件事捏一起：</p>
+      <p><strong>（A）代工 foundry（造芯片）：</strong>英伟达、AMD、博通这些公司自己<strong>不开厂</strong>，他们只设计芯片，把图纸交给<strong>代工厂</strong>去制造——这叫 fabless（无晶圆厂）模式，foundry 就是替他们造的工厂。全球最先进制程（2nm/3nm）几乎只有<strong>台积电 <span class="tk">TSM</span>(TSMC,NYSE/台交所 2330)</strong> 能稳定量产，三星追赶，中芯国际（港股 0981 / A 股 688981）受设备限制做不到最先进。</p>
+      <p><strong>（B）先进封装（把多块芯片拼成一块）：</strong>这是真正的卡点。<strong>CoWoS（Chip-on-Wafer-on-Substrate）</strong>是台积电的一种先进封装技术——你可以理解为：先做一块叫 <strong>interposer（中介层/硅转接板）</strong>的「精密底座」，再把 GPU 主芯片和周围的 HBM 内存塔<strong>全都焊在这块底座上</strong>，让它们之间用超短超宽的线连接。没有 CoWoS，GPU 和 HBM 就拼不成一颗能用的「AI 大芯片」。</p>
+      <div class="callout danger"><span class="label">★ 这是全链最著名的卡点之一</span>
+      台积电高管明确说过 <strong>CoWoS 产能「非常紧、2025 直到 2026 都已售罄」</strong> <span class="src src-b">🟡</span>；产能正从 2024 年底约 3.5 万片/月扩到 2026 年底目标约 13 万片/月，但仍供不应求，英伟达约占六成分配 <span class="src src-b">🟡</span>。2025 年业内分析普遍认为：<strong>真正限制 AI 芯片产量的不是逻辑芯片本身，而是「先进封装 + HBM」</strong> <span class="src src-b">🟡</span>。封装厂还有 <strong>ASE 日月光</strong>（台交所 3711 / NYSE ADR <span class="tk">ASX</span>）等。</div>
+      <p><strong>为什么是少数玩家垄断：</strong>最先进制程要几百亿美元建厂 + 几十年工艺积累 + ASML 的 EUV 机器（见下一层），这道门槛把全世界能玩的人压到了「台积电 + 三星 +（追赶中的）英特尔」三家，最尖端基本就台积电一家独大。</p>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section id="L5">
+    <h2><span class="n">5</span>半导体设备：造芯片的机器本身，就卡着全世界 <span class="src src-c">★卡点</span></h2>
+    <div class="seg">
+      <p><strong>是什么：</strong>台积电再厉害，也得有「造芯片的机器」才能开厂。芯片是在硅片上一层层「印电路」印出来的，印电路的核心机器叫<strong>光刻机（lithography）</strong>——用光把电路图案投影到涂了感光材料的硅片上，越先进的芯片要求光的波长越短、印得越精细。</p>
+      <div class="callout danger"><span class="label">★ EUV = ASML 一家独占（全链最硬的卡点）</span>
+      最先进的光刻用 <strong>EUV（极紫外光刻）</strong>，而全世界<strong>能造 EUV 光刻机的只有荷兰 ASML 一家</strong>——尼康、佳能十几年前就退出了。<span class="tk">ASML</span>(NYSE/阿姆斯特丹) 在 EUV 占 <strong>100%</strong>、整体光刻约 <strong>94%</strong> 份额 <span class="src src-b">🟡</span>。一台最新的 High-NA EUV 机器要价 <strong>$4 亿+</strong>，而且只有台积电/三星/英特尔买得起、用得上 <span class="src src-b">🟡</span>。<strong>没有 ASML，就没有最先进芯片——这是整条 AI 供应链最硬、最无可替代的单点。</strong> 2025 财年 ASML 营收约 €327 亿 <span class="src src-b">🟡</span>。</div>
+      <p><strong>另外几台关键机器（也都是寡头）：</strong>除了光刻，造芯片还要刻蚀、沉积薄膜、量测良率等等，对应几家美国/日本设备巨头：<span class="tk">AMAT</span>(应用材料,Nasdaq，沉积/刻蚀)、<span class="tk">LRCX</span>(Lam Research,Nasdaq，刻蚀)、<span class="tk">KLAC</span>(KLA,Nasdaq，量测/检测)、<strong>东京电子 TEL</strong>(日本 8035)。这几家加 ASML 基本垄断了「造芯片的机器」这一层——<strong>所以设备本身也是卡脖子的</strong>。</p>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section id="L6">
+    <h2><span class="n">6</span>网络 / 光互连：上万张 GPU 怎么连成「一台」超级计算机</h2>
+    <div class="seg">
+      <p><strong>是什么：</strong>训练一个大模型，一张 GPU 远远不够，要让<strong>上万张卡同时算同一道题、并不停交换中间结果</strong>。这就要求卡与卡之间有极快、极密的「内部高速公路」。卡一多、机柜一多，用铜线就太慢太耗电，于是要靠<strong>光</strong>来传——这就是「光互连」爆发的根本原因。</p>
+      <h3>这一层分几块</h3>
+      <ul>
+        <li><strong>交换芯片（switch ASIC）：</strong>像网络里的「交通枢纽」，决定数据往哪条路走。代表是<strong>博通 <span class="tk">AVGO</span> 的 Tomahawk 系列</strong>和 <span class="tk">MRVL</span>(Marvell)。</li>
+        <li><strong>光模块 / transceiver（收发器）：</strong>这是把「电信号 ↔ 光信号」互相转换的小盒子，插在交换机和服务器上，是光互连里出货量最大、最直接受益于 AI 的一环。代表：<span class="tk">COHR</span>(Coherent,NYSE)、<span class="tk">LITE</span>(Lumentum,Nasdaq)、<span class="tk">AAOI</span>(Applied Optoelectronics,Nasdaq)；<strong>中国厂商是这块的主力</strong>——<strong>中际旭创 InnoLight（300308.SZ）</strong>是 800G 全球出货龙头、约 35% 份额（2026），1.6T 预计 50–60% 份额 <span class="src src-b">🟡</span>；新易盛 Eoptolink（300502.SZ）也是主力。</li>
+        <li><strong>CPO（Co-Packaged Optics，光电共封装）：</strong>下一代方向——干脆把光器件<strong>直接封到交换芯片旁边</strong>，省掉一段电信号传输、更省电。还在早期放量阶段。</li>
+        <li><strong>CW 激光（Continuous-Wave laser，连续波激光）：</strong>光互连和 CPO 都需要一个「一直亮着的稳定光源」当载波，这就是 CW 激光。代表玩家有 <span class="tk">SIVE</span>(Sivers Semiconductors,Nasdaq 斯德哥尔摩 / OTC <span class="tk">SIVEF</span>，自有 InP 激光产线)、<span class="tk">AAOI</span> 等 <span class="src src-b">🟡</span>。</li>
+      </ul>
+      <div class="callout note"><span class="label">一个数字感受「光」有多火</span>
+      800G 及以上的高速光模块占比预计从 2024 年的约 19.5% 跳到 2026 年的 60%+；800G+ 光模块出货量预计从 2025 年约 2400 万只增长到 2026 年约 6300 万只（约 2.6 倍）<span class="src src-b">🟡</span>。这就是「AI 让光互连爆发」最直观的体现。</div>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section id="L7">
+    <h2><span class="n">7</span>衬底 / 外延：光模块里的激光，要长在 InP 衬底上 <span class="src src-c">★卡点</span></h2>
+    <div class="seg">
+      <p>这是很多人会混淆、也最「上游」的一层。先把三个常被混为一谈的词分清楚（<strong>这点很重要</strong>）：</p>
+      <div class="callout warn"><span class="label">别混：衬底 ≠ 外延片 ≠ 模组 ≠ 系统</span>
+      <ul style="margin:6px 0">
+        <li><strong>衬底（substrate）</strong>：最底下那块「地基晶圆」。激光芯片不是凭空长出来的，要先有一块单晶衬底当地基。光通信激光最常用的地基材料是 <strong>InP（磷化铟，indium phosphide）</strong>。</li>
+        <li><strong>外延片（epiwafer）</strong>：在衬底上面，用专门设备一层层「长」出几微米厚的功能薄膜（外延 = epitaxy）。这一步决定激光的性能。</li>
+        <li><strong>模组 / 系统</strong>：把做好的激光芯片封进光模块（模组），再插到交换机里（系统）。这是第 6 层的事。</li>
+      </ul>
+      一句话：<strong>InP 衬底（地基）→ 外延片（长薄膜）→ 激光芯片 → 光模块（模组）→ 交换机（系统）</strong>，层层往下游走，千万别把「衬底厂」当成「光模块厂」。</div>
+      <p><strong>为什么这是卡点：</strong>光互连越爆发，对底层的 <strong>InP 衬底</strong>需求越猛，而 InP 衬底全球只有<strong>三家</strong>能稳定供：美国 <span class="tk">AXTI</span>(AXT Inc,Nasdaq，全球第二)、日本 <strong>Sumitomo 住友电工</strong>、日本 <strong>JX Advanced Metals</strong>——三家合计约 <strong>80–90% 份额</strong> <span class="src src-b">🟡</span>。扩产还很慢（住友扩产据称要 2.5–3 年）<span class="src src-b">🟡</span>。这正是「越往上游、玩家越少、越卡脖子」的典型——也是供应链 bottleneck 视角最关注的那一格。</p>
+      <p><strong>相关玩家：</strong>外延片代表 <strong>IQE</strong>（英国，伦敦上市 IQE.L）；化合物半导体晶圆代工 <span class="tk">TSEM</span>(Tower Semiconductor,Nasdaq)。这些都属于「化合物半导体」（区别于普通硅芯片，用 III–V 族材料，专门做光/射频）的小众但关键环节。</p>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section id="L8">
+    <h2><span class="n">8</span>电力 &amp; 散热：钱和芯片都到位了，最后卡在「电」和「热」</h2>
+    <div class="seg">
+      <p><strong>是什么：</strong>上万张 GPU 一起算，耗电惊人、发热惊人。一座大型 AI 数据中心的用电量能达到几百兆瓦到吉瓦级，相当于一座中型城市。于是「能不能搞到足够的电」「能不能把热散掉」成了 2026 年最现实的瓶颈——<strong>不是缺芯片，是缺电、缺散热</strong>。</p>
+      <h3>分两块</h3>
+      <ul>
+        <li><strong>电源 / 配电（把电安全高效送到每张卡）：</strong>代表 <span class="tk">VRT</span>(Vertiv,NYSE)、<span class="tk">ETN</span>(Eaton,NYSE)。新趋势是 <strong>800V DC（800 伏直流配电）</strong>——传统机房用较低电压交流配电，电流大、线粗、损耗高；提到 800V 直流能在同样功率下减小电流、降损耗，更适合超高功率的 AI 机柜。Vertiv 正与英伟达合作 800V DC 架构，配套其 2027 年的 Rubin Ultra 平台，相关产品计划 2026 下半年推出 <span class="src src-b">🟡</span>。</li>
+        <li><strong>电力公用（发电、卖电给数据中心）：</strong>这是真·瓶颈——电网建得慢、供电合同要排队。核电因为「24 小时稳定 + 不排碳」特别受 AI 青睐。代表 <span class="tk">VST</span>(Vistra,NYSE)、<span class="tk">CEG</span>(Constellation Energy,Nasdaq，全美最大核电机队)、<span class="tk">TLN</span>(Talen Energy,Nasdaq)。例：Vistra 2026 年 1 月与 Meta 签了约 2600 MW 核电的 20 年长约 <span class="src src-b">🟡</span>。</li>
+      </ul>
+      <p><strong>散热 / 液冷（简述）：</strong>芯片功率太高，传统「风扇吹」散不掉热了，要改用<strong>液冷</strong>（冷板贴芯片、甚至整机泡进绝缘液）。这背后还有一整条「导热材料 / 冷却液 / 冷板」的供应链，本仓库另有一篇专门讲（见<a href="#more">延伸阅读</a>），这里不展开。</p>
+    </div>
+  </section>
+
+  <!-- 9 -->
+  <section id="L9">
+    <h2><span class="n">9</span>上游原材料：沙子、特种气体、铜与稀有金属</h2>
+    <div class="seg">
+      <p>链条的最顶端（最上游）是<strong>原材料</strong>。它们单价不高，但很多是「日韩几家垄断、断供就全停」的隐性卡点：</p>
+      <ul>
+        <li><strong>硅片（wafer）：</strong>芯片的「白纸」，从高纯硅长成大圆片。代表：<strong>信越化学 Shin-Etsu</strong>（日本 4063）、<strong>SUMCO</strong>（日本 3436）——日本两家就占了全球大头。</li>
+        <li><strong>特种气体（specialty gas）：</strong>造芯片每一步刻蚀、沉积都要用超高纯度气体，比如 <strong>WF₆（六氟化钨，用于沉积金属钨布线）</strong>。代表 <strong>Foosung 厚成</strong>（韩国 093370.KS），还有 SK Specialty、日本关东电化等 <span class="src src-b">🟡</span>。这类气体是典型「平时没人注意、一缺货就涨价 70–90%」的隐形卡点 <span class="src src-b">🟡</span>。</li>
+        <li><strong>光刻胶（photoresist）：</strong>光刻时涂在硅片上的感光材料，<strong>最高端的由日本 JSR、东京应化（TOK）、信越等几家垄断</strong>——这也是常被点名的「日本卡脖子」环节。</li>
+        <li><strong>铜 / 光纤 / 稀有金属：</strong>芯片布线、机柜供电、光互连布线分别要大量铜、光纤、以及镓/铟等稀有金属（铟正是 InP 衬底的原料之一，受出口管制影响）。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 光互连放大图 -->
+  <section id="optical">
+    <h2>放大图 · 光互连子链：从 GPU 到 InP 衬底（最容易混层级的一段）</h2>
+    <p>第 6、7 层是整条链里<strong>最关键、也最容易把层级搞混</strong>的地方。下面这张小图把「光互连子链」单独放大，让你一眼看清：一个信号从 GPU 出发，经过交换芯片、光模块、激光，最后<strong>溯源到最上游的 InP 衬底</strong>——以及每一格分别由谁主导。再次强调：<strong>衬底（地基）≠ 外延片（薄膜）≠ 模组（光模块）≠ 系统（交换机）</strong>，它们是上下游关系，不是同一层。</p>
+    <div class="figwrap">
+      <svg viewBox="0 0 900 420" role="img" aria-label="光互连子链放大示意图">
+        <defs>
+          <marker id="ar2" markerWidth="11" markerHeight="11" refX="9" refY="5" orient="auto">
+            <path d="M0 0 L10 5 L0 10 Z" fill="var(--accent)"/>
+          </marker>
+        </defs>
+        <rect x="0" y="0" width="900" height="420" fill="var(--svgbg)" rx="14"/>
+        <text x="30" y="34" fill="var(--svgmuted)" font-size="12">下游（系统/模组）</text>
+        <text x="720" y="34" fill="var(--svgmuted)" font-size="12">上游（材料/地基）</text>
+
+        <g font-size="13" font-weight="700">
+          <rect x="30" y="70" width="150" height="90" rx="10" fill="var(--panel)" stroke="var(--svgline)"/>
+          <text x="105" y="100" fill="var(--svgtext)" text-anchor="middle">GPU / 服务器</text>
+          <text x="105" y="122" fill="var(--svgmuted)" font-size="11" text-anchor="middle">NVDA AMD</text>
+          <text x="105" y="140" fill="var(--svgmuted)" font-size="11" text-anchor="middle">要和别的卡通信</text>
+
+          <rect x="210" y="70" width="150" height="90" rx="10" fill="var(--panel)" stroke="var(--svgline)"/>
+          <text x="285" y="100" fill="var(--svgtext)" text-anchor="middle">交换芯片</text>
+          <text x="285" y="122" fill="var(--svgmuted)" font-size="11" text-anchor="middle">AVGO Tomahawk</text>
+          <text x="285" y="140" fill="var(--svgmuted)" font-size="11" text-anchor="middle">MRVL · 决定数据走向</text>
+
+          <rect x="390" y="70" width="160" height="90" rx="10" fill="var(--panel)" stroke="var(--svgline)"/>
+          <text x="470" y="100" fill="var(--svgtext)" text-anchor="middle">光模块 transceiver</text>
+          <text x="470" y="122" fill="var(--svgmuted)" font-size="11" text-anchor="middle">中际旭创 COHR LITE</text>
+          <text x="470" y="140" fill="var(--svgmuted)" font-size="11" text-anchor="middle">电↔光 转换（模组）</text>
+
+          <rect x="580" y="70" width="150" height="90" rx="10" fill="var(--panel)" stroke="var(--svgline)"/>
+          <text x="655" y="100" fill="var(--svgtext)" text-anchor="middle">激光芯片 / CW 激光</text>
+          <text x="655" y="122" fill="var(--svgmuted)" font-size="11" text-anchor="middle">SIVE 等</text>
+          <text x="655" y="140" fill="var(--svgmuted)" font-size="11" text-anchor="middle">提供光载波</text>
+
+          <rect x="760" y="70" width="120" height="90" rx="10" fill="var(--panel)" stroke="var(--bad)" stroke-width="2"/>
+          <text x="820" y="98" fill="var(--svgtext)" text-anchor="middle" font-size="12">InP 衬底</text>
+          <text x="820" y="118" fill="var(--bad)" font-size="11" text-anchor="middle">★卡点</text>
+          <text x="820" y="136" fill="var(--svgmuted)" font-size="10.5" text-anchor="middle">AXTI Sumitomo</text>
+          <text x="820" y="150" fill="var(--svgmuted)" font-size="10.5" text-anchor="middle">JX（三家约80–90%）</text>
+        </g>
+
+        <g stroke="var(--accent)" stroke-width="2" fill="none" marker-end="url(#ar2)">
+          <line x1="180" y1="115" x2="206" y2="115"/>
+          <line x1="360" y1="115" x2="386" y2="115"/>
+          <line x1="550" y1="115" x2="576" y2="115"/>
+          <line x1="730" y1="115" x2="756" y2="115"/>
+        </g>
+        <text x="455" y="58" fill="var(--svgmuted)" font-size="11" text-anchor="middle">需求/采购往上游传导 →</text>
+
+        <rect x="580" y="200" width="300" height="70" rx="10" fill="var(--panel)" stroke="var(--svgline)" stroke-dasharray="4 4"/>
+        <text x="730" y="226" fill="var(--svgtext)" font-size="12" text-anchor="middle" font-weight="700">激光芯片 ← 外延片 ← InP 衬底</text>
+        <text x="730" y="248" fill="var(--svgmuted)" font-size="11" text-anchor="middle">外延片 epiwafer：在衬底上长功能薄膜（IQE）</text>
+        <text x="730" y="263" fill="var(--svgmuted)" font-size="11" text-anchor="middle">衬底=地基，外延=薄膜，别混为一层</text>
+
+        <rect x="30" y="300" width="850" height="90" rx="10" fill="var(--panel)" stroke="var(--svgline)"/>
+        <text x="48" y="326" fill="var(--svgtext)" font-size="12.5" font-weight="700">读这张图的方法</text>
+        <text x="48" y="350" fill="var(--svgmuted)" font-size="11.5">一个数据要发给另一张 GPU：GPU →（交换芯片选路）→（光模块把电变成光）→（激光当光源载波）→</text>
+        <text x="48" y="370" fill="var(--svgmuted)" font-size="11.5">而激光必须长在 InP 衬底上。越往右玩家越少：到 InP 衬底就只剩三家——这就是「光互连的卡脖子在最上游」。</text>
+      </svg>
+      <div class="figcap">放大图：光互连子链。红框 InP 衬底是这条子链最上游的单一来源卡点；中间虚线框强调「衬底 ≠ 外延片」。</div>
+    </div>
+
+    <h3>顺带：芯片封装那一颗「大芯片」长啥样</h3>
+    <p>回到第 4 层的 CoWoS，用一句话 + 一张极简图说清「GPU die + HBM 堆叠 + CoWoS 中介层」是怎么拼的：<strong>中间一颗 GPU 主芯片（die），两边各几座 HBM 内存塔（多层堆叠），它们全部焊在底下一块 interposer 中介层上，再封成一整颗</strong>。</p>
+    <div class="figwrap">
+      <svg viewBox="0 0 900 260" role="img" aria-label="CoWoS 封装示意图">
+        <rect x="0" y="0" width="900" height="260" fill="var(--svgbg)" rx="14"/>
+        <rect x="120" y="180" width="660" height="34" rx="6" fill="var(--panel2)" stroke="var(--accent)"/>
+        <text x="450" y="202" fill="var(--accent)" font-size="13" text-anchor="middle" font-weight="700">interposer 中介层（硅转接板，CoWoS 的核心，台积电）</text>
+        <rect x="100" y="214" width="700" height="22" rx="5" fill="var(--panel)" stroke="var(--svgline)"/>
+        <text x="450" y="230" fill="var(--svgmuted)" font-size="11" text-anchor="middle">封装基板 / 整颗 package（再焊到主板上）</text>
+        <rect x="370" y="70" width="160" height="100" rx="8" fill="var(--panel)" stroke="var(--svgtext)"/>
+        <text x="450" y="115" fill="var(--svgtext)" font-size="14" text-anchor="middle" font-weight="700">GPU die</text>
+        <text x="450" y="138" fill="var(--svgmuted)" font-size="11" text-anchor="middle">主芯片 NVDA/AMD</text>
+        <g>
+          <rect x="150" y="90" width="90" height="14" rx="3" fill="var(--panel)" stroke="var(--svgline)"/>
+          <rect x="150" y="108" width="90" height="14" rx="3" fill="var(--panel)" stroke="var(--svgline)"/>
+          <rect x="150" y="126" width="90" height="14" rx="3" fill="var(--panel)" stroke="var(--svgline)"/>
+          <rect x="150" y="144" width="90" height="14" rx="3" fill="var(--panel)" stroke="var(--svgline)"/>
+          <text x="195" y="84" fill="var(--svgmuted)" font-size="11" text-anchor="middle">HBM 堆叠</text>
+        </g>
+        <g>
+          <rect x="660" y="90" width="90" height="14" rx="3" fill="var(--panel)" stroke="var(--svgline)"/>
+          <rect x="660" y="108" width="90" height="14" rx="3" fill="var(--panel)" stroke="var(--svgline)"/>
+          <rect x="660" y="126" width="90" height="14" rx="3" fill="var(--panel)" stroke="var(--svgline)"/>
+          <rect x="660" y="144" width="90" height="14" rx="3" fill="var(--panel)" stroke="var(--svgline)"/>
+          <text x="705" y="84" fill="var(--svgmuted)" font-size="11" text-anchor="middle">HBM 堆叠</text>
+        </g>
+        <text x="450" y="34" fill="var(--svgtext)" font-size="13" text-anchor="middle" font-weight="700">一颗 AI「大芯片」= GPU die + 两侧 HBM 内存塔，全焊在 interposer 上</text>
+      </svg>
+      <div class="figcap">CoWoS 封装极简示意：HBM（第 3 层）+ GPU die（第 2 层）靠 interposer（第 4 层台积电）拼成一颗——这也是为什么 CoWoS 一紧，整条链都堵。</div>
+    </div>
+  </section>
+
+  <!-- 汇总表 -->
+  <section id="tbl">
+    <h2>汇总表：一张表看完 9 层 + 代表股票 + 集中度</h2>
+    <p>下表把全篇浓缩。<strong>「集中度/护城河」一栏越像「独家/三家」，就越是卡脖子点。</strong>来源等级：<span class="src src-a">🟢一手</span>/<span class="src src-b">🟡二手</span>/<span class="src src-c">🔴自述</span>。所有数字以官方申报为准，请自行核实。</p>
+    <table>
+      <thead>
+        <tr><th>层</th><th>在干嘛（小白版一句话）</th><th>代表股票 (ticker)</th><th>集中度 / 护城河</th><th>来源</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>1 应用/模型/云</strong></td>
+          <td>掏钱建 AI 工厂、买算力的人</td>
+          <td>MSFT GOOGL AMZN META（hyperscaler）；CRWV NBIS IREN（neocloud）；Lambda 未上市</td>
+          <td>买方集中（几家巨头主导 capex）；neocloud 拼规模与融资</td>
+          <td><span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td><strong>2 AI 芯片</strong></td>
+          <td>算力的心脏（GPU/ASIC）</td>
+          <td>NVDA（约80%份额'26）AMD INTC；AVGO MRVL（定制ASIC）；寒武纪/昇腾（国产）</td>
+          <td>NVDA 靠 CUDA 生态锁死；ASIC 协同设计 AVGO+MRVL 约95%</td>
+          <td><span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td><strong>3 HBM 内存</strong></td>
+          <td>给 GPU 高速喂数据的「内存塔」</td>
+          <td>SK海力士 000660.KS（约62%'26）三星 美光 MU；NAND: SNDK</td>
+          <td><strong>三家寡头</strong>，产能被英伟达包；HBM4 海力士拿约2/3</td>
+          <td><span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td><strong>4 封装+代工 ★</strong></td>
+          <td>把 GPU 和 HBM 焊成一颗大芯片</td>
+          <td>TSM（CoWoS）三星 中芯国际 0981/688981；封装 ASE 3711/ASX</td>
+          <td><strong>★卡点</strong>：最先进制程≈台积电独大；CoWoS 售罄至'26</td>
+          <td><span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td><strong>5 半导体设备 ★</strong></td>
+          <td>造芯片的机器本身</td>
+          <td>ASML（EUV）AMAT LRCX KLAC 东京电子8035</td>
+          <td><strong>★卡点</strong>：EUV=ASML 100% 独家；各机型均寡头</td>
+          <td><span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td><strong>6 网络/光互连</strong></td>
+          <td>把上万张卡连成一台超算</td>
+          <td>交换 AVGO MRVL；光模块 COHR LITE AAOI 中际旭创300308.SZ 新易盛300502.SZ；CW激光 SIVE</td>
+          <td>光模块中国厂主力（旭创 800G约35%'26）；CPO 早期</td>
+          <td><span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td><strong>7 衬底/外延 ★</strong></td>
+          <td>激光要长在 InP 衬底（地基）上</td>
+          <td>InP衬底 AXTI Sumitomo JX；外延 IQE.L；化合物代工 TSEM</td>
+          <td><strong>★卡点</strong>：InP 衬底三家约80–90%，扩产慢</td>
+          <td><span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td><strong>8 电力&散热</strong></td>
+          <td>最后卡在供电和散热</td>
+          <td>配电 VRT ETN（800V DC）；电力 VST CEG TLN；液冷材料（另文）</td>
+          <td>电网/供电合同排队=真瓶颈；核电受青睐</td>
+          <td><span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td><strong>9 原材料</strong></td>
+          <td>硅片、特气、铜、稀有金属</td>
+          <td>硅片 信越4063 SUMCO3436；特气 WF₆ Foosung 093370.KS；光刻胶 日本 JSR/TOK</td>
+          <td>硅片/光刻胶/特气=日韩几家垄断，隐形卡点</td>
+          <td><span class="src src-b">🟡</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="font-size:12px;color:var(--muted)">注：份额/市值类数字不同机构口径常有出入，文中尽量并列区间并标年份；交易所标注（Nasdaq/NYSE/KS=韩交所/SZ=深交所/SH=上交所/.L=伦敦/日股代码等）供识别，非精确法律实体表述。打不到的数字本文标「未找到/未证实」。</p>
+  </section>
+
+  <!-- 钱怎么流 -->
+  <section id="money">
+    <h2>钱怎么流 / 谁卡谁脖子</h2>
+    <p>把全篇串成一条因果链：</p>
+    <ol>
+      <li><strong>钱的源头在最下游。</strong> 几家 hyperscaler（MSFT/GOOGL/AMZN/META）2026 年合计扔出<strong>万亿美元级 capex</strong>（微软单家指引就约 $1900 亿 <span class="src src-b">🟡</span>），neocloud（CRWV/NBIS/IREN）再加几百亿，全砸向「买算力」。</li>
+      <li><strong>这笔钱一层层往上游传导。</strong> 买 GPU 的钱 → 英伟达；英伟达的钱 → 买 HBM（三家内存）、付台积电（封装代工）；台积电的钱 → 买 ASML/AMAT 的机器；光互连的钱 → 光模块厂 → InP 衬底三家；整座厂的钱 → 电力公司和配电/液冷厂。<strong>下游越有钱，上游卡点越能涨价、越能挑客户。</strong></li>
+      <li><strong>真正的卡脖子点（真寡头/单一来源）就这么几个：</strong>
+        <ul>
+          <li><strong>EUV 光刻 = ASML 一家独占（100%）</strong>——全链最硬的单点，没有它没有先进芯片。<span class="src src-b">🟡</span></li>
+          <li><strong>CoWoS 先进封装 = 台积电主导且售罄至 2026</strong>——GPU 和 HBM 拼不成一颗就出不了货。<span class="src src-b">🟡</span></li>
+          <li><strong>HBM = 三家（SK海力士/三星/美光），海力士约 62%</strong>——产能被英伟达提前包。<span class="src src-b">🟡</span></li>
+          <li><strong>InP 衬底 = 三家（AXT/住友/JX），约 80–90%</strong>——光互连越火，这块越紧、扩产越慢。<span class="src src-b">🟡</span></li>
+          <li><strong>光刻胶 / 特种气体 = 日本（JSR/TOK/信越）、韩国（Foosung 等）几家</strong>——平时不起眼，一断供全停、一缺货猛涨价。<span class="src src-b">🟡</span></li>
+          <li><strong>电力（供电合同/电网）</strong>——不是技术寡头，而是「物理上建得慢」，2026 年成了最现实的天花板。</li>
+        </ul>
+      </li>
+    </ol>
+    <div class="callout insight"><span class="label">一句话记住「谁卡谁」</span>
+    下游（云厂）有钱，但钱不能凭空变出芯片。整条链的「议价权」其实握在<strong>上游那几个少数玩家</strong>手里：<strong>ASML（造芯片的机器）、台积电（封装代工）、三家 HBM、三家 InP 衬底、日韩光刻胶/特气</strong>。看 AI 景气，盯这几个卡点的「紧不紧、扩产到哪、谁拿到分配」往往比盯下游谁家股票涨更说明问题。<strong>（再次提醒：以上是产业逻辑，不是买卖建议。）</strong></div>
+  </section>
+
+  <!-- 关键词 -->
+  <section id="kw">
+    <h2>给硬件小白的 10 个关键词速查</h2>
+    <dl class="kw">
+      <dt>GPU / ASIC</dt><dd>GPU=通用的 AI 算力心脏（英伟达主导，靠 CUDA 锁定）；ASIC=为某项活儿量身定做的专用芯片，大厂找博通/Marvell 做来省钱、少依赖英伟达。</dd>
+      <dt>HBM</dt><dd>高带宽内存：把内存芯片像盖楼一样垂直堆叠、紧贴 GPU，用超宽通道高速喂数据。全球只有三家能量产，是著名卡点。</dd>
+      <dt>CoWoS</dt><dd>台积电的先进封装术：用一块 interposer 中介层把 GPU 和周围的 HBM 全焊成一颗「大芯片」。产能售罄至 2026，是整条链最堵的环节之一。</dd>
+      <dt>EUV</dt><dd>极紫外光刻，造最先进芯片的核心机器，全世界<strong>只有 ASML 一家能造</strong>。整条 AI 供应链最硬的单点卡脖子。</dd>
+      <dt>foundry</dt><dd>代工厂：英伟达们只设计、不开厂，把图纸交给代工厂制造（台积电为首），这叫 fabless 模式。</dd>
+      <dt>transceiver / CPO</dt><dd>transceiver=光模块，把「电信号↔光信号」互转的小盒子，AI 让它出货暴增（中际旭创等中国厂为主力）；CPO=把光器件直接封到交换芯片旁，更省电的下一代方案。</dd>
+      <dt>InP</dt><dd>磷化铟，光通信激光必需的「衬底地基」材料，全球三家（AXT/住友/JX）垄断。注意：衬底≠外延片≠光模块，是层层上下游。</dd>
+      <dt>800V DC</dt><dd>800 伏直流配电：超高功率 AI 机柜的新供电方式，比传统低压交流损耗更低，英伟达+Vertiv 在推。</dd>
+      <dt>liquid cooling</dt><dd>液冷：芯片太热风扇吹不动，改用冷板贴芯片甚至整机泡绝缘液散热，是 AI 数据中心的标配趋势。</dd>
+      <dt>neocloud</dt><dd>新云：专做 AI 算力出租的新公司（CoreWeave/Nebius/IREN），替你扛下买卡的天量资本开支、再按小时租给你。</dd>
+    </dl>
+  </section>
+
+  <!-- 延伸阅读 -->
+  <section id="more">
+    <h2>延伸阅读（本仓库相关篇）</h2>
+    <ul>
+      <li><a href="../2026-06-17-amd/">AMD（超威）</a> — 第 2 层 GPU 里英伟达的主要挑战者。</li>
+      <li><a href="../2026-06-17-intc/">Intel（英特尔）</a> — 第 2/5 层，CPU 老牌厂 + 自有晶圆厂的转型故事。</li>
+      <li><a href="../2026-06-16-ai-datacenter-cooling-materials/">AI 数据中心散热材料</a> — 第 8 层「热」那一格的深挖（液冷/导热材料供应链）。</li>
+      <li><a href="../2026-06-17-asts/">AST SpaceMobile（可选）</a> — 太空通信，另一条「连接」叙事的对照。</li>
+      <li><a href="../2026-06-17-ppio/">PPIO 派欧云</a> — 第 1 层 neocloud / AI 推理算力云的中国视角。</li>
+      <li><a href="../2026-06-17-e2b/">E2B</a> — AI agent 运行沙箱，更上层的软件基础设施对照。</li>
+    </ul>
+  </section>
+
+  <footer class="foot">
+    <p><strong>免责声明（重申）：</strong>本文为<strong>产业科普与供应链地图</strong>，文中列出的股票仅为各环节代表，用于帮助理解产业结构，<strong>不构成任何投资建议</strong>。份额、市值、营收、capex 等数字会随时变化且口径不一，文中尽量标注年份与来源等级（🟢一手/🟡二手/🔴自述），但<strong>一律以公司官方申报（SEC / 投资者关系 / 交易所公告）为准，请务必自行核实</strong>。投资有风险，决策需谨慎，盈亏自负。</p>
+    <p style="margin-top:10px">整理日期 2026-06-22 · 硬件科普 · 自包含 HTML（内联 CSS + 内联 SVG，自动浅/深主题）</p>
+  </footer>
+
+</article>
+</body>
+</html>
