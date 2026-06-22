@@ -21,6 +21,27 @@
     "path": "papers/2026-06-17-ppio/index.html"
   },
   {
+    "slug": "2026-06-17-kobe",
+    "title": "Kobe（getkobe.ai）：AI 职业 agent 的竞争格局与早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://www.getkobe.ai",
+    "code": "",
+    "date": "2026-06-22",
+    "published": "公司调研 2026",
+    "tldr": "替个人读 Slack/Notion/Granola 工作流、量化技能并被动对接招聘的 AI career agent；赛道 emerging（切入点局部 nascent），与 Mercor/Micro1 的 B 端供给互补而非竞争；whitespace=读工作流的个人技能 agent + 隐私本地化；团队/融资未披露，产品实效未验证。",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "market-map",
+      "startup-idea",
+      "ai-agent",
+      "recruiting",
+      "china"
+    ],
+    "path": "papers/2026-06-17-kobe/index.html"
+  },
+  {
     "slug": "2026-06-17-asts",
     "title": "AST SpaceMobile（ASTS）：基本面 / 估值 / 是否值得买入",
     "authors": "—",

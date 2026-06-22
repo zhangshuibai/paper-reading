@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kobe（getkobe.ai）· 竞争格局与赛道早期度调研</title>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --bad:#ff6b81; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --bad:#d23651; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;}
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:920px; margin:0 auto; padding:18px 22px 90px}
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:25px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)} .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap; line-height:2}
+  nav.toc a:hover{color:var(--accent)}
+  section{margin:38px 0}
+  h2{font-size:20px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:16.5px; margin:22px 0 8px}
+  p{margin:12px 0} ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)} strong{color:var(--text)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.88em}
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:13px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:9px 10px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  figure{margin:24px 0; text-align:center}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+  .svgwrap{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 8px}
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+  .src{font-size:10.5px; padding:0 6px; border-radius:999px; white-space:nowrap; vertical-align:middle}
+  .src-a{background:rgba(67,197,158,.18); color:var(--ok)}
+  .src-b{background:rgba(255,180,84,.18); color:var(--warn)}
+  .src-c{background:rgba(255,107,129,.18); color:var(--bad)}
+  .legend{font-size:12px; color:var(--muted); margin:6px 0 0}
+  .verdict{display:inline-block; font-weight:700; padding:3px 12px; border-radius:999px; font-size:14px}
+  .v-nascent{background:rgba(122,162,255,.18); color:var(--accent)}
+  .v-emerging{background:rgba(67,197,158,.18); color:var(--ok)}
+  .v-crowded{background:rgba(255,180,84,.18); color:var(--warn)}
+  .v-mature{background:rgba(255,107,129,.18); color:var(--bad)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">AI agent</span>
+      <span class="chip">career / work intelligence</span>
+      <span class="chip">recruiting marketplace</span>
+      <span class="chip">竞争格局</span>
+      <span class="chip">赛道早期度</span>
+      <span class="chip">创业 idea</span>
+    </div>
+    <h1>Kobe（getkobe.ai）：AI 职业 agent 的竞争格局与早期度调研</h1>
+    <p class="orig-title">getkobe.ai — 替个人读工作流、量化技能、被动对接机会的 AI career agent / 早期（nascent–emerging）/ 与 Mercor 的 B 端形成「供给侧个人 agent」互补</p>
+    <dl class="meta-grid">
+      <dt>对象</dt><dd><a href="https://www.getkobe.ai" target="_blank" rel="noopener">https://www.getkobe.ai</a></dd>
+      <dt>赛道</dt><dd>AI agent for career / work intelligence（个人工作数据 → 技能量化 → 招聘双边匹配）</dd>
+      <dt>整理</dt><dd>对话调研笔记；信息来自公开检索，按来源分级标注，产品能力未必经独立验证</dd>
+      <dt>日期</dt><dd>2026-06-22</dd>
+    </dl>
+    <p class="legend">来源等级：<span class="src src-a">🟢 一手</span> 官网/SEC/官方 ·
+      <span class="src src-b">🟡 二手</span> 媒体/数据库/搜索引擎缓存 ·
+      <span class="src src-c">🔴 自述/未证实</span> 营销口径或未独立验证</p>
+  </header>
+
+  <div class="tldr">
+    <b>一句话</b> — Kobe（getkobe.ai）是一个<strong>替个人「读」自己工作流的 AI career agent</strong>：你授权它接入 Slack / Notion / Granola 等工具，它自动从你真实的工作（你驱动的项目、做的决策、解决的问题）里<strong>识别并量化技能</strong>，生成带「同行 percentile」的技能画像，并在你<strong>主动 opt-in</strong> 招聘 marketplace 后被动地把你匹配给公司——卖点是「raw data 只存本地、不上服务器」。赛道判 <span class="verdict v-emerging">emerging（局部 nascent）</span>：「主动读工作流→量化技能」这个切入点目前几乎没人正面做（Mercor / Micro1 是 B 端专家供给、Teal / Jobright 是简历/投递 copilot），<strong>whitespace 真实存在</strong>；但 Kobe 本身信息极少、官网当前甚至返回部署错误，<strong>产品实效完全未验证</strong>，双边冷启动与隐私信任是死穴。</div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#disambig">⓪ 消歧（哪个 Kobe）</a>
+    <a href="#market">① 赛道地图 + 早期度</a>
+    <a href="#matrix">② 竞品对照矩阵</a>
+    <a href="#map">③ 定位图</a>
+    <a href="#funding">④ 融资 timeline</a>
+    <a href="#snapshot">⑤ 公司速览</a>
+    <a href="#cn">⑥ 中国对标</a>
+    <a href="#idea">⑦ 创业 idea 借鉴</a>
+    <a href="#take">⑧ 现实判断</a>
+    <a href="#src">出处</a>
+  </nav>
+
+  <!-- 消歧 -->
+  <section id="disambig" style="margin-top:24px">
+    <h2><span class="n">⓪</span>先消歧：我研究的是哪一个 Kobe</h2>
+    <div class="callout note">
+      <span class="label">三个同名物，本篇只研究「与 agent 相关」的那一个</span>
+      <ul>
+        <li>✅ <strong>本篇主体 — getkobe.ai</strong>：一个 AI career / work-intelligence agent，tagline「Humans &amp; AI Working in Perfect Harmony」，接入 Slack/Notion/Granola 读你的工作、量化技能、对接招聘 marketplace。这正是用户要的「替你读工作流、自动识别技能与匹配机会的 AI agent」。<span class="src src-b">🟡</span></li>
+        <li>❌ <strong>getkobe.com（Kobe Global Technologies）</strong>：新加坡的 AI 网红/influencer marketing 平台，创始人 Evangeline Leong，2016 年成立，已被 We Are Social / Plus Company 收购——<strong>与 agent 无关</strong>，排除。<span class="src src-b">🟡</span></li>
+        <li>❌ <strong>Kobe Steel（神户制钢）</strong>：日本钢铁公司，完全无关，排除。</li>
+      </ul>
+      <strong>判断依据：</strong>用户明确要「和 agent 相关」的那个；getkobe.ai 自我定位即一个替用户读工作数据、自动识别技能、被动匹配机会的 agent，与「网红营销 / 钢铁」两者从产品到客户都不重叠。注意 <strong>Crunchbase 上 <code>organization/kobe</code> 词条指向的是 getkobe.com 那家网红营销公司</strong>，并非本篇主体——这点在查融资时极易混淆，已剔除。<span class="src src-b">🟡</span>
+    </div>
+    <div class="callout warn">
+      <span class="label">一手抓取受限（诚实说明）</span>
+      检索期间 <code>getkobe.ai</code> 直接抓取多次返回 Vercel <code>DEPLOYMENT_NOT_FOUND</code>（部署找不到）；Wayback 亦被网络策略挡住。因此<strong>本篇关于 Kobe 产品的描述主要来自搜索引擎对该页的缓存快照（🟡），未能独立载入实时一手页面</strong>。这本身就是「极早期 / 站点尚不稳定」的信号。融资、团队、估值、客户、用户数等<strong>均未找到可信披露</strong>，下文一律标「未披露 / 未找到」，绝不臆测。
+    </div>
+  </section>
+
+  <!-- ① 赛道与早期度 -->
+  <section id="market">
+    <h2><span class="n">①</span>赛道地图 + 早期度判断</h2>
+    <p>Kobe 处在三条线的交叉口：<strong>(a) 个人工作数据采集</strong>（像 Granola/Notion 那样从你的工具里抽取工作痕迹）、<strong>(b) 技能量化 / work intelligence</strong>（把工作痕迹转成「可验证的技能画像 + 同行 percentile」）、<strong>(c) 招聘双边匹配</strong>（把这份画像变成被动求职、对接公司）。它要解决的核心需求是：<strong>简历是自述、滞后、可注水的；而「你到底会什么」其实藏在你每天的真实工作里</strong>——Kobe 想用 agent 直接读这些工作、产出「proof-based」的技能与匹配。<span class="src src-b">🟡</span></p>
+    <h3>玩家分群（四象限别漏）</h3>
+    <ul>
+      <li><strong>现有巨头：</strong>LinkedIn（职业身份 + 招聘的事实标准，已大量铺 AI；但其数据仍是「用户自填 + 社交」而非「读工作流」）；Microsoft（Viva / Copilot 已经在企业内读你的 Teams/邮件/文档做 work intelligence，是离 Kobe「读工作」最近的巨头，只是它服务雇主、不服务个人求职）。<span class="src src-b">🟡</span></li>
+      <li><strong>垂直创业公司：</strong>Mercor（$10B，B 端专家人才/AI 训练数据）、Micro1（$500M，B 端 AI 招聘+数据）、Teal、Jobright、Careerflow、Simplify、Cord、Juicebox（招聘方搜人）——大多做<strong>简历优化 / 自动投递 / 招聘方找人</strong>，没有一个正面做「agent 主动读你工作流量化技能」。<span class="src src-b">🟡</span></li>
+      <li><strong>大厂顺手做：</strong>Microsoft Viva Skills / LinkedIn Skills、Google、Notion AI、Slack AI 都握着「你的工作数据」，理论上离 Kobe 一步之遥——这是 Kobe 最大的结构性威胁（数据在人家手里）。<span class="src src-c">🔴 推断</span></li>
+      <li><strong>开源 / 免费替代：</strong>暂无「读工作流量化技能」的开源标准品；但「AI 简历 / 自动投递」侧有大量免费/freemium（Teal 免费档、各 job copilot 浏览器插件），会从下方挤压 Kobe 的「匹配」价值。<span class="src src-b">🟡</span></li>
+    </ul>
+    <div class="callout insight">
+      <span class="label">早期度判断</span>
+      <span class="verdict v-emerging">emerging（「主动读工作流量化技能」这一格更接近 nascent）</span>
+      （nascent 萌芽 / emerging 新兴 / crowded 拥挤 / mature 成熟）<br><br>
+      <strong>判断信号：</strong>① 大赛道「AI + 招聘 / career」整体已经 <strong>crowded</strong>（Mercor $10B、Micro1 $100M ARR、一堆 job copilot），资本与玩家密集；② 但 Kobe 真正占的细分——<strong>「个人 agent 主动读真实工作流 → 量化技能 → 被动匹配」</strong>——目前几乎没有正面玩家，更接近 <strong>nascent</strong>；③ 巨头（LinkedIn / Microsoft）握着数据但尚未把它做成「个人侧、跨雇主、proof-based」的产品；④ 无公认 benchmark / 标准（「技能 percentile」如何度量、如何被雇主信任，都还没成型）；⑤ Kobe 自身处于 waitlist / 早期访问阶段、官网部署都不稳定，<strong>产品实效未验证</strong>。综合判 <strong>emerging</strong>，其切入点局部 nascent。
+    </div>
+  </section>
+
+  <!-- ② 竞品矩阵 -->
+  <section id="matrix">
+    <h2><span class="n">②</span>竞品对照矩阵</h2>
+    <p>选 6 个对这个赛道最决定性的维度：<strong>定位（C 端个人 agent vs B 端招聘）· 数据来源（主动接工作流 vs 简历/自填）· 隐私（本地 vs 云）· 变现 · 双边网络（求职者×公司）· 是否「真 agent」</strong>。这几维正好能把「Kobe 这类读工作流的个人 agent」和「Mercor/Micro1 的 B 端供给」「Teal/Jobright 的简历 copilot」「LinkedIn 的社交身份」拉开。指标来自各家口径，时间不一，已标来源等级。</p>
+    <table>
+      <thead><tr>
+        <th>玩家</th>
+        <th>定位（谁是客户）</th>
+        <th>数据来源</th>
+        <th>隐私 / 存储</th>
+        <th>变现</th>
+        <th>双边网络</th>
+        <th>是否「真 agent」</th>
+      </tr></thead>
+      <tbody>
+        <tr><td><strong>Kobe（本篇）</strong></td>
+          <td><strong>C 端个人 + 招聘供给侧</strong> <span class="src src-b">🟡</span></td>
+          <td><strong>主动接工作流</strong>（Slack/Notion/Granola）<span class="src src-b">🟡</span></td>
+          <td><strong>raw data 仅存本地，不上服务器</strong> <span class="src src-c">🔴自述</span></td>
+          <td>未披露（疑似 marketplace 抽成/订阅）<span class="src src-c">🔴</span></td>
+          <td>求职者 × 公司（opt-in 后）<span class="src src-b">🟡</span></td>
+          <td><strong>是</strong>（自动读工作、产出画像）<span class="src src-c">🔴自述</span></td></tr>
+        <tr><td>Mercor</td>
+          <td>B 端：AI 实验室 / 企业找专家 <span class="src src-b">🟡</span></td>
+          <td>面试 + 简历 + 工作样本 <span class="src src-b">🟡</span></td>
+          <td>云（中心化人才库）<span class="src src-b">🟡</span></td>
+          <td>对专家工时抽 finder/match fee（&gt;$1.5M/天流水）<span class="src src-b">🟡</span></td>
+          <td>专家 × AI 实验室 <span class="src src-b">🟡</span></td>
+          <td>有 AI 评估，但核心是 marketplace <span class="src src-b">🟡</span></td></tr>
+        <tr><td>Micro1</td>
+          <td>B 端：AI 招聘 + 训练数据 <span class="src src-b">🟡</span></td>
+          <td>AI 面试官 Zara 面试候选人 <span class="src src-b">🟡</span></td>
+          <td>云 <span class="src src-b">🟡</span></td>
+          <td>专家工时 / 数据服务（&gt;$100M ARR）<span class="src src-b">🟡</span></td>
+          <td>专家 × AI 实验室/F100 <span class="src src-b">🟡</span></td>
+          <td>AI 面试 agent（Zara）<span class="src src-b">🟡</span></td></tr>
+        <tr><td>LinkedIn</td>
+          <td>双边巨头：个人 + 招聘 <span class="src src-b">🟡</span></td>
+          <td>用户自填 + 社交图谱 <span class="src src-b">🟡</span></td>
+          <td>云（数据即护城河）<span class="src src-b">🟡</span></td>
+          <td>订阅 + 招聘 + 广告 <span class="src src-b">🟡</span></td>
+          <td>极强（双边事实标准）<span class="src src-a">🟢</span></td>
+          <td>铺 AI 但非「读工作流」agent <span class="src src-b">🟡</span></td></tr>
+        <tr><td>Teal</td>
+          <td>C 端：求职者 <span class="src src-b">🟡</span></td>
+          <td>简历 + 手动 job tracker <span class="src src-b">🟡</span></td>
+          <td>云 <span class="src src-b">🟡</span></td>
+          <td>freemium 订阅（Teal+）<span class="src src-b">🟡</span></td>
+          <td>弱（单边工具）<span class="src src-b">🟡</span></td>
+          <td>AI 工具集，非自主 agent <span class="src src-b">🟡</span></td></tr>
+        <tr><td>Jobright</td>
+          <td>C 端：求职者 <span class="src src-b">🟡</span></td>
+          <td>简历 + 岗位库 <span class="src src-b">🟡</span></td>
+          <td>云 <span class="src src-b">🟡</span></td>
+          <td>订阅 copilot <span class="src src-b">🟡</span></td>
+          <td>弱（求职者单边）<span class="src src-b">🟡</span></td>
+          <td>「job search copilot / agent」<span class="src src-c">🔴自述</span></td></tr>
+        <tr><td>Microsoft Viva/Copilot</td>
+          <td>B 端：雇主内部 work intelligence <span class="src src-b">🟡</span></td>
+          <td><strong>读工作流</strong>（Teams/邮件/文档）<span class="src src-b">🟡</span></td>
+          <td>企业云租户 <span class="src src-b">🟡</span></td>
+          <td>企业订阅 <span class="src src-b">🟡</span></td>
+          <td>无（对内，不做求职匹配）<span class="src src-b">🟡</span></td>
+          <td>Copilot agent，但服务雇主非个人 <span class="src src-b">🟡</span></td></tr>
+      </tbody>
+    </table>
+    <p><strong>读矩阵：</strong>Kobe 的差异化几乎全在两格——<strong>「数据来源=主动接工作流」</strong>和<strong>「隐私=本地存储 + C 端个人立场」</strong>。Mercor / Micro1 强但在 B 端供给（卖给 AI 实验室的专家工时），不直接抢 Kobe 的个人；LinkedIn 双边最强但数据是「自填」、立场是平台；Teal/Jobright 是简历 copilot、单边工具；唯一在「读工作流」上重叠的 Microsoft 却服务雇主、不做跨雇主求职。<strong>所以 Kobe 不算「同质化挤进红海」，而是卡了一个别人没正面做的格子</strong>——代价是它要独自承担「让雇主相信这套 percentile」和「双边冷启动」两座大山。</p>
+  </section>
+
+  <!-- ③ 定位图 -->
+  <section id="map">
+    <h2><span class="n">③</span>定位图（whitespace 在哪）</h2>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 640 400" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12">
+        <line x1="40" y1="200" x2="600" y2="200" stroke="#b9c2e0" stroke-width="1.5"/>
+        <line x1="320" y1="24" x2="320" y2="376" stroke="#b9c2e0" stroke-width="1.5"/>
+        <text x="598" y="218" text-anchor="end" fill="#5a627a">数据=主动读真实工作流 →</text>
+        <text x="42" y="218" fill="#5a627a">← 数据=简历 / 自填</text>
+        <text x="326" y="34" fill="#5a627a">↑ 服务个人（C 端求职供给侧）</text>
+        <text x="326" y="368" fill="#5a627a">↓ 服务雇主 / 平台（B 端）</text>
+        <rect x="322" y="26" width="276" height="172" fill="rgba(122,162,255,.10)"/>
+        <text x="450" y="120" text-anchor="middle" fill="#7aa2ff" font-size="11" opacity=".9">whitespace：读工作流的个人 agent</text>
+        <circle cx="470" cy="90" r="7" fill="#9b8cff"/><text x="482" y="94" fill="#1a1f33" font-weight="700">Kobe</text>
+        <circle cx="500" cy="300" r="6" fill="#5a627a"/><text x="512" y="304" fill="#5a627a">MS Viva/Copilot</text>
+        <circle cx="250" cy="150" r="6" fill="#5a627a"/><text x="160" y="154" fill="#5a627a">LinkedIn</text>
+        <circle cx="130" cy="100" r="6" fill="#5a627a"/><text x="78" y="92" fill="#5a627a">Teal</text>
+        <circle cx="150" cy="135" r="6" fill="#5a627a"/><text x="98" y="139" fill="#5a627a">Jobright</text>
+        <circle cx="420" cy="285" r="6" fill="#5a627a"/><text x="432" y="289" fill="#5a627a">Mercor</text>
+        <circle cx="460" cy="330" r="6" fill="#5a627a"/><text x="472" y="334" fill="#5a627a">Micro1</text>
+      </svg>
+      </div>
+      <figcaption>定位图（本调研重绘）。横轴=数据从哪来（简历自填 ↔ 主动读真实工作流），纵轴=服务谁（个人 C 端 ↔ 雇主/平台 B 端）。<strong>右上象限「读工作流 × 服务个人」基本空着，正是 Kobe 押注的 whitespace</strong>；离它最近的 Microsoft 在右下（读工作流但服务雇主）。</figcaption>
+    </figure>
+  </section>
+
+  <!-- ④ 融资 timeline -->
+  <section id="funding">
+    <h2><span class="n">④</span>融资 timeline</h2>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 720 160" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12.5">
+        <line x1="60" y1="80" x2="660" y2="80" stroke="#b9c2e0" stroke-width="2"/>
+        <circle cx="360" cy="80" r="8" fill="#9b8cff"/>
+        <text x="360" y="56" text-anchor="middle" fill="#1a1f33" font-weight="700">≈2026 上线 / waitlist</text>
+        <text x="360" y="108" text-anchor="middle" fill="#5a627a">早期访问阶段</text>
+        <text x="360" y="126" text-anchor="middle" fill="#d23651" font-size="11">融资 / 轮次：未找到任何披露</text>
+        <text x="660" y="100" text-anchor="end" fill="#9aa3bd" font-size="11">→ 时间</text>
+      </svg>
+      </div>
+      <figcaption>Kobe（getkobe.ai）时间线——<strong>仅能确认它处于早期上线 / waitlist 阶段；成立时间、轮次、金额、投资方、YC 批次均未找到可信披露</strong>。</figcaption>
+    </figure>
+    <table>
+      <thead><tr><th>时间</th><th>事件 / 轮次</th><th>金额</th><th>投资方</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr><td>约 2026</td><td>产品早期上线 / waitlist（接 Slack/Notion/Granola 读工作）</td><td>—</td><td>—</td><td><span class="src src-b">🟡</span> 搜索缓存</td></tr>
+        <tr><td>—</td><td>种子 / 任何融资轮</td><td><strong>未找到</strong></td><td><strong>未找到</strong></td><td>—</td></tr>
+        <tr><td>—</td><td>YC / 加速器批次</td><td colspan="2"><strong>未找到</strong>（注意 Crunchbase <code>organization/kobe</code> 指向的是另一家网红营销 Kobe，非本主体）</td><td><span class="src src-b">🟡</span></td></tr>
+      </tbody>
+    </table>
+    <p><strong>赛道整体融资热度（对照）：</strong>相邻 B 端供给侧极热——Mercor 2025-10 完成 $350M C 轮、估值 $10B（Felicis 领投）；Micro1 2025-09 $35M A 轮、估值 $500M，年底自述 &gt;$100M ARR。<span class="src src-b">🟡</span> 也就是说<strong>资本对「AI × 人才数据」下注凶猛，但钱主要砸在 B 端供给侧</strong>；Kobe 这种 C 端个人 agent 暂无可见融资信号——要么真的很早，要么尚未公开。</p>
+  </section>
+
+  <!-- ⑤ 公司速览 -->
+  <section id="snapshot">
+    <h2><span class="n">⑤</span>公司速览</h2>
+    <table>
+      <tbody>
+        <tr><td>是什么 / 定位</td><td>AI career / work-intelligence agent；tagline「Humans &amp; AI Working in Perfect Harmony」。替个人读真实工作、量化技能、被动对接招聘机会。<span class="src src-b">🟡</span></td></tr>
+        <tr><td>产品（怎么用）</td><td>① 30 秒授权接入 Slack / Notion / Granola 等工具；② Kobe 自动读工作，<strong>raw data 只存在你本地设备</strong>，云端只用于生成画像；③ 它识别你驱动的项目、做的决策、解决的问题，产出「verified skill profile + 同行 percentile」与月度技能演化报告；④ 你可问它任何职业问题（哪强、哪落后、该学什么、怎么准备 review）；⑤ <strong>仅当你 opt-in 招聘 marketplace</strong>，才生成对外的 high-level 报告并被动匹配公司。<span class="src src-c">🔴 多为自述</span></td></tr>
+        <tr><td>团队</td><td><strong>未找到</strong>可信的创始人/团队披露（不要与 getkobe.com 的 Evangeline Leong 混淆——那是另一家网红营销公司）。</td></tr>
+        <tr><td>商业模式</td><td><strong>未披露</strong>。结构上最可能是招聘 marketplace 抽成（雇主端付费）±个人订阅；「数据变现」因主打本地存储而被弱化。<span class="src src-c">🔴 推断</span></td></tr>
+        <tr><td>状态 / 阶段</td><td>早期：waitlist / 早期访问；官网当前抓取返回部署错误。融资、估值、用户数、客户<strong>均未找到</strong>。<strong>产品实效未经独立验证</strong>。<span class="src src-b">🟡</span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ⑥ 中国对标 -->
+  <section id="cn">
+    <h2><span class="n">⑥</span>中国对标（这套「个人工作 agent + 招聘双边」在中国可行吗）</h2>
+    <p>把 Kobe 的三块能力拆开看中国玩家：</p>
+    <ul>
+      <li><strong>招聘双边平台：</strong>BOSS 直聘已大量铺 AI——自研「南北阁」大模型 + 接入 DeepSeek，招聘端有帮 HR 搜人/匹配的 AI Agent（自述沟通效率 +25%），求职端有 AI 搜索、求职助手、AI 模拟面试、自动生成「牛人优势」简历优化。<span class="src src-b">🟡</span> 它是中国「双边网络」事实标准，等于 Kobe 要面对的「中国版 LinkedIn+Indeed」。</li>
+      <li><strong>中高端职业社交 / 人脉：</strong>脉脉（Maimai）——可投递、可直接搜企业员工建人脉聊机会；自报 2026 年 1–2 月 AI 岗位数同比涨约 12 倍、AI 岗均月薪 ¥60,738。<span class="src src-b">🟡</span> 最接近「LinkedIn 式个人职业身份」，但数据仍是自填+社交，<strong>不读工作流</strong>。</li>
+      <li><strong>AI 面试 / 测评：</strong>近屿智能（AI 得贤招聘官）等做 AI 面试/能力测评——对应 Micro1 的 Zara 那一层，偏 B 端雇主侧。<span class="src src-c">🔴 未在本次检索中独立核到细节</span></li>
+      <li><strong>个人工作数据 / RPA agent：</strong>实在智能等 RPA / agent 玩家握「读软件操作」的能力，但目标是企业自动化，<strong>没人把它转成「个人跨雇主技能画像 + 求职」</strong>。<span class="src src-c">🔴 推断</span></li>
+      <li><strong>个人简历 AI：</strong>大量免费/低价简历优化、自动投递工具，红海。</li>
+    </ul>
+    <div class="callout insight">
+      <span class="label">中国可行性 + whitespace</span>
+      <strong>「个人 agent 主动读工作流 → 量化技能」这一格，中国同样基本空着</strong>，whitespace 成立。但落地有三道强阻力：① <strong>数据合规</strong>——中国《个人信息保护法》《数据安全法》对「读员工的工作数据」极敏感，<strong>本地存储反而可能成为中国市场的核心卖点甚至合规前提</strong>；② <strong>工具生态不同</strong>——要接的是钉钉/飞书/企业微信/Notion 中国替代品，且企业 IT 管控强，个人未必有权导出工作数据；③ <strong>双边被 BOSS 直聘/脉脉锁死</strong>，冷启动比美国更难。<strong>更现实的中国打法</strong>：不做独立双边平台，而是做「<strong>个人侧的飞书/钉钉技能 agent</strong>」（帮你把工作沉淀成可携带的技能档案，对接现有招聘平台），把「读工作流量化技能」当能力层卖，而非自建 marketplace。
+    </div>
+  </section>
+
+  <!-- ⑦ 创业 idea 借鉴 -->
+  <section id="idea">
+    <h2><span class="n">⑦</span>创业 idea 借鉴</h2>
+    <div class="callout insight">
+      <span class="label">Whitespace / 机会</span>
+      定位图右上象限——<strong>「主动读真实工作流 × 服务个人」</strong>——目前几乎没人正面占。简历是自述、滞后、可注水；而「你真正会什么」藏在你每天的 Slack/文档/会议里。谁能把这层「<strong>proof-based、跨雇主、个人拥有</strong>」的技能画像做成被雇主信任的标准，谁就握住了「下一代简历」。这正是 Kobe 押的注，也是它最值得借鉴的一点。
+    </div>
+    <h3>现有玩家共同短板（unmet needs）</h3>
+    <p>① 简历/LinkedIn 是自填，雇主天然不信；② Mercor/Micro1 把价值收在 B 端，<strong>个人拿不到自己的「可携带技能资产」</strong>；③ job copilot 们只优化「投递动作」，不改变「凭据是自述的」这个根；④ 巨头（LinkedIn/Microsoft）虽握工作数据，但要么是自填社交、要么锁在雇主租户里、不给个人跨雇主使用。<strong>共同缺口 = 一个个人拥有、读真实工作、被雇主信任的技能凭据层。</strong></p>
+    <h3>Why now（为什么现在值得做）</h3>
+    <p>① <strong>agent 成熟</strong>——LLM 现在能真的「读懂」非结构化工作内容（聊天/会议/文档）并抽象成技能，三年前做不到；② <strong>work data 上云且可接</strong>——Slack/Notion/Granola 等都有 API，工作痕迹首次可被程序化读取；③ <strong>AI 人才数据需求井喷</strong>——Mercor/Micro1 证明「精准的人才/技能数据」值大钱；④ <strong>隐私焦虑 + 本地推理</strong>——端侧模型让「raw data 不出本地」从口号变得技术可行，正好对冲「读我工作」的最大顾虑。</p>
+    <h3>可借鉴的打法 + 相邻机会</h3>
+    <ul>
+      <li><strong>borrowable：</strong>（a）<strong>「读工作流而非读简历」</strong>这个数据切入点，可迁到任何需要「证明能力」的场景（freelancer 接单、晋升评审、内部转岗、保险/信贷的职业画像）；（b）<strong>「本地存储」当信任卖点</strong>——隐私即 GTM，可复制到任何要碰用户敏感数据的 agent；（c）<strong>「被动求职」</strong>——画像常驻、机会找上门，而非用户主动投递。</li>
+      <li><strong>adjacent：</strong>（a）<strong>与 Mercor 互补而非竞争</strong>——Kobe 做「个人供给侧画像」，把高质量、proof-based 的人才供给喂给 Mercor/Micro1 这类 B 端 marketplace，做「人才数据的上游」；（b）<strong>企业内「技能图谱」</strong>——同一引擎对内卖给雇主做内部人才盘点/晋升（即 Microsoft Viva 的个人友好版）；（c）<strong>面向 AI 训练的「专家发现」</strong>——读工作流天然能识别谁是某领域真专家，正是 AI 数据标注最缺的。</li>
+    </ul>
+    <div class="callout warn">
+      <span class="label">风险（诚实给）</span>
+      ① <strong>双边冷启动</strong>——没有求职者就没有雇主，反之亦然，这是招聘平台的经典死亡谷，Kobe 还要先攒到足够画像才有 marketplace；② <strong>隐私信任</strong>——让 agent 读你全部工作是巨大的信任门槛，「本地存储」是必要但未必充分的承诺（🔴 自述，未独立验证）；③ <strong>巨头碾压</strong>——LinkedIn 一旦做「verified skills from work」、或 Microsoft 把 Viva 个人化，Kobe 的数据与分发都被降维打击；④ <strong>与 Mercor 同质化的诱惑</strong>——若被迫往 B 端供给走，就直接撞上 $10B 的 Mercor；⑤ <strong>「percentile」可信度</strong>——雇主凭什么信 Kobe 的技能分？没有公认标准前，这套凭据的价值悬空；⑥ <strong>极早期执行风险</strong>——团队/融资不明、官网部署都不稳，产品能否做出来本身存疑。
+    </div>
+  </section>
+
+  <!-- ⑧ 现实判断 -->
+  <section id="take">
+    <h2><span class="n">⑧</span>现实判断</h2>
+    <p>Kobe 的<strong>叙事很对、卡位很巧</strong>：在一个已经 crowded 的「AI×招聘」大赛道里，它找了一个别人没正面做的 nascent 小格子（个人 agent 读工作流量化技能），且用「本地存储」直接拆掉这个切入点最大的隐私炸弹。如果「读工作→proof-based 技能凭据」真能被雇主接受，它就是「下一代 LinkedIn 资料」，天花板很高，并且能和 Mercor/Micro1 的 B 端形成「供给侧上游」的互补而非正面竞争。</p>
+    <p><strong>但软肋同样致命且现在就看得见</strong>：双边冷启动、隐私信任、巨头随时降维、技能 percentile 缺公认标准——任何一条都可能卡死。叠加<strong>团队/融资/用户全部未披露、官网当前抓取都失败</strong>，<strong>能核实的只有「方向」，产品实效完全未验证</strong>。结论：作为<strong>idea 来源</strong>，「读工作流的个人技能 agent + 隐私本地化 + 与 B 端 marketplace 互补」非常值得借鉴；作为<strong>一家公司</strong>，现在只能判为高赔率、高不确定的极早期下注，一切待其披露团队与真实产品后再校准。</p>
+    <div class="callout warn">
+      <span class="label">使用提醒</span>
+      本页为对话式调研，信息主要来自公开来源（其中 Kobe 产品描述多来自搜索引擎对其页面的缓存，未能载入实时一手页面）并按等级标注；融资数额、客户、能力声明等以官方一手为准，
+      <strong>产品能力未必经独立验证</strong>，引用前请核对最新信息。
+    </div>
+  </section>
+
+  <!-- 出处 -->
+  <section id="src">
+    <h2>出处</h2>
+    <ul style="font-size:13.5px">
+      <li><a href="https://www.getkobe.ai" target="_blank" rel="noopener">Kobe 官网 getkobe.ai</a>（本篇主体；检索期间直接抓取返回 Vercel 部署错误，产品描述据搜索引擎缓存快照）<span class="src src-b">🟡</span></li>
+      <li>getkobe.ai 缓存快照：tagline、接 Slack/Notion/Granola、本地存储、技能 percentile、opt-in marketplace 等表述 <span class="src src-c">🔴 多为公司自述</span></li>
+      <li><a href="https://techcrunch.com/2025/10/27/mercor-quintuples-valuation-to-10b-with-350m-series-c/" target="_blank" rel="noopener">TechCrunch — Mercor $350M C 轮 / $10B 估值</a> <span class="src src-b">🟡</span></li>
+      <li><a href="https://techcrunch.com/2025/02/20/mercor-an-ai-recruiting-startup-founded-by-21-year-olds-raises-100m-at-2b-valuation/" target="_blank" rel="noopener">TechCrunch — Mercor 早期轮次与创始人</a> <span class="src src-b">🟡</span></li>
+      <li><a href="https://techcrunch.com/2025/09/12/micro1-a-competitor-to-scale-ai-raises-funds-at-500m-valuation/" target="_blank" rel="noopener">TechCrunch — Micro1 $35M A 轮 / $500M 估值</a>；<a href="https://techcrunch.com/2025/12/04/micro1-a-scale-ai-competitor-touts-crossing-100m-arr/" target="_blank" rel="noopener">Micro1 跨过 $100M ARR</a> <span class="src src-b">🟡</span></li>
+      <li><a href="https://www.tealhq.com/" target="_blank" rel="noopener">Teal（tealhq.com）</a>、<a href="https://jobright.ai/" target="_blank" rel="noopener">Jobright</a>、<a href="https://cord.com/" target="_blank" rel="noopener">Cord</a>、<a href="https://juicebox.ai/" target="_blank" rel="noopener">Juicebox</a> — 竞品定位 <span class="src src-b">🟡</span></li>
+      <li><a href="https://www.getkobe.com/about-us/" target="_blank" rel="noopener">getkobe.com（Kobe Global，网红营销，非本篇主体）</a>、<a href="https://www.crunchbase.com/organization/kobe" target="_blank" rel="noopener">Crunchbase organization/kobe（指向网红营销 Kobe）</a> — 用于消歧 <span class="src src-b">🟡</span></li>
+      <li>BOSS 直聘 AI（南北阁/DeepSeek、招聘 Agent）、脉脉 2026 AI 岗位数据 — 中国对标 <span class="src src-b">🟡</span> 据国内媒体（新浪财经/光明网/新华网）报道</li>
+    </ul>
+  </section>
+
+  <footer class="foot">
+    公司竞争格局 / 赛道早期度调研笔记，仅作梳理；信息按来源分级、产品能力未必经独立验证，以官方一手信息为准 · 整理日期 2026-06-22
+  </footer>
+
+</article>
+</body>
+</html>
