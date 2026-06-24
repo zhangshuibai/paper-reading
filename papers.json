@@ -1957,5 +1957,25 @@
       "mcp",
       "agent"
     ]
+  },
+  {
+    "slug": "2026-06-17-helium-supply-chain",
+    "title": "氦气（Helium）在供应链中的地位：技术 / 财经 / 未来 / 股票全解",
+    "authors": "—",
+    "team": "产业研究",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-24",
+    "published": "产业研究 2026",
+    "tldr": "氦是半导体/光纤/MRI不可替代的控温检漏低温刚需,不可再生且来源高度集中(美/卡塔尔/俄),资源+地缘型隐形卡点;价格周期性暴涨,联邦储备退役;纯氦大盘股几乎没有,稳的是工业气体巨头副业、纯押只能碰高风险勘探小盘;非投资建议",
+    "tags": [
+      "supply-chain",
+      "materials",
+      "helium",
+      "semiconductors",
+      "stocks",
+      "industry"
+    ],
+    "path": "papers/2026-06-17-helium-supply-chain/index.html"
   }
 ]

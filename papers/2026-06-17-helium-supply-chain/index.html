@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>氦气（Helium）在供应链中的地位：技术 / 财经 / 未来 / 股票全解</title>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --bad:#ff6b81; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --bad:#d23651; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.7; font-size:16px;}
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:1000px; margin:0 auto; padding:18px 22px 90px}
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:25px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)} .meta-grid dd{margin:0}
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap; line-height:2}
+  nav.toc a:hover{color:var(--accent)}
+  section{margin:34px 0}
+  h2{font-size:20px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:16px; margin:20px 0 6px}
+  p{margin:11px 0} ul,ol{padding-left:22px} li{margin:5px 0}
+  a{color:var(--accent)} strong{color:var(--text)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.88em}
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:12.5px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:8px 9px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-word}
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+  .callout.bad{border-left:4px solid var(--bad)} .callout.bad .label{color:var(--bad)}
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+  .seg{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:16px 0; background:var(--panel)}
+  .seg h3{margin-top:4px}
+  .op{font-weight:700;white-space:nowrap}.op-g{color:var(--ok)}.op-y{color:var(--warn)}.op-r{color:var(--bad)}
+  .src{font-size:10.5px;padding:0 5px;border-radius:999px; white-space:nowrap}
+  .src-a{background:rgba(67,197,158,.18);color:var(--ok)}.src-b{background:rgba(255,180,84,.18);color:var(--warn)}.src-c{background:rgba(255,107,129,.18);color:var(--bad)}
+  .figwrap{border:1px solid var(--line); border-radius:12px; padding:14px 14px 6px; margin:18px 0; background:var(--panel); box-shadow:var(--shadow)}
+  .figwrap .cap{font-size:12.5px; color:var(--muted); margin:8px 4px 8px; line-height:1.5}
+  .figwrap svg{display:block; width:100%; height:auto}
+  .disc{border:1px solid var(--bad); background:rgba(255,107,129,.08); border-radius:12px; padding:13px 18px; margin:20px 0; font-size:13.5px}
+  .disc b{color:var(--bad)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+  .two{display:grid; grid-template-columns:1fr 1fr; gap:14px}
+  @media (max-width:680px){.two{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">供应链</span><span class="chip">氦 / Helium</span>
+      <span class="chip">半导体材料·特气</span><span class="chip">资源+地缘卡点</span>
+      <span class="chip">产业研究</span>
+    </div>
+    <h1>氦气（Helium）在供应链中的地位：技术 / 财经 / 未来 / 股票全解</h1>
+    <p class="orig-title">从晶圆背面冷却、光纤拉丝、MRI 超导磁体，到来源国集中、美国联邦氦储备退役、纯氦小盘股的归零风险——一个「资源型隐形卡点」的四角度拆解</p>
+    <dl class="meta-grid">
+      <dt>类型</dt><dd>产业研究 / 供应链深度</dd>
+      <dt>整理</dt><dd>数字按来源分级（<span class="src src-a">🟢一手 USGS/SEC/官方</span> / <span class="src src-b">🟡二手 媒体·分析</span> / <span class="src src-c">🔴自述·未证实</span>），口径差异时并列标年份</dd>
+      <dt>日期</dt><dd>2026-06-17</dd>
+    </dl>
+  </header>
+
+  <div class="disc">
+    <b>⚠️ 非投资建议</b>　本文为产业科普与公开信息整理，所列公司、股票代码（ticker）、市场数据仅用于说明供应链结构，<strong>不构成任何买卖建议、目标价或持仓推荐</strong>。氦相关小盘勘探股多为微盘、高波动、可能尚无稳定产量、存在归零风险；工业气体巨头的氦敞口又被庞大主业稀释。投资有风险，决策请以一手财报（SEC/IR）和专业意见为准。文末再次声明。
+  </div>
+
+  <div class="tldr">
+    <b>一句话</b> — 氦是半导体（晶圆控温/惰性气氛/检漏/低温刻蚀）、光纤拉丝冷却、MRI 超导磁体的<strong>不可替代刚需</strong>；它<strong>不可再生</strong>（地质上由放射性衰变累积上亿年，逃逸进太空就回不来），且几乎只能作为<strong>天然气副产品</strong>提取，导致来源<strong>高度集中</strong>（美国 + 卡塔尔约占世界产量 ~¾，再加俄罗斯/阿尔及利亚/加拿大）。这使氦成为一个「<strong>资源 + 地缘集中型隐形卡点</strong>」——和光刻胶那种「技术垄断型」卡点不同，氦卡在<strong>地下有没有、谁挖、谁运</strong>。价格呈剧烈周期（USGS 口径 2025 年 Grade-A 基价 ~$12/m³ ≈ $330/千立方英尺 <span class="src src-a">🟢</span>，现货在「氦荒」高峰被报道暴涨数倍 <span class="src src-b">🟡</span>）；2024 年美国<strong>联邦氦系统（Federal Helium System）整体卖给 Messer</strong>，国家队退场。<b>供需展望（本文判断）：中期偏紧→视新源放量转向脆弱平衡</b>——卡塔尔扩产 + 俄罗斯 Amur 缓慢爬坡 + 北美/坦桑尼亚新氦田是「松」的力量，AI/半导体/MRI/量子是「紧」的力量，地缘（卡塔尔单点、俄罗斯受制裁）是最大不确定项。股票层面：<strong>几乎没有「纯氦」大盘股</strong>，稳的是工业气体巨头（$LIN/$APD/AI.PA）但氦只占其一小块；纯押氦只能碰高风险勘探小盘。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#bg">⓪ 领域背景速补</a>
+    <a href="#tech">① 技术角度</a>
+    <a href="#fin">② 财经角度</a>
+    <a href="#future">③ 未来角度</a>
+    <a href="#stock">④ 股票角度</a>
+    <a href="#take">⑤ 现实判断 + 存疑</a>
+    <a href="#src">来源</a>
+  </nav>
+
+  <!-- ===================== ⓪ 背景 ===================== -->
+  <section id="bg">
+    <h2><span class="n">⓪</span>领域背景速补（读者只懂 LLM，不懂气体/地质也能跟上）</h2>
+    <p>这一节先把后面要反复出现的几个名词讲清楚——它是什么、为什么难、和这篇有什么关系。术语保留英文，旁边给中文解释。</p>
+
+    <div class="seg">
+      <h3>氦（Helium, He）是什么</h3>
+      <p>元素周期表第 2 号、最轻的<strong>惰性气体（noble/inert gas）</strong>。"惰性"=几乎不和任何东西反应，所以可以放心吹进精密腔体而不污染。它有两个别人比不了的物理特性：</p>
+      <ul>
+        <li><strong>沸点全宇宙最低（约 −269 ℃ / 4.2 开尔文）</strong>——所以它是终极「冷媒」，是唯一能把东西冷到接近绝对零度（超导工作温度）的液体。<span class="src src-a">🟢</span></li>
+        <li><strong>原子小、导热好、扩散快</strong>——能钻进极小缝隙（适合检漏）、能快速带走热量（适合控温）、能在高温下保护工件不被氧化（惰性气氛）。</li>
+      </ul>
+    </div>
+
+    <div class="callout warn">
+      <span class="label">为什么稀缺（这是全文的根）</span>
+      <p>氦在宇宙里多得是（恒星里造），但<strong>在地球上极难留住</strong>，原因有三，叠加成「一去不复返」：</p>
+      <ol>
+        <li><strong>不可再生（人类时间尺度上）。</strong>地壳里的氦来自岩石中铀/钍等放射性元素几亿年的<strong>α 衰变</strong>慢慢攒出来的，攒一吨要地质纪元，人为造不出来。</li>
+        <li><strong>只能"搭车"开采。</strong>氦没有自己的矿，它溶在某些<strong>天然气藏</strong>里（通常含量极低，富氦气田才有 0.3%–7% 这个量级 <span class="src src-b">🟡</span>），必须在<strong>处理天然气/LNG 时顺手分出来</strong>。这意味着氦产量<strong>受制于天然气项目</strong>——天然气不开、氦也出不来。</li>
+        <li><strong>逃逸进太空就回不来。</strong>氦太轻，一旦放进大气，会一路飘到高层大气最终逃逸地球引力。所以你今天放飞的一个氦气球，那些氦<strong>基本永久离开了地球</strong>。用掉≈消失。</li>
+      </ol>
+      <p>这三点合起来，让氦成为典型的<strong>"用一点少一点"的有限资源</strong>——这是它和"挖矿能再挖"的普通商品根本不同的地方。</p>
+    </div>
+
+    <div class="seg">
+      <h3>和半导体 / 光纤 / 医疗的关系（先给结论，技术节展开）</h3>
+      <ul>
+        <li><strong>半导体：</strong>造芯片要在真空腔里刻蚀/沉积，氦用来<strong>给晶圆背面控温（背面冷却）</strong>、做<strong>惰性吹扫/载气</strong>、做<strong>检漏</strong>、以及越来越多的<strong>低温刻蚀（cryo etch）/冷泵（cryopump）</strong>。没有合格氦，良率和工艺窗口都会出问题。</li>
+        <li><strong>光纤：</strong>拉光纤丝时玻璃从 ~2000 ℃ 拉出来要<strong>快速均匀冷却</strong>，业界主要靠氦（导热高、惰性不污染），是光纤产线的隐性刚需。</li>
+        <li><strong>医疗（MRI）：</strong>核磁共振的<strong>超导磁体</strong>要泡在液氦里维持超导，没有液氦磁体就"失超"。这是公众最有感、也最被"氦荒会影响看病"报道点名的用途。</li>
+      </ul>
+    </div>
+
+    <table>
+      <tr><th>名词</th><th>是什么 / 为什么和氦有关</th></tr>
+      <tr><td>Grade-A helium</td><td>纯度 ≥99.997% 的高纯氦，半导体/科研/医疗用的就是这个等级。USGS 报价口径即 Grade-A。<span class="src src-a">🟢</span></td></tr>
+      <tr><td>Crude helium（粗氦）</td><td>纯度 60%–80% 的中间品，从天然气先粗提，再送去提纯成 Grade-A。</td></tr>
+      <tr><td>mcf / Mcf / scf</td><td>气体体积单位。Mcf=千立方英尺（thousand cubic feet），Bcf=十亿立方英尺。USGS 也用 m³（立方米）。1 美元/m³ 与 美元/Mcf 是两套刻度，注意别混。</td></tr>
+      <tr><td>液氦 / cryogenic</td><td>把氦冷成液体（−269 ℃）用于超导/科研低温；运输储存都难、易蒸发损耗（boil-off）。</td></tr>
+      <tr><td>ASU / 天然气副产</td><td>氪/氖/氙这些稀有气体从<strong>空分装置（ASU）</strong>里提；但<strong>氦不行</strong>——空气里氦太稀，只能从<strong>天然气</strong>里提。这是氦和别的稀有气体的关键差异。<span class="src src-a">🟢</span></td></tr>
+    </table>
+  </section>
+
+  <!-- ===================== ① 技术 ===================== -->
+  <section id="tech">
+    <h2><span class="n">①</span>技术角度：氦在芯片/光纤/医疗里到底干什么、为什么难替代</h2>
+
+    <h3>1. 半导体里的氦（最硬核、也最被忽视的一块）</h3>
+    <div class="seg">
+      <p><strong>① 晶圆背面冷却 / 控温（wafer backside cooling / ESC He cooling）。</strong>刻蚀（etch）和 CVD/PECVD（化学气相沉积）在真空腔里进行，等离子体把晶圆烤得很烫，但工艺要求<strong>整片晶圆温度极均匀、可精确控制</strong>（差几度，刻蚀剖面和沉积膜厚就变）。真空里没法靠空气导热，业界的招是：晶圆被<strong>静电吸盘（ESC）</strong>吸住，从背面通入<strong>氦气</strong>——氦在晶圆背面与吸盘之间形成一层"导热气垫"，把热量传给被冷却的吸盘。氦<strong>导热好、惰性、不污染、在低压下仍能导热</strong>，这一岗位几乎专属于它。</p>
+      <p><strong>② 惰性气氛 / 吹扫 / 载气（purge / carrier）。</strong>很多步骤需要把腔体或管路里的氧/水赶干净（吹扫 purge），或用惰性气体把前驱体带进腔体（carrier）。氮气便宜但有时会和工艺反应或扩散性不够，氦在某些<strong>高纯/高扩散/防氧化</strong>场景不可替代。</p>
+      <p><strong>③ 泄漏检测（leak detection）。</strong>真空腔、气体管路、封装气密性测试，行业标准方法是<strong>氦质谱检漏</strong>：氦原子小、跑得快、本底低，灵敏度甩开其它气体几个数量级。半导体设备、航天、医疗器械的密封件都靠它验。</p>
+      <p><strong>④ 低温工艺：cryo etch / cryopump。</strong>先进逻辑和高深宽比存储（如高层 3D NAND、DRAM）越来越用<strong>低温刻蚀（cryogenic etch）</strong>把晶圆冷到很低温度以提升刻蚀各向异性和选择比；真空腔常用<strong>冷泵（cryopump）</strong>抽真空，靠极低温冷凝抽走气体——这些低温环节直接或间接吃氦/氦制冷。AI 芯片堆叠越复杂，这类低温步骤越多，氦的"工艺内含量"在上升。<span class="src src-b">🟡</span></p>
+    </div>
+
+    <h3>2. 光纤拉丝冷却（fiber draw cooling）</h3>
+    <p>玻璃预制棒在拉丝塔里被加热到约 2000 ℃ 拉成头发丝细的光纤，出炉后必须在落地前<strong>快速、均匀冷却</strong>到能上涂层的温度，否则直径波动、强度下降。业界主流就是在冷却管里通<strong>氦</strong>——它导热远高于氮、且惰性不和热玻璃反应。AI 数据中心和长途网络对光纤需求拉动越大，这块氦消耗越被关注。</p>
+
+    <h3>3. 医疗 MRI 超导磁体（公众最有感）</h3>
+    <p>MRI 的强磁场来自<strong>超导线圈</strong>，必须泡在<strong>液氦</strong>里维持在 4 K 附近才超导。一台 MRI 初装要灌上千升液氦，运行中有蒸发损耗（新机型已大幅降低补氦需求，甚至"封闭少氦"设计）。"氦荒会不会影响看病"正是这个环节——美国 2024 年卖掉联邦氦储备时，医疗界的担忧被多家媒体报道。<span class="src src-b">🟡</span></p>
+
+    <h3>4. 其它：航天 / 量子 / 起重 / 焊接 / 科研低温</h3>
+    <ul>
+      <li><strong>航天（aerospace）：</strong>火箭推进剂贮箱<strong>增压吹扫</strong>（把液氢/液氧贮箱顶压、置换），惰性又不会液化，发射前后大量用氦。USGS 口径航天约占美国用氦 <strong>9%</strong>。<span class="src src-a">🟢</span></li>
+      <li><strong>量子计算 / 科研低温：</strong>超导量子比特、稀释制冷机、强磁体实验都靠液氦/氦-3 把系统冷到 mK 级。氦-3（更稀有的同位素）用于中子探测器、研究和量子。<span class="src src-a">🟢</span></li>
+      <li><strong>起重（lifting gas）：</strong>气球、飞艇——比氢安全（不可燃）。USGS 把 MRI 与 lifting gas 合计列约 15%。</li>
+      <li><strong>焊接（welding）：</strong>某些高活性金属（铝、钛）焊接的保护气，约 8%。</li>
+      <li><strong>潜水（diving）：</strong>深潜混合气（氦氧 heliox），约 5%。</li>
+    </ul>
+
+    <div class="figwrap">
+      <div class="cap"><strong>图 1　氦的终端用途分布（美国 2025，USGS 口径）</strong>　数据 <span class="src src-a">🟢 USGS MCS 2026《Helium and Rare Gases》</span>。注：USGS 把若干用途合并列示（如 "受控气氛/光纤/半导体" 合计 17%、"MRI/起重" 合计 15%），这是<strong>美国国内</strong>消费结构、并非全球；全球口径下半导体占比通常被分析机构报得更高（见图 3c 旁注）。</div>
+      <svg viewBox="0 0 720 300" role="img" aria-label="氦终端用途分布饼图">
+        <g transform="translate(155,150)">
+          <circle r="90" fill="none" stroke="var(--line)" stroke-width="0.5"/>
+          <circle r="45" fill="none" stroke="#7aa2ff" stroke-width="90" stroke-dasharray="62.2 220.9" transform="rotate(-90)"/>
+          <circle r="45" fill="none" stroke="#9b8cff" stroke-width="90" stroke-dasharray="48.1 235.0" transform="rotate(-90)" stroke-dashoffset="-62.2"/>
+          <circle r="45" fill="none" stroke="#43c59e" stroke-width="90" stroke-dasharray="42.4 240.7" transform="rotate(-90)" stroke-dashoffset="-110.3"/>
+          <circle r="45" fill="none" stroke="#ffb454" stroke-width="90" stroke-dasharray="25.4 257.7" transform="rotate(-90)" stroke-dashoffset="-152.7"/>
+          <circle r="45" fill="none" stroke="#ff6b81" stroke-width="90" stroke-dasharray="22.6 260.5" transform="rotate(-90)" stroke-dashoffset="-178.1"/>
+          <circle r="45" fill="none" stroke="#5ad1e8" stroke-width="90" stroke-dasharray="14.1 269.0" transform="rotate(-90)" stroke-dashoffset="-200.7"/>
+          <circle r="45" fill="none" stroke="#c79bff" stroke-width="90" stroke-dasharray="14.1 269.0" transform="rotate(-90)" stroke-dashoffset="-214.8"/>
+          <circle r="45" fill="none" stroke="#8893b5" stroke-width="90" stroke-dasharray="5.6 277.5" transform="rotate(-90)" stroke-dashoffset="-228.9"/>
+          <circle r="34" fill="var(--bg)"/>
+          <text x="0" y="-3" text-anchor="middle" font-size="13" font-weight="700" fill="var(--text)">美国</text>
+          <text x="0" y="13" text-anchor="middle" font-size="11" fill="var(--muted)">2025 用氦</text>
+        </g>
+        <g transform="translate(330,40)" font-size="13" fill="var(--text)">
+          <g><rect width="13" height="13" rx="3" fill="#7aa2ff"/><text x="20" y="11">分析 / 实验室 / 特种气体　22%</text></g>
+          <g transform="translate(0,26)"><rect width="13" height="13" rx="3" fill="#9b8cff"/><text x="20" y="11">受控气氛 / 光纤 / 半导体　17%</text></g>
+          <g transform="translate(0,52)"><rect width="13" height="13" rx="3" fill="#43c59e"/><text x="20" y="11">MRI / 起重气　15%</text></g>
+          <g transform="translate(0,78)"><rect width="13" height="13" rx="3" fill="#ffb454"/><text x="20" y="11">航天　9%</text></g>
+          <g transform="translate(0,104)"><rect width="13" height="13" rx="3" fill="#ff6b81"/><text x="20" y="11">焊接　8%</text></g>
+          <g transform="translate(0,130)"><rect width="13" height="13" rx="3" fill="#5ad1e8"/><text x="20" y="11">潜水　5%</text></g>
+          <g transform="translate(0,156)"><rect width="13" height="13" rx="3" fill="#c79bff"/><text x="20" y="11">泄漏检测　5%</text></g>
+          <g transform="translate(0,182)"><rect width="13" height="13" rx="3" fill="#8893b5"/><text x="20" y="11">其它　2%</text></g>
+        </g>
+      </svg>
+    </div>
+
+    <h3>5. 氦在芯片供应链里的"层"——它在哪一格</h3>
+    <p>把造一颗芯片的链条从下往上看：<strong>设备（ASML/AMAT/Lam）→ 材料与特种气体（gases）→ 晶圆制造（fab）→ 封装测试 → 系统</strong>。氦不在"设备"也不在"芯片设计"，它在<strong>材料/特气这一横切层</strong>——和光刻胶、电子特气（NF₃、WF₆ 等）、高纯化学品并列，是 fab 每天都要消耗的"耗材/工艺气体"。和光刻胶不同的是：光刻胶是<strong>技术/配方垄断</strong>（少数日企会做），氦是<strong>资源/地理垄断</strong>（地下有没有、谁分离、谁液化运输）。</p>
+
+    <div class="figwrap">
+      <div class="cap"><strong>图 2　氦在半导体供应链里的位置（"材料 / 特气"横切层）</strong>　示意图，用于说明结构层级，非按比例。</div>
+      <svg viewBox="0 0 720 320" role="img" aria-label="氦在半导体供应链位置示意">
+        <defs>
+          <style>
+            .box{fill:var(--panel2);stroke:var(--line);stroke-width:1.2}
+            .lbl{fill:var(--text);font-size:12.5px;font-weight:600}
+            .sub{fill:var(--muted);font-size:10.5px}
+            .he{fill:rgba(122,162,255,.16);stroke:var(--accent);stroke-width:1.8}
+            .helbl{fill:var(--accent);font-weight:700;font-size:13px}
+            .arr{stroke:var(--muted);stroke-width:1.4;marker-end:url(#ah)}
+          </style>
+          <marker id="ah" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="var(--muted)"/></marker>
+        </defs>
+        <g>
+          <rect class="box" x="30" y="30" width="150" height="46" rx="9"/><text class="lbl" x="105" y="50" text-anchor="middle">设备 Equipment</text><text class="sub" x="105" y="66" text-anchor="middle">ASML / AMAT / Lam / TEL</text>
+          <rect class="box" x="30" y="100" width="150" height="46" rx="9"/><text class="lbl" x="105" y="120" text-anchor="middle">晶圆制造 Fab</text><text class="sub" x="105" y="136" text-anchor="middle">TSMC / Samsung / Intel</text>
+          <rect class="box" x="30" y="170" width="150" height="46" rx="9"/><text class="lbl" x="105" y="190" text-anchor="middle">封装测试 OSAT</text><text class="sub" x="105" y="206" text-anchor="middle">ASE / Amkor / CoWoS</text>
+          <rect class="box" x="30" y="240" width="150" height="46" rx="9"/><text class="lbl" x="105" y="260" text-anchor="middle">系统 / 终端</text><text class="sub" x="105" y="276" text-anchor="middle">AI 服务器 / 手机 / 车</text>
+          <line class="arr" x1="105" y1="76" x2="105" y2="98"/>
+          <line class="arr" x1="105" y1="146" x2="105" y2="168"/>
+          <line class="arr" x1="105" y1="216" x2="105" y2="238"/>
+        </g>
+        <rect x="250" y="30" width="200" height="256" rx="12" fill="rgba(155,140,255,.10)" stroke="var(--accent2)" stroke-width="1.5" stroke-dasharray="5 4"/>
+        <text x="350" y="52" text-anchor="middle" class="lbl" fill="var(--accent2)">材料 / 特种气体层</text>
+        <text x="350" y="68" text-anchor="middle" class="sub">（横切：fab 每天消耗）</text>
+        <g>
+          <rect class="box he" x="268" y="82" width="164" height="40" rx="8"/><text class="helbl" x="350" y="100" text-anchor="middle">氦 He</text><text class="sub" x="350" y="115" text-anchor="middle" fill="var(--accent)">控温·吹扫·检漏·低温</text>
+          <rect class="box" x="268" y="132" width="164" height="34" rx="8"/><text class="lbl" x="350" y="153" text-anchor="middle">光刻胶 Photoresist</text>
+          <rect class="box" x="268" y="176" width="164" height="34" rx="8"/><text class="lbl" x="350" y="197" text-anchor="middle">电子特气 NF₃/WF₆…</text>
+          <rect class="box" x="268" y="220" width="164" height="34" rx="8"/><text class="lbl" x="350" y="241" text-anchor="middle">高纯化学 / 靶材 / 抛光</text>
+        </g>
+        <line class="arr" x1="250" y1="123" x2="182" y2="123"/>
+        <rect x="500" y="82" width="195" height="160" rx="12" fill="rgba(67,197,158,.08)" stroke="var(--ok)" stroke-width="1.4"/>
+        <text x="597" y="104" text-anchor="middle" class="lbl" fill="var(--ok)">氦的上游（资源端）</text>
+        <text x="597" y="128" text-anchor="middle" class="sub">天然气 / LNG 处理副产</text>
+        <text x="597" y="150" text-anchor="middle" class="sub">美 · 卡塔尔 · 俄 · 阿尔及利亚</text>
+        <text x="597" y="172" text-anchor="middle" class="sub">分离→液化→工业气体巨头分销</text>
+        <text x="597" y="196" text-anchor="middle" class="sub">Linde / Air Products / Air Liquide</text>
+        <text x="597" y="218" text-anchor="middle" class="sub">/ Messer（联邦系统买家）</text>
+        <line class="arr" x1="500" y1="102" x2="434" y2="102"/>
+      </svg>
+    </div>
+
+    <div class="callout insight">
+      <span class="label">为什么难替代（核心论点）</span>
+      <ul>
+        <li><strong>物理唯一性：</strong>需要 4 K 级低温（超导/MRI/量子）时，<strong>没有任何替代物</strong>——USGS 明确写"温度低于 −429 ℉（约 4 K）以下没有替代品"。<span class="src src-a">🟢</span></li>
+        <li><strong>部分场景可替但有代价：</strong>检漏可用氢、起重可用氢/热空气、焊接保护可用氩、潜水可用其它惰性气——但要么不安全、要么性能差、要么换工艺成本高。USGS 列了这些替代关系，说明"边界存在但不彻底"。</li>
+        <li><strong>半导体控温/光纤冷却：</strong>工艺已围绕氦的导热特性优化，临时改用氮往往牺牲良率/速度，<strong>替代是"能但不愿"</strong>。真正的减量来自<strong>回收（reclaim）</strong>而非替代。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ===================== ② 财经 ===================== -->
+  <section id="fin">
+    <h2><span class="n">②</span>财经角度：市场多大、价格多疯、供给多集中、储备退役</h2>
+
+    <h3>1. 市场规模（多机构口径，务必看年份）</h3>
+    <table>
+      <tr><th>口径</th><th>数字</th><th>来源 / 年份</th></tr>
+      <tr><td>美国 Grade-A + 气态氦销售额</td><td>约 <strong>$970 百万</strong>（销量 81 Mm³）</td><td><span class="src src-a">🟢 USGS MCS 2026（2025 估）</span></td></tr>
+      <tr><td>美国销售额（前一版）</td><td>约 $1.1 十亿（销量 81 Mm³）</td><td><span class="src src-a">🟢 USGS MCS 2025（2024 估）</span></td></tr>
+      <tr><td>全球氦市场规模</td><td>约 <strong>$3.4–4.4 十亿</strong>（数量级，机构间口径差异大）</td><td><span class="src src-b">🟡 多家市场研究 2024–2025</span></td></tr>
+      <tr><td>全球市场长期预测</td><td>~$9 十亿级 / 2030s（CAGR ~6–7%，口径不一）</td><td><span class="src src-b">🟡 市场研究机构</span></td></tr>
+    </table>
+    <p style="font-size:12.5px;color:var(--muted)">注：氦是个"小金额、大杠杆"的市场——全球年销售额只有几十亿美元（比单个芯片大厂一个季度营收还小），但它卡住的下游（半导体、医疗、航天）价值是它的几百上千倍。这就是"隐形卡点"的财经特征：<strong>金额不大，但断了要命</strong>。</p>
+
+    <h3>2. 价格：剧烈周期，别信单一数字</h3>
+    <p>氦价格<strong>没有公开期货市场</strong>、多为长约 + 现货混合，透明度低、波动剧烈。可锚定的一手数字是 USGS 的"基价"：</p>
+    <ul>
+      <li>USGS 口径 <strong>2025 年 Grade-A 基价 ~$12/m³（≈ $330/千立方英尺）</strong>，且"生产商在此基础上加附加费（surcharge）"。<span class="src src-a">🟢</span></li>
+      <li>市场端在"氦荒"高峰被多家媒体报道<strong>现货价同比暴涨数倍（"+400%"之类标题）</strong>——但这类数字是<strong>二手、口径混乱（哪个等级/哪个市场/含不含附加费）</strong>，应理解为"周期性剧烈上行"的定性信号，而非精确报价。<span class="src src-b">🟡</span></li>
+    </ul>
+
+    <h3>3. 供给高度集中（这是氦最大的财经特征）</h3>
+    <p>供给集中体现在<strong>两层</strong>：来源国集中（资源在哪）+ 卖方集中（谁分离、液化、分销）。</p>
+
+    <div class="figwrap">
+      <div class="cap"><strong>图 3a　世界氦产量按国家（2025 估，USGS 口径）</strong>　数据 <span class="src src-a">🟢 USGS MCS 2026</span>。世界总量约 <strong>190 Mm³</strong>；美国 81 + 卡塔尔 63 ≈ 全球 <strong>~76%</strong>。</div>
+      <svg viewBox="0 0 720 250" role="img" aria-label="世界氦产量按国家条形图">
+        <g font-size="12.5" fill="var(--text)">
+          <g transform="translate(150,28)"><text x="-12" y="11" text-anchor="end" fill="var(--muted)">美国</text><rect width="520" height="18" rx="4" fill="#7aa2ff"/><text x="528" y="14" font-size="11.5" fill="var(--muted)">81</text></g>
+          <g transform="translate(150,56)"><text x="-12" y="11" text-anchor="end" fill="var(--muted)">卡塔尔</text><rect width="404" height="18" rx="4" fill="#9b8cff"/><text x="412" y="14" font-size="11.5" fill="var(--muted)">63</text></g>
+          <g transform="translate(150,84)"><text x="-12" y="11" text-anchor="end" fill="var(--muted)">俄罗斯</text><rect width="116" height="18" rx="4" fill="#ff6b81"/><text x="124" y="14" font-size="11.5" fill="var(--muted)">18</text></g>
+          <g transform="translate(150,112)"><text x="-12" y="11" text-anchor="end" fill="var(--muted)">阿尔及利亚</text><rect width="71" height="18" rx="4" fill="#ffb454"/><text x="79" y="14" font-size="11.5" fill="var(--muted)">11</text></g>
+          <g transform="translate(150,140)"><text x="-12" y="11" text-anchor="end" fill="var(--muted)">加拿大</text><rect width="39" height="18" rx="4" fill="#43c59e"/><text x="47" y="14" font-size="11.5" fill="var(--muted)">6</text></g>
+          <g transform="translate(150,168)"><text x="-12" y="11" text-anchor="end" fill="var(--muted)">中国</text><rect width="19" height="18" rx="4" fill="#5ad1e8"/><text x="27" y="14" font-size="11.5" fill="var(--muted)">3</text></g>
+          <g transform="translate(150,196)"><text x="-12" y="11" text-anchor="end" fill="var(--muted)">波兰</text><rect width="19" height="18" rx="4" fill="#8893b5"/><text x="27" y="14" font-size="11.5" fill="var(--muted)">3</text></g>
+          <text x="150" y="230" font-size="11" fill="var(--muted)">单位：百万立方米 Mm³　|　世界总量 ≈ 190 Mm³</text>
+        </g>
+      </svg>
+    </div>
+
+    <div class="two">
+      <div class="figwrap">
+        <div class="cap"><strong>图 3b　卖方端：工业气体巨头主导分销</strong>　示意（份额为数量级，<span class="src src-b">🟡 二手</span>；"top5 ≈ 80%" 为常见分析口径）。</div>
+        <svg viewBox="0 0 340 230" role="img" aria-label="氦卖方集中示意">
+          <g transform="translate(120,115)">
+            <circle r="78" fill="none" stroke="var(--line)" stroke-width="0.5"/>
+            <circle r="39" fill="none" stroke="#7aa2ff" stroke-width="78" stroke-dasharray="68.6 176.4" transform="rotate(-90)"/>
+            <circle r="39" fill="none" stroke="#9b8cff" stroke-width="78" stroke-dasharray="53.9 191.1" transform="rotate(-90)" stroke-dashoffset="-68.6"/>
+            <circle r="39" fill="none" stroke="#43c59e" stroke-width="78" stroke-dasharray="39.2 205.8" transform="rotate(-90)" stroke-dashoffset="-122.5"/>
+            <circle r="39" fill="none" stroke="#ffb454" stroke-width="78" stroke-dasharray="19.6 225.4" transform="rotate(-90)" stroke-dashoffset="-161.7"/>
+            <circle r="39" fill="none" stroke="#8893b5" stroke-width="78" stroke-dasharray="63.7 181.3" transform="rotate(-90)" stroke-dashoffset="-181.3"/>
+            <circle r="30" fill="var(--bg)"/>
+          </g>
+          <g transform="translate(230,40)" font-size="11.5" fill="var(--text)">
+            <g><rect width="11" height="11" rx="3" fill="#7aa2ff"/><text x="17" y="10">Linde</text></g>
+            <g transform="translate(0,22)"><rect width="11" height="11" rx="3" fill="#9b8cff"/><text x="17" y="10">Air Liquide</text></g>
+            <g transform="translate(0,44)"><rect width="11" height="11" rx="3" fill="#43c59e"/><text x="17" y="10">Air Products</text></g>
+            <g transform="translate(0,66)"><rect width="11" height="11" rx="3" fill="#ffb454"/><text x="17" y="10">Messer</text></g>
+            <g transform="translate(0,88)"><rect width="11" height="11" rx="3" fill="#8893b5"/><text x="17" y="10">其它(太阳日酸/岩谷等)</text></g>
+          </g>
+        </svg>
+      </div>
+      <div class="figwrap">
+        <div class="cap"><strong>图 3c　需求终端（定性对照）</strong>　半导体+电子是最大且最快增长的拉动；MRI、光纤、航天、科研次之。<span class="src src-b">🟡</span></div>
+        <svg viewBox="0 0 340 230" role="img" aria-label="氦需求终端对照">
+          <g font-size="12" fill="var(--text)">
+            <g transform="translate(120,24)"><text x="-10" y="11" text-anchor="end" fill="var(--muted)">半导体/电子</text><rect width="190" height="16" rx="4" fill="#7aa2ff"/></g>
+            <g transform="translate(120,50)"><text x="-10" y="11" text-anchor="end" fill="var(--muted)">医疗 MRI</text><rect width="120" height="16" rx="4" fill="#43c59e"/></g>
+            <g transform="translate(120,76)"><text x="-10" y="11" text-anchor="end" fill="var(--muted)">分析/科研</text><rect width="110" height="16" rx="4" fill="#9b8cff"/></g>
+            <g transform="translate(120,102)"><text x="-10" y="11" text-anchor="end" fill="var(--muted)">航天</text><rect width="78" height="16" rx="4" fill="#ffb454"/></g>
+            <g transform="translate(120,128)"><text x="-10" y="11" text-anchor="end" fill="var(--muted)">光纤</text><rect width="70" height="16" rx="4" fill="#5ad1e8"/></g>
+            <g transform="translate(120,154)"><text x="-10" y="11" text-anchor="end" fill="var(--muted)">焊接/潜水</text><rect width="64" height="16" rx="4" fill="#ff6b81"/></g>
+            <g transform="translate(120,180)"><text x="-10" y="11" text-anchor="end" fill="var(--muted)">其它</text><rect width="34" height="16" rx="4" fill="#8893b5"/></g>
+            <text x="20" y="214" font-size="10.5" fill="var(--muted)">条长为定性示意，非精确份额；全球口径半导体常被报 ~20–25%、趋向 30%/2030 🟡</text>
+          </g>
+        </svg>
+      </div>
+    </div>
+
+    <p><strong>来源国集中的另一面：储量。</strong>USGS 2026：美国储量 8,500 Mm³（最大，含地下储存）；俄罗斯 ~1,700、阿尔及利亚 ~1,800（估）、卡塔尔标"Large"。全球<strong>资源</strong>（更宽口径）主要分布：卡塔尔 10.1、阿尔及利亚 8.2、俄罗斯 6.8、加拿大 2.0、中国 1.1（单位十亿 m³，美国本土另算 8.49 十亿 m³）。<span class="src src-a">🟢</span>　<strong>含义：</strong>未来增量供给的"地理钥匙"主要握在卡塔尔、俄罗斯、阿尔及利亚、美国手里——这是个被少数地缘玩家锁定的资源。</p>
+
+    <h3>4. 美国联邦氦储备（Federal Helium Reserve）私有化/退役——国家队退场</h3>
+    <div class="seg">
+      <p><strong>背景：</strong>美国曾建有世界上独一无二的<strong>联邦氦储备</strong>（位于德州 Amarillo 附近的 Cliffside 气田 + 一条 ~400 英里的粗氦输送管线），上世纪为飞艇/军用战略储备而建，几十年里它一度供应全球相当大比例的氦，是<strong>稳定全球氦价的"压舱石"</strong>。1996 年起国会立法要求逐步私有化退出。</p>
+      <p><strong>2024 年事件（核实）：</strong>经公开竞标，<strong>Messer</strong>（德国背景的工业气体公司在美主体）以约 <strong>$353 百万</strong>买下整套<strong>联邦氦系统</strong>（储备、Cliffside 气田及集输、~423 英里粗氦管线等资产），<strong>另加约 $70 百万</strong>买下其中约 10 亿立方英尺存量氦；交易于 <strong>2024 年 6 月底完成</strong>。<span class="src src-a">🟢 Messer / BLM 官方公告</span>　这笔交易曾引发美国国会监督委员会就"买家关联"提出质询（政治争议，本文不展开评判）。<span class="src src-b">🟡 媒体/国会公告</span></p>
+      <p><strong>影响：</strong>① 全球失去了一个长期充当"缓冲库存 + 价格压舱石"的国家队来源，私有化后供给更受商业周期左右、波动放大；② 美国国内氦更多转为纯商业开采（USGS 2025–2026 记录多个新私营氦设施投产、Beaumont 新建储气洞）；③ 短期看是"换了运营方继续供"，长期看是<strong>"政府托底"这层安全垫的消失</strong>。</p>
+    </div>
+
+    <h3>5. "氦荒"周期（Helium Shortage 1.0 / 2.0 / 3.0 / 4.0）</h3>
+    <p>氦反复闹荒，几乎每隔几年一轮，本质是<strong>"少数大点源 + 副产受制于天然气 + 几乎无缓冲库存"</strong>这个脆弱结构在放大任何单点故障。几轮成因（综合 USGS + 行业媒体，时间/编号在不同来源略有出入）：</p>
+    <table>
+      <tr><th>轮次</th><th>大致时间</th><th>主因（多源综合）</th><th>源</th></tr>
+      <tr><td>1.0</td><td>~2006–2007</td><td>多套设施同时检修 + 需求上行，首次暴露脆弱性</td><td><span class="src src-b">🟡</span></td></tr>
+      <tr><td>2.0</td><td>~2011–2013</td><td>联邦储备政策不确定 + 新产能延迟 + 设施故障</td><td><span class="src src-b">🟡</span></td></tr>
+      <tr><td>3.0</td><td>~2018–2022</td><td>联邦储备逐步退场 + 卡塔尔断交封锁(2017–)余波 + <strong>俄罗斯 Amur 装置 2021/2022 连续起火爆炸</strong>致投产严重推迟 + 俄乌战争与对俄制裁切断俄氦</td><td><span class="src src-a">🟢/</span><span class="src src-b">🟡</span></td></tr>
+      <tr><td>4.0（"在闹"）</td><td>~2025–2026</td><td>新一轮趋紧：<strong>2025 年卡塔尔 LNG/氦设施一度因地区冲突中断</strong>（卡塔尔占全球 ~⅓，单点冲击巨大）；叠加联邦系统私有化后缓冲消失、AI/半导体需求上行。下半年因部分新源放量出现缓和迹象</td><td><span class="src src-b">🟡 行业媒体</span></td></tr>
+    </table>
+    <div class="callout note">
+      <span class="label">读法</span>
+      <p>编号（3.0/4.0）是行业媒体的叙事标签、不是官方定义，不同来源会把同一段时间叫不同号；但<strong>规律是确定的</strong>：<strong>俄罗斯 Amur 事故 + 联邦储备退役 + 卡塔尔单点（封锁/冲突）+ 需求上行</strong>这几股力量轮流或叠加，把一个本就没库存缓冲的市场反复推进短缺。USGS 也明确记录"对俄氦的进口制裁延续至 2025"、"俄乌冲突持续限制俄罗斯/乌克兰稀有气体供给"。<span class="src src-a">🟢</span></p>
+    </div>
+  </section>
+
+  <!-- ===================== ③ 未来 ===================== -->
+  <section id="future">
+    <h2><span class="n">③</span>未来角度：新增供给 vs 需求驱动 vs 回收，给个明确判断</h2>
+
+    <h3>1. 新增供给（"松"的力量）</h3>
+    <ul>
+      <li><strong>卡塔尔扩产（最大变量）。</strong>卡塔尔靠 Ras Laffan 的 Helium 1/2/3 装置已成<strong>世界最大氦出口国、第二大生产国（2025 ~63 Mm³，约占全球 ⅓）</strong>；随其巨型 LNG 扩能（North Field 扩张）顺带的氦产能仍有上行空间。<span class="src src-a">🟢/</span><span class="src src-b">🟡</span>　<strong>但这也意味着全球对单一国家/单一基地的依赖加深——是双刃剑。</strong></li>
+      <li><strong>俄罗斯 Amur 缓慢爬坡。</strong>Gazprom 的 Amur 天然气处理厂设计了三套大型氦装置（满产或可成世界级来源），但 2021/2022 连续起火 + 西方制裁让它<strong>多年远低于设计产能</strong>；其 Amur-2（Blagoveshchensk）液化项目投产又因市场过剩被推迟（媒体报或 2026 上半年）。<strong>受制裁，俄氦短期难进西方市场</strong>。<span class="src src-b">🟡</span></li>
+      <li><strong>北美新源放量。</strong>USGS 记录 2025 年美国多个新私营氦设施投产（新墨西哥、科罗拉多、堪萨斯、蒙大拿等），加拿大也有新设施、对美出口增加（美国进口来源 2021–24：加拿大占 47%）。<span class="src src-a">🟢</span></li>
+      <li><strong>新氦田 / 勘探（最大想象、最高风险）。</strong>坦桑尼亚（<strong>Helium One</strong> 的 Rukwa 项目，"非烃源"独立氦田概念）、美国 Minnesota（<strong>Pulsar Helium</strong> Topaz）、亚利桑那（Desert Mountain / Total Helium）、南非（USGS 据公司报告上修了南非储量、2025 新设施投产）等。<strong>这些是"可能改变格局"的新增量，但多数仍在勘探/早期生产、产量与时间高度不确定。</strong><span class="src src-b">🟡/</span><span class="src src-c">🔴</span></li>
+      <li><strong>中国本土增产 / 进口替代焦虑。</strong>中国约 85% 氦靠进口 <span class="src src-b">🟡</span>，正推动本土富氦气田提氦与 LNG 闪蒸气提氦，但短期难自给。</li>
+    </ul>
+
+    <h3>2. 需求驱动（"紧"的力量）</h3>
+    <ul>
+      <li><strong>半导体 / AI（最强引擎）。</strong>先进制程、3D 堆叠、低温刻蚀、HBM/先进封装、光纤拉丝——AI 资本开支把这些环节全部放大，半导体被多家分析机构视为氦需求增长的最大来源（全球口径常报 ~20–25%、趋向 30%/2030）。<span class="src src-b">🟡</span></li>
+      <li><strong>MRI / 医疗。</strong>装机量增长拉动液氦，但<strong>新机型"封闭少氦/零蒸发"设计在压低单台补氦需求</strong>——这是个需求侧的"自我节流"。</li>
+      <li><strong>量子计算 / 航天 / 科研低温。</strong>稀释制冷、超导磁体、火箭增压——单体量不大但增长快、且对纯度和稳定供给敏感。</li>
+    </ul>
+
+    <h3>3. 回收（reclaim / recycle）——对需求的结构性抑制</h3>
+    <p>过去氦"用一次就放掉"。现在<strong>闭环回收</strong>在普及：MRI 失超回收、半导体 fab 的氦回收提纯、实验室液氦再液化（boil-off 回收）。USGS 也记录"闭环回收系统越来越普遍、低用量/液氦蒸发回收在用"。<span class="src src-a">🟢</span>　回收不会消灭氦需求，但会<strong>抬高有效供给、削弱涨价时的恐慌性囤货</strong>，是平抑周期的重要力量——也是减少氦依赖最现实的路径（比"找替代"现实得多）。</p>
+
+    <div class="callout insight">
+      <span class="label">供需展望（本文明确判断）</span>
+      <p><strong>中期偏紧 → 视新源放量转向"脆弱平衡"。</strong>理由：</p>
+      <ul>
+        <li><strong>偏紧的底色：</strong>需求侧 AI/半导体是确定性增长；供给侧高度依赖卡塔尔单一基地 + 俄氦被制裁锁住 + 联邦储备缓冲消失，<strong>任何单点故障都会瞬间转为短缺</strong>（2025 卡塔尔冲突即是演示）。</li>
+        <li><strong>转松的力量：</strong>卡塔尔扩产、北美/加拿大/南非新设施投产、Amur 终将部分爬坡、回收普及——若这些如期兑现，供给会阶段性过剩、价格回落（2025 下半年已现缓和）。</li>
+        <li><strong>结论：</strong>不是"长期紧缺论"也不是"问题已解决"，而是<strong>"低库存 + 高地缘集中"决定了它会长期在'脆弱平衡'与'突发短缺'之间来回切换</strong>——周期性、而非单调。</li>
+      </ul>
+      <p><strong>关键变量 / 不确定性：</strong>① 卡塔尔地缘（最大单点）；② 对俄制裁与 Amur 实际产能；③ AI 资本开支节奏（半导体氦需求）；④ 新氦田能否真兑现产量（勘探股的"故事 vs 现实"差距）；⑤ 回收普及速度。</p>
+    </div>
+
+    <h3>4. 替代风险与边界</h3>
+    <p>对"会不会被替代掉"的诚实回答：<strong>关键场景替代不了（4 K 低温、半导体控温/检漏、光纤冷却），边缘场景可替但有代价（起重/焊接/潜水）。</strong>真正侵蚀氦需求的不是替代，而是<strong>回收 + MRI 少氦设计 + 工艺优化</strong>带来的"用量效率提升"。所以氦既不会"被淘汰"，也不会"无限涨价到天上"——长期由<strong>回收效率 + 新源开发成本</strong>共同设上限。</p>
+  </section>
+
+  <!-- ===================== ④ 股票 ===================== -->
+  <section id="stock">
+    <h2><span class="n">④</span>股票角度：怎么参与，以及为什么"纯押氦"这么难</h2>
+
+    <div class="disc">
+      <b>⚠️ 再次声明：非投资建议。</b>以下仅说明"氦敞口"的结构差异，<strong>不推荐任何标的</strong>。代码/上市状态可能随时变化，务必以交易所与公司 IR 为准。<strong>纯氦勘探小盘股普遍为微盘、投机性强、未必有稳定产量、存在归零风险</strong>；工业气体巨头则氦敞口被庞大主业稀释。
+    </div>
+
+    <h3>1. 三类"氦敞口"，性质完全不同</h3>
+    <ul>
+      <li><strong>A 类·工业气体巨头（稳，但氦只是副业一小块）：</strong>它们做的是分离、液化、长约分销，氦是其特种气体业务里的一小条线，<strong>买它们 ≈ 买整个工业气体周期，不是买氦</strong>。氦涨价对其整体业绩影响有限。</li>
+      <li><strong>B 类·上游天然气/油气大厂（氦是副产品的副产品）：</strong>如 ExxonMobil 在 LaBarge（怀俄明）等地处理含氦天然气顺带产氦、卡塔尔国家队（QatarEnergy，非上市）。<strong>氦在其营收里几乎可忽略</strong>，买它们更不是"押氦"。</li>
+      <li><strong>C 类·纯氦勘探/小盘（唯一"纯押"，但高风险投机）：</strong>专做氦气田勘探开发的微盘公司。<strong>它们才是真正对氦价/氦产量高弹性的标的——但也最可能没产量、烧钱、稀释、归零。</strong></li>
+    </ul>
+
+    <h3>2. 速查表（公司 | 代码 | 氦敞口类型 | 一句话）</h3>
+    <table>
+      <tr><th>公司</th><th>代码 ticker</th><th>类型</th><th>一句话（氦敞口性质）</th><th>源</th></tr>
+      <tr><td>Linde</td><td>$LIN（NYSE/Xetra）</td><td>A 巨头</td><td>全球最大工业气体公司；氦是特气里一小块，买它=买工业气体周期，<strong>非纯氦</strong></td><td><span class="src src-a">🟢上市</span>/<span class="src src-b">🟡份额</span></td></tr>
+      <tr><td>Air Products</td><td>$APD（NYSE）</td><td>A 巨头</td><td>大型工业气体；氦敞口同样被庞大主业稀释</td><td><span class="src src-a">🟢</span></td></tr>
+      <tr><td>Air Liquide</td><td>AI.PA（Euronext Paris）</td><td>A 巨头</td><td>法国工业气体巨头；氦为其特气小条线</td><td><span class="src src-a">🟢</span></td></tr>
+      <tr><td>Messer</td><td>未上市（私有）</td><td>A 巨头</td><td>德国背景；<strong>2024 年买下美国联邦氦系统</strong>，氦敞口大但<strong>买不到</strong></td><td><span class="src src-a">🟢</span></td></tr>
+      <tr><td>ExxonMobil</td><td>$XOM（NYSE）</td><td>B 上游副产</td><td>LaBarge 等含氦气处理顺带产氦；<strong>氦在其营收近乎可忽略</strong>，非押氦工具</td><td><span class="src src-b">🟡</span></td></tr>
+      <tr><td>QatarEnergy（卡塔尔国家队）</td><td>非上市</td><td>B 上游副产</td><td>全球最大氦出口国的国家队；<strong>无法直接投资</strong></td><td><span class="src src-a">🟢</span></td></tr>
+      <tr><td>Helium One Global</td><td>HE1.L（LSE/AIM）</td><td>C 纯氦小盘</td><td>坦桑尼亚 Rukwa 等"非烃源"氦田；<strong>微盘、勘探/早期、投机、归零风险</strong></td><td><span class="src src-b">🟡</span></td></tr>
+      <tr><td>Pulsar Helium</td><td>PLSR（LSE/AIM；亦 PLSR.V）</td><td>C 纯氦小盘</td><td>美国 Minnesota 的 Topaz、格陵兰 Tunu 项目；<strong>微盘、早期、投机</strong></td><td><span class="src src-b">🟡</span></td></tr>
+      <tr><td>Desert Mountain Energy</td><td>DME（TSX-V）</td><td>C 纯氦小盘</td><td>亚利桑那 Holbrook 盆地氦（兼氢/天然气）；<strong>微盘、波动大</strong></td><td><span class="src src-b">🟡</span></td></tr>
+      <tr><td>Total Helium</td><td>TOH（TSX-V）</td><td>C 纯氦小盘</td><td>美国氦资产（含亚利桑那等）；<strong>微盘、投机</strong></td><td><span class="src src-b">🟡</span></td></tr>
+      <tr><td>First Helium</td><td>HELI（TSX-V）/ FHELF（OTCQB）</td><td>C 纯氦小盘</td><td>加拿大阿尔伯塔氦+油气；<strong>微盘、投机</strong></td><td><span class="src src-b">🟡</span></td></tr>
+    </table>
+    <p style="font-size:12px;color:var(--muted)">代码与上市状态以交易所/公司 IR 实时核实为准；C 类公司估值/产量随勘探进展剧烈波动，本表仅作结构说明。</p>
+
+    <div class="callout bad">
+      <span class="label">诚实结论</span>
+      <p><strong>几乎没有"纯氦"的大盘股。</strong>氦在地下几乎都是天然气/LNG 的副产品，所以：</p>
+      <ul>
+        <li>想要<strong>稳</strong>→ 只能买工业气体巨头（$LIN/$APD/AI.PA），但氦敞口被稀释，<strong>更像买"工业气体 + 工业周期"</strong>而非买氦。</li>
+        <li>想要<strong>纯押氦弹性</strong>→ 只能碰 C 类微盘勘探股，<strong>高风险、高投机、可能无产量、归零风险真实存在</strong>。</li>
+        <li><strong>不存在"又稳又纯"的氦标的</strong>——这正是"资源型隐形卡点"在二级市场的尴尬：卡点很关键，但没有干净的上市载体。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ===================== ⑤ 判断 ===================== -->
+  <section id="take">
+    <h2><span class="n">⑤</span>现实判断 + 存疑</h2>
+    <div class="seg">
+      <h3>氦是哪一类卡点：资源 + 地缘集中型（对照光刻胶的技术垄断型）</h3>
+      <p>把供应链卡点分两类很有用：</p>
+      <ul>
+        <li><strong>技术垄断型（如光刻胶 / EUV）：</strong>卡在"少数人会做这个配方/这台机器"，护城河是<strong>know-how、专利、工艺积累</strong>，理论上可被追赶（虽很慢）。</li>
+        <li><strong>资源 + 地缘集中型（氦）：</strong>卡在"地下哪里有、哪个国家挖、谁有本事分离液化运输"，护城河是<strong>地质禀赋 + 地缘政治 + 重资产基础设施</strong>。你再聪明也造不出氦——只能找新气田、回收、或忍受周期。</li>
+      </ul>
+      <p>所以氦的风险画像是：<strong>不是"卡脖子技术"，而是"卡脖子资源"</strong>。它平时存在感很低（金额小、藏在工艺里），但一旦<strong>卡塔尔出事 / 俄氦断供 / 储备退场叠加</strong>，就会在几个月内从"没人提"变成"半导体和医院都缺货"。</p>
+    </div>
+
+    <div class="callout warn">
+      <span class="label">三股力量的博弈（一句话总览）</span>
+      <p><strong>价格周期（无库存缓冲放大波动）× 联邦储备退役（压舱石消失）× 新源放量（卡塔尔扩产/新氦田/回收）</strong>——三者拉锯决定了氦会在"脆弱平衡 ↔ 突发短缺"之间长期摆动。短期看新源能否如期、地缘是否生变；长期看回收效率与开发成本设定的天花板与地板。</p>
+    </div>
+
+    <div class="callout note">
+      <span class="label">数据口径与不确定性（务必带着读）</span>
+      <ul>
+        <li><strong>市场规模</strong>各机构口径差异大（$3.4–4.4B 数量级），别拿单一数字当真值；<strong>美国销售额</strong>用 USGS 一手（2025 ~$970M）。</li>
+        <li><strong>价格</strong>无公开期货、透明度低，USGS 基价 $12/m³（2025）是可靠锚，"暴涨数倍"是二手定性信号。</li>
+        <li><strong>份额</strong>（卖方/终端占比）多为二手估算，本文图中卖方饼图为数量级示意，非精确统计。</li>
+        <li><strong>勘探小盘</strong>的产量与时间表多为公司自述/早期，兑现度未知（🔴 风险）。</li>
+        <li>核不到精确值处一律标"约/数量级/视年份"或直接说明，未编造。</li>
+      </ul>
+    </div>
+
+    <div class="disc">
+      <b>⚠️ 非投资建议（结尾再声明）</b>　本文所有公司、ticker、市场与价格数据仅用于解释氦供应链结构，<strong>不构成买卖建议或目标价</strong>。纯氦勘探小盘股属高风险投机、可能归零；工业气体巨头氦敞口被稀释。请以一手财报（SEC/IR）、交易所信息与专业意见为准，自行承担决策风险。
+    </div>
+  </section>
+
+  <section id="src">
+    <h2>来源（按等级）</h2>
+    <p><strong><span class="src src-a">🟢 一手 / 官方</span></strong></p>
+    <ul>
+      <li>USGS《Mineral Commodity Summaries 2026 — Helium and Rare Gases》（2025 估：美国销量 81 Mm³、~$970M、基价 ~$12/m³；世界产量 ~190 Mm³，美/卡/俄/阿/加/中/波分布；储量/资源；用途结构；替代说明；事件趋势）<a href="https://pubs.usgs.gov/periodicals/mcs2026/mcs2026-helium.pdf">链接</a></li>
+      <li>USGS《Mineral Commodity Summaries 2025 — Helium》（2024 估对照） <a href="https://pubs.usgs.gov/periodicals/mcs2025/mcs2025-helium.pdf">链接</a> ；USGS Helium 信息页 <a href="https://www.usgs.gov/centers/national-minerals-information-center/helium-statistics-and-information">链接</a></li>
+      <li>Messer 官方：完成收购联邦氦系统公告 <a href="https://www.messer-us.com/press-releases/messer-completes-acquisition-of-federal-helium-system-from-blm">链接</a> ；BLM 官方：完成出售联邦氦系统 <a href="https://www.blm.gov/press-release/blm-completes-sale-federal-helium-system">链接</a></li>
+    </ul>
+    <p><strong><span class="src src-b">🟡 二手 / 媒体·分析</span></strong></p>
+    <ul>
+      <li>gasworld：氦荒 4.0、Amur 起火/Amur-2 推迟等系列报道 <a href="https://www.gasworld.com/story/helium-markets-now-experiencing-helium-shortage-4-0/2093551.article/">链接</a></li>
+      <li>C&amp;EN《Helium is in short supply again》（Amur 2021/2022 起火时间线） <a href="https://cen.acs.org/business/Helium-short-supply-again/100/i6">链接</a></li>
+      <li>Gulf Times：卡塔尔 Ras Laffan Helium 扩产、成世界最大出口国 <a href="https://www.gulf-times.com/story/374440/qatar-is-worlds-top-helium-exporter-with-qr18bn-new-plant">链接</a></li>
+      <li>NBC News：联邦氦储备出售与医疗界担忧 <a href="https://www.nbcnews.com/health/health-news/us-just-sold-helium-stockpile-s-medical-world-worried-rcna134785">链接</a></li>
+      <li>市场规模/价格/份额：Grand View / IDTechEx / 多家市场研究（数量级口径，年份见正文）；Visual Capitalist 按国产量 <a href="https://www.visualcapitalist.com/ranked-global-helium-production-by-country/">链接</a></li>
+      <li>个股资料：LSE / Yahoo Finance / TSX-V 公司页（HE1.L、PLSR、DME、TOH、HELI/FHELF 上市与项目信息）</li>
+    </ul>
+  </section>
+
+  <footer class="foot">
+    <p>产业研究 · 2026-06-17　|　四角度（技术 / 财经 / 未来 / 股票）自包含分析。数据按 🟢🟡🔴 分级，口径差异已标年份并列；核不到处已注明。<strong>本文非投资建议。</strong></p>
+  </footer>
+
+</article>
+</body>
+</html>
