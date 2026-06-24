@@ -21,6 +21,26 @@
     "path": "papers/2026-06-17-cpu-gpu-supply-chain-overlap/index.html"
   },
   {
+    "slug": "2026-06-17-training-vs-inference-demand-shift",
+    "title": "训练 vs 推理：算力转向如何重排 AI 供应链需求（含 red-team 修订）",
+    "authors": "—",
+    "team": "技术科普",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-24",
+    "published": "技术科普 2026",
+    "tldr": "推理分prefill/decode/reasoning三态,算力转向把需求重心从compute/scale-out漂向memory/energy/scale-up,但关键修订是网络未必降权(分离式+scale-up加权)、受益集中在CoWoS/Broadcom/Marvell/TSMC而非广义第三方;含初版结论→red-team修订对照;非投资建议",
+    "tags": [
+      "explainer",
+      "interactive",
+      "diagram",
+      "semiconductors",
+      "ai-infra",
+      "inference"
+    ],
+    "path": "papers/2026-06-17-training-vs-inference-demand-shift/index.html"
+  },
+  {
     "slug": "2026-06-17-ppio",
     "title": "PPIO 派欧云：AI 推理算力云的竞争格局与早期度调研",
     "authors": "—",

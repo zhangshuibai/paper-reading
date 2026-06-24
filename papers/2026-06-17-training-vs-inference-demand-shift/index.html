@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>训练 vs 推理：算力转向如何重排 AI 供应链需求（含 red-team 修订） · 关系图与数据流动画</title>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --bad:#ff6b81; --shadow:0 8px 30px rgba(0,0,0,.35);
+    --node:#1d2138; --nodeStroke:#3a4170; --lit:#ffd166;
+    --k1:#7aa2ff; --k2:#43c59e; --k3:#ffb454; --k4:#ff6b81;
+    --svgbg:#0c0f1a;
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --bad:#d23651; --shadow:0 8px 24px rgba(20,30,80,.08);
+      --node:#ffffff; --nodeStroke:#c7cdec; --lit:#d98a00; --svgbg:#fbfcff;
+      --k1:#3a66ff; --k2:#138a6e; --k3:#b3701a; --k4:#d23651;
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);line-height:1.75;font-size:16px;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;}
+  a{color:var(--accent)} strong{color:var(--text)}
+  .back{display:inline-block;margin:22px 0 0 22px;color:var(--muted);text-decoration:none;font-size:14px}
+  article{max-width:980px;margin:0 auto;padding:18px 22px 90px}
+  header.head{border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:8px}
+  h1{font-size:25px;line-height:1.35;margin:14px 0 6px}
+  .sub{color:var(--muted);font-size:15px;margin:0 0 14px}
+  .legend{font-size:12px;color:var(--muted);margin:6px 0 0}
+  .src{font-size:10.5px;padding:0 6px;border-radius:999px;white-space:nowrap;vertical-align:middle}
+  .src-a{background:rgba(67,197,158,.18);color:var(--ok)} .src-b{background:rgba(255,180,84,.18);color:var(--warn)} .src-c{background:rgba(255,107,129,.18);color:var(--bad)}
+  .tldr{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:12px;padding:14px 18px;margin:20px 0;box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+  nav.toc{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px 18px;margin:8px 0 26px;font-size:14px}
+  nav.toc a{color:var(--text);text-decoration:none;margin-right:16px;white-space:nowrap;line-height:2}
+  section{margin:34px 0}
+  h2{font-size:20px;margin:0 0 12px;padding-top:8px;border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent);font-weight:700;margin-right:8px}
+  h3{font-size:16.5px;margin:20px 0 8px}
+  p{margin:12px 0} ul,ol{padding-left:22px} li{margin:6px 0}
+  code{background:var(--panel2);padding:1.5px 6px;border-radius:6px;font-size:.88em}
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:13.5px;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  th,td{border-bottom:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:top}
+  th{background:var(--panel2);color:var(--muted);font-weight:600} tr:last-child td{border-bottom:none}
+  .callout{border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin:18px 0;background:var(--panel)}
+  .callout .label{font-size:12px;letter-spacing:.5px;font-weight:700;text-transform:uppercase;display:block;margin-bottom:4px;color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+  .callout.bad{border-left:4px solid var(--bad)} .callout.bad .label{color:var(--bad)}
+  .pill{display:inline-block;font-size:11px;padding:1px 8px;border-radius:999px;font-weight:700;white-space:nowrap}
+  .pill-robust{background:rgba(67,197,158,.18);color:var(--ok)}
+  .pill-doubt{background:rgba(255,180,84,.18);color:var(--warn)}
+  .pill-wrong{background:rgba(255,107,129,.18);color:var(--bad)}
+  .viz{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin:14px 0}
+  .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+  .tab{cursor:pointer;border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:6px 14px;border-radius:999px;font-size:13.5px}
+  .tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .stage{display:grid;grid-template-columns:1fr 280px;gap:12px}
+  @media (max-width:720px){ .stage{grid-template-columns:1fr} }
+  .svgwrap{background:var(--svgbg);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  svg.diagram{display:block;width:100%;height:auto}
+  .nd-node{cursor:pointer}
+  .nd-node rect{fill:var(--node);stroke:var(--nodeStroke);stroke-width:1.5;rx:9}
+  .nd-node text{fill:var(--text);font-size:12.5px;font-weight:600}
+  .nd-node.sel rect{stroke:var(--accent);stroke-width:2.5}
+  .nd-edge{stroke-width:2;fill:none;opacity:.85}
+  .nd-edge.k1{stroke:var(--k1)} .nd-edge.k2{stroke:var(--k2)} .nd-edge.k3{stroke:var(--k3)} .nd-edge.k4{stroke:var(--k4)}
+  .nd-edge.lit{stroke:var(--lit);stroke-width:4;opacity:1}
+  .nd-edgelabel{fill:var(--muted);font-size:10.5px}
+  .pulse{fill:var(--lit)}
+  @media (prefers-reduced-motion:reduce){ .pulse{display:none!important} }
+  .panel{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:13.5px;min-height:120px}
+  .panel h4{margin:0 0 6px;font-size:14.5px;color:var(--accent)}
+  .panel .conn{margin:8px 0 0;padding-left:18px} .panel .conn li{margin:3px 0;color:var(--muted)}
+  .panel .hint{color:var(--muted)}
+  .panel .tb{margin-top:8px;font-size:12.5px;color:var(--bad)}
+  .controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
+  .btn{cursor:pointer;border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:6px 12px;border-radius:8px;font-size:13.5px}
+  .btn:hover{border-color:var(--accent)}
+  .cap{font-size:13.5px;color:var(--text);margin-top:8px;min-height:1.6em}
+  .cap b{color:var(--accent)}
+  .edgekey{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:8px}
+  .edgekey i{display:inline-block;width:22px;height:0;border-top:3px solid;vertical-align:middle;margin-right:5px}
+  footer.foot{margin-top:54px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+  <header class="head">
+    <h1>训练 vs 推理：算力转向如何重排 AI 供应链需求（含 red-team 修订）</h1>
+    <p class="sub">当算力重心从「训练为主」漂向「推理为主」，AI 供应链哪些位置需求飙升、哪些降温、哪些公司更关键——并把「初版直觉结论 → red-team 修正」的对照摆在正中央。</p>
+    <p class="legend">来源等级：<span class="src src-a">🟢 一手</span> 官方/规范/论文 ·
+      <span class="src src-b">🟡 二手</span> 媒体/分析 · <span class="src src-c">🔴 自述/有强反条件的情景</span>；
+      份额/产能/份额转移数字一律「约 / 数量级 / 视年份」并标代表公司，不编精确值。</p>
+    <p class="legend" style="color:var(--bad);font-weight:600">⚠ 图里列出的所有公司：<b>非投资建议 / 非背书</b>，仅标其在产业链中的位置；多数为<b>有强反条件的情景判断</b>，受益≠确定。</p>
+  </header>
+
+  <div class="tldr"><b>一句话</b> — 推理不是均质负载（<b>prefill 算力密集 / decode 显存带宽密集 / reasoning 长思维链把两者一起放大</b>），算力转向把需求重心从「峰值 FLOPS + 最大同步 scale-out」漂向「显存带宽与容量 + 每 token 成本/每瓦 + scale-up 域内带宽 + 分离式 KV 搬运」；<b>但本篇的灵魂是 red-team 修订</b>——最危险的初版直觉是「推理＝只吃显存、网络降权」，实际上 reasoning/分离式推理把 compute 与 scale-up 网络一起拉回来；真正零替代的卡点更可能是 <b>CoWoS/先进封装</b> 而非 HBM，而受益高度<b>集中</b>在 Broadcom/Marvell/TSMC，并非「广义第三方供应链普涨」。</div>
+
+  <nav class="toc">
+    <a href="#primer">① 领域背景速补</a>
+    <a href="#viz">② 关系图 + 数据流</a>
+    <a href="#revision">③ 初版→red-team 对照</a>
+    <a href="#missed">④ 容易被漏的位置</a>
+    <a href="#compare">⑤ 卡点稀缺性对比</a>
+    <a href="#model">⑥ 心智模型</a>
+    <a href="#deps">⑦ 依赖与相互制约</a>
+    <a href="#more">⑧ 诚实边界 / 延伸阅读</a>
+  </nav>
+
+  <section id="primer">
+    <h2><span class="n">①</span>领域背景速补（讲给硬件小白）</h2>
+    <p>本篇假设你懂 LLM、但不熟 AI 硬件供应链。先把后面反复用到的几个硬件名词讲清——尤其要打破「推理就是显卡跑一下、比训练简单」的直觉，因为<b>推理根本不是一种均质负载</b>。</p>
+
+    <h3>推理的三种状态：prefill / decode / reasoning</h3>
+    <p>一次 LLM 推理至少分成性格迥异的两段，再加上长思维链这个放大器：</p>
+    <ul>
+      <li><b>prefill（预填充，处理输入）</b><span class="src src-a">🟢</span>：把整段 prompt 一次性喂进模型、并行算出所有输入 token 的中间表示。这是<b>稠密矩阵乘</b>，瓶颈是<b>算力（compute-bound）</b>——拼的是峰值 FLOPS。类比：把一本厚书<b>一口气读完</b>做笔记，越快越好，吃的是「脑子转速」。</li>
+      <li><b>decode（解码，逐 token 生成）</b><span class="src src-a">🟢</span>：自回归地一个 token 一个 token 往外吐。每生成一个 token 都要把模型权重和缓存从显存搬一遍，算的却很少，于是瓶颈是<b>显存带宽（bandwidth-bound）</b>，而不是算力。类比：<b>一个字一个字地写回信</b>，手不累，但要不停翻查资料，吃的是「翻书速度」（带宽）。</li>
+      <li><b>reasoning（长思维链 / o1 式推理）</b><span class="src src-b">🟡</span>：模型在给出答案前先生成大量「思考」token。它把 prefill（要反复读越来越长的上下文）和 decode（要生成海量中间 token）<b>同时放大</b>，于是<b>compute 回潮</b>——纠正了「推理一定比训练省算力」的旧印象。这是本篇最关键的背景：reasoning-heavy 的推理对 compute / memory / network <b>三样一起拉</b>。</li>
+    </ul>
+
+    <h3>KV cache：容量瓶颈的来源</h3>
+    <p><b>KV cache（键值缓存）</b><span class="src src-a">🟢</span>是推理时缓存下来的中间结果（每个已处理 token 的 Key/Value 向量），这样 decode 时不必把整段上下文重算一遍。它的麻烦在于<b>大小随「上下文长度 × 并发数」线性膨胀</b>——上下文越长、同时服务的用户越多，KV cache 就越大，很快吃光显存容量。所以它是<b>容量瓶颈（capacity）</b>的主要来源，和「带宽不够」是两个不同的墙。</p>
+
+    <h3>带宽瓶颈 vs 容量瓶颈（要求不同供应商）</h3>
+    <p>同样是「显存（HBM）不够」，可以是两种完全不同的不够：<b>带宽不够</b>（搬得不够快，decode 卡这里）要的是<b>更高代际、更快的 HBM</b>；<b>容量不够</b>（装不下 KV cache）要的是<b>更多 GB、更便宜的每 GB</b>，甚至可以把 KV 卸载到更慢但更大的存储（NAND/CXL 内存）。这两条墙对应不同的受益方——这正是后面「HBM＝最确定受益」需要被 red-team 拆开的原因：带宽和容量不分，结论就会走样。</p>
+
+    <h3>scale-up vs scale-out（两种「把卡连起来」）</h3>
+    <ul>
+      <li><b>scale-up（纵向扩展，机柜内）</b><span class="src src-a">🟢</span>：把一个机柜内的几十张 GPU 用<b>NVLink 域</b>（高带宽、低延迟、近距离铜/光）连成一个「超级大芯片」，让它们像共享显存一样协作。这是「域内带宽」。</li>
+      <li><b>scale-out（横向扩展，跨机柜）</b><span class="src src-a">🟢</span>：把很多机柜用<b>以太网/InfiniBand + 光模块</b>跨距离连起来，规模可达数万卡。训练时的「最大同步全互联」主要压在这里。</li>
+    </ul>
+    <p>初版最大的硬伤就是把「训练式超大 scale-out 全互联软化」错当成「网络整体降权」——而推理（尤其分离式）恰恰在<b>加权 scale-up 域内带宽</b>。</p>
+
+    <h3>分离式推理 disaggregation</h3>
+    <p><b>分离式推理（prefill/decode disaggregation）</b><span class="src src-a">🟢</span>把算力密集的 prefill 和带宽密集的 decode <b>拆到不同机器</b>上，各自配最合适的硬件（prefill 堆 FLOPS、decode 堆 HBM 带宽），从而都跑在最划算的点上。代价：prefill 算好的 <b>KV cache 要跨机搬运到 decode 节点</b>，于是凭空多出一条对网络（NVLink / NVLink-C2C / RDMA，如 NVIDIA Dynamo + NIXL）的<b>新需求</b>。<span class="src src-b">🟡</span>vLLM、SGLang、TensorRT-LLM、NVIDIA Dynamo 等在 2026 已普遍支持，DeepSeek 等在生产中大规模部署。<b>这是「推理拉动网络」的直接机制</b>，也是纠正「推理＝网络降权」的关键证据。</p>
+  </section>
+
+  <section id="viz">
+    <h2><span class="n">②</span>交互关系图 + 数据流</h2>
+    <p class="legend">两个视图：<b>「需求漂移图」</b>看训练驱动 vs 推理驱动各把需求压到哪个供应链位置；<b>「修订后的卡点稀缺性序」</b>看各位置按「确定 + 零替代」排队、点开看 thesis-breaker。
+      点节点看「是什么 / 连谁 / 为什么这个位次 + 反向条件」；点 ▶ 看一次 <b>reasoning-heavy 推理</b>如何<b>同时</b>拉动 compute / memory / network 的逐步数据流（直观纠正「推理＝只吃显存」）。</p>
+    <div class="viz">
+      <div class="tabs" id="tabs"></div>
+      <div class="stage">
+        <div class="svgwrap"><svg class="diagram" id="diagram" preserveAspectRatio="xMidYMid meet" role="img" aria-label="训练vs推理需求漂移与卡点稀缺性关系图"></svg></div>
+        <div class="panel" id="nodeinfo"><span class="hint">点击或聚焦任一节点查看详情（含位次理由与 thesis-breaker）。</span></div>
+      </div>
+      <div class="edgekey" id="edgekey"></div>
+      <div class="controls">
+        <button class="btn" id="playBtn">▶ 播放数据流</button>
+        <button class="btn" id="stepBtn">单步 ›</button>
+        <button class="btn" id="resetBtn">↺ 复位</button>
+        <span class="cap" id="cap"></span>
+      </div>
+    </div>
+    <p class="legend">图为<b>示意、非穷尽</b>；公司仅标产业链位置，<b>非投资建议/非背书</b>，且多为有强反条件的情景判断。边的方向＝「谁的需求拉动谁」。</p>
+  </section>
+
+  <section id="revision">
+    <h2><span class="n">③</span>初版直觉 → red-team 修订（本篇的灵魂）</h2>
+    <p>下面这张表是整篇的核心：把「初版凭直觉得到的结论」逐条拉出来，红队（red-team）对抗式地找硬伤，给出修正与稳健性评级。<b>评级图例</b>：
+      <span class="pill pill-robust">稳健</span> 多源支持、反例弱；
+      <span class="pill pill-doubt">存疑</span> 方向可能对但有重要遗漏/未分层；
+      <span class="pill pill-wrong">可能错</span> 存在足以推翻的强反例。</p>
+    <table>
+      <thead><tr><th style="width:23%">初版直觉</th><th style="width:54%">red-team 修正</th><th style="width:23%">稳健性评级</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><b>HBM＝最确定的第一受益</b></td>
+          <td>方向对，但<b>带宽 vs 容量没分</b>：decode 要带宽、KV cache 要容量，两条墙对应不同打法。供给侧 SK海力士/Samsung/Micron <b>三家竞争</b>，且 Samsung 等被传扩产约 +50% 量级<span class="src src-c">🔴</span>；叠加量化（FP8/FP4）降低单 token 带宽需求 → 存在 <b>约 2027 年的过剩尾部风险</b>（情景，非定论）。结论：HBM 是受益方，但<b>不是最稀缺的零替代卡点</b>——<b>CoWoS 才更卡</b>。</td>
+          <td><span class="pill pill-doubt">存疑</span><br><span class="legend">方向对、定价权被高估</span></td>
+        </tr>
+        <tr>
+          <td><b>电力＝第二受益</b></td>
+          <td>电力是<b>整体硬约束，但未必是「多头」标的</b>：它对<b>训练</b>（要大块、同步、就近的功率）硬，对<b>推理</b>可<b>地理套利 + 延迟容忍</b>（推理可分散到电便宜的地方、对几十 ms 延迟不敏感）而偏软。且初版<b>漏了真正会涨的那层：芯片级电源（GaN/SiC、800V HVDC）</b>。结论：宏观电力是约束，<b>微观受益点在配电/电源芯片</b>而非泛泛「电力」。</td>
+          <td><span class="pill pill-doubt">存疑</span><br><span class="legend">是约束，未必是多头</span></td>
+        </tr>
+        <tr>
+          <td><b>推理 ASIC＝份额转移利好（利好「ASIC 生态」）</b></td>
+          <td>受益<b>高度集中</b>在 <b>Broadcom / Marvell（定制芯片代设计双寡头）+ TSMC（制造/封装）</b>，而非「ASIC 生态」整体。<b>独立 ASIC 厂（Groq / Cerebras）反而可能是输家</b>（缺规模、缺 CoWoS 配额、缺软件生态）。强反例：<b>NVIDIA Vera Rubin + NIM 推理软件栈</b>把推理拉回 GPU 阵营。结论：是<b>零和的份额转移</b>，不是雨露均沾。</td>
+          <td><span class="pill pill-doubt">存疑</span><br><span class="legend">受益集中、非生态普涨</span></td>
+        </tr>
+        <tr>
+          <td><b>先进封装＝硬卡点（初版排第四）</b></td>
+          <td><b>应上调位次</b>：CoWoS / 3nm 级先进封装<b>近单源（TSMC 主导）</b>，且需求长期约为供给的<b>数量级 3×</b><span class="src src-c">🔴</span>（情景估计）。在「确定 + 零替代」上，它可能是<b>全链最确定的零替代位</b>——比 HBM 更卡，因为 HBM 有三家、CoWoS 实质一家。</td>
+          <td><span class="pill pill-robust">稳健</span><br><span class="legend">（被初版低估）</span></td>
+        </tr>
+        <tr>
+          <td><b>超高端 scale-out 网络降权</b></td>
+          <td><b>最危险、可能直接错</b>：把「训练式超大同步 scale-out 全互联被软化」错误外推成「<b>网络整体</b>降权」。事实相反——<b>分离式推理</b>要跨机搬 KV cache、<b>scale-up 域内带宽</b>（NVLink 域）随并发/上下文吃紧、<b>reasoning</b> 放大一切，于是 <b>CPO / scale-up 光 / 高速互联在涨</b>。结论：网络<b>不是降权，是重新加权</b>（从超大 scale-out 漂向 scale-up + 分离式搬运）。</td>
+          <td><span class="pill pill-wrong">可能错</span><br><span class="legend">方向性误判风险最高</span></td>
+        </tr>
+        <tr>
+          <td><b>纯 FLOPS / 训练基建降权</b></td>
+          <td><b>reasoning / prefill 把 compute 重新拉高</b>：长思维链与长上下文 prefill 都是算力密集，compute 回潮。叠加 <b>Jevons 悖论</b>（推理变便宜→用量爆炸），<b>绝对算力需求仍在涨</b>，所谓「降温」多是<b>相对权重</b>下降而非绝对量下降。</td>
+          <td><span class="pill pill-doubt">存疑</span><br><span class="legend">相对降权≠绝对下降</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="callout warn"><span class="label">一句话抓总</span>
+      初版六条里，<b>只有「先进封装被低估」是稳健（且方向相反——应上调）</b>，其余要么「方向对但未分层/被高估」，要么「可能直接错」（网络降权那条）。如果只记一件事：<b>推理转向 ≠ 第三方供应链普涨</b>，且<b>推理 ≠ 只吃显存、网络降权</b>。
+    </div>
+  </section>
+
+  <section id="missed">
+    <h2><span class="n">④</span>容易被漏的位置（red-team 补上）</h2>
+    <p>初版直觉常只盯 GPU/HBM/电力，漏掉若干在「推理转向 + 分离式 + KV 搬运」下才浮现的位置。逐条标来源等级，并强调<b>受益≠确定、含强反条件</b>。</p>
+    <table>
+      <thead><tr><th style="width:22%">位置</th><th style="width:34%">代表公司（仅标位置，非建议）</th><th style="width:44%">为什么被漏 / 强反条件</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><b>内存接口 / CXL / retimer</b></td>
+          <td>Astera Labs <code>$ALAB</code>、澜起 Montage <code>688008.SH</code>、Marvell <span class="src src-b">🟡</span></td>
+          <td>KV cache 容量膨胀 + 内存扩展/池化（CXL）需要信号 retiming。反条件：若 HBM 容量够用、CXL 推理侧落地慢，则需求被推后。</td>
+        </tr>
+        <tr>
+          <td><b>scale-up 铜连接 / SerDes</b></td>
+          <td>Credo <code>$CRDO</code> <span class="src src-b">🟡</span></td>
+          <td>scale-up 域内短距高速连接（AEC 有源铜缆/SerDes）随机柜内带宽吃紧而涨。<b>thesis-breaker：CPO（光进铜退）长期可能蚕食铜连接</b>——这是 Credo 自身的长期反向风险。</td>
+        </tr>
+        <tr>
+          <td><b>芯片级电源 GaN/SiC</b></td>
+          <td>Navitas <code>$NVTS</code>、MPWR、Power Integrations <span class="src src-a">🟢</span></td>
+          <td>800V HVDC + 机柜内高效 DC-DC 是 1MW 机柜的刚需。<b>NVIDIA 已官方选择 Navitas 合作下一代 800V HVDC 架构（GaN+SiC，面向 Kyber/Rubin Ultra，2025-05 公布）</b><span class="src src-a">🟢</span>。反条件：Navitas 为<b>小盘、单一大客户依赖、竞争激烈</b>，高风险；受益≠独占。</td>
+        </tr>
+        <tr>
+          <td><b>端侧 / open-weights 分流</b></td>
+          <td>Qualcomm、Apple、Arm、联发科 MediaTek、AMD APU <span class="src src-b">🟡</span></td>
+          <td>这是对<b>云推理供应链的结构性下行</b>：越多推理跑在手机/PC 端，云端 GPU/HBM/网络的边际需求越被分走。常被「云推理只会涨」的直觉忽略。</td>
+        </tr>
+        <tr>
+          <td><b>AMD MI 系列推理 GPU</b></td>
+          <td>AMD <code>$AMD</code> <span class="src src-b">🟡</span></td>
+          <td><b>初版整篇没提，是大洞</b>：MI 系列在「大显存容量、性价比推理」上是 NVIDIA 之外的真实第二供给，直接关系到「ASIC 侵蚀 NVIDIA」之外的另一条份额转移路径。反条件：软件生态（ROCm）仍是追赶项。</td>
+        </tr>
+        <tr>
+          <td><b>存储 / KV offload</b></td>
+          <td>SanDisk <code>$SNDK</code>（NAND）<span class="src src-b">🟡</span></td>
+          <td>KV cache 卸载到 NAND 是<b>容量缓冲</b>，不是带宽解。<b>别高估</b>：它缓解的是「装不下」，无法替代 HBM 的「搬得快」；只有在容量瓶颈主导、且延迟可容忍时才受益。</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="compare">
+    <h2><span class="n">⑤</span>卡点稀缺性对比（修订后排序）</h2>
+    <p>按「<b>确定 + 零替代</b>」从高到低排（也就是关系图视图 2 的顺序）。位次越靠前，越接近「不可绕过、定价权越强」。数字均为<b>数量级/情景估计</b>，不构成精确预测。</p>
+    <table>
+      <thead><tr><th>位次</th><th>位置</th><th>替代性 / 单源度</th><th>代表公司（非建议）</th><th>thesis-breaker（什么会推翻它）</th></tr></thead>
+      <tbody>
+        <tr><td><b>1</b></td><td>CoWoS / 先进封装</td><td>近<b>单源</b>（TSMC 主导），需求约 3× 供给<span class="src src-c">🔴</span></td><td>TSMC</td><td>封装产能加速扩张、面板级/扇出封装放量、设计降低对 CoWoS 依赖。</td></tr>
+        <tr><td><b>2</b></td><td>ASIC 代设计 + 制造</td><td><b>双寡头 + 单一代工</b></td><td>Broadcom、Marvell + TSMC</td><td>NVIDIA GPU（Vera Rubin + NIM）守住推理份额；超大厂自研外溢减少。</td></tr>
+        <tr><td><b>3</b></td><td>HBM（代际领先者）</td><td><b>三家竞争</b>，代际领先者占优</td><td>SK海力士、Samsung、Micron</td><td>三家扩产（含 Samsung +50% 量级）+ 量化降带宽 → 约 2027 过剩尾险。</td></tr>
+        <tr><td><b>4</b></td><td>scale-up 互联 / retimer / 芯片级电源</td><td>多供给、技术分散</td><td>Astera、Credo、Navitas、Marvell…</td><td>CPO 替代铜（对 Credo）、标准化压缩接口利润、电源多供应商竞争。</td></tr>
+        <tr><td><b>5</b></td><td>电力（电网/发电）</td><td><b>整体硬约束，但是「约束」非「多头」</b></td><td>（公用事业/发电，含地理套利）</td><td>推理地理套利 + 延迟容忍 + 能效提升（每瓦 token↑）软化峰值需求。</td></tr>
+      </tbody>
+    </table>
+    <div class="callout"><span class="label">读法</span>
+      位次 1–2 是「<b>零替代、定价权强</b>」（单源/双寡头），是修订后最确定的受益位；位次 3 方向对但定价权被高估（竞争+过剩尾险）；位次 4 受益但分散且各有反向技术；位次 5 是<b>整链硬顶</b>但对推理偏软、且更像「约束」而非「能赚钱的多头」。
+    </div>
+  </section>
+
+  <section id="model">
+    <h2><span class="n">⑥</span>给小白的心智模型</h2>
+    <p>把整条 AI 供应链想成一座<b>高速公路收费系统</b>：</p>
+    <ul>
+      <li><b>训练</b>像「<b>一次性铺一条全新八车道高速</b>」——爆发式 capex，要在同一时刻把最多的车（GPU）用最宽的同步立交（超大 scale-out 全互联）连起来，峰值功率拉满。</li>
+      <li><b>推理</b>像「<b>这条路天天有车流跑、要持续收费运营</b>」——opex 长期化，关心的是<b>每公里油耗（每 token 成本/每瓦）</b>、<b>收费站吞吐（带宽）</b>和<b>停车场容量（KV cache 容量）</b>。</li>
+      <li>初版直觉以为「运营阶段只要加油站（HBM）就行，立交桥（网络）可以拆」。<b>red-team 提醒</b>：reasoning 让车流既跑得远（compute）、又频繁进出停车场（带宽/容量）、还要在<b>分仓运营（分离式推理）</b>之间<b>来回运货（KV 跨机搬运）</b>——于是<b>机柜内的高架快速路（scale-up）反而更挤</b>，立交不能拆，只是从「跨城超级立交」换成「园区内高架」。</li>
+      <li>而真正<b>卡脖子的不是加油站，是「能造收费道闸的唯一工厂」</b>（CoWoS/先进封装）——加油站有三家（HBM），道闸只有一家（TSMC CoWoS），谁更有定价权一目了然。</li>
+    </ul>
+  </section>
+
+  <section id="deps">
+    <h2><span class="n">⑦</span>依赖与相互制约（深入）</h2>
+
+    <h3>核心因果链：推理转向 ≠ 第三方供应链普涨</h3>
+    <p>初版的隐含假设是「需求漂移＝把蛋糕换个位置切，大家都能分到」。red-team 拆出两条<b>对广义第三方链的下行路径</b>：</p>
+    <ol>
+      <li><b>份额转移是零和</b>：当推理转向定制 ASIC，<b>NVIDIA 的单芯片份额↓</b>，但接住的不是「ASIC 生态」，而是<b>Broadcom / Marvell / TSMC 旱涝保收</b>（它们做代设计/制造，不管谁赢都收钱）；<b>独立 ASIC（Groq/Cerebras）可能是输家</b>。所以「ASIC 利好」对绝大多数第三方其实是<b>集中度上升</b>，不是普惠。</li>
+      <li><b>两条结构性下行</b>：(a) <b>超大厂自研集中化</b>——hyperscaler 把芯片/网络/电源越来越多收进自研体系，挤压通用第三方器件；(b) <b>端侧分流</b>——越多推理跑在手机/PC（Qualcomm/Apple/Arm/联发科/AMD APU），云推理链的边际需求越被抽走。两条都指向「<b>广义第三方链未必随推理量同步涨</b>」。</li>
+    </ol>
+
+    <h3>单源 vs 竞争，决定卡点的定价权</h3>
+    <p>同样在「需求拉动」下，能不能<b>把需求变成利润</b>取决于替代性：<b>CoWoS（近单源 TSMC）</b>＞ <b>ASIC 代设计（Broadcom/Marvell 双寡头）+ TSMC</b> ＞ <b>HBM（三家竞争）</b>。HBM 需求再旺，三家互卷 + 量化降带宽 + 扩产，就可能把「最确定受益」变成「2027 过剩尾险」；而 CoWoS 一家说了算，需求 3× 供给，定价权完全不同。<b>这就是为什么修订把先进封装上调、把 HBM 从「最确定」降级。</b></p>
+
+    <div class="callout warn"><span class="label">相互制约因果链（推理侧）</span>
+      <b>reasoning-heavy 推理</b> →（长思维链 + 长上下文）<b>prefill 算力回潮</b>（撞 compute / FLOPS 墙）→ 同时 <b>decode 吃 HBM 带宽</b>（撞带宽墙）→ KV cache 随上下文×并发膨胀（撞<b>容量</b>墙）→ 为各取所长上<b>分离式推理</b>→ KV cache 必须<b>跨机搬运</b>（撞 <b>scale-up 域内带宽 / NVLink-C2C / RDMA</b> 墙）→ 机柜功率密度上探 1MW（撞<b>芯片级电源/散热</b>墙）→ 这一切的硅都要过<b>CoWoS 先进封装</b>（撞最终的<b>零替代</b>墙）。<b>每一步「想更大/更快」都撞一堵不同供应商的墙——所以推理同时拉动 compute / memory / network，而非单纯 memory。</b>
+    </div>
+
+    <div class="callout bad"><span class="label">最易被误植的一环</span>
+      「网络降权」之所以危险，是因为它把<b>一种网络</b>（训练式超大同步 scale-out）的软化，错当成<b>所有网络</b>降权。而推理新增的两类网络需求——<b>scale-up 域内带宽</b>与<b>分离式 KV 跨机搬运</b>——恰恰在<b>加权</b>，对应 <b>CPO / scale-up 光 / 高速互联</b>。把这两者混为一谈，是初版方向性最可能翻车的地方。
+    </div>
+  </section>
+
+  <section id="more">
+    <h2><span class="n">⑧</span>诚实边界 / 延伸阅读 / 出处</h2>
+    <h3>诚实边界（强反条件，必读）</h3>
+    <ul style="font-size:14px">
+      <li><b>「ASIC 侵蚀 NVIDIA」是有强反条件的情景</b>，非定论：NVIDIA Vera Rubin + NIM/Dynamo 软件栈、生态护城河、CoWoS 配额都可能让份额转移大幅放缓。<span class="src src-c">🔴</span></li>
+      <li><b>「约 2027 年 HBM 过剩」是情景</b>，依赖「三家如期扩产 + 量化广泛降带宽 + 需求不再加速」三个并未确定的前提；reasoning/Jevons 可能让需求继续超预期。<span class="src src-c">🔴</span></li>
+      <li><b>「电力硬顶」对推理偏软</b>：推理的地理套利与延迟容忍，使电力更像「整体约束」而非「稳赚的多头」。<span class="src src-b">🟡</span></li>
+      <li><b>「降温」多为相对而非绝对</b>：reasoning + Jevons 下，被「降权」的 compute/训练基建，绝对量大概率仍在涨。<span class="src src-b">🟡</span></li>
+      <li>图中所有公司<b>仅标产业链位置，非投资建议 / 非背书</b>；份额/产能/份额转移数字为「约/数量级/视年份」，不构成精确预测。</li>
+    </ul>
+
+    <h3>延伸阅读（repo 内同主题）</h3>
+    <ul style="font-size:13.5px">
+      <li><a href="../2026-06-17-cpu-gpu-supply-chain-overlap/">CPU 与 GPU 供应链的重合关系</a> — 供给侧：谁和谁共享 TSMC/CoWoS/HBM 产能、互相挤产能。</li>
+      <li><a href="../2026-06-17-ai-cluster-supply-chain/">AI 集群供应链</a> — 整条链的器件与上下游全景。</li>
+      <li><a href="../2026-06-17-ai-cluster-architecture/">AI 集群架构</a> — scale-up/scale-out、NVLink 域、网络拓扑的硬件解剖。</li>
+      <li class="legend" style="margin-top:8px">本篇补的是上面几篇没展开的「<b>需求侧会怎么漂移</b>」：当负载从训练转向推理（且推理分 prefill/decode/reasoning 三态），同一条供应链上的需求重心会被重新加权到哪些位置。</li>
+    </ul>
+
+    <h3>出处（关键事实）</h3>
+    <ul style="font-size:13px">
+      <li><span class="src src-a">🟢</span> NVIDIA × Navitas 800V HVDC 合作（GaN+SiC，面向 Kyber/Rubin Ultra）— Navitas IR / SEC 8-K / NVIDIA，2025-05-21。</li>
+      <li><span class="src src-a">🟢</span> 分离式推理（prefill/decode disaggregation）、KV cache 跨机搬运（NIXL/Dynamo）、scale-up/NVLink 为分离式服务硬需求 — vLLM/SGLang/TensorRT-LLM/NVIDIA Dynamo 文档与 2026 综述/博客。</li>
+      <li><span class="src src-b">🟡</span> prefill compute-bound / decode bandwidth-bound / reasoning 放大 compute — 多篇推理系统工程综述与厂商技术博客（2025–2026）。</li>
+      <li><span class="src src-c">🔴</span> CoWoS 需求约 3× 供给、HBM ~2027 过剩尾险、Samsung 扩产 +50% 量级 — 行业情景估计，随年份/产能计划而变，非定论。</li>
+    </ul>
+  </section>
+
+  <footer class="foot">技术科普 · 关系图为示意（非穷尽），份额/产能/份额转移数字多为数量级/视年份、关键事实按来源分级；图中公司仅标产业链位置，<b>非投资建议/非背书</b>，多为有强反条件的情景判断 · 2026-06-24</footer>
+</article>
+
+<script>
+const MODEL = {
+  kinds: { k1:"训练驱动→拉动", k2:"推理驱动→拉动", k3:"共同/重新加权", k4:"结构性下行/反向" },
+  views: [
+    { id:"v1", label:"① 需求漂移图（训练→推理）", w:880, h:560,
+      nodes:[
+        { id:"t_flops", label:"峰值 FLOPS", x:120, y:80, desc:"训练驱动：拼单芯片/集群峰值算力，爆发式 capex。red-team：reasoning/prefill 让 compute 回潮，绝对量未必降。" },
+        { id:"t_scaleout", label:"超大 scale-out 全互联", x:120, y:200, desc:"训练驱动：最大同步、跨机柜全互联（光网络/InfiniBand）。这一类被软化≠网络整体降权。" },
+        { id:"t_capex", label:"爆发式 capex", x:120, y:320, desc:"训练驱动：一次性铺路式资本开支；推理转向后转为持续 opex。" },
+        { id:"i_bw", label:"显存带宽+容量", x:760, y:60, desc:"推理驱动：decode 吃 HBM 带宽、KV cache 吃容量。带宽≠容量，对应不同供应商打法。" },
+        { id:"i_pertok", label:"每 token 成本/每瓦", x:760, y:160, desc:"推理驱动：opex 长期化，能效（每瓦 token）成为核心指标，利好芯片级电源与高效互联。" },
+        { id:"i_opex", label:"持续 opex", x:760, y:260, desc:"推理驱动：从一次性 capex 转为天天运营的 opex，关注吞吐/容量/能效。" },
+        { id:"i_scaleup", label:"scale-up 域内带宽", x:760, y:360, desc:"推理驱动：机柜内 NVLink 域随并发/上下文吃紧。red-team 关键证据：网络在重新加权，不是降权。" },
+        { id:"i_kv", label:"分离式 KV 搬运", x:760, y:460, desc:"推理驱动：prefill/decode 拆机后 KV cache 跨机搬运（NIXL/RDMA/NVLink-C2C），凭空新增网络需求。" },
+        { id:"hbm", label:"HBM", x:440, y:60, desc:"被两侧共同拉动。red-team：方向对但带宽/容量未分，三家竞争+扩产+量化→2027 过剩尾险。位次第3。" },
+        { id:"cowos", label:"CoWoS/先进封装", x:440, y:150, desc:"被两侧共同拉动且零替代。red-team：应上调为全链最确定卡点——近单源 TSMC，需求~3×供给。位次第1。" },
+        { id:"asic", label:"ASIC 代设计", x:440, y:240, desc:"推理份额转移的真受益方，但集中在 Broadcom/Marvell+TSMC，非'ASIC 生态'；独立 ASIC 可能输。位次第2。" },
+        { id:"interp", label:"scale-up 互联/retimer", x:440, y:330, desc:"分离式+域内带宽拉动：Astera/Credo/Marvell。Credo 的长期反向风险是 CPO。位次第4。" },
+        { id:"power", label:"芯片级电源 GaN/SiC", x:440, y:420, desc:"1MW 机柜/800V HVDC 刚需：Navitas(NVIDIA 官方合作)/MPWR/PI。初版漏掉的一层。位次第4。" },
+        { id:"cool", label:"液冷/散热", x:440, y:500, desc:"功率密度上探的配套约束，随机柜功率提升而拉动。" },
+        { id:"grid", label:"电力/电网", x:280, y:500, desc:"整体硬约束，但对推理可地理套利+延迟容忍而偏软；是'约束'非'稳赚多头'。位次第5。" },
+        { id:"cpo", label:"光/CPO", x:600, y:500, desc:"scale-up 光与分离式搬运在涨：网络重新加权的受益侧。把'scale-out 软化'误读成'网络降权'的反例。" }
+      ],
+      edges:[
+        { id:"e_t1", from:"t_flops", to:"asic", label:"算力", kind:"k1" },
+        { id:"e_t2", from:"t_flops", to:"cowos", label:"封装", kind:"k1" },
+        { id:"e_t3", from:"t_scaleout", to:"cpo", label:"光网络", kind:"k1" },
+        { id:"e_t4", from:"t_capex", to:"grid", label:"功率", kind:"k1" },
+        { id:"e_i1", from:"i_bw", to:"hbm", label:"带宽/容量", kind:"k2" },
+        { id:"e_i2", from:"i_pertok", to:"power", label:"每瓦", kind:"k2" },
+        { id:"e_i3", from:"i_scaleup", to:"interp", label:"域内带宽", kind:"k2" },
+        { id:"e_i4", from:"i_kv", to:"cpo", label:"KV 搬运", kind:"k2" },
+        { id:"e_i5", from:"i_kv", to:"interp", label:"跨机", kind:"k2" },
+        { id:"e_i6", from:"i_opex", to:"cool", label:"持续运营", kind:"k2" },
+        { id:"e_c1", from:"hbm", to:"cowos", label:"需先进封装", kind:"k3" },
+        { id:"e_c2", from:"asic", to:"cowos", label:"近单源", kind:"k3" },
+        { id:"e_c3", from:"power", to:"grid", label:"配电", kind:"k3" },
+        { id:"e_c4", from:"cool", to:"grid", label:"散热↔功率", kind:"k3" },
+        { id:"e_x1", from:"i_pertok", to:"asic", label:"端侧分流(反)", kind:"k4" }
+      ]
+    },
+    { id:"v2", label:"② 修订后的卡点稀缺性序", w:880, h:520,
+      nodes:[
+        { id:"s1", label:"1. CoWoS/先进封装", x:220, y:70, desc:"位次第1：近单源(TSMC)、需求~3×供给。修订后上调为全链最确定零替代位。",
+          tb:"thesis-breaker：封装扩产加速 / 面板级·扇出封装放量 / 设计降低对 CoWoS 依赖。" },
+        { id:"s2", label:"2. ASIC 代设计+TSMC", x:220, y:160, desc:"位次第2：Broadcom/Marvell 双寡头+单一代工，份额转移旱涝保收。受益集中、非生态普涨。",
+          tb:"thesis-breaker：NVIDIA Vera Rubin+NIM 守住推理份额；超大厂自研外溢减少；独立 ASIC 出局不等于第三方受益。" },
+        { id:"s3", label:"3. HBM 代际领先者", x:220, y:250, desc:"位次第3：方向对但定价权被高估。三家竞争(SK海力士/Samsung/Micron)。",
+          tb:"thesis-breaker：三家扩产(Samsung +50%量级)+量化降带宽 → 约 2027 过剩尾险；带宽 vs 容量未分。" },
+        { id:"s4", label:"4. scale-up 互联/电源", x:220, y:340, desc:"位次第4：受益但分散。Astera/Credo/Marvell/Navitas/MPWR。",
+          tb:"thesis-breaker：CPO 替代铜(对 Credo)、接口标准化压利润、电源多供应商竞争。" },
+        { id:"s5", label:"5. 电力=约束非多头", x:220, y:430, desc:"位次第5：整体硬约束，但对推理偏软(地理套利+延迟容忍)，更像约束而非稳赚多头。",
+          tb:"thesis-breaker：推理地理套利、能效提升、需求增速放缓都会软化峰值功率约束。" },
+        { id:"d_single", label:"单源/零替代", x:660, y:70, desc:"替代性维度：越接近单源，定价权越强。CoWoS≈单源 > ASIC 双寡头 > HBM 三家。" },
+        { id:"d_concentr", label:"受益集中度", x:660, y:200, desc:"份额转移是零和：受益集中在 Broadcom/Marvell/TSMC，独立 ASIC 可能输，第三方未必普涨。" },
+        { id:"d_soft", label:"可被软化(反向)", x:660, y:340, desc:"反向力量：量化降带宽、扩产、CPO 替代铜、端侧分流、地理套利——决定位次会不会下移。" }
+      ],
+      edges:[
+        { id:"r1", from:"s1", to:"s2", label:"零替代↓", kind:"k3" },
+        { id:"r2", from:"s2", to:"s3", label:"集中↓", kind:"k3" },
+        { id:"r3", from:"s3", to:"s4", label:"竞争↑", kind:"k3" },
+        { id:"r4", from:"s4", to:"s5", label:"分散↑", kind:"k3" },
+        { id:"r5", from:"s1", to:"d_single", label:"近单源", kind:"k2" },
+        { id:"r6", from:"s2", to:"d_concentr", label:"双寡头", kind:"k2" },
+        { id:"r7", from:"s3", to:"d_soft", label:"过剩尾险", kind:"k4" },
+        { id:"r8", from:"s4", to:"d_soft", label:"CPO/标准化", kind:"k4" },
+        { id:"r9", from:"s5", to:"d_soft", label:"套利/能效", kind:"k4" }
+      ]
+    }
+  ],
+  flow: { view:"v1", steps:[
+    { edges:["e_t1","e_t2"], cap:"<b>误解起点：</b> 初版直觉——'推理转向＝只吃显存、compute/网络降权'。先看训练驱动拉动 ASIC/CoWoS。" },
+    { edges:["e_i1"], cap:"<b>1. decode 吃 HBM 带宽</b> + KV cache 吃容量 → 拉动 HBM（但带宽≠容量，三家竞争）。" },
+    { edges:["e_t1","e_t2"], cap:"<b>2. reasoning 让 prefill 算力回潮</b> → compute 被重新拉高（不是只吃显存！），ASIC/封装承接算力。" },
+    { edges:["e_i5","e_i3"], cap:"<b>3. 分离式推理：KV cache 跨机搬运</b> + scale-up 域内带宽吃紧 → 拉动 scale-up 互联/retimer。" },
+    { edges:["e_i4"], cap:"<b>4. KV 搬运 + scale-up 光在涨</b> → CPO/光受益。<b>纠正'网络降权'：网络是重新加权，不是降权。</b>" },
+    { edges:["e_i2","e_c3"], cap:"<b>5. 每瓦 token 成为指标</b> → 芯片级电源 GaN/SiC（800V HVDC）被拉动，配电↔电网。" },
+    { edges:["e_c1","e_c2"], cap:"<b>6. 一切硅都过 CoWoS</b> → 先进封装是最终零替代墙（位次第1）。<b>结论：compute/memory/network 被同时拉动。</b>" }
+  ]}
+};
+
+/* ===================== 引擎（一般无需改动） ===================== */
+(function(){
+  const SVGNS="http://www.w3.org/2000/svg";
+  const diagram=document.getElementById('diagram');
+  const tabsEl=document.getElementById('tabs');
+  const infoEl=document.getElementById('nodeinfo');
+  const capEl=document.getElementById('cap');
+  const edgekeyEl=document.getElementById('edgekey');
+  let curView=MODEL.views[0], sel=null, flowIdx=-1, timer=null;
+
+  function el(tag,attrs,kids){ const e=document.createElementNS(SVGNS,tag);
+    for(const k in (attrs||{})) e.setAttribute(k,attrs[k]);
+    (kids||[]).forEach(c=>e.appendChild(c)); return e; }
+  function nodeById(v,id){ return v.nodes.find(n=>n.id===id); }
+
+  function renderTabs(){
+    tabsEl.innerHTML='';
+    if(MODEL.views.length<2){ tabsEl.style.display='none'; return; }
+    MODEL.views.forEach(v=>{
+      const b=document.createElement('button'); b.className='tab'+(v===curView?' active':''); b.textContent=v.label;
+      b.onclick=()=>{ curView=v; sel=null; stopFlow(); render(); };
+      tabsEl.appendChild(b);
+    });
+  }
+  function renderEdgeKey(){
+    edgekeyEl.innerHTML='';
+    Object.keys(MODEL.kinds||{}).forEach(k=>{
+      const txt=MODEL.kinds[k]; if(!txt) return;
+      const s=document.createElement('span'); s.innerHTML='<i style="border-color:var(--'+k+')"></i>'+txt; edgekeyEl.appendChild(s);
+    });
+  }
+  function render(){
+    renderTabs();
+    const v=curView; diagram.setAttribute('viewBox','0 0 '+v.w+' '+v.h);
+    diagram.innerHTML='';
+    v.edges.forEach(ed=>{
+      const a=nodeById(v,ed.from), b=nodeById(v,ed.to); if(!a||!b) return;
+      const line=el('line',{x1:a.x,y1:a.y,x2:b.x,y2:b.y,class:'nd-edge '+(ed.kind||'k1'),'data-edge':ed.id});
+      diagram.appendChild(line);
+      if(ed.label){ const mx=(a.x+b.x)/2, my=(a.y+b.y)/2-4;
+        const t=el('text',{x:mx,y:my,'text-anchor':'middle',class:'nd-edgelabel'}); t.textContent=ed.label; diagram.appendChild(t); }
+    });
+    v.nodes.forEach(n=>{
+      const w=Math.max(58, n.label.length*14+24), h=34;
+      const g=el('g',{class:'nd-node'+(sel===n.id?' sel':''),'data-node':n.id,tabindex:'0',role:'button','aria-label':n.label});
+      g.appendChild(el('rect',{x:n.x-w/2,y:n.y-h/2,width:w,height:h,rx:9}));
+      const t=el('text',{x:n.x,y:n.y+4,'text-anchor':'middle'}); t.textContent=n.label; g.appendChild(t);
+      const pick=()=>{ sel=n.id; showInfo(n); document.querySelectorAll('.nd-node').forEach(x=>x.classList.remove('sel')); g.classList.add('sel'); };
+      g.addEventListener('click',pick); g.addEventListener('mouseenter',()=>showInfo(n)); g.addEventListener('focus',pick);
+      diagram.appendChild(g);
+    });
+    applyLit();
+  }
+  function showInfo(n){
+    const v=curView;
+    const conns=v.edges.filter(e=>e.from===n.id||e.to===n.id).map(e=>{
+      const other=nodeById(v, e.from===n.id?e.to:e.from);
+      return '<li>'+(other?other.label:'?')+(e.label?'（'+e.label+'）':'')+'</li>';
+    }).join('');
+    infoEl.innerHTML='<h4>'+n.label+'</h4><div>'+(n.desc||'')+'</div>'
+      +(n.tb?'<div class="tb">⚑ '+n.tb+'</div>':'')
+      +(conns?'<div style="margin-top:6px;color:var(--text)">连接：</div><ul class="conn">'+conns+'</ul>':'');
+  }
+  function applyLit(){
+    document.querySelectorAll('.nd-edge').forEach(e=>e.classList.remove('lit'));
+    if(flowIdx<0||!MODEL.flow) return;
+    const step=MODEL.flow.steps[flowIdx]; if(!step) return;
+    (step.edges||[]).forEach(id=>{ const e=diagram.querySelector('[data-edge="'+id+'"]'); if(e) e.classList.add('lit'); });
+  }
+  function gotoStep(i){
+    if(!MODEL.flow){ return; }
+    if(curView.id!==MODEL.flow.view){ curView=MODEL.views.find(v=>v.id===MODEL.flow.view)||curView; render(); }
+    const n=MODEL.flow.steps.length; flowIdx=((i%n)+n)%n;
+    applyLit(); capEl.innerHTML=MODEL.flow.steps[flowIdx].cap||'';
+  }
+  function stopFlow(){ if(timer){clearInterval(timer);timer=null;} document.getElementById('playBtn').textContent='▶ 播放数据流'; }
+  function play(){
+    if(!MODEL.flow) return;
+    if(timer){ stopFlow(); return; }
+    document.getElementById('playBtn').textContent='⏸ 暂停';
+    if(flowIdx<0) gotoStep(0);
+    const reduce=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+    timer=setInterval(()=>{ gotoStep(flowIdx+1); }, reduce?2600:2000);
+  }
+  document.getElementById('playBtn').onclick=play;
+  document.getElementById('stepBtn').onclick=()=>{ stopFlow(); gotoStep(flowIdx+1); };
+  document.getElementById('resetBtn').onclick=()=>{ stopFlow(); flowIdx=-1; applyLit(); capEl.innerHTML=''; };
+  document.addEventListener('keydown',e=>{
+    if(e.target&&/INPUT|TEXTAREA/.test(e.target.tagName)) return;
+    if(e.key===' '){ e.preventDefault(); play(); }
+    else if(e.key==='ArrowRight'){ stopFlow(); gotoStep(flowIdx+1); }
+    else if(e.key==='ArrowLeft'){ stopFlow(); gotoStep(flowIdx-1); }
+  });
+  renderEdgeKey(); render();
+})();
+</script>
+</body>
+</html>
