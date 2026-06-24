@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CPU 与 GPU 供应链的重合关系 · 关系图与产能争夺动画</title>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --bad:#ff6b81; --shadow:0 8px 30px rgba(0,0,0,.35);
+    --node:#1d2138; --nodeStroke:#3a4170; --lit:#ffd166;
+    /* 边的分类：k1=CPU 侧需求 / k2=GPU(AI) 侧需求 / k3=共享供给链 / k4=产能争夺·挤压 */
+    --k1:#7aa2ff; --k2:#ff6b81; --k3:#43c59e; --k4:#ffb454;
+    --svgbg:#0c0f1a;
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --bad:#d23651; --shadow:0 8px 24px rgba(20,30,80,.08);
+      --node:#ffffff; --nodeStroke:#c7cdec; --lit:#d98a00; --svgbg:#fbfcff;
+      --k1:#3a66ff; --k2:#d23651; --k3:#138a6e; --k4:#b3701a;
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);line-height:1.75;font-size:16px;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;}
+  a{color:var(--accent)} strong{color:var(--text)}
+  .back{display:inline-block;margin:22px 0 0 22px;color:var(--muted);text-decoration:none;font-size:14px}
+  article{max-width:980px;margin:0 auto;padding:18px 22px 90px}
+  header.head{border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:8px}
+  h1{font-size:25px;line-height:1.35;margin:14px 0 6px}
+  .sub{color:var(--muted);font-size:15px;margin:0 0 14px}
+  .legend{font-size:12px;color:var(--muted);margin:6px 0 0}
+  .src{font-size:10.5px;padding:0 6px;border-radius:999px;white-space:nowrap;vertical-align:middle}
+  .src-a{background:rgba(67,197,158,.18);color:var(--ok)} .src-b{background:rgba(255,180,84,.18);color:var(--warn)} .src-c{background:rgba(255,107,129,.18);color:var(--bad)}
+  .tldr{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:12px;padding:14px 18px;margin:20px 0;box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+  nav.toc{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px 18px;margin:8px 0 26px;font-size:14px}
+  nav.toc a{color:var(--text);text-decoration:none;margin-right:16px;white-space:nowrap;line-height:2}
+  section{margin:34px 0}
+  h2{font-size:20px;margin:0 0 12px;padding-top:8px;border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent);font-weight:700;margin-right:8px}
+  h3{font-size:16.5px;margin:20px 0 8px}
+  p{margin:12px 0} ul,ol{padding-left:22px} li{margin:6px 0}
+  code{background:var(--panel2);padding:1.5px 6px;border-radius:6px;font-size:.88em}
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:13.5px;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  th,td{border-bottom:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:top}
+  th{background:var(--panel2);color:var(--muted);font-weight:600} tr:last-child td{border-bottom:none}
+  .callout{border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin:18px 0;background:var(--panel)}
+  .callout .label{font-size:12px;letter-spacing:.5px;font-weight:700;text-transform:uppercase;display:block;margin-bottom:4px;color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+  .callout.bad{border-left:4px solid var(--bad)} .callout.bad .label{color:var(--bad)}
+  /* ---- 交互关系图 ---- */
+  .viz{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin:14px 0}
+  .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+  .tab{cursor:pointer;border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:6px 14px;border-radius:999px;font-size:13.5px}
+  .tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .stage{display:grid;grid-template-columns:1fr 260px;gap:12px}
+  @media (max-width:720px){ .stage{grid-template-columns:1fr} }
+  .svgwrap{background:var(--svgbg);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  svg.diagram{display:block;width:100%;height:auto}
+  .nd-node{cursor:pointer}
+  .nd-node rect{fill:var(--node);stroke:var(--nodeStroke);stroke-width:1.5;rx:9}
+  .nd-node text{fill:var(--text);font-size:12.5px;font-weight:600}
+  .nd-node.sel rect{stroke:var(--accent);stroke-width:2.5}
+  .nd-node.shared rect{stroke:var(--ok);stroke-width:2.2}
+  .nd-edge{stroke-width:2;fill:none;opacity:.85}
+  .nd-edge.k1{stroke:var(--k1)} .nd-edge.k2{stroke:var(--k2)} .nd-edge.k3{stroke:var(--k3)} .nd-edge.k4{stroke:var(--k4)}
+  .nd-edge.lit{stroke:var(--lit);stroke-width:4;opacity:1}
+  .nd-edgelabel{fill:var(--muted);font-size:10.5px}
+  .pulse{fill:var(--lit)}
+  @media (prefers-reduced-motion:reduce){ .pulse{display:none!important} }
+  .colhdr{fill:var(--muted);font-size:12px;font-weight:700;letter-spacing:.5px}
+  .panel{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:13.5px;min-height:120px}
+  .panel h4{margin:0 0 6px;font-size:14.5px;color:var(--accent)}
+  .panel .conn{margin:8px 0 0;padding-left:18px} .panel .conn li{margin:3px 0;color:var(--muted)}
+  .panel .hint{color:var(--muted)}
+  .panel .tag{display:inline-block;font-size:10.5px;padding:1px 7px;border-radius:999px;margin-bottom:6px}
+  .tag.s{background:rgba(67,197,158,.18);color:var(--ok)} .tag.c{background:rgba(122,162,255,.18);color:var(--accent)} .tag.g{background:rgba(255,107,129,.18);color:var(--bad)}
+  .controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
+  .btn{cursor:pointer;border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:6px 12px;border-radius:8px;font-size:13.5px}
+  .btn:hover{border-color:var(--accent)}
+  .cap{font-size:13.5px;color:var(--text);margin-top:8px;min-height:1.6em}
+  .cap b{color:var(--accent)}
+  .edgekey{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:8px}
+  .edgekey i{display:inline-block;width:22px;height:0;border-top:3px solid;vertical-align:middle;margin-right:5px}
+  footer.foot{margin-top:54px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+  <header class="head">
+    <h1>CPU 与 GPU 供应链的重合关系：哪些共享 / 哪些专属 / 为什么互相挤产能</h1>
+    <p class="sub">CPU 和 GPU 是两种芯片，却抢同一批上游卡点的产能——一张关系图看清「共享层 / CPU 专属 / GPU 专属」，再用动画演示 AI 浪潮如何把共享产能从 CPU 那边吸走。</p>
+    <p class="legend">来源等级：<span class="src src-a">🟢 一手</span> 官方/规范/财报 ·
+      <span class="src src-b">🟡 二手</span> 媒体/分析 · <span class="src src-c">🔴 自述/未证实</span>；
+      份额/产能/制程数字多为「约 / 数量级 / 视年份」，并尽量标代表公司。</p>
+  </header>
+
+  <div class="tldr"><b>一句话</b> — CPU 和 GPU 看着是两类芯片，但它们的<strong>上游供应链大量重合</strong>：都用同一批 <strong>EDA</strong>（Synopsys/Cadence/Siemens）、挤同一个 <strong>TSMC</strong> 先进制程、共用同一批 <strong>ASML EUV</strong> 设备与<strong>硅片/光刻胶/特气</strong>材料、走同一套 <strong>CoWoS/chiplet</strong> 先进封装与 <strong>OSAT</strong> 封测。正因为共享这些<strong>卡点（bottleneck）</strong>，AI 把 GPU 需求拉爆时，就会<strong>直接从 CPU 那边吸走产能</strong>、抬高整链成本、并强化这几个卡点的定价权。本篇用一张三栏关系图 + 一段「产能争夺」动画把这件事讲清。<br><span class="legend" style="display:block;margin-top:8px">⚠️ 图中出现的公司仅用于标注其在产业链中的位置，<strong>非投资建议、非背书</strong>。</span></div>
+
+  <nav class="toc">
+    <a href="#primer">领域背景速补</a>
+    <a href="#viz">交互关系图 + 产能争夺</a>
+    <a href="#compare">重合对照表</a>
+    <a href="#model">心智模型</a>
+    <a href="#deps">依赖与相互制约</a>
+    <a href="#more">延伸阅读 / 出处</a>
+  </nav>
+
+  <!-- 领域背景速补 -->
+  <section id="primer">
+    <h2><span class="n">①</span>领域背景速补（给只懂 LLM、不懂半导体的读者）</h2>
+    <p>这篇讲的是芯片产业链，里面全是缩写。先把关键名词讲清「<strong>它是什么 / 为什么难 / 和这篇有什么关系</strong>」，后面看图就不卡了。术语保留英文，旁边给中文。</p>
+    <ul>
+      <li><strong>CPU（中央处理器）</strong>：电脑/服务器里管「<strong>通用逻辑、调度、低延迟串行任务</strong>」的芯片，核心少但每核很强、擅长分支预测。代表设计公司 Intel、AMD、Apple、Qualcomm、以及 Arm 阵营。它和这篇的关系：CPU 是「需求方一」。</li>
+      <li><strong>GPU（图形/通用并行处理器）</strong>：原本画图、现在是 <strong>AI 训练/推理的主力</strong>。特点是「<strong>海量并行</strong>」——成千上万个小核同时算矩阵乘。代表 NVIDIA、AMD。它和这篇的关系：GPU 是「需求方二」，而且 AI 让它的需求暴涨。</li>
+      <li><strong>为什么 CPU 和 GPU 会「抢」？</strong> 因为它们虽然算的东西不同，但<strong>造出来的方式高度雷同</strong>——都要先用软件设计、再到同一家代工厂用同一批设备和材料造出来、再封装测试。产业链上游是「共享的」，所以谁需求大谁就把产能占走。</li>
+      <li><strong>EDA（Electronic Design Automation，电子设计自动化软件）</strong>：设计芯片的「IDE + 编译器 + 仿真器」。没有它没人能把上百亿晶体管画出来并验证。三家垄断：Synopsys、Cadence、Siemens EDA。<em>CPU 和 GPU 都离不开它</em>，是第一个共享卡点。</li>
+      <li><strong>Foundry / 晶圆代工（Foundry）</strong>：只负责「制造」别人设计好的芯片的工厂。<strong>TSMC（台积电）</strong>是全球先进制程的绝对龙头（约 70% 代工份额，先进节点更高 <span class="src src-b">🟡</span>）。关键点：<strong>AMD 的 CPU、NVIDIA 的 GPU、Apple 的芯片都在 TSMC 同一批产线上造</strong>——这是最大的重合点。</li>
+      <li><strong>制程节点（process node，如 5nm / 3nm / 2nm）</strong>：越小代表晶体管越密、越省电越快。「先进制程」指 7nm 及以下。<em>越先进的产线越稀缺、越贵</em>，CPU 和 GPU 都想用最新的，于是抢。</li>
+      <li><strong>EUV（Extreme Ultraviolet，极紫外光刻）</strong>：造先进芯片必须的「曝光机」，把电路图投到硅片上。<strong>全世界只有 ASML（荷兰）一家能造 EUV 光刻机</strong>——这是设备端的单点卡脖子。所有先进 CPU/GPU 都依赖它，外加 AMAT / Lam / KLA 等设备厂。</li>
+      <li><strong>材料：硅片（wafer）/ 光刻胶（photoresist）/ 特气（specialty gas）</strong>：造芯片的「原料」。硅片是芯片的「画布」（日本信越/SUMCO 等主导），光刻胶是感光涂层（日本 JSR/TOK 等），特气是工艺用气体。CPU/GPU 共用同一批料。</li>
+      <li><strong>先进封装（advanced packaging）：CoWoS / chiplet / Foveros</strong>：芯片造好后，把多块小芯片（die）拼到一起、或把芯片和内存堆在一块基板上的「<strong>高级组装</strong>」工艺。
+        <ul>
+          <li><strong>CoWoS</strong>（TSMC 的招牌封装）：把 GPU 主芯片和 <strong>HBM 内存</strong>并排放到一块硅中介层（interposer）上。<em>AI GPU 重度依赖它</em>，也是当前最紧的卡点之一。</li>
+          <li><strong>chiplet（小芯片）</strong>：把一颗大芯片拆成几颗小芯片再拼起来，良率更高、更灵活。<strong>高端 CPU 也大量用</strong>（AMD 的 EPYC/Ryzen、Intel）。</li>
+          <li><strong>Foveros</strong>：Intel 的 3D 堆叠封装，把芯片上下叠。</li>
+        </ul>
+      </li>
+      <li><strong>HBM（High Bandwidth Memory，高带宽内存）</strong>：把多层 DRAM 垂直堆叠、紧贴 GPU 的超高带宽内存。<strong>GPU/AI 重度依赖 HBM</strong>（喂数据给上万个核），而 <strong>CPU 大多用便宜得多的 DDR 内存</strong>——这是 CPU/GPU 一个重要的「专属」分界。HBM 三家主导：SK海力士（SK Hynix）、Samsung、Micron（美光）。</li>
+      <li><strong>OSAT（Outsourced Semiconductor Assembly and Test，封测外包）</strong>：专门做「封装 + 测试」的工厂（如日月光 ASE、Amkor）。CPU/GPU 共用。</li>
+      <li><strong>IP / Arm</strong>：可复用的电路设计「积木」（如 Arm 的 CPU 核、各种接口 IP）。CPU 和不少 SoC/GPU 都可能买来用。</li>
+      <li><strong>卡点 / 瓶颈（bottleneck）</strong>：产业链上「<strong>只有一两家能做、且短期扩不出产能</strong>」的环节。本篇核心就是：CPU 和 GPU 共享了好几个卡点（TSMC 先进制程、ASML EUV、CoWoS、HBM），所以会互相挤。</li>
+    </ul>
+    <p class="legend">说明：这是「示意、非穷尽」的产业链骨架；真实供应链还有更多层级（基板、载板、测试设备、化学品……），本篇聚焦「CPU 与 GPU 的<strong>重合与争夺</strong>」这条主线。</p>
+  </section>
+
+  <!-- 交互关系图 -->
+  <section id="viz">
+    <h2><span class="n">②</span>交互关系图 + 产能争夺</h2>
+    <p class="legend">点节点看「是什么 / 连谁 / 为什么」；<strong>绿框</strong>=共享卡点（CPU 与 GPU 同时连）。切到「产能争夺」视图后点 ▶ 看一次<strong>「AI 浪潮 → GPU 暴涨 → 抢占共享产能 → 挤压 CPU」</strong>的逐步动画。</p>
+    <div class="viz">
+      <div class="tabs" id="tabs"><!-- 引擎按 MODEL.views 自动生成 --></div>
+      <div class="stage">
+        <div class="svgwrap"><svg class="diagram" id="diagram" preserveAspectRatio="xMidYMid meet" role="img" aria-label="CPU 与 GPU 供应链重合关系图"></svg></div>
+        <div class="panel" id="nodeinfo"><span class="hint">点击或聚焦任一节点查看详情。绿框节点是 CPU 与 GPU 都依赖的<strong>共享卡点</strong>。</span></div>
+      </div>
+      <div class="edgekey" id="edgekey"><!-- 引擎按 kinds 生成图例 --></div>
+      <div class="controls">
+        <button class="btn" id="playBtn">▶ 播放产能争夺</button>
+        <button class="btn" id="stepBtn">单步 ›</button>
+        <button class="btn" id="resetBtn">↺ 复位</button>
+        <span class="cap" id="cap"></span>
+      </div>
+      <p class="legend" style="margin-top:10px">动画在「产能争夺」视图里效果最直观：建议先切到第二个标签再按 ▶。</p>
+    </div>
+  </section>
+
+  <!-- 重合对照表 -->
+  <section id="compare">
+    <h2><span class="n">③</span>重合对照表：每个环节谁在用、是不是卡点、谁主导</h2>
+    <p>「是否共享/卡点」一栏是这篇的重点——<strong>共享 + 卡点</strong>的环节就是 CPU 与 GPU 互相挤的地方。份额/产能数字多为「约/视年份」，标了来源等级。</p>
+    <table>
+      <thead><tr><th>环节</th><th>CPU 用吗</th><th>GPU 用吗</th><th>是否共享 / 卡点</th><th>谁主导（代表公司）</th></tr></thead>
+      <tbody>
+        <tr><td><strong>EDA 设计软件</strong></td><td>✅</td><td>✅</td><td><strong>共享 · 卡点</strong>（三家垄断）</td><td>Synopsys、Cadence、Siemens EDA <span class="src src-b">🟡</span></td></tr>
+        <tr><td><strong>IP / Arm 核</strong></td><td>✅（Arm 阵营 CPU）</td><td>部分（SoC/部分 GPU）</td><td>部分共享</td><td>Arm、各 IP 厂 <span class="src src-b">🟡</span></td></tr>
+        <tr><td><strong>晶圆代工（先进制程）</strong></td><td>✅（AMD/Apple 在 TSMC；Intel 部分自产+TSMC）</td><td>✅（NVIDIA/AMD GPU 在 TSMC）</td><td><strong>共享 · 最大卡点</strong></td><td>TSMC ≈70% 代工份额、先进节点更高 <span class="src src-b">🟡</span></td></tr>
+        <tr><td><strong>EUV 光刻设备</strong></td><td>✅</td><td>✅</td><td><strong>共享 · 单点卡脖子</strong>（全球独家）</td><td>ASML（EUV 唯一供应商）<span class="src src-a">🟢</span>；AMAT/Lam/KLA 等 <span class="src src-b">🟡</span></td></tr>
+        <tr><td><strong>材料（硅片/光刻胶/特气）</strong></td><td>✅</td><td>✅</td><td><strong>共享</strong>（集中度高）</td><td>信越/SUMCO（硅片）、JSR/TOK（光刻胶）等 <span class="src src-b">🟡</span></td></tr>
+        <tr><td><strong>先进封装 CoWoS</strong></td><td>少（个别高端/超级芯片）</td><td>✅（AI GPU <strong>重度依赖</strong>）</td><td><strong>共享倾向 GPU · 强卡点</strong></td><td>TSMC（CoWoS），产能 2026 前基本售罄、NVIDIA 占约 60% <span class="src src-b">🟡</span></td></tr>
+        <tr><td><strong>chiplet / 3D 封装</strong></td><td>✅（AMD EPYC/Ryzen、Intel Foveros）</td><td>✅</td><td><strong>共享</strong></td><td>TSMC、Intel、各 OSAT <span class="src src-b">🟡</span></td></tr>
+        <tr><td><strong>封测 OSAT</strong></td><td>✅</td><td>✅</td><td><strong>共享</strong></td><td>日月光 ASE、Amkor 等 <span class="src src-b">🟡</span></td></tr>
+        <tr><td><strong>HBM 高带宽内存</strong></td><td>少（CPU 多用 DDR）</td><td>✅（<strong>重度依赖</strong>）</td><td><strong>GPU 专属倾向 · 强卡点</strong></td><td>SK海力士 ≈62%、Micron ≈21%、Samsung ≈17%（Q2 2025）<span class="src src-b">🟡</span></td></tr>
+        <tr><td><strong>DDR 内存 / 内存控制器</strong></td><td>✅（主用）</td><td>辅</td><td>偏 CPU 专属</td><td>三星/SK海力士/美光（DRAM）<span class="src src-b">🟡</span></td></tr>
+        <tr><td><strong>x86 ISA / 指令集</strong></td><td>✅（封闭）</td><td>—</td><td><strong>CPU 专属</strong></td><td>Intel、AMD（x86 授权封闭）<span class="src src-b">🟡</span></td></tr>
+        <tr><td><strong>CUDA / NVLink 生态</strong></td><td>—</td><td>✅（护城河）</td><td><strong>GPU 专属</strong></td><td>NVIDIA <span class="src src-b">🟡</span></td></tr>
+      </tbody>
+    </table>
+    <p class="legend">⚠️ 公司名仅标注产业链位置，<strong>非投资建议、非背书</strong>；份额/产能数字随年份与口径波动，请以原始来源为准。</p>
+  </section>
+
+  <!-- 心智模型 -->
+  <section id="model">
+    <h2><span class="n">④</span>给小白的心智模型</h2>
+    <p><strong>一家米其林后厨，同时接 CPU 桌和 GPU 桌两桌订单。</strong></p>
+    <p>把整条供应链想成<strong>一家顶级餐厅</strong>：</p>
+    <ul>
+      <li><strong>菜谱设计软件 = EDA</strong>：所有菜都得用这套软件设计配方，全世界只有三家供这软件。</li>
+      <li><strong>后厨（同一个） = TSMC 代工厂</strong>：CPU 桌点的菜、GPU 桌点的菜，<strong>都在这同一个后厨、用同一批炉灶（先进制程产线）做</strong>。后厨就这么大。</li>
+      <li><strong>那台全世界独一份的高级烤箱 = ASML EUV</strong>：做任何招牌菜都得排队用它，别家造不出第二台。</li>
+      <li><strong>稀有食材（黑松露） = HBM + CoWoS 封装产能</strong>：GPU 桌的招牌菜（AI 加速卡）<strong>每一道都要大量黑松露</strong>；CPU 桌大多点用普通食材（DDR）的菜。</li>
+    </ul>
+    <p>平时两桌相安无事。但 <strong>AI 这桌（GPU）突然一口气点了 100 份招牌菜</strong>——它把<strong>后厨的炉灶、那台独一份烤箱、和几乎所有黑松露全占了</strong>。结果：CPU 桌的菜上得更慢（交期拉长）、价格被抬高（产能稀缺涨价）、而供炉灶/烤箱/松露的几家供应商<strong>说一不二（定价权变强）</strong>。这就是「因为共享后厨，所以 GPU 的暴涨直接挤了 CPU」。</p>
+  </section>
+
+  <!-- 依赖与相互制约（深入） -->
+  <section id="deps">
+    <h2><span class="n">⑤</span>依赖与相互制约（深入）：为什么「共享」就一定「互挤」</h2>
+    <p>把链条接口讲清：<strong>谁靠什么连谁、谁的能力卡住谁</strong>。核心逻辑是——CPU 和 GPU 在<strong>同一批有限产能</strong>的卡点上是「<strong>零和</strong>」关系：这些环节短期扩不出产能（建一座先进 fab/封装厂要数年、ASML EUV 年产有限），于是<strong>一方多拿，另一方就少拿或更贵</strong>。</p>
+
+    <h3>三个共享瓶颈，被 AI/GPU 拉满</h3>
+    <ul>
+      <li><strong>TSMC 先进制程</strong>：AMD CPU、NVIDIA/AMD GPU、Apple SoC 都排在 TSMC 同一代先进节点（如 3nm/2nm）上。晶圆产能（wafer/月）短期固定，<strong>AI GPU 大量吃掉 wafer 配额，留给 CPU 的先进产能就被压缩</strong>，且新节点首发产能往往优先给出价最高、量最大的 AI 客户。TSMC 约 70% 代工份额、先进节点占比更高 <span class="src src-b">🟡</span>，使其定价权很强。</li>
+      <li><strong>CoWoS 先进封装</strong>：AI GPU 几乎每片都要 CoWoS（把 GPU die 和 HBM 拼到中介层上）。媒体/分析称 <strong>CoWoS 产能到 2026 年前基本售罄、NVIDIA 一家占约 60%、前三大客户合计 &gt;85%</strong> <span class="src src-b">🟡</span>，留给其他玩家（含想用高端封装的 CPU/加速器）的份额很小，交期可长达一年以上 <span class="src src-b">🟡</span>。</li>
+      <li><strong>HBM 供给</strong>：GPU 重度依赖、CPU 大多用 DDR，所以 HBM 名义上「偏 GPU 专属」，但它仍是<strong>共享内存产线与产能</strong>的一部分——HBM 用的是 DRAM 晶圆和先进封装/TSV 工艺，<strong>HBM 拉满会占用 DRAM 厂的产能与资本开支</strong>，间接抬高包括 CPU 用的 DDR 在内的整体内存价格。HBM 三家主导（SK海力士 ≈62% / Micron ≈21% / Samsung ≈17%，Q2 2025）、到 2026 前基本售罄 <span class="src src-b">🟡</span>，定价权强。</li>
+      <li><strong>ASML EUV</strong>：再上一层，TSMC/Intel/Samsung 想扩先进产能都得先拿到 EUV 机台，而 <strong>EUV 全球只有 ASML 一家供</strong> <span class="src src-a">🟢</span>，年产有限。这把「扩产」本身卡死在最上游：不管 CPU 还是 GPU 想要更多先进产能，最终都撞到同一台「独一份烤箱」。</li>
+    </ul>
+
+    <div class="callout warn"><span class="label">相互制约因果链</span>
+      <strong>AI 浪潮</strong> → 云厂/大模型疯抢 <strong>GPU</strong>（NVIDIA/AMD） → GPU 订单灌向 <strong>TSMC 先进制程 + CoWoS 封装 + HBM</strong>（三个共享卡点）→ 这些卡点产能短期固定、扩产要数年且受 <strong>ASML EUV</strong> 年产上限约束 → 于是 GPU「拿满」后，<strong>留给 CPU 的先进晶圆/封装份额被挤压、整链报价上调、交期拉长</strong> → 同时几个卡点（TSMC/CoWoS/HBM/ASML）因为「<strong>谁都绕不开</strong>」而<strong>定价权与利润率走强</strong>。一句话：<em>因为共享，所以 GPU 的需求暴涨会沿着供应链「传导」成 CPU 的成本与交期压力。</em>
+    </div>
+
+    <h3>CPU 与 GPU 的边界正在模糊</h3>
+    <p>「CPU 专属 / GPU 专属」并不是铁墙，反而越来越交融，这让「重合」更深：</p>
+    <ul>
+      <li><strong>GPU 里有 CPU</strong>：现代 GPU/加速器内部也有控制逻辑；数据中心一块 GPU 旁常配 CPU 做调度。</li>
+      <li><strong>CPU 里加 AI 单元</strong>：新一代 CPU（含 NPU/矩阵扩展）也开始做 AI 推理，吃更先进的制程。</li>
+      <li><strong>APU / 超级芯片</strong>：AMD 的 APU、NVIDIA 的 <strong>Grace-Hopper / Grace-Blackwell「超级芯片」</strong>把 CPU 和 GPU <strong>封进同一个封装</strong>（用 chiplet/CoWoS 互联）<span class="src src-b">🟡</span>——这时 CPU 和 GPU 不只是「共享上游」，而是<strong>共享同一块基板和封装产能</strong>，争夺关系被进一步内化。</li>
+    </ul>
+    <div class="callout bad"><span class="label">诚实边界</span>
+      具体份额/产能/制程数字（如 CoWoS 60%、HBM 62%、TSMC 70%）多为 <strong>2025–2026 年的媒体与分析口径</strong> <span class="src src-b">🟡</span>，会随年份、统计口径（按营收 vs 按晶圆 vs 按「Foundry 2.0」）、新增产能投放而变化；本图是<strong>示意、非穷尽</strong>的产业链骨架。请以 TSMC/ASML/SK海力士/Micron 等官方财报与原始报告为准。
+    </div>
+  </section>
+
+  <!-- 延伸阅读 / 出处 -->
+  <section id="more">
+    <h2>延伸阅读 / 出处</h2>
+    <p>本篇专讲 <strong>CPU 与 GPU 供应链的「重合与产能争夺」</strong>。仓库内另有几篇从不同角度切，可对照看（点明区别）：</p>
+    <ul style="font-size:13.5px">
+      <li><a href="../2026-06-17-cpu-supply-chain/">CPU 供应链（关系图）</a> — 专讲 <strong>CPU 这一条链</strong>本身（设计→代工→封测→x86/Arm 阵营），不涉及与 GPU 的争夺。</li>
+      <li><a href="../2026-06-17-ai-cluster-supply-chain/">AI 集群供应链</a> — 讲 <strong>AI 整机/集群</strong>的供应链（GPU、网络、内存、电力、整柜），范围更大、偏「整机怎么攒出来」。</li>
+      <li><a href="../2026-06-17-ai-cluster-architecture/">AI 集群架构（关系图）</a> — 讲 AI 集群的<strong>架构与互联</strong>（芯片→节点→机柜→集群怎么连），偏体系结构而非供应链。</li>
+    </ul>
+    <p style="font-size:13.5px;margin-top:14px">外部出处（均为二手分析/媒体，数字视年份）：</p>
+    <ul style="font-size:13px">
+      <li><span class="src src-b">🟡</span> TSMC 代工份额（Q2/Q3 2025 约 70%）：design-reuse / dataconomy / electronicsforyou 等行业报道。</li>
+      <li><span class="src src-b">🟡</span> CoWoS 产能售罄、NVIDIA 约 60%、前三大 &gt;85%、交期 52–78 周：wccftech / astutegroup / digitimes / siliconanalysts 等。</li>
+      <li><span class="src src-b">🟡</span> HBM 份额（SK海力士 ≈62% / Micron ≈21% / Samsung ≈17%，Q2 2025）、2026 前售罄：astutegroup / patsnap / introl 等。</li>
+      <li><span class="src src-a">🟢</span> ASML 为 EUV 唯一供应商：ASML 官方与公开行业共识。</li>
+      <li>具体口径请回到 TSMC、ASML、SK hynix、Micron、Samsung 的官方财报与 IR 材料核对。</li>
+    </ul>
+  </section>
+
+  <footer class="foot">技术科普 · 关系图为示意（非穷尽），份额/产能/制程数字多为数量级/视年份，关键事实按来源分级；图中公司仅标产业链位置，非投资建议、非背书 · 2026-06-24</footer>
+</article>
+
+<script>
+/* ===========================================================================
+   数据驱动 MODEL：引擎据此渲染关系图、节点详情、视图切换、产能争夺动画。
+   kinds: k1=CPU 侧需求 / k2=GPU(AI) 侧需求 / k3=共享供给链 / k4=产能争夺·挤压
+   节点 desc 用 [TAG:s|c|g] 前缀标 共享/CPU专属/GPU专属（引擎渲成小标签）
+   三栏布局：左 x≈140=CPU 专属、中 x≈420=共享、右 x≈700=GPU 专属
+   =========================================================================== */
+const MODEL = {
+  kinds: { k1:"CPU 侧需求", k2:"GPU(AI) 侧需求", k3:"共享供给（上游→下游）", k4:"产能争夺 / 挤压" },
+  views: [
+    /* ---------- 视图一：重合关系图（三栏） ---------- */
+    { id:"overlap", label:"重合关系图（共享 / CPU 专属 / GPU 专属）", w:840, h:560,
+      cols:[ {x:140,label:"CPU 专属"}, {x:420,label:"共享层（卡点）"}, {x:700,label:"GPU 专属"} ],
+      nodes:[
+        /* 左：CPU 专属 */
+        { id:"cpu",   label:"CPU 设计", x:140, y:70,  desc:"[TAG:c]中央处理器：通用逻辑/低延迟/分支预测。代表 Intel、AMD、Apple、Qualcomm、Arm 阵营。是「需求方一」。" },
+        { id:"x86",   label:"x86 ISA", x:140, y:200, desc:"[TAG:c]x86 指令集，Intel/AMD 封闭授权——CPU 专属、与 GPU 无关。" },
+        { id:"ddr",   label:"DDR 内存", x:140, y:330, desc:"[TAG:c]CPU 主用的通用内存（便宜、容量大）。GPU 大多改用 HBM。三星/SK海力士/美光供 DRAM。" },
+        { id:"cpukit",label:"低延迟/内存控制器", x:140, y:460, desc:"[TAG:c]面向串行/分支/低延迟的 CPU 专属设计取向与内存控制器。" },
+        /* 中：共享层（卡点） */
+        { id:"eda",   label:"EDA 设计软件", x:420, y:55,  desc:"[TAG:s]芯片设计软件（Synopsys/Cadence/Siemens 三家垄断）。CPU 与 GPU 都离不开——第一个共享卡点。" },
+        { id:"ip",    label:"IP / Arm 核", x:420, y:150, desc:"[TAG:s]可复用电路积木（Arm 核、接口 IP）。CPU 与部分 GPU/SoC 都可能用。" },
+        { id:"euv",   label:"ASML EUV 设备", x:420, y:245, desc:"[TAG:s]极紫外光刻机，造先进芯片必需，全球仅 ASML 一家。最上游单点卡脖子，约束所有人扩产。🟢 唯一供应商。" },
+        { id:"mat",   label:"材料 硅片/光刻胶/特气", x:420, y:340, desc:"[TAG:s]造芯片的原料（信越/SUMCO 硅片、JSR/TOK 光刻胶、特气）。CPU/GPU 共用，集中度高。" },
+        { id:"tsmc",  label:"TSMC 晶圆代工（先进制程）", x:420, y:435, desc:"[TAG:s]★最大重合点★ AMD CPU、NVIDIA/AMD GPU、Apple 都在 TSMC 同一批先进产线上造。约 70% 代工份额、先进节点更高。产能短期固定→零和争夺。🟡" },
+        { id:"cowos", label:"先进封装 CoWoS/chiplet", x:380, y:520, desc:"[TAG:s]把多 die / die+HBM 拼到一块基板。GPU 重度用 CoWoS 堆 HBM；高端 CPU 走 chiplet（AMD/Intel Foveros）。强卡点。🟡" },
+        { id:"osat",  label:"封测 OSAT", x:560, y:520, desc:"[TAG:s]封装+测试外包（日月光 ASE、Amkor）。CPU/GPU 共用。" },
+        /* 右：GPU 专属 */
+        { id:"gpu",   label:"GPU 设计", x:700, y:70,  desc:"[TAG:g]海量并行加速器，AI 训练/推理主力。代表 NVIDIA、AMD。是「需求方二」，AI 让它需求暴涨。" },
+        { id:"hbm",   label:"HBM 高带宽内存", x:700, y:200, desc:"[TAG:g]垂直堆叠 DRAM、紧贴 GPU 的超高带宽内存。GPU 重度依赖（CPU 多用 DDR）。SK海力士≈62%/Micron≈21%/Samsung≈17%。强卡点。🟡" },
+        { id:"cuda",  label:"CUDA / NVLink 生态", x:700, y:330, desc:"[TAG:g]NVIDIA 的软件+互联生态，GPU 专属护城河，与制造产能无关。" },
+        { id:"par",   label:"海量并行设计", x:700, y:460, desc:"[TAG:g]成千上万小核做矩阵乘的并行架构取向，GPU 专属。" }
+      ],
+      edges:[
+        /* CPU 专属内部 */
+        { id:"oe1", from:"x86", to:"cpu", kind:"k1" },
+        { id:"oe2", from:"ddr", to:"cpu", label:"内存", kind:"k1" },
+        { id:"oe3", from:"cpukit", to:"cpu", kind:"k1" },
+        /* GPU 专属内部 */
+        { id:"oe4", from:"hbm", to:"gpu", label:"内存(重度)", kind:"k2" },
+        { id:"oe5", from:"cuda", to:"gpu", kind:"k2" },
+        { id:"oe6", from:"par", to:"gpu", kind:"k2" },
+        /* 共享上游链条（上游→下游） */
+        { id:"oe7",  from:"euv", to:"tsmc", label:"光刻设备", kind:"k3" },
+        { id:"oe8",  from:"mat", to:"tsmc", label:"原料", kind:"k3" },
+        { id:"oe9",  from:"tsmc", to:"cowos", label:"造好的 die", kind:"k3" },
+        { id:"oe10", from:"cowos", to:"osat", kind:"k3" },
+        /* EDA/IP 供两侧设计 */
+        { id:"oe11", from:"eda", to:"cpu", label:"设计软件", kind:"k3" },
+        { id:"oe12", from:"eda", to:"gpu", label:"设计软件", kind:"k3" },
+        { id:"oe13", from:"ip", to:"cpu", kind:"k3" },
+        /* ★共享卡点同时连 CPU 与 GPU：直观显示「抢同一个代工/封装」★ */
+        { id:"oe14", from:"cpu",  to:"tsmc",  label:"CPU 排产", kind:"k1" },
+        { id:"oe15", from:"gpu",  to:"tsmc",  label:"GPU 排产", kind:"k2" },
+        { id:"oe16", from:"gpu",  to:"cowos", label:"GPU 堆 HBM", kind:"k2" },
+        { id:"oe17", from:"cpu",  to:"cowos", label:"高端 chiplet", kind:"k1" },
+        { id:"oe18", from:"hbm",  to:"cowos", label:"HBM 进封装", kind:"k2" }
+      ]
+    },
+    /* ---------- 视图二：产能争夺（聚焦三个共享瓶颈） ---------- */
+    { id:"squeeze", label:"产能争夺（AI 如何挤占共享产能）", w:840, h:480,
+      nodes:[
+        { id:"ai",    label:"AI 浪潮", x:120, y:240, desc:"[TAG:g]大模型/云厂资本开支爆发，驱动 GPU 需求暴涨——一切争夺的起点。" },
+        { id:"gpud",  label:"GPU(AI) 需求 ↑↑", x:330, y:120, desc:"[TAG:g]NVIDIA/AMD 加速卡订单灌满，沿供应链向上游传导。" },
+        { id:"cpud",  label:"CPU 需求（稳定）", x:330, y:360, desc:"[TAG:c]CPU 需求相对平稳，但要和暴涨的 GPU 抢同一批共享产能。" },
+        { id:"sq_tsmc", label:"TSMC 先进制程产能", x:600, y:90,  desc:"[TAG:s]共享卡点①：晶圆产能短期固定。GPU 多拿 wafer 配额 → 留给 CPU 的先进产能被压缩。🟡" },
+        { id:"sq_cowos",label:"CoWoS 封装产能", x:600, y:240, desc:"[TAG:s]共享卡点②：2026 前基本售罄，NVIDIA 占约 60%、前三大>85%，交期 52–78 周。GPU 几乎占满。🟡" },
+        { id:"sq_hbm",  label:"HBM 供给", x:600, y:390, desc:"[TAG:s]共享卡点③：GPU 重度吃 HBM，2026 前售罄；占用 DRAM 产能/资本开支，间接抬高含 CPU 用 DDR 的整体内存价。🟡" },
+        { id:"euv2",   label:"ASML EUV（扩产上限）", x:790, y:240, desc:"[TAG:s]再上游：扩任何先进产能都得先拿 EUV 机台，全球仅 ASML，年产有限——把扩产卡死在最上游。🟢" },
+        { id:"out",    label:"结果：CPU 被挤压", x:330, y:240, desc:"[TAG:c]CPU 先进份额被挤、整链成本上升、交期拉长；卡点定价权走强。" }
+      ],
+      edges:[
+        { id:"se1", from:"ai",   to:"gpud", label:"驱动", kind:"k2" },
+        { id:"se2", from:"gpud", to:"sq_tsmc",  label:"抢 wafer", kind:"k2" },
+        { id:"se3", from:"gpud", to:"sq_cowos", label:"抢封装", kind:"k2" },
+        { id:"se4", from:"gpud", to:"sq_hbm",   label:"抢 HBM", kind:"k2" },
+        { id:"se5", from:"cpud", to:"sq_tsmc",  label:"也要 wafer", kind:"k1" },
+        { id:"se6", from:"cpud", to:"sq_cowos", label:"高端也要", kind:"k1" },
+        { id:"se7", from:"sq_tsmc",  to:"euv2", label:"受限于", kind:"k3" },
+        { id:"se8", from:"sq_cowos", to:"euv2", kind:"k3" },
+        { id:"se9", from:"sq_tsmc",  to:"out", label:"挤压", kind:"k4" },
+        { id:"se10", from:"sq_cowos", to:"out", label:"挤压", kind:"k4" },
+        { id:"se11", from:"sq_hbm",   to:"out", label:"抬价", kind:"k4" }
+      ]
+    }
+  ],
+  flow: { view:"squeeze", steps:[
+    { edges:["se1"], cap:"<b>1.</b> AI 浪潮 → 云厂/大模型疯抢 <b>GPU</b>，需求暴涨。" },
+    { edges:["se2","se3","se4"], cap:"<b>2.</b> GPU 订单灌向三个<b>共享卡点</b>：抢 TSMC 先进 wafer、抢 CoWoS 封装、抢 HBM。" },
+    { edges:["se5","se6"], cap:"<b>3.</b> 但 <b>CPU 也要</b>同一批 wafer 和高端封装——它们在共享产能上是<b>零和</b>。" },
+    { edges:["se7","se8"], cap:"<b>4.</b> 想扩产？先得拿 <b>ASML EUV</b> 机台（全球独家、年产有限），扩产被卡在最上游。" },
+    { edges:["se9","se10","se11"], cap:"<b>5.</b> 结果：GPU 拿满 → <b>CPU 先进份额被挤、成本上升、交期拉长</b>，卡点定价权走强。" }
+  ]}
+};
+
+/* ===================== 引擎 ===================== */
+(function(){
+  const SVGNS="http://www.w3.org/2000/svg";
+  const diagram=document.getElementById('diagram');
+  const tabsEl=document.getElementById('tabs');
+  const infoEl=document.getElementById('nodeinfo');
+  const capEl=document.getElementById('cap');
+  const edgekeyEl=document.getElementById('edgekey');
+  let curView=MODEL.views[0], sel=null, flowIdx=-1, timer=null;
+  const TAGTXT={s:'共享卡点',c:'CPU 专属',g:'GPU 专属'};
+
+  function el(tag,attrs,kids){ const e=document.createElementNS(SVGNS,tag);
+    for(const k in (attrs||{})) e.setAttribute(k,attrs[k]);
+    (kids||[]).forEach(c=>e.appendChild(c)); return e; }
+  function nodeById(v,id){ return v.nodes.find(n=>n.id===id); }
+  function tagOf(desc){ const m=/^\[TAG:(s|c|g)\]/.exec(desc||''); return m?m[1]:null; }
+  function descBody(desc){ return (desc||'').replace(/^\[TAG:(s|c|g)\]/,''); }
+
+  function renderTabs(){
+    tabsEl.innerHTML='';
+    if(MODEL.views.length<2){ tabsEl.style.display='none'; return; }
+    MODEL.views.forEach(v=>{
+      const b=document.createElement('button'); b.className='tab'+(v===curView?' active':''); b.textContent=v.label;
+      b.onclick=()=>{ curView=v; sel=null; stopFlow(); flowIdx=-1; capEl.innerHTML=''; render(); };
+      tabsEl.appendChild(b);
+    });
+  }
+  function renderEdgeKey(){
+    edgekeyEl.innerHTML='';
+    Object.keys(MODEL.kinds||{}).forEach(k=>{
+      const txt=MODEL.kinds[k]; if(!txt) return;
+      const s=document.createElement('span'); s.innerHTML='<i style="border-color:var(--'+k+')"></i>'+txt; edgekeyEl.appendChild(s);
+    });
+  }
+  function render(){
+    renderTabs();
+    const v=curView; diagram.setAttribute('viewBox','0 0 '+v.w+' '+v.h);
+    diagram.innerHTML='';
+    // 列标题（仅重合视图有 cols）
+    if(v.cols){ v.cols.forEach(c=>{
+      const t=el('text',{x:c.x,y:24,'text-anchor':'middle',class:'colhdr'}); t.textContent=c.label; diagram.appendChild(t);
+    }); }
+    // edges first
+    v.edges.forEach(ed=>{
+      const a=nodeById(v,ed.from), b=nodeById(v,ed.to); if(!a||!b) return;
+      const line=el('line',{x1:a.x,y1:a.y,x2:b.x,y2:b.y,class:'nd-edge '+(ed.kind||'k1'),'data-edge':ed.id});
+      diagram.appendChild(line);
+      if(ed.label){ const mx=(a.x+b.x)/2, my=(a.y+b.y)/2-4;
+        const t=el('text',{x:mx,y:my,'text-anchor':'middle',class:'nd-edgelabel'}); t.textContent=ed.label; diagram.appendChild(t); }
+    });
+    // nodes
+    v.nodes.forEach(n=>{
+      const w=Math.max(58, n.label.length*14+24), h=34;
+      const tg=tagOf(n.desc);
+      const cls='nd-node'+(sel===n.id?' sel':'')+(tg==='s'?' shared':'');
+      const g=el('g',{class:cls,'data-node':n.id,tabindex:'0',role:'button','aria-label':n.label});
+      g.appendChild(el('rect',{x:n.x-w/2,y:n.y-h/2,width:w,height:h,rx:9}));
+      const t=el('text',{x:n.x,y:n.y+4,'text-anchor':'middle'}); t.textContent=n.label; g.appendChild(t);
+      const pick=()=>{ sel=n.id; showInfo(n); document.querySelectorAll('.nd-node').forEach(x=>x.classList.remove('sel')); g.classList.add('sel'); };
+      g.addEventListener('click',pick); g.addEventListener('mouseenter',()=>showInfo(n)); g.addEventListener('focus',pick);
+      diagram.appendChild(g);
+    });
+    applyLit();
+  }
+  function showInfo(n){
+    const v=curView;
+    const tg=tagOf(n.desc);
+    const tagHtml=tg?'<span class="tag '+tg+'">'+TAGTXT[tg]+'</span><br>':'';
+    const conns=v.edges.filter(e=>e.from===n.id||e.to===n.id).map(e=>{
+      const other=nodeById(v, e.from===n.id?e.to:e.from);
+      return '<li>'+(other?other.label:'?')+(e.label?'（'+e.label+'）':'')+'</li>';
+    }).join('');
+    infoEl.innerHTML='<h4>'+n.label+'</h4>'+tagHtml+'<div>'+descBody(n.desc)+'</div>'+(conns?'<div style="margin-top:6px;color:var(--text)">连接：</div><ul class="conn">'+conns+'</ul>':'');
+  }
+  function applyLit(){
+    document.querySelectorAll('.nd-edge').forEach(e=>e.classList.remove('lit'));
+    if(flowIdx<0||!MODEL.flow) return;
+    const step=MODEL.flow.steps[flowIdx]; if(!step) return;
+    (step.edges||[]).forEach(id=>{ const e=diagram.querySelector('[data-edge="'+id+'"]'); if(e) e.classList.add('lit'); });
+  }
+  function gotoStep(i){
+    if(!MODEL.flow){ return; }
+    if(curView.id!==MODEL.flow.view){ curView=MODEL.views.find(v=>v.id===MODEL.flow.view)||curView; render(); }
+    const n=MODEL.flow.steps.length; flowIdx=((i%n)+n)%n;
+    applyLit(); capEl.innerHTML=MODEL.flow.steps[flowIdx].cap||'';
+  }
+  function stopFlow(){ if(timer){clearInterval(timer);timer=null;} document.getElementById('playBtn').textContent='▶ 播放产能争夺'; }
+  function play(){
+    if(!MODEL.flow) return;
+    if(timer){ stopFlow(); return; }
+    document.getElementById('playBtn').textContent='⏸ 暂停';
+    if(flowIdx<0) gotoStep(0);
+    const reduce=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+    timer=setInterval(()=>{ gotoStep(flowIdx+1); }, reduce?2600:2200);
+  }
+  document.getElementById('playBtn').onclick=play;
+  document.getElementById('stepBtn').onclick=()=>{ stopFlow(); gotoStep(flowIdx+1); };
+  document.getElementById('resetBtn').onclick=()=>{ stopFlow(); flowIdx=-1; applyLit(); capEl.innerHTML=''; };
+  document.addEventListener('keydown',e=>{
+    if(e.target&&/INPUT|TEXTAREA/.test(e.target.tagName)) return;
+    if(e.key===' '){ e.preventDefault(); play(); }
+    else if(e.key==='ArrowRight'){ stopFlow(); gotoStep(flowIdx+1); }
+    else if(e.key==='ArrowLeft'){ stopFlow(); gotoStep(flowIdx-1); }
+  });
+  renderEdgeKey(); render();
+})();
+</script>
+</body>
+</html>
