@@ -41,6 +41,25 @@
     "path": "papers/2026-06-17-training-vs-inference-demand-shift/index.html"
   },
   {
+    "slug": "2026-06-17-stock-fundamentals-explainer",
+    "title": "股票的底层逻辑：为什么涨跌 / 为什么值钱 / 成长股 vs 周期股（小白向）",
+    "authors": "—",
+    "team": "财经科普",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-24",
+    "published": "财经科普 2026",
+    "tldr": "从最底层讲股票=公司未来利润索取权,价值=未来现金流折现,短期价格由预期/资金、长期向盈利收敛;股价≈EPS×PE,利率影响估值;讲透成长股vs周期股判断,以及周期股PE反直觉(顶部低PE陷阱、底部高PE/失效是机会);面向小白,非投资建议",
+    "tags": [
+      "explainer",
+      "finance",
+      "stocks",
+      "education",
+      "valuation"
+    ],
+    "path": "papers/2026-06-17-stock-fundamentals-explainer/index.html"
+  },
+  {
     "slug": "2026-06-17-ppio",
     "title": "PPIO 派欧云：AI 推理算力云的竞争格局与早期度调研",
     "authors": "—",
