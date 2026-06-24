@@ -156,6 +156,7 @@
     <a href="#flow">一步训练的数据流</a>
     <a href="#compare">三类连接对比</a>
     <a href="#hw">🔩 硬件依赖与交互（深入）</a>
+    <a href="#stocks">📈 相关股票</a>
     <a href="#more">延伸阅读</a>
   </nav>
 
@@ -589,6 +590,66 @@
     </table>
     <div class="callout insight"><span class="label">一句话串起来</span>
       <strong>带宽喂不饱算力 → 想把内存贴更近 → 封装面积卡住 → 想把更多卡黏成一块 → 铜距离卡住 → 想把卡堆更密拉更近 → 供电散热卡住 → 想用光跨更远连更多 → 光功耗与交换 radix 卡住。</strong>每一步「想更大/更快」，都撞上一堵物理墙——AI 集群的工程，就是在这一连串墙之间找当代最优解。
+    </div>
+  </section>
+
+  <!-- ============ STOCKS ============ -->
+  <section id="stocks">
+    <h2><span class="n">📈</span>相关股票（按架构模块）</h2>
+    <p>把上面这张关系图的<strong>各模块</strong>，对照到产业里<strong>做这块的代表上市公司</strong>。一颗 GPU、一条 NVLink、一个光模块背后，往往是一串不同公司在供货。下表按本文「从封装内到集群」的模块顺序排列。来源标记：<span style="color:var(--ok); font-weight:700">🟢</span> 主流交易所代码、长期稳定；<span style="color:var(--warn); font-weight:700">🟡</span> 海外/A 股/台股/日股代码或归属，按时点会变、请自行核实。</p>
+    <table>
+      <thead><tr><th>模块（对应本文哪一环）</th><th>代表公司（ticker）</th><th>一句话定位</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>加速芯片</strong><br>GPU die / Tensor Core（A 节点）</td>
+          <td><span style="color:var(--ok)">🟢</span> NVIDIA $NVDA、AMD $AMD、Intel $INTC、Broadcom $AVGO、Marvell $MRVL</td>
+          <td>算力主力：GPU 与定制 AI 加速器（含 ASIC/XPU），是整张图的「算」之源。</td>
+        </tr>
+        <tr>
+          <td><strong>HBM / 内存</strong><br>HBM 高带宽内存（A 节点）</td>
+          <td><span style="color:var(--ok)">🟢</span> Micron $MU、SanDisk $SNDK；<span style="color:var(--warn)">🟡</span> SK Hynix(000660.KS)、Samsung(005930.KS)</td>
+          <td>贴身「弹药袋」：HBM 决定喂数据多快（破内存墙）；SK Hynix/三星/美光为主力，三星/SK 在韩股。</td>
+        </tr>
+        <tr>
+          <td><strong>代工 / 封装</strong><br>CoWoS / interposer（A 节点、🔩①）</td>
+          <td><span style="color:var(--ok)">🟢</span> TSMC $TSM；<span style="color:var(--warn)">🟡</span> Samsung(005930.KS)</td>
+          <td>把 GPU die 与 HBM 封在一块基板上：先进封装 <strong>CoWoS</strong> 由 TSMC 主导，是 AI 芯片的产能咽喉。</td>
+        </tr>
+        <tr>
+          <td><strong>设备</strong><br>制造这些芯片的机器（上游）</td>
+          <td><span style="color:var(--ok)">🟢</span> ASML $ASML、Applied Materials $AMAT、Lam $LRCX、KLA $KLAC；<span style="color:var(--warn)">🟡</span> Tokyo Electron(8035.T)</td>
+          <td>光刻/刻蚀/沉积/量测设备：没有它们，GPU/HBM 都造不出来；ASML 的 EUV 是硬卡点。</td>
+        </tr>
+        <tr>
+          <td><strong>网络 / 交换</strong><br>NIC / Leaf-Spine 交换机（C 节点、🔩⑤）</td>
+          <td><span style="color:var(--ok)">🟢</span> Broadcom $AVGO、Marvell $MRVL、Arista $ANET、Cisco $CSCO</td>
+          <td>交换 ASIC 与交换机：radix 决定集群能堆多大；NVIDIA 也自供 NIC/交换（ConnectX/Spectrum）。</td>
+        </tr>
+        <tr>
+          <td><strong>光模块 / CW 激光</strong><br>光模块 transceiver、E/O（C 节点、🔩④）</td>
+          <td><span style="color:var(--ok)">🟢</span> Coherent $COHR、Lumentum $LITE、AAOI $AAOI；<span style="color:var(--warn)">🟡</span> 中际旭创(300308.SZ)、新易盛(300502.SZ)、Sivers(SIVE.ST)</td>
+          <td>跨机柜「电变光」的耗材：光模块数量随集群规模暴涨；CW 激光/相干为 CPO 关键。</td>
+        </tr>
+        <tr>
+          <td><strong>衬底 / 外延</strong><br>光器件的 InP/外延片（光模块更上游）</td>
+          <td><span style="color:var(--ok)">🟢</span> AXT $AXTI；<span style="color:var(--warn)">🟡</span> IQE(IQE.L)、Tower $TSEM、Sumitomo Electric(5802.T)</td>
+          <td>光模块里激光器/探测器的「地基」：InP 衬底与外延片（epiwafer），单点高纯依赖。</td>
+        </tr>
+        <tr>
+          <td><strong>电力 / 散热</strong><br>800V DC 配电、液冷（D 节点、🔩⑦）</td>
+          <td><span style="color:var(--ok)">🟢</span> Vertiv $VRT、Eaton $ETN、Vistra $VST、Constellation $CEG</td>
+          <td>「包住一切」的物理约束：供配电/液冷（Vertiv/Eaton）与电源供给（Vistra/Constellation 含核电）。</td>
+        </tr>
+        <tr>
+          <td><strong>云 / neocloud</strong><br>把集群租出去的下游</td>
+          <td><span style="color:var(--ok)">🟢</span> CoreWeave $CRWV、Nebius $NBIS、IREN $IREN；hyperscaler MSFT / GOOGL / AMZN / META</td>
+          <td>买下整柜整集群对外出租算力：neocloud 专做 GPU 云，hyperscaler 自建自用为主。</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="font-size:13px; color:var(--muted)">说明：同一家公司可能横跨多环（如 NVIDIA 既做 GPU 也做 NVLink/NIC/交换，Broadcom/Marvell 既做交换也做光/定制 ASIC，TSMC 既是代工也是 CoWoS）；上表只取其最具代表性的位置示意。</p>
+    <div class="callout warn"><span class="label">免责声明</span>
+      本表仅标各公司在产业链/架构中的位置，<strong>非投资建议、非背书</strong>，ticker 与上市状态请自行核实。
     </div>
   </section>
 

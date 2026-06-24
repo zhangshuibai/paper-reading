@@ -109,6 +109,7 @@
     <a href="#compare">环节对比</a>
     <a href="#model">心智模型</a>
     <a href="#deps">依赖与相互制约</a>
+    <a href="#stocks">📈 相关股票</a>
     <a href="#more">延伸阅读 / 出处</a>
   </nav>
 
@@ -214,6 +215,54 @@
 
     <h3>卡点五：中国国产替代卡在哪</h3>
     <p>综合看，中国在<b>设计、成熟制程、传统封测</b>上已较强，但替代主要卡在三处：<b>EUV（拿不到 ASML）、高端 EDA（先进节点全流程）、高端设备/材料（高端量测、EUV 光刻胶等）</b>。结果是 SMIC 大致<b>困在 7nm 级附近</b>（向 5nm 级推进但成本/良率受限），先进 node 与海外差代际（<span class="src src-b">🟡</span>）。</p>
+  </section>
+
+  <!-- 相关股票 -->
+  <section id="stocks">
+    <h2><span class="n">⑥</span>相关股票（按供应链环节）</h2>
+    <p>把上面这条链的<strong>每个环节</strong>，对照到产业里<strong>做这块的代表上市公司</strong>，汇总成一张表。来源等级沿用全文：<span class="src src-a">🟢 一手</span> 主流交易所代码、长期稳定 · <span class="src src-b">🟡 二手</span> 海外/A 股/台股/日股代码或归属，按时点会变、请自行核实。<b>未上市</b>的直接标「未上市」。</p>
+    <table>
+      <thead><tr><th>环节</th><th>代表公司（ticker）</th><th>备注</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><b>ISA 指令集</b></td>
+          <td><span class="src src-a">🟢</span> Arm $ARM；Intel $INTC / AMD $AMD（x86）</td>
+          <td>Arm 走授权 IP；<b>x86</b> 由 Intel/AMD 私有授权封闭把持；<b>RISC-V</b> 为开放标准、无单一发行公司。</td>
+        </tr>
+        <tr>
+          <td><b>EDA 工具</b></td>
+          <td><span class="src src-a">🟢</span> Synopsys $SNPS、Cadence $CDNS；<span class="src src-b">🟡</span> 华大九天(301269.SZ)</td>
+          <td>Siemens EDA 属 <b>Siemens AG</b>（德股 SIE.DE / ADR $SIEGY），非独立上市；国产华大九天追赶成熟节点。</td>
+        </tr>
+        <tr>
+          <td><b>CPU 设计</b></td>
+          <td><span class="src src-a">🟢</span> Intel $INTC、AMD $AMD、Apple $AAPL、Qualcomm $QCOM；<span class="src src-b">🟡</span> 龙芯中科(688047.SH)</td>
+          <td>Ampere <b>未上市</b>；海思（华为旗下）<b>未上市</b>；兆芯、飞腾、申威多为<b>未上市</b>或国资体系，请自行核实。</td>
+        </tr>
+        <tr>
+          <td><b>晶圆代工 foundry</b></td>
+          <td><span class="src src-a">🟢</span> TSMC $TSM、GlobalFoundries $GFS、Intel Foundry($INTC)；<span class="src src-b">🟡</span> Samsung(005930.KS)、中芯国际 SMIC(0981.HK / 688981.SH)</td>
+          <td>先进制程高度集中于 TSMC；Intel Foundry 为 Intel 内部业务、随 $INTC；SMIC 港股+科创板双重上市。</td>
+        </tr>
+        <tr>
+          <td><b>半导体设备</b></td>
+          <td><span class="src src-a">🟢</span> ASML $ASML、Applied Materials $AMAT、Lam $LRCX、KLA $KLAC；<span class="src src-b">🟡</span> Tokyo Electron(8035.T)、中微公司(688012.SH)、北方华创(002371.SZ)</td>
+          <td>EUV=ASML 独家；刻蚀/沉积/量测各有寡头；国产中微/北方华创在刻蚀/沉积等追赶。</td>
+        </tr>
+        <tr>
+          <td><b>材料</b></td>
+          <td><span class="src src-b">🟡</span> 信越 Shin-Etsu(4063.T)、SUMCO(3436.T)、环球晶 GlobalWafers(6488.TWO)、东京应化 TOK(4186.T)</td>
+          <td>硅片与光刻胶<b>日本主导</b>；JSR 已被日本产业革新机构(JIC)私有化退市、现<b>未公开上市</b>；高端 EUV 胶仍卡。</td>
+        </tr>
+        <tr>
+          <td><b>封测 OSAT</b></td>
+          <td><span class="src src-a">🟢</span> Amkor $AMKR；<span class="src src-b">🟡</span> 日月光 ASE(3711.TW / ADR $ASX)、长电科技(600584.SH)、通富微电(002156.SZ)、华天科技(002185.SZ)</td>
+          <td>传统封测国产化高（长电/通富/华天）；<b>先进封装 CoWoS 由 TSMC 主导</b>，是 AI 时代新咽喉。</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="legend" style="margin-top:10px">说明：同一家公司可能横跨多环（如 Intel 既设计 CPU 又有 Intel Foundry、TSMC 既代工又主导 CoWoS、Synopsys/Cadence 既做 EDA 又卖接口 IP）；上表只取其最具代表性的位置。代码/归属/上市状态会随时点变动。</p>
+    <div class="callout warn"><span class="label">免责声明</span>本表仅标各公司在产业链/架构中的位置，<b>非投资建议、非背书</b>，ticker 与上市状态请自行核实。</div>
   </section>
 
   <!-- 延伸阅读 / 出处 -->
