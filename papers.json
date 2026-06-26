@@ -20,6 +20,26 @@
     "path": "papers/2026-06-17-hongshan-sequoia-china-investments/index.html"
   },
   {
+    "slug": "2026-06-17-game-engines-mcp-ai-agents",
+    "title": "游戏引擎 × MCP/CLI × AI 做游戏 agent 调研（「游戏生成的 Cursor」）",
+    "authors": "—",
+    "team": "技术调研",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-26",
+    "published": "技术调研 2026",
+    "tldr": "盘点常用游戏/渲染引擎(UE5/Unity/Godot/Cocos/Three.js等)的CLI与MCP接口现状(多为社区项目如unity-mcp/unreal-mcp/blender-mcp),以及AI做游戏两条路线(引擎内Cursor式助手Ludus/Unity Muse + text-to-game Rosebud/Astrocade + 端到端generative game Genie/Oasis),给定位图与whitespace;非投资建议",
+    "tags": [
+      "game-engine",
+      "mcp",
+      "ai-agent",
+      "gamedev",
+      "explainer",
+      "generative-game"
+    ],
+    "path": "papers/2026-06-17-game-engines-mcp-ai-agents/index.html"
+  },
+  {
     "slug": "2026-06-17-cpu-gpu-supply-chain-overlap",
     "title": "CPU 与 GPU 供应链的重合关系：哪些共享 / 哪些专属 / 为什么互相挤产能（关系图）",
     "authors": "—",

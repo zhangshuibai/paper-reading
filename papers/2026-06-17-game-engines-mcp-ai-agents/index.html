@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>游戏引擎 × MCP/CLI × AI 做游戏 agent 调研（「游戏生成的 Cursor」）</title>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --bad:#ff6b81; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --bad:#d23651; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.7; font-size:16px;}
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:1000px; margin:0 auto; padding:18px 22px 90px}
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:24px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)} .meta-grid dd{margin:0}
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap; line-height:2}
+  nav.toc a:hover{color:var(--accent)}
+  section{margin:34px 0}
+  h2{font-size:20px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:16px; margin:20px 0 6px}
+  p{margin:11px 0} ul,ol{padding-left:22px} li{margin:5px 0}
+  a{color:var(--accent)} strong{color:var(--text)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.88em}
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:12px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:8px 9px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-word}
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+  .seg{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:16px 0; background:var(--panel)}
+  .seg h3{margin-top:4px}
+  .op{font-weight:700;white-space:nowrap}.op-g{color:var(--ok)}.op-y{color:var(--warn)}.op-r{color:var(--bad)}
+  .src{font-size:10.5px;padding:0 5px;border-radius:999px}
+  .src-a{background:rgba(67,197,158,.18);color:var(--ok)}.src-b{background:rgba(255,180,84,.18);color:var(--warn)}.src-c{background:rgba(255,107,129,.18);color:var(--bad)}
+  .figwrap{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:14px; margin:18px 0; box-shadow:var(--shadow)}
+  .figcap{color:var(--muted); font-size:12.5px; margin-top:8px; text-align:center}
+  figure{margin:0}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">游戏引擎</span><span class="chip">MCP / CLI</span>
+      <span class="chip">AI 做游戏 agent</span><span class="chip">generative game</span>
+      <span class="chip">技术调研</span>
+    </div>
+    <h1>游戏引擎 × MCP/CLI × AI 做游戏 agent 调研（「游戏生成的 Cursor」）</h1>
+    <p class="orig-title">盘点常用游戏/渲染引擎的命令行 &amp; MCP 接口现状，以及「AI 帮你做游戏」的三条技术路线——引擎内 Cursor 式助手、零代码 text-to-game、端到端 generative game / world model</p>
+    <dl class="meta-grid">
+      <dt>缘起</dt><dd>「会不会出现一个『游戏生成的 Cursor』」这个问题的系统调研</dd>
+      <dt>整理</dt><dd>对话调研 + WebSearch/WebFetch 多源核实；MCP server / 工具真实性按来源分级（<span class="src src-a">🟢一手仓库/官方</span>/<span class="src src-b">🟡二手</span>/<span class="src src-c">🔴自述/未证实</span>）</dd>
+      <dt>日期</dt><dd>2026-06-26</dd>
+      <dt>免责</dt><dd>下文列举公司 / 产品仅为技术现状梳理，<strong>非投资建议、非背书</strong>；份额 / 估值等数字均「约 / 视年份」</dd>
+    </dl>
+  </header>
+
+  <div class="tldr">
+    <b>一句话</b> — 「AI 做游戏」实际上是<strong>三件不同的事</strong>：(a) <strong>AI agent 驱动现有引擎</strong>（让 Claude/Cursor 经 <strong>MCP</strong> 去 Unity/Unreal/Godot/Blender 里建场景、写脚本、调参）；(b) <strong>零代码 text-to-game</strong>（Rosebud / Astrocade / HYTOPIA 等，一句话生成可玩小游戏）；(c) <strong>端到端 generative game / world model</strong>（DeepMind Genie 3、Decart Oasis、Microsoft Muse，神经网络<u>直接生成可玩画面</u>，<strong>根本不经过传统引擎</strong>）。现状：路线 (a) 的 MCP server <strong>几乎全是社区项目</strong>（unity-mcp 已被 Coplay 收购、unreal-mcp、blender-mcp 最成熟），官方仅 Unity 把 AI 收进编辑器（<strong>Unity AI，已替代被弃用的 Muse</strong>）；路线 (b) 能做 demo / 小游戏但难做「正经游戏」；路线 (c) 仍偏 research / 早期产品。<strong>真正成熟的「游戏生成的 Cursor」还不存在</strong>——最大 whitespace 在「把 MCP 接进 UE/Unity，做成会自己搭场景、调参、写玩法、还能自测的成熟 agent」，以及垂直品类的 text-to-game。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#bg">① 领域背景速补</a>
+    <a href="#engines">② 引擎盘点（表格）</a>
+    <a href="#mcp">③ MCP / CLI 接口现状</a>
+    <a href="#landscape">④ AI 做游戏 landscape + 定位图</a>
+    <a href="#verdict">⑤ 现状判断 + whitespace</a>
+    <a href="#more">延伸阅读</a>
+  </nav>
+
+  <!-- ① 背景 -->
+  <section id="bg">
+    <h2><span class="n">①</span>领域背景速补（假设你只懂 LLM、不懂游戏引擎）</h2>
+    <p>为了让只有 LLM 背景的读者跟上，先把几个最容易混的概念拆清楚。</p>
+
+    <h3>游戏引擎 vs 纯渲染引擎</h3>
+    <p><strong>渲染引擎（renderer）</strong>只负责「把 3D 场景算成一帧画面」——光照、阴影、材质、光栅化 / 光线追踪。它是「画图的」。<strong>游戏引擎（game engine）</strong>是个大全套，渲染只是其中一块，还包含：<strong>物理引擎</strong>（碰撞、重力、布料）、<strong>脚本 / 逻辑系统</strong>（C#、GDScript、蓝图，决定「按下跳跃键角色怎么动」）、<strong>资产管线</strong>（导入模型、贴图、动画、音频）、<strong>编辑器</strong>（拖拽搭关卡的 GUI）、以及打包发布到各平台的工具链。类比 LLM 世界：渲染引擎像「单独一个 attention kernel」，游戏引擎像「整个 PyTorch + 训练框架 + 数据管线 + 部署」。本文主角是<strong>游戏引擎</strong>；Blender 是 3D 建模 / 资产工具（不是游戏引擎），但它是 AI 做游戏「资产侧」最重要的一环，所以一并盘点。</p>
+
+    <h3>MCP（Model Context Protocol）：让 agent 调工具的「USB 口」</h3>
+    <p><strong>MCP</strong> 是 Anthropic 2024 年底提出的开放协议，标准化了「LLM / agent 如何调用外部工具和数据」。把它想成 AI 的 USB-C：一边是 <strong>MCP client</strong>（Claude Desktop、Claude Code、Cursor、VS Code 等会「说 MCP」的 AI），另一边是 <strong>MCP server</strong>（一段程序，把某个软件的能力包装成一组「工具」暴露出来）。<strong>「Unity MCP server」= 一段把 Unity 编辑器的操作（建物体、改材质、写脚本、跑测试）包成 MCP 工具的程序</strong>，这样任意 MCP client 都能用自然语言驱动 Unity。本文路线 (a) 的核心就是「各引擎有没有 MCP server、是官方还是社区、能干啥」。</p>
+
+    <h3>CLI / headless：没有界面也能跑</h3>
+    <p><strong>CLI（命令行接口）</strong>指能用命令行参数驱动引擎而非点 GUI；<strong>headless（无头）</strong>指不开窗口、不初始化图形设备地运行（如 <code>-nographics</code>、<code>--headless</code>），常用于服务器、CI 自动构建、批量导出。<strong>对 AI agent 很关键</strong>：agent 不会用鼠标点 GUI，它需要能通过命令行 / API 程序化地驱动引擎。一个引擎的 CLI / 脚本 API 越完整，越容易被 agent 接管——MCP server 往往就是封装在这些底层能力之上的。</p>
+
+    <h3>「AI 做游戏」的两条大路线，务必分清</h3>
+    <ul>
+      <li><strong>(a) AI agent 驱动现有引擎</strong>：AI 生成<u>代码 / 资产 / 关卡配置</u>，最终仍由传统引擎（Unity/Unreal/Godot）渲染和运行。游戏的「确定性、可调试、可发布」由引擎保证，AI 只是「会写代码 / 会搭场景的助手」。这条路线又分两支：引擎内的 <strong>Copilot/Cursor 式助手</strong>（Ludus AI、Unity AI），和把外部 AI 经 <strong>MCP</strong> 接进引擎。</li>
+      <li><strong>(b) generative game / world model</strong>：一个<u>神经网络直接输出可玩的画面帧</u>，玩家的操作（键鼠）作为输入喂进去，模型预测下一帧——<strong>没有传统意义上的代码、关卡文件、物理引擎</strong>，整个「游戏」就是模型权重。代表：DeepMind <strong>Genie</strong>、Decart <strong>Oasis</strong>、Microsoft <strong>Muse/WHAM</strong>、World Labs。优点是「想象即可玩」；缺点是当前只能维持几十秒到几分钟一致性、分辨率有限、难精确控制、几乎无法做成「可发布、可联机、规则确定」的正经游戏。</li>
+    </ul>
+    <div class="callout note"><span class="label">一句话区分</span>路线 (a) 是「AI 当程序员 / 美术，引擎照常跑游戏」；路线 (b) 是「模型就是游戏，引擎被整个跳过」。媒体常把两者混为「AI 生成游戏」，但它们的成熟度、可控性、商业形态完全不同。</div>
+  </section>
+
+  <!-- ② 引擎盘点 -->
+  <section id="engines">
+    <h2><span class="n">②</span>常用游戏 / 渲染引擎盘点</h2>
+    <p>下表覆盖主流引擎，逐行标注其 CLI/headless 能力、脚本自动化 API、以及<strong>是否有 MCP server</strong>（社区 vs 官方）。MCP 列详情见第 ③ 节带链接核实。</p>
+    <table>
+      <thead><tr>
+        <th>引擎</th><th>类型</th><th>开源/闭源</th><th>主语言/脚本</th><th>渲染特点</th><th>CLI / headless</th><th>脚本 / 自动化 API</th><th>有无 MCP server</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Unreal Engine 5</strong></td><td>游戏引擎</td>
+          <td>源码可见 / 闭源商业（营收分成）</td><td>C++ / Blueprint 蓝图 / Python（编辑器）</td>
+          <td>Nanite 虚拟几何 + Lumen 全局光照，业界顶级</td>
+          <td>✅ UnrealBuildTool 命令行编译、<code>-game</code>/<code>-server</code> 无头运行</td>
+          <td>编辑器 Python API + <strong>Remote Control API</strong>（HTTP/WebSocket 远程控制）</td>
+          <td>🟡 社区（unreal-mcp 等多个）</td>
+        </tr>
+        <tr>
+          <td><strong>Unity</strong></td><td>游戏引擎</td>
+          <td>闭源商业（订阅/Runtime 费）</td><td>C#</td>
+          <td>URP/HDRP 可伸缩管线，跨平台覆盖最广</td>
+          <td>✅ <code>-batchmode -nographics</code> 无头 + CLI 构建</td>
+          <td>Editor 脚本 API（C#）、CI 友好；官方 <strong>Unity AI</strong> 进编辑器</td>
+          <td>🟡 社区（CoplayDev/unity-mcp，原 justinpbarnett）</td>
+        </tr>
+        <tr>
+          <td><strong>Godot</strong></td><td>游戏引擎</td>
+          <td>✅ 开源（MIT）</td><td>GDScript / C# / C++</td>
+          <td>2D 极强，3D 中端（Vulkan/Forward+）</td>
+          <td>✅ <code>--headless</code>、<code>--export-release</code> 命令行导出</td>
+          <td>编辑器可脚本化；引擎本身可作库嵌入</td>
+          <td>🟡 社区（多个 godot-mcp 实现）</td>
+        </tr>
+        <tr>
+          <td><strong>CryEngine</strong></td><td>游戏引擎</td>
+          <td>源码可见 / 闭源商业</td><td>C++ / C# / Lua / Schematyc</td>
+          <td>历史上以画质著称（CryEngine 系）</td>
+          <td>部分命令行 / 专用服务器</td>
+          <td>C++/C#/Lua API</td>
+          <td>🔴 未找到知名 MCP server</td>
+        </tr>
+        <tr>
+          <td><strong>Cocos（Cocos Creator）</strong></td><td>游戏引擎</td>
+          <td>✅ 开源（引擎）</td><td>TypeScript / JavaScript</td>
+          <td>2D/3D 轻量；<strong>微信小游戏事实标准</strong></td>
+          <td>✅ 命令行构建 / 自动化发布</td>
+          <td>编辑器扩展 API（JS/TS）</td>
+          <td>🔴 未找到知名官方/社区 MCP server</td>
+        </tr>
+        <tr>
+          <td><strong>Construct 3</strong></td><td>游戏引擎</td>
+          <td>闭源商业（订阅）</td><td>事件表（可选 JS）</td>
+          <td>2D，浏览器内可视化开发</td>
+          <td>有限</td><td>JS SDK / 插件</td>
+          <td>🔴 未找到</td>
+        </tr>
+        <tr>
+          <td><strong>GameMaker</strong></td><td>游戏引擎</td>
+          <td>闭源商业（付费）</td><td>GML（自有语言）</td>
+          <td>2D 老牌</td>
+          <td>有限</td><td>GML 脚本</td>
+          <td>🔴 未找到知名 MCP server</td>
+        </tr>
+        <tr>
+          <td><strong>Defold</strong></td><td>游戏引擎</td>
+          <td>✅ 开源（源码可见）</td><td>Lua</td>
+          <td>2D 为主，轻量、包体小</td>
+          <td>✅ 命令行构建（Bob）</td><td>Lua + 编辑器脚本</td>
+          <td>🔴 未找到知名 MCP server</td>
+        </tr>
+        <tr>
+          <td><strong>Bevy</strong></td><td>游戏引擎</td>
+          <td>✅ 开源（MIT/Apache）</td><td>Rust（ECS）</td>
+          <td>数据驱动 ECS，年轻、缺成熟编辑器</td>
+          <td>✅ 纯代码即可（Rust 工具链）</td>
+          <td>全代码（无强 GUI 编辑器，对 agent 友好）</td>
+          <td>🔴 未找到知名 MCP server</td>
+        </tr>
+        <tr>
+          <td><strong>O3DE（Open 3D Engine）</strong></td><td>游戏引擎</td>
+          <td>✅ 开源（Apache 2.0，Linux 基金会）</td><td>C++ / Lua / Python</td>
+          <td>AAA 取向，模块化（Atom 渲染器）</td>
+          <td>✅ 自带 CLI 工具 + GUI</td>
+          <td>C++/Lua/Python 脚本</td>
+          <td>🟡 社区（o3de-mcp）</td>
+        </tr>
+        <tr>
+          <td><strong>Three.js / Babylon.js / PlayCanvas</strong></td><td>Web 渲染/轻量引擎</td>
+          <td>✅ 开源（PlayCanvas 引擎开源，编辑器商业）</td><td>JavaScript / TypeScript</td>
+          <td>WebGL/WebGPU，浏览器内 3D</td>
+          <td>纯代码 / Node 工具链</td>
+          <td>全 JS API（天然可被 codegen agent 驱动）</td>
+          <td>🔴 多为通用代码 agent，非专用 MCP</td>
+        </tr>
+        <tr>
+          <td><strong>Blender</strong>（资产侧，非游戏引擎）</td><td>3D 建模 / 渲染</td>
+          <td>✅ 开源（GPL）</td><td>Python（bpy）</td>
+          <td>Cycles/EEVEE；建模 / 雕刻 / 动画全能</td>
+          <td>✅ <code>--background</code> 无头 + Python 脚本</td>
+          <td>完整 Python API（bpy），自动化极强</td>
+          <td>🟢 社区旗舰（ahujasid/blender-mcp，最知名）</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="figcap">说明：「开源/闭源」中 UE 为「源码可见但商业授权」，并非自由开源。MCP 列的 🟢/🟡/🔴 指「成熟度 / 是否官方」，详见下一节。</p>
+  </section>
+
+  <!-- ③ MCP / CLI -->
+  <section id="mcp">
+    <h2><span class="n">③</span>MCP / CLI 接口现状（逐引擎核实带链接）</h2>
+    <p>这是路线 (a) 的「管道层」。一个关键结论先放这：<strong>截至目前，几乎所有引擎 MCP server 都是社区项目，没有一家大引擎厂商官方发布过自家 MCP server</strong>。官方动作集中在「把 AI 收进自家编辑器」（Unity AI），而非「开放 MCP 让外部 agent 接管」。下面逐个核实。</p>
+
+    <h3>Blender — <span class="op op-g">🟢 社区旗舰，最成熟</span></h3>
+    <div class="seg">
+      <p><strong><a href="https://github.com/ahujasid/blender-mcp" target="_blank" rel="noopener">ahujasid/blender-mcp</a></strong>（Siddharth Ahuja，开源）—— 当前最知名、最常被引用的引擎类 MCP server。架构是：一个 Blender 插件（<code>addon.py</code>）在 Blender 内开 socket 服务，加一个 MCP server（<code>server.py</code>）说 MCP、连到插件。能力：创建/修改/删除 3D 物体、改材质和颜色、查询场景信息、<strong>在 Blender 内执行任意 Python 代码</strong>。MCP client 支持 Claude Desktop、Cursor、VS Code 等。<span class="src src-a">🟢 一手仓库</span></p>
+    </div>
+
+    <h3>Unity — <span class="op op-y">🟡 社区成熟（已被收购），官方走 Unity AI</span></h3>
+    <div class="seg">
+      <p><strong><a href="https://github.com/CoplayDev/unity-mcp" target="_blank" rel="noopener">CoplayDev/unity-mcp</a></strong>（MIT 开源）—— 原由 <a href="https://github.com/justinpbarnett" target="_blank" rel="noopener">justinpbarnett</a> 开发，后<strong>被 Coplay 收购</strong>并继续维护。在 Unity 编辑器和 AI 助手间架桥，暴露 40+ 工具：<code>manage_scene</code>、<code>manage_script</code>、<code>manage_gameobject</code>、<code>manage_material</code>、<code>run_tests</code> 等，外加 25+ 只读资源做状态自省；自动配置 Claude Desktop / Claude Code / Cursor / VS Code / Windsurf / Cline / Codex / Gemini CLI 等 client。<span class="src src-a">🟢 一手仓库</span></p>
+      <p><strong>官方侧：Unity AI</strong> —— 注意一个重要变化：原 <a href="https://muse.unity.com/" target="_blank" rel="noopener">Unity Muse</a>（$30/月的 AI 助手）<strong>已被弃用，于 2025-10-01 退役</strong>，由 <strong>Unity AI</strong>（随 Unity 6.2 推出）替代。Unity AI 改用第三方前沿模型（不再只用 Unity 自研），内嵌编辑器、带完整工程上下文，按 Unity Points 计费而非单独订阅。<span class="src src-b">🟡 官方博客/媒体</span> 这是「引擎内 Copilot」路线，<u>不是 MCP</u>。</p>
+    </div>
+
+    <h3>Unreal Engine — <span class="op op-y">🟡 多个社区实验，标注 EXPERIMENTAL</span></h3>
+    <div class="seg">
+      <p><strong><a href="https://github.com/chongdashu/unreal-mcp" target="_blank" rel="noopener">chongdashu/unreal-mcp</a></strong>（社区，约 1.9k★）—— 让 Cursor / Windsurf / Claude Desktop 用自然语言控制 UE。工具含：创建/删除 actor、设置 transform、查询 actor 属性、创建带组件的 Blueprint 类、设置组件属性与物理。配套 UE 5.5 空白起始工程已带 <code>UnrealMCP.uplugin</code>。<strong>仓库自我标注为 EXPERIMENTAL</strong>，API 仍会大改。<span class="src src-a">🟢 一手仓库</span></p>
+      <p>另有 <a href="https://github.com/ChiR24/Unreal_mcp" target="_blank" rel="noopener">ChiR24/Unreal_mcp</a>（TypeScript + C++ 原生 Automation Bridge 插件）、kvick-games/UnrealMCP 等多个并行实现。<span class="src src-b">🟡 二手聚合页</span> <strong>底层依赖：</strong>UE 的 <strong>Remote Control API</strong>（HTTP/WebSocket 远程控制）+ 编辑器 Python，这是 agent 能接进 UE 的根基。</p>
+    </div>
+
+    <h3>Godot — <span class="op op-y">🟡 社区项目最多（碎片化）</span></h3>
+    <div class="seg">
+      <p>Godot 因开源 + headless CLI 友好，社区 MCP 实现<strong>数量最多但很碎片化</strong>，质量参差。已核实存在的包括：
+      <a href="https://github.com/Coding-Solo/godot-mcp" target="_blank" rel="noopener">Coding-Solo/godot-mcp</a>（启动编辑器、运行工程、抓调试输出）、
+      <a href="https://github.com/tugcantopaloglu/godot-mcp" target="_blank" rel="noopener">tugcantopaloglu/godot-mcp</a>（自述 149 工具，全引擎控制）、
+      <a href="https://github.com/IvanMurzak/Godot-MCP" target="_blank" rel="noopener">IvanMurzak/Godot-MCP</a>（C#，Apache-2.0，连云端 ai-game.dev）、
+      <a href="https://github.com/mkdevkit/godot-mcp" target="_blank" rel="noopener">mkdevkit/godot-mcp</a>、
+      <a href="https://github.com/bradypp/godot-mcp" target="_blank" rel="noopener">bradypp/godot-mcp</a> 等。<span class="src src-a">🟢 一手仓库</span> 没有 Godot 官方 MCP。底层 CLI：<code>godot --headless --export-release …</code> 支持 CI 导出。</p>
+    </div>
+
+    <h3>O3DE — <span class="op op-y">🟡 单个社区实现</span></h3>
+    <div class="seg">
+      <p><a href="https://github.com/nickschuetz/o3de-mcp" target="_blank" rel="noopener">nickschuetz/o3de-mcp</a> —— 自动化 Open 3D Engine 的 MCP server，做编辑器控制、工程与构建管理。O3DE 本身自带 CLI 工具，开源（Apache 2.0）对 agent 友好。<span class="src src-a">🟢 一手仓库</span></p>
+    </div>
+
+    <h3>未找到知名 MCP server 的引擎 <span class="op op-r">🔴</span></h3>
+    <div class="seg">
+      <p>CryEngine、Cocos、Construct、GameMaker、Defold、Bevy 截至核实<strong>未找到广为人知的官方或社区 MCP server</strong>（不排除存在零散个人项目）。其中 Cocos / Bevy / Web 引擎（Three.js 等）因 API 全代码化，更多是被<strong>通用代码 agent</strong>（Cursor/Claude 直接写 JS/Rust）驱动，而非专用 MCP。<span class="src src-b">🟡 检索为负，标「未找到」而非「不存在」</span></p>
+    </div>
+
+    <div class="callout insight"><span class="label">这一层的核心判断</span>MCP/CLI 管道<strong>已经能用，但全靠社区、且大多 EXPERIMENTAL</strong>：blender-mcp 最稳，unity-mcp 因被收购有商业维护，unreal-mcp/godot-mcp 仍在快速变动。瓶颈不在「能不能连上引擎」，而在「连上之后 agent 能不能<u>可靠、可重复、可自测</u>地完成一个完整玩法」——这一步目前都还脆弱。</div>
+  </section>
+
+  <!-- ④ landscape -->
+  <section id="landscape">
+    <h2><span class="n">④</span>「AI 做游戏的 agent / 游戏生成的 Cursor」landscape</h2>
+    <p>把玩家按前述三条路线归类。每个标 research / 产品、官方 / 社区，并按来源分级。</p>
+
+    <h3>路线 (a-1)：引擎内 AI 助手 / Cursor 式（agent 驱动现有引擎）</h3>
+    <ul>
+      <li><strong><a href="https://ludusengine.com/" target="_blank" rel="noopener">Ludus AI</a></strong>（Unreal）—— 把 AI 嵌进 UE5 的插件：LudusChat（自然语言生成 3D 场景/资产）、LudusBlueprint（蓝图 copilot）、LudusCode（C++ 助手）、LudusDocs。支持 UE 5.4–5.7；蓝图 Agent 生成 2025-07 进 Open Beta。<span class="src src-b">🟡 官网/媒体</span> 这是目前最接近「Unreal 里的 Cursor」的产品之一。</li>
+      <li><strong><a href="https://unity.com/features/ai" target="_blank" rel="noopener">Unity AI</a></strong>（官方，Unity 6.2+）—— 内嵌编辑器的 Assistant + Generators，用第三方前沿模型，带工程上下文。替代已退役的 Muse。<span class="src src-b">🟡 官方</span></li>
+      <li><strong>把 Cursor / Claude 经 MCP 接进引擎</strong> —— 即第 ③ 节那些 MCP server。本质上是「用通用 coding agent + 引擎 MCP」拼出一个引擎内助手，灵活但需自己搭、稳定性看社区项目。<span class="src src-a">🟢 一手仓库</span></li>
+    </ul>
+
+    <h3>路线 (a-2)：text-to-game 零代码平台（AI 生成代码/资产，引擎仍跑游戏）</h3>
+    <ul>
+      <li><strong><a href="https://rosebud.ai/" target="_blank" rel="noopener">Rosebud AI</a></strong> —— 无代码「vibe coding」做 3D 游戏 / 交互世界，描述场景规则即生成可玩逻辑，带模板、资产、实时预览、即时部署、内置变现与创作者社区。<span class="src src-b">🟡 官网</span></li>
+      <li><strong><a href="https://theresanaiforthat.com/ai/astrocade/" target="_blank" rel="noopener">Astrocade</a></strong> —— 文字 prompt 生成<strong>社交化小游戏</strong>（含美术、动画、特效、音乐、玩法），偏「快做、好玩但浅」，不做沉浸 3D / 长线世界。<span class="src src-b">🟡 二手</span></li>
+      <li><strong><a href="https://blog.hytopia.com/2025/01/20/ai-agents-text-to-game-transform-voxel-development/" target="_blank" rel="noopener">HYTOPIA</a></strong> —— 浏览器端 voxel 引擎 + TS/JS SDK，AI 按 prompt 生成代码、地图、怪物、UI、计分，可直接发布可玩；还出了 <strong>MCP & AI API 插件直连 Cursor</strong>。瞄准 UGC 游戏赛道。<span class="src src-b">🟡 官方博客</span></li>
+      <li><strong><a href="https://gamesbeat.com/series-ai-unveils-rho-engine-to-speed-ai-native-game-development/" target="_blank" rel="noopener">Series AI（Rho Engine）</a></strong> —— 「AI-native 多模态全栈游戏创作平台」，一套 copilot + AI 技术，可与 Unity/Unreal 协作（引擎无关的内容生成器，像「meta engine」）。据报道已<strong>悄悄融资约 $28M</strong>（Netflix、Dell、a16z 等，2024）。<span class="src src-b">🟡 媒体 TechCrunch/GamesBeat</span></li>
+      <li><strong><a href="https://www.buildbox.com/buildbox-4-is-now-available-make-games-with-ai/" target="_blank" rel="noopener">Buildbox 4</a></strong> —— 老牌无代码引擎，4.0 主打「用 AI 做游戏」。<span class="src src-b">🟡 官网</span></li>
+      <li><strong><a href="https://www.layer.ai/" target="_blank" rel="noopener">Layer</a></strong> —— 严格说是<strong>游戏美术资产</strong>侧（图像/视频/3D/音频，149+ 模型，可训练自有画风），不是 text-to-game，但属同一工具链。<span class="src src-b">🟡 官网</span></li>
+    </ul>
+
+    <h3>路线 (b)：generative game / world model（模型即游戏，跳过传统引擎）</h3>
+    <ul>
+      <li><strong><a href="https://deepmind.google/models/genie/" target="_blank" rel="noopener">DeepMind Genie 3</a></strong> —— 文本/图像/草图生成可<strong>实时交互</strong>的虚拟世界，24fps、720p、一致性可维持数分钟（Genie 2 仅约 10 秒）。2025-08 公布；<strong>2026-01-29 以 Project Genie 形式向 Google AI Ultra 订阅者（美国）开放</strong>。<span class="src src-b">🟡 官方/媒体</span> 介于 research 与早期产品之间。</li>
+      <li><strong><a href="https://en.wikipedia.org/wiki/Genie_(world_model)" target="_blank" rel="noopener">Decart Oasis</a></strong> —— 把 world model 直接做成游戏（基于 Minecraft 画面训练），实时开放环境 + 涌现物理 + 流式扩散，自述「数百万用户、3 天破百万」。<span class="src src-c">🔴 用户数为自述</span> 偏 demo / 体验产品。</li>
+      <li><strong><a href="https://www.microsoft.com/en-us/research/blog/introducing-muse-our-first-generative-ai-model-designed-for-gameplay-ideation/" target="_blank" rel="noopener">Microsoft Muse（WHAM）</a></strong> —— 微软研究院 + Ninja Theory 的 World and Human Action Model，能生成游戏画面 / 手柄动作，一致性约 2 分钟；用《Bleeding Edge》训练（15M–1.6B 参数），最大模型 2025-02 发表于 Nature，<strong>开源权重 + 样本数据</strong>，WHAMM 扩展迁移到 Quake II。定位「<strong>gameplay ideation</strong> 研究」，不是发售游戏。<span class="src src-b">🟡 官方研究/Nature</span></li>
+      <li><strong><a href="https://www.worldlabs.ai/" target="_blank" rel="noopener">World Labs</a></strong> —— 「大世界模型（LWM）」，从单张图生成可探索 3D 环境（几何 + 深度，可导航），偏「prompt-to-world」。已与 Rosebud 有合作案例。<span class="src src-b">🟡 官网</span> research / 早期产品。</li>
+    </ul>
+
+    <!-- SVG 定位图 -->
+    <div class="figwrap">
+      <figure>
+      <svg viewBox="0 0 760 560" width="100%" role="img" aria-label="AI 做游戏 landscape 定位图：横轴改造现有引擎到端到端生成，纵轴面向开发者到面向零基础玩家">
+        <defs>
+          <marker id="ah" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+            <path d="M0,0 L8,4 L0,8 Z" fill="var(--muted)"/>
+          </marker>
+        </defs>
+        <!-- 背景象限 -->
+        <rect x="70" y="40" width="640" height="440" fill="none" stroke="var(--line)" stroke-width="1"/>
+        <line x1="390" y1="40" x2="390" y2="480" stroke="var(--line)" stroke-dasharray="5 5"/>
+        <line x1="70" y1="260" x2="710" y2="260" stroke="var(--line)" stroke-dasharray="5 5"/>
+        <!-- 轴箭头 -->
+        <line x1="70" y1="500" x2="710" y2="500" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#ah)"/>
+        <line x1="50" y1="480" x2="50" y2="40" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#ah)"/>
+        <!-- 轴标签 -->
+        <text x="80" y="518" font-size="12.5" fill="var(--muted)">改造现有引擎（agent 驱动）</text>
+        <text x="565" y="518" font-size="12.5" fill="var(--muted)">端到端神经生成</text>
+        <text x="60" y="58" font-size="12.5" fill="var(--muted)">▲ 面向开发者 / 专业</text>
+        <text x="60" y="472" font-size="12.5" fill="var(--muted)">▼ 面向零基础玩家</text>
+
+        <!-- 象限淡标题 -->
+        <text x="120" y="80" font-size="11" fill="var(--accent)" opacity="0.7">引擎内 Cursor / MCP</text>
+        <text x="470" y="80" font-size="11" fill="var(--accent)" opacity="0.7">研究级 world model</text>
+        <text x="120" y="455" font-size="11" fill="var(--accent)" opacity="0.7">零代码 text-to-game</text>
+        <text x="470" y="455" font-size="11" fill="var(--accent)" opacity="0.7">玩家级 generative game</text>
+
+        <!-- 玩家点：左上 开发者 × 改造引擎 -->
+        <g font-size="11.5" fill="var(--text)">
+          <circle cx="150" cy="130" r="5" fill="var(--accent)"/><text x="160" y="134">Ludus AI（UE）</text>
+          <circle cx="210" cy="170" r="5" fill="var(--accent)"/><text x="220" y="174">Unity AI（官方）</text>
+          <circle cx="140" cy="210" r="5" fill="var(--accent2)"/><text x="150" y="214">unity-mcp / unreal-mcp</text>
+          <circle cx="180" cy="100" r="5" fill="var(--accent2)"/><text x="190" y="104">blender-mcp（资产）</text>
+          <circle cx="300" cy="200" r="5" fill="var(--accent)"/><text x="280" y="220">Series AI · Rho</text>
+        </g>
+        <!-- 左下 玩家 × 改造引擎（text-to-game） -->
+        <g font-size="11.5" fill="var(--text)">
+          <circle cx="150" cy="320" r="5" fill="var(--ok)"/><text x="160" y="324">Rosebud AI</text>
+          <circle cx="160" cy="370" r="5" fill="var(--ok)"/><text x="170" y="374">HYTOPIA</text>
+          <circle cx="250" cy="410" r="5" fill="var(--ok)"/><text x="200" y="430">Astrocade</text>
+          <circle cx="130" cy="420" r="5" fill="var(--ok)"/><text x="140" y="424">Buildbox 4</text>
+        </g>
+        <!-- 右上 开发者 × 端到端（research） -->
+        <g font-size="11.5" fill="var(--text)">
+          <circle cx="560" cy="120" r="5" fill="var(--warn)"/><text x="570" y="124">MS Muse / WHAM</text>
+          <circle cx="500" cy="170" r="5" fill="var(--warn)"/><text x="510" y="174">World Labs</text>
+        </g>
+        <!-- 右下 玩家 × 端到端 -->
+        <g font-size="11.5" fill="var(--text)">
+          <circle cx="560" cy="330" r="5" fill="var(--bad)"/><text x="570" y="334">DeepMind Genie 3</text>
+          <circle cx="520" cy="390" r="5" fill="var(--bad)"/><text x="530" y="394">Decart Oasis</text>
+        </g>
+
+        <!-- whitespace 标注 -->
+        <rect x="250" y="270" width="130" height="62" rx="8" fill="none" stroke="var(--insight)" stroke-dasharray="4 4" stroke-width="1.5"/>
+        <text x="256" y="290" font-size="11" fill="var(--insight)">whitespace：</text>
+        <text x="256" y="305" font-size="10.5" fill="var(--insight)">成熟「会自己搭场景</text>
+        <text x="256" y="318" font-size="10.5" fill="var(--insight)">/调参/写玩法/自测」</text>
+        <text x="256" y="329" font-size="10.5" fill="var(--insight)">的引擎 agent（半专业）</text>
+      </svg>
+      </figure>
+      <p class="figcap">定位图：横轴 = 改造现有引擎 ↔ 端到端神经生成；纵轴 = 面向开发者 ↔ 面向零基础玩家。左半（蓝/绿）靠传统引擎、可控可发布但需搭管道；右半（橙/红）端到端、想象即玩但偏 demo。中间虚线框 = 最大空白：开发者与玩家之间、「会干一整套引擎活又可靠」的 agent 尚缺。（仅技术现状梳理，非投资建议 / 非背书）</p>
+    </div>
+  </section>
+
+  <!-- ⑤ 判断 -->
+  <section id="verdict">
+    <h2><span class="n">⑤</span>现状判断 + whitespace</h2>
+
+    <h3>现状三句话</h3>
+    <ul>
+      <li><strong>MCP/agent 驱动引擎：管道通了，但多为社区实验、尚不成熟。</strong>blender-mcp 最稳、unity-mcp 有商业维护，unreal-mcp/godot-mcp 还在快速变动、自标 EXPERIMENTAL；官方引擎厂商至今没人发自家 MCP，只把 AI 收进编辑器（Unity AI）。</li>
+      <li><strong>「游戏生成的 Cursor」真正能用的还少。</strong>Ludus（UE）、Unity AI、Series Rho 等已是「引擎内助手」，但离「给一句话、agent 自己把一个完整可玩、可调试、可发布的游戏从场景到玩法到测试全做完」还有明显距离——能做 demo 和片段，做不了「正经游戏」的端到端闭环。</li>
+      <li><strong>端到端 generative game 仍偏 demo / research。</strong>Genie 3 / Oasis / Muse 惊艳，但受一致性时长、分辨率、可控性、无法联机/发布/规则确定所限，短期内是「体验 / 创意工具」，不是「做出可上架游戏」的路径。</li>
+    </ul>
+
+    <h3>最有机会的空白（whitespace）</h3>
+    <div class="callout insight"><span class="label">whitespace A · 成熟的「引擎 agent」</span>把 MCP 接进 <strong>UE / Unity</strong>，做成一个真正<u>可靠</u>的 agent：会自己搭场景、调参数、写玩法脚本、<strong>还能自测（跑 PIE / 单元测试、看报错、自修）</strong>。难点全在「确定性与自验证」——这正是当前社区 MCP 最弱的一环，也是把「能连引擎」变成「能交付游戏」的关键缺口。谁先把这条闭环做稳，谁就接近「真正的游戏 Cursor」。</div>
+    <div class="callout insight"><span class="label">whitespace B · 垂直品类 text-to-game</span>通用 text-to-game（Rosebud/Astrocade）什么都能做一点、但都浅。垂直切口——某一类玩法（卡牌 / 塔防 / 视觉小说 / 教育 / 小游戏买量素材）的「专精生成器」，靠领域模板 + 资产 + 玩法约束把质量做到「能直接上线」，比通用平台更易做出可用产品。中国侧叠加 <strong>Cocos / 微信小游戏</strong>生态是天然切口。</div>
+
+    <h3>诚实给风险</h3>
+    <ul>
+      <li><strong>引擎复杂度：</strong>UE/Unity 的状态空间巨大（蓝图、序列化、依赖、平台差异），agent 容易「看似改对了、运行崩了」。</li>
+      <li><strong>确定性 / 可重复：</strong>游戏要求规则稳定、可调试；LLM 的随机性与「自信地出错」与之天然冲突，自验证回路是硬骨头。</li>
+      <li><strong>版权 / 训练数据：</strong>生成资产与代码的版权归属、训练语料合规（Unity 已明确把版权责任推给用户）是悬而未决的风险。</li>
+      <li><strong>质量天花板：</strong>「能跑的 demo」到「好玩、耐玩、能变现的游戏」之间，是玩法设计与打磨，这部分 AI 短期补不上。</li>
+    </ul>
+
+    <div class="callout warn"><span class="label">免责声明</span>本文为技术现状梳理，所列公司 / 产品 / 仓库仅作举例，<strong>不构成任何投资建议、不构成背书</strong>；融资 / 估值 / 用户数等数字按来源分级（🟢/🟡/🔴）且「约 / 视年份」，未必经独立验证；MCP 项目多为快速演进的社区实验，使用前请以各仓库最新状态为准。</div>
+  </section>
+
+  <!-- 延伸阅读 -->
+  <section id="more">
+    <h2>延伸阅读（本仓库相关，但角度不同）</h2>
+    <ul>
+      <li><a href="../2026-06-17-ai-native-ugc-game-platform/">AI-native UGC 游戏平台调研 →</a>：讲<strong>「玩家造、玩家玩」的 UGC 平台</strong>商业形态与竞争格局。本篇不同——本篇聚焦<strong>引擎 + MCP/CLI 管道 + AI agent 工具链</strong>这层「怎么做出来」的技术现状。</li>
+      <li><a href="../2026-06-17-roblox/">Roblox 调研 →</a>：讲 <strong>Roblox 这家 UGC 平台公司</strong>本身（生态、变现、护城河）。本篇不同——本篇是横向盘点<strong>各种游戏引擎及其 AI/MCP 接口</strong>，Roblox 只是 UGC 路线里的一个终点，不是引擎工具链的主题。</li>
+    </ul>
+  </section>
+
+  <footer class="foot">
+    <p>技术调研 · 2026-06-26 · 对话整理。MCP server / 引擎能力均经 WebSearch + 仓库核实并按来源分级；非投资建议、非背书。SVG 定位图 1 张为本文原创示意。</p>
+  </footer>
+
+</article>
+</body>
+</html>
