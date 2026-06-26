@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>红杉中国（HongShan）2025–2026 投资盘点（公开披露部分）</title>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --bad:#ff6b81; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+    --ai:#7aa2ff; --robot:#9b8cff; --chip2:#43c59e; --bio:#ff6b81; --ent:#ffb454; --consume:#f0a6ca; --other:#6bb6ff;
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --bad:#d23651; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+      --ai:#3a66ff; --robot:#6b4cff; --chip2:#138a6e; --bio:#d23651; --ent:#b3701a; --consume:#c44d86; --other:#2a7fd0;
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.7; font-size:16px;}
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:1040px; margin:0 auto; padding:18px 22px 90px}
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:25px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)} .meta-grid dd{margin:0}
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap; line-height:2}
+  nav.toc a:hover{color:var(--accent)}
+  section{margin:34px 0}
+  h2{font-size:20px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:16px; margin:20px 0 6px}
+  p{margin:11px 0} ul,ol{padding-left:22px} li{margin:5px 0}
+  a{color:var(--accent)} strong{color:var(--text)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.88em}
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:12.5px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:8px 9px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-word}
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+  .seg{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:16px 0; background:var(--panel)}
+  .seg h3{margin-top:4px}
+  .src{font-size:10.5px;padding:0 5px;border-radius:999px;white-space:nowrap}
+  .src-a{background:rgba(67,197,158,.18);color:var(--ok)}.src-b{background:rgba(255,180,84,.18);color:var(--warn)}.src-c{background:rgba(255,107,129,.18);color:var(--bad)}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;margin:10px 0}
+  .legend span{display:inline-flex;align-items:center;gap:5px}
+  .dot{width:11px;height:11px;border-radius:3px;display:inline-block}
+  .figwrap{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:16px 0}
+  .figcap{color:var(--muted);font-size:12px;margin-top:8px}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">红杉中国 / HongShan</span><span class="chip">沈南鹏 Neil Shen</span>
+      <span class="chip">投资盘点</span><span class="chip">2025–2026</span><span class="chip">公开披露样本</span>
+    </div>
+    <h1>红杉中国（HongShan）2025–2026 投资盘点（公开披露部分）</h1>
+    <p class="orig-title">把检索能核实到的公开交易，按赛道 + 时间整理成一张表 —— AI / 具身智能 / 半导体 / 生物医疗 / 企业服务 / 消费，每笔标来源等级与出处。</p>
+    <dl class="meta-grid">
+      <dt>主体</dt><dd>HongShan（2023 年从全球红杉拆分独立的中国团队，中文沿用「红杉中国」，掌门人沈南鹏 Neil Shen）。<strong>不含</strong>美国 Sequoia Capital 与印度/东南亚 Peak XV。</dd>
+      <dt>整理</dt><dd>对话式检索汇编；每笔交易标来源分级（<span class="src src-a">🟢一手</span>/<span class="src src-b">🟡二手</span>/<span class="src src-c">🔴传闻</span>），数字以公开报道为准、可能有出入</dd>
+      <dt>日期</dt><dd>2026-06-26</dd>
+    </dl>
+  </header>
+
+  <div class="callout warn">
+    <span class="label">⚠️ 醒目声明：公开样本，非完整清单</span>
+    本盘点<strong>只是 HongShan 公开披露交易中能被检索核实的一个样本</strong>，<strong>绝非完整清单</strong>。大量早期/未官宣/未披露金额的交易无法收录；一二级市场披露口径、人民币/美元基金不同，<strong>金额、轮次、日期以公开报道为准，可能与实际有出入</strong>。本文为<strong>信息整理，非投资建议</strong>，不构成任何买卖推荐。
+  </div>
+
+  <div class="tldr">
+    <b>一句话</b> — 2023 年从全球红杉拆分独立的 <strong>HongShan（红杉中国，沈南鹏）</strong>，在 2025–2026 的公开交易里把火力压在 <strong>AI / 具身智能</strong>（占其官方月报披露的一半以上）：从大模型应用（LiblibAI、新言意码）到具身基座（它石智航 4.55 亿美元 Pre-A、自变量、无界动力），并在<strong>半导体</strong>（沐曦 GPU、芯耀辉 IP、星钥 Micro LED）、<strong>生物医疗</strong>（控股拜耳莫西沙星业务、北芯生命 IPO）、<strong>企业服务</strong>（亿格云 SASE）、<strong>消费出海</strong>（约 25 亿欧元控股意大利 Golden Goose）多线下注。本文收录 <strong>约 16 笔</strong>可核实的公开交易 + 退出案例，做成一张带来源链接的表，并附赛道分布图。<strong>数据为公开样本、非全量；非投资建议。</strong>
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#bg">① 背景速补</a>
+    <a href="#list">② 2025–2026 投资清单</a>
+    <a href="#dist">③ 赛道分布（SVG）</a>
+    <a href="#theme">④ 主题观察</a>
+    <a href="#exit">⑤ 退出 / IPO</a>
+    <a href="#limit">⑥ 局限与存疑</a>
+  </nav>
+
+  <!-- ① 背景 -->
+  <section id="bg">
+    <h2><span class="n">①</span>背景速补：HongShan 是谁、和美国 Sequoia 什么关系</h2>
+    <div class="seg">
+      <h3>拆分：一个红杉变成三个</h3>
+      <p>2023 年 6 月，原「红杉资本」宣布<strong>全球拆分为三个独立机构</strong>，各自募资、各自决策、品牌分家：</p>
+      <ul>
+        <li><strong>HongShan（红杉中国）</strong> —— 中国团队独立运营，英文新名 <code>HongShan</code>，中文继续叫「红杉中国」，掌门人<strong>沈南鹏（Neil Shen）</strong>。<strong>本篇主角。</strong></li>
+        <li><strong>Sequoia Capital</strong> —— 美国/欧洲业务，保留 Sequoia 品牌。</li>
+        <li><strong>Peak XV Partners</strong> —— 原印度/东南亚团队，改名 Peak XV。</li>
+      </ul>
+      <p class="callout note" style="margin-top:8px"><span class="label">消歧提醒</span>三家从此是<strong>独立机构</strong>。新闻里只写「Sequoia」往往指美国那家；本篇只收 HongShan / 红杉中国主体的交易，凡来源没分清主体的一律标存疑或不收。</p>
+    </div>
+    <div class="seg">
+      <h3>规模与基金</h3>
+      <p>独立后 HongShan 完成约 <strong>90 亿美元</strong>募资，含种子、风险（VC）、成长（Growth）、扩张（Expansion）四类基金 <span class="src src-b">🟡</span>。对外口径的管理规模存在<strong>不同说法</strong>：有报道称<strong>管理资产超 550 亿美元</strong> <span class="src src-b">🟡</span>，亦有报道以人民币口径称<strong>管理基金规模超 3000 亿元人民币</strong> <span class="src src-b">🟡</span>——两个数字口径不同（美元 AUM vs 人民币基金规模），请勿简单换算。累计参投 <strong>超 1500 家</strong>企业，被投上市公司 <strong>超 160 家</strong>，独角兽 <strong>超 110–140 家</strong>（口径随时点变化）<span class="src src-b">🟡</span>。</p>
+    </div>
+    <div class="seg">
+      <h3>阶段与风格</h3>
+      <p>覆盖<strong>从种子到成长/扩张</strong>全阶段；据其官方月报，2025 年公开披露的股权投资里<strong>早期（天使/Pre-A/A）合计占比约八成</strong>，AI 一度占当月项目过半 <span class="src src-b">🟡</span>。行业上横跨 <strong>AI / 硬科技（半导体）/ 医疗健康 / 企业服务 / 机器人·具身智能 / 消费</strong>。沈南鹏本人在 AI 大模型潮中曾密集会见创业者；红杉中国是国内机器人/具身赛道布局最早最广的机构之一（早年已投智元机器人、梅卡曼德、海柔创新、思灵机器人等）<span class="src src-b">🟡</span>。</p>
+    </div>
+  </section>
+
+  <!-- ② 清单 -->
+  <section id="list">
+    <h2><span class="n">②</span>2025–2026 投资清单（公开披露样本）</h2>
+    <p>下表为<strong>检索能核实到的公开交易</strong>，按赛道分组、组内大致按时间。字段缺失处写「未披露」。<strong>来源等级</strong>：<span class="src src-a">🟢一手</span>(官网/官宣/SEC·交易所)、<span class="src src-b">🟡二手</span>(36氪/投资界/投中网/新浪财经/量子位/财联社等)、<span class="src src-c">🔴传闻</span>。HongShan 在每笔中的角色（领投/跟投）已注明。</p>
+
+    <h3>AI / 大模型 / AI 应用</h3>
+    <table>
+      <thead><tr><th>被投公司</th><th>日期</th><th>轮次</th><th>金额</th><th>赛道</th><th>HongShan 角色 / 共同投资方</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>亿格云</strong>（杭州亿格云科技）</td><td>2025-06</td><td>Pre-B</td><td>近亿元人民币</td><td>企业安全·SASE/零信任·AI 办公平台</td>
+          <td>红杉中国<strong>领投</strong>；元璟资本、启创资本等老股东加码</td>
+          <td><span class="src src-b">🟡</span> <a href="https://www.36kr.com/p/3325227565951233">36氪</a>·<a href="https://www.chinaventure.com.cn/news/108-20250609-386628.html">投中网</a></td>
+        </tr>
+        <tr>
+          <td><strong>新言意码</strong>（YouWare，明超平/前月之暗面产品负责人）</td><td>2025-06/07</td><td>新一轮（A 轮之后）</td><td>未披露（估值达数亿美元，较上轮翻倍）</td><td>AI 编程 / Vibe coding 社区</td>
+          <td>红杉中国<strong>加注/参投</strong>；部分老股东（含五源、高榕、真格系背景）跟投</td>
+          <td><span class="src src-b">🟡</span> <a href="https://news.pedaily.cn/202507/551724.shtml">投资界</a>·<a href="https://www.lanjinger.com/d/1751269316118388145">蓝鲸</a></td>
+        </tr>
+        <tr>
+          <td><strong>讯兔科技</strong></td><td>2025-10-22</td><td>Pre-A</td><td>超 1 亿元人民币</td><td>金融 AI</td>
+          <td>高瓴创投 + 红杉中国<strong>联合领投</strong>；钟鼎资本、嘉程资本跟投</td>
+          <td><span class="src src-b">🟡</span> <a href="https://finance.sina.com.cn/roll/2025-10-26/doc-infvesvs4871801.shtml">新浪财经/投中网</a></td>
+        </tr>
+        <tr>
+          <td><strong>LiblibAI</strong>（哩布哩布）</td><td>2025-10-22</td><td>B</td><td>1.3 亿美元（国内 AI 应用年度最大单笔）</td><td>AIGC·多模态创作社区</td>
+          <td>红杉中国、CMC 资本及一战略投资方<strong>联合领投</strong>；顺为、源码、明势、渶策超额增持（战投方据报为蚂蚁集团等）</td>
+          <td><span class="src src-b">🟡</span> <a href="https://www.36kr.com/p/3531918453234569">36氪</a>·<a href="https://www.qbitai.com/2025/10/344890.html">量子位</a></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>机器人 / 具身智能</h3>
+    <table>
+      <thead><tr><th>被投公司</th><th>日期</th><th>轮次</th><th>金额</th><th>赛道</th><th>HongShan 角色 / 共同投资方</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>无界动力</strong></td><td>2025-11-10</td><td>天使（首轮）</td><td>3 亿元人民币（累计含天使+轮超 5 亿元）</td><td>具身智能·机器人通用大脑</td>
+          <td>红杉中国、线性资本<strong>联合领投</strong>；高瓴创投、地平线、华业天成、钟鼎资本、BV百度风投、同歌创投跟投</td>
+          <td><span class="src src-b">🟡</span> <a href="https://m.chinaventure.com.cn/news/114-20251111-388812.html">投中网</a></td>
+        </tr>
+        <tr>
+          <td><strong>自变量机器人</strong>（X Square Robot）</td><td>2026-01-12</td><td>A++（前序 A+ 亦参与）</td><td>10 亿元人民币</td><td>具身智能·通用基座模型 WALL-A</td>
+          <td>字节跳动、红杉中国<strong>领投</strong>（A++）；北京信息产业基金、深创投、南山战新投、锡创投等跟投。注：2025-09 A+ 轮红杉中国为<strong>跟投</strong>（阿里云、国科领投）</td>
+          <td><span class="src src-b">🟡</span> <a href="https://www.qbitai.com/2026/01/369147.html">量子位</a>·<a href="http://www.news.cn/finance/20260113/e7a8264a266b4ee0809dc474a1bd1387/c.html">新华网</a></td>
+        </tr>
+        <tr>
+          <td><strong>它石智航</strong>（Tashi Intelligent）</td><td>2026-04-16</td><td>Pre-A</td><td>4.55 亿美元（刷新中国具身智能单轮 & Pre-A 纪录）</td><td>具身智能·端到端「大脑」</td>
+          <td>高瓴创投、红杉中国、美团龙珠<strong>联合领投</strong>；中金资本、凯联资本、东方富海等跟投</td>
+          <td><span class="src src-b">🟡</span> <a href="https://finance.sina.com.cn/jjxw/2026-04-16/doc-inhusvkh1572005.shtml">新浪财经</a>·<a href="https://www.tmtpost.com/7954674.html">钛媒体</a></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>半导体 / 硬科技</h3>
+    <table>
+      <thead><tr><th>被投公司</th><th>日期</th><th>轮次</th><th>金额</th><th>赛道</th><th>HongShan 角色 / 共同投资方</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>芯耀辉</strong></td><td>2025（A+ 轮，报道于上半年）</td><td>A+</td><td>未披露</td><td>半导体高速互连 IP / 先进 IP</td>
+          <td>高瓴创投、红杉中国、云晖资本、高榕资本<strong>联合投资</strong></td>
+          <td><span class="src src-b">🟡</span> <a href="https://finance.sina.com.cn/roll/2025-04-11/doc-inesuxcq4845041.shtml">新浪财经</a></td>
+        </tr>
+        <tr>
+          <td><strong>沐曦股份</strong>（沐曦集成电路）</td><td>2025（IPO 前历轮）</td><td>多轮跟投（共 8 轮，累计超 20 亿元）</td><td>未单独披露红杉出资额</td><td>国产高性能 GPU</td>
+          <td>红杉中国为<strong>股东/跟投</strong>之一；经纬创投、真格基金、国资基金等（见⑤退出）</td>
+          <td><span class="src src-b">🟡</span> <a href="https://finance.sina.com.cn/tech/roll/2025-08-14/doc-infkxykc5298780.shtml">新浪财经</a></td>
+        </tr>
+        <tr>
+          <td><strong>星钥半导体</strong>（武汉）</td><td>2025-11（工商新增投资方）</td><td>未披露</td><td>未披露</td><td>硅基氮化镓 Micro LED 微显示芯片（AR/MR）</td>
+          <td>新增投资方高瓴创投、红杉中国（角色未明）、柏睿资本</td>
+          <td><span class="src src-b">🟡</span> <a href="https://www.cls.cn/detail/2214382">财联社</a></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>生物医疗</h3>
+    <table>
+      <thead><tr><th>被投/标的</th><th>日期</th><th>轮次/形式</th><th>金额</th><th>赛道</th><th>HongShan 角色 / 共同投资方</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>杉泽生物医药</strong>（杭州；100% 控股拜耳莫西沙星 Avelox 业务）</td><td>2026 年初</td><td>资产收购 / 100% 控股</td><td>约 13.2–21.5 亿元人民币（报道区间）</td><td>成熟抗生素药品·商业化资产</td>
+          <td>红杉中国新设平台公司收购拜耳 Avelox（莫西沙星）全球注册证、IP 与业务合同</td>
+          <td><span class="src src-b">🟡</span> <a href="https://www.chinaventure.com.cn/news/111-20260203-390041.html">投中网</a></td>
+        </tr>
+        <tr>
+          <td><strong>北芯生命</strong>（北芯生命科技）</td><td>2025-09（D+ 轮，持续追加）</td><td>D+（IPO 前）</td><td>未披露</td><td>心血管介入器械（见⑤退出：2026-02 科创板上市）</td>
+          <td>红杉中国为<strong>第一大机构股东</strong>（2018 领投 B 轮后逐轮加注）；启明创投、泰格医药等</td>
+          <td><span class="src src-b">🟡</span> <a href="https://36kr.com/p/3669900125283204">36氪</a>·<a href="https://www.stcn.com/article/detail/709687.html">证券时报</a></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>消费 / 出海</h3>
+    <table>
+      <thead><tr><th>被投/标的</th><th>日期</th><th>轮次/形式</th><th>金额</th><th>赛道</th><th>HongShan 角色 / 共同投资方</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Golden Goose</strong>（意大利「小脏鞋」奢侈运动鞋）</td><td>2025-12</td><td>控股权收购（多数股权）</td><td>企业估值约 25 亿欧元（刷新红杉中国欧洲投资纪录）</td><td>高端时尚 / 消费品牌出海</td>
+          <td>红杉中国<strong>收购控股权</strong>；淡马锡及淡明资本旗下基金作少数股东共投，原股东 Permira 保留少数股权</td>
+          <td><span class="src src-b">🟡</span> <a href="https://news.pedaily.cn/202512/558908.shtml">投资界</a>·<a href="https://www.fashionnetwork.cn/share/5706.html">FashionNetwork</a></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout note">
+      <span class="label">读表须知</span>
+      ① 表中多为<strong>有官宣或主流媒体报道</strong>的交易，未官宣/未披露金额者大量缺席；② 同一公司红杉在不同轮次角色可能从「领投」变「跟投」（如自变量），已分别注明；③「联合领投」表示红杉与他方共同领投，份额未必相等；④ 金额单位人民币/美元/欧元已逐条标注，<strong>勿混算</strong>。
+    </div>
+  </section>
+
+  <!-- ③ 分布 SVG -->
+  <section id="dist">
+    <h2><span class="n">③</span>赛道分布（基于已收录交易）</h2>
+    <p>下图按<strong>本文已收录的约 16 笔公开交易/事件</strong>（含投资与退出标的）做赛道计数，<strong>仅为样本，非 HongShan 全量投资分布</strong>。具身/机器人与 AI 应用合计占样本约一半，与其官方月报「AI 占当月项目过半」的口径方向一致 <span class="src src-b">🟡</span>。</p>
+    <div class="figwrap">
+      <div class="legend">
+        <span><i class="dot" style="background:var(--ai)"></i>AI/大模型·应用 (4)</span>
+        <span><i class="dot" style="background:var(--robot)"></i>机器人/具身 (3)</span>
+        <span><i class="dot" style="background:var(--chip2)"></i>半导体/硬科技 (3)</span>
+        <span><i class="dot" style="background:var(--bio)"></i>生物医疗 (2)</span>
+        <span><i class="dot" style="background:var(--ent)"></i>企业服务 (1,含AI应用重叠)</span>
+        <span><i class="dot" style="background:var(--consume)"></i>消费/出海 (1)</span>
+      </div>
+      <!-- 条形图：宽度按计数比例 -->
+      <svg viewBox="0 0 720 230" width="100%" role="img" aria-label="赛道分布条形图">
+        <line x1="150" y1="10" x2="150" y2="210" stroke="var(--line)" stroke-width="1"/>
+        <text x="142" y="30" text-anchor="end" font-size="12" fill="var(--text)">AI/大模型·应用</text>
+        <rect x="150" y="18" width="380" height="18" rx="4" fill="var(--ai)"/>
+        <text x="540" y="31" font-size="12" fill="var(--muted)">4</text>
+        <text x="142" y="62" text-anchor="end" font-size="12" fill="var(--text)">机器人/具身</text>
+        <rect x="150" y="50" width="285" height="18" rx="4" fill="var(--robot)"/>
+        <text x="445" y="63" font-size="12" fill="var(--muted)">3</text>
+        <text x="142" y="94" text-anchor="end" font-size="12" fill="var(--text)">半导体/硬科技</text>
+        <rect x="150" y="82" width="285" height="18" rx="4" fill="var(--chip2)"/>
+        <text x="445" y="95" font-size="12" fill="var(--muted)">3</text>
+        <text x="142" y="126" text-anchor="end" font-size="12" fill="var(--text)">生物医疗</text>
+        <rect x="150" y="114" width="190" height="18" rx="4" fill="var(--bio)"/>
+        <text x="350" y="127" font-size="12" fill="var(--muted)">2</text>
+        <text x="142" y="158" text-anchor="end" font-size="12" fill="var(--text)">企业服务</text>
+        <rect x="150" y="146" width="95" height="18" rx="4" fill="var(--ent)"/>
+        <text x="255" y="159" font-size="12" fill="var(--muted)">1*</text>
+        <text x="142" y="190" text-anchor="end" font-size="12" fill="var(--text)">消费/出海</text>
+        <rect x="150" y="178" width="95" height="18" rx="4" fill="var(--consume)"/>
+        <text x="255" y="191" font-size="12" fill="var(--muted)">1</text>
+      </svg>
+      <div class="figcap">* 亿格云兼具「企业服务」与「AI 应用」属性，分类有重叠，仅作示意。计数为本文样本，<strong>非全量、非加权金额</strong>（若按金额，Golden Goose 与它石智航等大额单笔会显著拉高其赛道权重）。</div>
+    </div>
+  </section>
+
+  <!-- ④ 主题观察 -->
+  <section id="theme">
+    <h2><span class="n">④</span>主题观察：2025–2026 的下注重心</h2>
+    <div class="callout insight">
+      <span class="label">数据支持（来自已收录交易 + 其官方月报口径）</span>
+      <ul>
+        <li><strong>AI / 具身是绝对重心。</strong>样本里 AI 应用 + 机器人/具身合计占约一半；它石智航（4.55 亿美元）、自变量（10 亿元）、LiblibAI（1.3 亿美元）是单笔金额最大的几笔。其官方月报亦自述某月 AI 项目占比过半、早期占八成 <span class="src src-b">🟡</span>。</li>
+        <li><strong>半导体是长期底仓、持续加注。</strong>沐曦（GPU）、芯耀辉（IP）、星钥（Micro LED）覆盖算力芯片—IP—显示芯片；红杉自 2006 年即系统布局半导体 <span class="src src-b">🟡</span>。</li>
+        <li><strong>生物医疗从「0→1 创新」转向「能卖能赚的成熟资产」。</strong>典型信号是新设杉泽平台<strong>整体收购拜耳莫西沙星</strong>这类已商业化药品 —— 押注确定性现金流而非早期管线 <span class="src src-b">🟡</span>。</li>
+        <li><strong>消费押「出海 + 高端品牌」。</strong>约 25 亿欧元控股 Golden Goose，是其消费板块转向<strong>控股型、品牌国际化</strong>的标志性动作 <span class="src src-b">🟡</span>。</li>
+      </ul>
+    </div>
+    <div class="callout warn">
+      <span class="label">推测（证据较弱，需进一步验证）</span>
+      <ul>
+        <li>「红杉与高瓴在具身/硬科技频繁联合领投」可能反映<strong>头部机构抱团抬估值、分摊大额单轮风险</strong>的趋势——但这是从几笔交易归纳的<strong>推测</strong>，非定论。</li>
+        <li>大模型「六小虎」（月之暗面/MiniMax/智谱/阶跃等）红杉早年布局深，但 2025–2026 是否在这些项目继续大额加注，<strong>本轮检索未拿到可核实的明确新交易</strong>，故未计入清单（标存疑、不编）。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ⑤ 退出 -->
+  <section id="exit">
+    <h2><span class="n">⑤</span>退出 / IPO（2025–2026 公开案例）</h2>
+    <table>
+      <thead><tr><th>公司</th><th>事件</th><th>日期</th><th>红杉角色</th><th>关键数据</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>北芯生命</strong></td><td>科创板 IPO（心血管介入器械）</td><td>2026-02</td><td>第一大机构股东（2018 领投 B 轮后逐轮加注）</td><td>上市首日大涨（报道首日涨约 183%）；市值约 200+ 亿元 <span class="src src-b">🟡</span></td>
+          <td><span class="src src-b">🟡</span> <a href="https://36kr.com/p/3669900125283204">36氪</a></td>
+        </tr>
+        <tr>
+          <td><strong>沐曦股份</strong>（688802.SH）</td><td>科创板 IPO（国产 GPU）</td><td>2025-12-17</td><td>股东/历轮跟投之一</td><td>发行价 104.66 元；首日收涨约 <strong>692.95%</strong>，市值近 3300 亿元 <span class="src src-b">🟡</span></td>
+          <td><span class="src src-b">🟡</span> <a href="https://finance.sina.com.cn/roll/2025-12-17/doc-inhccfvz2149677.shtml">新浪财经</a>·<a href="https://www.metax-tech.com/ndetail/12533">沐曦官网</a></td>
+        </tr>
+      </tbody>
+    </table>
+    <p>另有报道称红杉中国 2025 年以 <strong>17 家 IPO</strong> 居「年度 IPO 之王」榜首（深创投、中金资本随后）<span class="src src-b">🟡</span> <a href="https://www.thecapital.com.cn/newsDetail/120958">融中财经</a>——该榜含其全量被投、不限于本文样本，仅作背景。智元机器人等被投亦有上市/借壳进展，因主体或口径未完全核实，本文不展开。</p>
+  </section>
+
+  <!-- ⑥ 局限 -->
+  <section id="limit">
+    <h2><span class="n">⑥</span>局限与存疑（再次强调）</h2>
+    <ul>
+      <li><strong>样本不全。</strong>本文仅收录<strong>可检索核实的公开交易</strong>；HongShan 大量早期/种子/未官宣/未披露金额的交易无法收录，清单<strong>系统性偏向「有报道的大额轮次」</strong>。</li>
+      <li><strong>口径差异。</strong>AUM 有「550 亿美元」与「3000 亿元人民币」等不同口径；金额单位混杂人民币/美元/欧元；估值有「企业估值」与「投后估值」之别——<strong>勿直接横向比较或换算</strong>。</li>
+      <li><strong>主体易混。</strong>红杉拆分后，部分英文报道的「Sequoia」可能指美国 Sequoia 或 Peak XV；凡主体不清者本文未收，但仍可能有误判，欢迎对照原始来源核验。</li>
+      <li><strong>一二级披露差异。</strong>一级市场（私募轮次）披露多依赖被投官宣与媒体，<strong>金额/轮次/共同投资方常不完整或有出入</strong>；二级（IPO/交易所）数据相对硬。</li>
+      <li><strong>角色随轮次变化。</strong>同一被投，红杉可能某轮领投、另一轮跟投，已尽量逐轮标注，但仍可能遗漏。</li>
+      <li><strong>本文为信息整理，非投资建议</strong>，不构成任何证券或基金的买卖推荐；数据可能过时或有误，决策前请回到一手来源（官网/官宣/交易所披露）独立核实。</li>
+    </ul>
+  </section>
+
+  <footer class="foot">
+    红杉中国（HongShan）2025–2026 投资盘点 · 公开披露样本（非完整清单）· 每笔标来源等级 <span class="src src-a">🟢</span>/<span class="src src-b">🟡</span>/<span class="src src-c">🔴</span> · 数字以公开报道为准、可能有出入 · <strong>仅为信息整理，非投资建议</strong> · 整理日期 2026-06-26
+  </footer>
+
+</article>
+</body>
+</html>
