@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>🗺️ 总览导航：全部解读与调研按主题归类</title>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.7; font-size:16px;}
+  a{color:var(--accent); text-decoration:none}
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); font-size:14px}
+  .back:hover{color:var(--accent)}
+  main{max-width:1080px; margin:0 auto; padding:18px 22px 90px}
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:18px}
+  h1{font-size:26px; line-height:1.35; margin:14px 0 8px}
+  .lede{color:var(--muted); font-size:15px; margin:6px 0 0}
+  .lede b{color:var(--text)}
+  .stats{margin:14px 0 0; font-size:13px; color:var(--muted)}
+  .searchbox{margin:20px 0 6px}
+  .searchbox input{width:100%; padding:12px 16px; font-size:15px; border-radius:12px;
+    border:1px solid var(--line); background:var(--panel); color:var(--text); outline:none}
+  .searchbox input:focus{border-color:var(--accent)}
+  .no-results{display:none; color:var(--muted); padding:20px 0; font-size:14px}
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+    padding:14px 18px; margin:16px 0 26px; font-size:14px; display:flex; flex-wrap:wrap; gap:6px 18px}
+  nav.toc a{color:var(--text); white-space:nowrap; line-height:2}
+  nav.toc a:hover{color:var(--accent)}
+  nav.toc .navn{display:inline-block; min-width:20px; text-align:center; background:var(--chip);
+    color:var(--chipText); font-size:11.5px; border-radius:999px; padding:1px 7px; margin-left:2px}
+  section.cluster{margin:34px 0}
+  h2{font-size:20px; margin:0 0 6px; padding-top:10px; border-top:1px dashed var(--line); display:flex; align-items:center; gap:10px}
+  h2 .count{font-size:13px; font-weight:700; background:var(--chip); color:var(--chipText);
+    border-radius:999px; padding:2px 10px}
+  .cluster-desc{color:var(--muted); font-size:13.5px; margin:2px 0 14px}
+  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:14px}
+  .card{display:flex; flex-direction:column; background:var(--panel); border:1px solid var(--line);
+    border-radius:14px; padding:14px 16px; box-shadow:var(--shadow); transition:transform .12s ease,border-color .12s ease; color:var(--text)}
+  .card:hover{transform:translateY(-2px); border-color:var(--accent)}
+  .card-title{font-weight:600; font-size:15px; line-height:1.4; color:var(--text)}
+  .card-tldr{color:var(--muted); font-size:13px; margin:8px 0 0; flex:1}
+  .card-meta{display:flex; justify-content:space-between; align-items:center; gap:8px; margin-top:12px; font-size:11.5px; color:var(--muted)}
+  .card-pub{background:var(--chip); color:var(--chipText); border-radius:999px; padding:1px 9px; white-space:nowrap}
+  .skills{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:18px 20px; margin:30px 0; box-shadow:var(--shadow)}
+  .skills h2{border-top:none; padding-top:0; margin-bottom:10px}
+  .skills ul{margin:8px 0 0; padding-left:20px}
+  .skills li{margin:7px 0; font-size:14px}
+  .skills b{color:var(--accent2)}
+  footer{margin-top:50px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:12.5px}
+  .cluster.hidden, .card.hidden{display:none}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回首页</a>
+<main>
+  <header class="head">
+    <h1>🗺️ 总览导航：全部解读与调研按主题归类</h1>
+    <p class="lede">本页是 <b>整个 repo 的总览入口</b>：把全部 <b>98 篇</b>论文解读 / 公司·股票调研 / 技术科普，按主题归类成一个清晰索引，<b>一篇不漏</b>。点任意卡片直达对应页面。</p>
+    <p class="stats">共 7 个主题簇：🔌 14 · 🧪 25 · 🏷️ 6 · 🤖 43 · 🎮 3 · 💰 2 · 🏢 5　|　各簇之和 = 98，与 papers.json 总数 98 一致 ✅</p>
+    <div class="searchbox">
+      <input id="q" type="search" placeholder="🔍 搜索标题 / 关键词 / 标签（纯前端过滤）…" autocomplete="off">
+    </div>
+    <nav class="toc">
+      <a href="#c-hw">🔌 半导体 / AI-infra 硬件与供应链 <span class="navn">14</span></a>
+      <a href="#c-ai4s">🧪 AI4S / 科学发现 <span class="navn">25</span></a>
+      <a href="#c-data">🏷️ AI 数据 / RLHF / 评测 <span class="navn">6</span></a>
+      <a href="#c-agent">🤖 Agent / LLM 论文 &amp; 工具 <span class="navn">43</span></a>
+      <a href="#c-game">🎮 AI × 游戏 <span class="navn">3</span></a>
+      <a href="#c-finance">💰 财经 / 投资 <span class="navn">2</span></a>
+      <a href="#c-company">🏢 公司调研 · 其它 <span class="navn">5</span></a>
+    </nav>
+  </header>
+
+  <section class="skills">
+    <h2>🧰 本仓库的 Skills</h2>
+    <p class="cluster-desc">下面这些是产出本仓库各类页面的「能力」（skill），不是 papers.json 里的条目：</p>
+    <ul>
+      <li><b>paper-reading</b>：下载并深读一篇论文，产出自包含的中文 HTML 解读（开源情况核实、动机贡献、方法图、评测、洞见）。</li>
+      <li><b>company-research</b>：调研一家公司，输出聚焦竞争格局 / 赛道早期度 / 可借鉴 idea 的中文 HTML（含市场地图、竞品矩阵、融资时间线、来源分级）。</li>
+      <li><b>stock-research</b>：调研一只股票，面向「买/持/避」投资决策，输出含基本面 / 财务健康 / 估值 / 多空论点 / 催化剂的中文 HTML（非投资建议）。</li>
+      <li><b>serenity</b>：用交易员 Serenity 的「AI/半导体供应链瓶颈」框架评估美股与市场判断，专挖被错杀的上游单一来源卡点。</li>
+      <li><b>tech-explainer</b>：把任意系统 / 架构 / 流程 / 供应链做成以「关系图 + 数据流动画 + 节点详情」为核心的交互式中文技术科普页。</li>
+    </ul>
+  </section>
+
+  <p class="no-results" id="noResults">没有匹配的条目，换个关键词试试。</p>
+
+  <section class="cluster" id="c-hw">
+    <h2>🔌 半导体 / AI-infra 硬件与供应链 <span class="count">14</span></h2>
+    <p class="cluster-desc">AI 集群供应链、CPU/GPU 链、训练 vs 推理需求漂移、散热材料、氦气、相关芯片股票（AMD/Intel/ASTS）</p>
+    <div class="grid">
+      <a class="card" href="papers/2026-06-17-cpu-gpu-supply-chain-overlap/index.html" data-search="cpu 与 gpu 供应链的重合关系：哪些共享 / 哪些专属 / 为什么互相挤产能（关系图） cpu与gpu供应链大量重合(共享eda/tsmc代工/asml euv设备/材料/cowos封装/osat封测),ai推动gpu需求暴涨正抢占共享的tsmc先进制程/cowos/hbm产能挤压cpu、抬升整链成本与交期;含交互重合关系图(三栏:cpu专属/共享/gpu专属)与产能争夺动画;非投资建议 explainer interactive diagram semiconductors supply-chain cpu gpu 2026-06-17-cpu-gpu-supply-chain-overlap">
+        <div class="card-title">CPU 与 GPU 供应链的重合关系：哪些共享 / 哪些专属 / 为什么互相挤产能（关系图）</div>
+        <div class="card-tldr">CPU与GPU供应链大量重合(共享EDA/TSMC代工/ASML EUV设备/材料/CoWoS封装/OSAT封测),AI推动GPU需求暴涨正抢占共享的TSMC先进制程/CoWoS/HBM产能挤压CPU、抬升整链成本与交期…</div>
+        <div class="card-meta"><span class="card-date">2026-06-24</span><span class="card-pub">技术科普 2026</span></div>
+      </a>
+      <a class="card" href="papers/2026-06-17-training-vs-inference-demand-shift/index.html" data-search="训练 vs 推理：算力转向如何重排 ai 供应链需求（含 red-team 修订） 推理分prefill/decode/reasoning三态,算力转向把需求重心从compute/scale-out漂向memory/energy/scale-up,但关键修订是网络未必降权(分离式+scale-up加权)、受益集中在cowos/broadcom/marvell/tsmc而非广义第三方;含初版结论→red-team修订对照;非投资建议 explainer interactive diagram semiconductors ai-infra inference 2026-06-17-training-vs-inference-demand-shift">
+        <div class="card-title">训练 vs 推理：算力转向如何重排 AI 供应链需求（含 red-team 修订）</div>
+        <div class="card-tldr">推理分prefill/decode/reasoning三态,算力转向把需求重心从compute/scale-out漂向memory/energy/scale-up,但关键修订是网络未必降权(分离式+scale-up加权)…</div>
+        <div class="card-meta"><span class="card-date">2026-06-24</span><span class="card-pub">技术科普 2026</span></div>
+      </a>
+      <a class="card" href="papers/2026-06-17-helium-supply-chain/index.html" data-search="氦气（helium）在供应链中的地位：技术 / 财经 / 未来 / 股票全解 氦是半导体/光纤/mri不可替代的控温检漏低温刚需,不可再生且来源高度集中(美/卡塔尔/俄),资源+地缘型隐形卡点;价格周期性暴涨,联邦储备退役;纯氦大盘股几乎没有,稳的是工业气体巨头副业、纯押只能碰高风险勘探小盘;非投资建议 supply-chain materials helium semiconductors stocks industry 2026-06-17-helium-supply-chain">
+        <div class="card-title">氦气（Helium）在供应链中的地位：技术 / 财经 / 未来 / 股票全解</div>
+        <div class="card-tldr">氦是半导体/光纤/MRI不可替代的控温检漏低温刚需,不可再生且来源高度集中(美/卡塔尔/俄),资源+地缘型隐形卡点;价格周期性暴涨,联邦储备退役;纯氦大盘股几乎没有,稳的是工业气体巨头副业、纯押只能碰高风险勘探小盘;非投…</div>
+        <div class="card-meta"><span class="card-date">2026-06-24</span><span class="card-pub">产业研究 2026</span></div>
+      </a>
+      <a class="card" href="papers/2026-06-17-ppio/index.html" data-search="ppio 派欧云：ai 推理算力云的竞争格局与早期度调研 分布式边缘云转型的ai推理算力云(按token/卡时卖开源大模型推理+租gpu);赛道emerging→已crowded价格血战;最大威胁是大厂(火山/阿里/腾讯)自带推理碾毛利;whitespace在分布式聚合闲置算力压成本+信创私有化推理 company competitive-landscape market-map startup-idea ai-infra gpu-cloud china 2026-06-17-ppio">
+        <div class="card-title">PPIO 派欧云：AI 推理算力云的竞争格局与早期度调研</div>
+        <div class="card-tldr">分布式边缘云转型的AI推理算力云(按token/卡时卖开源大模型推理+租GPU);赛道emerging→已crowded价格血战;最大威胁是大厂(火山/阿里/腾讯)自带推理碾毛利;whitespace在分布式聚合闲置算力…</div>
+        <div class="card-meta"><span class="card-date">2026-06-22</span><span class="card-pub">公司调研 2026</span></div>
+      </a>
+      <a class="card" href="papers/2026-06-17-ai-cluster-supply-chain-video/index.html" data-search="ai 集群供应链科普（动画讲解版 + 配音脚本） 把ai集群供应链做成12幕自动播放动画讲解页(竖向9层svg逐层点亮+大字旁白+ticker chips+可选zh-cn tts朗读+播放/键盘控制),并附timed配音脚本script.md(含纯旁白全文+每幕英文视觉提示词)可喂ai视频工具生成mp4;面向硬件小白,术语讲人话;非投资建议。 ai-infra semiconductors supply-chain hardware explainer video 2026-06-17-ai-cluster-supply-chain-video">
+        <div class="card-title">AI 集群供应链科普（动画讲解版 + 配音脚本）</div>
+        <div class="card-tldr">把AI集群供应链做成12幕自动播放动画讲解页(竖向9层SVG逐层点亮+大字旁白+ticker chips+可选zh-CN TTS朗读+播放/键盘控制),并附timed配音脚本script.md(含纯旁白全文+每幕英文视觉…</div>
+        <div class="card-meta"><span class="card-date">2026-06-22</span><span class="card-pub">硬件科普 2026</span></div>
+      </a>
+      <a class="card" href="papers/2026-06-17-ai-cluster-supply-chain/index.html" data-search="ai 集群供应链全景：从一句 prompt 到一座数据中心（含代表股票） 把ai集群从云/gpu/hbm/封装/设备/光互连/inp衬底/电力散热/原材料逐层拆开,每层讲人话+给代表股票ticker,讲清谁卡谁脖子(euv=asml独家/cowos=台积电/hbm三家/inp衬底三家);非投资建议 ai-infra semiconductors supply-chain hardware stocks explainer 2026-06-17-ai-cluster-supply-chain">
+        <div class="card-title">AI 集群供应链全景：从一句 Prompt 到一座数据中心（含代表股票）</div>
+        <div class="card-tldr">把AI集群从云/GPU/HBM/封装/设备/光互连/InP衬底/电力散热/原材料逐层拆开,每层讲人话+给代表股票ticker,讲清谁卡谁脖子(EUV=ASML独家/CoWoS=台积电/HBM三家/InP衬底三家);非投资…</div>
+        <div class="card-meta"><span class="card-date">2026-06-22</span><span class="card-pub">硬件科普 2026</span></div>
+      </a>
+      <a class="card" href="papers/2026-06-17-ai-cluster-architecture/index.html" data-search="ai 集群技术架构关系图：各模块如何连接与协作（数据流动画） 从技术角度讲ai集群各模块如何连接与通信:按封装内(计算↔hbm/破内存墙)、节点内scale-up(nvlink把多卡黏成一块大gpu)、跨柜scale-out(nic→光模块→交换机/ib或roce,spine-leaf,以gb200 nvl72举例)、存储与电力散热四个尺度组织,配一步训练的数据流动画(读batch→进hbm→前向→反向→域内nvlink聚合→跨柜光网络all-reduce→更新)讲清为什么互联带宽/延迟才是集群效率瓶颈(通信墙);面向硬件小白,内联svg交互关系图+四尺度切换+自动浅深主题 ai-infra hardware architecture interconnect explainer 2026-06-17-ai-cluster-architecture">
+        <div class="card-title">AI 集群技术架构关系图：各模块如何连接与协作（数据流动画）</div>
+        <div class="card-tldr">从技术角度讲AI集群各模块如何连接与通信:按封装内(计算↔HBM/破内存墙)、节点内scale-up(NVLink把多卡黏成一块大GPU)、跨柜scale-out(NIC→光模块→交换机/IB或RoCE,spine-le…</div>
+        <div class="card-meta"><span class="card-date">2026-06-22</span><span class="card-pub">硬件科普 2026</span></div>
+      </a>
+      <a class="card" href="papers/2026-06-17-cpu-supply-chain/index.html" data-search="cpu 供应链：从 isa 到成品芯片，谁供给谁（关系图 + 数据流） 把cpu供应链做成交互关系图(isa/eda/ip→设计→代工→设备→材料→封测→成品),含一颗cpu诞生的数据流动画,讲清谁供给谁与euv/eda/光刻胶等卡点;非投资建议 explainer interactive diagram semiconductors supply-chain cpu 2026-06-17-cpu-supply-chain">
+        <div class="card-title">CPU 供应链：从 ISA 到成品芯片，谁供给谁（关系图 + 数据流）</div>
+        <div class="card-tldr">把CPU供应链做成交互关系图(ISA/EDA/IP→设计→代工→设备→材料→封测→成品),含一颗CPU诞生的数据流动画,讲清谁供给谁与EUV/EDA/光刻胶等卡点;非投资建议</div>
+        <div class="card-meta"><span class="card-date">2026-06-22</span><span class="card-pub">技术科普 2026</span></div>
+      </a>
+      <a class="card" href="papers/2026-06-17-asts/index.html" data-search="ast spacemobile（asts）：基本面 / 估值 / 是否值得买入 卫星直连普通手机的 pre-revenue 叙事股：评级 持有/投机仓(仅小仓位)；最强多头=全球盲区 tam 巨大+唯一上市纯标的+at&amp;t/verizon/google 绑定，最致命空头=持续巨额烧钱与无限摊薄+starlink 碾压。 stock equity-research valuation satellite space china 2026-06-17-asts">
+        <div class="card-title">AST SpaceMobile（ASTS）：基本面 / 估值 / 是否值得买入</div>
+        <div class="card-tldr">卫星直连普通手机的 pre-revenue 叙事股：评级 持有/投机仓(仅小仓位)；最强多头=全球盲区 TAM 巨大+唯一上市纯标的+AT&amp;T/Verizon/Google 绑定，最致命空头=持续巨额烧钱与无限摊薄+St…</div>
+        <div class="card-meta"><span class="card-date">2026-06-21</span><span class="card-pub">股票调研 2026</span></div>
+      </a>
+      <a class="card" href="papers/2026-06-17-amd/index.html" data-search="amd（advanced micro devices）：基本面 / 估值 / 是否值得买入 数据中心 gpu（epyc+instinct）成第二增长引擎、手握 openai/meta 各 6gw 协议与 mi450，评级 hold（不追高）；最关键多空＝meta/mi450 兑现 vs nvidia cuda 生态与 71% 毛利率碾压。 stock equity-research valuation semiconductors ai-chips 2026-06-17-amd">
+        <div class="card-title">AMD（Advanced Micro Devices）：基本面 / 估值 / 是否值得买入</div>
+        <div class="card-tldr">数据中心 GPU（EPYC+Instinct）成第二增长引擎、手握 OpenAI/Meta 各 6GW 协议与 MI450，评级 Hold（不追高）；最关键多空＝Meta/MI450 兑现 vs NVIDIA CUDA…</div>
+        <div class="card-meta"><span class="card-date">2026-06-21</span><span class="card-pub">股票调研 2026</span></div>
+      </a>
+      <a class="card" href="papers/2026-06-17-intc/index.html" data-search="intel（intc）：基本面 / 估值 / 是否值得买入 x86 老霸主的困境反转：产品端被 amd/arm 蚕食、ai 几乎缺席输给 nvidia，却豪赌 intel foundry 反转抢 tsmc 生意、巨额 capex 烧钱致 fcf 连年为负；靠美国政府入股约10%+softbank输血续命、分红已砍；股价在政府背书+agentic cpu叙事下暴涨至≈34(市值≈72b)、已超分析师共识甚至citi 30目标价——故事真但估值透支，评级减持/回避(reduce→avoid)。非投资建议。 stock equity-research valuation semiconductors foundry 2026-06-17-intc">
+        <div class="card-title">Intel（INTC）：基本面 / 估值 / 是否值得买入</div>
+        <div class="card-tldr">x86 老霸主的困境反转：产品端被 AMD/ARM 蚕食、AI 几乎缺席输给 NVIDIA，却豪赌 Intel Foundry 反转抢 TSMC 生意、巨额 capex 烧钱致 FCF 连年为负；靠美国政府入股约10%+…</div>
+        <div class="card-meta"><span class="card-date">2026-06-21</span><span class="card-pub">股票调研 2026</span></div>
+      </a>
+      <a class="card" href="papers/2026-06-17-e2b/index.html" data-search="e2b：ai agent 代码沙箱赛道的竞争格局与早期度调研 e2b 是给 ai agent 跑代码的开源 secure sandbox（firecracker microvm 秒级启动，sdk+托管云+self-host）；赛道 emerging→快速 crowded，最大威胁是大模型厂自带 code execution 与 cloudflare/vercel 顺手做，一个可借鉴 whitespace 是信创/私有化的 agent 沙箱。 company competitive-landscape market-map startup-idea agent-infra sandbox china 2026-06-17-e2b">
+        <div class="card-title">E2B：AI agent 代码沙箱赛道的竞争格局与早期度调研</div>
+        <div class="card-tldr">E2B 是给 AI agent 跑代码的开源 secure sandbox（Firecracker microVM 秒级启动，SDK+托管云+self-host）；赛道 emerging→快速 crowded，最大威胁是…</div>
+        <div class="card-meta"><span class="card-date">2026-06-21</span><span class="card-pub">公司调研 2026</span></div>
+      </a>
+      <a class="card" href="papers/2026-06-16-ai-datacenter-cooling-materials/index.html" data-search="ai 数据中心散热「材料」机会扫描：分层赛道早期度与中国创业 whitespace ai 算力推高 gpu 机柜功率密度(gb200/gb300 ~120–140kw vs 风冷 ~15–30kw),液冷渗透拐点在 2024h2;散热从机房问题变材料问题——junction→tim→冷板/均热板→冷却液 每层材料都是瓶颈。普通硅脂/铜冷板已 mature 红海;真正早的是两相介电工质(3m 退出 pfas 留窗口)、沸腾强化涂层、高导热衬底(diamond/bn/graphene) nascent→emerging。给中国创业者最值得切的 whitespace=用 ai 找 pfas-free 冷却液/tim 配方 + 快速实测闭环,配套 immersion 兼容性测试数据库;pfas 监管+3m 退出+aidc capex 爆发=国产替代窗口。 ai4s startup-idea competitive-landscape materials thermal-management datacenter-cooling china 2026-06-16-ai-datacenter-cooling-materials">
+        <div class="card-title">AI 数据中心散热「材料」机会扫描：分层赛道早期度与中国创业 whitespace</div>
+        <div class="card-tldr">AI 算力推高 GPU 机柜功率密度(GB200/GB300 ~120–140kW vs 风冷 ~15–30kW),液冷渗透拐点在 2024H2;散热从机房问题变材料问题——junction→TIM→冷板/均热板→冷却液…</div>
+        <div class="card-meta"><span class="card-date">2026-06-16</span><span class="card-pub">机会扫描 2026</span></div>
+      </a>
+      <a class="card" href="papers/2026-06-01-nvidia-rtx-spark/index.html" data-search="nvidia rtx spark 是什么（小白向调研） rtx spark 是 nvidia 的 cpu+gpu 融合芯片笔记本/小台式，最高 128gb 统一内存让本地能跑/微调大模型；区别于 dgx spark(开发者版/linux)。含与普通电脑对比、亮点、配套软件、选购建议。 hardware nvidia rtx-spark local-ai unified-memory 科普 2026-06-01-nvidia-rtx-spark">
+        <div class="card-title">NVIDIA RTX Spark 是什么（小白向调研）</div>
+        <div class="card-tldr">RTX Spark 是 NVIDIA 的 CPU+GPU 融合芯片笔记本/小台式，最高 128GB 统一内存让本地能跑/微调大模型；区别于 DGX Spark(开发者版/Linux)。含与普通电脑对比、亮点、配套软件、选…</div>
+        <div class="card-meta"><span class="card-date">2026-06-02</span><span class="card-pub">调研 2026</span></div>
+      </a>
+    </div>
+  </section>
+  <section class="cluster" id="c-ai4s">
+    <h2>🧪 AI4S / 科学发现 <span class="count">25</span></h2>
+    <p class="cluster-desc">做科学的公司（材料/制药/生物）+ 科学 agent 论文 + AI4S 机会扫描与赛道地图</p>
+    <div class="grid">
+      <a class="card" href="papers/2512.24189-scp-science-context-protocol/index.html" data-search="science context protocol (scp): accelerating discovery with a global web of autonomous scientific agents 上海 ai lab 面向科学 agent 的开放协议：在 mcp 之上加 experiment context、中心化 hub 编排、多 agent 协调与湿实验室设备集成；开源 spec+参考实现+1600+工具平台，但仅有定性 case study、无量化 benchmark。 agent mcp lab-automation autonomous-science ai4s protocol multi-agent 2512.24189-scp-science-context-protocol">
+        <div class="card-title">Science Context Protocol (SCP): Accelerating Discovery with a Global Web of Autonomous Scientific Agents</div>
+        <div class="card-tldr">上海 AI Lab 面向科学 agent 的开放协议：在 MCP 之上加 experiment context、中心化 Hub 编排、多 agent 协调与湿实验室设备集成；开源 spec+参考实现+1600+工具平台，…</div>
+        <div class="card-meta"><span class="card-date">2026-06-17</span><span class="card-pub">arXiv 2025</span></div>
+      </a>
+      <a class="card" href="papers/2026-06-16-dp-technology/index.html" data-search="深势科技 dp technology：竞争格局与赛道早期度调研 深势科技=中国最早体系化做ai for science的平台型龙头(脱胎于鄂维南院士aisi,创始人孙伟杰/张林峰);开源deepmd-kit势函数+dpa原子间势大模型+uni-mol,中层卖bohrium玻尔科学计算云,上层做电池(piloteye)/制药(hermite)/材料;2025-12超8亿c轮、投后&gt;60亿独角兽;赛道emerging→局部crowded(国内对标晶泰/百图,国际对标cuspai/periodic labs/ms mattergen);whitespace=站在深势开源+玻尔算力肩上做垂直行业×轻应用层闭环交付、按outcome收费。 company competitive-landscape startup-idea ai4s china 2026-06-16-dp-technology">
+        <div class="card-title">深势科技 DP Technology：竞争格局与赛道早期度调研</div>
+        <div class="card-tldr">深势科技=中国最早体系化做AI for Science的平台型龙头(脱胎于鄂维南院士AISI,创始人孙伟杰/张林峰);开源DeePMD-kit势函数+DPA原子间势大模型+Uni-Mol,中层卖Bohrium玻尔科学计算…</div>
+        <div class="card-meta"><span class="card-date">2026-06-16</span><span class="card-pub">公司调研 2026</span></div>
+      </a>
+      <a class="card" href="papers/2026-06-16-xtalpi/index.html" data-search="晶泰科技 xtalpi：竞争格局与赛道早期度调研 量子物理+ai+机器人湿实验室做药物发现cro，港股ai制药第一股、2025首次盈利(营收约8亿/净利约2.58亿)；赛道emerging→crowded，whitespace在垂直单病种/卖铲子/outcome-based细分cro，但单客户(dovetree)依赖是头号风险 company competitive-landscape startup-idea drug-discovery ai4s china 2026-06-16-xtalpi">
+        <div class="card-title">晶泰科技 XtalPi：竞争格局与赛道早期度调研</div>
+        <div class="card-tldr">量子物理+AI+机器人湿实验室做药物发现CRO，港股AI制药第一股、2025首次盈利(营收约8亿/净利约2.58亿)；赛道emerging→crowded，whitespace在垂直单病种/卖铲子/outcome-bas…</div>
+        <div class="card-meta"><span class="card-date">2026-06-16</span><span class="card-pub">公司调研 2026</span></div>
+      </a>
+      <a class="card" href="papers/2026-06-16-ai4s-picks-and-shovels/index.html" data-search="ai4s「卖铲子」机会扫描：给中国创业者的细分赛道地图 为 ai4s 做卖铲子的 6 个细分赛道扫描（科学数据/专家rlhf、模拟数据飞轮、模型评测即服务、实验室中间件 lab os、科研 agent 工具链/协议、cro-like 按 outcome 收费），每格标早期度与拥挤度，给出最值得先挖的 whitespace。 ai4s startup-idea competitive-landscape picks-and-shovels china 2026-06-16-ai4s-picks-and-shovels">
+        <div class="card-title">AI4S「卖铲子」机会扫描：给中国创业者的细分赛道地图</div>
+        <div class="card-tldr">为 AI4S 做卖铲子的 6 个细分赛道扫描（科学数据/专家RLHF、模拟数据飞轮、模型评测即服务、实验室中间件 lab OS、科研 agent 工具链/协议、CRO-like 按 outcome 收费），每格标早期度与…</div>
+        <div class="card-meta"><span class="card-date">2026-06-16</span><span class="card-pub">机会扫描 2026</span></div>
+      </a>
+      <a class="card" href="papers/2026-06-16-insilico-medicine/index.html" data-search="英矽智能 insilico medicine：ai 制药的竞争格局与赛道早期度调研 端到端 ai 制药（靶点/生成化学/临床预测三平台 + 自研管线 ism001-055/rentosertib 治 ipf），赛道 emerging→crowded、ai 获批药全球未验证；可借鉴 whitespace 是单病种/单模态的轻资产垂直工具层。 company competitive-landscape market-map startup-idea ai-drug-discovery china 2026-06-16-insilico-medicine">
+        <div class="card-title">英矽智能 Insilico Medicine：AI 制药的竞争格局与赛道早期度调研</div>
+        <div class="card-tldr">端到端 AI 制药（靶点/生成化学/临床预测三平台 + 自研管线 ISM001-055/Rentosertib 治 IPF），赛道 emerging→crowded、AI 获批药全球未验证；可借鉴 whitespace…</div>
+        <div class="card-meta"><span class="card-date">2026-06-16</span><span class="card-pub">公司调研 2026</span></div>
+      </a>
+      <a class="card" href="papers/2026-06-16-wuxi-apptec/index.html" data-search="药明康德 wuxi apptec：crdmo 巨头的竞争格局与赛道成熟度调研 crdmo 一体化药物研发+生产外包巨头（cro+小分子/寡核苷酸/多肽 cdmo），赛道 mature 巨头主导；最大风险是美国 biosecure act；创业者最现实的 whitespace 是给 cro/cdmo 卖铲子的实验室软件/数据层。 company competitive-landscape market-map startup-idea cro cdmo china 2026-06-16-wuxi-apptec">
+        <div class="card-title">药明康德 WuXi AppTec：CRDMO 巨头的竞争格局与赛道成熟度调研</div>
+        <div class="card-tldr">CRDMO 一体化药物研发+生产外包巨头（CRO+小分子/寡核苷酸/多肽 CDMO），赛道 mature 巨头主导；最大风险是美国 BIOSECURE Act；创业者最现实的 whitespace 是给 CRO/CDMO…</div>
+        <div class="card-meta"><span class="card-date">2026-06-16</span><span class="card-pub">公司调研 2026</span></div>
+      </a>
+      <a class="card" href="papers/2026-06-16-cro-industry-landscape/index.html" data-search="cro / cdmo 行业全景：赛道分段早期度与中国创业 whitespace cro/cdmo 是制药公司把研发+生产外包出去的卖铲子赛道;整体 mature(巨头主导、增速7-9%),但按分子×环节切开,tides(寡核苷酸+多肽)/adc/cgt 新分子cdmo产能紧缺双位数增长、ai+cro(发现端)emerging→crowded、实验室软件数据层(lab os/lims/eln)国内偏空白仍 emerging;叠加美国 biosecure act(2025-12 成法)制造友岸/国产替代窗口;给中国创业者最该切的一个=给cro/cdmo卖铲子的研发数据/实验室软件层。数字口径乱,已多源并列标年份。 ai4s startup-idea competitive-landscape cro cdmo china industry-landscape 2026-06-16-cro-industry-landscape">
+        <div class="card-title">CRO / CDMO 行业全景：赛道分段早期度与中国创业 whitespace</div>
+        <div class="card-tldr">CRO/CDMO 是制药公司把研发+生产外包出去的卖铲子赛道;整体 mature(巨头主导、增速7-9%),但按分子×环节切开,TIDES(寡核苷酸+多肽)/ADC/CGT 新分子CDMO产能紧缺双位数增长、AI+CRO…</div>
+        <div class="card-meta"><span class="card-date">2026-06-16</span><span class="card-pub">机会扫描 2026</span></div>
+      </a>
+      <a class="card" href="papers/2026-06-16-scientific-agent-infra/index.html" data-search="科学 agent 基础设施深挖：仪器 mcp 协议层 × agent 评测即服务 深挖ai4s卖铲子两格:①科学仪器mcp/agent-to-instrument协议层(让agent真驱动移液机器人/hplc/电镜)——判nascent,标准林立未统一(sila2/opc-ua lads/allotrope),mcp真接仪器案例屈指可数(lbnl tem agent/instrmcp),lap(arxiv2606.03755)与上海ai lab的scp两个agent-to-instrument协议刚提出;②科学agent评测即服务——科研专用benchmark全是学术开源几乎无人商业化(judnascent),对比通用eval已crowded(scale$29b/mercor$10b/lmarena)。结论:a格更适合中国早期创业(付费方在中国+政策助力国产替代+商业模式可借鉴ecl/ginkgo),b格付费方不明宜作a格嵌入能力。可借鉴:emerald cloud lab/ginkgo/strateos/opentrons/pylabrobot。 ai4s startup-idea competitive-landscape mcp agent-eval lab-automation china 2026-06-16-scientific-agent-infra">
+        <div class="card-title">科学 agent 基础设施深挖：仪器 MCP 协议层 × agent 评测即服务</div>
+        <div class="card-tldr">深挖AI4S卖铲子两格:①科学仪器MCP/agent-to-instrument协议层(让agent真驱动移液机器人/HPLC/电镜)——判nascent,标准林立未统一(SiLA2/OPC-UA LADS/Allotr…</div>
+        <div class="card-meta"><span class="card-date">2026-06-16</span><span class="card-pub">机会扫描 2026</span></div>
+      </a>
+      <a class="card" href="papers/2606.03755-lap-agent-to-instrument/index.html" data-search="lap: an agent-to-instrument protocol for autonomous science 把 agentic 生态的第三条边 agent-to-instrument 标准化的协议设计：用 instrumentcard、独占预约、绑定参数哈希的安全围栏 token、和强制带单位/标定/不确定度的 measurementresult 四原语，补上 mcp/a2a 没覆盖的「agent 驱动物理仪器」那条边；封装而非取代 sila 2/opc-ua。仅 v0.1 设计规范，尚无开源实现。 agent mcp lab-automation autonomous-science ai4s protocol a2a 2606.03755-lap-agent-to-instrument">
+        <div class="card-title">LAP: An Agent-to-Instrument Protocol for Autonomous Science</div>
+        <div class="card-tldr">把 agentic 生态的第三条边 agent-to-instrument 标准化的协议设计：用 InstrumentCard、独占预约、绑定参数哈希的安全围栏 token、和强制带单位/标定/不确定度的 Measure…</div>
+        <div class="card-meta"><span class="card-date">2026-06-16</span><span class="card-pub">arXiv 2026</span></div>
+      </a>
+      <a class="card" href="papers/2026-06-15-agents-for-scientific-discovery/index.html" data-search="agent 在科学发现里的应用（文献综述） agent 把 ai 从 ai-for-science 推向 agentic science：按科研闭环梳理端到端研究 agent(ai scientist/agent lab)、假设生成(ai co-scientist)、化学材料自驱实验室(coscientist/chemcrow/a-lab)、生物医药(biodiscoveryagent/virtual biotech)与评测(scienceagentbench 等),含现状与挑战。 ai-for-science agentic-science scientific-discovery self-driving-lab survey 2026-06-15-agents-for-scientific-discovery">
+        <div class="card-title">Agent 在科学发现里的应用（文献综述）</div>
+        <div class="card-tldr">Agent 把 AI 从 AI-for-Science 推向 Agentic Science：按科研闭环梳理端到端研究 agent(AI Scientist/Agent Lab)、假设生成(AI co-scientist…</div>
+        <div class="card-meta"><span class="card-date">2026-06-15</span><span class="card-pub">综述 2026</span></div>
+      </a>
+      <a class="card" href="papers/2023-11-29-a-lab-autonomous-materials/index.html" data-search="an autonomous laboratory for the accelerated synthesis of novel materials (a-lab) a-lab 把计算预测→文献挖掘提配方→机器人合成→自动 xrd/rietveld→arrows 主动学习串成无人闭环，17 天对 57 个目标成功合成 36 个(63%)；自驱实验室从有机液相走向固态无机粉末的代表作，含 post-publication 关于表征质量与 novelty 的争议与 nature 更正。 self-driving-lab materials-science autonomous-synthesis active-learning scientific-discovery 2023-11-29-a-lab-autonomous-materials">
+        <div class="card-title">An autonomous laboratory for the accelerated synthesis of novel materials (A-Lab)</div>
+        <div class="card-tldr">A-Lab 把计算预测→文献挖掘提配方→机器人合成→自动 XRD/Rietveld→ARROWS 主动学习串成无人闭环，17 天对 57 个目标成功合成 36 个(63%)；自驱实验室从有机液相走向固态无机粉末的代表作，…</div>
+        <div class="card-meta"><span class="card-date">2026-06-15</span><span class="card-pub">Nature 2023</span></div>
+      </a>
+      <a class="card" href="papers/2410.05080-scienceagentbench/index.html" data-search="scienceagentbench: toward rigorous assessment of language agents for data-driven scientific discovery 从 44 篇同行评审论文抽取 102 个数据驱动科学发现任务（bioinformatics/计算化学/gis/认知神经科学），统一成可执行验证的 python program 生成问题，配 rubric 与防数据污染策略；评测 5 个 llm × 3 个框架，最好的 agent（claude-3.5-sonnet+self-debug）三次尝试也只解 32.4%（带专家知识 34.3%），说明 language agent 离自动化科研还很远。 benchmark scientific-discovery language-agent code-generation evaluation 2410.05080-scienceagentbench">
+        <div class="card-title">ScienceAgentBench: Toward Rigorous Assessment of Language Agents for Data-Driven Scientific Discovery</div>
+        <div class="card-tldr">从 44 篇同行评审论文抽取 102 个数据驱动科学发现任务（bioinformatics/计算化学/GIS/认知神经科学），统一成可执行验证的 Python program 生成问题，配 rubric 与防数据污染策略…</div>
+        <div class="card-meta"><span class="card-date">2026-06-15</span><span class="card-pub">ICLR 2025</span></div>
+      </a>
+      <a class="card" href="papers/2026-02-23-virtual-biotech/index.html" data-search="the virtual biotech: a multi-agent ai framework for therapeutic discovery and development 把一支药企早期研发团队抽象成 multi-agent 系统：cso agent 编排跨学科科学家 agent（statistical genetics/functional genomics/cheminformatics/clinical 等），经 mcp 工具连接生物医学数据库做证据级分析；以三个真实案例（55,984 临床试验分析、b7-h3 肺癌靶点、osmrβ 失败试验复盘）展示，全程 keep human in the loop。 multi-agent drug-discovery biomedicine scientific-discovery orchestration 2026-02-23-virtual-biotech">
+        <div class="card-title">The Virtual Biotech: A Multi-Agent AI Framework for Therapeutic Discovery and Development</div>
+        <div class="card-tldr">把一支药企早期研发团队抽象成 multi-agent 系统：CSO agent 编排跨学科科学家 agent（statistical genetics/functional genomics/cheminformatic…</div>
+        <div class="card-meta"><span class="card-date">2026-06-15</span><span class="card-pub">bioRxiv 2026</span></div>
+      </a>
+      <a class="card" href="papers/2602.00169-agentic-materials-science/index.html" data-search="towards agentic intelligence for materials science 以 pipeline-centric 端到端视角综述材料科学的 agentic intelligence：把语料/预训练/领域适配/微调/goal-conditioned agent 视为可联合优化系统，用真实发现奖励而非 proxy benchmark 驱动，梳理 reactive 能力维度与 agentic 系统、scientist ai、自驱实验室及其挑战。 agentic-ai materials-science self-driving-lab survey scientific-discovery 2602.00169-agentic-materials-science">
+        <div class="card-title">Towards Agentic Intelligence for Materials Science</div>
+        <div class="card-tldr">以 pipeline-centric 端到端视角综述材料科学的 agentic intelligence：把语料/预训练/领域适配/微调/goal-conditioned agent 视为可联合优化系统，用真实发现奖励而…</div>
+        <div class="card-meta"><span class="card-date">2026-06-15</span><span class="card-pub">arXiv 2026</span></div>
+      </a>
+      <a class="card" href="papers/2304.05376-chemcrow/index.html" data-search="chemcrow: augmenting large-language models with chemistry tools gpt-4 + 18 个专家化学工具，用 react 式 thought-action-observation 循环编排，自主规划并在 roborxn 上合成 deet、三个 organocatalyst、发现新 chromophore；并揭示 gpt-4 当裁判会偏爱流畅但错误的答案。 llm-agent chemistry tool-use react scientific-discovery retrosynthesis 2304.05376-chemcrow">
+        <div class="card-title">ChemCrow: Augmenting large-language models with chemistry tools</div>
+        <div class="card-tldr">GPT-4 + 18 个专家化学工具，用 ReAct 式 Thought-Action-Observation 循环编排，自主规划并在 RoboRXN 上合成 DEET、三个 organocatalyst、发现新 chr…</div>
+        <div class="card-meta"><span class="card-date">2026-06-15</span><span class="card-pub">Nature Machine Intelligence 2024</span></div>
+      </a>
+      <a class="card" href="papers/2026-06-15-cuspai/index.html" data-search="cuspai：竞争格局与赛道早期度调研 材料搜索引擎/generative ai for materials(英国cambridge,welling);emerging→crowded,累计~$130m;idea=材料验证即服务+合成代工网络。 company competitive-landscape startup-idea ai4s materials 2026-06-15-cuspai">
+        <div class="card-title">CuspAI：竞争格局与赛道早期度调研</div>
+        <div class="card-tldr">材料搜索引擎/generative AI for materials(英国Cambridge,Welling);emerging→crowded,累计~$130M;idea=材料验证即服务+合成代工网络。</div>
+        <div class="card-meta"><span class="card-date">2026-06-15</span><span class="card-pub">公司调研 2026</span></div>
+      </a>
+      <a class="card" href="papers/2026-06-15-quantumbond-ai/index.html" data-search="quantumbond ai：竞争格局与赛道早期度调研 声称做ai×电解质/催化剂界面模拟+ip授权,但公司本体网上无法确证(全标🔴);借此摸清电池界面ai4s赛道(emerging);idea=电化学界面轻资产配方ip工坊。 company competitive-landscape startup-idea ai4s batteries 2026-06-15-quantumbond-ai">
+        <div class="card-title">QuantumBond AI：竞争格局与赛道早期度调研</div>
+        <div class="card-tldr">声称做AI×电解质/催化剂界面模拟+IP授权,但公司本体网上无法确证(全标🔴);借此摸清电池界面AI4S赛道(emerging);idea=电化学界面轻资产配方IP工坊。</div>
+        <div class="card-meta"><span class="card-date">2026-06-15</span><span class="card-pub">公司调研 2026</span></div>
+      </a>
+      <a class="card" href="papers/2026-06-15-periodic-labs/index.html" data-search="periodic labs：竞争格局与赛道早期度调研 ai scientist+自驱实验室(物理/材料,fedus ex-openai+cubuk ex-deepmind);a16z领投$300m种子;emerging;idea=自主实验室/数据 as-a-service。 company competitive-landscape startup-idea ai4s self-driving-lab 2026-06-15-periodic-labs">
+        <div class="card-title">Periodic Labs：竞争格局与赛道早期度调研</div>
+        <div class="card-tldr">AI scientist+自驱实验室(物理/材料,Fedus ex-OpenAI+Cubuk ex-DeepMind);a16z领投$300M种子;emerging;idea=自主实验室/数据 as-a-service。</div>
+        <div class="card-meta"><span class="card-date">2026-06-15</span><span class="card-pub">公司调研 2026</span></div>
+      </a>
+      <a class="card" href="papers/2026-06-15-orbital-materials/index.html" data-search="orbital industries(原 orbital materials)：竞争格局与赛道早期度调研 ai+自建制造做数据中心脱碳材料(液冷剂);2026改名orbital industries;累计~$70m;emerging;idea=抓监管逼出的刚需实物缺口(无pfas冷却液)。 company competitive-landscape startup-idea ai4s materials 2026-06-15-orbital-materials">
+        <div class="card-title">Orbital Industries(原 Orbital Materials)：竞争格局与赛道早期度调研</div>
+        <div class="card-tldr">AI+自建制造做数据中心脱碳材料(液冷剂);2026改名Orbital Industries;累计~$70M;emerging;idea=抓监管逼出的刚需实物缺口(无PFAS冷却液)。</div>
+        <div class="card-meta"><span class="card-date">2026-06-15</span><span class="card-pub">公司调研 2026</span></div>
+      </a>
+      <a class="card" href="papers/2026-06-15-ares-materials/index.html" data-search="ares materials：竞争格局与赛道早期度调研 texas柔性显示基板/光学薄膜(2014 ut dallas spinout),ai仅内部加速器、非真ai4s平台;材料层crowded→mature;2025-10 series b首笔$12m。 company competitive-landscape materials 2026-06-15-ares-materials">
+        <div class="card-title">Ares Materials：竞争格局与赛道早期度调研</div>
+        <div class="card-tldr">Texas柔性显示基板/光学薄膜(2014 UT Dallas spinout),AI仅内部加速器、非真AI4S平台;材料层crowded→mature;2025-10 Series B首笔$12M。</div>
+        <div class="card-meta"><span class="card-date">2026-06-15</span><span class="card-pub">公司调研 2026</span></div>
+      </a>
+      <a class="card" href="papers/2026-06-15-altrove/index.html" data-search="altrove：竞争格局与赛道早期度调研 法国ai+自驱产线做无稀土磁体;外层材料发现crowded、内层垂直造磁体nascent;累计~$14m种子;idea=单一卡脖子材料品类自建小产线卖过认证实物+ip。 company competitive-landscape startup-idea ai4s materials 2026-06-15-altrove">
+        <div class="card-title">Altrove：竞争格局与赛道早期度调研</div>
+        <div class="card-tldr">法国AI+自驱产线做无稀土磁体;外层材料发现crowded、内层垂直造磁体nascent;累计~$14M种子;idea=单一卡脖子材料品类自建小产线卖过认证实物+IP。</div>
+        <div class="card-meta"><span class="card-date">2026-06-15</span><span class="card-pub">公司调研 2026</span></div>
+      </a>
+      <a class="card" href="papers/2026-06-15-lila-sciences/index.html" data-search="lila sciences：竞争格局与赛道早期度调研 flagship孵化的自驱跨域研发平台;种子$200m→a$350m累计$550m(~$1.3b,传洽$8.5b);emerging偏nascent;idea=自驱实验室 as-a-service(cro 2.0)。 company competitive-landscape startup-idea ai4s self-driving-lab 2026-06-15-lila-sciences">
+        <div class="card-title">Lila Sciences：竞争格局与赛道早期度调研</div>
+        <div class="card-tldr">Flagship孵化的自驱跨域研发平台;种子$200M→A$350M累计$550M(~$1.3B,传洽$8.5B);emerging偏nascent;idea=自驱实验室 as-a-service(CRO 2.0)。</div>
+        <div class="card-meta"><span class="card-date">2026-06-15</span><span class="card-pub">公司调研 2026</span></div>
+      </a>
+      <a class="card" href="papers/2026-06-15-radical-ai/index.html" data-search="radical ai：竞争格局与赛道早期度调研 nyc自驱材料实验室,极端环境材料+政府/国防;$55m seed+(rtx领投)+afwerx合同;emerging;idea=极端环境材料×政府阶段交付窄缝。 company competitive-landscape startup-idea ai4s gov-contract 2026-06-15-radical-ai">
+        <div class="card-title">Radical AI：竞争格局与赛道早期度调研</div>
+        <div class="card-tldr">NYC自驱材料实验室,极端环境材料+政府/国防;$55M Seed+(RTX领投)+AFWERX合同;emerging;idea=极端环境材料×政府阶段交付窄缝。</div>
+        <div class="card-meta"><span class="card-date">2026-06-15</span><span class="card-pub">公司调研 2026</span></div>
+      </a>
+      <a class="card" href="papers/2026-06-15-isomorphic-labs/index.html" data-search="isomorphic labs：竞争格局与赛道早期度调研 deepmind分拆ai药物发现(hassabis,alphafold);lilly/novartis合作+$600m+$2.1b b轮;crowded→maturing,临床尚未兑现;idea=做中立工具/数据/评测层卖铲子。 company competitive-landscape startup-idea drug-discovery 2026-06-15-isomorphic-labs">
+        <div class="card-title">Isomorphic Labs：竞争格局与赛道早期度调研</div>
+        <div class="card-tldr">DeepMind分拆AI药物发现(Hassabis,AlphaFold);Lilly/Novartis合作+$600M+$2.1B B轮;crowded→maturing,临床尚未兑现;idea=做中立工具/数据/评测层…</div>
+        <div class="card-meta"><span class="card-date">2026-06-15</span><span class="card-pub">公司调研 2026</span></div>
+      </a>
+      <a class="card" href="papers/2026-06-15-ai4s-china-startup-map/index.html" data-search="ai4s × 中国创业机会总览(国外 idea → 中国对标/拥挤度/切口) 把11家国外ai4s/ai公司的中国对标横向汇总:中国在模型层不落后甚至反超,机会在下游闭环/卖铲子/垂直卡脖子;最像whitespace的是ai冷却液与中文agent search api;避开ai药物与c端搜索红海。 ai4s china startup-idea competitive-landscape overview 2026-06-15-ai4s-china-startup-map">
+        <div class="card-title">AI4S × 中国创业机会总览(国外 idea → 中国对标/拥挤度/切口)</div>
+        <div class="card-tldr">把11家国外AI4S/AI公司的中国对标横向汇总:中国在模型层不落后甚至反超,机会在下游闭环/卖铲子/垂直卡脖子;最像whitespace的是AI冷却液与中文agent search API;避开AI药物与C端搜索红海。</div>
+        <div class="card-meta"><span class="card-date">2026-06-15</span><span class="card-pub">公司调研 2026</span></div>
+      </a>
+    </div>
+  </section>
+  <section class="cluster" id="c-data">
+    <h2>🏷️ AI 数据 / RLHF / 评测 <span class="count">6</span></h2>
+    <p class="cluster-desc">给前沿 labs 供专家数据、RLHF、programmatic labeling、AI 招聘与评测的数据公司</p>
+    <div class="grid">
+      <a class="card" href="papers/2026-06-17-kobe/index.html" data-search="kobe（getkobe.ai）：ai 职业 agent 的竞争格局与早期度调研 替个人读 slack/notion/granola 工作流、量化技能并被动对接招聘的 ai career agent；赛道 emerging（切入点局部 nascent），与 mercor/micro1 的 b 端供给互补而非竞争；whitespace=读工作流的个人技能 agent + 隐私本地化；团队/融资未披露，产品实效未验证。 company competitive-landscape market-map startup-idea ai-agent recruiting china 2026-06-17-kobe">
+        <div class="card-title">Kobe（getkobe.ai）：AI 职业 agent 的竞争格局与早期度调研</div>
+        <div class="card-tldr">替个人读 Slack/Notion/Granola 工作流、量化技能并被动对接招聘的 AI career agent；赛道 emerging（切入点局部 nascent），与 Mercor/Micro1 的 B 端供给互…</div>
+        <div class="card-meta"><span class="card-date">2026-06-22</span><span class="card-pub">公司调研 2026</span></div>
+      </a>
+      <a class="card" href="papers/2026-06-16-micro1/index.html" data-search="micro1：ai 招聘与专家数据的竞争格局与早期度调研 用 ai 面试官 zara 筛专家、给前沿 ai labs 供 rlhf/专家数据的 ai 招聘起家公司；赛道 emerging→快速 crowding、巨头环伺，体量小护城河弱；可借鉴垂直专家数据闭环 whitespace。 company competitive-landscape market-map startup-idea ai-data ai-recruiting china 2026-06-16-micro1">
+        <div class="card-title">Micro1：AI 招聘与专家数据的竞争格局与早期度调研</div>
+        <div class="card-tldr">用 AI 面试官 Zara 筛专家、给前沿 AI labs 供 RLHF/专家数据的 AI 招聘起家公司；赛道 emerging→快速 crowding、巨头环伺，体量小护城河弱；可借鉴垂直专家数据闭环 whitespa…</div>
+        <div class="card-meta"><span class="card-date">2026-06-16</span><span class="card-pub">公司调研 2026</span></div>
+      </a>
+      <a class="card" href="papers/2026-06-16-snorkel-ai/index.html" data-search="snorkel ai：programmatic labeling 与 ai 评测的竞争格局与早期度调研 stanford 衍生、以 programmatic labeling/弱监督起家的 ai 数据公司，2025 转向专家数据+模型评测（series d $100m@$1.3b）；赛道整体 crowded 但 programmatic+垂直 eval 切口仍 emerging，中国 whitespace 显著。 company competitive-landscape market-map startup-idea ai-data data-labeling china 2026-06-16-snorkel-ai">
+        <div class="card-title">Snorkel AI：programmatic labeling 与 AI 评测的竞争格局与早期度调研</div>
+        <div class="card-tldr">Stanford 衍生、以 programmatic labeling/弱监督起家的 AI 数据公司，2025 转向专家数据+模型评测（Series D $100M@$1.3B）；赛道整体 crowded 但 progr…</div>
+        <div class="card-meta"><span class="card-date">2026-06-16</span><span class="card-pub">公司调研 2026</span></div>
+      </a>
+      <a class="card" href="papers/2026-06-16-turing/index.html" data-search="turing：从开发者人才平台到 ai 训练数据的竞争格局与早期度调研 起家远程开发者人才平台、2022 后转向给 frontier labs 供 coding/reasoning/rlhf 训练数据（2025 估值 $2.2b）；赛道判 crowded（专家 coding/agent 数据细分仍 emerging）；可借鉴 whitespace：把全球开发者供给池做成垂直 agent 轨迹数据护城河。 company competitive-landscape market-map startup-idea ai-data coding-data china 2026-06-16-turing">
+        <div class="card-title">Turing：从开发者人才平台到 AI 训练数据的竞争格局与早期度调研</div>
+        <div class="card-tldr">起家远程开发者人才平台、2022 后转向给 frontier labs 供 coding/reasoning/RLHF 训练数据（2025 估值 $2.2B）；赛道判 crowded（专家 coding/agent 数据…</div>
+        <div class="card-meta"><span class="card-date">2026-06-16</span><span class="card-pub">公司调研 2026</span></div>
+      </a>
+      <a class="card" href="papers/2026-06-16-mercor/index.html" data-search="mercor：ai 专家数据市场的竞争格局与早期度调研 ai驱动的专家数据市场:用20分钟ai面试筛医生/律师/phd/工程师接入openai/anthropic等frontier labs做高端标注与eval;创始人brendan foody/adarsh hiremath/surya midha(22岁thiel fellow);seed$3.6m→a~$32m→b$100m@$2b→c$350m@$10b(2025-10,felicis领);arr口径打架(传$450-500m@2025-09/$1.5b@2026-05,多为gross,take-rate30-40%);早期度emerging→crowded(surge$25b/scale$29b/micro1/handshake同质化升温);中国whitespace=出海接单+垂直医疗法律专家+ai面试工具层(大厂已自建晓天睿士/xpert)。 company competitive-landscape market-map startup-idea ai-data rlhf china 2026-06-16-mercor">
+        <div class="card-title">Mercor：AI 专家数据市场的竞争格局与早期度调研</div>
+        <div class="card-tldr">AI驱动的专家数据市场:用20分钟AI面试筛医生/律师/PhD/工程师接入OpenAI/Anthropic等frontier labs做高端标注与eval;创始人Brendan Foody/Adarsh Hiremath…</div>
+        <div class="card-meta"><span class="card-date">2026-06-16</span><span class="card-pub">公司调研 2026</span></div>
+      </a>
+      <a class="card" href="papers/2026-06-16-surge-ai/index.html" data-search="surge ai：rlhf 专家数据赛道的竞争格局与早期度调研 纯 bootstrap、零 vc 做到 2024 传 ~$1.2b 营收反超 scale 的 rlhf/专家数据公司；赛道判 crowded（高端仍有空），whitespace 在垂直专家 eval/rl 环境数据。 company competitive-landscape market-map startup-idea ai-data rlhf china 2026-06-16-surge-ai">
+        <div class="card-title">Surge AI：RLHF 专家数据赛道的竞争格局与早期度调研</div>
+        <div class="card-tldr">纯 bootstrap、零 VC 做到 2024 传 ~$1.2B 营收反超 Scale 的 RLHF/专家数据公司；赛道判 crowded（高端仍有空），whitespace 在垂直专家 eval/RL 环境数据。</div>
+        <div class="card-meta"><span class="card-date">2026-06-16</span><span class="card-pub">公司调研 2026</span></div>
+      </a>
+    </div>
+  </section>
+  <section class="cluster" id="c-agent">
+    <h2>🤖 Agent / LLM 论文 &amp; 工具 <span class="count">43</span></h2>
+    <p class="cluster-desc">agentic SFT、tool-use 数据合成、MCP、world model、RL、test-time 学习、推理等 arXiv/会议论文与工具调研</p>
+    <div class="grid">
+      <a class="card" href="papers/2605.17172-openjarvis-on-device-personal-ai/index.html" data-search="openjarvis：把整套 personal ai 搬上本地设备（llm-guided spec search） 把 personal ai 系统抽象成跨五个 primitive 的 typed spec，用 frontier 云模型在搜索期改写、本地推理期零云调用；本地 spec 平均仅差云 3.2 pp，但 api 成本降约 800×、延迟降 4×。 on-device llm personal ai agent local-cloud spec search distillation 2605.17172-openjarvis-on-device-personal-ai">
+        <div class="card-title">OpenJarvis：把整套 Personal AI 搬上本地设备（LLM-guided spec search）</div>
+        <div class="card-tldr">把 personal AI 系统抽象成跨五个 primitive 的 typed spec，用 frontier 云模型在搜索期改写、本地推理期零云调用；本地 spec 平均仅差云 3.2 pp，但 API 成本降约 8…</div>
+        <div class="card-meta"><span class="card-date">2026-06-17</span><span class="card-pub">arXiv 2026</span></div>
+      </a>
+      <a class="card" href="papers/2606.03854-cli-anything/index.html" data-search="cli-anything: towards agent-native computer use 把专业 gui 软件 lift 成有状态的 command-line harness，用结构化命令/显式状态/确定反馈实现 agent-native computer use，并交付 cli-hub 平台生成与分发这些接口。 agent computer-use cli agent-native tool-use gui 2606.03854-cli-anything">
+        <div class="card-title">CLI-Anything: Towards Agent-Native Computer Use</div>
+        <div class="card-tldr">把专业 GUI 软件 lift 成有状态的 command-line harness，用结构化命令/显式状态/确定反馈实现 agent-native computer use，并交付 CLI-Hub 平台生成与分发这些接…</div>
+        <div class="card-meta"><span class="card-date">2026-06-12</span><span class="card-pub">arXiv 2026</span></div>
+      </a>
+      <a class="card" href="papers/2504.13065-echoworld/index.html" data-search="echoworld: learning motion-aware world models for echocardiography probe guidance 用 world model 思路做心脏超声探头导航：jepa 式 spatial(masked region) + motion(visual outcome) 双任务 pre-training，再用把 6-dof 相对位姿嵌进 attention 的 motion-aware attention 融合历史，single-frame 与 sequential 协议下 guidance error 均最低。 world-model medical-imaging echocardiography probe-guidance representation-learning 2504.13065-echoworld">
+        <div class="card-title">EchoWorld: Learning Motion-Aware World Models for Echocardiography Probe Guidance</div>
+        <div class="card-tldr">用 world model 思路做心脏超声探头导航：JEPA 式 spatial(masked region) + motion(visual outcome) 双任务 pre-training，再用把 6-DoF 相对…</div>
+        <div class="card-meta"><span class="card-date">2026-06-11</span><span class="card-pub">CVPR 2025</span></div>
+      </a>
+      <a class="card" href="papers/2026-06-02-airllm-survey/index.html" data-search="airllm 调研：小显存跑大模型 + 竞品对照 airllm 用逐层 disk-offload 在 4gb 显卡跑 70b(不量化、保精度,但很慢);对照 accelerate/zero-inference/flexgen/llama.cpp/ktransformers/powerinfer/petals 等竞品与选型建议。 inference offloading local-llm quantization hardware 工具调研 2026-06-02-airllm-survey">
+        <div class="card-title">AirLLM 调研：小显存跑大模型 + 竞品对照</div>
+        <div class="card-tldr">AirLLM 用逐层 disk-offload 在 4GB 显卡跑 70B(不量化、保精度,但很慢);对照 Accelerate/ZeRO-Inference/FlexGen/llama.cpp/ktransformer…</div>
+        <div class="card-meta"><span class="card-date">2026-06-05</span><span class="card-pub">调研 2026</span></div>
+      </a>
+      <a class="card" href="papers/2510.24645-funreason-mt/index.html" data-search="funreason-mt: advanced data synthesis for real-world multi-turn tool-use 用 api graph 定向采样 + advanced-tool 反推 hard query + ground-truth 校验的迭代 cot，合成高质量多轮 tool-use 数据；训出的 4b 模型在 bfclv3 multi-turn 达 57.75，同尺寸 sota 并反超 claude-sonnet-4 等大模型。 tool-use data-synthesis multi-turn function-calling bfcl agent 2510.24645-funreason-mt">
+        <div class="card-title">FunReason-MT: Advanced Data Synthesis for Real-world Multi-Turn Tool-use</div>
+        <div class="card-tldr">用 API graph 定向采样 + advanced-tool 反推 hard query + ground-truth 校验的迭代 CoT，合成高质量多轮 tool-use 数据；训出的 4B 模型在 BFCLv3…</div>
+        <div class="card-meta"><span class="card-date">2026-06-05</span><span class="card-pub">arXiv 2025</span></div>
+      </a>
+      <a class="card" href="papers/2026-06-02-mai-thinking-1/index.html" data-search="mai-thinking-1: building a hill-climbing machine microsoft ai 首个从零自研、不蒸馏第三方的 reasoning 模型（35b active / 1t total moe）；把模型研发当成系统级优化的「爬山机」，靠 scaling 中心的 pre-training 与稳健 rl 配方实现数千步 log-linear 持续爬坡，aime 2025 97.0%、swe-bench pro 52.8%。纯技术报告，未开源。 moe reasoning pretraining-scaling rl from-scratch microsoft 2026-06-02-mai-thinking-1">
+        <div class="card-title">MAI-Thinking-1: Building a Hill-Climbing Machine</div>
+        <div class="card-tldr">Microsoft AI 首个从零自研、不蒸馏第三方的 reasoning 模型（35B active / 1T total MoE）；把模型研发当成系统级优化的「爬山机」，靠 scaling 中心的 pre-train…</div>
+        <div class="card-meta"><span class="card-date">2026-06-04</span><span class="card-pub">Microsoft AI Tech Report 2026</span></div>
+      </a>
+      <a class="card" href="papers/2026-06-01-agentic-sft-algorithms-survey/index.html" data-search="agentic sft 的算法研究现状（文献综述） agentic sft 算法按 6 方向梳理：监督/掩码设计、多轮组样本与效率、轨迹数据合成、turn/step 级 credit、拒绝采样/自蒸馏、sft 病理与 sft↔rl 融合；含代表工作表与脉络判断。 agentic-sft survey tool-use trajectory credit-assignment self-distillation 2026-06-01-agentic-sft-algorithms-survey">
+        <div class="card-title">Agentic SFT 的算法研究现状（文献综述）</div>
+        <div class="card-tldr">Agentic SFT 算法按 6 方向梳理：监督/掩码设计、多轮组样本与效率、轨迹数据合成、turn/step 级 credit、拒绝采样/自蒸馏、SFT 病理与 SFT↔RL 融合；含代表工作表与脉络判断。</div>
+        <div class="card-meta"><span class="card-date">2026-06-03</span><span class="card-pub">综述 2026</span></div>
+      </a>
+      <a class="card" href="papers/2604.26904-clawgym-claw-agents/index.html" data-search="clawgym: a scalable framework for building effective claw agents 为 claw 式个人 agent 打造数据合成+训练+评测一体化框架：双路合成 13.5k 可验证任务，黑盒 rollout+sft+轻量 rl 训出 clawgym-agents，并建 200 题 clawgym-bench；合成数据让 qwen3-8b 在 pinchbench/clawgym-bench 相对提升 38.90%/43.46%。 agent agentic-sft data-synthesis tool-use benchmark rl 2604.26904-clawgym-claw-agents">
+        <div class="card-title">ClawGym: A Scalable Framework for Building Effective Claw Agents</div>
+        <div class="card-tldr">为 Claw 式个人 agent 打造数据合成+训练+评测一体化框架：双路合成 13.5K 可验证任务，黑盒 rollout+SFT+轻量 RL 训出 ClawGym-Agents，并建 200 题 ClawGym-Be…</div>
+        <div class="card-meta"><span class="card-date">2026-06-03</span><span class="card-pub">arXiv 2026</span></div>
+      </a>
+      <a class="card" href="papers/2605.27276-sia-self-improving-ai/index.html" data-search="sia: self improving ai with harness &amp; weight updates 用一个 feedback-agent 在同一闭环里同时更新 agent 的 harness 与 lora 权重，在法律分类、gpu kernel、单细胞 rna 去噪三任务上双杠杆均超只改 harness 与此前 sota。 self-improving-agents test-time-training rl lora harness 2605.27276-sia-self-improving-ai">
+        <div class="card-title">SIA: Self Improving AI with Harness &amp; Weight Updates</div>
+        <div class="card-tldr">用一个 Feedback-Agent 在同一闭环里同时更新 agent 的 harness 与 LoRA 权重，在法律分类、GPU kernel、单细胞 RNA 去噪三任务上双杠杆均超只改 harness 与此前 SOT…</div>
+        <div class="card-meta"><span class="card-date">2026-06-01</span><span class="card-pub">arXiv 2026</span></div>
+      </a>
+      <a class="card" href="papers/2504.16084-ttrl-test-time-reinforcement-learning/index.html" data-search="ttrl: test-time reinforcement learning 在无标签测试数据上用多数投票造伪标签与 reward 跑 rl，让 llm 自我进化：qwen2.5-math-7b 在 aime 2024 上 pass@1 +211%，且能超过自身 maj@n 并逼近偷看标签直训的上界。 test-time-training rl reasoning majority-voting unlabeled grpo 2504.16084-ttrl-test-time-reinforcement-learning">
+        <div class="card-title">TTRL: Test-Time Reinforcement Learning</div>
+        <div class="card-tldr">在无标签测试数据上用多数投票造伪标签与 reward 跑 RL，让 LLM 自我进化：Qwen2.5-Math-7B 在 AIME 2024 上 pass@1 +211%，且能超过自身 maj@n 并逼近偷看标签直训的上…</div>
+        <div class="card-meta"><span class="card-date">2026-06-01</span><span class="card-pub">NeurIPS 2025</span></div>
+      </a>
+      <a class="card" href="papers/2505.20633-test-time-learning-llm/index.html" data-search="test-time learning for large language models tlm：测试时只用无标注输入，通过最小化 input perplexity（+高perplexity样本选择+lora抗遗忘）让 llm 在线适配目标域，domain 任务提升≥20%；含 adapteval benchmark。 test-time-learning domain-adaptation perplexity lora unsupervised 2505.20633-test-time-learning-llm">
+        <div class="card-title">Test-Time Learning for Large Language Models</div>
+        <div class="card-tldr">TLM：测试时只用无标注输入，通过最小化 input perplexity（+高perplexity样本选择+LoRA抗遗忘）让 LLM 在线适配目标域，domain 任务提升≥20%；含 AdaptEval bench…</div>
+        <div class="card-meta"><span class="card-date">2026-06-01</span><span class="card-pub">ICML 2025</span></div>
+      </a>
+      <a class="card" href="papers/2601.19897-self-distillation-continual-learning/index.html" data-search="self-distillation enables continual learning sdft 用 demonstration-conditioned 的自身作 teacher、在 on-policy 轨迹上做 reverse-kl 自蒸馏，无需显式 reward 即可从专家示范学习，大幅减少 catastrophic forgetting，实现从示范中持续学习。 continual-learning catastrophic-forgetting on-policy-distillation self-distillation in-context-learning sft 2601.19897-self-distillation-continual-learning">
+        <div class="card-title">Self-Distillation Enables Continual Learning</div>
+        <div class="card-tldr">SDFT 用 demonstration-conditioned 的自身作 teacher、在 on-policy 轨迹上做 reverse-KL 自蒸馏，无需显式 reward 即可从专家示范学习，大幅减少 catas…</div>
+        <div class="card-meta"><span class="card-date">2026-06-01</span><span class="card-pub">arXiv 2026</span></div>
+      </a>
+      <a class="card" href="papers/2604.01193-self-distillation-code-generation/index.html" data-search="embarrassingly simple self-distillation improves code generation ssd 用某个 temperature/truncation 配置从 base model 采样代码、再对这些未验证样本做标准 sft（无 verifier/teacher/rl），把 qwen3-30b-instruct 在 livecodebench v6 上 pass@1 从 42.4% 提到 55.3%，增益集中在 hard 题，机制是缓解 decoding 的 precision-exploration conflict。 code-generation self-distillation livecodebench post-training decoding-temperature no-verifier 2604.01193-self-distillation-code-generation">
+        <div class="card-title">Embarrassingly Simple Self-Distillation Improves Code Generation</div>
+        <div class="card-tldr">SSD 用某个 temperature/truncation 配置从 base model 采样代码、再对这些未验证样本做标准 SFT（无 verifier/teacher/RL），把 Qwen3-30B-Instruc…</div>
+        <div class="card-meta"><span class="card-date">2026-06-01</span><span class="card-pub">arXiv 2026</span></div>
+      </a>
+      <a class="card" href="papers/2605.21850-acc-agent-context-compilation/index.html" data-search="acc: compiling agent trajectories for long-context training 把多轮 agent 轨迹编译成 long-context qa 对来做 sft：拼接各 turn 的 tool response、不 mask、让模型直接在长上下文里推理作答，修复 agent sft 的监督盲区。训练 qwen3-30b-a3b 在 mrcr/graphwalks 上逼近 qwen3-235b-a22b。 long-context agent tool-use training-data distillation 2605.21850-acc-agent-context-compilation">
+        <div class="card-title">ACC: Compiling Agent Trajectories for Long-Context Training</div>
+        <div class="card-tldr">把多轮 agent 轨迹编译成 long-context QA 对来做 SFT：拼接各 turn 的 tool response、不 mask、让模型直接在长上下文里推理作答，修复 agent SFT 的监督盲区。训练…</div>
+        <div class="card-meta"><span class="card-date">2026-06-01</span><span class="card-pub">arXiv 2026</span></div>
+      </a>
+      <a class="card" href="papers/2026-06-01-rl-for-test-time-scaling/index.html" data-search="rl for test-time scaling（@sheriyuo 博客解读） 把 tts 写进训练目标的演进梳理：training-free 渐近次优(ω√h)→mrt→e3→privileged on-policy exploration→int→tti，落到 opd 与 continual learning。 test-time-scaling rl survey blog on-policy-distillation 2026-06-01-rl-for-test-time-scaling">
+        <div class="card-title">RL for Test-Time Scaling（@sheriyuo 博客解读）</div>
+        <div class="card-tldr">把 TTS 写进训练目标的演进梳理：training-free 渐近次优(Ω√H)→MRT→e3→privileged on-policy exploration→InT→TTI，落到 OPD 与 Continual L…</div>
+        <div class="card-meta"><span class="card-date">2026-06-01</span><span class="card-pub">Blog/X 2026</span></div>
+      </a>
+      <a class="card" href="papers/2026-06-01-agentic-sft-masking-multiturn/index.html" data-search="agentic sft 笔记：tool response 该不该 mask + 多轮怎么组样本 多轮工具调用 sft 中 tool response 一律 mask；不带 thinking 整段一条、带 thinking 按轮拆 n 条(删历史思考)，one-pass to reason 给等价高效解。 agentic-sft tool-use mcp loss-masking multi-turn reasoning 2026-06-01-agentic-sft-masking-multiturn">
+        <div class="card-title">Agentic SFT 笔记：tool response 该不该 mask + 多轮怎么组样本</div>
+        <div class="card-tldr">多轮工具调用 SFT 中 tool response 一律 mask；不带 thinking 整段一条、带 thinking 按轮拆 N 条(删历史思考)，One-Pass to Reason 给等价高效解。</div>
+        <div class="card-meta"><span class="card-date">2026-06-01</span><span class="card-pub">笔记 2026</span></div>
+      </a>
+      <a class="card" href="papers/2605.24517-echo-terminal-agents-world-models/index.html" data-search="echo: terminal agents learn world models for free 在 grpo 的 action-token loss 之外加一项预测 terminal 输出 token 的 auxiliary cross-entropy，让 terminal agent 复用同一次 forward pass 顺带学到 world model；terminalbench-2.0 pass@1 几乎翻倍，且能少用专家示范。 terminal-agent world-model rl auxiliary-loss grpo terminalbench 2605.24517-echo-terminal-agents-world-models">
+        <div class="card-title">ECHO: Terminal Agents Learn World Models for Free</div>
+        <div class="card-tldr">在 GRPO 的 action-token loss 之外加一项预测 terminal 输出 token 的 auxiliary cross-entropy，让 terminal agent 复用同一次 forward…</div>
+        <div class="card-meta"><span class="card-date">2026-06-01</span><span class="card-pub">arXiv 2026</span></div>
+      </a>
+      <a class="card" href="papers/2605.17933-atlasva-visual-skill-memory/index.html" data-search="atlasva: self-evolving visual skill memory for teacher-free vlm agents 把 vlm 智能体的文本记忆升级为三层视觉技能记忆（热力图+视觉范例+符号文本），并用无教师的轨迹统计自进化出 danger/affinity 图谱、复用为稠密势函数奖励；3b 模型在 sokoban/frozenlake/3d 导航/机械臂上平均成功率 0.93，反超 gpt-5、o3 与 vagen。 vlm agent memory self-evolving visual-skill 2605.17933-atlasva-visual-skill-memory">
+        <div class="card-title">AtlasVA: Self-Evolving Visual Skill Memory for Teacher-Free VLM Agents</div>
+        <div class="card-tldr">把 VLM 智能体的文本记忆升级为三层视觉技能记忆（热力图+视觉范例+符号文本），并用无教师的轨迹统计自进化出 danger/affinity 图谱、复用为稠密势函数奖励；3B 模型在 Sokoban/FrozenLak…</div>
+        <div class="card-meta"><span class="card-date">2026-05-30</span><span class="card-pub">arXiv 2026</span></div>
+      </a>
+      <a class="card" href="papers/2605.27366-muse-autoskill/index.html" data-search="muse-autoskill: self-evolving agents via skill creation, memory, management, and evaluation 把 skill 重新定义为有完整 lifecycle（creation/memory/management/evaluation/refinement）的长期资产：react 内 skill_create 现造、unit-test 门控进库、per-skill .memory.md、dag 两级 context 压缩；skillsbench 上 with-skills 68.40%（+15.21pp），自生成 skill 在覆盖到的 35 个任务达 87.94%，且能跨 agent 迁移。 llm agent skill self-evolving memory 2605.27366-muse-autoskill">
+        <div class="card-title">MUSE-Autoskill: Self-Evolving Agents via Skill Creation, Memory, Management, and Evaluation</div>
+        <div class="card-tldr">把 skill 重新定义为有完整 lifecycle（creation/memory/management/evaluation/refinement）的长期资产：ReAct 内 skill_create 现造、unit…</div>
+        <div class="card-meta"><span class="card-date">2026-05-30</span><span class="card-pub">arXiv 2026</span></div>
+      </a>
+      <a class="card" href="papers/2605.24426-seal-coevolution-agents-environments/index.html" data-search="seal: synergistic co-evolution of agents and learning environments 提出 agent-environment misalignment 问题，并用 verifier-grounded failure diagnosis 作为共享信号，闭环协同演化 training-time learning interface 与 policy（diagnosis-guided advantage reweighting）；仅 400 样本即在三个 backbone 上拿到 +8.25~+26.25 平均分提升并正向 ood transfer。 llm agent self-evolving environment tool-use rl 2605.24426-seal-coevolution-agents-environments">
+        <div class="card-title">SEAL: Synergistic Co-Evolution of Agents and Learning Environments</div>
+        <div class="card-tldr">提出 Agent-Environment Misalignment 问题，并用 verifier-grounded failure diagnosis 作为共享信号，闭环协同演化 training-time learni…</div>
+        <div class="card-meta"><span class="card-date">2026-05-30</span><span class="card-pub">arXiv 2026</span></div>
+      </a>
+      <a class="card" href="papers/2026-05-30-kaonai-online-autoresearch/index.html" data-search="online autoresearch: running autoresearch with real online feedback 把 autoresearch 的 agent loop 接到真实线上流量，用 online elo win rate 作为唯一 reward，两天 7 个 sft 实验把 win rate 从 56.0% 提到 60.1%；核心发现是更脏、更匹配 deployment distribution 的数据胜过干净的 expert 数据。 blog agent autoresearch rl online-feedback 2026-05-30-kaonai-online-autoresearch">
+        <div class="card-title">Online Autoresearch: Running Autoresearch with Real Online Feedback</div>
+        <div class="card-tldr">把 autoresearch 的 agent loop 接到真实线上流量，用 online ELO win rate 作为唯一 reward，两天 7 个 SFT 实验把 win rate 从 56.0% 提到 60.1…</div>
+        <div class="card-meta"><span class="card-date">2026-05-30</span><span class="card-pub">KaonAI Blog 2026</span></div>
+      </a>
+      <a class="card" href="papers/2601.06487-arenarl/index.html" data-search="arenarl: scaling rl for open-ended agents via tournament-based relative ranking 用锦标赛式组内相对排名替代会发生 discriminative collapse 的 pointwise scalar reward，并以 seeded single-elimination 把复杂度降到 o(n)，显著提升 open-ended agent 的 rl 效果。 llm agent rl ranking open-ended 2601.06487-arenarl">
+        <div class="card-title">ArenaRL: Scaling RL for Open-Ended Agents via Tournament-based Relative Ranking</div>
+        <div class="card-tldr">用锦标赛式组内相对排名替代会发生 discriminative collapse 的 pointwise scalar reward，并以 seeded single-elimination 把复杂度降到 O(N)，显著…</div>
+        <div class="card-meta"><span class="card-date">2026-05-30</span><span class="card-pub">arXiv 2026</span></div>
+      </a>
+      <a class="card" href="papers/2605.26494-minimax-m2/index.html" data-search="the minimax-m2 series: mini activations unleashing max real-world intelligence 229.9b 总参 / 9.8b 激活的 moe，用 agent 数据 pipeline + forge rl 系统 + m2.7 self-evolution，把小激活推到逼近闭源前沿的 agentic coding/cowork/reasoning 水平。 llm moe agent rl self-evolving 2605.26494-minimax-m2">
+        <div class="card-title">The MiniMax-M2 Series: Mini Activations Unleashing Max Real-World Intelligence</div>
+        <div class="card-tldr">229.9B 总参 / 9.8B 激活的 MoE，用 agent 数据 pipeline + Forge RL 系统 + M2.7 self-evolution，把小激活推到逼近闭源前沿的 agentic coding/…</div>
+        <div class="card-meta"><span class="card-date">2026-05-30</span><span class="card-pub">arXiv 2026</span></div>
+      </a>
+      <a class="card" href="papers/2605.23904-skillopt/index.html" data-search="skillopt: executive strategy for self-evolving agent skills 把 agent 的 skill 文档当成 frozen 模型的可训练外部状态：独立 optimizer 提出有界 add/delete/replace 编辑，仅当 held-out validation 严格变好才接受；52 个 cell 全部 best-or-tied，部署零权重更新。 llm agent skill self-evolving optimization 2605.23904-skillopt">
+        <div class="card-title">SkillOpt: Executive Strategy for Self-Evolving Agent Skills</div>
+        <div class="card-tldr">把 agent 的 skill 文档当成 frozen 模型的可训练外部状态：独立 optimizer 提出有界 add/delete/replace 编辑，仅当 held-out validation 严格变好才接受；…</div>
+        <div class="card-meta"><span class="card-date">2026-05-30</span><span class="card-pub">arXiv 2026</span></div>
+      </a>
+      <a class="card" href="papers/2605.24539-demoevolve/index.html" data-search="demoevolve: overcoming sparse feedback in agentic harness evolution with demonstrations 用少量人类 demonstration 轨迹当 coding proposer 的诊断参照，破解 long-horizon、sparse-reward 下 self-rollout harness evolution 被噪声误导、改动不生效的问题，使 harness 编辑更有效、可定位、可审计。 llm agent harness demonstrations self-evolving 2605.24539-demoevolve">
+        <div class="card-title">DemoEvolve: Overcoming Sparse Feedback in Agentic Harness Evolution with Demonstrations</div>
+        <div class="card-tldr">用少量人类 demonstration 轨迹当 coding proposer 的诊断参照，破解 long-horizon、sparse-reward 下 self-rollout harness evolution 被…</div>
+        <div class="card-meta"><span class="card-date">2026-05-30</span><span class="card-pub">arXiv 2026</span></div>
+      </a>
+      <a class="card" href="papers/2026-05-30-learning-beyond-gradients/index.html" data-search="learning beyond gradients 提出 heuristic learning：不训练神经网络，而让 coding agent 读 reward/测试/日志/视频等多模态反馈直接改写手写代码策略，像软件系统一样持续生长；atari/mujoco/vizdoom 上取得与 deep rl 同量级结果。 blog heuristic-learning agent rl continual-learning 2026-05-30-learning-beyond-gradients">
+        <div class="card-title">Learning Beyond Gradients</div>
+        <div class="card-tldr">提出 Heuristic Learning：不训练神经网络，而让 coding agent 读 reward/测试/日志/视频等多模态反馈直接改写手写代码策略，像软件系统一样持续生长；Atari/MuJoCo/VizDo…</div>
+        <div class="card-meta"><span class="card-date">2026-05-30</span><span class="card-pub">Blog 2026</span></div>
+      </a>
+      <a class="card" href="papers/2603.19312-leworldmodel/index.html" data-search="leworldmodel: stable end-to-end joint-embedding predictive architecture from pixels 首个从原始像素端到端稳定训练的 jepa world model：只用 next-embedding prediction + 高斯正则 sigreg 两项 loss，超参从 6 降到 1 且 anti-collapse 可证明；~15m 参数单卡可训，latent-space mpc 规划比 dino-wm 快至多 48×。 world-model jepa self-supervised planning control 2603.19312-leworldmodel">
+        <div class="card-title">LeWorldModel: Stable End-to-End Joint-Embedding Predictive Architecture from Pixels</div>
+        <div class="card-tldr">首个从原始像素端到端稳定训练的 JEPA world model：只用 next-embedding prediction + 高斯正则 SIGReg 两项 loss，超参从 6 降到 1 且 anti-collapse…</div>
+        <div class="card-meta"><span class="card-date">2026-05-30</span><span class="card-pub">arXiv 2026</span></div>
+      </a>
+      <a class="card" href="papers/2605.15155-sdar/index.html" data-search="self-distilled agentic reinforcement learning 把 opsd 当作 rl 之上的 gated 辅助 objective：用 detached sigmoid gate 对 teacher 背书的 positive-gap token 加强 distillation、对 negative rejection 柔性衰减，稳住多轮 agentic rl，全面超过 grpo 与 hybrid baseline。 llm agent rl distillation self-distillation 2605.15155-sdar">
+        <div class="card-title">Self-Distilled Agentic Reinforcement Learning</div>
+        <div class="card-tldr">把 OPSD 当作 RL 之上的 gated 辅助 objective：用 detached sigmoid gate 对 teacher 背书的 positive-gap token 加强 distillation、对…</div>
+        <div class="card-meta"><span class="card-date">2026-05-30</span><span class="card-pub">arXiv 2026</span></div>
+      </a>
+      <a class="card" href="papers/2604.15840-coevolve-agent-data-mutual-evolution/index.html" data-search="coevolve: training llm agents via agent-data mutual evolution 在 grpo 训练中从 rollout 抽取 forgetting/boundary/rare 三类弱点信号，引导 llm 定向再探索并合成、验证新任务回训练集，让 agent 与训练数据相互进化；appworld/bfcl 上对 qwen 系列取得 +15~19 分提升，仅约 10% 额外算力。 llm-agent rl grpo synthetic-data self-evolving 2604.15840-coevolve-agent-data-mutual-evolution">
+        <div class="card-title">CoEvolve: Training LLM Agents via Agent-Data Mutual Evolution</div>
+        <div class="card-tldr">在 GRPO 训练中从 rollout 抽取 forgetting/boundary/rare 三类弱点信号，引导 LLM 定向再探索并合成、验证新任务回训练集，让 agent 与训练数据相互进化；AppWorld/BF…</div>
+        <div class="card-meta"><span class="card-date">2026-05-30</span><span class="card-pub">arXiv 2026</span></div>
+      </a>
+      <a class="card" href="papers/2604.20779-swe-chat-coding-agent-in-the-wild/index.html" data-search="swe-chat: coding agent interactions from real users in the wild 首个大规模真实&#x27;野外&#x27;coding agent 会话数据集（~6k 会话、63k+ prompt、355k+ tool call、逐行 human/agent 代码归属）：真实使用高度双峰、agent 自主性超过其寻求监督的能力、vibe coding 又贵又不安全。 coding-agent dataset human-ai-interaction vibe-coding code-security 2604.20779-swe-chat-coding-agent-in-the-wild">
+        <div class="card-title">SWE-chat: Coding Agent Interactions From Real Users in the Wild</div>
+        <div class="card-tldr">首个大规模真实&#x27;野外&#x27;coding agent 会话数据集（~6K 会话、63K+ prompt、355K+ tool call、逐行 human/agent 代码归属）：真实使用高度双峰、agent 自主性超过其寻求监…</div>
+        <div class="card-meta"><span class="card-date">2026-05-30</span><span class="card-pub">arXiv 2026</span></div>
+      </a>
+      <a class="card" href="papers/2604.08377-skillclaw-collective-skill-evolution/index.html" data-search="skillclaw: let skills evolve collectively with agentic evolver 把跨用户、跨时间的真实交互轨迹当作改进 agent skills 的第一信号：agentic evolver 对按 skill 分组的共享证据做 refine/create/skip，夜间真实环境验证后才合并同步，让 skills 在多用户生态中集体进化、单调不退化。 llm-agent agent-skills skill-evolution self-improving wildclawbench 2604.08377-skillclaw-collective-skill-evolution">
+        <div class="card-title">SkillClaw: Let Skills Evolve Collectively with Agentic Evolver</div>
+        <div class="card-tldr">把跨用户、跨时间的真实交互轨迹当作改进 agent skills 的第一信号：agentic evolver 对按 skill 分组的共享证据做 refine/create/skip，夜间真实环境验证后才合并同步，让 s…</div>
+        <div class="card-meta"><span class="card-date">2026-05-30</span><span class="card-pub">arXiv 2026</span></div>
+      </a>
+      <a class="card" href="papers/2605.07725-sod/index.html" data-search="sod: step-wise on-policy distillation for small language model agents 把 on-policy distillation 用于小模型 tir 时，错误 tool call 会引发 error cascade 使 teacher 监督失准；sod 用零开销的 step-level divergence 按步自适应缩放蒸馏强度，切断级联并允许先错后恢复，math/science/code 上相对次优 baseline 最高 +20.86%。 llm agent distillation on-policy small-models 2605.07725-sod">
+        <div class="card-title">SOD: Step-wise On-policy Distillation for Small Language Model Agents</div>
+        <div class="card-tldr">把 on-policy distillation 用于小模型 TIR 时，错误 tool call 会引发 error cascade 使 teacher 监督失准；SOD 用零开销的 step-level diverg…</div>
+        <div class="card-meta"><span class="card-date">2026-05-30</span><span class="card-pub">arXiv 2026</span></div>
+      </a>
+      <a class="card" href="papers/2605.15040-orchard-agentic-modeling/index.html" data-search="orchard: an open-source agentic modeling framework 把 agentic 训练的环境层抽象成薄、harness-agnostic 的 kubernetes-native 服务 orchard env，并在其上搭 swe/gui/claw 三个 sft+rl recipe（swe-bench verified 67.5% 同尺寸开源 sota），论证环境层是 agentic 数据与 recipe 可复用的底座。 agentic-modeling rl-environment swe-agent gui-agent sft-rl 2605.15040-orchard-agentic-modeling">
+        <div class="card-title">Orchard: An Open-Source Agentic Modeling Framework</div>
+        <div class="card-tldr">把 agentic 训练的环境层抽象成薄、harness-agnostic 的 Kubernetes-native 服务 Orchard Env，并在其上搭 SWE/GUI/Claw 三个 SFT+RL recipe（S…</div>
+        <div class="card-meta"><span class="card-date">2026-05-30</span><span class="card-pub">arXiv 2026</span></div>
+      </a>
+      <a class="card" href="papers/2604.02268-skill-zero-skill-internalization/index.html" data-search="skill0: in-context agentic reinforcement learning for skill internalization 把 agent skill 从推理时的 prompt 注入「内化」进模型参数：in-context rl 在训练 rollout 给 skill 指导、推理时完全移除，配 helpfulness 驱动的动态课程线性退火技能预算到 0；alfworld/search-qa/webshop +6.6~10.1% 且每步 context &lt;0.5k token。 agentic-rl skill-internalization in-context-rl curriculum token-efficiency 2604.02268-skill-zero-skill-internalization">
+        <div class="card-title">SKILL0: In-Context Agentic Reinforcement Learning for Skill Internalization</div>
+        <div class="card-tldr">把 agent skill 从推理时的 prompt 注入「内化」进模型参数：In-Context RL 在训练 rollout 给 skill 指导、推理时完全移除，配 helpfulness 驱动的动态课程线性退火技…</div>
+        <div class="card-meta"><span class="card-date">2026-05-30</span><span class="card-pub">arXiv 2026</span></div>
+      </a>
+      <a class="card" href="papers/2605.10906-datamaster-data-centric-autonomous-ai/index.html" data-search="datamaster: data-centric autonomous ai research 固定 learning algorithm、只在数据侧优化（外部数据发现/选择/清洗/转换）的自主 data-engineering 框架：datatree 树搜索 + 共享 data pool + 累积 global memory；mle-bench lite medal rate +32.27pt、posttrainbench 平均 +22.70pt，gpqa 超人类专家 instruct。消融显示 global memory 是收益命门。 data-centric-ai llm-agent tree-search automl post-training 2605.10906-datamaster-data-centric-autonomous-ai">
+        <div class="card-title">DataMaster: Data-Centric Autonomous AI Research</div>
+        <div class="card-tldr">固定 learning algorithm、只在数据侧优化（外部数据发现/选择/清洗/转换）的自主 data-engineering 框架：DataTree 树搜索 + 共享 Data Pool + 累积 Global…</div>
+        <div class="card-meta"><span class="card-date">2026-05-30</span><span class="card-pub">arXiv 2026</span></div>
+      </a>
+      <a class="card" href="papers/2605.09998-continual-harness-self-improving-agents/index.html" data-search="continual harness: online adaptation for self-improving foundation agents reset-free 自改进框架：agent 一边玩一边由 refiner 在同一局内对 prompt/sub-agents/skills/memory 做 crud 编辑，从极简接口追回到人工专家 harness 的大半差距；并用 process-reward + frontier teacher 重标注让开源模型在不重置环境下持续推进游戏里程碑（即 gemini plays pokémon 的自动化版）。 agentic-harness self-improving reset-free in-context-learning llm-agent 2605.09998-continual-harness-self-improving-agents">
+        <div class="card-title">Continual Harness: Online Adaptation for Self-Improving Foundation Agents</div>
+        <div class="card-tldr">reset-free 自改进框架：agent 一边玩一边由 Refiner 在同一局内对 prompt/sub-agents/skills/memory 做 CRUD 编辑，从极简接口追回到人工专家 harness 的大…</div>
+        <div class="card-meta"><span class="card-date">2026-05-30</span><span class="card-pub">arXiv 2026</span></div>
+      </a>
+      <a class="card" href="papers/2605.12090-world-action-models-survey/index.html" data-search="world action models: the next frontier in embodied ai 首篇系统综述 world action models（wams）：把环境未来预测与动作生成统一进一个具身 foundation model、建模 p(o&#x27;,a|o,l)；提出 cascaded/joint 分类法，梳理数据与评测协议，并指出&#x27;视觉逼真≠动作可行&#x27;的评测割裂缺陷。 survey world-action-model embodied-ai vla world-model 2605.12090-world-action-models-survey">
+        <div class="card-title">World Action Models: The Next Frontier in Embodied AI</div>
+        <div class="card-tldr">首篇系统综述 World Action Models（WAMs）：把环境未来预测与动作生成统一进一个具身 foundation model、建模 p(o&#x27;,a|o,l)；提出 Cascaded/Joint 分类法，梳理数…</div>
+        <div class="card-meta"><span class="card-date">2026-05-30</span><span class="card-pub">arXiv 2026</span></div>
+      </a>
+      <a class="card" href="papers/2508.14704-mcp-universe-benchmark/index.html" data-search="mcp-universe: benchmarking large language models with real-world model context protocol servers 第一个让 llm 接入真实世界 mcp server 的综合 benchmark：6 领域 / 11 server（133 tools）/ 231 难任务 + execution-based 评测器（dynamic 评测自动抓实时 ground truth）；连 gpt-5 也只有 43.72% 成功率，grok-4 33.33%、claude-4-sonnet 29.44%。框架 apache-2.0 开源。 mcp benchmark llm-agent tool-use execution-eval 2508.14704-mcp-universe-benchmark">
+        <div class="card-title">MCP-Universe: Benchmarking Large Language Models with Real-World Model Context Protocol Servers</div>
+        <div class="card-tldr">第一个让 LLM 接入真实世界 MCP server 的综合 benchmark：6 领域 / 11 server（133 tools）/ 231 难任务 + execution-based 评测器（dynamic 评测…</div>
+        <div class="card-meta"><span class="card-date">2026-05-30</span><span class="card-pub">arXiv 2025</span></div>
+      </a>
+      <a class="card" href="papers/2506.14728-agentdistill-mcp-boxes/index.html" data-search="agentdistill: training-free agent distillation with generalizable mcp boxes 完全 training-free 的 agent 蒸馏：把蒸馏载体从 teacher 行为轨迹换成 teacher 自动生成的可参数化 mcp 工具，整理成可复用 mcp-box 直接挂到小模型 student 的 tool 接口（零梯度更新）；pathvqa/slake/game-of-24 全面提升，student 追平 teacher。 mcp agent distillation training-free tool-use 2506.14728-agentdistill-mcp-boxes">
+        <div class="card-title">AgentDistill: Training-Free Agent Distillation with Generalizable MCP Boxes</div>
+        <div class="card-tldr">完全 training-free 的 agent 蒸馏：把蒸馏载体从 teacher 行为轨迹换成 teacher 自动生成的可参数化 MCP 工具，整理成可复用 MCP-Box 直接挂到小模型 student 的 to…</div>
+        <div class="card-meta"><span class="card-date">2026-05-30</span><span class="card-pub">arXiv 2025</span></div>
+      </a>
+      <a class="card" href="papers/2510.24284-mcp-flow/index.html" data-search="mcp-flow: facilitating llm agents to master real-world, diverse and scaling mcp tools 用 web agent 自动爬 6 大 mcp marketplace，造出覆盖 1166 server / 11536 tool 的 68733 条 function-call 数据 + 6439 条 trajectory；在其上 lora 微调的 0.6b–8b 小模型在真实 mcp 工具调用三指标上反超 gpt-4o / claude-4-sonnet，并泛化到 unseen tool/server。 mcp llm-agent tool-use function-calling data-synthesis 2510.24284-mcp-flow">
+        <div class="card-title">MCP-Flow: Facilitating LLM Agents to Master Real-World, Diverse and Scaling MCP Tools</div>
+        <div class="card-tldr">用 web agent 自动爬 6 大 MCP marketplace，造出覆盖 1166 server / 11536 tool 的 68733 条 function-call 数据 + 6439 条 trajecto…</div>
+        <div class="card-meta"><span class="card-date">2026-05-30</span><span class="card-pub">ACL 2026</span></div>
+      </a>
+      <a class="card" href="papers/2510.01179-toucan-mcp-tool-agentic-data/index.html" data-search="toucan: synthesizing 1.5m tool-agentic data from real-world mcp environments 把近 500 个真实 mcp server 当可执行环境，合成 152.7 万条真实执行的 tool-agentic 轨迹（最大开源同类数据集）；仅用 11.9 万高质量子集 sft，就让 qwen2.5-7b/14b/32b 在 bfcl v3 上反超 gpt-4.5-preview 并推进 mcp-universe 的 pareto frontier。 mcp tool-agentic synthetic-data function-calling sft 2510.01179-toucan-mcp-tool-agentic-data">
+        <div class="card-title">TOUCAN: Synthesizing 1.5M Tool-Agentic Data from Real-World MCP Environments</div>
+        <div class="card-tldr">把近 500 个真实 MCP server 当可执行环境，合成 152.7 万条真实执行的 tool-agentic 轨迹（最大开源同类数据集）；仅用 11.9 万高质量子集 SFT，就让 Qwen2.5-7B/14B/…</div>
+        <div class="card-meta"><span class="card-date">2026-05-30</span><span class="card-pub">arXiv 2025</span></div>
+      </a>
+      <a class="card" href="papers/2510.25726-toolathlon/index.html" data-search="the tool decathlon: benchmarking language agents for diverse, realistic, and long-horizon task execution 面向 language agent 的真实/多样/长程工具使用 benchmark（又名 toolathlon）：32 个真实软件、604 个工具（多为 mcp server）、108 个可确定性脚本验证的跨应用长程任务；最强 claude-4.5-sonnet 仅 38.6% pass@1，最强开源 deepseek-v3.2-exp 仅 20.1%。 agent benchmark mcp tool-use long-horizon 2510.25726-toolathlon">
+        <div class="card-title">The Tool Decathlon: Benchmarking Language Agents for Diverse, Realistic, and Long-Horizon Task Execution</div>
+        <div class="card-tldr">面向 language agent 的真实/多样/长程工具使用 benchmark（又名 Toolathlon）：32 个真实软件、604 个工具（多为 MCP server）、108 个可确定性脚本验证的跨应用长程任务…</div>
+        <div class="card-meta"><span class="card-date">2026-05-30</span><span class="card-pub">ICLR 2026</span></div>
+      </a>
+      <a class="card" href="papers/2509.24002-mcpmark/index.html" data-search="mcpmark: a benchmark for stress-testing realistic and comprehensive mcp use 用 127 个专家+ai 协作构建、带程序化验证脚本的多步 crud 任务，跨 notion/github/filesystem/postgresql/playwright 五个真实 mcp server 压测 mcp 使用能力；最强 gpt-5-medium 也仅 52.56% pass@1 / 33.86% pass^4，瓶颈在多轮 tool use 稳定性。 mcp benchmark tool-use llm-eval crud 2509.24002-mcpmark">
+        <div class="card-title">MCPMark: A Benchmark for Stress-Testing Realistic and Comprehensive MCP Use</div>
+        <div class="card-tldr">用 127 个专家+AI 协作构建、带程序化验证脚本的多步 CRUD 任务，跨 Notion/GitHub/Filesystem/PostgreSQL/Playwright 五个真实 MCP server 压测 MCP…</div>
+        <div class="card-meta"><span class="card-date">2026-05-30</span><span class="card-pub">arXiv 2025</span></div>
+      </a>
+    </div>
+  </section>
+  <section class="cluster" id="c-game">
+    <h2>🎮 AI × 游戏 <span class="count">3</span></h2>
+    <p class="cluster-desc">AI 原生 UGC 游戏平台、Roblox、游戏引擎 × MCP 做游戏 agent</p>
+    <div class="grid">
+      <a class="card" href="papers/2026-06-17-game-engines-mcp-ai-agents/index.html" data-search="游戏引擎 × mcp/cli × ai 做游戏 agent 调研（「游戏生成的 cursor」） 盘点常用游戏/渲染引擎(ue5/unity/godot/cocos/three.js等)的cli与mcp接口现状(多为社区项目如unity-mcp/unreal-mcp/blender-mcp),以及ai做游戏两条路线(引擎内cursor式助手ludus/unity muse + text-to-game rosebud/astrocade + 端到端generative game genie/oasis),给定位图与whitespace;非投资建议 game-engine mcp ai-agent gamedev explainer generative-game 2026-06-17-game-engines-mcp-ai-agents">
+        <div class="card-title">游戏引擎 × MCP/CLI × AI 做游戏 agent 调研（「游戏生成的 Cursor」）</div>
+        <div class="card-tldr">盘点常用游戏/渲染引擎(UE5/Unity/Godot/Cocos/Three.js等)的CLI与MCP接口现状(多为社区项目如unity-mcp/unreal-mcp/blender-mcp),以及AI做游戏两条路线(…</div>
+        <div class="card-meta"><span class="card-date">2026-06-26</span><span class="card-pub">技术调研 2026</span></div>
+      </a>
+      <a class="card" href="papers/2026-06-17-ai-native-ugc-game-platform/index.html" data-search="ai native ugc 游戏平台：赛道竞争格局与早期度调研 ai让玩家零代码造游戏的ugc平台赛道:传统ugc平台(roblox/蛋仔/fortnite)已mature/crowded,但ai原生零代码这一新形态仍emerging→nascent;最大威胁是roblox/蛋仔的网络效应+大厂(腾讯giinex)资源;whitespace在&#x27;ai零代码×开放平台&#x27;象限尚无跑通赢家;引子公司上海哇奥醒梦科技为stealth查无公开信息 company competitive-landscape market-map startup-idea ai-games ugc china 2026-06-17-ai-native-ugc-game-platform">
+        <div class="card-title">AI Native UGC 游戏平台：赛道竞争格局与早期度调研</div>
+        <div class="card-tldr">AI让玩家零代码造游戏的UGC平台赛道:传统UGC平台(Roblox/蛋仔/Fortnite)已mature/crowded,但AI原生零代码这一新形态仍emerging→nascent;最大威胁是Roblox/蛋仔的网…</div>
+        <div class="card-meta"><span class="card-date">2026-06-22</span><span class="card-pub">公司调研 2026</span></div>
+      </a>
+      <a class="card" href="papers/2026-06-17-roblox/index.html" data-search="roblox：ugc 游戏平台的竞争格局与赛道调研 ugc游戏平台定义者(玩家造experiences+robux内购抽成+devex创作者经济);护城河=内容×玩家双边网络效应;赛道整体mature(但内部ai零代码创作emerging);中国对标网易蛋仔派对;whitespace=ai零代码×年轻成人受众绕开未成年人监管 company competitive-landscape market-map startup-idea ugc ai-games china 2026-06-17-roblox">
+        <div class="card-title">Roblox：UGC 游戏平台的竞争格局与赛道调研</div>
+        <div class="card-tldr">UGC游戏平台定义者(玩家造experiences+Robux内购抽成+DevEx创作者经济);护城河=内容×玩家双边网络效应;赛道整体mature(但内部AI零代码创作emerging);中国对标网易蛋仔派对;whit…</div>
+        <div class="card-meta"><span class="card-date">2026-06-22</span><span class="card-pub">公司调研 2026</span></div>
+      </a>
+    </div>
+  </section>
+  <section class="cluster" id="c-finance">
+    <h2>💰 财经 / 投资 <span class="count">2</span></h2>
+    <p class="cluster-desc">股票基本面科普、投资盘点等财经/投资内容</p>
+    <div class="grid">
+      <a class="card" href="papers/2026-06-17-hongshan-sequoia-china-investments/index.html" data-search="红杉中国（hongshan）2025–2026 投资盘点（公开披露部分） 红杉中国(2023拆分独立为hongshan,沈南鹏)2025-2026公开披露投资盘点,按赛道与时间整理(ai/大模型/具身机器人/半导体/生物医疗/企业服务/消费出海)+赛道分布svg+下注重心(ai与具身为重心);收录约16笔可核实公开交易及ipo退出,每笔标来源等级,数据为公开样本非完整;非投资建议 investment venture-capital china hongshan sequoia portfolio 2026-06-17-hongshan-sequoia-china-investments">
+        <div class="card-title">红杉中国（HongShan）2025–2026 投资盘点（公开披露部分）</div>
+        <div class="card-tldr">红杉中国(2023拆分独立为HongShan,沈南鹏)2025-2026公开披露投资盘点,按赛道与时间整理(AI/大模型/具身机器人/半导体/生物医疗/企业服务/消费出海)+赛道分布SVG+下注重心(AI与具身为重心);…</div>
+        <div class="card-meta"><span class="card-date">2026-06-26</span><span class="card-pub">投资研究 2026</span></div>
+      </a>
+      <a class="card" href="papers/2026-06-17-stock-fundamentals-explainer/index.html" data-search="股票的底层逻辑：为什么涨跌 / 为什么值钱 / 成长股 vs 周期股（小白向） 从最底层讲股票=公司未来利润索取权,价值=未来现金流折现,短期价格由预期/资金、长期向盈利收敛;股价≈eps×pe,利率影响估值;讲透成长股vs周期股判断,以及周期股pe反直觉(顶部低pe陷阱、底部高pe/失效是机会);面向小白,非投资建议 explainer finance stocks education valuation 2026-06-17-stock-fundamentals-explainer">
+        <div class="card-title">股票的底层逻辑：为什么涨跌 / 为什么值钱 / 成长股 vs 周期股（小白向）</div>
+        <div class="card-tldr">从最底层讲股票=公司未来利润索取权,价值=未来现金流折现,短期价格由预期/资金、长期向盈利收敛;股价≈EPS×PE,利率影响估值;讲透成长股vs周期股判断,以及周期股PE反直觉(顶部低PE陷阱、底部高PE/失效是机会);…</div>
+        <div class="card-meta"><span class="card-date">2026-06-24</span><span class="card-pub">财经科普 2026</span></div>
+      </a>
+    </div>
+  </section>
+  <section class="cluster" id="c-company">
+    <h2>🏢 公司调研 · 其它 <span class="count">5</span></h2>
+    <p class="cluster-desc">未落入科学/数据/游戏簇的公司调研</p>
+    <div class="grid">
+      <a class="card" href="papers/2026-06-17-palantir/index.html" data-search="palantir：数据决策 / aip 平台的竞争格局与赛道调研 政企大数据集成+ontology+aip把llm接进可执行决策、靠fde重交付落地；底层数据平台已mature但「llm/agent接ontology做可执行决策」仍emerging；最大威胁是databricks/snowflake+aws/ms/google超大厂自带ai、软肋是fde重交付难规模化；一个whitespace=垂直行业轻量ontology+aip并用ai agent替代部分fde去够中腰部客户 company competitive-landscape market-map startup-idea data-platform ai-ops china 2026-06-17-palantir">
+        <div class="card-title">Palantir：数据决策 / AIP 平台的竞争格局与赛道调研</div>
+        <div class="card-tldr">政企大数据集成+ontology+AIP把LLM接进可执行决策、靠FDE重交付落地；底层数据平台已mature但「LLM/agent接ontology做可执行决策」仍emerging；最大威胁是Databricks/Sn…</div>
+        <div class="card-meta"><span class="card-date">2026-06-22</span><span class="card-pub">公司调研 2026</span></div>
+      </a>
+      <a class="card" href="papers/2026-06-16-sakana-ai/index.html" data-search="sakana ai：竞争格局与赛道早期度调研 东京 frontier ai lab(david ha+llion jones),小而精反 scaling 做 ai scientist/进化式模型合并/transformer²;早期度 emerging(招牌 ai-scientist 滑向 crowded);seed$30m→a~$200m→b$135m@$2.65b(in-q-tel,进军defense);中国whitespace=行业版ai scientist+央国企渠道。注:ai cuda engineer「100×」被发现是reward hacking。 company competitive-landscape startup-idea ai-lab ai4s 2026-06-16-sakana-ai">
+        <div class="card-title">Sakana AI：竞争格局与赛道早期度调研</div>
+        <div class="card-tldr">东京 frontier AI lab(David Ha+Llion Jones),小而精反 scaling 做 AI Scientist/进化式模型合并/Transformer²;早期度 emerging(招牌 AI-S…</div>
+        <div class="card-meta"><span class="card-date">2026-06-16</span><span class="card-pub">公司调研 2026</span></div>
+      </a>
+      <a class="card" href="papers/2026-06-16-fin-intercom/index.html" data-search="fin(intercom)ai客服：竞争格局与赛道早期度调研 fin=intercom 的 ai 客服 agent(2026-05 母公司改名 fin);按成功outcome收费$0.99/个;赛道 crowded→mature(sierra$15.8b/decagon$4.5b/zendesk/agentforce);中国 ai 客服已红海(智齿/网易七鱼/阿里小蜜/coze),照搬没戏——可借鉴切口是出海英文/垂直私有化/按效果计费,出海最现实。 company competitive-landscape startup-idea customer-service saas 2026-06-16-fin-intercom">
+        <div class="card-title">Fin(Intercom)AI客服：竞争格局与赛道早期度调研</div>
+        <div class="card-tldr">Fin=Intercom 的 AI 客服 agent(2026-05 母公司改名 Fin);按成功outcome收费$0.99/个;赛道 crowded→mature(Sierra$15.8B/Decagon$4.5B/…</div>
+        <div class="card-meta"><span class="card-date">2026-06-16</span><span class="card-pub">公司调研 2026</span></div>
+      </a>
+      <a class="card" href="papers/2026-06-15-unreasonable-labs/index.html" data-search="unreasonable labs 公司调研（ai for 科学发现） unreasonable labs(2026-03 出 stealth, 3.5m, playground 领投)做 ai 科学发现引擎 unreasonable.discovery;创始人 yuan cao(gemini)+markus buehler(mit/sciagents);技术血统=知识图谱+多agent图推理(sciagents)+范畴论式生成+前沿llm;早期、产品实效待验证。 ai-for-science company knowledge-graph multi-agent scientific-discovery startup 2026-06-15-unreasonable-labs">
+        <div class="card-title">Unreasonable Labs 公司调研（AI for 科学发现）</div>
+        <div class="card-tldr">Unreasonable Labs(2026-03 出 stealth, 3.5M, Playground 领投)做 AI 科学发现引擎 Unreasonable.DISCOVERY;创始人 Yuan Cao(Gemin…</div>
+        <div class="card-meta"><span class="card-date">2026-06-15</span><span class="card-pub">公司调研 2026</span></div>
+      </a>
+      <a class="card" href="papers/2026-06-15-exa-labs/index.html" data-search="exa labs：竞争格局与赛道早期度调研 ai搜索api(自建索引+自研embedding,前身metaphor);通用搜索emerging→crowded;a→c $250m@$2.2b(a16z);idea=ai4s版的exa(科研agent领域语义检索api)。 company competitive-landscape startup-idea search ai-infra 2026-06-15-exa-labs">
+        <div class="card-title">Exa Labs：竞争格局与赛道早期度调研</div>
+        <div class="card-tldr">AI搜索API(自建索引+自研embedding,前身Metaphor);通用搜索emerging→crowded;A→C $250M@$2.2B(a16z);idea=AI4S版的Exa(科研agent领域语义检索AP…</div>
+        <div class="card-meta"><span class="card-date">2026-06-15</span><span class="card-pub">公司调研 2026</span></div>
+      </a>
+    </div>
+  </section>
+
+  <footer>
+    自动浅 / 深主题（跟随系统）· 响应式 · 纯整理本 repo 已有内容，不编造。<br>
+    校验：7 个主题簇条目数之和 = 98 == papers.json 总条目数 98。<!-- cluster sum check: {'hw': 14, 'ai4s': 25, 'data': 6, 'agent': 43, 'game': 3, 'finance': 2, 'company': 5, 'other': 0} -->
+  </footer>
+</main>
+<script>
+(function(){
+  var input = document.getElementById('q');
+  var cards = Array.prototype.slice.call(document.querySelectorAll('.card[data-search]'));
+  var clusters = Array.prototype.slice.call(document.querySelectorAll('section.cluster'));
+  var noRes = document.getElementById('noResults');
+  function apply(){
+    var q = (input.value || '').trim().toLowerCase();
+    var anyVisible = false;
+    cards.forEach(function(c){
+      var match = !q || c.getAttribute('data-search').indexOf(q) !== -1;
+      c.classList.toggle('hidden', !match);
+      if (match) anyVisible = true;
+    });
+    clusters.forEach(function(sec){
+      var visible = sec.querySelectorAll('.card:not(.hidden)').length;
+      sec.classList.toggle('hidden', visible === 0);
+    });
+    noRes.style.display = anyVisible ? 'none' : 'block';
+  }
+  input.addEventListener('input', apply);
+})();
+</script>
+</body>
+</html>

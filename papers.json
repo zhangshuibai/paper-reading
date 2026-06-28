@@ -1,5 +1,23 @@
 [
   {
+    "slug": "2026-06-17-overview-map",
+    "title": "🗺️ 总览导航：全部解读与调研按主题归类",
+    "authors": "—",
+    "team": "导航",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-28",
+    "published": "导航",
+    "tldr": "本repo所有解读/调研/科普的总览入口,按半导体硬件供应链/AI4S科学发现/AI数据RLHF评测/Agent与LLM论文工具/AI游戏/财经投资/公司调研等主题归类,一篇不漏可点击直达",
+    "tags": [
+      "overview",
+      "navigation",
+      "index",
+      "map"
+    ],
+    "path": "papers/2026-06-17-overview-map/index.html"
+  },
+  {
     "slug": "2026-06-17-hongshan-sequoia-china-investments",
     "title": "红杉中国（HongShan）2025–2026 投资盘点（公开披露部分）",
     "authors": "—",
