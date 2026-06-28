@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>真实案例：AAPL 期权价格如何随时间变化</title>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2;
+    --muted:#9aa3bd; --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff;
+    --ok:#43c59e; --warn:#f0a93c; --bad:#ff6b81; --chip:#232842; --chipText:#c7cdec;
+    --shadow:0 6px 22px rgba(0,0,0,.30);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f0f2f9; --text:#1a1f33;
+      --muted:#5a627a; --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff;
+      --ok:#138a6e; --warn:#b9791a; --bad:#d83a55; --chip:#eef1fb; --chipText:#36406b;
+      --shadow:0 6px 18px rgba(20,30,80,.07);
+    }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--text);line-height:1.75;font-size:16px;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;}
+  .wrap{max-width:900px;margin:0 auto;padding:40px 20px 100px}
+  h1{font-size:28px;line-height:1.3;margin:0 0 10px}
+  h2{font-size:22px;margin:50px 0 14px;padding-top:14px;border-top:1px solid var(--line)}
+  h3{font-size:18px;margin:26px 0 10px;color:var(--accent2)}
+  p{margin:12px 0}
+  code{background:var(--panel2);padding:2px 7px;border-radius:6px;font-size:.9em;font-family:"SF Mono",Menlo,Consolas,monospace}
+  .sub{color:var(--muted);font-size:15px}
+  .badges{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}
+  .badge{font-size:12px;font-weight:700;padding:3px 11px;border-radius:999px;background:rgba(122,162,255,.16);color:var(--accent)}
+  .badge.g{background:rgba(67,197,158,.18);color:var(--ok)}
+  .badge.r{background:rgba(255,107,129,.18);color:var(--bad)}
+  .box{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin:18px 0;box-shadow:var(--shadow)}
+  .tldr{background:linear-gradient(135deg,rgba(122,162,255,.10),rgba(155,140,255,.08));border-left:4px solid var(--accent)}
+  .note{border-left:4px solid var(--accent2)}
+  .warn{border-left:4px solid var(--warn);background:rgba(240,169,60,.07)}
+  .key{border-left:4px solid var(--ok);background:rgba(67,197,158,.07)}
+  .real{border-left:4px solid var(--ok)}
+  .model{border-left:4px solid var(--warn)}
+  .box h4:first-child{margin-top:0}
+  .box h4{margin:0 0 8px;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14px}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:right}
+  th:first-child,td:first-child{text-align:left}
+  th{background:var(--panel2);font-weight:700}
+  tr:nth-child(even) td{background:rgba(128,128,128,.04)}
+  .demo{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin:22px 0;box-shadow:var(--shadow)}
+  .demo h4{margin:0 0 4px;font-size:15px;color:var(--accent)}
+  .demo .hint{color:var(--muted);font-size:13px;margin:0 0 14px}
+  canvas{width:100%;display:block;border-radius:8px;background:var(--panel2);touch-action:none}
+  .controls{display:flex;flex-wrap:wrap;gap:14px 20px;margin:14px 0 4px}
+  .ctl{flex:1;min-width:170px}
+  .ctl label{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-bottom:6px}
+  .ctl label b{color:var(--text);font-variant-numeric:tabular-nums}
+  input[type=range]{width:100%;accent-color:var(--accent);cursor:pointer}
+  select{width:100%;background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-size:14px}
+  .stats{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+  .stat{flex:1;min-width:110px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .stat .lab{font-size:11.5px;color:var(--muted)}
+  .stat .val{font-size:19px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:2px}
+  .btn{display:inline-block;cursor:pointer;border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:7px 13px;border-radius:9px;font-size:13.5px;transition:.12s;margin:2px 4px 2px 0}
+  .btn:hover{border-color:var(--accent)}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin-top:10px}
+  .legend i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}
+  ul,ol{padding-left:24px}li{margin:6px 0}
+  .pill{display:inline-block;font-size:12px;padding:1px 8px;border-radius:999px;background:var(--chip);color:var(--chipText);margin:0 2px}
+  footer{margin-top:60px;padding-top:20px;border-top:1px solid var(--line);color:var(--muted);font-size:13px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="badges">
+    <span class="badge g">真实数据</span>
+    <span class="badge">期权 · 进阶</span>
+    <span class="badge r">含交互</span>
+  </div>
+  <h1>真实案例拆解：AAPL 期权的价格如何随<u>时间</u>和<u>股价</u>变化</h1>
+  <p class="sub">数据取自 Robinhood，AAPL 2026-01 至 2026-06 真实日线 + 2026-06-26 真实期权链 · 重点：价格的时间演变</p>
+</header>
+
+<div class="box tldr">
+  <h4>这篇在干什么</h4>
+  <p style="margin-top:6px">用一只真股票 <b>AAPL</b> 的<b>真实历史价格</b>和<b>真实期权报价</b>，把你学过的概念（权利金、delta、内在/时间价值、theta 时间损耗）全部<b>落到真实数字上</b>。三个交互组件，核心回答一个问题：
+  <b>你买的那张期权，价格每天到底是怎么变的？</b></p>
+</div>
+
+<div class="box real">
+  <h4>⬛ 哪些是真实、哪些是模型（务必先读）</h4>
+  <ul style="margin:0">
+    <li><b style="color:var(--ok)">真实数据</b>：AAPL 每日股价（2026-01-02 → 06-26）；2026-06-26 收盘时的真实期权链（权利金、delta、gamma、theta、隐含波动率、买卖价、持仓量）。</li>
+    <li><b style="color:var(--warn)">模型重建</b>：因为券商接口<b>没有期权的历史价格序列</b>，"期权价格随时间变化"的曲线是用标准 <b>Black-Scholes 模型</b>（固定隐含波动率）在真实股价路径上算出来的。已用真实报价校验过：$285 call 模型算 $12.63 vs 真实 $12.35、delta 0.501 vs 0.499 —— 误差很小，用于教学足够可靠，但<b>不是历史成交价</b>。</li>
+  </ul>
+</div>
+
+<!-- ============ 1 ============ -->
+<h2>1 · 先看真实标的：AAPL 这半年的过山车</h2>
+<p>这张图是 AAPL <b>真实</b>日收盘价。半年里它从 $271 一路爬到 <b>$315</b>（6/2），又在 <b>6/25 一天暴跌约 10%</b> 到 $275（成交量 1 亿股，次日 2.6 亿，典型重大事件），再反弹到 $283。这段剧烈行情正好用来观察期权怎么反应。</p>
+<div class="demo">
+  <h4>📈 真实 AAPL 日线（2026-01 ~ 06）</h4>
+  <canvas id="cv-stock" height="240"></canvas>
+  <div class="legend"><span><i style="background:var(--accent)"></i>AAPL 收盘价</span><span>悬停/拖动看具体日期与价格</span></div>
+</div>
+
+<!-- ============ 2 ============ -->
+<h2>2 · 真实期权链快照（2026-06-26，AAPL≈$281.3）</h2>
+<p>同一天、同一到期日（<b>2026-08-21</b>，约 56 天后）的一排 call。看 delta 怎么从价内到价外<b>逐级递减</b>，价格怎么变便宜，以及 bid/ask 价差和持仓量（流动性）。这些全是<b>真实报价</b>：</p>
+<table id="chain-table"></table>
+<div class="box note">
+  <h4>从这张真表里能读到什么</h4>
+  <ul style="margin:0">
+    <li><b>delta 随行权价递减</b>：$270(价内)=0.67 → $285(平值)≈0.50 → $310(价外)=0.22。完全印证"越价内越像股票、越价外越像废纸"。</li>
+    <li><b>越价外越便宜但越像彩票</b>：$310 call 只要 $3.6，但 delta 仅 0.22 ≈ <b>到期价内概率约 16%</b>（看 chance_of_profit）。便宜有便宜的道理。</li>
+    <li><b>theta（每日损耗）</b>：平值的 $285 每天 <b>−$0.136</b>，即什么都不发生、光过一天，这张合约就缩水约 $13.6（×100）。</li>
+    <li><b>买卖价差</b>：$310 那张 bid/ask = $3.00/$4.20，价差占了近 30%！流动性差的合约一进一出先亏一大截（持仓量 OI 高 ≠ 当下价差小）。</li>
+  </ul>
+</div>
+
+<!-- ============ 3 ============ -->
+<h2>3 · 交互一：期权价格 = 内在价值 + 时间价值</h2>
+<p>选一个真实行权价，拖动<b>股价</b>和<b>剩余天数</b>，看期权价格这条<b>曲线</b>怎么动。两个关键现象：① 曲线是<b>弯的</b>（这就是 delta 在变 = gamma）；② <b>时间价值会随到期临近而融化</b>（theta）。</p>
+<div class="demo">
+  <h4>🧮 Black-Scholes 价格曲线（锚定真实 IV）</h4>
+  <p class="hint">绿色直线=内在价值（到期时的最终价值，硬下限）；紫色曲线=当前期权价格。两线之间的垂直距离<b>就是时间价值</b>——它随剩余天数减少而塌陷到 0。</p>
+  <canvas id="cv-bs" height="260"></canvas>
+  <div class="controls">
+    <div class="ctl"><label>行权价（真实合约）</label>
+      <select id="bs-strike"></select></div>
+    <div class="ctl"><label>标的股价 S <b id="bs-sv">$281</b></label><input id="bs-s" type="range" min="230" max="340" value="281" step="1"></div>
+    <div class="ctl"><label>剩余天数 <b id="bs-tv">56</b> 天</label><input id="bs-t" type="range" min="0" max="56" value="56" step="1"></div>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="lab">期权价格</div><div class="val" id="bs-price">—</div></div>
+    <div class="stat"><div class="lab">内在价值</div><div class="val" id="bs-intr">—</div></div>
+    <div class="stat"><div class="lab">时间价值</div><div class="val" id="bs-tv2" style="color:var(--warn)">—</div></div>
+    <div class="stat"><div class="lab">delta</div><div class="val" id="bs-delta" style="color:var(--accent)">—</div></div>
+  </div>
+  <div class="legend">
+    <span><i style="background:var(--ok)"></i>内在价值（到期价值）</span>
+    <span><i style="background:var(--accent2)"></i>当前期权价格</span>
+    <span><i style="background:var(--accent)"></i>当前股价位置</span>
+  </div>
+</div>
+<div class="box key">
+  <p style="margin:0"><b>玩法建议</b>：把行权价选 $285（平值），先只拖<b>剩余天数</b>从 56 拖到 0——你会看到紫色曲线<b>慢慢压向绿色折线</b>，到 0 天时两者重合：<b>时间价值彻底归零，只剩内在价值</b>。这就是"买期权像握着冰块，握着就化"。</p>
+</div>
+
+<!-- ============ 4 ============ -->
+<h2>4 · 交互二：时间机器 —— 在真实 AAPL 走势上持有一张 call</h2>
+<p>这是本篇<b>核心</b>。设定你在某天买入一张 call，持有到到期。下图用<b>真实 AAPL 股价</b>逐日驱动，重建这张期权的<b>每日价值</b>。拖动"当前日"滑块，看股价、期权价、内在/时间价值、盈亏如何随时间演变。</p>
+<div class="demo">
+  <h4>⏳ 真实股价路径 + 期权价值重建</h4>
+  <p class="hint">上图：真实 AAPL 价格（蓝）+ 你的行权价（虚线）；下图：期权价值（紫）vs 内在价值（绿）。竖线 = 当前所在日。先点下面的<b>预设场景</b>感受两种典型命运。</p>
+  <div style="margin-bottom:8px">
+    <span class="btn" id="preset-win">🚀 预设A：大涨赢家</span>
+    <span class="btn" id="preset-crash">💥 预设B：暴跌归零</span>
+  </div>
+  <canvas id="cv-tm-px" height="170"></canvas>
+  <canvas id="cv-tm-opt" height="150" style="margin-top:8px"></canvas>
+  <div class="controls">
+    <div class="ctl"><label>买入日 <b id="tm-buyv">—</b></label><input id="tm-buy" type="range" min="0" max="100" value="60" step="1"></div>
+    <div class="ctl"><label>到期日 <b id="tm-expv">—</b></label><input id="tm-exp" type="range" min="0" max="119" value="110" step="1"></div>
+    <div class="ctl"><label>行权价 <b id="tm-kv">$280</b></label><input id="tm-k" type="range" min="240" max="340" value="280" step="5"></div>
+    <div class="ctl"><label>当前日 ▶ <b id="tm-curv">—</b></label><input id="tm-cur" type="range" min="0" max="119" value="60" step="1"></div>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="lab">当日股价</div><div class="val" id="tm-spot">—</div></div>
+    <div class="stat"><div class="lab">期权价值</div><div class="val" id="tm-opt" style="color:var(--accent2)">—</div></div>
+    <div class="stat"><div class="lab">内在 / 时间</div><div class="val" id="tm-split" style="font-size:15px">—</div></div>
+    <div class="stat"><div class="lab">盈亏 (×100)</div><div class="val" id="tm-pnl">—</div></div>
+  </div>
+  <div class="legend">
+    <span>买入成本/张：<b id="tm-cost" style="color:var(--text)">—</b></span>
+    <span>剩余天数：<b id="tm-dte" style="color:var(--text)">—</b></span>
+    <span>隐含波动率假设：<b style="color:var(--text)">30%</b>（固定）</span>
+  </div>
+</div>
+<div class="box warn">
+  <h4>两个预设想让你看到的</h4>
+  <ul style="margin:0">
+    <li><b>🚀 赢家</b>：买在低位、股票大涨 → 期权价值随 delta 放大暴涨。但注意：临近到期时<b>时间价值越来越薄</b>，最后几乎只剩内在价值。</li>
+    <li><b>💥 归零</b>：买了价外 call，股票一度涨到接近行权价（期权大涨、让你兴奋），<b>结果 6/25 一根大阴线砸下来</b>，到期时跌回价外 → 期权<b>归零</b>。这就是"账面浮盈不落袋，一个大跌全没了 + theta 一直在抽血"的真实写照。</li>
+  </ul>
+</div>
+
+<!-- ============ 5 ============ -->
+<h2>5 · 把真实数字串成的几条铁律</h2>
+<div class="box key">
+  <ol style="margin:0">
+    <li><b>期权价 = 内在价值 + 时间价值</b>。内在是硬下限（到期价值），时间价值是"还没到期的可能性溢价"，<b>一定随时间流逝而归零</b>。</li>
+    <li><b>theta 每天都在抽血</b>。真实的 $285 call 每天 −$13.6/张，且<b>越接近到期、抽得越快</b>（临期 ATM 损耗最猛）。横盘 = 慢性失血。</li>
+    <li><b>delta 决定你跟涨多少，但它自己在变（gamma）</b>。所以"涨 $3 赚多少"只是近似——大涨时赚得比 delta×3 更多，大跌时同理。</li>
+    <li><b>浮盈不是落袋</b>。交互二的崩盘预设里，期权一度大幅盈利，但没卖掉，一根大阴线 + 到期就归零。<b>期权是有"保质期"的资产</b>，和股票最大的不同就在这。</li>
+    <li><b>买卖价差是隐性成本</b>。真实链里价外合约价差能到 20-30%，进出各啃一刀。</li>
+  </ol>
+</div>
+
+<div class="box note">
+  <p style="margin:0"><b>给你（量化视角）</b>：期权价格是一个<b>多变量函数</b> V(S, t, σ, r)，希腊字母就是它在各个方向的偏导。你在交互一里拖股价看到的曲线、拖时间看到的塌陷，本质就是 <code>∂V/∂S</code>(delta)、<code>∂V/∂t</code>(theta) 在真实数字上的可视化。理解了这个，你就从"赌方向"升级到"理解一个可定价、可对冲的资产"了。</p>
+</div>
+
+<footer>
+  真实数据来自 Robinhood MCP（AAPL 日线 2026-01~06 + 2026-06-26 期权链快照）· 期权价格曲线由 Black-Scholes 重建并经真实报价校验<br>
+  收录于 <a href="https://github.com/zhangshuibai/paper-reading">zhangshuibai/paper-reading</a> · 图表均在浏览器本地计算，可随意拖动
+</footer>
+</div>
+
+<script>
+"use strict";
+/* ============ 真实数据 ============ */
+// AAPL 真实日收盘价 (MM-DD, close)，2026-01-02 ~ 06-26，来自 Robinhood
+const AAPL = [["01-02",271.01],["01-05",267.26],["01-06",262.36],["01-07",260.33],["01-08",259.04],["01-09",259.37],["01-12",260.25],["01-13",261.05],["01-14",259.96],["01-15",258.21],["01-16",255.53],["01-20",246.70],["01-21",247.65],["01-22",248.35],["01-23",248.04],["01-26",255.41],["01-27",258.27],["01-28",256.44],["01-29",258.28],["01-30",259.48],["02-02",270.01],["02-03",269.48],["02-04",276.49],["02-05",275.91],["02-06",278.12],["02-09",274.62],["02-10",273.68],["02-11",275.50],["02-12",261.73],["02-13",255.78],["02-17",263.88],["02-18",264.35],["02-19",260.58],["02-20",264.58],["02-23",266.18],["02-24",272.14],["02-25",274.23],["02-26",272.95],["02-27",264.18],["03-02",264.72],["03-03",263.75],["03-04",262.52],["03-05",260.29],["03-06",257.46],["03-09",259.88],["03-10",260.83],["03-11",260.81],["03-12",255.76],["03-13",250.12],["03-16",252.82],["03-17",254.23],["03-18",249.94],["03-19",248.96],["03-20",247.99],["03-23",251.49],["03-24",251.64],["03-25",252.62],["03-26",252.89],["03-27",248.80],["03-30",246.63],["03-31",253.79],["04-01",255.63],["04-02",255.92],["04-06",258.86],["04-07",253.50],["04-08",258.90],["04-09",260.49],["04-10",260.48],["04-13",259.20],["04-14",258.83],["04-15",266.43],["04-16",263.40],["04-17",270.23],["04-20",273.05],["04-21",266.17],["04-22",273.17],["04-23",273.43],["04-24",271.06],["04-27",267.61],["04-28",270.71],["04-29",270.17],["04-30",271.35],["05-01",280.14],["05-04",276.83],["05-05",284.18],["05-06",287.51],["05-07",287.44],["05-08",293.32],["05-11",292.68],["05-12",294.80],["05-13",298.87],["05-14",298.21],["05-15",300.23],["05-18",297.84],["05-19",298.97],["05-20",302.25],["05-21",304.99],["05-22",308.82],["05-26",308.33],["05-27",310.85],["05-28",312.51],["05-29",312.06],["06-01",306.31],["06-02",315.20],["06-03",310.26],["06-04",311.23],["06-05",307.34],["06-08",301.54],["06-09",290.55],["06-10",291.58],["06-11",295.63],["06-12",291.13],["06-15",296.42],["06-16",299.24],["06-17",295.95],["06-18",298.01],["06-22",297.01],["06-23",294.30],["06-24",293.08],["06-25",275.15],["06-26",283.78]];
+// 真实期权链快照 2026-08-21 到期, asof 2026-06-26, S≈281.30
+const CHAIN = [
+  {k:270, mark:21.13, d:0.668, g:0.0103, t:-0.135, iv:0.326, bid:19.50, ask:22.75, oi:6538, vol:316, cop:0.385},
+  {k:275, mark:17.23, d:0.618, g:0.0116, t:-0.132, iv:0.303, bid:15.75, ask:18.70, oi:7756, vol:625, cop:0.368},
+  {k:280, mark:14.50, d:0.558, g:0.0120, t:-0.134, iv:0.302, bid:13.25, ask:15.75, oi:9870, vol:2225, cop:0.343},
+  {k:285, mark:12.35, d:0.499, g:0.0119, t:-0.136, iv:0.308, bid:11.40, ask:13.30, oi:5456, vol:887, cop:0.316},
+  {k:290, mark:9.80, d:0.437, g:0.0122, t:-0.129, iv:0.298, bid:9.10, ask:10.50, oi:7447, vol:939, cop:0.287},
+  {k:300, mark:6.18, d:0.320, g:0.0113, t:-0.112, iv:0.290, bid:5.65, ask:6.70, oi:17016, vol:6215, cop:0.223},
+  {k:310, mark:3.60, d:0.216, g:0.0096, t:-0.089, iv:0.283, bid:3.00, ask:4.20, oi:24951, vol:1210, cop:0.159},
+];
+const S0=281.30, DTE0=56, RATE=0.04;
+
+/* ============ Black-Scholes ============ */
+function erf(x){const t=1/(1+0.3275911*Math.abs(x));const y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);return x>=0?y:-y;}
+function N(x){return 0.5*(1+erf(x/Math.SQRT2));}
+function bs(S,K,Tyears,sig){ // 返回 {price, delta} for a CALL；T 以"年"为单位
+  const T=Math.max(Tyears,0);
+  if(T<=0) return {price:Math.max(0,S-K), delta:S>K?1:0};
+  const d1=(Math.log(S/K)+(RATE+sig*sig/2)*T)/(sig*Math.sqrt(T));
+  const d2=d1-sig*Math.sqrt(T);
+  return {price:S*N(d1)-K*Math.exp(-RATE*T)*N(d2), delta:N(d1)};
+}
+const YR_CAL=365, YR_TRD=252; // 日历日/交易日 折算年化的两种分母
+
+/* ============ canvas 工具（已修复尺寸增长 bug）============ */
+function setup(cv){
+  const dpr=window.devicePixelRatio||1;
+  if(!cv.dataset.logih) cv.dataset.logih=String(cv.getAttribute('height')||cv.height||200);
+  const h=+cv.dataset.logih;
+  const w=cv.clientWidth||cv.parentElement.clientWidth;
+  cv.width=Math.round(w*dpr); cv.height=Math.round(h*dpr);
+  cv.style.height=h+'px';
+  const ctx=cv.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0);
+  return {ctx,w,h};
+}
+function css(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim();}
+function plot(ctx,xs,ys,color,lw,dash){ctx.save();ctx.setLineDash(dash||[]);ctx.beginPath();ctx.lineWidth=lw||2;ctx.strokeStyle=color;for(let i=0;i<xs.length;i++){i?ctx.lineTo(xs[i],ys[i]):ctx.moveTo(xs[i],ys[i]);}ctx.stroke();ctx.restore();}
+// 把数值 v 映射到像素 y：最小值贴底(h-pad)、最大值贴顶(pad)
+function ymap(mn,mx,h,pad){if(mn===mx)mx=mn+1;return v=>h-pad-(v-mn)/(mx-mn)*(h-2*pad);}
+function xmap(n,w,pad){return i=>pad+ (n<=1?0: i/(n-1))*(w-2*pad);}
+
+/* ============ 0. 期权链表格 ============ */
+(function(){
+  const t=document.getElementById('chain-table');
+  let h='<tr><th>行权价</th><th>价格(mark)</th><th>delta</th><th>theta/日</th><th>IV</th><th>bid/ask</th><th>到期价内概率</th><th>状态</th></tr>';
+  CHAIN.forEach(c=>{
+    const st = c.k<S0?'<span class="pill">价内</span>': Math.abs(c.k-S0)<6?'<span class="pill">≈平值</span>':'<span class="pill">价外</span>';
+    h+=`<tr><td><b>$${c.k}</b></td><td>$${c.mark.toFixed(2)}</td><td style="color:var(--accent)">${c.d.toFixed(3)}</td><td style="color:var(--bad)">${c.t.toFixed(3)}</td><td>${(c.iv*100).toFixed(1)}%</td><td>${c.bid}/${c.ask}</td><td>${(c.cop*100).toFixed(0)}%</td><td>${st}</td></tr>`;
+  });
+  t.innerHTML=h;
+})();
+
+/* ============ 1. 股价图 ============ */
+(function(){
+  const cv=document.getElementById('cv-stock');
+  function draw(){
+    const {ctx,w,h}=setup(cv);ctx.clearRect(0,0,w,h);
+    const ys=AAPL.map(d=>d[1]);
+    const sy=ymap(Math.min(...ys),Math.max(...ys),h,22), sx=xmap(AAPL.length,w,34);
+    // y grid
+    ctx.fillStyle=css('--muted');ctx.font='11px sans-serif';ctx.textAlign='right';
+    const mn=Math.min(...ys),mx=Math.max(...ys);
+    [mn,(mn+mx)/2,mx].forEach(v=>{const y=sy(v);ctx.strokeStyle=css('--line');ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(30,y);ctx.lineTo(w-6,y);ctx.stroke();ctx.fillText('$'+v.toFixed(0),28,y+3);});
+    plot(ctx,AAPL.map((_,i)=>sx(i)),ys.map(sy),css('--accent'),2);
+    // 标注崩盘点 06-25
+    const ci=AAPL.findIndex(d=>d[0]==='06-25');
+    if(ci>=0){const x=sx(ci),y=sy(AAPL[ci][1]);ctx.fillStyle=css('--bad');ctx.beginPath();ctx.arc(x,y,4,0,7);ctx.fill();ctx.textAlign='center';ctx.fillText('6/25 暴跌',x,y+16);}
+    // 标注高点
+    let hi=0;ys.forEach((v,i)=>{if(v>ys[hi])hi=i;});
+    const hx=sx(hi),hy=sy(ys[hi]);ctx.fillStyle=css('--ok');ctx.beginPath();ctx.arc(hx,hy,4,0,7);ctx.fill();ctx.fillText('高点 $'+ys[hi].toFixed(0),hx,hy-8);
+    // x labels
+    ctx.fillStyle=css('--muted');ctx.textAlign='center';
+    [0,Math.floor(AAPL.length/2),AAPL.length-1].forEach(i=>ctx.fillText(AAPL[i][0],sx(i),h-6));
+  }
+  draw();window.addEventListener('resize',draw);
+})();
+
+/* ============ 2. 交互一：BS 曲线 ============ */
+(function(){
+  const cv=document.getElementById('cv-bs');
+  const sel=document.getElementById('bs-strike'),sS=document.getElementById('bs-s'),sT=document.getElementById('bs-t');
+  CHAIN.forEach((c,i)=>{const o=document.createElement('option');o.value=i;o.textContent=`$${c.k}  (真实IV ${(c.iv*100).toFixed(0)}%, delta ${c.d.toFixed(2)})`;if(c.k===285)o.selected=true;sel.appendChild(o);});
+  function draw(){
+    const c=CHAIN[+sel.value], S=+sS.value, T=+sT.value, sig=c.iv;
+    const Ty=T/YR_CAL; // 剩余日历天 → 年
+    document.getElementById('bs-sv').textContent='$'+S;
+    document.getElementById('bs-tv').textContent=T;
+    const o=bs(S,c.k,Ty,sig);
+    const intr=Math.max(0,S-c.k), tv=Math.max(0,o.price-intr);
+    document.getElementById('bs-price').textContent='$'+o.price.toFixed(2);
+    document.getElementById('bs-intr').textContent='$'+intr.toFixed(2);
+    document.getElementById('bs-tv2').textContent='$'+tv.toFixed(2);
+    document.getElementById('bs-delta').textContent=o.delta.toFixed(3);
+    // 画曲线: x = 股价范围, y = 期权价
+    const {ctx,w,h}=setup(cv);ctx.clearRect(0,0,w,h);
+    const xLo=230,xHi=340, N1=120;
+    const priceArr=[],intrArr=[];
+    for(let i=0;i<=N1;i++){const s=xLo+(xHi-xLo)*i/N1;priceArr.push(bs(s,c.k,Ty,sig).price);intrArr.push(Math.max(0,s-c.k));}
+    const allY=priceArr.concat(intrArr);
+    const sy=ymap(0,Math.max(...allY),h,20), sx=v=>20+(v-xLo)/(xHi-xLo)*(w-40);
+    // axes
+    ctx.strokeStyle=css('--line');ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(20,sy(0));ctx.lineTo(w-20,sy(0));ctx.stroke();
+    // 行权价竖线
+    ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(sx(c.k),20);ctx.lineTo(sx(c.k),h-14);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle=css('--muted');ctx.font='11px sans-serif';ctx.textAlign='center';ctx.fillText('K=$'+c.k,sx(c.k),12);
+    // 内在价值(绿折线) + 期权价(紫曲线)
+    plot(ctx,intrArr.map((_,i)=>sx(xLo+(xHi-xLo)*i/N1)),intrArr.map(sy),css('--ok'),1.6);
+    plot(ctx,priceArr.map((_,i)=>sx(xLo+(xHi-xLo)*i/N1)),priceArr.map(sy),css('--accent2'),2.4);
+    // 当前股价竖线 + 点
+    ctx.strokeStyle=css('--accent');ctx.lineWidth=1;ctx.setLineDash([2,3]);ctx.beginPath();ctx.moveTo(sx(S),20);ctx.lineTo(sx(S),h-14);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle=css('--accent');ctx.beginPath();ctx.arc(sx(S),sy(o.price),4,0,7);ctx.fill();
+    // 时间价值阴影提示（当前股价处的两点间）
+    ctx.strokeStyle=css('--warn');ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(sx(S),sy(intr));ctx.lineTo(sx(S),sy(o.price));ctx.stroke();
+    ctx.fillStyle=css('--muted');ctx.textAlign='left';ctx.fillText('股价 →',w-50,h-4);
+  }
+  [sel,sS,sT].forEach(e=>e.addEventListener('input',draw));
+  draw();window.addEventListener('resize',draw);
+})();
+
+/* ============ 3. 交互二：时间机器 ============ */
+(function(){
+  const N1=AAPL.length;
+  const sBuy=document.getElementById('tm-buy'),sExp=document.getElementById('tm-exp'),sK=document.getElementById('tm-k'),sCur=document.getElementById('tm-cur');
+  sBuy.max=N1-1;sExp.max=N1-1;sCur.max=N1-1;
+  const IV=0.30;
+  function idxDate(i){return AAPL[Math.max(0,Math.min(N1-1,i))][0];}
+  function clampOrder(){
+    let b=+sBuy.value, e=+sExp.value;
+    if(e<=b){e=Math.min(N1-1,b+5);sExp.value=e;}
+    let cur=+sCur.value; if(cur<b){cur=b;sCur.value=b;} if(cur>e){cur=e;sCur.value=e;}
+  }
+  function draw(){
+    clampOrder();
+    const b=+sBuy.value, e=+sExp.value, K=+sK.value, cur=+sCur.value;
+    document.getElementById('tm-buyv').textContent=idxDate(b);
+    document.getElementById('tm-expv').textContent=idxDate(e);
+    document.getElementById('tm-curv').textContent=idxDate(cur);
+    document.getElementById('tm-kv').textContent='$'+K;
+    // 期权价值序列（从买入到到期）
+    const optVals=[], intrVals=[];
+    for(let i=b;i<=e;i++){
+      const dte=e-i; // 剩余交易日
+      const S=AAPL[i][1];
+      optVals.push(bs(S,K,dte/YR_TRD,IV).price);
+      intrVals.push(Math.max(0,S-K));
+    }
+    const cost=optVals[0]; // 买入成本
+    const ci=cur-b;
+    const curOpt=optVals[ci], curIntr=intrVals[ci], curTV=Math.max(0,curOpt-curIntr);
+    const pnl=(curOpt-cost)*100;
+    document.getElementById('tm-spot').textContent='$'+AAPL[cur][1].toFixed(2);
+    document.getElementById('tm-opt').textContent='$'+curOpt.toFixed(2);
+    document.getElementById('tm-split').textContent='$'+curIntr.toFixed(1)+' / $'+curTV.toFixed(1);
+    const pe=document.getElementById('tm-pnl');pe.textContent=(pnl>=0?'+$':'-$')+Math.abs(pnl).toFixed(0);pe.style.color=pnl>=0?'var(--ok)':'var(--bad)';
+    document.getElementById('tm-cost').textContent='$'+cost.toFixed(2);
+    document.getElementById('tm-dte').textContent=(e-cur)+' 交易日';
+    // ---- 上图: 股价 ----
+    const A=setup(document.getElementById('cv-tm-px'));A.ctx.clearRect(0,0,A.w,A.h);
+    const ys=AAPL.map(d=>d[1]);
+    const syA=ymap(Math.min(...ys),Math.max(...ys),A.h,16), sxA=xmap(N1,A.w,30);
+    plot(A.ctx,AAPL.map((_,i)=>sxA(i)),ys.map(syA),css('--accent'),1.6);
+    // 行权价虚线
+    A.ctx.strokeStyle=css('--muted');A.ctx.setLineDash([4,4]);A.ctx.beginPath();A.ctx.moveTo(30,syA(K));A.ctx.lineTo(A.w-6,syA(K));A.ctx.stroke();A.ctx.setLineDash([]);
+    A.ctx.fillStyle=css('--muted');A.ctx.font='10px sans-serif';A.ctx.textAlign='left';A.ctx.fillText('K=$'+K,32,syA(K)-3);
+    // 买入/到期/当前 标记
+    [['b',b,css('--ok')],['e',e,css('--bad')]].forEach(m=>{A.ctx.strokeStyle=m[2];A.ctx.lineWidth=1;A.ctx.setLineDash([2,2]);A.ctx.beginPath();A.ctx.moveTo(sxA(m[1]),10);A.ctx.lineTo(sxA(m[1]),A.h-12);A.ctx.stroke();A.ctx.setLineDash([]);});
+    A.ctx.strokeStyle=css('--accent2');A.ctx.lineWidth=2;A.ctx.beginPath();A.ctx.moveTo(sxA(cur),10);A.ctx.lineTo(sxA(cur),A.h-12);A.ctx.stroke();
+    A.ctx.fillStyle=css('--accent2');A.ctx.beginPath();A.ctx.arc(sxA(cur),syA(AAPL[cur][1]),3.5,0,7);A.ctx.fill();
+    A.ctx.fillStyle=css('--ok');A.ctx.textAlign='center';A.ctx.fillText('买',sxA(b),A.h-3);
+    A.ctx.fillStyle=css('--bad');A.ctx.fillText('到期',sxA(e),A.h-3);
+    // ---- 下图: 期权价值 ----
+    const B=setup(document.getElementById('cv-tm-opt'));B.ctx.clearRect(0,0,B.w,B.h);
+    const allO=optVals.concat(intrVals,[cost]);
+    const syB=ymap(0,Math.max(...allO,1),B.h,14), sxB=i=> 30+ ((e-b)<=0?0:(i)/(e-b))*(B.w-44);
+    // 0 线 & 成本线
+    B.ctx.strokeStyle=css('--line');B.ctx.lineWidth=1;B.ctx.beginPath();B.ctx.moveTo(30,syB(0));B.ctx.lineTo(B.w-14,syB(0));B.ctx.stroke();
+    B.ctx.strokeStyle=css('--muted');B.ctx.setLineDash([4,4]);B.ctx.beginPath();B.ctx.moveTo(30,syB(cost));B.ctx.lineTo(B.w-14,syB(cost));B.ctx.stroke();B.ctx.setLineDash([]);
+    B.ctx.fillStyle=css('--muted');B.ctx.font='10px sans-serif';B.ctx.textAlign='left';B.ctx.fillText('成本 $'+cost.toFixed(1),32,syB(cost)-3);
+    // 内在(绿) + 期权价值(紫)
+    plot(B.ctx,intrVals.map((_,i)=>sxB(i)),intrVals.map(syB),css('--ok'),1.4);
+    plot(B.ctx,optVals.map((_,i)=>sxB(i)),optVals.map(syB),css('--accent2'),2.2);
+    // 当前点竖线
+    B.ctx.strokeStyle=css('--accent2');B.ctx.lineWidth=1;B.ctx.setLineDash([2,3]);B.ctx.beginPath();B.ctx.moveTo(sxB(ci),10);B.ctx.lineTo(sxB(ci),B.h-10);B.ctx.stroke();B.ctx.setLineDash([]);
+    B.ctx.fillStyle=css('--accent2');B.ctx.beginPath();B.ctx.arc(sxB(ci),syB(curOpt),4,0,7);B.ctx.fill();
+  }
+  function findIdx(d){return AAPL.findIndex(x=>x[0]===d);}
+  document.getElementById('preset-win').onclick=()=>{sBuy.value=findIdx('04-30');sExp.value=findIdx('06-18');sK.value=280;sCur.value=findIdx('06-02');draw();};
+  document.getElementById('preset-crash').onclick=()=>{sBuy.value=findIdx('05-20');sExp.value=findIdx('06-26');sK.value=310;sCur.value=findIdx('06-02');draw();};
+  [sBuy,sExp,sK,sCur].forEach(e=>e.addEventListener('input',draw));
+  // 默认: 赢家
+  sBuy.value=findIdx('04-30');sExp.value=findIdx('06-18');sK.value=280;sCur.value=findIdx('05-22');
+  draw();window.addEventListener('resize',draw);
+})();
+</script>
+</body>
+</html>

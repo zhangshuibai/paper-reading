@@ -2057,5 +2057,28 @@
     ],
     "categories": [],
     "path": "papers/2026-06-28-quant-intro-for-ml/index.html"
+  },
+  {
+    "slug": "2026-06-28-option-pricing-aapl-real",
+    "title": "真实案例:AAPL期权价格如何随时间和股价变化(交互)",
+    "authors": "—",
+    "team": "实战·进阶",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-28",
+    "published": "财经投资",
+    "tldr": "用Robinhood真实数据(AAPL 2026上半年日线+6/26真实期权链)拆解期权定价:真实期权链快照看delta逐级递减/theta每日损耗/买卖价差,Black-Scholes重建(经真实报价校验误差<2%)期权价格随股价和剩余天数的演变,含3个浏览器交互—真实股价图/BS价格曲线/时间机器(在真实AAPL走势上持有一张call看每日盈亏与时间价值融化),配大涨赢家与暴跌归零两个预设",
+    "tags": [
+      "options",
+      "期权",
+      "black-scholes",
+      "delta",
+      "theta",
+      "实战",
+      "真实数据",
+      "AAPL"
+    ],
+    "categories": [],
+    "path": "papers/2026-06-28-option-pricing-aapl-real/index.html"
   }
 ]
