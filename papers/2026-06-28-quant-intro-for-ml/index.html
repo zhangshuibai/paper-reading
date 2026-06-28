@@ -486,9 +486,12 @@ function css(name){return getComputedStyle(document.documentElement).getProperty
 /* ---------- 高清 canvas ---------- */
 function setup(cv){
   const dpr=window.devicePixelRatio||1;
+  // 逻辑高度只在首次从 HTML 属性读取一次并记住，之后复用，
+  // 否则每次重绘都会把已被 ×dpr 放大的 cv.height 再次放大 → 画布越拖越大。
+  if(!cv.dataset.logih) cv.dataset.logih=String(cv.getAttribute('height')||cv.height||200);
+  const h=+cv.dataset.logih;
   const w=cv.clientWidth||cv.parentElement.clientWidth;
-  const h=cv.height; // CSS height attr used as logical height
-  cv.width=w*dpr; cv.height=h*dpr;
+  cv.width=Math.round(w*dpr); cv.height=Math.round(h*dpr);
   cv.style.height=h+'px';
   const ctx=cv.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0);
   return {ctx,w,h};
