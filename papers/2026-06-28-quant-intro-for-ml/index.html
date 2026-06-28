@@ -498,9 +498,9 @@ function line(ctx,xs,ys,color,lw){
   for(let i=0;i<xs.length;i++){i?ctx.lineTo(xs[i],ys[i]):ctx.moveTo(xs[i],ys[i]);}
   ctx.stroke();
 }
-function scaler(vals,lo,hi,pad){ // map value-array range -> [pad, size-pad] (inverted handled by caller)
+function scaler(vals,size,_zero,pad){ // 调用处用 (size - f(v)) 取像素 y，落在 [pad, size-pad] 内（最小值贴底、最大值贴顶）
   let mn=Math.min(...vals),mx=Math.max(...vals);if(mn===mx){mx=mn+1;}
-  return v=> lo+pad + (v-mn)/(mx-mn)*(hi-lo-2*pad);
+  return v=> pad + (v-mn)/(mx-mn)*(size-2*pad);
 }
 
 /* ================= 1. 翻译表 ================= */
