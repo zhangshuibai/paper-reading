@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>散户量化策略调研报告（$1万–$10万资金）</title>
+<style>
+  :root{
+    --bg:#0f1220;--panel:#171a2b;--panel2:#1d2138;--text:#e8eaf2;--muted:#9aa3bd;
+    --line:#2a2f4a;--accent:#7aa2ff;--accent2:#9b8cff;--ok:#43c59e;--warn:#f0a93c;--bad:#ff6b81;
+    --chip:#232842;--chipText:#c7cdec;--shadow:0 6px 22px rgba(0,0,0,.30);
+  }
+  @media (prefers-color-scheme:light){:root{
+    --bg:#f6f7fb;--panel:#fff;--panel2:#f0f2f9;--text:#1a1f33;--muted:#5a627a;--line:#e6e9f2;
+    --accent:#3a66ff;--accent2:#6b4cff;--ok:#138a6e;--warn:#b9791a;--bad:#d83a55;
+    --chip:#eef1fb;--chipText:#36406b;--shadow:0 6px 18px rgba(20,30,80,.07);}}
+  *{box-sizing:border-box}html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--text);line-height:1.75;font-size:16px;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",Helvetica,Arial,sans-serif;}
+  .wrap{max-width:920px;margin:0 auto;padding:40px 20px 100px}
+  h1{font-size:28px;line-height:1.3;margin:0 0 10px}
+  h2{font-size:22px;margin:50px 0 14px;padding-top:14px;border-top:1px solid var(--line)}
+  h3{font-size:18px;margin:28px 0 8px;color:var(--accent2)}
+  p{margin:12px 0}
+  a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+  code{background:var(--panel2);padding:2px 7px;border-radius:6px;font-size:.9em;font-family:"SF Mono",Menlo,Consolas,monospace}
+  sup a{font-size:11px;padding:0 1px}
+  .sub{color:var(--muted);font-size:15px}
+  .badges{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}
+  .badge{font-size:12px;font-weight:700;padding:3px 11px;border-radius:999px;background:rgba(122,162,255,.16);color:var(--accent)}
+  .badge.g{background:rgba(67,197,158,.18);color:var(--ok)}
+  .badge.r{background:rgba(255,107,129,.18);color:var(--bad)}
+  .box{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin:18px 0;box-shadow:var(--shadow)}
+  .tldr{background:linear-gradient(135deg,rgba(122,162,255,.10),rgba(155,140,255,.08));border-left:4px solid var(--accent)}
+  .note{border-left:4px solid var(--accent2)}
+  .warn{border-left:4px solid var(--warn);background:rgba(240,169,60,.07)}
+  .key{border-left:4px solid var(--ok);background:rgba(67,197,158,.07)}
+  .bad-box{border-left:4px solid var(--bad);background:rgba(255,107,129,.07)}
+  .box h4:first-child{margin-top:0}
+  .box h4{margin:0 0 8px;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+  nav.toc{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 20px;margin:22px 0}
+  nav.toc h4{margin:0 0 10px;font-size:13px;color:var(--muted);letter-spacing:.6px}
+  nav.toc ol{margin:0;padding-left:22px;columns:2;column-gap:30px}
+  @media(max-width:620px){nav.toc ol{columns:1}}
+  nav.toc li{margin:5px 0;font-size:14.5px}
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14px}
+  th,td{border:1px solid var(--line);padding:9px 11px;text-align:left;vertical-align:top}
+  th{background:var(--panel2);font-weight:700}
+  tr:nth-child(even) td{background:rgba(128,128,128,.04)}
+  .strat{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:0;margin:18px 0;overflow:hidden;box-shadow:var(--shadow)}
+  .strat .hd{padding:14px 18px;background:var(--panel2);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+  .strat .hd h3{margin:0;color:var(--text)}
+  .strat .body{padding:6px 18px 16px}
+  .tag{font-size:11px;font-weight:700;padding:2px 9px;border-radius:6px}
+  .t-low{background:rgba(67,197,158,.20);color:var(--ok)}
+  .t-mid{background:rgba(240,169,60,.20);color:var(--warn)}
+  .t-high{background:rgba(255,107,129,.20);color:var(--bad)}
+  .kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:14px;margin:8px 0}
+  .kv .k{color:var(--muted)}
+  ul,ol{padding-left:24px}li{margin:5px 0}
+  .pill{display:inline-block;font-size:12px;padding:1px 8px;border-radius:999px;background:var(--chip);color:var(--chipText);margin:0 2px}
+  .demo{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin:22px 0;box-shadow:var(--shadow)}
+  .demo h4{margin:0 0 4px;font-size:15px;color:var(--accent)}
+  .controls{display:flex;flex-wrap:wrap;gap:14px 20px;margin:12px 0}
+  .ctl{flex:1;min-width:160px}
+  .ctl label{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-bottom:6px}
+  .ctl label b{color:var(--text)}
+  input[type=range]{width:100%;accent-color:var(--accent)}
+  canvas{width:100%;display:block;border-radius:8px;background:var(--panel2)}
+  .stats{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+  .stat{flex:1;min-width:120px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .stat .lab{font-size:11.5px;color:var(--muted)}.stat .val{font-size:19px;font-weight:700;margin-top:2px}
+  .src{font-size:13px;color:var(--muted)}
+  ol.refs{font-size:13px;padding-left:26px}ol.refs li{margin:7px 0;word-break:break-word}
+  footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);color:var(--muted);font-size:13px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="badges"><span class="badge g">调研报告</span><span class="badge">散户量化</span><span class="badge r">$1万–$10万</span><span class="badge">2026</span></div>
+  <h1>散户量化策略调研报告：$1万–$10万资金，到底该做什么</h1>
+  <p class="sub">基于公开网络资料综合整理 · 2026-06 · 含真实数据来源引用 · 面向有 ML/编程背景的个人投资者</p>
+</header>
+
+<div class="box bad-box">
+  <h4>⚠️ 免责声明（先读）</h4>
+  <p style="margin:0">本文是<b>教育性调研综述</b>，不是投资建议。所有策略都有亏损风险，过往业绩不代表未来。文中收益数字来自公开资料，<b>多为乐观情形或营销口径</b>，请结合下面"残酷现实"一节理性看待。真金白银前请自行尽调、先纸面交易。</p>
+</div>
+
+<div class="box tldr">
+  <h4>核心结论（TL;DR）</h4>
+  <ul style="margin:6px 0 0">
+    <li><b>先认清现实</b>：约 <b>90%</b> 的散户量化交易者第一年跑不赢"买入持有标普"<sup><a href="#r1">[1]</a></sup>；幸存者的现实年化约 <b>8–15%</b>，不是网上吹的 50%+<sup><a href="#r5">[5]</a></sup>。</li>
+    <li><b>对 $1万–$10万、有工作的人，最现实的不是"高频日内"，而是低频系统化</b>：① <b>ETF/资产类动量 & 双动量</b>（月度再平衡）② <b>趋势跟踪/管理期货</b>（用 ETF 或微型期货）③ <b>期权 Wheel 卖权收租</b>（需较多资金）④ <b>短期均值回归</b>（需编程+纪律）。</li>
+    <li><b>2026 利好</b>：困扰小账户 20 年的 <b>$2.5 万 PDT 日内交易门槛已于 6/4 取消</b><sup><a href="#r9">[9]</a></sup>，小资金做日内/期权的限制大幅放松。</li>
+    <li><b>给你的路线</b>：核心用<b>系统化动量/趋势</b>（省时、可回测、税务友好），资金够了再加<b>期权 Wheel</b>卫星仓；一切先在 <b>QuantConnect/Alpaca</b> 纸面验证。</li>
+  </ul>
+</div>
+
+<nav class="toc">
+  <h4>目录</h4>
+  <ol>
+    <li><a href="#s1">残酷的现实：先把期望值校准</a></li>
+    <li><a href="#s2">适合散户的 6 类策略（逐个拆解）</a></li>
+    <li><a href="#s3">按资金量分层：$1万 / $5万 / $10万</a></li>
+    <li><a href="#s4">2026 监管与成本现实</a></li>
+    <li><a href="#s5">平台与工具</a></li>
+    <li><a href="#s6">给你的推荐路径（蓝图）</a></li>
+    <li><a href="#s7">现实收益计算器（交互）</a></li>
+    <li><a href="#s8">必避的致命陷阱</a></li>
+    <li><a href="#refs">资料来源</a></li>
+  </ol>
+</nav>
+
+<!-- ===== 1 ===== -->
+<h2 id="s1">1 · 残酷的现实：先把期望值校准</h2>
+<p>几乎所有调研资料的第一条共识都是"别抱不切实际的幻想"。把这些数字钉在脑子里，能帮你避开 90% 的坑：</p>
+<table>
+  <tr><th>事实</th><th>数字</th><th>来源</th></tr>
+  <tr><td>第一年跑不赢"买入持有标普"的比例</td><td><b>~90%</b></td><td><sup><a href="#r1">[1]</a></sup></td></tr>
+  <tr><td>回测漂亮但实盘失效（过拟合）的比例</td><td><b>~80%</b></td><td><sup><a href="#r5">[5]</a></sup></td></tr>
+  <tr><td>幸存者现实年化（新手）</td><td><b>5–15%</b></td><td><sup><a href="#r5">[5]</a></sup></td></tr>
+  <tr><td>幸存者现实年化（有成熟策略的老手）</td><td><b>15–25%</b></td><td><sup><a href="#r5">[5]</a></sup></td></tr>
+  <tr><td>QuantConnect 盈利用户中有 STEM 学位的比例</td><td><b>68%</b></td><td><sup><a href="#r5">[5]</a></sup></td></tr>
+</table>
+<div class="box warn">
+  <p style="margin:0"><b>读这些数字的方式</b>：① <b>"跑赢买入持有"本身就很难</b>——如果你的策略长期跑不赢一只标普 ETF，那不如直接买 ETF 省心。② <b>你有 ML/编程背景是真实优势</b>（STEM 相关性印证），但优势体现在"少犯过拟合错误、能严肃回测"，不是"能预测涨跌"。③ <b>目标先定为"用更低回撤拿到接近市场的收益"</b>，而不是"暴富"。</p>
+</div>
+
+<!-- ===== 2 ===== -->
+<h2 id="s2">2 · 适合散户的 6 类策略</h2>
+<p>下面 6 类按"<b>工作量从低到高</b>"排列。每个标注：<span class="tag t-low">工作量</span> / <span class="tag t-mid">资金要求</span> / 适合谁。</p>
+
+<!-- 策略1 -->
+<div class="strat">
+  <div class="hd"><h3>① 系统化「资产类动量 / 双动量」</h3><div><span class="tag t-low">工作量低</span> <span class="tag t-low">资金 $1万起</span></div></div>
+  <div class="body">
+    <p><b>逻辑</b>：在一篮子 ETF（不同国家/行业/资产）里，<b>买过去 12 个月涨得最好的 3–5 只</b>，每月（或每 1–3 月）再平衡<sup><a href="#r7">[7]</a></sup>。"双动量(Dual Momentum)"再加一道<b>绝对动量</b>过滤：只有跑赢短期国债才持有，否则空仓避险<sup><a href="#r8">[8]</a></sup>。</p>
+    <div class="kv">
+      <span class="k">核心规则</span><span>按 12 月收益排序 → 剔除跑不赢无风险利率的 → 取前 3–5 等权 → 月度再平衡<sup><a href="#r7">[7]</a></sup></span>
+      <span class="k">为何适合散户</span><span>低频（每月一次）、可完全回测、换手低=税务/成本友好；几千美元就能分散</span>
+      <span class="k">现实预期</span><span>多个 50 年回测显示简单动量长期跑赢市场、回撤更低<sup><a href="#r6">[6]</a></sup>；但会有"动量崩溃"的尾部风险</span>
+      <span class="k">资源</span><span>CXO SACEMS<sup><a href="#r6">[6]</a></sup>、Quantpedia<sup><a href="#r10">[10]</a></sup>、Gary Antonacci《Dual Momentum》</span>
+    </div>
+    <p class="src">👉 对你最推荐的<b>入门核心仓</b>：规则清晰、最容易严肃回测、最不容易过拟合。</p>
+  </div>
+</div>
+
+<!-- 策略2 -->
+<div class="strat">
+  <div class="hd"><h3>② 趋势跟踪 / 管理期货（危机 Alpha）</h3><div><span class="tag t-low">工作量低-中</span> <span class="tag t-mid">ETF版$1万 / 微期货$1万+</span></div></div>
+  <div class="body">
+    <p><b>逻辑</b>：跨股票/债券/商品/外汇做多上涨、做空下跌的趋势，<b>纯系统化</b><sup><a href="#r11">[11]</a></sup>。最大价值是<b>"危机 Alpha"</b>——股市崩盘时它常逆势赚钱，给组合上保险。</p>
+    <div class="kv">
+      <span class="k">散户怎么做</span><span>① 最省事：买<b>趋势 ETF</b>（如 DBMF、KMLM、TFPN）<sup><a href="#r13">[13]</a></sup> ② 进阶：用<b>微型期货</b>(MNQ/MYM，$1万即可承受回撤)自建系统<sup><a href="#r1">[1]</a></sup></span>
+      <span class="k">现实预期</span><span>与股票相关性低，单独看收益一般，<b>价值在分散和抗崩盘</b>；和股票/债券组合能改善整体夏普<sup><a href="#r12">[12]</a></sup></span>
+      <span class="k">资源</span><span>AQR Managed Futures<sup><a href="#r12">[12]</a></sup>、Clenow《Following the Trend》、ReturnStacked<sup><a href="#r11">[11]</a></sup></span>
+    </div>
+  </div>
+</div>
+
+<!-- 策略3 -->
+<div class="strat">
+  <div class="hd"><h3>③ 期权 Wheel（卖权收租）</h3><div><span class="tag t-mid">工作量中</span> <span class="tag t-high">资金要求高</span></div></div>
+  <div class="body">
+    <p><b>逻辑</b>：散户最流行的期权<b>收入</b>策略<sup><a href="#r14">[14]</a></sup>。循环：卖<b>现金担保看跌(CSP)</b>收权利金 → 被行权就持股 → 对持股卖<b>备兑看涨(covered call)</b>继续收租 → 被叫走再循环。靠 <b>theta 时间损耗</b>站在卖方赚钱<sup><a href="#r15">[15]</a></sup>。</p>
+    <div class="kv">
+      <span class="k">现实预期</span><span>选好标的、合理 IV 下，年化约 <b>10–20%</b><sup><a href="#r14">[14]</a></sup>；收益封顶、且承担持股下跌风险</span>
+      <span class="k">资金门槛</span><span><b>很吃资金</b>：$50 的股票一张 CSP 锁约 $5,000；$200 的锁约 $20,000<sup><a href="#r14">[14]</a></sup>。$1万只能做低价股，$5万+才舒展</span>
+      <span class="k">致命点</span><span>"赢小亏大"——平时稳收租，标的暴跌时把多月利润一次吐回（见你学过的 6/25 AAPL 暴跌）</span>
+      <span class="k">资源</span><span>Schwab Wheel<sup><a href="#r16">[16]</a></sup>、Alpaca Python 实现<sup><a href="#r15">[15]</a></sup></span>
+    </div>
+  </div>
+</div>
+
+<!-- 策略4 -->
+<div class="strat">
+  <div class="hd"><h3>④ 短期均值回归（统计套利的入门版）</h3><div><span class="tag t-mid">工作量中-高</span> <span class="tag t-low">资金 $1万起</span></div></div>
+  <div class="body">
+    <p><b>逻辑</b>：股票短期"超跌反弹、超涨回落"。用 <b>RSI &lt;30 买 / &gt;70 卖</b>、<b>Z-Score &gt;±2</b>、布林带等信号<sup><a href="#r17">[17]</a></sup>。股票在短周期高度均值回归，是回测里最稳的一类<sup><a href="#r4">[4]</a></sup>。</p>
+    <div class="kv">
+      <span class="k">为何适合编程者</span><span>信号简单、易向量化回测；适合练你学的 <code>shift(1)</code> 防未来函数那套</span>
+      <span class="k">现实预期</span><span>胜率较高但单笔薄利，<b>对交易成本/滑点敏感</b>；需要纪律执行、不能手动干预</span>
+      <span class="k">进阶</span><span>配对交易(pairs)/统计套利：做多A做空B赚价差收敛——经典统计套利入门</span>
+      <span class="k">资源</span><span>QuantifiedStrategies<sup><a href="#r4">[4]</a></sup>、QuantInsti<sup><a href="#r17">[17]</a></sup></span>
+    </div>
+  </div>
+</div>
+
+<!-- 策略5 -->
+<div class="strat">
+  <div class="hd"><h3>⑤ 因子/Smart-Beta 长期持有（最省心）</h3><div><span class="tag t-low">工作量极低</span> <span class="tag t-low">资金任意</span></div></div>
+  <div class="body">
+    <p><b>逻辑</b>：不做择时，直接长期持有<b>因子 ETF</b>（动量 MTUM、价值 VLUE、质量 QUAL、低波 USMV），赚学术验证过的因子溢价。本质是"量化思想的被动版"。</p>
+    <div class="kv">
+      <span class="k">现实预期</span><span>长期接近或略超市场、波动特征不同；几乎零维护</span>
+      <span class="k">适合谁</span><span>没时间盯盘、想要"量化味道"又不想写代码的人——也是其它策略的<b>底仓基准</b></span>
+    </div>
+  </div>
+</div>
+
+<!-- 策略6 -->
+<div class="strat">
+  <div class="hd"><h3>⑥ 加密量化（高风险，练手可以）</h3><div><span class="tag t-high">工作量高</span> <span class="tag t-high">风险高</span></div></div>
+  <div class="body">
+    <p><b>逻辑</b>：7×24 交易、波动大、API 开放，适合<b>练手和做趋势/资金费率套利</b>。但市场更不成熟、操纵和暴雷风险高。仅用小仓试验，别当主力。</p>
+    <div class="kv"><span class="k">资源</span><span><code>ccxt</code> 统一交易所 API；从趋势跟踪/网格起步</span></div>
+  </div>
+</div>
+
+<div class="box note">
+  <h4>一句话选择指南</h4>
+  <p style="margin:0"><b>没时间/不想写代码</b> → ⑤因子ETF + ①动量。<b>愿意写代码、想系统化</b> → ①动量 + ②趋势 + ④均值回归。<b>资金 $5万+ 且想要现金流</b> → 加 ③Wheel。<b>纯练手</b> → ⑥加密。</p>
+</div>
+
+<!-- ===== 3 ===== -->
+<h2 id="s3">3 · 按资金量分层</h2>
+<table>
+  <tr><th>资金</th><th>现实能做什么</th><th>不建议</th></tr>
+  <tr><td><b>~$1万</b></td><td>因子ETF底仓 + 资产类动量(①) + 趋势ETF(②)；少量微型期货练系统；均值回归小仓(④)。PDT 取消后也能做期权日内/小额 Wheel(低价股)</td><td>高价股 Wheel（一张就吃掉大半资金，无法分散）</td></tr>
+  <tr><td><b>~$5万</b></td><td>上面全部 + <b>Wheel 开始舒展</b>（能在 3–5 只标的上分散卖权）+ 多策略组合分散</td><td>把全部押在单一策略/单一标的</td></tr>
+  <tr><td><b>~$10万</b></td><td>核心(动量/趋势) + 卫星(Wheel/均值回归)的<b>多策略组合</b>；足够分散、可承受单策略回撤；可考虑微型期货做真正的趋势分散</td><td>仍不建议高频/HFT（拼不过机构延迟）<sup><a href="#r1">[1]</a></sup></td></tr>
+</table>
+
+<!-- ===== 4 ===== -->
+<h2 id="s4">4 · 2026 监管与成本现实</h2>
+<div class="box key">
+  <h4>🔔 重大变化：PDT $2.5万门槛已取消</h4>
+  <p style="margin:0">困扰小账户 20 年的"<b>4 次日内交易需 $2.5 万</b>"规则，SEC 已于 <b>2026-04-14 批准取消，6-04 生效</b><sup><a href="#r9">[9]</a></sup>。取而代之的是按持仓的保证金维持要求（约 25%）；<b>纯现金账户无最低门槛</b>，仅用杠杆才需 $2,000<sup><a href="#r9">[9]</a></sup>。Robinhood/IBKR 已即时执行。<b>意义</b>：$1万账户现在也能自由做日内和期权策略，小资金量化的最大制度障碍消失了。</p>
+</div>
+<ul>
+  <li><b>佣金</b>：美股基本 $0（Alpaca 免佣，IBKR 约 $0.005/股）<sup><a href="#r18">[18]</a></sup>；期权有每张小额费。<b>但滑点和买卖价差是真实成本</b>（你已学过）。</li>
+  <li><b>税务</b>：应税账户里<b>短期交易=按普通收入征税</b>（比长期资本利得高）；注意<b>洗售规则(wash sale)</b>；高频/收租类策略在 <b>IRA/Roth</b> 里做更省税<sup><a href="#r9">[9]</a></sup>。</li>
+  <li><b>基础设施成本</b>：TradingView ~$49/月、回测平台 ~$20–40/月，<b>合计可控制在 $100/月内</b><sup><a href="#r1">[1]</a></sup>。</li>
+</ul>
+
+<!-- ===== 5 ===== -->
+<h2 id="s5">5 · 平台与工具</h2>
+<table>
+  <tr><th>平台</th><th>定位</th><th>费用</th></tr>
+  <tr><td><b>QuantConnect</b></td><td>云端<b>回测+实盘</b>，自带数据，支持 Python；接 IBKR/Alpaca/Coinbase 等 20+ 券商<sup><a href="#r19">[19]</a></sup></td><td>$20–40/月<sup><a href="#r18">[18]</a></sup></td></tr>
+  <tr><td><b>Alpaca</b></td><td>Python 优先、<b>免佣</b> REST/WebSocket API，纸面↔实盘一键切；美股+加密<sup><a href="#r20">[20]</a></sup></td><td>免佣</td></tr>
+  <tr><td><b>Interactive Brokers</b></td><td>低费、全球市场、股票/期权/期货全有，专业执行<sup><a href="#r18">[18]</a></sup></td><td>~$0.005/股</td></tr>
+  <tr><td><b>TradingView</b></td><td>图表 + Pine Script 写信号/简单回测，配桥接执行</td><td>~$49/月</td></tr>
+  <tr><td><b>Python 库</b></td><td><code>pandas/numpy</code>、<code>backtesting.py</code>/<code>vectorbt</code> 回测、<code>alphalens</code> 因子、<code>cvxpy/PyPortfolioOpt</code> 组合、<code>ccxt</code> 加密</td><td>免费</td></tr>
+</table>
+<p class="src">对你（ML 背景）：<b>QuantConnect 做严肃回测 + Alpaca 免佣实盘</b>是性价比最高的组合；本地用 Python 自建向量化回测理解最深。</p>
+
+<!-- ===== 6 ===== -->
+<h2 id="s6">6 · 给你的推荐路径（蓝图）</h2>
+<div class="box key">
+  <ol style="margin:0">
+    <li><b>0–1 月 · 底仓先立住</b>：先用<b>因子/指数 ETF</b> 把大部分钱稳住（别让"学量化"耽误了最基本的市场收益）。</li>
+    <li><b>1–2 月 · 核心系统化仓</b>：实现①<b>资产类双动量</b>（12 月动量 + 绝对动量过滤，月度再平衡），在 QuantConnect 跨多个市场周期回测，纸面跑 1 个月，再上小资金。</li>
+    <li><b>2–3 月 · 加趋势分散</b>：加②<b>趋势 ETF</b>（如 DBMF/KMLM）做"危机 Alpha"，降低组合回撤。</li>
+    <li><b>3–6 月 · 卫星策略</b>：资金够($5万+)就加③<b>Wheel</b>在 3–5 只优质标的上收租；想练编程就做④<b>均值回归</b>小仓。</li>
+    <li><b>持续 · 严肃工程化</b>：每个策略都做<b>样本外 + walk-forward + 蒙特卡洛 + 真实成本</b>验证<sup><a href="#r1">[1]</a></sup>；写交易日志防自欺；用你的 ML 武器只在因子组合环节用（别一上来就深度学习预测涨跌）。</li>
+  </ol>
+  <p style="margin:10px 0 0"><b>北极星</b>：<span style="color:var(--bad)">先求"不被市场淘汰"（控回撤、防过拟合）</span>，再谈超额收益。你的真实优势是<b>工程严谨</b>，不是预测能力。</p>
+</div>
+
+<!-- ===== 7 ===== -->
+<h2 id="s7">7 · 现实收益计算器</h2>
+<p>把"现实年化"的概念量化一下：拖动看不同年化对 $1万–$10万本金、若干年后的差别。<b>灰色带=现实区间(8–15%)，红色=网上鼓吹的 50%</b>——感受一下别被忽悠。</p>
+<div class="demo">
+  <h4>📊 复利 · 现实 vs 鼓吹</h4>
+  <canvas id="cv-comp" height="240"></canvas>
+  <div class="controls">
+    <div class="ctl"><label>本金 <b id="v-cap">$50,000</b></label><input id="s-cap" type="range" min="10000" max="100000" value="50000" step="5000"></div>
+    <div class="ctl"><label>年化收益 <b id="v-cagr">12%</b></label><input id="s-cagr" type="range" min="-10" max="40" value="12" step="1"></div>
+    <div class="ctl"><label>年数 <b id="v-yrs">10</b></label><input id="s-yrs" type="range" min="1" max="30" value="10" step="1"></div>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="lab">你设定的终值</div><div class="val" id="o-final" style="color:var(--accent2)">—</div></div>
+    <div class="stat"><div class="lab">现实区间(8–15%)终值</div><div class="val" id="o-real" style="color:var(--ok);font-size:15px">—</div></div>
+    <div class="stat"><div class="lab">"50%"鼓吹终值</div><div class="val" id="o-hype" style="color:var(--bad)">—</div></div>
+  </div>
+  <p class="src" style="margin-top:10px">注：50% 那条几乎没人能长期维持——若真有，几年就成世界首富了。看到鼓吹长期 30%+ 的，基本是营销或幸存者偏差。</p>
+</div>
+
+<!-- ===== 8 ===== -->
+<h2 id="s8">8 · 必避的致命陷阱</h2>
+<ul>
+  <li><b>过拟合</b>：80% 漂亮回测实盘失效<sup><a href="#r5">[5]</a></sup>。一段牛市 6 个月不算验证——要跨多个市场状态 + 样本外 + walk-forward + 蒙特卡洛<sup><a href="#r1">[1]</a></sup>。</li>
+  <li><b>未来函数</b>：用了当时不可知的信息（你已学过 <code>shift(1)</code>）。</li>
+  <li><b>忽略真实成本</b>：滑点、买卖价差、税。很多回测赚钱的策略一加成本就归零。</li>
+  <li><b>自动化放大错误</b>：程序会把策略的优点和缺点<b>同时</b>放大<sup><a href="#r5">[5]</a></sup>；上线先小资金、设熔断。</li>
+  <li><b>容量与拥挤</b>：好策略管太多钱会失效；别幻想无限扩容。</li>
+  <li><b>心理</b>：系统化的意义就是<b>排除情绪</b>——定了规则就别手动干预，否则回测全白做。</li>
+</ul>
+
+<div class="box bad-box">
+  <p style="margin:0"><b>最后的现实主义忠告</b>：对绝大多数有正职的散户，"<b>低成本指数/因子 ETF + 一个低频系统化动量/趋势叠加</b>"已经能拿到很好的风险调整收益，且省时、省税、少踩坑。真正的"主动量化"是高投入、低成功率的游戏——<b>把它当作有趣且能长期精进的副业，而不是快速致富的捷径</b>。你的 ML 背景在"严谨验证、避免自欺"上是真优势，在"预测市场"上不是。</p>
+</div>
+
+<h2 id="refs">资料来源</h2>
+<ol class="refs">
+  <li id="r1"><a href="https://www.tradealgo.com/trading-guides/ai-trading/algorithmic-trading-for-retail-investors-a-complete-2026-guide" target="_blank">TradeAlgo — Algorithmic Trading for Retail Investors: A Complete 2026 Guide</a></li>
+  <li id="r2"><a href="https://blog.traderspost.io/article/algorithmic-trading-for-retail-investors" target="_blank">TradersPost — Can Retail Traders Succeed with Algorithmic Trading?</a></li>
+  <li id="r3"><a href="https://www.quantstart.com/articles/Can-Algorithmic-Traders-Still-Succeed-at-the-Retail-Level/" target="_blank">QuantStart — Can Algorithmic Traders Still Succeed at the Retail Level?</a></li>
+  <li id="r4"><a href="https://www.quantifiedstrategies.com/mean-reversion-trading-strategy/" target="_blank">QuantifiedStrategies — Mean Reversion Trading Strategies (Backtests)</a></li>
+  <li id="r5"><a href="https://www.tradealgo.com/trading-guides/tools/is-algorithmic-trading-worth-it-costs-returns-and-a-reality-check-for-2026" target="_blank">TradeAlgo — Is Algorithmic Trading Worth It? Costs, Returns & Reality Check 2026</a></li>
+  <li id="r6"><a href="https://www.cxoadvisory.com/momentum-strategy/" target="_blank">CXO Advisory — Simple Asset Class ETF Momentum Strategy (SACEMS)</a></li>
+  <li id="r7"><a href="https://www.quant-investing.com/blog/etf-momentum-strategy-step-by-step-guide" target="_blank">Quant Investing — ETF Momentum Strategy Step-By-Step Guide</a></li>
+  <li id="r8"><a href="https://www.justetf.com/en/how-to/invest-in-momentum-etfs.html" target="_blank">justETF — Momentum ETFs / Dual Momentum</a></li>
+  <li id="r9"><a href="https://www.nerdwallet.com/investing/news/pattern-day-trading-rule-change" target="_blank">NerdWallet — The $25,000 Pattern Day Trading Rule Is No More (2026)</a></li>
+  <li id="r10"><a href="https://quantpedia.com/refining-etf-asset-momentum-strategy/" target="_blank">QuantPedia — Refining ETF Asset Momentum Strategy</a></li>
+  <li id="r11"><a href="https://www.returnstacked.com/managed-futures-trend-following/" target="_blank">Return Stacked — Managed Futures Trend Following</a></li>
+  <li id="r12"><a href="https://funds.aqr.com/Insights/Strategies/Managed-Futures" target="_blank">AQR — Managed Futures Strategies</a></li>
+  <li id="r13"><a href="https://kraneshares.com/the-total-portfolio-approach-in-2026-construction-risk-and-the-role-of-kmlm/" target="_blank">KraneShares — Total Portfolio Approach 2026 (KMLM)</a></li>
+  <li id="r14"><a href="https://riskpicks.com/blog/options-wheel-strategy-explained/" target="_blank">RiskPicks — Options Wheel Strategy Explained</a></li>
+  <li id="r15"><a href="https://alpaca.markets/learn/options-wheel-strategy" target="_blank">Alpaca — The Options Wheel Strategy (Python)</a></li>
+  <li id="r16"><a href="https://www.schwab.com/learn/story/three-things-to-know-about-wheel-strategy" target="_blank">Charles Schwab — Three Things to Know About the Wheel Strategy</a></li>
+  <li id="r17"><a href="https://www.quantinsti.com/articles/types-trading-strategies/" target="_blank">QuantInsti — Types of Trading Strategies: Momentum, Mean Reversion</a></li>
+  <li id="r18"><a href="https://medium.com/@pta.forwork/comparing-algorithmic-trading-platforms-metatrader-interactive-brokers-ibkr-alpaca-3fc0fab11288" target="_blank">Comparing Algo Trading Platforms: IBKR / Alpaca / QuantConnect</a></li>
+  <li id="r19"><a href="https://www.luxalgo.com/blog/quantconnect-review-best-platform-for-algo-trading-2/" target="_blank">LuxAlgo — QuantConnect Review</a></li>
+  <li id="r20"><a href="https://alpaca.markets/learn/algo-trading-landscape" target="_blank">Alpaca — API Algo Trading Landscape</a></li>
+</ol>
+
+<footer>
+  散户量化策略调研 · 基于公开网络资料综合 · 2026-06-28 · 教育用途，非投资建议<br>
+  收录于 <a href="https://github.com/zhangshuibai/paper-reading">zhangshuibai/paper-reading</a>
+</footer>
+</div>
+
+<script>
+"use strict";
+function setup(cv){const dpr=window.devicePixelRatio||1;if(!cv.dataset.logih)cv.dataset.logih=String(cv.getAttribute('height')||cv.height||200);const h=+cv.dataset.logih;const w=cv.clientWidth||cv.parentElement.clientWidth;cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);cv.style.height=h+'px';const ctx=cv.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);return {ctx,w,h};}
+function css(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim();}
+function plot(ctx,xs,ys,color,lw,dash){ctx.save();ctx.setLineDash(dash||[]);ctx.beginPath();ctx.lineWidth=lw||2;ctx.strokeStyle=color;for(let i=0;i<xs.length;i++){i?ctx.lineTo(xs[i],ys[i]):ctx.moveTo(xs[i],ys[i]);}ctx.stroke();ctx.restore();}
+function fmt(v){return '$'+Math.round(v).toLocaleString('en-US');}
+(function(){
+  const sCap=document.getElementById('s-cap'),sC=document.getElementById('s-cagr'),sY=document.getElementById('s-yrs');
+  function draw(){
+    const cap=+sCap.value, cagr=+sC.value/100, yrs=+sY.value;
+    document.getElementById('v-cap').textContent=fmt(cap);
+    document.getElementById('v-cagr').textContent=(cagr*100).toFixed(0)+'%';
+    document.getElementById('v-yrs').textContent=yrs;
+    const path=r=>{const a=[];for(let i=0;i<=yrs;i++)a.push(cap*Math.pow(1+r,i));return a;};
+    const you=path(cagr), lo=path(0.08), hi=path(0.15), hype=path(0.50);
+    document.getElementById('o-final').textContent=fmt(you[yrs]);
+    document.getElementById('o-real').textContent=fmt(lo[yrs])+' ~ '+fmt(hi[yrs]);
+    document.getElementById('o-hype').textContent=fmt(hype[yrs]);
+    const {ctx,w,h}=setup(document.getElementById('cv-comp'));ctx.clearRect(0,0,w,h);
+    const mx=Math.max(hype[yrs],you[yrs],hi[yrs]); const pad=46;
+    const sx=i=>pad+(yrs<=0?0:i/yrs)*(w-pad-12), sy=v=>h-24-(v/mx)*(h-36);
+    // 轴
+    ctx.strokeStyle=css('--line');ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pad,h-24);ctx.lineTo(w-12,h-24);ctx.stroke();
+    ctx.fillStyle=css('--muted');ctx.font='11px sans-serif';ctx.textAlign='right';
+    [0,mx/2,mx].forEach(v=>ctx.fillText('$'+Math.round(v/1000)+'k',pad-3,sy(v)+3));
+    ctx.textAlign='center';for(let i=0;i<=yrs;i+=Math.max(1,Math.round(yrs/6)))ctx.fillText(i+'y',sx(i),h-8);
+    // 现实带(8-15%)
+    ctx.fillStyle='rgba(67,197,158,.15)';ctx.beginPath();
+    for(let i=0;i<=yrs;i++)ctx.lineTo(sx(i),sy(hi[i]));
+    for(let i=yrs;i>=0;i--)ctx.lineTo(sx(i),sy(lo[i]));
+    ctx.closePath();ctx.fill();
+    plot(ctx,hype.map((_,i)=>sx(i)),hype.map(sy),css('--bad'),1.5,[5,4]);
+    plot(ctx,you.map((_,i)=>sx(i)),you.map(sy),css('--accent2'),2.6);
+    // 标注
+    ctx.fillStyle=css('--bad');ctx.textAlign='left';ctx.fillText('50%鼓吹',sx(yrs*0.5),sy(hype[Math.round(yrs*0.5)])-4);
+    ctx.fillStyle=css('--ok');ctx.fillText('现实8-15%',pad+4,sy(hi[Math.round(yrs*0.15)])-4);
+  }
+  [sCap,sC,sY].forEach(e=>e.addEventListener('input',draw));
+  draw();window.addEventListener('resize',draw);
+})();
+</script>
+</body>
+</html>

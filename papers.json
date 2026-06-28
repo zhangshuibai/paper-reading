@@ -2102,5 +2102,28 @@
     ],
     "categories": [],
     "path": "papers/2026-06-28-black-scholes-explained/index.html"
+  },
+  {
+    "slug": "2026-06-28-retail-quant-strategies",
+    "title": "散户量化策略调研报告:$1万-$10万资金该做什么(含引用)",
+    "authors": "—",
+    "team": "调研·综述",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-28",
+    "published": "财经投资",
+    "tldr": "基于公开网络资料综合的散户量化调研:先校准现实(90%第一年跑不赢买入持有/80%回测过拟合失效/幸存者年化8-15%),再逐个拆解6类适合$1万-$10万的策略(资产类双动量/趋势跟踪管理期货/期权Wheel卖权收租/短期均值回归/因子ETF/加密),按资金量分层,讲2026 PDT$2.5万门槛取消等监管成本变化与QuantConnect/Alpaca/IBKR平台对比,给出推荐蓝图+现实收益复利计算器,20条来源引用",
+    "tags": [
+      "量化",
+      "散户",
+      "策略",
+      "动量",
+      "趋势跟踪",
+      "期权wheel",
+      "调研报告",
+      "2026"
+    ],
+    "categories": [],
+    "path": "papers/2026-06-28-retail-quant-strategies/index.html"
   }
 ]
