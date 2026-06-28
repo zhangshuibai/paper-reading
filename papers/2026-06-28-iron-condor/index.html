@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>详解 Iron Condor（铁鹰）：beta=0 的期权收租策略</title>
+<style>
+  :root{
+    --bg:#0f1220;--panel:#171a2b;--panel2:#1d2138;--text:#e8eaf2;--muted:#9aa3bd;
+    --line:#2a2f4a;--accent:#7aa2ff;--accent2:#9b8cff;--ok:#43c59e;--warn:#f0a93c;--bad:#ff6b81;
+    --chip:#232842;--chipText:#c7cdec;--shadow:0 6px 22px rgba(0,0,0,.30);
+  }
+  @media (prefers-color-scheme:light){:root{
+    --bg:#f6f7fb;--panel:#fff;--panel2:#f0f2f9;--text:#1a1f33;--muted:#5a627a;--line:#e6e9f2;
+    --accent:#3a66ff;--accent2:#6b4cff;--ok:#138a6e;--warn:#b9791a;--bad:#d83a55;
+    --chip:#eef1fb;--chipText:#36406b;--shadow:0 6px 18px rgba(20,30,80,.07);}}
+  *{box-sizing:border-box}html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--text);line-height:1.75;font-size:16px;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",Helvetica,Arial,sans-serif;}
+  .wrap{max-width:900px;margin:0 auto;padding:40px 20px 100px}
+  h1{font-size:27px;line-height:1.3;margin:0 0 10px}
+  h2{font-size:22px;margin:48px 0 14px;padding-top:14px;border-top:1px solid var(--line)}
+  h3{font-size:18px;margin:24px 0 8px;color:var(--accent2)}
+  p{margin:12px 0}
+  code{background:var(--panel2);padding:2px 7px;border-radius:6px;font-size:.9em;font-family:"SF Mono",Menlo,Consolas,monospace}
+  .sub{color:var(--muted);font-size:15px}
+  .badges{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}
+  .badge{font-size:12px;font-weight:700;padding:3px 11px;border-radius:999px;background:rgba(122,162,255,.16);color:var(--accent)}
+  .badge.g{background:rgba(67,197,158,.18);color:var(--ok)}
+  .box{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin:18px 0;box-shadow:var(--shadow)}
+  .tldr{background:linear-gradient(135deg,rgba(122,162,255,.10),rgba(155,140,255,.08));border-left:4px solid var(--accent)}
+  .note{border-left:4px solid var(--accent2)}
+  .warn{border-left:4px solid var(--warn);background:rgba(240,169,60,.07)}
+  .key{border-left:4px solid var(--ok);background:rgba(67,197,158,.07)}
+  .box h4:first-child{margin-top:0}
+  .box h4{margin:0 0 8px;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14px}
+  th,td{border:1px solid var(--line);padding:9px 11px;text-align:left;vertical-align:top}
+  th{background:var(--panel2);font-weight:700}
+  tr:nth-child(even) td{background:rgba(128,128,128,.04)}
+  .demo{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin:22px 0;box-shadow:var(--shadow)}
+  .demo h4{margin:0 0 4px;font-size:15px;color:var(--accent)}
+  .demo .hint{color:var(--muted);font-size:13px;margin:0 0 14px}
+  canvas{width:100%;display:block;border-radius:8px;background:var(--panel2);touch-action:none}
+  .controls{display:flex;flex-wrap:wrap;gap:14px 20px;margin:14px 0 4px}
+  .ctl{flex:1;min-width:160px}
+  .ctl label{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-bottom:6px}
+  .ctl label b{color:var(--text);font-variant-numeric:tabular-nums}
+  input[type=range]{width:100%;accent-color:var(--accent)}
+  .stats{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+  .stat{flex:1;min-width:108px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .stat .lab{font-size:11.5px;color:var(--muted)}.stat .val{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:2px}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin-top:10px}
+  .legend i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}
+  ul,ol{padding-left:24px}li{margin:6px 0}
+  .pill{display:inline-block;font-size:12px;padding:1px 8px;border-radius:999px;background:var(--chip);color:var(--chipText);margin:0 2px}
+  .legs{font-family:"SF Mono",Menlo,Consolas,monospace;font-size:13.5px;line-height:1.9}
+  .legs .s{color:var(--bad)}.legs .l{color:var(--ok)}
+  footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);color:var(--muted);font-size:13px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="badges"><span class="badge g">期权进阶</span><span class="badge">Iron Condor 铁鹰</span><span class="badge">beta=0 / delta中性</span><span class="badge">含交互</span></div>
+  <h1>详解 Iron Condor（铁鹰）：一个 delta 中性的"收租"期权策略</h1>
+  <p class="sub">参数取自真实 AAPL 期权（≈$281，IV≈30%）· 重点：盈亏结构 + 时间如何帮你赚钱 + 击穿如何亏</p>
+</header>
+
+<div class="box tldr">
+  <h4>一句话</h4>
+  <p style="margin-top:6px"><b>Iron Condor = 同时卖出一个价外看涨价差 + 一个价外看跌价差（共 4 条腿）。</b>你赌股票<b>待在一个区间里别乱动</b>。只要到期时股价在区间内，你净收权利金；冲出区间则亏损，但被两条"翼"<b>封顶</b>。它<b>delta≈0（不赌方向）</b>，靠 <b>theta 时间损耗 + 波动率溢价</b>赚钱——是散户做 beta=0 最经典、风险有限的入门结构。</p>
+</div>
+
+<!-- 1 -->
+<h2>1 · 从"卖跨式"一步步搭出铁鹰</h2>
+<p>理解铁鹰，最好从它的"裸体版"开始，分两步加装：</p>
+
+<h3>第 1 步：卖宽跨式（Short Strangle）—— 中性但危险</h3>
+<p>你卖一张价外 call + 一张价外 put（都收权利金）。只要股票不大涨也不大跌，两张都作废，你赚双份权利金。这已经是 delta 中性了。<b>但问题致命</b>：股票若暴涨，你卖的 call <b>亏损无上限</b>；暴跌则卖的 put 巨亏。</p>
+
+<h3>第 2 步：给两边各买一个更远的"保险"—— 变成铁鹰</h3>
+<p>在更远的价外，<b>买</b>一张 call（保上涨）+ <b>买</b>一张 put（保下跌）。这两条"长腿(翼)"把无限风险<b>封顶</b>了。代价是花掉一点权利金，所以净收入变少——但换来了**有限风险**。这就是 Iron Condor。</p>
+
+<div class="box note">
+  <h4>4 条腿（真实 AAPL ≈$281 的例子）</h4>
+  <div class="legs">
+    <span class="l">买入 put @ $250</span>　← 下方保险（长腿/翼）<br>
+    <span class="s">卖出 put @ $260</span>　← 收租（短腿）<br>
+    <span style="color:var(--accent)">‹‹ 当前股价 $281，希望它待在这一带 ››</span><br>
+    <span class="s">卖出 call @ $300</span>　← 收租（短腿）<br>
+    <span class="l">买入 call @ $310</span>　← 上方保险（长腿/翼）
+  </div>
+  <p style="margin:10px 0 0;font-size:14px">中间两条<b style="color:var(--bad)">卖出</b>（收权利金）+ 两端两条<b style="color:var(--ok)">买入</b>（付保险费）。你希望全部到期作废 → 净收开仓时那笔权利金。</p>
+</div>
+
+<!-- 2 -->
+<h2>2 · 盈亏长什么样：交互一</h2>
+<p>下图是<b>到期盈亏图</b>——经典的"<b>桌面形(table-top)</b>"：中间一块平台（最大盈利），两边是斜坡跌入亏损，但很快被翼<b>削平封顶</b>。拖动滑块改变结构，看每个数字怎么变。还能拖<b>剩余天数</b>看 theta 如何把曲线"抬"向到期形态——<b>时间就是你的朋友</b>。</p>
+
+<div class="demo">
+  <h4>🦅 铁鹰盈亏图（真实 AAPL 期权参数计算）</h4>
+  <p class="hint">绿色阴影=盈利区；红色虚线=到期最终盈亏(桌面形)；紫色曲线=当前剩余天数下的实时盈亏(平滑)。把<b>剩余天数</b>从大拖到 0，看紫线在中间<b>抬升到平台</b>——这就是 theta 在替你收钱。</p>
+  <canvas id="cv" height="280"></canvas>
+  <div class="controls">
+    <div class="ctl"><label>短腿离现价多远 <b id="v-d">20</b></label><input id="s-d" type="range" min="8" max="45" value="20" step="1"></div>
+    <div class="ctl"><label>翼宽（保险距离）<b id="v-w">10</b></label><input id="s-w" type="range" min="5" max="30" value="10" step="1"></div>
+    <div class="ctl"><label>剩余天数 <b id="v-t">45</b> 天</label><input id="s-t" type="range" min="0" max="45" value="45" step="1"></div>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="lab">净权利金(收入)</div><div class="val" id="o-credit" style="color:var(--ok)">—</div></div>
+    <div class="stat"><div class="lab">最大盈利</div><div class="val" id="o-mp" style="color:var(--ok)">—</div></div>
+    <div class="stat"><div class="lab">最大亏损</div><div class="val" id="o-ml" style="color:var(--bad)">—</div></div>
+    <div class="stat"><div class="lab">净 delta</div><div class="val" id="o-delta" style="color:var(--accent)">—</div></div>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="lab">盈亏平衡(下/上)</div><div class="val" id="o-be" style="font-size:14px">—</div></div>
+    <div class="stat"><div class="lab">盈利区间宽度</div><div class="val" id="o-zone" style="font-size:15px">—</div></div>
+    <div class="stat"><div class="lab">大致盈利概率*</div><div class="val" id="o-pop" style="font-size:16px">—</div></div>
+    <div class="stat"><div class="lab">风险回报比</div><div class="val" id="o-rr" style="font-size:15px">—</div></div>
+  </div>
+  <div class="legend">
+    <span><i style="background:var(--bad)"></i>到期盈亏(桌面形)</span>
+    <span><i style="background:var(--accent2)"></i>当前实时盈亏</span>
+    <span><i style="background:var(--accent)"></i>当前股价 $281</span>
+    <span>每张合约 ×100；单位为美元(一组铁鹰)</span>
+  </div>
+  <p class="hint" style="margin-top:8px">* 盈利概率≈"到期落在两短腿之间"的概率，按模型近似估算，仅供直觉。</p>
+</div>
+
+<!-- 3 -->
+<h2>3 · 关键数字怎么来的</h2>
+<table>
+  <tr><th>指标</th><th>公式</th><th>含义</th></tr>
+  <tr><td><b>净权利金</b></td><td>卖两短腿收的 − 买两翼付的</td><td>开仓时<b>到手</b>的钱，也是你的最大盈利</td></tr>
+  <tr><td><b>最大盈利</b></td><td>= 净权利金</td><td>股价到期落在<b>两短腿之间</b>时拿满</td></tr>
+  <tr><td><b>最大亏损</b></td><td>翼宽 − 净权利金</td><td>股价冲出某一翼之外时，被封顶在此</td></tr>
+  <tr><td><b>盈亏平衡</b></td><td>下=短put−权利金；上=短call+权利金</td><td>超出这个范围才真正开始亏</td></tr>
+  <tr><td><b>风险回报比</b></td><td>最大亏损 ÷ 最大盈利</td><td>铁鹰<b>通常"赚得少、潜在亏得多"</b>，靠高胜率扳回</td></tr>
+</table>
+<div class="box warn">
+  <p style="margin:0"><b>注意这个不对称</b>：铁鹰常常是"<b>大概率赚一点点、小概率亏一大笔</b>"（比如赢 $200 vs 亏 $800）。所以它的命根子是<b>胜率</b>和<b>风险管理</b>——一两次击穿就能吞掉很多次的盈利。这就是"卖波动"的负偏本性。</p>
+</div>
+
+<!-- 4 -->
+<h2>4 · 为什么它是 beta=0？靠什么赚钱？</h2>
+<h3>delta≈0 → 不赌方向（这就是 beta=0）</h3>
+<p>卖 call 给你负 delta、卖 put 给你正 delta，左右对称时<b>净 delta≈0</b>（上面交互里那个数你能看到一直贴近 0）。所以股价小幅涨跌，你几乎不赚不亏——<b>收益和大盘方向脱钩</b>，这正是市场中性。</p>
+<h3>那钱从哪来？theta + 波动率溢价</h3>
+<table>
+  <tr><th>希腊字母</th><th>铁鹰的暴露</th><th>对你</th></tr>
+  <tr><td><b>delta</b></td><td>≈ 0</td><td>不赌方向 ✅</td></tr>
+  <tr><td><b>theta</b></td><td><b>正</b>（你是净卖方）</td><td><b>每天替你收钱</b> ✅ 时间是朋友</td></tr>
+  <tr><td><b>vega</b></td><td>负（净空波动率）</td><td>IV 下降你赚、IV 飙升你亏 ⚠️</td></tr>
+  <tr><td><b>gamma</b></td><td>负</td><td>股价大跳你亏（曲率不利）⚠️</td></tr>
+</table>
+<p>核心 edge 是 <b>波动率溢价(VRP)</b>：市场的 IV 通常高于真实波动，<b>卖期权平均能赚这个差</b>。铁鹰就是把这个"卖保险"做成<b>有限风险</b>的版本：你像保险公司收保费，多数时候平安收租，偶尔赔一次。</p>
+
+<!-- 5 -->
+<h2>5 · 什么时候会亏 / 怎么管理</h2>
+<ul>
+  <li><b>击穿（最常见）</b>：股价大涨或大跌冲出区间 → 亏损（被翼封顶）。<b>财报、大事件</b>最危险——大跳空 + IV 飙升双杀。</li>
+  <li><b>IV 飙升</b>：哪怕股价没动，IV 突然上涨也让你的空头仓位浮亏（负 vega）。</li>
+  <li><b>管理纪律</b>（业界常见做法）：
+    <ul>
+      <li>选<b>高流动性</b>标的（指数 ETF 如 SPY/QQQ，或大盘股），价差窄好进出。</li>
+      <li>开仓选 <b>30–45 天到期</b>，theta 性价比好。</li>
+      <li>**盈利到约 50% 就平仓**落袋，别贪到归零（最后那点钱赚得慢、风险还在）。</li>
+      <li>**避开财报**等已知大事件日。</li>
+      <li><b>仓位要小</b>：单组铁鹰风险占账户很小比例，一次击穿亏不伤筋骨。</li>
+    </ul>
+  </li>
+</ul>
+
+<!-- 6 -->
+<h2>6 · 对你账户的现实</h2>
+<div class="box note">
+  <p style="margin:0">铁鹰是 <b>4 条腿的多腿结构 = 期权 Level 3</b>。你的 Agentic 账户目前是 <b>Level 2（只能单腿）</b>，而且 <b>MCP 接口下不了多腿单</b>。所以真要做铁鹰：① 把账户升到 <b>Level 3</b>；② 在 <b>Robinhood App 里手动建腿</b>（App 有现成的 Iron Condor 下单界面，会把 4 条腿打包成一个组合单）。我（agent）无法替你下多腿单。<b>建议先在这个页面 + 纸面交易把结构吃透，再上真钱。</b></p>
+</div>
+
+<div class="box key">
+  <h4>三句话总结</h4>
+  <ol style="margin:0">
+    <li><b>铁鹰 = 卖一个看涨价差 + 卖一个看跌价差</b>，赌股价待在区间里；delta≈0 不赌方向(beta=0)，风险有限。</li>
+    <li><b>靠 theta + 波动率溢价赚钱</b>，时间是朋友；但 vega/gamma 为负，大行情或 IV 飙升会亏。</li>
+    <li><b>"高胜率、小赔率"的负偏结构</b>——命根子是风险管理：高流动性标的、30–45天、盈利50%了结、避财报、小仓位。</li>
+  </ol>
+</div>
+
+<footer>
+  Iron Condor 详解 · 盈亏与希腊值由 Black-Scholes 实时计算，参数取自真实 AAPL（2026-06）· 教育用途，非投资建议<br>
+  收录于 <a href="https://github.com/zhangshuibai/paper-reading">zhangshuibai/paper-reading</a>
+</footer>
+</div>
+
+<script>
+"use strict";
+function erf(x){const t=1/(1+0.3275911*Math.abs(x));const y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);return x>=0?y:-y;}
+function Ncdf(x){return 0.5*(1+erf(x/Math.SQRT2));}
+const R=0.04, SIG=0.30, S0=281;
+// 期权定价：type 'c'/'p'，T 以年；返回 {price, delta}
+function bs(S,K,Ty,type){
+  const T=Math.max(Ty,0);
+  if(T<=0){const intr=type==='c'?Math.max(0,S-K):Math.max(0,K-S);return {price:intr,delta: type==='c'?(S>K?1:0):(S<K?-1:0)};}
+  const d1=(Math.log(S/K)+(R+SIG*SIG/2)*T)/(SIG*Math.sqrt(T)), d2=d1-SIG*Math.sqrt(T);
+  if(type==='c') return {price:S*Ncdf(d1)-K*Math.exp(-R*T)*Ncdf(d2), delta:Ncdf(d1)};
+  return {price:K*Math.exp(-R*T)*Ncdf(-d2)-S*Ncdf(-d1), delta:Ncdf(d1)-1};
+}
+function setup(cv){const dpr=window.devicePixelRatio||1;if(!cv.dataset.logih)cv.dataset.logih=String(cv.getAttribute('height')||cv.height||200);const h=+cv.dataset.logih;const w=cv.clientWidth||cv.parentElement.clientWidth;cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);cv.style.height=h+'px';const ctx=cv.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);return {ctx,w,h};}
+function css(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim();}
+function plot(ctx,xs,ys,color,lw,dash){ctx.save();ctx.setLineDash(dash||[]);ctx.beginPath();ctx.lineWidth=lw||2;ctx.strokeStyle=color;for(let i=0;i<xs.length;i++){i?ctx.lineTo(xs[i],ys[i]):ctx.moveTo(xs[i],ys[i]);}ctx.stroke();ctx.restore();}
+
+const sD=document.getElementById('s-d'),sW=document.getElementById('s-w'),sT=document.getElementById('s-t');
+const T_OPEN=45/365;
+// 组合的"平仓净值"（买回 4 条腿要付的钱）= 短腿价值 - 长腿价值
+function netValue(S,Ty,K1,K2,K3,K4){
+  return (bs(S,K2,Ty,'p').price - bs(S,K1,Ty,'p').price) + (bs(S,K3,Ty,'c').price - bs(S,K4,Ty,'c').price);
+}
+function netDelta(S,Ty,K1,K2,K3,K4){
+  // +long put K1, -short put K2, -short call K3, +long call K4
+  return bs(S,K1,Ty,'p').delta - bs(S,K2,Ty,'p').delta - bs(S,K3,Ty,'c').delta + bs(S,K4,Ty,'c').delta;
+}
+function draw(){
+  let d=+sD.value, w=+sW.value, tdays=+sT.value;
+  document.getElementById('v-d').textContent=d;
+  document.getElementById('v-w').textContent=w;
+  document.getElementById('v-t').textContent=tdays;
+  const K2=S0-d, K3=S0+d, K1=K2-w, K4=K3+w;
+  const Tnow=tdays/365;
+  const credit=netValue(S0,T_OPEN,K1,K2,K3,K4); // 开仓(45天)收到的净权利金
+  const maxLoss=w-credit;
+  const beLo=K2-credit, beHi=K3+credit;
+  const nd=netDelta(S0,Tnow,K1,K2,K3,K4);
+  // 盈利概率 ≈ 到期落在 [K2,K3] 概率（用对数正态、SIG、T_OPEN 近似）
+  const sd=SIG*Math.sqrt(T_OPEN);
+  const z=(k)=>(Math.log(k/S0)-( -SIG*SIG/2)*T_OPEN)/sd;
+  const pop=Ncdf(z(K3))-Ncdf(z(K2));
+  document.getElementById('o-credit').textContent='$'+(credit*100).toFixed(0);
+  document.getElementById('o-mp').textContent='+$'+(credit*100).toFixed(0);
+  document.getElementById('o-ml').textContent='-$'+(maxLoss*100).toFixed(0);
+  document.getElementById('o-delta').textContent=nd.toFixed(3);
+  document.getElementById('o-be').textContent='$'+beLo.toFixed(0)+' / $'+beHi.toFixed(0);
+  document.getElementById('o-zone').textContent='$'+K2+'–$'+K3;
+  document.getElementById('o-pop').textContent=(pop*100).toFixed(0)+'%';
+  document.getElementById('o-rr').textContent=(maxLoss/Math.max(credit,0.01)).toFixed(1)+' : 1';
+  // ---- 画图 ----
+  const {ctx,w:W,h:H}=setup(document.getElementById('cv'));ctx.clearRect(0,0,W,H);
+  const xLo=S0-d-w-25, xHi=S0+d+w+25, NS=160;
+  const expPL=[], nowPL=[];
+  for(let i=0;i<=NS;i++){
+    const S=xLo+(xHi-xLo)*i/NS;
+    expPL.push((credit-netValue(S,0,K1,K2,K3,K4))*100);
+    nowPL.push((credit-netValue(S,Tnow,K1,K2,K3,K4))*100);
+  }
+  const allY=expPL.concat(nowPL); let mn=Math.min(...allY),mx=Math.max(...allY);
+  const padY=(mx-mn)*0.12; mn-=padY; mx+=padY;
+  const padL=44,padB=22;
+  const sx=S=>padL+(S-xLo)/(xHi-xLo)*(W-padL-10);
+  const sy=v=>H-padB-(v-mn)/(mx-mn)*(H-padB-12);
+  // 盈利区阴影(到期 PL>0)
+  ctx.fillStyle='rgba(67,197,158,.13)';
+  ctx.beginPath();let started=false;
+  for(let i=0;i<=NS;i++){const S=xLo+(xHi-xLo)*i/NS;const y=expPL[i]>0?sy(expPL[i]):sy(0);if(!started){ctx.moveTo(sx(S),sy(0));started=true;}ctx.lineTo(sx(S),expPL[i]>0?sy(expPL[i]):sy(0));}
+  ctx.lineTo(sx(xHi),sy(0));ctx.closePath();ctx.fill();
+  // 0 线
+  ctx.strokeStyle=css('--line');ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(padL,sy(0));ctx.lineTo(W-10,sy(0));ctx.stroke();
+  // y 刻度
+  ctx.fillStyle=css('--muted');ctx.font='11px sans-serif';ctx.textAlign='right';
+  [mx, (mx+mn)/2>0?0:(mx+mn)/2, mn].forEach(v=>{});
+  [Math.round(mx/50)*50, 0, Math.round(mn/50)*50].forEach(v=>{if(v<=mx&&v>=mn){ctx.fillText((v>=0?'+$':'-$')+Math.abs(v),padL-3,sy(v)+3);}});
+  // 行权价竖线
+  [[K1,'翼'],[K2,'空P'],[K3,'空C'],[K4,'翼']].forEach(m=>{
+    ctx.strokeStyle=css('--line');ctx.setLineDash([2,3]);ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(sx(m[0]),10);ctx.lineTo(sx(m[0]),H-padB);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle=css('--muted');ctx.textAlign='center';ctx.fillText('$'+m[0],sx(m[0]),H-8);
+  });
+  // 当前股价
+  ctx.strokeStyle=css('--accent');ctx.setLineDash([4,3]);ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(sx(S0),10);ctx.lineTo(sx(S0),H-padB);ctx.stroke();ctx.setLineDash([]);
+  // 曲线
+  plot(ctx,expPL.map((_,i)=>sx(xLo+(xHi-xLo)*i/NS)),expPL.map(sy),css('--bad'),2,[6,4]);
+  plot(ctx,nowPL.map((_,i)=>sx(xLo+(xHi-xLo)*i/NS)),nowPL.map(sy),css('--accent2'),2.4);
+}
+[sD,sW,sT].forEach(e=>e.addEventListener('input',draw));
+draw();window.addEventListener('resize',draw);
+</script>
+</body>
+</html>

@@ -2125,5 +2125,28 @@
     ],
     "categories": [],
     "path": "papers/2026-06-28-retail-quant-strategies/index.html"
+  },
+  {
+    "slug": "2026-06-28-iron-condor",
+    "title": "详解Iron Condor铁鹰:beta=0的delta中性期权收租策略(交互)",
+    "authors": "—",
+    "team": "期权·进阶",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-28",
+    "published": "财经投资",
+    "tldr": "从卖宽跨式一步步搭出铁鹰:卖看涨价差+卖看跌价差4条腿,赌股价待在区间,delta≈0不赌方向(beta=0)风险有限,靠theta时间损耗+波动率溢价VRP赚钱;含真实AAPL期权参数计算的交互盈亏图(拖短腿距离/翼宽/剩余天数看桌面形盈亏与theta抬升曲线),讲透最大盈亏/盈亏平衡/净delta/4个希腊字母暴露/负偏风险与管理纪律(高流动性标的/30-45天/盈利50%了结/避财报/小仓位),含账户Level3多腿限制说明",
+    "tags": [
+      "iron-condor",
+      "铁鹰",
+      "期权",
+      "delta中性",
+      "market-neutral",
+      "theta",
+      "波动率溢价",
+      "交互"
+    ],
+    "categories": [],
+    "path": "papers/2026-06-28-iron-condor/index.html"
   }
 ]
