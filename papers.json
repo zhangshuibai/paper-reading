@@ -2080,5 +2080,27 @@
     ],
     "categories": [],
     "path": "papers/2026-06-28-option-pricing-aapl-real/index.html"
+  },
+  {
+    "slug": "2026-06-28-black-scholes-explained",
+    "title": "从零讲透Black-Scholes:期权理论价是什么、有什么用",
+    "authors": "—",
+    "team": "零基础·科普",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-28",
+    "published": "财经投资",
+    "tldr": "面向金融零基础:用保险定价类比讲清Black-Scholes和期权理论价(公允价)是什么—理论价=内在价值+时间价值,波动越大时间越长越值钱(不确定性=价值),理论价vs市场价的差距就是IV的来源;含真实BS公式实时计算器(拖5个输入S/K/T/σ/r看理论价与内在外价值此消彼长)和单因子敏感度图,讲透5个输入怎么推动价格、理论价的5个用途与模型局限",
+    "tags": [
+      "black-scholes",
+      "期权",
+      "理论价",
+      "期权定价",
+      "零基础",
+      "科普",
+      "计算器"
+    ],
+    "categories": [],
+    "path": "papers/2026-06-28-black-scholes-explained/index.html"
   }
 ]

@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>从零讲透 Black-Scholes：期权理论价是什么、有什么用</title>
+<style>
+  :root{
+    --bg:#0f1220;--panel:#171a2b;--panel2:#1d2138;--text:#e8eaf2;--muted:#9aa3bd;
+    --line:#2a2f4a;--accent:#7aa2ff;--accent2:#9b8cff;--ok:#43c59e;--warn:#f0a93c;--bad:#ff6b81;
+    --chip:#232842;--chipText:#c7cdec;--shadow:0 6px 22px rgba(0,0,0,.30);
+  }
+  @media (prefers-color-scheme:light){:root{
+    --bg:#f6f7fb;--panel:#fff;--panel2:#f0f2f9;--text:#1a1f33;--muted:#5a627a;--line:#e6e9f2;
+    --accent:#3a66ff;--accent2:#6b4cff;--ok:#138a6e;--warn:#b9791a;--bad:#d83a55;
+    --chip:#eef1fb;--chipText:#36406b;--shadow:0 6px 18px rgba(20,30,80,.07);}}
+  *{box-sizing:border-box}html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--text);line-height:1.75;font-size:16px;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",Helvetica,Arial,sans-serif;}
+  .wrap{max-width:900px;margin:0 auto;padding:40px 20px 100px}
+  h1{font-size:27px;line-height:1.3;margin:0 0 10px}
+  h2{font-size:22px;margin:48px 0 14px;padding-top:14px;border-top:1px solid var(--line)}
+  h3{font-size:18px;margin:26px 0 10px;color:var(--accent2)}
+  p{margin:12px 0}
+  code{background:var(--panel2);padding:2px 7px;border-radius:6px;font-size:.9em;font-family:"SF Mono",Menlo,Consolas,monospace}
+  .sub{color:var(--muted);font-size:15px}
+  .badges{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}
+  .badge{font-size:12px;font-weight:700;padding:3px 11px;border-radius:999px;background:rgba(122,162,255,.16);color:var(--accent)}
+  .badge.g{background:rgba(67,197,158,.18);color:var(--ok)}
+  .box{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin:18px 0;box-shadow:var(--shadow)}
+  .tldr{background:linear-gradient(135deg,rgba(122,162,255,.10),rgba(155,140,255,.08));border-left:4px solid var(--accent)}
+  .note{border-left:4px solid var(--accent2)}
+  .warn{border-left:4px solid var(--warn);background:rgba(240,169,60,.07)}
+  .key{border-left:4px solid var(--ok);background:rgba(67,197,158,.07)}
+  .box h4:first-child{margin-top:0}
+  .box h4{margin:0 0 8px;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14.5px}
+  th,td{border:1px solid var(--line);padding:9px 11px;text-align:left;vertical-align:top}
+  th{background:var(--panel2);font-weight:700}
+  tr:nth-child(even) td{background:rgba(128,128,128,.04)}
+  .up{color:var(--ok);font-weight:700}.down{color:var(--bad);font-weight:700}
+  .demo{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin:22px 0;box-shadow:var(--shadow)}
+  .demo h4{margin:0 0 4px;font-size:15px;color:var(--accent)}
+  .demo .hint{color:var(--muted);font-size:13px;margin:0 0 14px}
+  canvas{width:100%;display:block;border-radius:8px;background:var(--panel2);touch-action:none}
+  .controls{display:flex;flex-wrap:wrap;gap:14px 20px;margin:14px 0 4px}
+  .ctl{flex:1;min-width:150px}
+  .ctl label{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-bottom:6px}
+  .ctl label b{color:var(--text);font-variant-numeric:tabular-nums}
+  input[type=range]{width:100%;accent-color:var(--accent);cursor:pointer}
+  select{width:100%;background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-size:14px}
+  .bigprice{text-align:center;margin:14px 0 6px}
+  .bigprice .v{font-size:42px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--accent)}
+  .bigprice .l{font-size:13px;color:var(--muted)}
+  .splitbar{height:34px;border-radius:8px;overflow:hidden;display:flex;margin:10px 0 4px;border:1px solid var(--line)}
+  .splitbar .seg{display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700;color:#fff;white-space:nowrap;transition:flex-basis .15s}
+  .seg.intr{background:var(--ok)}.seg.tv{background:var(--warn)}
+  .stats{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+  .stat{flex:1;min-width:110px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .stat .lab{font-size:11.5px;color:var(--muted)}.stat .val{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:2px}
+  .btn{display:inline-block;cursor:pointer;border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:6px 12px;border-radius:9px;font-size:13px;margin:2px 4px 2px 0}
+  .btn:hover{border-color:var(--accent)}
+  ul,ol{padding-left:24px}li{margin:6px 0}
+  .pill{display:inline-block;font-size:12px;padding:1px 8px;border-radius:999px;background:var(--chip);color:var(--chipText);margin:0 2px}
+  .analogy{display:flex;gap:14px;align-items:flex-start;background:var(--panel2);border-radius:10px;padding:12px 14px;margin:10px 0}
+  .analogy .ico{font-size:26px}
+  footer{margin-top:60px;padding-top:20px;border-top:1px solid var(--line);color:var(--muted);font-size:13px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="badges"><span class="badge g">零基础友好</span><span class="badge">Black-Scholes</span><span class="badge">含交互计算器</span></div>
+  <h1>从零讲透 Black-Scholes：期权"理论价"到底是什么、拿来干嘛</h1>
+  <p class="sub">假设你金融基础薄弱 · 用大白话 + 保险类比 + 可拖动计算器，把这个诺奖公式讲明白</p>
+</header>
+
+<div class="box tldr">
+  <h4>一句话先抓住</h4>
+  <p style="margin-top:6px"><b>Black-Scholes 回答一个问题：一张期权"应该"卖多少钱才公平？</b>它像保险公司给保单定价那样，把"赌一个未来"折算成今天的一个合理价格——这个算出来的数，就叫<b>期权理论价（理论公允价）</b>。有了它，你才能判断市场上的期权是贵了还是便宜了。</p>
+</div>
+
+<!-- 1 -->
+<h2>1 · 先想象一个难题：这张"权利"该卖多少钱？</h2>
+<p>假设有人卖你一张纸，写着：<b>"未来 2 个月内，你随时可以用 \$285 买入 1 股 AAPL"</b>（现在 AAPL \$281）。这张纸（一张 call）显然有价值——万一 AAPL 涨到 \$320，你就能用 \$285 买、立刻赚 \$35。</p>
+<p>但问题来了：<b>这张纸今天卖多少钱才合理？</b> \$1？\$10？\$50？卖贵了没人买，卖便宜了卖家亏。在 1973 年之前，<b>没人有一个公认的算法</b>。Black、Scholes、Merton 三人给出了答案，拿了诺贝尔经济学奖。这个公式算出的"合理价格"，就是<b>理论价</b>。</p>
+
+<div class="analogy"><div class="ico">🏠</div><div><b>保险类比（最贴切）</b>：买火险，保费该收多少？保险公司会估"失火的概率 × 赔付金额"，折算成今天的保费。<b>期权理论价是一模一样的逻辑</b>：估"到期时能赚钱的概率 × 能赚多少"，折算成今天该付的价。期权买方像投保人，卖方像保险公司。</div></div>
+
+<!-- 2 -->
+<h2>2 · "理论价" vs "市场价"：两个不同的东西</h2>
+<table>
+  <tr><th>　</th><th>市场价（market price）</th><th>理论价（theoretical price）</th></tr>
+  <tr><td>是什么</td><td>期权<b>实际成交</b>的价（bid/ask）</td><td>模型算出的<b>"应该"值多少</b></td></tr>
+  <tr><td>谁定的</td><td>买卖双方供需</td><td>Black-Scholes 公式</td></tr>
+  <tr><td>用途</td><td>你真金白银进出的价</td><td><b>判断市场价贵贱的标尺</b></td></tr>
+</table>
+<p>两者通常很接近，但不总相等。<b>它们的差距，正是信息的来源</b>：如果市场价比你算的理论价高，说明市场预期的波动比你假设的大（也就是 IV 更高）——市场在用更高的价格"押注"更大的波动。</p>
+
+<!-- 3 -->
+<h2>3 · 为什么期权会有价值？= 内在价值 + 时间价值</h2>
+<p>理论价拆成两块，理解了这两块，整个模型就通了：</p>
+<div class="box key">
+  <p style="font-size:18px;text-align:center;margin:6px 0"><b>理论价 = <span style="color:var(--ok)">内在价值</span> + <span style="color:var(--warn)">时间价值</span></b></p>
+</div>
+<ul>
+  <li><b style="color:var(--ok)">内在价值</b>：现在<b>立刻行权</b>能赚多少 = max(股价 − 行权价, 0)。AAPL \$281、行权价 \$285 → 立刻行权赚不到（还没涨过），内在价值 = <b>\$0</b>。</li>
+  <li><b style="color:var(--warn)">时间价值</b>：<b>"还没到期、未来还有机会"这件事本身值多少钱</b>。哪怕现在赚不到，2 个月里 AAPL 完全可能涨过 \$285。这份"可能性"就是时间价值——也是期权最迷人、最难懂的部分。</li>
+</ul>
+<div class="box note">
+  <h4>关键直觉：不确定性 = 价值</h4>
+  <p style="margin:0">为什么"波动越大、期权越值钱"？因为期权买方<b>下跌有保护、上涨无上限</b>：股票跌再多，你顶多放弃这张纸（亏掉权利金，不会更多）；但涨起来你全吃。<b>这种"亏损封顶、盈利敞开"的不对称，让"波动"本身变成好事</b>——未来越不确定，那份"万一大涨"的可能性越值钱。这就是时间价值的来源。</p>
+</div>
+
+<!-- 4 -->
+<h2>4 · Black-Scholes 怎么把"该值多少"算出来</h2>
+<p>公式需要 <b>5 个输入</b>，吐出理论价。下面这个计算器是<b>真的在用 Black-Scholes 公式算</b>（默认值取自真实 AAPL）。<b>拖动每个滑块</b>，看理论价怎么变、内在/时间价值怎么此消彼长：</p>
+
+<div class="demo">
+  <h4>🧮 Black-Scholes 理论价计算器</h4>
+  <div class="bigprice"><div class="v" id="bs-price">$—</div><div class="l">这张 call 的理论价（每股；一张合约 ×100）</div></div>
+  <div class="splitbar"><div class="seg intr" id="seg-intr">内在</div><div class="seg tv" id="seg-tv">时间价值</div></div>
+  <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted)"><span style="color:var(--ok)">内在价值 <b id="lab-intr">$0</b></span><span style="color:var(--warn)">时间价值 <b id="lab-tv">$0</b></span></div>
+  <div class="controls" style="margin-top:16px">
+    <div class="ctl"><label>① 股价 S <b id="v-s">$281</b></label><input id="s-s" type="range" min="230" max="340" value="281" step="1"></div>
+    <div class="ctl"><label>② 行权价 K <b id="v-k">$285</b></label><input id="s-k" type="range" min="230" max="340" value="285" step="1"></div>
+    <div class="ctl"><label>③ 剩余天数 T <b id="v-t">56</b> 天</label><input id="s-t" type="range" min="0" max="365" value="56" step="1"></div>
+    <div class="ctl"><label>④ 波动率 σ <b id="v-sig">30%</b></label><input id="s-sig" type="range" min="5" max="90" value="30" step="1"></div>
+    <div class="ctl"><label>⑤ 无风险利率 r <b id="v-r">4%</b></label><input id="s-r" type="range" min="0" max="10" value="4" step="0.5"></div>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="lab">理论价/股</div><div class="val" id="o-price">—</div></div>
+    <div class="stat"><div class="lab">一张合约(×100)</div><div class="val" id="o-contract">—</div></div>
+    <div class="stat"><div class="lab">delta</div><div class="val" id="o-delta" style="color:var(--accent)">—</div></div>
+    <div class="stat"><div class="lab">状态</div><div class="val" id="o-money" style="font-size:15px">—</div></div>
+  </div>
+  <p class="hint" style="margin-top:12px">试试：把 <b>④波动率</b> 从 30% 拖到 80%，看理论价飙升——这就是"不确定性=价值"。再把 <b>③剩余天数</b> 拖到 0，时间价值塌成 0，只剩内在价值。</p>
+</div>
+
+<!-- 5 -->
+<h2>5 · 5 个输入分别怎么"推动"价格</h2>
+<table>
+  <tr><th>输入</th><th>它变大时，call 理论价</th><th>大白话直觉</th></tr>
+  <tr><td>① 股价 S</td><td class="up">↑ 涨</td><td>股票越高，越容易涨过行权价 → 期权越值钱</td></tr>
+  <tr><td>② 行权价 K</td><td class="down">↓ 跌</td><td>要求的买入价越高 → 越难赚 → 越不值钱</td></tr>
+  <tr><td>③ 剩余时间 T</td><td class="up">↑ 涨</td><td>时间越长，越可能发生有利的大涨 → 越值钱</td></tr>
+  <tr><td>④ 波动率 σ</td><td class="up">↑ 涨</td><td><b>波动越大越值钱</b>（下跌有保护、上涨无上限）← 最反直觉</td></tr>
+  <tr><td>⑤ 利率 r</td><td class="up">↑ 涨(小)</td><td>影响较小，源于折现/持有成本，入门可忽略</td></tr>
+</table>
+<p>下面这张图让你<b>单独看一个输入的影响</b>：选一个变量，看理论价随它变化的曲线（其余固定在计算器当前值）。</p>
+<div class="demo">
+  <h4>📈 单因子敏感度</h4>
+  <div class="controls">
+    <div class="ctl"><label>看哪个输入对价格的影响</label>
+      <select id="sx-var">
+        <option value="S">① 股价 S</option>
+        <option value="sig" selected>④ 波动率 σ（最值得看）</option>
+        <option value="T">③ 剩余天数 T</option>
+        <option value="K">② 行权价 K</option>
+      </select></div>
+  </div>
+  <canvas id="cv-sens" height="240"></canvas>
+  <div class="hint" id="sens-hint" style="margin-top:8px"></div>
+</div>
+
+<!-- 6 -->
+<h2>6 · 理论价到底拿来干嘛？（5 个真实用途）</h2>
+<div class="box">
+  <ol style="margin:0">
+    <li><b>判断贵贱</b>：把理论价当标尺，对比市场价——市场价远高于你的理论价 = 期权"贵"（市场押注更大波动）。</li>
+    <li><b>反解 IV</b>：把模型<b>反着用</b>，用市场价倒推出 σ（隐含波动率），看市场情绪。</li>
+    <li><b>算希腊值做对冲</b>：理论价对各输入求导 = delta / theta / gamma…，做市商和基金靠它们<b>对冲风险</b>。</li>
+    <li><b>做市商报价</b>：他们围绕理论价挂 bid/ask，赚价差同时控制风险。</li>
+    <li><b>给一篮子期权估值/管风险</b>：组合里几百个期权，靠模型统一定价、加总风险敞口。</li>
+  </ol>
+</div>
+<div class="box note">
+  <p style="margin:0"><b>给你（量化/ML 视角）</b>：理论价就是一个函数 <code>V = f(S,K,T,r,σ)</code>。希腊值是它的偏导（梯度），IV 是它的逆运算。整个期权交易，本质就是围绕这个函数和它的导数在做<b>定价、对冲、套利</b>。你熟悉的"函数 + 梯度"那套直觉，在这里全部适用。</p>
+</div>
+
+<!-- 7 -->
+<h2>7 · 它不是万能的（局限）</h2>
+<ul>
+  <li>假设<b>波动率 σ 恒定</b>——现实里 σ 一直在变（所以才有 IV 的各种玩法）。</li>
+  <li>假设<b>欧式期权</b>（只能到期行权）——美股是美式，可提前行权，需用二叉树等修正。</li>
+  <li>假设<b>无分红、无摩擦、可连续对冲</b>——现实有分红、有买卖价差。</li>
+</ul>
+<p>所以它是个<b>极好用但近似</b>的模型：短期、近价的合约很准（我们用真实 AAPL 报价验证过误差 &lt;3%），极端情形会偏。但它建立的<b>整套思维框架</b>（理论价、希腊值、IV）是所有期权交易的通用语言。</p>
+
+<div class="box key">
+  <h4>三句话总结</h4>
+  <ol style="margin:0">
+    <li><b>理论价 = 期权"应该"值多少的公允价</b>，像保险定价：估"到期能赚的概率×金额"折成今天的价。</li>
+    <li><b>= 内在价值（立刻行权赚多少）+ 时间价值（未来还有机会值多少）</b>，波动越大、时间越长，时间价值越高。</li>
+    <li><b>用途</b>：当标尺判断贵贱、反解 IV、算希腊值做对冲——是期权世界的"价格地基"。</li>
+  </ol>
+</div>
+
+<footer>
+  零基础 Black-Scholes 讲解 · 计算器为真实 BS 公式实时计算 · 默认值取自真实 AAPL（2026-06）<br>
+  收录于 <a href="https://github.com/zhangshuibai/paper-reading">zhangshuibai/paper-reading</a>
+</footer>
+</div>
+
+<script>
+"use strict";
+function erf(x){const t=1/(1+0.3275911*Math.abs(x));const y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);return x>=0?y:-y;}
+function N(x){return 0.5*(1+erf(x/Math.SQRT2));}
+function bsCall(S,K,Tyears,sig,r){
+  const T=Math.max(Tyears,0);
+  if(T<=0||sig<=0) return {price:Math.max(0,S-K),delta:S>K?1:0};
+  const d1=(Math.log(S/K)+(r+sig*sig/2)*T)/(sig*Math.sqrt(T));
+  const d2=d1-sig*Math.sqrt(T);
+  return {price:S*N(d1)-K*Math.exp(-r*T)*N(d2),delta:N(d1)};
+}
+function setup(cv){const dpr=window.devicePixelRatio||1;if(!cv.dataset.logih)cv.dataset.logih=String(cv.getAttribute('height')||cv.height||200);const h=+cv.dataset.logih;const w=cv.clientWidth||cv.parentElement.clientWidth;cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);cv.style.height=h+'px';const ctx=cv.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);return {ctx,w,h};}
+function css(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim();}
+function plot(ctx,xs,ys,color,lw,dash){ctx.save();ctx.setLineDash(dash||[]);ctx.beginPath();ctx.lineWidth=lw||2;ctx.strokeStyle=color;for(let i=0;i<xs.length;i++){i?ctx.lineTo(xs[i],ys[i]):ctx.moveTo(xs[i],ys[i]);}ctx.stroke();ctx.restore();}
+
+/* ===== 计算器 ===== */
+const S=document.getElementById('s-s'),K=document.getElementById('s-k'),T=document.getElementById('s-t'),SIG=document.getElementById('s-sig'),R=document.getElementById('s-r');
+function state(){return {S:+S.value,K:+K.value,Tdays:+T.value,sig:+SIG.value/100,r:+R.value/100};}
+function calc(){
+  const st=state(); const Ty=st.Tdays/365;
+  const o=bsCall(st.S,st.K,Ty,st.sig,st.r);
+  const intr=Math.max(0,st.S-st.K), tv=Math.max(0,o.price-intr);
+  document.getElementById('v-s').textContent='$'+st.S;
+  document.getElementById('v-k').textContent='$'+st.K;
+  document.getElementById('v-t').textContent=st.Tdays;
+  document.getElementById('v-sig').textContent=(st.sig*100).toFixed(0)+'%';
+  document.getElementById('v-r').textContent=(st.r*100).toFixed(1)+'%';
+  document.getElementById('bs-price').textContent='$'+o.price.toFixed(2);
+  document.getElementById('o-price').textContent='$'+o.price.toFixed(2);
+  document.getElementById('o-contract').textContent='$'+(o.price*100).toFixed(0);
+  document.getElementById('o-delta').textContent=o.delta.toFixed(3);
+  const mny = st.S>st.K+1?'价内 ITM':st.S<st.K-1?'价外 OTM':'≈平值 ATM';
+  document.getElementById('o-money').textContent=mny;
+  // 分割条
+  const tot=Math.max(o.price,0.0001);
+  const pi=Math.max(2,intr/tot*100), pt=Math.max(2,tv/tot*100);
+  document.getElementById('seg-intr').style.flexBasis=pi+'%';
+  document.getElementById('seg-tv').style.flexBasis=pt+'%';
+  document.getElementById('seg-intr').textContent= intr>0.3? '内在 $'+intr.toFixed(1):'';
+  document.getElementById('seg-tv').textContent= tv>0.3? '时间价值 $'+tv.toFixed(1):'';
+  document.getElementById('lab-intr').textContent='$'+intr.toFixed(2);
+  document.getElementById('lab-tv').textContent='$'+tv.toFixed(2);
+  drawSens();
+}
+[S,K,T,SIG,R].forEach(e=>e.addEventListener('input',calc));
+
+/* ===== 敏感度图 ===== */
+const sxVar=document.getElementById('sx-var');
+const RANGES={S:[200,360,'股价 S ($)'],sig:[0.02,0.90,'波动率 σ'],T:[0,365,'剩余天数 (天)'],K:[200,360,'行权价 K ($)']};
+const HINTS={
+  S:'股价越高 → call 越值钱（曲线上扬）。注意它是<b>弯的</b>——斜率就是 delta，斜率在变就是 gamma。',
+  sig:'波动率越大 → 理论价<b>单调上升</b>。这就是"不确定性=价值"：未来越难测，那份"万一大涨"越值钱。',
+  T:'时间越长 → 越值钱，但呈<b>放缓的弧线</b>（√时间关系）；时间趋近 0 时，价值塌向内在价值。',
+  K:'行权价越高 → call 越<b>便宜</b>（门槛越高越难赚），曲线下行。'
+};
+function drawSens(){
+  const st=state(); const v=sxVar.value; const [lo,hi,xl]=RANGES[v];
+  document.getElementById('sens-hint').innerHTML=HINTS[v];
+  const cv=document.getElementById('cv-sens'); const {ctx,w,h}=setup(cv); ctx.clearRect(0,0,w,h);
+  const NS=120, xs=[], ys=[];
+  for(let i=0;i<=NS;i++){
+    const x=lo+(hi-lo)*i/NS;
+    let s=st.S,k=st.K,Ty=st.Tdays/365,sig=st.sig;
+    if(v==='S')s=x; else if(v==='K')k=x; else if(v==='T')Ty=x/365; else if(v==='sig')sig=x;
+    xs.push(x); ys.push(bsCall(s,k,Ty,sig,st.r).price);
+  }
+  const mxY=Math.max(...ys,0.01);
+  const pad=30, sx=x=>pad+(x-lo)/(hi-lo)*(w-pad-12), sy=y=>h-22-(y/mxY)*(h-34);
+  // 轴
+  ctx.strokeStyle=css('--line');ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pad,h-22);ctx.lineTo(w-12,h-22);ctx.stroke();
+  ctx.fillStyle=css('--muted');ctx.font='11px sans-serif';
+  ctx.textAlign='left';ctx.fillText('理论价 ↑',pad,14);
+  ctx.textAlign='right';ctx.fillText(xl+' →',w-12,h-6);
+  // y 刻度
+  ctx.textAlign='right';[0,mxY/2,mxY].forEach(yy=>{ctx.fillText('$'+yy.toFixed(0),pad-3,sy(yy)+3);});
+  // 曲线
+  plot(ctx,xs.map(sx),ys.map(sy),css('--accent2'),2.4);
+  // 当前点
+  let curX = v==='S'?st.S : v==='K'?st.K : v==='T'?st.Tdays : st.sig;
+  curX=Math.max(lo,Math.min(hi,curX));
+  let cs=st.S,ck=st.K,cTy=st.Tdays/365,csig=st.sig;
+  if(v==='S')cs=curX;else if(v==='K')ck=curX;else if(v==='T')cTy=curX/365;else if(v==='sig')csig=curX;
+  const cy=bsCall(cs,ck,cTy,csig,st.r).price;
+  ctx.strokeStyle=css('--accent');ctx.setLineDash([2,3]);ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(sx(curX),14);ctx.lineTo(sx(curX),h-22);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle=css('--accent');ctx.beginPath();ctx.arc(sx(curX),sy(cy),4.5,0,7);ctx.fill();
+  ctx.textAlign='center';ctx.fillText('当前 $'+cy.toFixed(1),sx(curX),sy(cy)-9);
+}
+sxVar.addEventListener('change',drawSens);
+window.addEventListener('resize',()=>{drawSens();});
+calc();
+</script>
+</body>
+</html>
