@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>量化投资入门 · 写给有 ML/LLM 背景的人</title>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2;
+    --muted:#9aa3bd; --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff;
+    --ok:#43c59e; --warn:#f0a93c; --bad:#ff6b81; --chip:#232842; --chipText:#c7cdec;
+    --shadow:0 6px 22px rgba(0,0,0,.30);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f0f2f9; --text:#1a1f33;
+      --muted:#5a627a; --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff;
+      --ok:#138a6e; --warn:#b9791a; --bad:#d83a55; --chip:#eef1fb; --chipText:#36406b;
+      --shadow:0 6px 18px rgba(20,30,80,.07);
+    }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;
+  }
+  .wrap{max-width:900px; margin:0 auto; padding:40px 20px 100px}
+  h1{font-size:30px; line-height:1.3; margin:0 0 10px; letter-spacing:.3px}
+  h2{font-size:23px; margin:54px 0 14px; padding-top:14px; border-top:1px solid var(--line); letter-spacing:.2px}
+  h3{font-size:18px; margin:30px 0 10px; color:var(--accent2)}
+  p{margin:12px 0}
+  a{color:var(--accent); text-decoration:none}
+  a:hover{text-decoration:underline}
+  code{background:var(--panel2); padding:2px 7px; border-radius:6px; font-size:.9em;
+       font-family:"SF Mono",Menlo,Consolas,"Liberation Mono",monospace}
+  .sub{color:var(--muted); font-size:15px; margin:0 0 4px}
+  .lead{font-size:17px; color:var(--text)}
+  .hero{margin-bottom:10px}
+  .badges{display:flex; gap:8px; flex-wrap:wrap; margin:14px 0 6px}
+  .badge{font-size:12px; font-weight:700; padding:3px 11px; border-radius:999px;
+         background:rgba(122,162,255,.16); color:var(--accent)}
+  .badge.g{background:rgba(67,197,158,.18); color:var(--ok)}
+  .badge.p{background:rgba(155,140,255,.20); color:var(--accent2)}
+
+  /* 卡片/盒子 */
+  .box{background:var(--panel); border:1px solid var(--line); border-radius:14px;
+       padding:18px 20px; margin:18px 0; box-shadow:var(--shadow)}
+  .tldr{background:linear-gradient(135deg, rgba(122,162,255,.10), rgba(155,140,255,.08));
+        border:1px solid var(--line); border-left:4px solid var(--accent)}
+  .note{border-left:4px solid var(--accent2)}
+  .warn{border-left:4px solid var(--warn); background:rgba(240,169,60,.07)}
+  .key{border-left:4px solid var(--ok); background:rgba(67,197,158,.07)}
+  .box h3:first-child,.box h4:first-child{margin-top:0}
+  .box h4{margin:0 0 8px; font-size:15px; color:var(--muted); text-transform:uppercase; letter-spacing:.6px}
+
+  /* TOC */
+  nav.toc{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:16px 20px; margin:22px 0 10px}
+  nav.toc h4{margin:0 0 10px; font-size:13px; color:var(--muted); letter-spacing:.6px; text-transform:uppercase}
+  nav.toc ol{margin:0; padding-left:22px; columns:2; column-gap:30px}
+  @media(max-width:620px){nav.toc ol{columns:1}}
+  nav.toc li{margin:5px 0; font-size:14.5px}
+
+  /* 表格 */
+  table{border-collapse:collapse; width:100%; margin:16px 0; font-size:14.5px; overflow:hidden; border-radius:10px}
+  th,td{border:1px solid var(--line); padding:9px 12px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); font-weight:700}
+  tr:nth-child(even) td{background:rgba(128,128,128,.04)}
+  .ml{color:var(--accent2); font-weight:600}
+  .qt{color:var(--ok); font-weight:600}
+
+  /* 交互组件 */
+  .demo{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:18px 20px; margin:22px 0; box-shadow:var(--shadow)}
+  .demo h4{margin:0 0 4px; font-size:15px; color:var(--accent)}
+  .demo .hint{color:var(--muted); font-size:13px; margin:0 0 14px}
+  canvas{width:100%; display:block; border-radius:8px; background:var(--panel2); touch-action:none}
+  .controls{display:flex; flex-wrap:wrap; gap:16px 22px; margin:14px 0 4px}
+  .ctl{flex:1; min-width:180px}
+  .ctl label{display:flex; justify-content:space-between; font-size:13px; color:var(--muted); margin-bottom:6px}
+  .ctl label b{color:var(--text); font-variant-numeric:tabular-nums}
+  input[type=range]{width:100%; accent-color:var(--accent); cursor:pointer}
+  .stats{display:flex; flex-wrap:wrap; gap:10px; margin-top:14px}
+  .stat{flex:1; min-width:120px; background:var(--panel2); border:1px solid var(--line); border-radius:10px; padding:10px 12px}
+  .stat .lab{font-size:11.5px; color:var(--muted); letter-spacing:.3px}
+  .stat .val{font-size:20px; font-weight:700; font-variant-numeric:tabular-nums; margin-top:2px}
+  .btn{display:inline-block; cursor:pointer; border:1px solid var(--line); background:var(--panel2);
+       color:var(--text); padding:7px 14px; border-radius:9px; font-size:13.5px; transition:.12s}
+  .btn:hover{border-color:var(--accent)}
+  .legend{display:flex; gap:16px; flex-wrap:wrap; font-size:12.5px; color:var(--muted); margin-top:10px}
+  .legend i{display:inline-block; width:14px; height:3px; border-radius:2px; vertical-align:middle; margin-right:5px}
+
+  /* 翻译表卡片 */
+  .flip{display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:12px; margin:18px 0}
+  .fcard{background:var(--panel2); border:1px solid var(--line); border-radius:12px; padding:14px 16px; cursor:pointer; transition:.15s}
+  .fcard:hover{border-color:var(--accent); transform:translateY(-2px)}
+  .fcard .ml{font-size:15px}
+  .fcard .arrow{color:var(--muted); margin:6px 0; font-size:13px}
+  .fcard .qt{font-size:15px}
+  .fcard .exp{font-size:13px; color:var(--muted); margin-top:8px; max-height:0; overflow:hidden; transition:max-height .25s ease; line-height:1.6}
+  .fcard.open .exp{max-height:200px}
+  .fcard .tap{font-size:11px; color:var(--accent); margin-top:8px}
+
+  ul,ol{padding-left:24px}
+  li{margin:6px 0}
+  .pill{display:inline-block; font-size:12px; padding:1px 8px; border-radius:999px; background:var(--chip); color:var(--chipText); margin:0 2px}
+  footer{margin-top:60px; padding-top:20px; border-top:1px solid var(--line); color:var(--muted); font-size:13px; text-align:center}
+  .pipeline{display:flex; flex-wrap:wrap; align-items:stretch; gap:0; margin:18px 0}
+  .pstep{flex:1; min-width:120px; background:var(--panel2); border:1px solid var(--line); padding:12px; position:relative; text-align:center}
+  .pstep:not(:last-child){border-right:none}
+  .pstep .n{font-size:11px; color:var(--muted)}
+  .pstep .t{font-weight:700; font-size:14px; margin:3px 0}
+  .pstep .ml{font-size:12px; display:block; margin-top:4px}
+  @media(max-width:620px){.pstep{min-width:45%; border-right:1px solid var(--line)!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <div class="badges">
+    <span class="badge p">科普 · 入门</span>
+    <span class="badge g">财经投资</span>
+    <span class="badge">面向 ML/LLM 背景</span>
+  </div>
+  <h1>量化投资（Quant）入门：用机器学习的语言重新理解它</h1>
+  <p class="sub">2026-06-28 · 写给「懂 LLM/ML、但对金融与量化几乎零基础」的你</p>
+</header>
+
+<div class="box tldr">
+  <h4>TL;DR — 一句话版本</h4>
+  <p class="lead" style="margin-top:6px">
+    <b>量化投资 = 把「赚钱的想法」写成可被数据检验的程序。</b>
+    你已经会的那套 ML 方法论几乎能一比一迁移过来：<span class="ml">特征工程</span>→<span class="qt">找因子(factor)</span>，
+    <span class="ml">训练/验证集</span>→<span class="qt">样本内/样本外回测</span>，
+    <span class="ml">过拟合</span>→<span class="qt">策略曲线拟合</span>，
+    <span class="ml">标签泄漏</span>→<span class="qt">未来函数(look-ahead)</span>。
+    最大的不同只有一个：<b>数据是时间序列、且会「反过来打你」</b>——市场非平稳、还会因为你的交易而改变。这篇用你熟悉的概念把整张地图讲清楚。
+  </p>
+</div>
+
+<nav class="toc">
+  <h4>目录</h4>
+  <ol>
+    <li><a href="#t1">先给你一张「ML → 量化」翻译表</a></li>
+    <li><a href="#t2">量化到底是什么、不是什么</a></li>
+    <li><a href="#t3">最小金融概念集（含价格模拟器）</a></li>
+    <li><a href="#t4">风险与收益的度量（夏普计算器）</a></li>
+    <li><a href="#t5">Alpha、Beta 与因子</a></li>
+    <li><a href="#t6">常见策略大类</a></li>
+    <li><a href="#t7">量化研究流水线 ≈ ML Pipeline</a></li>
+    <li><a href="#t8">回测与三大致命陷阱（均线交叉 + 过拟合 demo）</a></li>
+    <li><a href="#t9">需要补的数学/统计</a></li>
+    <li><a href="#t10">学习资料大全（书/课/库/数据/社区）</a></li>
+    <li><a href="#t11">给你的学习路线图</a></li>
+    <li><a href="#t12">术语速查表</a></li>
+  </ol>
+</nav>
+
+<!-- ============ 1 ============ -->
+<h2 id="t1">1 · 先给你一张「ML → 量化」翻译表</h2>
+<p>量化领域 90% 的核心概念，你其实早就在 ML 里见过同构物，只是换了名字。<b>点一下卡片</b>看详细对应关系：</p>
+
+<div class="flip" id="flip"></div>
+
+<div class="box note">
+  <h4>读这张表的关键</h4>
+  <p>把量化研究想成一个<b>特殊的监督学习问题</b>：输入是历史行情/财报/另类数据，输出是「未来一段时间的收益方向或大小」。但它有三个 ML 课堂上不强调、实战却要命的特性：</p>
+  <ul>
+    <li><b>时间不可打乱</b>：不能随机 shuffle 划分训练/测试，否则等于用未来预测过去（典型泄漏）。</li>
+    <li><b>非平稳</b>：数据分布一直在漂移（regime change），昨天有效的特征明天可能反转——比 ML 里的 distribution shift 严重得多。</li>
+    <li><b>有反身性</b>：你的预测一旦拿去交易，就会改变市场本身（alpha 会衰减/拥挤），相当于「测试集会因为你的模型而变化」。</li>
+  </ul>
+</div>
+
+<!-- ============ 2 ============ -->
+<h2 id="t2">2 · 量化到底是什么、不是什么</h2>
+<p><b>量化投资（Quantitative Investing）</b>指：用<b>数学模型 + 数据 + 程序化规则</b>来做投资决策，而不是靠「我觉得这家公司前景好」的主观判断。一句话——<b>把直觉变成可回测、可复现、可批量执行的规则</b>。</p>
+
+<table>
+  <tr><th>维度</th><th>主观投资（discretionary）</th><th>量化投资（quant）</th></tr>
+  <tr><td>决策依据</td><td>人对公司/宏观的判断</td><td>模型对数据的统计规律</td></tr>
+  <tr><td>覆盖广度</td><td>几十只深度跟踪</td><td>几千只同时扫描（像批处理）</td></tr>
+  <tr><td>可复现性</td><td>难，依赖个人</td><td>强，代码即策略</td></tr>
+  <tr><td>每笔胜率</td><td>可能很高</td><td>常常 51%~55%，靠<b>大数定律</b>累积</td></tr>
+  <tr><td>失败模式</td><td>看走眼、情绪化</td><td>过拟合、数据错误、模型失效</td></tr>
+</table>
+
+<div class="box warn">
+  <h4>先破三个误解</h4>
+  <ul>
+    <li><b>「量化 = 高频交易(HFT)」</b>❌。HFT（微秒级抢单）只是量化里很小、很贵、拼硬件的一支。绝大多数量化是<b>日频/周频/月频</b>，你在笔记本上就能研究。</li>
+    <li><b>「量化 = 用 AI 预测明天涨跌」</b>❌。能稳定预测涨跌方向的模型几乎不存在；真实的 alpha 往往是<b>微弱但稳定的统计优势</b>（比如某因子让你在成千上万次下注里平均多赢一点点）。</li>
+    <li><b>「回测赚钱 = 实盘赚钱」</b>❌。这是新手最大的坑。漂亮的回测曲线 90% 是过拟合或数据 bug 的产物。<b>怀疑你自己的回测</b>，是量化第一美德。</li>
+  </ul>
+</div>
+
+<!-- ============ 3 ============ -->
+<h2 id="t3">3 · 最小金融概念集</h2>
+<p>不需要金融学位，先掌握这几个量就够开工了。</p>
+
+<h3>3.1 收益率（return）—— 你的「标签」</h3>
+<p>价格本身没法直接比较（贵的股票变动绝对值大），所以一切都用<b>收益率</b>说话：</p>
+<ul>
+  <li><b>简单收益率</b>：<code>r_t = P_t / P_{t-1} − 1</code>。今天相对昨天涨跌百分之几。</li>
+  <li><b>对数收益率</b>：<code>log(P_t / P_{t-1})</code>。量化里更爱用它，因为<b>可加</b>（多日收益直接相加）、且更接近正态分布——和你在 ML 里偏好 log 空间是同一种动机。</li>
+  <li><b>复利</b>：净值 = <code>∏(1 + r_t)</code>。收益靠连乘累积，所以<b>一次大亏的杀伤力远超同等幅度的盈利</b>（亏 50% 要涨 100% 才回本）。</li>
+</ul>
+
+<h3>3.2 波动率与回撤 —— 你的「风险」</h3>
+<ul>
+  <li><b>波动率(volatility)</b>：收益率的标准差，衡量「颠簸程度」。年化波动 = 日波动 × √252（252 是一年交易日数）。</li>
+  <li><b>最大回撤(max drawdown)</b>：从历史最高点跌下来的最大幅度。它衡量「最难受的时候有多难受」，直接决定你能不能拿得住、会不会爆仓。</li>
+</ul>
+
+<div class="demo">
+  <h4>🎲 交互 1：价格是怎么来的？随机游走 vs 趋势</h4>
+  <p class="hint">股价常被建模为<b>带漂移的几何布朗运动</b>：每天涨跌 = 一点点确定性趋势(drift) + 大量随机噪声(vol)。拖动滑块，体会「趋势」和「噪声」如何博弈——你会直观感到：<b>当噪声远大于趋势时，看图找规律基本是自欺欺人</b>。</p>
+  <canvas id="cv-gbm" height="300"></canvas>
+  <div class="controls">
+    <div class="ctl"><label>年化趋势 drift <b id="v-drift">8%</b></label><input id="s-drift" type="range" min="-20" max="30" value="8"></div>
+    <div class="ctl"><label>年化波动 vol <b id="v-vol">20%</b></label><input id="s-vol" type="range" min="2" max="60" value="20"></div>
+    <div class="ctl" style="flex:0 0 auto"><label>&nbsp;</label><button class="btn" id="b-gbm">🔄 换一组随机种子</button></div>
+  </div>
+  <div class="legend"><span><i style="background:var(--accent)"></i>模拟价格</span><span><i style="background:var(--muted)"></i>纯趋势（无噪声时的理论线）</span></div>
+</div>
+
+<!-- ============ 4 ============ -->
+<h2 id="t4">4 · 风险与收益的度量</h2>
+<p>有了收益和风险，就能定义量化里最重要的「评分函数」。它们的地位相当于 ML 里的 metric。</p>
+
+<table>
+  <tr><th>指标</th><th>含义</th><th>ML 类比</th><th>经验阈值</th></tr>
+  <tr><td><b>年化收益 (CAGR)</b></td><td>把累计收益摊成「平均每年涨多少」</td><td>主指标</td><td>越高越好（但要配合风险看）</td></tr>
+  <tr><td><b>夏普比率 (Sharpe)</b></td><td>每单位风险换来多少超额收益 = 收益/波动</td><td>最像「信噪比」</td><td>&gt;1 还行，&gt;2 很好，实盘能稳定&gt;1.5 已属优秀</td></tr>
+  <tr><td><b>最大回撤 (MaxDD)</b></td><td>最坏时从高点跌多少</td><td>worst-case loss</td><td>越小越好；-30% 已让多数人睡不着</td></tr>
+  <tr><td><b>Calmar</b></td><td>年化收益 / 最大回撤</td><td>收益-风险比</td><td>&gt;0.5 不错</td></tr>
+  <tr><td><b>胜率 / 盈亏比</b></td><td>赢的次数占比 / 平均盈利÷平均亏损</td><td>precision 之类</td><td>高胜率≠赚钱，要和盈亏比一起看</td></tr>
+  <tr><td><b>信息比率 (IR)</b></td><td>相对基准的超额收益 / 跟踪误差</td><td>相对 baseline 的提升稳定性</td><td>评价主动管理的金标准</td></tr>
+</table>
+
+<div class="demo">
+  <h4>📐 交互 2：夏普比率计算器</h4>
+  <p class="hint">夏普 = (年化收益 − 无风险利率) / 年化波动。它回答「这点收益，值得承担这么大颠簸吗？」。试试：一个年化 30% 但波动 60% 的策略，夏普其实<b>不如</b>年化 10% 波动 8% 的稳健策略。</p>
+  <div class="controls">
+    <div class="ctl"><label>年化收益 <b id="v-ret">12%</b></label><input id="s-ret" type="range" min="-10" max="40" value="12"></div>
+    <div class="ctl"><label>年化波动 <b id="v-volr">15%</b></label><input id="s-volr" type="range" min="3" max="60" value="15"></div>
+    <div class="ctl"><label>无风险利率 <b id="v-rf">4%</b></label><input id="s-rf" type="range" min="0" max="6" value="4"></div>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="lab">夏普比率</div><div class="val" id="o-sharpe">—</div></div>
+    <div class="stat"><div class="lab">评价</div><div class="val" id="o-verdict" style="font-size:16px">—</div></div>
+    <div class="stat"><div class="lab">≈ 10年里亏损年份概率*</div><div class="val" id="o-ploss">—</div></div>
+  </div>
+  <p class="hint" style="margin-top:10px">* 在收益近似正态的粗略假设下估算，仅帮助建立直觉，非精确预测。</p>
+</div>
+
+<!-- ============ 5 ============ -->
+<h2 id="t5">5 · Alpha、Beta 与因子</h2>
+<p>这是量化的世界观核心。一个资产的收益可以被<b>拆解</b>：</p>
+<div class="box key">
+  <p style="font-size:18px; text-align:center; margin:6px 0">
+    资产收益 = <span class="qt">α (alpha)</span> + <span style="color:var(--accent)">β (beta)</span> × 市场收益 + 噪声
+  </p>
+</div>
+<ul>
+  <li><b>Beta（β）</b>：随大盘一起涨跌的部分。买指数基金赚的就是 beta——<b>不需要技巧，承担市场风险即可获得</b>。β=1 表示和大盘同步，β=1.5 表示大盘涨1%你涨1.5%。</li>
+  <li><b>Alpha（α）</b>：<b>剔除市场影响后，靠本事多赚的超额收益</b>。这才是量化真正追逐的东西，也是最稀缺、最容易消失的东西。可以类比：beta 是「baseline 模型」白送的分，alpha 是「你的模型比 baseline 多出来的那点提升」。</li>
+  <li><b>因子（factor）</b>：能系统性解释收益的特征维度——<b>这就是量化版的「feature」</b>。经典因子有：
+    <ul>
+      <li><span class="pill">价值 Value</span> 便宜的股票长期跑赢贵的</li>
+      <li><span class="pill">动量 Momentum</span> 过去涨得好的短期继续涨</li>
+      <li><span class="pill">规模 Size</span> 小盘股有额外溢价</li>
+      <li><span class="pill">质量 Quality</span> 盈利稳健、低负债的公司更好</li>
+      <li><span class="pill">低波动 Low-Vol</span> 波动小的股票风险调整后反而更优</li>
+    </ul>
+  </li>
+</ul>
+<p>整个「因子投资」流派（Fama-French 三因子/五因子模型）本质上就是<b>一个线性回归</b>：用这些因子去解释一篮子股票的收益。你对线性模型的所有直觉都能用上。</p>
+
+<!-- ============ 6 ============ -->
+<h2 id="t6">6 · 常见策略大类</h2>
+<table>
+  <tr><th>策略</th><th>核心假设</th><th>一句话</th></tr>
+  <tr><td><b>趋势/动量</b> Momentum</td><td>涨的会继续涨</td><td>追随趋势，截断亏损、让利润奔跑</td></tr>
+  <tr><td><b>均值回归</b> Mean-Reversion</td><td>价格偏离会回归</td><td>跌多了买、涨多了卖</td></tr>
+  <tr><td><b>价值/基本面</b></td><td>价格终将反映价值</td><td>买便宜的好公司</td></tr>
+  <tr><td><b>统计套利</b> Stat-Arb</td><td>相关资产价差会收敛</td><td>配对交易：做多A做空B赚价差</td></tr>
+  <tr><td><b>套利/做市</b></td><td>同一东西不该有两个价</td><td>赚无风险或低风险价差/价差报价</td></tr>
+  <tr><td><b>机器学习选股</b></td><td>多因子非线性组合有预测力</td><td>把上百因子喂给模型排序选股</td></tr>
+</table>
+<div class="box note">
+  <p><b>给 ML 人的提醒</b>：你可能第一反应就是「上 XGBoost / Transformer 预测收益」。可以，但要知道——<b>金融数据信噪比极低</b>（信号也许只有 1%~2%，其余全是噪声），样本量按「独立的市场周期」算其实<b>少得可怜</b>。所以这个领域里，<b>简单稳健 &gt; 复杂炫技</b>，特征的经济学逻辑往往比模型结构更重要。先把线性因子玩透，再上 ML 不迟。</p>
+</div>
+
+<!-- ============ 7 ============ -->
+<h2 id="t7">7 · 量化研究流水线 ≈ ML Pipeline</h2>
+<p>整条工作流和你做一个 ML 项目几乎同构，对照着看：</p>
+<div class="pipeline">
+  <div class="pstep"><div class="n">①</div><div class="t">数据</div><span class="ml">≈ 数据采集/清洗</span></div>
+  <div class="pstep"><div class="n">②</div><div class="t">因子/信号</div><span class="ml">≈ 特征工程</span></div>
+  <div class="pstep"><div class="n">③</div><div class="t">回测</div><span class="ml">≈ 离线评估</span></div>
+  <div class="pstep"><div class="n">④</div><div class="t">组合构建</div><span class="ml">≈ 多输出聚合</span></div>
+  <div class="pstep"><div class="n">⑤</div><div class="t">风控</div><span class="ml">≈ 约束/正则</span></div>
+  <div class="pstep"><div class="n">⑥</div><div class="t">实盘</div><span class="ml">≈ 部署/上线</span></div>
+</div>
+<ol>
+  <li><b>数据</b>：行情(价/量)、基本面(财报)、另类数据(新闻、卫星图、舆情)。<b>脏数据是头号杀手</b>——拆股、分红、退市、幸存者偏差都会污染结论。</li>
+  <li><b>因子/信号</b>：把原始数据加工成「对未来收益有预测力的数字」。一个信号通常是横截面排序（今天这 3000 只股票，按某指标从好到坏排队）。</li>
+  <li><b>回测</b>：在历史上模拟「如果当时按这个规则交易，结果会怎样」。<b>下一节专门讲它的陷阱。</b></li>
+  <li><b>组合构建</b>：把多个信号、多只标的合成一个真实可持有的仓位组合（涉及权重优化、相关性）。</li>
+  <li><b>风控</b>：仓位上限、行业中性、止损、杠杆控制——相当于给优化目标加约束，防止模型在某个方向上裸奔。</li>
+  <li><b>实盘</b>：考虑交易成本、滑点、容量（策略管多少钱就失效）、延迟。很多回测里赚钱的策略，<b>一加上真实成本就归零</b>。</li>
+</ol>
+
+<!-- ============ 8 ============ -->
+<h2 id="t8">8 · 回测与三大致命陷阱</h2>
+<p>这是全篇<b>最重要</b>的一节。回测是量化的「离线评估」，但它比 ML 评估危险得多，因为<b>你只有一段历史</b>，反复在上面调参，等于无数次偷看测试集。三大陷阱：</p>
+
+<div class="box warn">
+  <h4>① 未来函数 / 前视偏差（look-ahead bias）= 标签泄漏</h4>
+  <p>用了「当时还不可能知道」的信息。最经典的形式：<b>用今天的收盘价决定今天的买入</b>——可收盘价要等收盘才知道，你根本来不及在那个价位买。防法：<b>信号一律滞后一期生效</b>（今天的信号，最早明天才能交易）。这一行代码 <code>position = signal.shift(1)</code> 漏掉，整个回测就是骗自己。</p>
+</div>
+<div class="box warn">
+  <h4>② 过拟合 / 曲线拟合（overfitting）= 多重检验</h4>
+  <p>你试了 1000 组参数，挑出回测最漂亮的那组——它大概率只是<b>恰好拟合了历史噪声</b>，实盘立刻失效。这和 ML 过拟合同源，但更隐蔽，因为「试了多少次」往往没人记录。防法：样本外测试、walk-forward、参数敏感性分析、限制自由度、对「太完美」的曲线保持警惕。</p>
+</div>
+<div class="box warn">
+  <h4>③ 幸存者偏差（survivorship bias）= 采样偏差</h4>
+  <p>只用「今天还活着的股票」做回测，自动剔除了暴雷退市的——好比只统计考上的学生来证明某学习法有效。结果系统性偏乐观。防法：用<b>包含已退市标的</b>的「point-in-time」数据集。</p>
+</div>
+
+<div class="demo">
+  <h4>📈 交互 3：完整的均线交叉策略回测（本篇核心）</h4>
+  <p class="hint">最经典的入门策略：<b>短期均线上穿长期均线就买入、下穿就空仓</b>。拖动两个窗口长度，实时看：上图=价格+两条均线+买卖点；下图=策略净值 vs「一直持有(buy&hold)」基准。<b>重点体会</b>：你会忍不住反复调参数去让净值变好看——<b>这正是过拟合发生的瞬间</b>。同一条价格、不同参数，绩效天差地别，但这不代表你「找到了」什么。</p>
+  <canvas id="cv-ma" height="240"></canvas>
+  <canvas id="cv-eq" height="180" style="margin-top:10px"></canvas>
+  <div class="controls">
+    <div class="ctl"><label>短期均线窗口 <b id="v-fast">10</b> 天</label><input id="s-fast" type="range" min="2" max="50" value="10"></div>
+    <div class="ctl"><label>长期均线窗口 <b id="v-slow">50</b> 天</label><input id="s-slow" type="range" min="10" max="200" value="50"></div>
+    <div class="ctl"><label>单边交易成本 <b id="v-cost">0.05%</b></label><input id="s-cost" type="range" min="0" max="30" value="5"></div>
+    <div class="ctl" style="flex:0 0 auto"><label>&nbsp;</label><button class="btn" id="b-ma">🔄 换一段行情</button></div>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="lab">策略年化</div><div class="val" id="m-cagr">—</div></div>
+    <div class="stat"><div class="lab">策略夏普</div><div class="val" id="m-sharpe">—</div></div>
+    <div class="stat"><div class="lab">最大回撤</div><div class="val" id="m-dd">—</div></div>
+    <div class="stat"><div class="lab">交易次数</div><div class="val" id="m-trades">—</div></div>
+  </div>
+  <div class="legend">
+    <span><i style="background:var(--accent)"></i>价格</span>
+    <span><i style="background:var(--ok)"></i>短均线</span>
+    <span><i style="background:var(--warn)"></i>长均线</span>
+    <span><i style="background:var(--accent2)"></i>策略净值</span>
+    <span><i style="background:var(--muted)"></i>一直持有</span>
+  </div>
+</div>
+
+<div class="demo">
+  <h4>⚠️ 交互 4：直观感受「过拟合」</h4>
+  <p class="hint">同一批带噪声的点（<b>蓝点=训练集/历史，红点=测试集/未来</b>）。增大多项式阶数 = 增加策略的自由度/参数。看着<b>蓝点</b>被拟合得越来越完美，但<b>红点</b>上的误差先降后暴涨——这就是「参数调到历史上完美的策略，未来反而最差」的数学本质。</p>
+  <canvas id="cv-of" height="280"></canvas>
+  <div class="controls">
+    <div class="ctl"><label>模型复杂度（多项式阶数） <b id="v-deg">3</b></label><input id="s-deg" type="range" min="1" max="12" value="3"></div>
+    <div class="ctl" style="flex:0 0 auto"><label>&nbsp;</label><button class="btn" id="b-of">🔄 重新采样</button></div>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="lab">训练集误差（历史）</div><div class="val" id="of-train" style="color:var(--accent)">—</div></div>
+    <div class="stat"><div class="lab">测试集误差（未来）</div><div class="val" id="of-test" style="color:var(--bad)">—</div></div>
+  </div>
+</div>
+
+<!-- ============ 9 ============ -->
+<h2 id="t9">9 · 需要补的数学/统计</h2>
+<p>好消息：以你的 ML 底子，几乎不用额外补课。真正高频用到的是：</p>
+<ul>
+  <li><b>概率统计</b>：分布、均值/方差、相关性、假设检验、p-hacking 的危害（多重检验）。<span class="pill">最重要</span></li>
+  <li><b>线性代数 & 回归</b>：因子模型、协方差矩阵、PCA 降维——全是你熟的。</li>
+  <li><b>时间序列</b>：平稳性、自相关、ARIMA/GARCH（波动率建模）。这是相对新的一块，值得专门学。</li>
+  <li><b>最优化</b>：投资组合优化（均值-方差/Markowitz）本质是带约束的二次规划。</li>
+  <li><b>随机过程（了解即可）</b>：布朗运动、伊藤引理——做衍生品定价才深入需要，选股策略入门用不上。</li>
+</ul>
+
+<!-- ============ 10 ============ -->
+<h2 id="t10">10 · 学习资料大全</h2>
+
+<h3>📚 书（按入门→进阶）</h3>
+<ul>
+  <li><b>《Active Portfolio Management》</b>(Grinold &amp; Kahn) — 主动管理与 alpha 的圣经，信息比率等概念出处。</li>
+  <li><b>《Quantitative Equity Portfolio Management》</b>(Qian 等) — 多因子选股体系化讲解。</li>
+  <li><b>《Advances in Financial Machine Learning》</b>(Marcos López de Prado) — <span class="pill">ML 背景必读</span>专讲金融里 ML 的坑：purged/embargo 交叉验证、样本权重、特征重要性、过拟合检测。和你的背景最契合。</li>
+  <li><b>《Machine Learning for Algorithmic Trading》</b>(Stefan Jansen) — 厚但实战，配套大量 Python 代码，端到端。</li>
+  <li><b>《Algorithmic Trading》/《Quantitative Trading》</b>(Ernest Chan) — 薄、好读、适合最先翻，建立全局观。</li>
+  <li><b>《Options, Futures, and Other Derivatives》</b>(John Hull) — 衍生品定价标准教材（想往期权/固收方向再读）。</li>
+  <li><b>《Analysis of Financial Time Series》</b>(Ruey Tsay) — 金融时间序列的经典教材。</li>
+</ul>
+
+<h3>🎓 课程 / 视频</h3>
+<ul>
+  <li><b>WorldQuant University</b> — 免费的「Applied Data Science / 金融工程」项目，质量高。</li>
+  <li><b>Coursera</b>：密歇根大学 <i>Python and Statistics for Financial Analysis</i>；<i>Investment Management</i>(日内瓦大学)。</li>
+  <li><b>EdX / MIT OCW</b>：<i>18.S096 Topics in Mathematics with Applications in Finance</i>（MIT 公开课，理论扎实）。</li>
+  <li><b>YouTube</b>：<i>QuantPy</i>、<i>Part Time Larry</i>（代码实操）、<i>Dimitri Bianco</i>（聊量化职业与现实）。</li>
+</ul>
+
+<h3>🐍 Python 库（你的主战场）</h3>
+<table>
+  <tr><th>用途</th><th>库</th></tr>
+  <tr><td>数据处理</td><td><code>pandas</code> <code>numpy</code> <code>polars</code>(更快)</td></tr>
+  <tr><td>统计/时序</td><td><code>statsmodels</code> <code>scipy</code> <code>arch</code>(GARCH)</td></tr>
+  <tr><td>回测框架</td><td><code>backtesting.py</code>(轻量好上手) · <code>vectorbt</code>(向量化快) · <code>backtrader</code>/<code>zipline-reloaded</code>(事件驱动) · <code>nautilus_trader</code>(专业级)</td></tr>
+  <tr><td>因子/投研</td><td><code>alphalens-reloaded</code>(因子分析) · <code>pyfolio-reloaded</code>(绩效归因) · <code>empyrical</code>(指标)</td></tr>
+  <tr><td>机器学习</td><td><code>scikit-learn</code> <code>xgboost</code> <code>lightgbm</code> <code>pytorch</code></td></tr>
+  <tr><td>组合优化</td><td><code>cvxpy</code> <code>PyPortfolioOpt</code> <code>riskfolio-lib</code></td></tr>
+  <tr><td>开源平台</td><td><code>Qlib</code>(微软,A股友好,强烈推荐) · <code>QuantConnect/LEAN</code>(云端回测)</td></tr>
+</table>
+<div class="box note"><p>⚠️ 你的环境是 <b>Python 3.13</b>，<code>vectorbt</code>/<code>backtrader</code>/<code>zipline</code> 可能装不上或不兼容。入门建议：<b>先用 <code>backtesting.py</code> 或干脆自己手写向量化回测</b>（就是交互3里那套 <code>shift(1)</code> 逻辑，几十行，理解最深）。</p></div>
+
+<h3>📡 数据源</h3>
+<ul>
+  <li><b>美股/全球（免费）</b>：<code>yfinance</code>（你环境里已有）、Stooq、Alpha Vantage、Tiingo、FRED(宏观经济)。</li>
+  <li><b>美股（专业/付费）</b>：Polygon.io、IEX Cloud、Norgate(含退市数据，治幸存者偏差)、CRSP(学术金标准)。</li>
+  <li><b>A股</b>：<code>akshare</code>(免费开源)、<code>tushare</code>(部分免费)、<code>baostock</code>、Wind/聚宽(专业)。</li>
+  <li><b>加密货币</b>：<code>ccxt</code>(统一各交易所 API)、Binance/Coinbase 官方 API。</li>
+</ul>
+
+<h3>🏆 平台 / 社区 / 竞赛</h3>
+<ul>
+  <li><b>QuantConnect</b> — 免费云端回测+实盘，社区活跃，适合练手与找灵感。</li>
+  <li><b>Numerai</b> — <span class="pill">ML 人友好</span>「加密的数据科学竞赛」，给你脱敏特征，你交预测，用加密货币结算。纯 ML 问题，无需懂金融数据细节。</li>
+  <li><b>Kaggle</b> — 历年有 Jane Street、Optiver、Two Sigma 等顶级量化机构主办的预测赛，题目和真实研究很像。</li>
+  <li><b>社区</b>：Reddit <i>r/algotrading</i>、<i>r/quant</i>；论坛 <i>Quantitative Finance StackExchange</i>、<i>Wilmott</i>；中文圈 <i>聚宽/优矿社区</i>。</li>
+  <li><b>博客</b>：<i>Quantitative Research and Trading</i>、<i>QuantStart</i>、<i>Robot Wealth</i>、<i>Alpha Architect</i>(有学术深度)。</li>
+</ul>
+
+<!-- ============ 11 ============ -->
+<h2 id="t11">11 · 给你的学习路线图</h2>
+<div class="box key">
+  <ol>
+    <li><b>第 1 周 · 打通数据→可视化</b>：用 <code>yfinance</code> 拉 SPY/AAPL，算日收益、累计净值、年化波动，画出来。目标：手不生。</li>
+    <li><b>第 2 周 · 第一个完整回测</b>：手写均线交叉策略（就是交互3），务必加上 <code>shift(1)</code> 和交易成本，算夏普/回撤。目标：理解回测每一步。</li>
+    <li><b>第 3–4 周 · 因子初步</b>：实现一个动量因子或价值因子，对一篮子股票做横截面排序，分 5 组看收益单调性（用 <code>alphalens</code>）。目标：从「单股策略」升级到「横截面因子」思维。</li>
+    <li><b>第 2 月 · 严肃对待过拟合</b>：读 López de Prado，学 walk-forward / purged CV，给你之前的策略做样本外检验，亲眼看它失效。目标：建立怀疑精神。</li>
+    <li><b>第 3 月 · 上 ML + 组合</b>：用 LightGBM 把多个因子组合成排序模型；用 <code>PyPortfolioOpt</code> 做组合优化。目标：把你的 ML 武器库接进来。</li>
+    <li><b>持续 · 打比赛/写记录</b>：去 Numerai 或 Kaggle 量化赛练手；把每个策略的假设、结果、教训写成笔记（防止自己骗自己）。</li>
+  </ol>
+  <p style="margin-bottom:0"><b>北极星原则</b>：<span style="color:var(--bad)">怀疑你的回测</span> · <span style="color:var(--warn)">先逻辑后代码</span>（说不清为什么该赚钱的策略别碰）· <span style="color:var(--ok)">简单稳健优先于复杂炫技</span>。</p>
+</div>
+
+<!-- ============ 12 ============ -->
+<h2 id="t12">12 · 术语速查表</h2>
+<table>
+  <tr><th>术语</th><th>英文</th><th>白话</th></tr>
+  <tr><td>阿尔法</td><td>Alpha</td><td>靠本事赚的超额收益</td></tr>
+  <tr><td>贝塔</td><td>Beta</td><td>跟着大盘走的收益/敞口</td></tr>
+  <tr><td>因子</td><td>Factor</td><td>能解释收益的特征（量化版 feature）</td></tr>
+  <tr><td>夏普比率</td><td>Sharpe Ratio</td><td>收益/风险性价比</td></tr>
+  <tr><td>回撤</td><td>Drawdown</td><td>从高点跌下来的幅度</td></tr>
+  <tr><td>回测</td><td>Backtest</td><td>用历史数据模拟策略表现</td></tr>
+  <tr><td>未来函数</td><td>Look-ahead bias</td><td>偷看了未来信息（=标签泄漏）</td></tr>
+  <tr><td>过拟合</td><td>Overfitting</td><td>把历史噪声当规律</td></tr>
+  <tr><td>幸存者偏差</td><td>Survivorship bias</td><td>只统计活下来的样本</td></tr>
+  <tr><td>滑点</td><td>Slippage</td><td>实际成交价比预期差的部分</td></tr>
+  <tr><td>持仓/仓位</td><td>Position</td><td>当前持有多少（可正可负）</td></tr>
+  <tr><td>做多/做空</td><td>Long / Short</td><td>赌涨 / 赌跌</td></tr>
+  <tr><td>对冲</td><td>Hedge</td><td>用反向头寸抵消风险</td></tr>
+  <tr><td>横截面</td><td>Cross-sectional</td><td>同一时刻比较多只股票</td></tr>
+  <tr><td>容量</td><td>Capacity</td><td>策略能管多少钱而不失效</td></tr>
+  <tr><td>再平衡</td><td>Rebalance</td><td>定期把仓位调回目标权重</td></tr>
+</table>
+
+<footer>
+  量化投资入门科普 · 面向 ML/LLM 背景读者 · 2026-06-28<br>
+  收录于 <a href="https://github.com/zhangshuibai/paper-reading">zhangshuibai/paper-reading</a> ·
+  本页所有图表与计算均在浏览器本地运行，可随意拖动体验
+</footer>
+</div>
+
+<script>
+"use strict";
+/* ---------- 工具：确定性随机数（可复现） ---------- */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return ((t^t>>>14)>>>0)/4294967296;};}
+function gauss(rng){let u=0,v=0;while(u===0)u=rng();while(v===0)v=rng();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+function css(name){return getComputedStyle(document.documentElement).getPropertyValue(name).trim();}
+
+/* ---------- 高清 canvas ---------- */
+function setup(cv){
+  const dpr=window.devicePixelRatio||1;
+  const w=cv.clientWidth||cv.parentElement.clientWidth;
+  const h=cv.height; // CSS height attr used as logical height
+  cv.width=w*dpr; cv.height=h*dpr;
+  cv.style.height=h+'px';
+  const ctx=cv.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0);
+  return {ctx,w,h};
+}
+function line(ctx,xs,ys,color,lw){
+  ctx.beginPath();ctx.lineWidth=lw||2;ctx.strokeStyle=color;
+  for(let i=0;i<xs.length;i++){i?ctx.lineTo(xs[i],ys[i]):ctx.moveTo(xs[i],ys[i]);}
+  ctx.stroke();
+}
+function scaler(vals,lo,hi,pad){ // map value-array range -> [pad, size-pad] (inverted handled by caller)
+  let mn=Math.min(...vals),mx=Math.max(...vals);if(mn===mx){mx=mn+1;}
+  return v=> lo+pad + (v-mn)/(mx-mn)*(hi-lo-2*pad);
+}
+
+/* ================= 1. 翻译表 ================= */
+const PAIRS=[
+  ['特征 / Feature','因子 / Factor','把原始数据加工成有预测力的数字，量化里叫「因子」，做法和特征工程一模一样。'],
+  ['标签 / Label','未来收益 / Forward Return','你要预测的目标，通常是「未来 N 天的收益率或其排序」。'],
+  ['训练 / 测试集','样本内 / 样本外','绝不能随机划分！必须按时间切，过去训练、未来测试，否则泄漏。'],
+  ['交叉验证 / CV','Walk-Forward / Purged CV','金融版 CV 要在折之间留「禁区」防止信息跨折泄漏（López de Prado）。'],
+  ['过拟合 / Overfitting','曲线拟合 / Curve-fitting','反复在同一段历史上调参挑最优，等于偷看测试集无数次。'],
+  ['标签泄漏 / Leakage','未来函数 / Look-ahead','用了当时还不知道的信息，是回测虚高的头号元凶。'],
+  ['离线评估 / Eval','回测 / Backtest','在历史上模拟策略。比 ML 评估危险，因为只有一段历史。'],
+  ['损失/指标 / Metric','夏普 / 回撤 等','量化的「评分函数」，但要同时看收益与风险。'],
+  ['分布漂移 / Drift','市场状态切换 / Regime','市场分布一直在变，且变化幅度远超普通 ML 场景。'],
+  ['Baseline 模型','Beta / 买指数','不需要技巧、承担市场风险就能拿到的收益。'],
+  ['模型提升 / Lift','Alpha','剔除市场后靠本事多赚的部分，稀缺且会衰减。'],
+  ['采样偏差 / Bias','幸存者偏差 / Survivorship','只用活到今天的股票回测，结论系统性偏乐观。'],
+];
+(function(){
+  const box=document.getElementById('flip');
+  box.innerHTML=PAIRS.map((p,i)=>`<div class="fcard" data-i="${i}">
+    <div class="ml">${p[0]}</div><div class="arrow">↓ 对应</div><div class="qt">${p[1]}</div>
+    <div class="exp">${p[2]}</div><div class="tap">点击展开说明</div></div>`).join('');
+  box.querySelectorAll('.fcard').forEach(c=>{
+    c.onclick=()=>{c.classList.toggle('open');
+      c.querySelector('.tap').textContent=c.classList.contains('open')?'点击收起':'点击展开说明';};
+  });
+})();
+
+/* ================= 交互1：GBM 价格模拟 ================= */
+(function(){
+  const cv=document.getElementById('cv-gbm');
+  const sD=document.getElementById('s-drift'),sV=document.getElementById('s-vol'),btn=document.getElementById('b-gbm');
+  let seed=12345;
+  function draw(){
+    const drift=+sD.value/100, vol=+sV.value/100;
+    document.getElementById('v-drift').textContent=sD.value+'%';
+    document.getElementById('v-vol').textContent=sV.value+'%';
+    const N=252, dt=1/252, rng=mulberry32(seed);
+    const price=[100], pure=[100];
+    for(let i=1;i<N;i++){
+      const z=gauss(rng);
+      price.push(price[i-1]*Math.exp((drift-0.5*vol*vol)*dt+vol*Math.sqrt(dt)*z));
+      pure.push(pure[i-1]*Math.exp(drift*dt));
+    }
+    const {ctx,w,h}=setup(cv); ctx.clearRect(0,0,w,h);
+    const all=price.concat(pure), sy=scaler(all,h,0,18), sx=i=>10+i/(N-1)*(w-20);
+    // grid baseline
+    ctx.strokeStyle=css('--line');ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(10,h-18);ctx.lineTo(w-10,h-18);ctx.stroke();
+    line(ctx,pure.map((_,i)=>sx(i)),pure.map(v=>h-sy(v)),css('--muted'),1.5);
+    line(ctx,price.map((_,i)=>sx(i)),price.map(v=>h-sy(v)),css('--accent'),2);
+  }
+  [sD,sV].forEach(s=>s.oninput=draw);
+  btn.onclick=()=>{seed=Math.floor(Math.random()*1e6);draw();};
+  draw(); window.addEventListener('resize',draw);
+})();
+
+/* ================= 交互2：夏普计算器 ================= */
+(function(){
+  const sR=document.getElementById('s-ret'),sV=document.getElementById('s-volr'),sF=document.getElementById('s-rf');
+  function erf(x){const t=1/(1+0.3275911*Math.abs(x));const y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);return x>=0?y:-y;}
+  function ncdf(x){return 0.5*(1+erf(x/Math.SQRT2));}
+  function upd(){
+    const r=+sR.value/100, v=+sV.value/100, rf=+sF.value/100;
+    document.getElementById('v-ret').textContent=sR.value+'%';
+    document.getElementById('v-volr').textContent=sV.value+'%';
+    document.getElementById('v-rf').textContent=sF.value+'%';
+    const sharpe=(r-rf)/v;
+    document.getElementById('o-sharpe').textContent=sharpe.toFixed(2);
+    let verdict,color;
+    if(sharpe<0){verdict='亏钱/不值';color='var(--bad)';}
+    else if(sharpe<0.5){verdict='偏弱';color='var(--warn)';}
+    else if(sharpe<1){verdict='及格';color='var(--warn)';}
+    else if(sharpe<2){verdict='不错 👍';color='var(--ok)';}
+    else{verdict='很优秀 🌟';color='var(--ok)';}
+    const ve=document.getElementById('o-verdict');ve.textContent=verdict;ve.style.color=color;
+    // 单年收益近似 N(r, v^2)，亏损概率 = P(X<0)
+    const pYearLoss=ncdf((0-r)/v);
+    document.getElementById('o-ploss').textContent=(pYearLoss*10).toFixed(1)+' 年';
+  }
+  [sR,sV,sF].forEach(s=>s.oninput=upd);upd();
+})();
+
+/* ================= 交互3：均线交叉回测 ================= */
+(function(){
+  const cvP=document.getElementById('cv-ma'),cvE=document.getElementById('cv-eq');
+  const sF=document.getElementById('s-fast'),sS=document.getElementById('s-slow'),sC=document.getElementById('s-cost'),btn=document.getElementById('b-ma');
+  let seed=2024;
+  function genPrices(seed){
+    // 带缓慢变化趋势的价格，让均线策略有时灵有时不灵（更真实）
+    const N=500, rng=mulberry32(seed), p=[100];
+    let trend=0.0004;
+    for(let i=1;i<N;i++){
+      if(i%80===0) trend=(rng()-0.45)*0.0016; // 趋势不时切换
+      p.push(p[i-1]*Math.exp(trend-0.5*0.013*0.013+0.013*gauss(rng)));
+    }
+    return p;
+  }
+  function sma(p,win){const out=Array(p.length).fill(null);let s=0;for(let i=0;i<p.length;i++){s+=p[i];if(i>=win)s-=p[i-win];if(i>=win-1)out[i]=s/win;}return out;}
+  let PRICES=genPrices(seed);
+  function run(){
+    let fast=+sF.value, slow=+sS.value, cost=+sC.value/10000;
+    if(fast>=slow){slow=fast+1;sS.value=slow;}
+    document.getElementById('v-fast').textContent=fast;
+    document.getElementById('v-slow').textContent=slow;
+    document.getElementById('v-cost').textContent=(cost*100).toFixed(2)+'%';
+    const p=PRICES,N=p.length;
+    const mf=sma(p,fast),ms=sma(p,slow);
+    // 信号：短>长 =>1 否则 0；仓位滞后一天（防未来函数）
+    const sig=p.map((_,i)=>(mf[i]!=null&&ms[i]!=null&&mf[i]>ms[i])?1:0);
+    const pos=sig.map((_,i)=>i>0?sig[i-1]:0);
+    const eq=[1],bh=[1];let trades=0;const rets=[];
+    for(let i=1;i<N;i++){
+      const r=p[i]/p[i-1]-1;
+      const tc=Math.abs(pos[i]-pos[i-1])*cost; if(pos[i]!==pos[i-1])trades++;
+      const sr=pos[i]*r-tc; rets.push(sr);
+      eq.push(eq[i-1]*(1+sr)); bh.push(bh[i-1]*(1+r));
+    }
+    // 指标
+    const yrs=N/252;
+    const cagr=Math.pow(eq[eq.length-1],1/yrs)-1;
+    const mean=rets.reduce((a,b)=>a+b,0)/rets.length;
+    const sd=Math.sqrt(rets.reduce((a,b)=>a+(b-mean)**2,0)/rets.length)||1e-9;
+    const sharpe=Math.sqrt(252)*mean/sd;
+    let peak=-1e9,dd=0;eq.forEach(v=>{peak=Math.max(peak,v);dd=Math.min(dd,v/peak-1);});
+    document.getElementById('m-cagr').textContent=(cagr*100).toFixed(1)+'%';
+    const sh=document.getElementById('m-sharpe');sh.textContent=sharpe.toFixed(2);
+    sh.style.color=sharpe>1?'var(--ok)':sharpe<0?'var(--bad)':'var(--text)';
+    document.getElementById('m-dd').textContent=(dd*100).toFixed(1)+'%';
+    document.getElementById('m-trades').textContent=trades;
+    // --- 上图：价格 + 均线 + 买卖点 ---
+    const A=setup(cvP);A.ctx.clearRect(0,0,A.w,A.h);
+    const sy=scaler(p,A.h,0,14),sx=i=>8+i/(N-1)*(A.w-16);
+    line(A.ctx,p.map((_,i)=>sx(i)),p.map(v=>A.h-sy(v)),css('--accent'),1.6);
+    const xf=[],yf=[],xs=[],ys=[];
+    for(let i=0;i<N;i++){if(mf[i]!=null){xf.push(sx(i));yf.push(A.h-sy(mf[i]));}if(ms[i]!=null){xs.push(sx(i));ys.push(A.h-sy(ms[i]));}}
+    line(A.ctx,xf,yf,css('--ok'),1.4);line(A.ctx,xs,ys,css('--warn'),1.4);
+    // 交叉点标记
+    for(let i=1;i<N;i++){if(pos[i]!==pos[i-1]){A.ctx.beginPath();A.ctx.fillStyle=pos[i]?css('--ok'):css('--bad');A.ctx.arc(sx(i),A.h-sy(p[i]),3,0,7);A.ctx.fill();}}
+    // --- 下图：净值 vs 买入持有 ---
+    const B=setup(cvE);B.ctx.clearRect(0,0,B.w,B.h);
+    const allE=eq.concat(bh),ey=scaler(allE,B.h,0,14),ex=i=>8+i/(N-1)*(B.w-16);
+    // 1.0 基准线
+    B.ctx.strokeStyle=css('--line');B.ctx.lineWidth=1;B.ctx.setLineDash([4,4]);
+    B.ctx.beginPath();B.ctx.moveTo(8,B.h-ey(1));B.ctx.lineTo(B.w-8,B.h-ey(1));B.ctx.stroke();B.ctx.setLineDash([]);
+    line(B.ctx,bh.map((_,i)=>ex(i)),bh.map(v=>B.h-ey(v)),css('--muted'),1.5);
+    line(B.ctx,eq.map((_,i)=>ex(i)),eq.map(v=>B.h-ey(v)),css('--accent2'),2);
+  }
+  [sF,sS,sC].forEach(s=>s.oninput=run);
+  btn.onclick=()=>{seed=Math.floor(Math.random()*1e6);PRICES=genPrices(seed);run();};
+  run();window.addEventListener('resize',run);
+})();
+
+/* ================= 交互4：过拟合 ================= */
+(function(){
+  const cv=document.getElementById('cv-of'),sD=document.getElementById('s-deg'),btn=document.getElementById('b-of');
+  let seed=7;
+  // 简单最小二乘多项式拟合（正规方程 + 高斯消元），x 归一化到[0,1]
+  function polyfit(xs,ys,deg){
+    const n=deg+1;const A=[],b=[];
+    for(let r=0;r<n;r++){A.push(new Array(n).fill(0));b.push(0);
+      for(let k=0;k<xs.length;k++){const xr=Math.pow(xs[k],r);b[r]+=xr*ys[k];
+        for(let c=0;c<n;c++)A[r][c]+=Math.pow(xs[k],r+c);}}
+    // 高斯消元
+    for(let i=0;i<n;i++){let piv=i;for(let r=i+1;r<n;r++)if(Math.abs(A[r][i])>Math.abs(A[piv][i]))piv=r;
+      [A[i],A[piv]]=[A[piv],A[i]];[b[i],b[piv]]=[b[piv],b[i]];
+      const d=A[i][i]||1e-9;for(let c=i;c<n;c++)A[i][c]/=d;b[i]/=d;
+      for(let r=0;r<n;r++){if(r===i)continue;const f=A[r][i];for(let c=i;c<n;c++)A[r][c]-=f*A[i][c];b[r]-=f*b[i];}}
+    return b;
+  }
+  function eval_(coef,x){let s=0;for(let i=0;i<coef.length;i++)s+=coef[i]*Math.pow(x,i);return s;}
+  let train,test;
+  function sample(){
+    const rng=mulberry32(seed);
+    const f=x=>0.5+0.35*Math.sin(2.2*x+0.6); // 真实规律
+    train=[];test=[];
+    for(let i=0;i<14;i++){const x=i/13;train.push([x,f(x)+0.10*gauss(rng)]);}
+    for(let i=0;i<14;i++){const x=(i+0.5)/13;if(x<=1)test.push([x,f(x)+0.10*gauss(rng)]);}
+  }
+  function draw(){
+    const deg=+sD.value;document.getElementById('v-deg').textContent=deg;
+    const xs=train.map(p=>p[0]),ys=train.map(p=>p[1]);
+    const coef=polyfit(xs,ys,deg);
+    const {ctx,w,h}=setup(cv);ctx.clearRect(0,0,w,h);
+    const pad=24,sx=x=>pad+x*(w-2*pad),sy=y=>h-pad-(y-0)/(1)*(h-2*pad);
+    // axes
+    ctx.strokeStyle=css('--line');ctx.lineWidth=1;
+    ctx.strokeRect(pad,pad,w-2*pad,h-2*pad);
+    // 拟合曲线
+    const cx=[],cy=[];for(let i=0;i<=120;i++){const x=i/120;cx.push(sx(x));cy.push(sy(Math.max(-0.5,Math.min(1.5,eval_(coef,x)))));}
+    line(ctx,cx,cy,css('--accent2'),2.2);
+    // 训练点(蓝) & 测试点(红)
+    train.forEach(p=>{ctx.fillStyle=css('--accent');ctx.beginPath();ctx.arc(sx(p[0]),sy(p[1]),4,0,7);ctx.fill();});
+    test.forEach(p=>{ctx.fillStyle=css('--bad');ctx.beginPath();ctx.arc(sx(p[0]),sy(p[1]),4,0,7);ctx.fill();});
+    // 误差
+    const mse=(set)=>set.reduce((a,p)=>a+(p[1]-eval_(coef,p[0]))**2,0)/set.length;
+    document.getElementById('of-train').textContent=mse(train).toFixed(4);
+    const te=mse(test);document.getElementById('of-test').textContent=(te>9?'9.99+':te.toFixed(4));
+  }
+  sD.oninput=draw;btn.onclick=()=>{seed=Math.floor(Math.random()*1e6);sample();draw();};
+  sample();draw();window.addEventListener('resize',draw);
+})();
+</script>
+</body>
+</html>

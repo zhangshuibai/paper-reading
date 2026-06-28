@@ -2035,5 +2035,27 @@
       "mcp",
       "agent"
     ]
+  },
+  {
+    "slug": "2026-06-28-quant-intro-for-ml",
+    "title": "量化投资(Quant)入门：用机器学习的语言重新理解它",
+    "authors": "—",
+    "team": "科普·入门",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-28",
+    "published": "财经投资",
+    "tldr": "写给有LLM/ML背景但量化零基础的人:用特征工程/训练测试集/过拟合/标签泄漏等你熟悉的概念一一对应量化里的因子/样本内外/曲线拟合/未来函数,讲透收益率/夏普/回撤/alpha-beta/因子/回测三大陷阱,含6个浏览器本地交互(价格模拟/夏普计算器/均线交叉回测/过拟合演示)和书课库数据社区资料大全+学习路线图",
+    "tags": [
+      "quant",
+      "量化投资",
+      "金融",
+      "factor-investing",
+      "backtest",
+      "入门科普",
+      "for-ML-people"
+    ],
+    "categories": [],
+    "path": "papers/2026-06-28-quant-intro-for-ml/index.html"
   }
 ]
