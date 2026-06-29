@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Engram · AI 持续记忆层赛道的竞争格局与早期度调研</title>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --bad:#ff6b81; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --bad:#d23651; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;}
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:920px; margin:0 auto; padding:18px 22px 90px}
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:25px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)} .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap; line-height:2}
+  nav.toc a:hover{color:var(--accent)}
+  section{margin:38px 0}
+  h2{font-size:20px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:16.5px; margin:22px 0 8px}
+  p{margin:12px 0} ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)} strong{color:var(--text)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.88em}
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:13px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:9px 10px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  figure{margin:24px 0; text-align:center}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+  .svgwrap{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 8px}
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+  .src{font-size:10.5px; padding:0 6px; border-radius:999px; white-space:nowrap; vertical-align:middle}
+  .src-a{background:rgba(67,197,158,.18); color:var(--ok)}
+  .src-b{background:rgba(255,180,84,.18); color:var(--warn)}
+  .src-c{background:rgba(255,107,129,.18); color:var(--bad)}
+  .legend{font-size:12px; color:var(--muted); margin:6px 0 0}
+  .verdict{display:inline-block; font-weight:700; padding:3px 12px; border-radius:999px; font-size:14px}
+  .v-nascent{background:rgba(122,162,255,.18); color:var(--accent)}
+  .v-emerging{background:rgba(67,197,158,.18); color:var(--ok)}
+  .v-crowded{background:rgba(255,180,84,.18); color:var(--warn)}
+  .v-mature{background:rgba(255,107,129,.18); color:var(--bad)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">AI Memory</span>
+      <span class="chip">Continual Learning</span>
+      <span class="chip">Agent Infra</span>
+      <span class="chip">竞争格局</span>
+      <span class="chip">赛道早期度</span>
+      <span class="chip">创业 idea</span>
+    </div>
+    <h1>Engram：AI 持续记忆层赛道的竞争格局与早期度调研</h1>
+    <p class="orig-title">engram.com — 给 LLM/agent 的「学习型记忆层」 / 赛道有多早 / 有没有可借鉴 idea</p>
+    <dl class="meta-grid">
+      <dt>对象</dt><dd><a href="https://engram.com" target="_blank" rel="noopener">https://engram.com</a></dd>
+      <dt>赛道</dt><dd>AI memory / context layer / continual-learning infrastructure（给 LLM 与 agent 的持久记忆与私有上下文层）</dd>
+      <dt>整理</dt><dd>对话调研笔记；信息来自公开检索，按来源分级标注，产品能力未必经独立验证</dd>
+      <dt>日期</dt><dd>2026-06-29</dd>
+    </dl>
+    <p class="legend">来源等级：<span class="src src-a">🟢 一手</span> 官网/官方 newsroom/创始人发言 ·
+      <span class="src src-b">🟡 二手</span> 媒体（CNBC/Calcalist/Qz 等）/数据库 ·
+      <span class="src src-c">🔴 自述/未证实</span> 营销口径或未独立验证（如 100× token 节省、"significant revenue"）</p>
+  </header>
+
+  <div class="tldr">
+    <b>一句话</b> — <strong>Engram</strong> 做的是「AI 持续记忆层 / learned memory layer」：与其每次提问都现查 RAG，它把计算<strong>前移</strong>，让模型<strong>提前消化</strong>组织内的 GitHub / Slack / Notion / 合同等私有上下文，压成一份「随时间持续变好、归客户所有」的紧凑记忆，从而把模型的 <em>reasoning/inference</em> 与 <em>memory</em> 解耦
+    <span class="src src-a">🟢</span>。2026-06-23 带 <strong>$98M</strong> 出 stealth、估值约 <strong>$600M</strong>、仅 <strong>13 人</strong>（General Catalyst / Kleiner Perkins / Sequoia 领投，Karpathy + Pieter Abbeel 站台）
+    <span class="src src-b">🟡</span>。首个产品是<strong>面向 agent 的 API</strong>，传早期合作 Notion / Harvey / Microsoft <span class="src src-a">🟢</span>。
+    赛道判 <span class="verdict v-emerging">emerging（新兴）</span>：2024–2026 玩家涌入、资本热，但无赢家、无标准。<strong>最大威胁</strong>不是同行而是<strong>大厂把记忆做进模型/平台（OpenAI/ChatGPT memory、Anthropic、LangGraph）</strong>＋<strong>长上下文 + RAG 直接把问题"绕过去"</strong>。一个 whitespace：<strong>隐私/本地化的垂直领域记忆</strong>（受监管行业的"记忆归客户所有 + 不出域"）。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#disambig">⓪ 消歧</a>
+    <a href="#market">① 赛道地图 + 早期度</a>
+    <a href="#matrix">② 竞品对照矩阵</a>
+    <a href="#map">③ 定位图</a>
+    <a href="#funding">④ 融资 timeline</a>
+    <a href="#snapshot">⑤ 公司速览</a>
+    <a href="#cn">⑥ 中国对标</a>
+    <a href="#idea">⑦ 创业 idea 借鉴</a>
+    <a href="#take">⑧ 现实判断</a>
+    <a href="#src">出处</a>
+  </nav>
+
+  <!-- ⓪ 消歧 -->
+  <section id="disambig">
+    <h2><span class="n">⓪</span>消歧：哪个 "Engram"</h2>
+    <p>"Engram" 本是神经科学术语，指大脑里储存记忆的<strong>记忆痕迹（memory trace）</strong>，同名物很多。本篇 canonical 主体唯一锚定为：<strong>2026 年 6 月 23 日从 stealth 出来、带约 $98M 融资、由 Dan Biderman 任 CEO、出自 Stanford / Berkeley / Cornell 研究者、Karpathy 与 Pieter Abbeel 站台、官网 engram.com 的那家 enterprise AI memory 创业公司</strong> <span class="src src-a">🟢</span>。</p>
+    <p>需明确排除的同名物：</p>
+    <ul>
+      <li><strong>DeepSeek "Engram" 记忆架构</strong>——有媒体在标题里点出二者「同名」，但那是 DeepSeek 的一种<em>模型内部记忆架构/技术名词</em>，与这家公司无关，是纯粹的名字撞车 <span class="src src-b">🟡</span>。</li>
+      <li>神经科学语境里的 engram、以及任何叫 Engram 的其它产品/工具（输入法、游戏等），均非本篇对象。</li>
+    </ul>
+    <div class="callout note">
+      <span class="label">命名的双关</span>
+      公司用 "engram" 一词正是借神经科学的「记忆痕迹」之意——官方把每个客户专属的那份记忆本身就称作 "an engram" <span class="src src-a">🟢</span>。
+    </div>
+  </section>
+
+  <!-- ① 赛道与早期度 -->
+  <section id="market">
+    <h2><span class="n">①</span>赛道地图 + 早期度判断</h2>
+    <p>赛道：<strong>AI memory / context layer / continual-learning infrastructure</strong>。要解决的核心痛点是当前 LLM 的「<strong>无状态</strong>」：模型在会话间<strong>遗忘</strong>上下文、面对持续增长的组织数据吃力、且不了解某个团队/个人的具体工作流。市面上两条主流解法——（a）<strong>RAG / 向量库</strong>：每次提问现去检索相关文档塞进 prompt；（b）<strong>长上下文</strong>：把更多东西硬塞进越来越大的 context window。两者都意味着<strong>每次请求都要重新"读一遍"上下文</strong>，token 成本高且记忆不真正"内化"。Engram 主张第三条路：把消化提前到<strong>请求之前</strong>，用 continual learning + context compression + LoRA 微调 + 合成数据，把组织知识压进一份可复用、持续更新的「学习型记忆」<span class="src src-a">🟢</span>。</p>
+
+    <h3>玩家分群（四象限别漏）</h3>
+    <ul>
+      <li><strong>垂直创业公司（直接竞品）：</strong><strong>Mem0</strong>（开源 memory 层，$24M，48k★）、<strong>Zep / Graphiti</strong>（时序知识图，YC）、<strong>Letta（前 MemGPT）</strong>（agent runtime + memory，$10M seed @ $70M post）、<strong>Cognee</strong>（memory graph，$7.5M seed）、<strong>Supermemory</strong>（universal memory API，$2.6M seed）、Memobase / Charlie Mnemonic / Memori / Honcho 等一长串 <span class="src src-b">🟡</span>。</li>
+      <li><strong>大厂顺手做（最危险）：</strong><strong>OpenAI / ChatGPT memory</strong>、<strong>Anthropic</strong>（记忆/上下文能力直接进模型与产品）、<strong>LangChain / LangGraph memory</strong>、各 agent 框架（CrewAI、AutoGen 等）自带记忆模块——平台方把"记忆"做成<strong>默认能力</strong>，创业公司的独立价值被稀释 <span class="src src-b">🟡</span>。</li>
+      <li><strong>现有巨头 / 平台：</strong>Microsoft（M365 Copilot 自带 organizational context）、Google（Gemini + Workspace）、向量库厂商 Pinecone / Weaviate（记忆的"存储底座"，可向上渗透成记忆层）<span class="src src-b">🟡</span>。</li>
+      <li><strong>替代方案（不是同形态、但解决同需求）：</strong>纯 <strong>RAG + 向量库</strong>、以及<strong>超长上下文模型</strong>（1M–10M token context 直接"装下"整个知识库，让"记忆问题"部分消失）。这是对整个 memory 赛道最根本的替代威胁 <span class="src src-a">🟢</span>（Engram 官网正是把自己定位成对 RAG/长上下文的"超越"）。</li>
+    </ul>
+
+    <div class="callout insight">
+      <span class="label">早期度判断</span>
+      <span class="verdict v-emerging">emerging（新兴）</span>
+      （nascent 萌芽 / emerging 新兴 / crowded 拥挤 / mature 成熟）<br><br>
+      <strong>判断信号：</strong>
+      ① <strong>玩家数与新增速度</strong>：2024–2026 两年里涌入十几家专门做 memory 的创业公司，且仍在新增——已过"萌芽"。
+      ② <strong>融资热度/轮次分布</strong>：多数还停在 seed / 小 A（Mem0 $24M、Cognee $7.5M、Supermemory $2.6M、Letta $10M），Engram 的 $98M @ $600M 是赛道里<strong>异常突出的一笔</strong>，说明资本愿意为"差异化技术路线 + 顶级 research 血统"下重注，但<strong>整体融资规模尚不像成熟赛道</strong>。
+      ③ <strong>巨头是否进场</strong>：OpenAI / Anthropic / Microsoft / LangChain <strong>已在做记忆</strong>，但都还是产品的"附属功能"、未形成独立标准——介于 emerging 与 crowded 之间，往 crowded 滑。
+      ④ <strong>开源/免费替代</strong>：大量存在（Mem0、Letta、Cognee、Graphiti 全部 Apache-2.0、几万★），免费方案随手可得——这是把赛道往"拥挤"推、压低毛利的强信号。
+      ⑤ <strong>客户认知/标准</strong>：尚未成型；连"AI memory 该用什么 benchmark"都还在争（LongMemEval 等是社区自发，非公认标准）。<br>
+      <strong>结论</strong>：典型 emerging——需求被广泛承认、玩家与资本涌入，但<strong>无赢家、无标准、无定价共识</strong>，且开源替代密集，正快速向 crowded 演化。Engram 用"预消化 / continual learning"这条<strong>不同的技术路线</strong>＋巨额融资，试图在拥挤化之前抢占"企业级、高端、技术差异化"那一格。
+    </div>
+  </section>
+
+  <!-- ② 竞品矩阵 -->
+  <section id="matrix">
+    <h2><span class="n">②</span>竞品对照矩阵</h2>
+    <p>选了 7 个对这个赛道最决定性的维度：<strong>技术路线</strong>（预消化/continual learning vs 现查 RAG vs 长上下文，这是 Engram 差异化的核心）、<strong>产品形态</strong>、<strong>开源/闭源</strong>、<strong>目标客户</strong>、<strong>融资&团队背景</strong>、<strong>护城河来源</strong>。每格尽量标来源等级；闭源未披露处写明而非留空。Engram 一行加粗。</p>
+    <table>
+      <thead><tr>
+        <th>玩家</th>
+        <th>技术路线</th><th>产品形态</th><th>开源/闭源</th>
+        <th>目标客户</th><th>融资 / 团队</th><th>护城河来源</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Engram（本篇）</strong></td>
+          <td><strong>预消化 + continual learning</strong>：请求前把私有上下文压成"学习型记忆"，解耦 reasoning/memory <span class="src src-a">🟢</span></td>
+          <td>面向 agent 的 <strong>API</strong>（"learn on very large shared knowledge workspaces"）<span class="src src-a">🟢</span></td>
+          <td>闭源 <span class="src src-a">🟢</span></td>
+          <td>企业（M365 / 法律 / 协作软件场景）<span class="src src-a">🟢</span></td>
+          <td><strong>$98M @ ~$600M</strong>，13 人；Stanford(Chris Ré/Sabri Eyuboglu) + Berkeley(Jessy Lin) + Cornell(Jack Morris) <span class="src src-b">🟡</span></td>
+          <td>技术路线壁垒（compression + continual learning）+ 顶级 research 血统 + 资本/算力（Microsoft GPU 承诺）<span class="src src-c">🔴</span></td>
+        </tr>
+        <tr>
+          <td>Mem0</td>
+          <td>现查为主：抽取/存取 facts，跨会话持久召回 <span class="src src-b">🟡</span></td>
+          <td>开源 memory 层 + 托管云 API/SDK <span class="src src-b">🟡</span></td>
+          <td><strong>开源</strong> Apache-2.0（~41–48k★）<span class="src src-b">🟡</span></td>
+          <td>agent 开发者 + 企业 <span class="src src-b">🟡</span></td>
+          <td>$24M（seed+A，YC/Basis Set/Peak XV）；传为 AWS Agent SDK 默认 memory <span class="src src-b">🟡</span></td>
+          <td>开源生态 + 采用量（13M+ 下载）<span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Zep / Graphiti</td>
+          <td>现查 + <strong>时序知识图</strong>（temporal graph）<span class="src src-b">🟡</span></td>
+          <td>开源 Graphiti + 托管平台 <span class="src src-b">🟡</span></td>
+          <td>开源 Apache-2.0（Graphiti ~27k★）<span class="src src-b">🟡</span></td>
+          <td>企业（SOC2/HIPAA 合规向）<span class="src src-b">🟡</span></td>
+          <td>$500K seed（YC，2024；后续未明确）<span class="src src-b">🟡</span></td>
+          <td>时序推理 + 合规 <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Letta（前 MemGPT）</td>
+          <td>现查 + 自管理记忆的 <strong>agent runtime</strong>（OS 式分页）<span class="src src-b">🟡</span></td>
+          <td>开源框架 + 平台 <span class="src src-b">🟡</span></td>
+          <td>开源 Apache-2.0（~13–22k★）<span class="src src-b">🟡</span></td>
+          <td>长 horizon agent 开发者 <span class="src src-b">🟡</span></td>
+          <td>$10M seed @ $70M post（Felicis；Jeff Dean / Clem Delangue）<span class="src src-b">🟡</span></td>
+          <td>MemGPT 论文 IP + 开发者心智 <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Cognee</td>
+          <td>现查：把非结构化数据转成<strong>记忆知识图</strong> <span class="src src-b">🟡</span></td>
+          <td>开源 + 可气隙部署 <span class="src src-b">🟡</span></td>
+          <td>开源 Apache-2.0（~17k★）<span class="src src-b">🟡</span></td>
+          <td>企业（数据驻留/隐私向）<span class="src src-b">🟡</span></td>
+          <td>€/$7.5M seed（Pebblebed/42CAP）<span class="src src-b">🟡</span></td>
+          <td>知识图 + on-prem/隐私 <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Supermemory</td>
+          <td>现查：universal memory API（MCP-native）<span class="src src-b">🟡</span></td>
+          <td>memory API <span class="src src-b">🟡</span></td>
+          <td>部分开源 <span class="src src-b">🟡</span></td>
+          <td>开发者 <span class="src src-b">🟡</span></td>
+          <td>$2.6M seed（Susa/Browder）<span class="src src-b">🟡</span></td>
+          <td>易接入 / MCP 生态 <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>大厂自带（OpenAI / Anthropic / LangGraph）</td>
+          <td>记忆做进模型/平台（ChatGPT memory、LangGraph memory 等）<span class="src src-b">🟡</span></td>
+          <td>产品内置功能 <span class="src src-b">🟡</span></td>
+          <td>闭源（模型）/ 开源（LangGraph）混合 <span class="src src-b">🟡</span></td>
+          <td>全体用户 + 开发者 <span class="src src-b">🟡</span></td>
+          <td>母体公司体量 <span class="src src-b">🟡</span></td>
+          <td>分发渠道 + 模型一体化（最强护城河）<span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>替代：RAG + 向量库 / 长上下文</td>
+          <td><strong>现查 RAG</strong>（Pinecone/Weaviate）或<strong>超长 context</strong>直接装下 <span class="src src-a">🟢</span></td>
+          <td>向量 DB / 模型本身 <span class="src src-b">🟡</span></td>
+          <td>闭源云 + 开源库都有 <span class="src src-b">🟡</span></td>
+          <td>所有开发者 <span class="src src-b">🟡</span></td>
+          <td>Pinecone 等已是大额融资/独角兽 <span class="src src-b">🟡</span></td>
+          <td>"够用就好" + 零额外依赖 <span class="src src-a">🟢</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>读矩阵：</strong>绝大多数同行走的是<strong>"现查"（RAG / 知识图 / 跨会话召回）</strong>这条同质化路线，且<strong>大面积开源</strong>（Mem0/Zep/Letta/Cognee 都是 Apache-2.0、几万★），毛利与差异化承压。Engram 的差异化非常清晰：<strong>唯一主打"请求前预消化 + continual learning"</strong>（把 token 花在"提前学"而非"现场读"），并以<strong>100× 更少 token</strong>为卖点 <span class="src src-c">🔴</span>（厂商自述，未独立验证）。代价是<strong>闭源 + 企业级重打法 + 资本/算力密集</strong>。真正能压垮整条赛道的不在这张表的创业公司列，而在<strong>"大厂自带"</strong>与<strong>"长上下文 + RAG"</strong>两列。</p>
+  </section>
+
+  <!-- ③ 定位图 -->
+  <section id="map">
+    <h2><span class="n">③</span>定位图（whitespace 在哪）</h2>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 640 400" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12">
+        <line x1="40" y1="200" x2="600" y2="200" stroke="#b9c2e0" stroke-width="1.5"/>
+        <line x1="320" y1="24" x2="320" y2="376" stroke="#b9c2e0" stroke-width="1.5"/>
+        <text x="600" y="218" text-anchor="end" fill="#5a627a">预消化 / continual learning →</text>
+        <text x="40" y="218" fill="#5a627a">← 现查 RAG / 召回</text>
+        <text x="326" y="34" fill="#5a627a">闭源 · 企业重打法 ↑</text>
+        <text x="326" y="368" fill="#5a627a">开源 · 开发者自助 ↓</text>
+        <rect x="430" y="232" width="160" height="120" fill="#7aa2ff" opacity="0.10" rx="8"/>
+        <text x="510" y="296" text-anchor="middle" fill="#3a66ff" opacity="0.85" font-size="11">whitespace：</text>
+        <text x="510" y="312" text-anchor="middle" fill="#3a66ff" opacity="0.85" font-size="11">预消化 × 开源/本地</text>
+        <text x="510" y="328" text-anchor="middle" fill="#3a66ff" opacity="0.85" font-size="11">隐私/垂直记忆</text>
+        <circle cx="500" cy="95" r="8" fill="#6b4cff"/>
+        <text x="500" y="82" text-anchor="middle" fill="#6b4cff" font-weight="700">Engram</text>
+        <circle cx="270" cy="70" r="6" fill="#ff6b81"/>
+        <text x="270" y="58" text-anchor="middle" fill="#d23651">OpenAI/Anthropic memory</text>
+        <circle cx="160" cy="300" r="6" fill="#43c59e"/>
+        <text x="160" y="320" text-anchor="middle" fill="#138a6e">Mem0</text>
+        <circle cx="118" cy="255" r="6" fill="#43c59e"/>
+        <text x="118" y="245" text-anchor="middle" fill="#138a6e">Letta</text>
+        <circle cx="210" cy="340" r="6" fill="#43c59e"/>
+        <text x="210" y="358" text-anchor="middle" fill="#138a6e">Zep/Graphiti</text>
+        <circle cx="240" cy="150" r="6" fill="#43c59e"/>
+        <text x="240" y="138" text-anchor="middle" fill="#138a6e">Cognee</text>
+        <circle cx="92" cy="320" r="5" fill="#43c59e"/>
+        <text x="92" y="338" text-anchor="middle" fill="#138a6e">Supermemory</text>
+        <circle cx="68" cy="200" r="6" fill="#ffb454"/>
+        <text x="68" y="186" text-anchor="middle" fill="#b3701a">RAG/向量库</text>
+        <circle cx="150" cy="108" r="6" fill="#ffb454"/>
+        <text x="150" y="96" text-anchor="middle" fill="#b3701a">长上下文模型</text>
+      </svg>
+      </div>
+      <figcaption>定位图（本调研重绘）。X 轴 = 技术路线（左：现查 RAG/召回 → 右：请求前预消化/continual learning）；Y 轴 = 开源开发者自助 ↔ 闭源企业重打法。<strong>Engram 几乎独占右上"预消化 × 闭源企业"格</strong>；同行密集挤在"现查 × 开源"左下；右下"预消化 × 开源/本地/隐私垂直"基本无人——是潜在 whitespace。</figcaption>
+    </figure>
+  </section>
+
+  <!-- ④ 融资 timeline -->
+  <section id="funding">
+    <h2><span class="n">④</span>融资 timeline</h2>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 720 170" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12.5">
+        <line x1="80" y1="80" x2="640" y2="80" stroke="#b9c2e0" stroke-width="2"/>
+        <circle cx="170" cy="80" r="8" fill="#7aa2ff"/>
+        <text x="170" y="52" text-anchor="middle" fill="#5a627a">2025 年 10 月</text>
+        <text x="170" y="108" text-anchor="middle" fill="#1a1f33" font-weight="600">成立（stealth）</text>
+        <text x="170" y="126" text-anchor="middle" fill="#5a627a">出自 Stanford AI lab</text>
+        <circle cx="540" cy="80" r="10" fill="#6b4cff"/>
+        <text x="540" y="46" text-anchor="middle" fill="#5a627a">2026-06-23</text>
+        <text x="540" y="108" text-anchor="middle" fill="#1a1f33" font-weight="700">出 stealth · $98M</text>
+        <text x="540" y="126" text-anchor="middle" fill="#5a627a">~$600M 估值 · 13 人</text>
+        <text x="540" y="144" text-anchor="middle" fill="#5a627a">GC / Kleiner / Sequoia 领投</text>
+      </svg>
+      </div>
+      <figcaption>Engram 融资时间线（据公开报道整理）。约 8 个月从成立到带 $98M 出 stealth。</figcaption>
+    </figure>
+    <table>
+      <thead><tr><th>时间</th><th>事件 / 轮次</th><th>金额 / 估值</th><th>投资方</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>2025-10（约）</td>
+          <td>成立，stealth；直接出自 Stanford AI lab（Chris Ré 组）</td>
+          <td>—</td>
+          <td>—</td>
+          <td><span class="src src-b">🟡</span> Calcalist / CNBC</td>
+        </tr>
+        <tr>
+          <td>2026-06-23</td>
+          <td>出 stealth，单笔融资（媒体多称 Series A 量级，官方未明确标轮次）</td>
+          <td><strong>$98M</strong> · 估值约 <strong>$600M</strong>（估值见 Calcalist，官方 PR 未披露）</td>
+          <td><strong>领投</strong>：General Catalyst、Kleiner Perkins、Sequoia；<strong>跟投</strong>：Factory、Modern、Amplify Partners、Neo；<strong>天使/背书</strong>：Assaf Rappaport (Wiz CEO)、<strong>Andrej Karpathy</strong>、<strong>Pieter Abbeel</strong>（注：官方 PR 措辞为 "advisors"，CNBC/Calcalist 称 "investors"——并列保留，见下方提醒）</td>
+          <td><span class="src src-a">🟢</span> PR · <span class="src src-b">🟡</span> CNBC/Calcalist</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="callout warn">
+      <span class="label">两处数字/口径打架（并列保留，不替它取一个）</span>
+      ① <strong>Karpathy / Abbeel 的身份</strong>：Engram 官方新闻稿把二人列为 <strong>"advisors"（顾问）</strong>；CNBC、Calcalist 等二手媒体直接写成 <strong>"investors"（投资人）</strong>。两种说法并存，<strong>"是否真出资"以官方为准存疑</strong> <span class="src src-a">🟢</span><span class="src src-b">🟡</span>。
+      ② <strong>估值 $600M</strong>：来自 Calcalist 等媒体，<strong>官方 PR 未披露估值</strong> <span class="src src-b">🟡</span>。
+      ③ <strong>"already generating significant revenue" / 100× token 节省</strong>：均为<strong>厂商自述、未经独立验证</strong> <span class="src src-c">🔴</span>。
+    </div>
+    <p><strong>对阶段的佐证：</strong>单从"约 8 个月、13 人、$98M @ $600M"看，这是赛道里<strong>极度异常的一笔早期巨额融资</strong>——背后是"顶级 academic research 血统（Chris Ré 系）+ 差异化技术叙事 + 顶流站台（Karpathy/Abbeel）"的组合拳，而非赛道整体已成熟。对照同行多停在 seed/$2–24M，说明<strong>资本在赌"技术路线差异化"</strong>，也印证赛道处于 emerging：钱多、共识少。</p>
+  </section>
+
+  <!-- ⑤ 公司速览 -->
+  <section id="snapshot">
+    <h2><span class="n">⑤</span>公司速览</h2>
+    <table>
+      <tbody>
+        <tr><td>是什么 / 定位</td><td>给企业 AI 的<strong>"学习型记忆层（learned memory layer）"</strong>。官网 tagline："AI has learned the world. Now it should learn yours."——在你的私有上下文上训练，让模型用 <strong>1%–10% 的 token</strong> 匹配甚至超过 frontier model <span class="src src-a">🟢</span><span class="src src-c">🔴</span>（性能/省 token 为自述）。</td></tr>
+        <tr><td>产品</td><td>首个产品：<strong>面向 agent 的 API</strong>——"an API for agents that learn on very large shared knowledge workspaces"。机制：请求<strong>之前</strong>就把 GitHub / Slack / Notion / 合同等私有上下文"研读"并压成一份持续更新、<strong>归客户所有</strong>的紧凑记忆（"an engram"），把模型的 reasoning/inference 与 memory 解耦 <span class="src src-a">🟢</span>。技术栈自述含 context compression、retrieval、LoRA 微调、合成数据、state space models（Cartridges、Active Reading 等团队成果）。</td></tr>
+        <tr><td>团队</td><td>13 人（出 stealth 时）<span class="src src-b">🟡</span>。核心 research 血统极强：<strong>Dan Biderman</strong>（CEO，Columbia 理论神经科学 PhD → Stanford 在 Chris Ré 组做博后）、<strong>Sabri Eyuboglu</strong>（CTO，Stanford PhD，Chris Ré 组，"Cartridges" 文档压缩作者）、<strong>Jessy Lin</strong>（Berkeley PhD，Meta FAIR，"Active Reading"）、<strong>Jack Morris</strong>（Cornell PhD，Meta FAIR，LLM retrieval/memorization）、<strong>Chris Ré</strong>（联创/Stanford 教授，现代 ML 重量级人物）、<strong>Scott Linderman</strong>（Stanford 统计与神经科学终身教授，state space models）<span class="src src-a">🟢</span>。</td></tr>
+        <tr><td>商业模式</td><td>企业级 API（按使用/合同）。卖点是<strong>大幅降 token 成本</strong>（自述 10×–100×），对"AI 运营成本极高"的企业客户。自述已签约、"on track to generate significant revenue" <span class="src src-c">🔴</span>。</td></tr>
+        <tr><td>客户 / 合作</td><td><strong>Microsoft</strong>："working together to test Engram's models within Microsoft 365"，并承诺跨 Dapple/Azure 的 GPU 算力 <span class="src src-a">🟢</span>。<strong>Notion</strong>："testing Engram's models inside our new custom agents"（在自定义 agent 内试用）<span class="src src-a">🟢</span>。<strong>Harvey</strong>（法律 AI）："working with Engram to build learned enterprise memories" <span class="src src-a">🟢</span>。<em>注：三者均为<strong>测试/试点/合作（test / pilot / working with）</strong>口径，非已规模化付费客户——勿夸大。</em></td></tr>
+        <tr><td>状态</td><td>2026-06-23 出 stealth；约 8 个月历史；$98M / ~$600M / 13 人；闭源；San Francisco <span class="src src-b">🟡</span>。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ⑥ 中国对标 -->
+  <section id="cn">
+    <h2><span class="n">⑥</span>中国对标（#cn）</h2>
+    <p>"AI 记忆 / agent 记忆 / 个人上下文"在中国也已起步，但形态与 Engram 的"企业级、技术路线差异化"略有错位：</p>
+    <ul>
+      <li><strong>穗升科技</strong>（2025-08 成立）：明确把 <strong>AI Memory</strong> 作为战略主线，定位"基于 AI 生态为用户构建结构化、可调用的<strong>个人记忆</strong>，为 AI agent 提供上下文支撑"。2025-12 完成<strong>数百万美元天使轮，红杉中国种子基金领投</strong>（安克联创等跟投）；创始人<strong>王时远（前 Anker 全球 CMO / 中国区总裁）</strong>，团队来自 Anker / 华为 / 腾讯，切入点偏<strong>AI 录音硬件 + 个人记忆</strong>，首个产品计划 2026 先打欧美市场 <span class="src src-b">🟡</span>。——这是中国最贴近"AI 记忆层"叙事的一家，但走的是<strong>消费硬件 + 个人记忆</strong>，而非 Engram 的<strong>企业 API + continual learning</strong>。</li>
+      <li><strong>大厂 agent 记忆</strong>：字节、阿里、腾讯、百度的 agent/助手产品都在内卷"记忆/长期上下文"能力（如各家 C 端助手的"记住你"），与 OpenAI/Anthropic 把记忆做进产品同构——同样是创业公司的最大压制源 <span class="src src-c">🔴</span>（多为产品宣传，未独立核实细节）。</li>
+      <li><strong>个人知识库 / 第二大脑类</strong>：国内有一批 note/知识库 + AI 检索产品在做"个人上下文"，但多停留在<strong>RAG/检索</strong>层，未触及"预消化 + continual learning"的训练侧路线。</li>
+      <li><strong>Mem0 是否有中国用户</strong>：Mem0 为开源 Apache-2.0、全球开发者可用，<strong>中国开发者技术上可直接用</strong>，但<strong>未找到其在华商业化/本地化的明确披露</strong>——记为"未找到"。</li>
+    </ul>
+    <div class="callout insight">
+      <span class="label">中国可行性 + whitespace</span>
+      在华做"AI 记忆层"，<strong>纯技术路线（预消化/continual learning）+ 出海企业 API</strong> 这条路被本土巨头与算力门槛挤压，难度大；更现实的是<strong>消费硬件 + 个人记忆（穗升路线）</strong>、以及<strong>受监管行业（金融/医疗/政务）的"记忆不出域 + 私有化部署"</strong>。<strong>whitespace</strong>：面向中国中小企业/专业人士的<strong>本地化、可私有部署的垂直记忆服务</strong>（合规驱动，大厂云端记忆进不来的地方）。
+    </div>
+  </section>
+
+  <!-- ⑦ 创业 idea 借鉴 -->
+  <section id="idea">
+    <h2><span class="n">⑦</span>创业 idea 借鉴</h2>
+    <div class="callout insight">
+      <span class="label">Whitespace / 机会（定位图右下那格）</span>
+      ① <strong>隐私 / 本地化的垂直记忆</strong>：现有玩家要么开源云、要么大厂闭源——<strong>"预消化 + 可私有部署 + 记忆归客户所有"</strong> 的组合几乎无人占（Engram 占了闭源企业版，但偏大客户）。面向受监管行业（医疗、法律、金融、政务）做<strong>记忆不出域</strong>的垂直产品是空白格。
+      ② <strong>"记忆即服务"的护城河在数据飞轮</strong>：谁能让"用得越久、记忆越好、迁不走"成立，谁就有 lock-in——这是 Engram"memories owned by customer + get smarter over time"叙事的关键，可迁移到任何垂直。
+    </div>
+    <h3>现有玩家共同短板（unmet needs）</h3>
+    <p>① <strong>同质化的"现查"路线</strong>：Mem0/Zep/Letta/Cognee 大多在做"存取+召回"，差异主要在知识图 vs 向量——<strong>真正"内化/训练侧"的记忆少有人做</strong>（Engram 正是抓这点）。② <strong>开源压低毛利</strong>：免费方案随手可得，创业公司很难就"基础 memory API"收到高价——必须往<strong>企业级/合规/省成本</strong>叠加值。③ <strong>缺公认 benchmark</strong>：客户难比较，"100× token 节省"这类宣称无人能裁判——谁能立<strong>可信的省成本/记忆质量标准</strong>，谁就有话语权。</p>
+    <h3>Why now（为什么现在值得做）</h3>
+    <p><strong>agent 爆发 → 记忆刚需</strong>：agent 要长期、跨会话、在私有数据上自主工作，"无状态 LLM"成了硬瓶颈，记忆从"nice-to-have"变"基础设施"。同时<strong>token 成本</strong>在长上下文场景里爆炸——"把计算前移、用更少 token 拿同等效果"恰好戳中企业账单痛点（Engram 的全部叙事都建立在这条 why-now 上）。</p>
+    <h3>可借鉴的打法 + 相邻机会</h3>
+    <ul>
+      <li><strong>borrowable：</strong>（a）<strong>"计算前移"叙事</strong>——把"现查 RAG"重构成"请求前预消化"，用<strong>省 token / 降成本</strong>这个 CFO 听得懂的指标做 GTM，比"记忆质量"更好卖；（b）<strong>顶级 research 血统 + 顶流站台</strong>（Chris Ré 系 + Karpathy/Abbeel）作为<strong>深科技融资模板</strong>——技术路线差异 + 名人背书撬动超额估值；（c）<strong>"记忆归客户所有"</strong>作为信任/反 lock-in 卖点，反而成 lock-in（数据飞轮）。</li>
+      <li><strong>adjacent：</strong>（a）<strong>个人版记忆层</strong>（对 C 端/专业个人，对标穗升的硬件+个人记忆）；（b）<strong>记忆的"评测/审计"工具</strong>——既然全行业缺 benchmark，做"记忆质量 & 省成本第三方裁判"是中立卡位；（c）<strong>记忆迁移/互操作层</strong>（让记忆能跨 Mem0/Zep/Engram 搬家，吃"反 lock-in"需求）；（d）<strong>垂直 SaaS 自带记忆</strong>（不是卖 memory API，而是把记忆做进某个垂直应用，绕开"记忆 API 同质化"）。</li>
+    </ul>
+    <div class="callout warn">
+      <span class="label">风险（诚实给）</span>
+      ① <strong>大厂把记忆做进模型/平台</strong>（OpenAI/Anthropic memory、M365 Copilot、LangGraph）——<strong>最大威胁</strong>，独立记忆层可能沦为"功能"。
+      ② <strong>长上下文 + RAG 直接替代</strong>——当 context window 涨到 10M+、RAG"够用"，"记忆问题"被部分消解，独立记忆层的必要性被质疑。
+      ③ <strong>护城河薄</strong>：开源免费方案密集，"基础 memory API"很难收费；Engram 的技术壁垒（compression+continual learning）能否守住、能否复现 100× 宣称，<strong>未独立验证</strong>。
+      ④ <strong>资本/算力密集</strong>：训练侧路线烧钱烧 GPU（要靠 Microsoft GPU 承诺），小团队难复制。
+      ⑤ <strong>数据隐私/合规</strong>：把企业全部私有上下文交给第三方"预消化"，信任与合规门槛高，也是双刃（既是壁垒也是阻力）。
+    </div>
+  </section>
+
+  <!-- ⑧ 现实判断 -->
+  <section id="take">
+    <h2><span class="n">⑧</span>现实判断</h2>
+    <p><strong>胜算：</strong>Engram 在一众"现查/开源"同行里<strong>路线最差异化</strong>（请求前预消化 + continual learning），团队是赛道里 research 血统最硬的之一（Chris Ré 系），并拿到了赛道里最大的一笔早期钱与顶流背书——在"企业级、高端、省成本"这一格，它目前几乎独占，且 Microsoft/Notion/Harvey 的早期试点给了真实场景入口。</p>
+    <p><strong>软肋：</strong>（1）它的核心宣称（100× token、significant revenue、性能匹配 frontier）<strong>全是自述、未独立验证</strong>，技术路线能否在生产规模成立是最大未知；（2）<strong>护城河是否够深</strong>存疑——一旦"预消化记忆"被验证有效，大厂（尤其 Microsoft，本身既是合作方又是潜在竞争者）完全可能把它内化进平台；（3）赛道正快速<strong>从 emerging 滑向 crowded</strong>，开源替代密集压低天花板；（4）三大"客户"目前都还是 <strong>test/pilot</strong>，未必转化为规模营收。综合：<strong>赛道 emerging、Engram 是其中下注最大、最被看好的差异化玩家之一，但赌的是一条尚未被生产验证的技术路线，且头上悬着"大厂自带 + 长上下文/RAG"两把刀。</strong></p>
+    <div class="callout warn">
+      <span class="label">使用提醒</span>
+      本页为对话式调研，信息主要来自公开来源并按等级标注；融资数额、估值、客户、能力声明（尤其 100× token、"significant revenue"、Karpathy/Abbeel 是 advisor 还是 investor）等以官方一手为准，
+      <strong>产品能力未必经独立验证</strong>，引用前请核对最新信息。
+    </div>
+  </section>
+
+  <!-- 出处 -->
+  <section id="src">
+    <h2>出处</h2>
+    <ul style="font-size:13.5px">
+      <li><span class="src src-a">🟢</span> <a href="https://engram.com" target="_blank" rel="noopener">Engram 官网</a>（tagline、首个产品"API for agents"、技术栈自述、合作方）</li>
+      <li><span class="src src-a">🟢</span> <a href="https://www.prnewswire.com/news-releases/engram-launches-with-98m-to-build-ai-that-actually-knows-your-organization-302807126.html" target="_blank" rel="noopener">官方新闻稿（PR Newswire）</a>（$98M、投资方、创始人、Microsoft/Notion/Harvey 引语、Karpathy/Abbeel 列为 advisors）</li>
+      <li><span class="src src-b">🟡</span> <a href="https://www.cnbc.com/2026/06/23/ai-memory-startup-focused-on-cutting-token-costs-raises-98-million.html" target="_blank" rel="noopener">CNBC</a>（融资、客户、Karpathy 称 investor、Notion/Microsoft 试点细节）</li>
+      <li><span class="src src-b">🟡</span> <a href="https://www.calcalistech.com/ctechnews/article/skoqbrumze" target="_blank" rel="noopener">Calcalist / Ctech</a>（$600M 估值、13 人、Israeli 背景、reasoning/memory 解耦、"10–100× 降本"引语）</li>
+      <li><span class="src src-b">🟡</span> <a href="https://qz.com/engram-ai-memory-startup-98-million-funding-062426" target="_blank" rel="noopener">Quartz</a> · <a href="https://techstartups.com/2026/06/23/engram-raises-98-million-to-help-companies-lower-ai-token-costs-with-smarter-memory-models/" target="_blank" rel="noopener">Tech Startups</a> · <a href="https://www.citybiz.co/article/864393/engram-emerges-from-stealth-with-98m-to-build-enterprise-ai-memory-layer/" target="_blank" rel="noopener">citybiz</a>（融资/产品综述）</li>
+      <li><span class="src src-b">🟡</span> <a href="https://eu.36kr.com/en/p/3866737090565125" target="_blank" rel="noopener">36Kr</a>（与 DeepSeek "Engram" 同名的消歧）</li>
+      <li><span class="src src-b">🟡</span> 竞品融资/参数：<a href="https://techcrunch.com/2025/10/28/mem0-raises-24m-from-yc-peak-xv-and-basis-set-to-build-the-memory-layer-for-ai-apps/" target="_blank" rel="noopener">Mem0 $24M（TechCrunch）</a> · <a href="https://mem0.ai/series-a" target="_blank" rel="noopener">Mem0 官方</a> · <a href="https://www.cognee.ai/blog/cognee-news/cognee-raises-seven-million-five-hundred-thousand-dollars-seed" target="_blank" rel="noopener">Cognee $7.5M</a> · Letta $10M@$70M post / Zep YC / Supermemory $2.6M（PitchBook/Crunchbase/Tracxn）</li>
+      <li><span class="src src-b">🟡</span> 赛道 landscape / benchmark：<a href="https://atlan.com/know/best-ai-agent-memory-frameworks-2026/" target="_blank" rel="noopener">Atlan</a> · <a href="https://particula.tech/blog/agent-memory-frameworks-tested-mem0-zep-letta-cognee-2026" target="_blank" rel="noopener">Particula</a>（Mem0/Zep/Letta/Cognee/Supermemory 对比、★数、LongMemEval）</li>
+      <li><span class="src src-b">🟡</span> 中国对标：<a href="https://news.pedaily.cn/202512/558161.shtml" target="_blank" rel="noopener">投资界</a> · <a href="https://www.jiemian.com/article/13719261.html" target="_blank" rel="noopener">界面新闻</a>（穗升科技天使轮 / 红杉中国种子 / AI Memory）</li>
+    </ul>
+  </section>
+
+  <footer class="foot">
+    公司竞争格局 / 赛道早期度调研笔记，仅作梳理；信息按来源分级、产品能力未必经独立验证，以官方一手信息为准 · 整理日期 2026-06-29
+  </footer>
+
+</article>
+</body>
+</html>

@@ -1,5 +1,26 @@
 [
   {
+    "slug": "2026-06-29-engram",
+    "title": "Engram：AI 持续记忆层赛道的竞争格局与早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://engram.com",
+    "code": "",
+    "date": "2026-06-29",
+    "published": "公司调研 2026",
+    "tldr": "Engram做AI持续记忆层(请求前预消化私有上下文/continual learning),融~$98M(估值~$600M,13人,Karpathy+Abbeel参投),首个产品是面向Agent的API;赛道emerging,最大威胁是大厂自带记忆+长上下文/RAG,whitespace在隐私/本地化垂直记忆",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "market-map",
+      "startup-idea",
+      "ai-memory",
+      "agent",
+      "china"
+    ],
+    "path": "papers/2026-06-29-engram/index.html"
+  },
+  {
     "slug": "2026-06-17-overview-map",
     "title": "🗺️ 总览导航：全部解读与调研按主题归类",
     "authors": "—",
