@@ -79,6 +79,26 @@
     "path": "papers/2026-06-29-kaiwu-intelligence/index.html"
   },
   {
+    "slug": "2026-06-29-bloomberggpt-fingpt-financial-llms",
+    "title": "BloombergGPT vs FinGPT：金融大模型的两条路线（综述）",
+    "authors": "—",
+    "team": "调研综述",
+    "arxiv": "https://arxiv.org/abs/2303.17564",
+    "code": "https://github.com/AI4Finance-Foundation/FinGPT",
+    "date": "2026-06-30",
+    "published": "综述 2026",
+    "tldr": "金融LLM两条路线——BloombergGPT(50B从头训/闭源/约300万美元)vs FinGPT(开源/LoRA微调+RAG/数据为中心/自述约300美元);并指出通用前沿模型已追平专用金融LLM、前沿转向RAG+金融agent;含5-8维对比表与两轴定位图",
+    "tags": [
+      "finance",
+      "llm",
+      "survey",
+      "fingpt",
+      "bloomberggpt",
+      "fintech"
+    ],
+    "path": "papers/2026-06-29-bloomberggpt-fingpt-financial-llms/index.html"
+  },
+  {
     "slug": "2026-06-29-engram",
     "title": "Engram：AI 持续记忆层赛道的竞争格局与早期度调研",
     "authors": "—",

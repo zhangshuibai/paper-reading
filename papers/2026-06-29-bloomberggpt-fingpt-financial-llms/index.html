@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BloombergGPT vs FinGPT：金融大模型的两条路线（综述）</title>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --bad:#ff6b81; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --bad:#d23651; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.7; font-size:16px;}
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:1000px; margin:0 auto; padding:18px 22px 90px}
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:24px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)} .meta-grid dd{margin:0}
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap; line-height:2}
+  nav.toc a:hover{color:var(--accent)}
+  section{margin:34px 0}
+  h2{font-size:20px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:16px; margin:20px 0 6px}
+  p{margin:11px 0} ul,ol{padding-left:22px} li{margin:5px 0}
+  a{color:var(--accent)} strong{color:var(--text)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.88em}
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:12.5px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:8px 9px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-word}
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+  .seg{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:16px 0; background:var(--panel)}
+  .seg h3{margin-top:4px}
+  .src{font-size:10.5px;padding:0 5px;border-radius:999px;white-space:nowrap}
+  .src-a{background:rgba(67,197,158,.18);color:var(--ok)}.src-b{background:rgba(255,180,84,.18);color:var(--warn)}.src-c{background:rgba(255,107,129,.18);color:var(--bad)}
+  .fig{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:16px; margin:18px 0; box-shadow:var(--shadow)}
+  .fig figcaption{color:var(--muted); font-size:12.5px; margin-top:10px; text-align:center}
+  .two{font-weight:700}.two-b{color:var(--accent)}.two-f{color:var(--ok)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">金融 LLM</span><span class="chip">调研综述</span>
+      <span class="chip">BloombergGPT</span><span class="chip">FinGPT</span><span class="chip">闭源从头训 vs 开源微调</span>
+    </div>
+    <h1>BloombergGPT vs FinGPT：金融大模型的两条路线（综述）</h1>
+    <p class="orig-title">一边花几百万美元从头训一个专用金融大模型并锁起来，一边主张「别从头训」——用几百美元 LoRA 微调开源模型 + 数据为中心。两条路线之争，外加一个更扎心的现实判断。</p>
+    <dl class="meta-grid">
+      <dt>性质</dt><dd>调研综述（非单篇论文精读）；围绕 <a href="https://arxiv.org/abs/2303.17564">arXiv 2303.17564</a>（BloombergGPT）与 <a href="https://arxiv.org/abs/2306.06031">arXiv 2306.06031</a> / <a href="https://github.com/AI4Finance-Foundation/FinGPT">FinGPT GitHub</a></dd>
+      <dt>核实口径</dt><dd>数字按来源分级：<span class="src src-a">🟢 一手（论文/官方/GitHub）</span> / <span class="src src-b">🟡 二手</span> / <span class="src src-c">🔴 自述/未独立验证</span>；核不到的标「未找到」</dd>
+      <dt>读者假设</dt><dd>懂 LLM；金融专名首次出现一句话解释</dd>
+      <dt>日期</dt><dd>2026-06-29</dd>
+    </dl>
+  </header>
+
+  <div class="tldr">
+    <b>一句话</b> — 金融大模型早期走出两条相反的路：<span class="two two-b">BloombergGPT</span>（2023，约 50B 参数）选择<strong>烧钱从头训一个闭源专用模型</strong>——在 Bloomberg 私有金融语料上训练、模型不发布；<span class="two two-f">FinGPT</span>（2023，AI4Finance）则主张<strong>「别从头训」</strong>——用 <strong>LoRA 微调开源 LLM + RAG + 数据为中心</strong>，强调便宜（自述单次微调约几百美元 <span class="src src-c">🔴</span>）、可复现、能频繁更新（金融数据时效性极强）。但今天最重要的判断是：<strong>通用前沿模型（GPT-4 / Claude 等）在很多金融任务上已追平甚至超过专用金融 LLM</strong>，让「是否值得做专用金融大模型」本身受质疑；前沿正从「单体金融大模型」转向 <strong>RAG over 金融数据 + 金融 agent</strong>（如 TradingAgents）。专用金融 LLM 真正的护城河在<strong>私有金融数据</strong>，而非模型本身。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#tldr2">① 两条路线之争</a>
+    <a href="#bgpt">② BloombergGPT</a>
+    <a href="#fingpt">③ FinGPT</a>
+    <a href="#cmp">④ 正面对比表</a>
+    <a href="#land">⑤ 更大的图景</a>
+    <a href="#take">⑥ 现实判断 + 局限</a>
+    <a href="#read">延伸阅读</a>
+  </nav>
+
+  <section id="tldr2">
+    <h2><span class="n">①</span>两条路线之争</h2>
+    <p>2023 年，「能不能给金融做一个专属大模型」这个问题，几乎同时收到了两种针锋相对的答卷。</p>
+    <ul>
+      <li><strong>重资产派（BloombergGPT）：</strong>金融语言有它自己的「方言」——SEC filing（上市公司向美国证监会提交的法定披露文件，如 10-K 年报）、财报电话会、行情术语、彭博终端的私有数据。Bloomberg 的赌注是：<strong>把这些私有语料攒起来，从零训练一个 50B 的专用模型</strong>，让它在金融 NLP 任务上碾压通用模型。代价是几百万美元的算力和一个<strong>不对外发布</strong>的闭源模型。</li>
+      <li><strong>轻资产派（FinGPT）：</strong>AI4Finance 的反问是——<strong>金融数据天天在变（今天的新闻明天就过期），你从头训一次要烧几百万、还训得慢，怎么跟得上市场？</strong> 不如<strong>站在开源 LLM 的肩膀上</strong>，用 LoRA 这种参数高效微调（只训极少量新增参数）+ RAG（检索增强，让模型即时查最新资料）快速贴合金融，把功夫下在<strong>数据管线和频繁更新</strong>上，而不是模型权重本身。这就是它的「<strong>data-centric / 数据为中心</strong>」哲学。</li>
+    </ul>
+    <div class="callout note"><span class="label">一句话区分</span>
+      BloombergGPT 的核心资产是<strong>「私有数据 + 从头训出来的那一个闭源大模型」</strong>；FinGPT 的核心资产是<strong>「开源 + 一条便宜、可复现、能不断重训的数据-微调流水线」</strong>。前者卖「成品」，后者卖「持续生产成品的方法」。
+    </div>
+  </section>
+
+  <section id="bgpt">
+    <h2><span class="n">②</span>BloombergGPT：闭源、从头训的专用金融大模型</h2>
+    <div class="seg">
+      <p><strong>是什么：</strong>Bloomberg 与 Johns Hopkins 大学合作的金融大语言模型，论文 <a href="https://arxiv.org/abs/2303.17564">arXiv 2303.17564</a>（2023，Wu、Irsoy 等）。它是<strong>首个公开报告的大规模专用金融 LLM</strong>，被广泛当作这条路线的标杆。</p>
+      <ul>
+        <li><strong>参数规模：约 50B（500 亿）</strong> <span class="src src-a">🟢</span>。论文与官方稿一致；架构为 BLOOM 风格的 decoder-only，70 层、隐藏维 7510 <span class="src src-b">🟡</span>。50B 是按其算力预算下的「Chinchilla 最优」规模选的。</li>
+        <li><strong>训练数据：约 7000 亿（700B）token 量级</strong> <span class="src src-a">🟢</span>。其中 Bloomberg 自建的金融语料 <strong>FinPile 约 363B token</strong>（金融新闻、公司披露 / SEC filing、新闻稿、网页、彭博专有数据），再<strong>混入约 345B token 的通用语料</strong>（约一半金融、一半通用）；论文报告实际训练消耗约 569B token。</li>
+        <li><strong>训练方式：从头预训练（from scratch）</strong> <span class="src src-a">🟢</span>——不是在别人模型上微调，而是从随机初始化开始训。</li>
+        <li><strong>算力 / 成本：约 130 万 A100 GPU 小时</strong>（512 张 40GB A100、约 53 天）<span class="src src-a">🟢</span>。换算成钱常被引为「约 <strong>$300 万 / 次</strong>」量级 <span class="src src-b">🟡</span>（成本是按云价折算的估计，非官方账单，口径会随 GPU 单价波动）。</li>
+        <li><strong>开源情况：闭源，模型权重未发布</strong> <span class="src src-a">🟢</span>。论文公开了方法与训练日志（"chronicles"），但不放模型——这正是 FinGPT 后来主打的反差点。</li>
+      </ul>
+      <p><strong>强在哪：</strong>论文报告它在<strong>金融 NLP 任务</strong>上整体优于同规模通用模型，同时不牺牲通用能力。典型金融任务包括：<strong>sentiment（情绪分析，判断一段财经文本看涨/看跌/中性）</strong>、<strong>NER（命名实体识别，从文本里抽出公司/人名/金额等实体）</strong>、金融问答与分类。</p>
+      <div class="callout insight"><span class="label">意义</span>
+        BloombergGPT 的历史地位是「<strong>证明了专用金融大模型这件事能做、且在金融 NLP 上确有增益</strong>」的第一块里程碑。但它把模型锁在内部，意味着外部研究者<strong>无法复现、无法在其上继续建设</strong>——这恰好给开源路线留出了叙事空间。
+      </div>
+    </div>
+  </section>
+
+  <section id="fingpt">
+    <h2><span class="n">③</span>FinGPT：开源、廉价微调、数据为中心</h2>
+    <div class="seg">
+      <p><strong>是什么：</strong>AI4Finance Foundation（Xiao-Yang Liu 等）的<strong>开源</strong>金融 LLM 项目，论文 <a href="https://arxiv.org/abs/2306.06031">arXiv 2306.06031</a>（2023），代码与模型在 <a href="https://github.com/AI4Finance-Foundation/FinGPT">GitHub: AI4Finance-Foundation/FinGPT</a>、权重在 <a href="https://huggingface.co/FinGPT">HuggingFace</a>。</p>
+      <p><strong>哲学（核心）：不从头训。</strong> FinGPT 明确把自己定位成 BloombergGPT 的反面——既然金融数据时效性强、从头训又贵又慢，就<strong>复用预训练好的开源 LLM，只做轻量适配</strong>：</p>
+      <ul>
+        <li><strong>LoRA / QLoRA 微调</strong> <span class="src src-a">🟢</span>：Low-Rank Adaptation 只训练新增的低秩矩阵，冻结原模型绝大部分权重。论文一例中 LoRA 引入的可训练参数仅约 <strong>8.3M</strong>，<strong>不到 8B 基座模型的 0.1%</strong>，因此显存占用和训练时间都大幅下降。</li>
+        <li><strong>数据为中心（data-centric）+ 自动标注</strong> <span class="src src-a">🟢</span>：FinGPT 强调真正的活儿在数据。一个聪明点子是<strong>用「市场自带的标签」</strong>——把一条新闻发布后对应股价的相对涨跌幅，当作该新闻情绪的监督标签，省去人工标注。</li>
+        <li><strong>RAG（检索增强）</strong> <span class="src src-a">🟢</span>：FinGPT-RAG 在情绪分析里接入外部知识检索，让模型回答时即时拿到最新上下文，缓解「模型权重里的知识会过期」的问题。</li>
+        <li><strong>便宜 + 可频繁更新（卖点）：</strong>项目自述单次微调成本可低至<strong>约 $300 量级</strong> <span class="src src-c">🔴</span>，并据此宣称「<strong>约为从头训 BloombergGPT 的万分之一</strong>」<span class="src src-c">🔴</span>——这是 FinGPT 方的对比说法，便宜到可以<strong>每月甚至每周重训</strong>以跟上市场，是它相对闭源大模型最实在的差异化。</li>
+      </ul>
+      <p><strong>组件 / 应用（据 GitHub）：</strong></p>
+      <ul>
+        <li><strong>数据管线：</strong>data source 层 + 实时 NLP 数据工程层，覆盖多市场新闻 / 行情。</li>
+        <li><strong>模型 / 任务：</strong>多版 <strong>FinGPT-Sentiment-Analysis</strong>（v1 市场标签 / v2 LLM 标签 / v3 学术数据集），演示 LoRA 的效果。</li>
+        <li><strong>FinGPT-Forecaster</strong> <span class="src src-a">🟢</span>：一个「初级 robo-advisor（机器人投顾，自动给投资建议的程序）」demo，输入一家公司，输出综合分析 + 下周股价走势预测；有 HuggingFace Space 演示，发布过 <code>fingpt-forecaster_dow30_llama2-7b_lora</code>（在 DOW30 上、2022-12 至 2023-09 数据上微调）。</li>
+        <li><strong>FinRobot</strong>：AI4Finance 后续推出的开源金融 agent 平台（更偏「用 LLM 搭金融分析 agent」，是 FinGPT 路线的自然延伸）。</li>
+      </ul>
+      <div class="callout warn"><span class="label">需谨慎对待的自述</span>
+        「FinGPT 在某些任务上<strong>超过 BloombergGPT</strong>」是 FinGPT 方的报告口径 <span class="src src-c">🔴</span>，且两者评测集 / 提示词 / 基座未必完全可比——把它当「开源廉价方案也能打」的存在性证据看，而不是「全面碾压」的定论。同理「$300/次」「万分之一成本」是其宣传对比，量级可信，但精确数字依基座、硬件、数据量浮动。
+      </div>
+    </div>
+  </section>
+
+  <section id="cmp">
+    <h2><span class="n">④</span>正面对比表</h2>
+    <table>
+      <thead><tr><th>维度</th><th class="two-b">BloombergGPT</th><th class="two-f">FinGPT</th><th>诚实备注</th></tr></thead>
+      <tbody>
+        <tr><td><strong>开源 / 闭源</strong></td><td>闭源，权重不发布 <span class="src src-a">🟢</span></td><td>开源（代码 + 权重 + 数据管线）<span class="src src-a">🟢</span></td><td>这是两者最根本的分歧</td></tr>
+        <tr><td><strong>训练方式</strong></td><td>从头预训练（from scratch）<span class="src src-a">🟢</span></td><td>LoRA/QLoRA 微调开源基座 + RAG <span class="src src-a">🟢</span></td><td>一个造地基，一个装修</td></tr>
+        <tr><td><strong>成本量级</strong></td><td>~130 万 A100·时 / 约 $300 万 量级 <span class="src src-a">🟢</span><span class="src src-b">🟡</span></td><td>自述约 $300/次量级 <span class="src src-c">🔴</span></td><td>BGPT 算力一手、美元为折算；FinGPT 美元为自述</td></tr>
+        <tr><td><strong>参数规模</strong></td><td>约 50B <span class="src src-a">🟢</span></td><td>随所选开源基座（如 7B/8B/13B）<span class="src src-a">🟢</span></td><td>FinGPT 自身只加 &lt;0.1% LoRA 参数</td></tr>
+        <tr><td><strong>更新频率 / 数据时效</strong></td><td>慢、贵（重训代价高）<span class="src src-b">🟡</span></td><td>快、便宜，可周/月级重训 + RAG 取最新 <span class="src src-a">🟢</span></td><td>金融数据时效性强，这是 FinGPT 主打优势</td></tr>
+        <tr><td><strong>可复现性</strong></td><td>低（外部无法复现/续建）<span class="src src-a">🟢</span></td><td>高（开源，社区可复现）<span class="src src-a">🟢</span></td><td>BGPT 公开了方法但不公开模型</td></tr>
+        <tr><td><strong>评测表现</strong></td><td>同规模通用模型之上的金融 NLP 增益 <span class="src src-a">🟢</span></td><td>自述部分任务可比/超 BGPT <span class="src src-c">🔴</span></td><td>口径不完全可比，慎下「谁全面更强」结论</td></tr>
+        <tr><td><strong>可获得性</strong></td><td>仅 Bloomberg 内部 <span class="src src-a">🟢</span></td><td>人人可下载、可商用受 license 约束 <span class="src src-a">🟢</span></td><td>外部要用金融 LLM，FinGPT 是现成入口</td></tr>
+      </tbody>
+    </table>
+    <div class="callout note"><span class="label">不是「谁赢」而是「为什么不同」</span>
+      BloombergGPT 的优势是<strong>私有数据 + 一个调好的成品</strong>，适合一家有海量专有金融数据、且只服务自己的机构；FinGPT 的优势是<strong>便宜、透明、可持续迭代</strong>，适合需要快速跟上市场、预算有限、要复现/二次开发的人。两者本质是「<strong>资本密集 vs 工程/数据密集</strong>」的取舍。
+    </div>
+  </section>
+
+  <section id="land">
+    <h2><span class="n">⑤</span>更大的图景：金融 LLM landscape 与一个扎心判断</h2>
+    <p>把两条路线放回整个金融 NLP/LLM 谱系，会看到一条清晰的演进线，以及一个让「专用金融大模型」叙事松动的现实。</p>
+    <h3>谱系：从 FinBERT 到金融 agent</h3>
+    <ul>
+      <li><strong>FinBERT（早期）</strong> <span class="src src-b">🟡</span>：BERT 时代的金融情绪分析模型，证明「预训练语言模型用在金融文本上能显著提升」，是这条线的起点。</li>
+      <li><strong>PIXIU / FinMA + FLARE benchmark</strong>（<a href="https://arxiv.org/abs/2306.05443">arXiv 2306.05443</a>）<span class="src src-a">🟢</span>：开源的「金融 LLM + 指令数据 + 评测基准」三件套。FinMA 是在 136K 金融指令数据（FIT）上微调 LLaMA 得到的开源金融模型；<strong>FLARE</strong> 是配套 benchmark（5 类金融 NLP 任务 + 1 类预测任务），让金融 LLM 第一次有了相对统一的「考卷」。其报告 FinMA 在若干任务上分数高于更大的通用模型甚至 BloombergGPT <span class="src src-c">🔴</span>（同样是论文自述口径）。</li>
+      <li><strong>FinTral</strong>（<a href="https://arxiv.org/abs/2402.10986">arXiv 2402.10986</a>）<span class="src src-b">🟡</span>：基于 Mistral-7B 的<strong>多模态</strong>金融模型（文本 + 数字 + 表格 + 图），自述全面超过 ChatGPT-3.5、部分任务超 GPT-4——代表「金融 LLM 也走向多模态 + 对标前沿」的方向。</li>
+      <li><strong>金融推理 / agent 模型</strong>：最新方向不再追求「单体大模型」，而是把 LLM 当组件去搭系统。代表是 <strong>TradingAgents</strong>（<a href="https://arxiv.org/abs/2412.20138">arXiv 2412.20138</a>，<a href="https://github.com/TauricResearch/TradingAgents">GitHub</a>）<span class="src src-a">🟢</span>：模仿交易公司分工，用多个 LLM agent 扮演基本面/情绪/技术分析师、看多看空研究员、风控、交易员，互相辩论后决策。</li>
+    </ul>
+    <div class="callout insight"><span class="label">最重要的现实判断</span>
+      <strong>通用前沿模型（GPT-4 / Claude 等）在很多金融任务上已经追平甚至超过专用金融 LLM。</strong> 这直接动摇了 BloombergGPT 式叙事——当一个没专门为金融训过的通用模型，靠强大的通用推理 + 一点提示工程就能把金融情绪/问答做得很好时，「<strong>专门花几百万从头训一个金融大模型</strong>」的性价比就成问题了。于是前沿重心明显从「<strong>造一个金融大模型</strong>」转向「<strong>RAG over 金融数据 + 金融 agent</strong>」：用通用强模型 + 检索最新私有数据 + 多 agent 协作，而不是把知识硬塞进权重。<span class="src src-b">🟡</span>（landscape 综合判断，非单一权威数字）
+    </div>
+
+    <figure class="fig">
+      <svg viewBox="0 0 760 460" width="100%" role="img" aria-label="金融 LLM 两轴定位图：横轴闭源到开源，纵轴从头训到微调/RAG">
+        <defs>
+          <marker id="ah" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+            <path d="M0,0 L8,4 L0,8 z" fill="var(--muted)"/>
+          </marker>
+        </defs>
+        <line x1="80" y1="40" x2="80" y2="410" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#ah)"/>
+        <line x1="80" y1="410" x2="720" y2="410" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#ah)"/>
+        <text x="78" y="30" fill="var(--muted)" font-size="13" text-anchor="start">↑ 从头训 (from scratch)</text>
+        <text x="92" y="432" fill="var(--muted)" font-size="13" text-anchor="start">← 闭源</text>
+        <text x="710" y="432" fill="var(--muted)" font-size="13" text-anchor="end">开源 →</text>
+        <text x="92" y="396" fill="var(--muted)" font-size="12" text-anchor="start">↓ 微调 / RAG</text>
+        <line x1="400" y1="40" x2="400" y2="410" stroke="var(--line)" stroke-width="1" stroke-dasharray="5 5"/>
+        <line x1="80" y1="225" x2="720" y2="225" stroke="var(--line)" stroke-width="1" stroke-dasharray="5 5"/>
+        <circle cx="210" cy="110" r="9" fill="var(--accent)"/>
+        <text x="226" y="106" fill="var(--text)" font-size="14" font-weight="700">BloombergGPT</text>
+        <text x="226" y="124" fill="var(--muted)" font-size="11.5">闭源 · 50B · 从头训 · 天价</text>
+        <circle cx="360" cy="300" r="9" fill="var(--warn)"/>
+        <text x="376" y="296" fill="var(--text)" font-size="14" font-weight="700">通用前沿模型</text>
+        <text x="376" y="314" fill="var(--muted)" font-size="11.5">GPT-4 / Claude：非为金融训，却已追平</text>
+        <circle cx="600" cy="340" r="9" fill="var(--ok)"/>
+        <text x="586" y="336" fill="var(--text)" font-size="14" font-weight="700" text-anchor="end">FinGPT</text>
+        <text x="586" y="354" fill="var(--muted)" font-size="11.5" text-anchor="end">开源 · LoRA 微调 + RAG · 廉价</text>
+        <circle cx="560" cy="150" r="8" fill="var(--accent2)"/>
+        <text x="546" y="146" fill="var(--text)" font-size="13" font-weight="700" text-anchor="end">FinBERT</text>
+        <text x="546" y="163" fill="var(--muted)" font-size="11" text-anchor="end">早期 · 开源 · 小模型预训练</text>
+        <circle cx="635" cy="290" r="7" fill="var(--ok)" opacity="0.75"/>
+        <text x="650" y="294" fill="var(--muted)" font-size="11.5">PIXIU/FinMA（开源·微调）</text>
+        <text x="400" y="402" fill="var(--insight)" font-size="11.5" text-anchor="middle">趋势 → RAG + 金融 agent（TradingAgents）</text>
+      </svg>
+      <figcaption>金融 LLM 两轴定位：横轴 闭源↔开源，纵轴 从头训↔微调/RAG。BloombergGPT 居「闭源·从头训」角，FinGPT 居「开源·微调/RAG」角；通用前沿模型从中部切入并把专用模型的优势区压缩，趋势整体向「微调/RAG + agent」一侧滑动。（定位为示意，非定量坐标）</figcaption>
+    </figure>
+  </section>
+
+  <section id="take">
+    <h2><span class="n">⑥</span>现实判断 + 局限</h2>
+    <ul>
+      <li><strong>BloombergGPT 是里程碑，但已被通用前沿模型部分盖过。</strong> 它证明了「专用金融大模型可行且有增益」，但闭源 + 从头训的重资产打法，在通用模型能力暴涨后性价比下降——它更像「<strong>一个时代的标杆</strong>」而非「<strong>当下最优解</strong>」。</li>
+      <li><strong>FinGPT 的开源 / 廉价 / 数据为中心更可持续。</strong> 金融数据天然要频繁更新，能用几百美元就重训一次的流水线，比一个训一次几百万的庞然大物更契合这个领域的节奏。但要清醒：它的「超过 BloombergGPT」「$300/次」是自述口径，需独立验证。</li>
+      <li><strong>专用金融 LLM 的护城河在「私有金融数据」，而非模型本身。</strong> 既然通用模型 + RAG 就能贴合金融，模型权重越来越不是壁垒；真正稀缺的是 Bloomberg 那种<strong>独家、实时、结构化的金融数据</strong>。这也解释了为何前沿在往「RAG over 私有数据 + agent」走——价值从「模型」转移到「数据 + 编排」。</li>
+      <li><strong>评测要警惕 lookahead bias / 数据泄漏。</strong> 这是金融 LLM 评测的特有陷阱：在互联网级语料上预训练的模型，<strong>可能在训练时就「见过」未来的真实结果</strong>（lookahead bias，即用了评测时点之后才该知道的信息）。研究已发现 LLM 能近乎逐字复述其训练截止前的历史经济/股价数值——这意味着许多「LLM 能预测股价」的亮眼回测，可能<strong>部分来自记忆而非真预测</strong>。缓解手段包括实体/日期脱敏提示、时间感知预训练、按时间戳严格切分等。<span class="src src-b">🟡</span>（<a href="https://arxiv.org/abs/2512.23847">A Test of Lookahead Bias in LLM Forecasts</a> 等）</li>
+    </ul>
+    <div class="callout insight"><span class="label">一句话收尾</span>
+      与其问「BloombergGPT 和 FinGPT 谁对」，不如看到：<strong>两条路线都已被「通用强模型 + RAG + 金融 agent」这条新主线超越或吸收</strong>。BloombergGPT 留下「专用可行」的证明，FinGPT 留下「便宜可复现可持续」的方法论，而金融 AI 的下一站，是把强通用模型接到<strong>独家私有数据</strong>和<strong>多 agent 工作流</strong>上——并时刻提防回测里的数据泄漏。
+    </div>
+  </section>
+
+  <section id="read">
+    <h2>延伸阅读</h2>
+    <ul>
+      <li><a href="../2026-06-17-stock-fundamentals-explainer/">股票基本面解读（同仓库）</a> — 想把「金融 LLM 在分析什么」落到具体的基本面指标上，可对照阅读。</li>
+      <li>一手来源：<a href="https://arxiv.org/abs/2303.17564">BloombergGPT (2303.17564)</a> · <a href="https://arxiv.org/abs/2306.06031">FinGPT (2306.06031)</a> · <a href="https://github.com/AI4Finance-Foundation/FinGPT">FinGPT GitHub</a> · <a href="https://arxiv.org/abs/2306.05443">PIXIU/FLARE (2306.05443)</a> · <a href="https://arxiv.org/abs/2402.10986">FinTral (2402.10986)</a> · <a href="https://arxiv.org/abs/2412.20138">TradingAgents (2412.20138)</a>。</li>
+    </ul>
+  </section>
+
+  <footer class="foot">
+    <p>本文为调研综述，非投资建议。数字按来源分级标注：<span class="src src-a">🟢 一手</span>（论文/官方/GitHub）/ <span class="src src-b">🟡 二手</span> / <span class="src src-c">🔴 自述/未独立验证</span>。BloombergGPT 的 50B 参数、约 363B FinPile token、约 569B 训练 token、约 130 万 A100·时为论文一手核实；「$300 万/次」为按云价折算的二手估计。FinGPT 的 LoRA &lt;0.1% 参数、市场标签、RAG、Forecaster 组件为一手核实；「$300/次」「超过 BloombergGPT」「万分之一成本」为 FinGPT 方自述、未独立验证。lookahead bias 一节为领域综合判断 + 二手文献。</p>
+    <p>整理日期：2026-06-29</p>
+  </footer>
+
+</article>
+</body>
+</html>
