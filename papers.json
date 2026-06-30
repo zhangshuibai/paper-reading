@@ -58,6 +58,27 @@
     "path": "papers/2026-06-29-qiming-investments/index.html"
   },
   {
+    "slug": "2026-06-29-kaiwu-intelligence",
+    "title": "开物纪（Kaiwu Intelligence）：AI 发明新材料的竞争格局与早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://www.xiaoyuzhoufm.com/podcast/60502e253c92d4f62c2a9577",
+    "code": "",
+    "date": "2026-06-30",
+    "published": "公司调研 2026",
+    "tldr": "开物纪(陆子恒,前微软MatterGen/MatterSim负责人)用AI发明新材料,走'自己拥有材料IP'(对标Flagship Pioneering)而非卖铲子;赛道emerging+最大难点(实验室到量产/开源模型MatterGen/GNoME压低预测价值)+对标晶泰深势/MatterGen,产品实效未验证",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "market-map",
+      "startup-idea",
+      "ai4s",
+      "materials",
+      "china"
+    ],
+    "path": "papers/2026-06-29-kaiwu-intelligence/index.html"
+  },
+  {
     "slug": "2026-06-29-engram",
     "title": "Engram：AI 持续记忆层赛道的竞争格局与早期度调研",
     "authors": "—",

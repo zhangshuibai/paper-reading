@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>开物纪（Kaiwu Intelligence） · 竞争格局与赛道早期度调研</title>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --bad:#ff6b81; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --bad:#d23651; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;}
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:920px; margin:0 auto; padding:18px 22px 90px}
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:25px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px; font-style:italic}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)} .meta-grid dd{margin:0}
+  .meta-grid a{color:var(--accent); text-decoration:none}
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap; line-height:2}
+  nav.toc a:hover{color:var(--accent)}
+  section{margin:38px 0}
+  h2{font-size:20px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:16.5px; margin:22px 0 8px}
+  p{margin:12px 0} ul,ol{padding-left:22px} li{margin:6px 0}
+  a{color:var(--accent)} strong{color:var(--text)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.88em}
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:13px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:9px 10px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-all}
+  figure{margin:24px 0; text-align:center}
+  figcaption{color:var(--muted); font-size:13px; margin-top:8px; text-align:center}
+  .svgwrap{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 8px}
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); font-size:12px; padding:3px 10px; border-radius:999px}
+  .src{font-size:10.5px; padding:0 6px; border-radius:999px; white-space:nowrap; vertical-align:middle}
+  .src-a{background:rgba(67,197,158,.18); color:var(--ok)}
+  .src-b{background:rgba(255,180,84,.18); color:var(--warn)}
+  .src-c{background:rgba(255,107,129,.18); color:var(--bad)}
+  .legend{font-size:12px; color:var(--muted); margin:6px 0 0}
+  .verdict{display:inline-block; font-weight:700; padding:3px 12px; border-radius:999px; font-size:14px}
+  .v-nascent{background:rgba(122,162,255,.18); color:var(--accent)}
+  .v-emerging{background:rgba(67,197,158,.18); color:var(--ok)}
+  .v-crowded{background:rgba(255,180,84,.18); color:var(--warn)}
+  .v-mature{background:rgba(255,107,129,.18); color:var(--bad)}
+  footer.foot{margin-top:60px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+
+  <header class="head">
+    <div class="chips">
+      <span class="chip">AI4S 材料发现</span>
+      <span class="chip">venture creation</span>
+      <span class="chip">China deep-tech</span>
+      <span class="chip">竞争格局</span>
+      <span class="chip">赛道早期度</span>
+      <span class="chip">创业 idea</span>
+    </div>
+    <h1>开物纪（Kaiwu Intelligence）：AI 发明新材料的竞争格局与早期度调研</h1>
+    <p class="orig-title">北京 · AI4Materials 全栈材料创新平台 / 创始人陆子恒（前微软研究院 MatterGen/MatterSim 负责人）/ 成立 2025-09 / 走「自己挖金」而非「卖铲子」、对标 Flagship Pioneering</p>
+    <dl class="meta-grid">
+      <dt>对象</dt><dd>开物纪 Kaiwu Intelligence（官网未独立核实到稳定域名，以下以官宣稿与创始人公开发言为锚）</dd>
+      <dt>赛道</dt><dd>AI for Science · 材料发现（AI 算配方 + 自动化高通量实验闭环 + 产业化）</dd>
+      <dt>整理</dt><dd>对话调研笔记；信息来自公开检索，按来源分级标注，产品能力未必经独立验证</dd>
+      <dt>日期</dt><dd>2026-06-30</dd>
+    </dl>
+    <p class="legend">来源等级：<span class="src src-a">🟢 一手</span> 官网/官宣稿/创始人公开发言 ·
+      <span class="src src-b">🟡 二手</span> 媒体（36氪/钛媒体/新浪/投中/腾讯）/数据库 ·
+      <span class="src src-c">🔴 自述/未证实</span> 营销口径或未独立验证</p>
+  </header>
+
+  <div class="tldr">
+    <b>一句话</b> — 开物纪是前微软研究院 AI4Materials 负责人<strong>陆子恒</strong>于 2025 年 9 月创办的北京 deep-tech 公司，用「<strong>材料大模型 + 自动化高通量实验</strong>」做闭环，目标是把材料从虚拟「发现」推到吨级「量产」。它的关键选择是<strong>不卖铲子、自己挖金</strong>——以「自有材料 IP 管线」为主、产业合作为辅（双轨），公开对标孵化出 Moderna 的 <strong>Flagship Pioneering</strong>（venture-creation / 自己造资产）<span class="src src-a">🟢</span>。赛道判 <strong>emerging（新兴）</strong>：海外 Periodic Labs / Lila / Radical AI 同期密集融资、巨头（MatterGen/GNoME）已开源压低「预测」价值，但<strong>从实验室到量产的工程化是全行业生死线，产品实效全部未验证</strong>。已知融资：2025-11 亿元级天使轮（IDG、蓝驰领投）+ 2026-03 数亿元天使+轮（Monolith 领投）<span class="src src-b">🟡</span>。
+  </div>
+
+  <nav class="toc">
+    <b>目录</b>
+    <a href="#bg">⓪ 领域背景速补</a>
+    <a href="#market">① 赛道地图 + 早期度</a>
+    <a href="#matrix">② 竞品对照矩阵</a>
+    <a href="#map">③ 定位图</a>
+    <a href="#funding">④ 融资 timeline</a>
+    <a href="#snapshot">⑤ 公司速览</a>
+    <a href="#bench">⑥ 国际对标 / Benchmarks</a>
+    <a href="#idea">⑦ 创业 idea 借鉴</a>
+    <a href="#take">⑧ 现实判断</a>
+    <a href="#src">出处</a>
+  </nav>
+
+  <!-- ⓪ 领域背景速补（读者只有 LLM 基础） -->
+  <section id="bg">
+    <h2><span class="n">⓪</span>领域背景速补（只懂 LLM 也能跟上）</h2>
+    <p>这家公司在「材料科学 + AI」交叉处，下面把会反复出现的术语先讲清，假设你只懂 LLM、不懂材料。</p>
+    <ul>
+      <li><strong>材料发现（materials discovery）是什么、为什么难：</strong>材料指的是电池正极、半导体、磁体、超导体、散热/导热材料这类「有特定物理性能的物质」。难点在于<strong>组合空间天文数字</strong>（元素 × 配比 × 晶体结构 × 工艺），且「想出一个结构」和「真造出来、还稳定、还能批量做」之间隔着千山万水。过去几十年材料界几乎没几个商业级突破（锂电算一个）。这就是 AI 想切入的地方：用模型在虚拟空间里筛掉绝大多数不靠谱的候选。</li>
+      <li><strong>晶体结构 / 稳定性：</strong>无机材料多是周期性排列的晶体。AI 要预测一个假想结构是否「热力学稳定」（不会自己塌掉分解）。DeepMind 的 GNoME 一口气预测了 220 万个晶体结构、其中 38 万个号称最稳定 <span class="src src-b">🟡</span>——但「在绝对零度计算稳定」和「真实实验室能造出来且有用」是两回事（见⑥）。</li>
+      <li><strong>生成模型 vs 预测模型（类比 LLM）：</strong>把 LLM 的「文生图/文生文」搬到材料：<em>预测引擎</em>（如 MatterSim，类似 forward model）给定结构算性能；<em>生成引擎</em>（如 MatterGen，扩散模型，类似 Stable Diffusion）反过来「给定目标性能 → 直接生成符合要求的结构」，即「逆向设计 / inverse design」。开物纪自述的「Prophet 预测引擎 + Creator 生成引擎」双引擎就是这两类 <span class="src src-c">🔴</span>。</li>
+      <li><strong>MLIP（机器学习原子间势）/ 力场：</strong>传统算材料性能要跑 DFT（密度泛函理论），又慢又贵。MLIP 是「用神经网络拟合原子间作用力」的代理模型，比 DFT 快几个数量级，是 MatterSim、DeepMind、深势科技等的核心技术之一。可类比 LLM 里「用小模型蒸馏/近似昂贵计算」。</li>
+      <li><strong>自驱实验室 / self-driving lab（A-Lab）：</strong>把「合成 → 表征 → 反馈」交给机器人 + AI 自动闭环跑，不靠人手。这是把「虚拟预测」落到「真东西」的关键环节，也是最难自动化的部分（固态合成不像药物那样靠液体移液就能流水线化）。</li>
+      <li><strong>从克级到吨级（scale-up）：</strong>材料创业的「生死线」。实验室造出 1 克和工厂稳定产 1 吨，是完全不同的工程问题（纯度、良率、成本、设备）。很多 AI 材料公司死在这一步，所以业内常说材料创业「九死一生」。</li>
+      <li><strong>Flagship Pioneering 是谁、为什么被对标：</strong>美国一家「风险创造（venture creation）」机构，自己养科学家、自己孵化公司、自己持有平台 IP，最著名的产物是 mRNA 疫苗公司 Moderna <span class="src src-b">🟡</span>。它不是普通 VC（投别人），而是「自己造资产」。开物纪公开说自己对标的不是陶氏/巴斯夫（卖材料的化工巨头），而是 Flagship 这种「从发现到商业化全链条、自己拥有 IP」的模式 <span class="src src-a">🟢</span>——这正是「自己挖金」的含义。</li>
+      <li><strong>AI4S（AI for Science）：</strong>用 AI 加速科学发现的大方向，材料只是其中一支（还有药物、蛋白、催化等）。中国这条线的两个头部是<strong>晶泰科技 XtalPi</strong>（已港股上市）和<strong>深势科技 DP Technology</strong>。</li>
+    </ul>
+  </section>
+
+  <!-- ① 赛道与早期度 -->
+  <section id="market">
+    <h2><span class="n">①</span>赛道地图 + 早期度判断</h2>
+    <p>category：<strong>AI for Science · 材料发现（AI4Materials）</strong>。它解决的需求是把「新材料从想出来到能量产」的周期与成本砍掉一个数量级——传统路径靠科学家凭经验试错、动辄十年。开物纪自我定位是「<strong>模型—实验—量产</strong>」全栈闭环的材料创新平台 <span class="src src-b">🟡</span>。下面按四象限分群（这是判断「威胁从哪来」的关键，后两类最容易被忽视）。</p>
+    <h3>玩家分群（四象限别漏）</h3>
+    <ul>
+      <li><strong>现有巨头（化工 / 材料 incumbents）：</strong>BASF、Dow、宁德时代等——拥有量产、客户、渠道，但 AI 发现能力弱。它们是开物纪的潜在<strong>客户/合作方</strong>，也是「自己挖金」时要正面竞争产业化的对手。<span class="src src-b">🟡</span></li>
+      <li><strong>垂直创业公司（直接竞品）：</strong>海外 <strong>Periodic Labs</strong>（前 OpenAI/DeepMind 团队，$300M 种子）<span class="src src-b">🟡</span>、<strong>Lila Sciences</strong>（数亿美元、自动实验室）、<strong>Radical AI</strong>（A-Lab 负责人 Gerbrand Ceder 加盟）、<strong>Orbital Industries</strong>（前 Orbital Materials，$50M B 轮，做数据中心材料）、<strong>Citrine Informatics</strong>、<strong>Altrove</strong>；中国 <strong>晶泰科技 XtalPi</strong>、<strong>深势科技 DP Technology</strong>。开物纪自己就属于这一格。</li>
+      <li><strong>大厂顺手做（最大威胁之一）：</strong><strong>Microsoft</strong>（MatterGen/MatterSim/DiG，开物纪创始团队的「母体」）、<strong>Google DeepMind</strong>（GNoME，220 万材料）、<strong>Meta</strong>（开放催化剂等）。它们把「预测/生成」做成开源公共品，直接压低创业公司「我有更好模型」的叙事价值。<span class="src src-b">🟡</span></li>
+      <li><strong>开源 / 免费替代（易被忽视）：</strong><strong>MatterGen 已开源</strong>、<strong>GNoME 数据库公开</strong>、Materials Project、OMat24 等开放数据/模型——意味着「会用 AI 预测材料」本身不再是壁垒，<strong>壁垒被迫往「实验闭环 + 量产工程」迁移</strong>。<span class="src src-b">🟡</span></li>
+    </ul>
+    <div class="callout insight">
+      <span class="label">早期度判断</span>
+      <span class="verdict v-emerging">emerging（新兴）</span>
+      （nascent 萌芽 / emerging 新兴 / crowded 拥挤 / mature 成熟）<br><br>
+      <strong>判断信号：</strong>
+      ① <strong>玩家数与新增速度</strong>——2025 年集中冒出一批（Periodic、Lila、Radical、开物纪），新进者多但总量仍是「几十家级」，远未到拥挤；
+      ② <strong>融资热度</strong>——极热且早期化（Periodic $300M <em>种子</em>、开物纪成立 3 个月即亿元天使），典型 emerging 的资本前置；
+      ③ <strong>巨头已进场但未独占</strong>——MS/Google 做研究与开源，不做量产，留出「把发现落到产品」的窗口；
+      ④ <strong>开源/免费替代已存在</strong>（MatterGen/GNoME）——这是把赛道从「nascent」推向「emerging」、并把价值从预测端挤向工程端的关键信号；
+      ⑤ <strong>客户认知未成型、无公认 benchmark 商业标准</strong>——没人证明「AI 发现的材料真量产赚钱了」，整条线<strong>产品实效全部未验证</strong>。
+      <br><br>结论：赛道 emerging，<strong>开物纪本身处于赛道最早期（成立不到一年、产品未验证）</strong>。
+    </div>
+  </section>
+
+  <!-- ② 竞品矩阵 -->
+  <section id="matrix">
+    <h2><span class="n">②</span>竞品对照矩阵</h2>
+    <p>选这 6 个维度，因为它们最能拉开 AI 材料公司的差距：<strong>商业模式（自有 IP/资产 vs 工具平台 vs CRO）</strong>是「挖金 vs 卖铲」的核心分歧；<strong>技术路线</strong>区分生成模型 / MLIP / 自驱实验室；<strong>目标材料</strong>看打哪个产业；<strong>实验闭环 / 量产</strong>是行业生死线；<strong>融资 & 团队</strong>看血统与弹药；<strong>数据 / 壁垒</strong>看护城河。各格尽量标来源；闭源/未披露的如实写「未披露」。</p>
+    <table>
+      <thead><tr>
+        <th>玩家</th>
+        <th>商业模式</th><th>技术路线</th><th>目标材料</th>
+        <th>实验闭环 / 量产</th><th>融资 & 团队</th><th>数据 / 壁垒</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>开物纪 Kaiwu（本篇）</strong></td>
+          <td><strong>双轨：自有材料 IP 管线为主 + 产业合作；对标 Flagship</strong> <span class="src src-a">🟢</span></td>
+          <td>材料大模型「弱先验规模化」+ Prophet 预测 / Creator 生成双引擎；合成数据 + 高通量物理数据 <span class="src src-c">🔴</span></td>
+          <td>新能源电池、冷存储、具身散热、超导 <span class="src src-b">🟡</span></td>
+          <td>实验室 / 自动化高通量 / 公斤级验证平台「启动建设中」，自述已有器件级落地 <span class="src src-c">🔴</span></td>
+          <td>2025-11 亿元天使 + 2026-03 数亿天使+；前 MSR 团队 <span class="src src-b">🟡</span></td>
+          <td>自有实验数据 + 全流程工程体系（自述真壁垒不在模型）<span class="src src-a">🟢</span></td>
+        </tr>
+        <tr>
+          <td>Microsoft（MatterGen/MatterSim）</td>
+          <td>研究 + 开源（非独立商业体）</td>
+          <td>扩散生成 + MLIP，逆向设计标杆</td>
+          <td>通用（电池/磁体等示例）</td>
+          <td>与 PNNL 等国家实验室合作验证</td>
+          <td>大厂资源；开物纪创始团队出处</td>
+          <td><strong>模型已开源</strong>——把「预测」变公共品 <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Google DeepMind（GNoME）</td>
+          <td>研究 + 数据库公开</td>
+          <td>GNN 图网络预测稳定性</td>
+          <td>无机晶体（220 万预测）</td>
+          <td>与 LBNL A-Lab 合作验证（41 种）</td>
+          <td>大厂资源</td>
+          <td>数据库公开；新颖性遭学界质疑 <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Periodic Labs</td>
+          <td>自建「AI 科学家」+ 自有实验室（偏自做）</td>
+          <td>LLM 读文献 + 设计实验 + 迭代</td>
+          <td>量子材料 / 室温超导（目标）</td>
+          <td>手工合成起步，机器人高通量待建</td>
+          <td>$300M 种子（a16z 领投）；前 OpenAI/DeepMind</td>
+          <td>团队 + 资本 + 自有实验数据 <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Citrine Informatics</td>
+          <td><strong>SaaS 工具/平台（卖铲子）</strong></td>
+          <td>数据稀缺下融合先验的 ML 平台</td>
+          <td>化工 / 消费品 / 电子等客户材料</td>
+          <td>不自做量产，赋能客户研发</td>
+          <td>累计约 $81M（成立较早）；年收入 $10–50M 区间</td>
+          <td>平台 + 客户数据飞轮 <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>晶泰科技 XtalPi（2228.HK）</td>
+          <td>平台 + CRO（AI+机器人为药企/材料企赋能）</td>
+          <td>量子物理 + AI + 机器人干湿闭环</td>
+          <td>生物医药为主，延伸材料/能源化工</td>
+          <td>万㎡湿实验室、机器人自动化，服务 200+ 机构</td>
+          <td>2024-06 港股 18C 第一股；大额合作订单</td>
+          <td>规模化机器人实验 + 客户网络 <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>深势科技 DP Technology</td>
+          <td>双轮：SaaS 平台（Bohrium 等）+ 头部客户定制</td>
+          <td>MLIP / 大原子模型「宇知」体系</td>
+          <td>药物 + 新能源材料（Piloteye 电池）</td>
+          <td>云平台为主 + 客户研发流程嵌入</td>
+          <td>2025-12 完成 8 亿元 C 轮；估值数十亿元</td>
+          <td>AI4S 基础设施「安卓」定位 + 数据 <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Orbital Industries（前 Orbital Materials）</td>
+          <td>自有产品（数据中心材料，偏自做）</td>
+          <td>AI 设计 + 自有产线</td>
+          <td>数据中心（吸碳/散热等）</td>
+          <td>已商业化部署其首批产品</td>
+          <td>$50M B 轮（Nvidia/Radical Ventures 等）</td>
+          <td>聚焦单一高需求场景 <span class="src src-b">🟡</span></td>
+        </tr>
+        <tr>
+          <td>Flagship Pioneering（模式对标，非材料竞品）</td>
+          <td><strong>venture creation：自养科学家、自孵化、持有平台 IP</strong></td>
+          <td>不限技术（生物为主）</td>
+          <td>健康 / 可持续（Moderna 等）</td>
+          <td>自建公司直至商业化</td>
+          <td>机构级基金（数十亿美元规模）</td>
+          <td>「造资产」方法论本身 <span class="src src-b">🟡</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>读矩阵：</strong>这一格里有清晰的<strong>三种商业模式分层</strong>——「卖铲子」的工具/平台（Citrine、深势的 SaaS 侧、XtalPi 的平台侧）、「自己挖金」的自有 IP/资产（Periodic、Orbital、<strong>开物纪</strong>），以及做公共品的巨头（MS/DeepMind）。开物纪的差异化在于<strong>明确选择「挖金」+ 双轨（一边商业化、一边 show muscle）+ 公开对标 Flagship 的 venture-creation 叙事</strong>，并把壁垒主动从「模型」迁到「全流程工程化」。它的软肋同样清楚：模型端被开源巨头摊平，量产端要正面硬刚化工 incumbents，而它成立不到一年、量产平台还在「建设中」。同质化风险中等——大家技术栈趋同（生成 + MLIP + 自驱实验室），真正分胜负的是<strong>谁先把一条材料真的量产并卖出钱</strong>，目前<strong>无人证明</strong>。</p>
+  </section>
+
+  <!-- ③ 定位图 -->
+  <section id="map">
+    <h2><span class="n">③</span>定位图（whitespace 在哪）</h2>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 640 400" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12">
+        <line x1="40" y1="200" x2="600" y2="200" stroke="#b9c2e0" stroke-width="1.5"/>
+        <line x1="320" y1="24" x2="320" y2="372" stroke="#b9c2e0" stroke-width="1.5"/>
+        <text x="598" y="218" text-anchor="end" fill="#5a627a">自己挖金 · 自有材料 IP / 资产 →</text>
+        <text x="42" y="218" fill="#5a627a">← 卖铲子 · 工具 / 平台 / CRO</text>
+        <text x="326" y="34" fill="#5a627a">↑ 自建量产 / 重实验闭环</text>
+        <text x="326" y="366" fill="#5a627a">↓ 纯软件 / 轻资产</text>
+        <rect x="320" y="24" width="280" height="176" fill="rgba(122,162,255,.07)"/>
+        <text x="590" y="52" text-anchor="end" fill="#7aa2ff" font-size="11" font-style="italic">资本/工程最密集，护城河最深</text>
+        <circle cx="445" cy="150" r="7" fill="#7aa2ff"/>
+        <text x="455" y="146" fill="#3a66ff" font-weight="700">开物纪 Kaiwu</text>
+        <text x="455" y="162" fill="#5a627a" font-size="10">双轨·对标 Flagship</text>
+        <circle cx="500" cy="100" r="6" fill="#43c59e"/>
+        <text x="510" y="104" fill="#138a6e">Periodic Labs</text>
+        <circle cx="540" cy="70" r="6" fill="#43c59e"/>
+        <text x="535" y="62" text-anchor="end" fill="#138a6e">Orbital</text>
+        <circle cx="470" cy="120" r="5" fill="#9b8cff"/>
+        <text x="478" y="124" fill="#6b4cff">Lila / Radical</text>
+        <circle cx="250" cy="95" r="6" fill="#ffb454"/>
+        <text x="242" y="92" text-anchor="end" fill="#b3701a">晶泰 XtalPi</text>
+        <circle cx="180" cy="130" r="6" fill="#ffb454"/>
+        <text x="172" y="134" text-anchor="end" fill="#b3701a">深势 DP Tech</text>
+        <circle cx="130" cy="300" r="6" fill="#ffb454"/>
+        <text x="140" y="304" fill="#b3701a">Citrine（卖铲子）</text>
+        <circle cx="200" cy="330" r="6" fill="#ff6b81"/>
+        <text x="210" y="334" fill="#d23651">MatterGen / GNoME（开源）</text>
+        <circle cx="470" cy="300" r="6" fill="#9b8cff"/>
+        <text x="462" y="304" text-anchor="end" fill="#6b4cff">Flagship（模式对标）</text>
+      </svg>
+      </div>
+      <figcaption>定位图（本调研重绘）。开物纪扎在「自有 IP × 自建量产」的右上象限——护城河最深、但资本/工程门槛也最高；左下「开源公共品」正把整条「卖预测」的价值往下压。whitespace：<strong>右上象限里「单一高价值材料 × 端到端自做量产」</strong>仍稀疏（Orbital 的数据中心打法是范例），而非又一个通用平台。</figcaption>
+    </figure>
+  </section>
+
+  <!-- ④ 融资 timeline -->
+  <section id="funding">
+    <h2><span class="n">④</span>融资 timeline</h2>
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 720 170" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,PingFang SC,Microsoft YaHei,sans-serif" font-size="12.5">
+        <line x1="70" y1="80" x2="650" y2="80" stroke="#b9c2e0" stroke-width="2"/>
+        <circle cx="130" cy="80" r="7" fill="#7aa2ff"/>
+        <text x="130" y="50" text-anchor="middle" fill="#3a66ff" font-weight="700">2025-09</text>
+        <text x="130" y="108" text-anchor="middle" fill="#5a627a">成立 · 北京</text>
+        <circle cx="370" cy="80" r="8" fill="#43c59e"/>
+        <text x="370" y="44" text-anchor="middle" fill="#138a6e" font-weight="700">2025-11</text>
+        <text x="370" y="60" text-anchor="middle" fill="#5a627a" font-size="11">天使轮 · 亿元级</text>
+        <text x="370" y="108" text-anchor="middle" fill="#5a627a" font-size="11">IDG、蓝驰 领投</text>
+        <text x="370" y="124" text-anchor="middle" fill="#5a627a" font-size="11">BV百度风投/光源L2F/高瓴 跟投</text>
+        <circle cx="610" cy="80" r="8" fill="#9b8cff"/>
+        <text x="610" y="44" text-anchor="middle" fill="#6b4cff" font-weight="700">2026-03</text>
+        <text x="610" y="60" text-anchor="middle" fill="#5a627a" font-size="11">天使+轮 · 数亿元</text>
+        <text x="610" y="108" text-anchor="middle" fill="#5a627a" font-size="11">Monolith 砺思 领投</text>
+        <text x="610" y="124" text-anchor="middle" fill="#5a627a" font-size="11">光合创投/集富亚洲；老股东加注</text>
+      </svg>
+      </div>
+      <figcaption>开物纪融资时间线（据公开报道整理 🟡）。成立 3 个月即拿亿元天使、半年内连续两轮——资本极度前置，是 emerging 赛道的典型信号，也反衬「材料量产烧钱、需大额前置弹药」。</figcaption>
+    </figure>
+    <table>
+      <thead><tr><th>时间</th><th>事件 / 轮次</th><th>金额</th><th>投资方</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr><td>2025-09</td><td>公司成立（北京）</td><td>—</td><td>—（成立日期媒体多写 9 月初；一篇写 9/1、一篇写 9/8，未统一，并列）</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2025-11-26（报道）</td><td>天使轮</td><td>亿元级 / 近亿元人民币（两种口径并列）</td><td>领投：IDG资本、蓝驰创投；跟投：BV百度风投、L2F光源创业者基金、高瓴创投；FA：光源资本</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>2026-03-24（报道）</td><td>天使+轮</td><td>数亿元人民币</td><td>领投：Monolith（砺思资本）；跟投：光合创投、集富亚洲；老股东（高瓴、IDG、蓝驰、BV百度风投、L2F）超额加注；FA：光源资本</td><td><span class="src src-b">🟡</span></td></tr>
+        <tr><td>估值</td><td>—</td><td><strong>未披露</strong></td><td>—</td><td><span class="src src-c">🔴</span></td></tr>
+      </tbody>
+    </table>
+    <p><strong>赛道整体融资热度：</strong>极热。海外 Periodic Labs 2025 年录得 $300M <em>种子</em>（a16z 领投，Nvidia/Bezos/Schmidt/Dean 等天使）、Lila Sciences 数亿美元、Orbital $50M B 轮；中国深势科技 2025-12 完成 8 亿元 C 轮、晶泰已港股上市。开物纪的两轮节奏与这股全球热潮同频。<span class="src src-b">🟡</span></p>
+  </section>
+
+  <!-- ⑤ 公司速览 -->
+  <section id="snapshot">
+    <h2><span class="n">⑤</span>公司速览</h2>
+    <table>
+      <tbody>
+        <tr><td>是什么 / 定位</td><td>AI4Materials「模型—实验—量产」全栈闭环的材料创新平台；用 AI 发明新材料并自己推到量产 <span class="src src-b">🟡</span></td></tr>
+        <tr><td>产品 / 技术</td><td>材料大模型「弱先验约束的规模化路线」；自述「Prophet 预测引擎 + Creator 生成引擎」双引擎；2025 年称在《Nature》发表 Scaling Law 验证研究（论文细节未独立核实）<span class="src src-c">🔴</span>。基础设施：百万级高并发数据 + 实验室/自动化高通量/公斤级验证平台「建设中」<span class="src src-c">🔴</span></td></tr>
+        <tr><td>团队</td><td>创始人 <strong>陆子恒</strong>博士：本科南京理工、博士香港科技大学、剑桥大学材料系博士后；前微软研究院首席研究员 & 材料团队负责人，参与开发 <strong>MatterSim / MatterGen / DiG</strong>（research 血统强）<span class="src src-b">🟡</span>。联合创始人<strong>杨孟洋</strong>博士（前微软高级研究经理，光学/电子/材料交叉）；产业 CTO <strong>任瑜</strong>博士（BASF 等 20+ 年量产/选品经验）。核心成员来自剑桥、牛津、耶鲁、清华、中关村学院、微软、BASF。年龄/具体履历细节未充分披露。</td></tr>
+        <tr><td>商业模式</td><td><strong>双轨「自己挖金」</strong>：以自有材料 IP 管线为主（追商业化「要发财的」+ 展示能力「show muscle 的」两类项目并行），辅以与产业伙伴合作共研；公开对标 <strong>Flagship Pioneering</strong>（venture-creation），明确不是定位成卖 AI 工具的 SaaS <span class="src src-a">🟢</span>（创始人播客发言 + 官宣稿）</td></tr>
+        <tr><td>目标材料</td><td>新能源电池、冷存储、具身散热、超导材料 <span class="src src-b">🟡</span></td></tr>
+        <tr><td>状态</td><td>极早期：成立不到一年、两轮天使、量产平台「建设中」；<strong>无公开的量产产品或营收证据，产品实效未验证</strong></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ⑥ 国际对标 / Benchmarks -->
+  <section id="bench">
+    <h2><span class="n">⑥</span>国际对标 / Benchmarks（它学谁、差在哪、有什么中国特色）</h2>
+    <p>开物纪是中国公司，这节反过来看它对标的海外是谁、借了什么、差距与本土变量在哪。</p>
+    <h3>对标谁、学了什么</h3>
+    <ul>
+      <li><strong>技术母体：Microsoft（MatterGen/MatterSim/DiG）。</strong>创始团队直接出自微软研究院材料组，技术栈（扩散生成 + MLIP + scaling）与微软一脉相承——这是它最硬的背书，也是最尴尬之处：<strong>它的「武器」微软已经开源了</strong>，等于把自己最初的差异化变成行业公共品。</li>
+      <li><strong>商业模式：Flagship Pioneering（venture creation）。</strong>学的是「自己养科学家、自己孵化、持有平台 IP、做到商业化」——把材料发现当「造资产」而非「卖工具」。这是它区别于 Citrine（卖 SaaS）、也区别于 XtalPi/深势（平台 + CRO + SaaS 偏卖铲）的根本叙事 <span class="src src-a">🟢</span>。</li>
+      <li><strong>实验闭环：Periodic Labs / Lila / Radical AI / A-Lab。</strong>学的是「自驱实验室 + 自有实验数据飞轮」——大家都意识到，模型摊平后，<strong>真正的稀缺品是高质量实验数据与能跑通的物理闭环</strong>。</li>
+    </ul>
+    <h3>差在哪（诚实）</h3>
+    <ul>
+      <li><strong>弹药量级差一档：</strong>开物纪两轮合计「亿元 + 数亿元」人民币；Periodic 一把 $300M 美元种子。海外头部的资本与算力厚度明显更高。<span class="src src-b">🟡</span></li>
+      <li><strong>实验/量产基建仍「在建」：</strong>对标方多已有运行中的（半）自动实验室，开物纪的实验室/高通量/公斤级平台公开口径是「启动建设」，验证尚未跑出。<span class="src src-c">🔴</span></li>
+      <li><strong>「发现新颖性」整条线都被质疑：</strong>DeepMind GNoME 的 220 万材料被 UCSB 学者批「几乎没有新颖性/可信度/实用性的三位一体」，且绝对零度计算 ≠ 真实可造——这盆冷水浇在所有「我预测了很多新材料」的叙事上，开物纪不能例外。<span class="src src-b">🟡</span></li>
+    </ul>
+    <h3>中国特色（潜在优势 / 变量）</h3>
+    <ul>
+      <li><strong>产业链与工程化更近：</strong>中国在电池、电子、化工的<strong>量产产业链密集</strong>，对一家想「自己挖金、做到量产」的公司是天然主场——从克级到吨级的工程伙伴、设备、产能更易就近找到。这恰好对冲了「实验室到量产」的最大难点。</li>
+      <li><strong>国产替代 + 政策顺风：</strong>新能源、半导体、超导等是国家战略卡脖子方向，AI4S 是政策鼓励赛道，资本（IDG、高瓴、百度、Monolith 等一线机构齐聚）愿意为深科技长周期下注。</li>
+      <li><strong>人才回流：</strong>创始团队是「海外大厂顶尖 research + 产业老兵」的组合，这类「MSR 出走创业」叙事在中国一级市场极受追捧。</li>
+      <li><strong>差距侧的本土风险：</strong>先进实验设备/高端表征仪器、最前沿算力获取仍可能受限；且「自己挖金」要真量产卖钱，要直面成熟化工巨头的成本与渠道。</li>
+    </ul>
+  </section>
+
+  <!-- ⑦ 创业 idea 借鉴 -->
+  <section id="idea">
+    <h2><span class="n">⑦</span>创业 idea 借鉴</h2>
+    <div class="callout insight">
+      <span class="label">Whitespace / 机会</span>
+      <strong>「单一高价值材料 × 端到端自做量产」</strong>这一格仍稀疏。多数玩家要么做通用平台/工具（拥挤、被开源压价），要么宏大叙事追超导/室温超导（周期极长）。Orbital「只打数据中心散热/吸碳材料、且自己产线交付」的窄而深打法是范例——选一个<strong>需求确定、客户付费意愿强、不必等十年</strong>的材料品类（如 AI 数据中心散热/导热材料、储能特定正极、特定半导体前驱体），把 AI 发现 + 自动实验 + 小批量量产端到端做透，比再造一个「材料界 OpenAI」更可落地。开物纪把「具身散热」列入方向，正卡在这个 why-now 上。
+    </div>
+    <h3>现有玩家共同短板（unmet needs）</h3>
+    <p>① <strong>预测≠可造≠有用</strong>——全行业都强于「生成候选」、弱于「真造出来且稳定」，谁能把<strong>合成成功率 / 表征自动化 / 数据回流</strong>做成飞轮，谁就握住稀缺品。② <strong>缺商业级证据</strong>——至今没人能展示「AI 发现的材料量产并卖出钱」的完整案例，第一个跑通的会重定义赛道叙事。③ <strong>从克到吨的工程化</strong>几乎是公认黑洞，懂量产的产业老兵稀缺（开物纪专门设「产业 CTO」正是看到这点）。</p>
+    <h3>Why now（为什么现在值得做）</h3>
+    <p>① 生成模型 + MLIP + 自驱实验室三件套同时成熟，且 <strong>MatterGen/GNoME 已开源</strong>——「会做预测」的门槛被巨头打到地板，反而让小团队能站在巨人肩上、把精力全押在「实验闭环 + 量产」这个真护城河上；② AI 数据中心爆发带来<strong>散热/导热/电力材料</strong>的硬性新需求（Orbital 已验证可付费）；③ 中国国产替代 + AI4S 政策红利 + 一线资本愿为长周期 deep-tech 前置下注。</p>
+    <h3>可借鉴的打法 + 相邻机会</h3>
+    <ul>
+      <li><strong>borrowable：</strong>(a)「<strong>不卖铲子、自己挖金</strong>」——当你的模型/能力开始稀缺时，自己持有终端 IP/产品比当工具供应商捕获的价值高得多（前提是你能承受重资产）；(b)「<strong>双轨</strong>」——一边做能快变现的项目养现金流、一边做 show-muscle 的灯塔项目立叙事；(c)「<strong>科学家 + 产业老兵</strong>」配队，用产业 CTO 补「实验室到量产」的硬伤；(d) 借「对标 Flagship」一句话把模式叙事讲清楚，便于早期融资。</li>
+      <li><strong>adjacent：</strong>(a) 反向做「<strong>卖铲子</strong>」——给所有「挖金」公司提供自动化高通量实验硬件 / 表征即服务 / 材料数据标注与回流平台（卖水者，不必押注单一材料）；(b) 垂直到单一产业（电池配方优化即服务、半导体前驱体定制）；(c) 做「材料界的 evals」——公认的「可造性 / 可量产性」benchmark 与第三方验证，正是当前最缺的标准。</li>
+    </ul>
+    <div class="callout warn">
+      <span class="label">风险（诚实给）</span>
+      ① <strong>量产九死一生</strong>——实验室到吨级是材料创业的生死线，多数死在这；② <strong>开源压低预测价值</strong>——MatterGen/GNoME 让「我有更好模型」叙事贬值，逼你必须在工程/数据/量产端建壁垒；③ <strong>资本密集 + 长周期</strong>——重资产实验室与产线烧钱、回报以年计，对融资节奏要求极高；④ <strong>巨头与 incumbents 双向夹击</strong>——上有 MS/DeepMind 摊平模型、下有 BASF/宁德等掌握量产渠道；⑤ <strong>新颖性/实效未证</strong>——整条赛道尚无「AI 材料量产赚钱」铁证，开物纪自己产品实效全部未验证，当前可核实的只有团队 + 方向 + 融资。
+    </div>
+  </section>
+
+  <!-- ⑧ 现实判断 -->
+  <section id="take">
+    <h2><span class="n">⑧</span>现实判断</h2>
+    <p><strong>胜算：</strong>开物纪是中国 AI4Materials 里血统最硬、叙事最清晰的早期玩家之一——前微软 MatterGen/MatterSim 核心 + 产业量产老兵 + 一线资本（IDG/高瓴/百度/Monolith）连续两轮加持，且踩中「国产替代 + AI4S + 数据中心新需求」三重 why-now。它「不卖铲子、自己挖金、对标 Flagship」的定位，理论上能捕获比卖 SaaS 高得多的价值，并把护城河放在最难被开源摊平的「实验闭环 + 量产工程」上。<strong>软肋：</strong>(1) 它最初的技术差异化（MatterGen 系）已被微软开源、变成公共品；(2) 弹药量级仍小于 Periodic 等海外头部一档；(3) 真正的壁垒（公斤级/吨级量产平台）还在「建设中」，<strong>没有任何量产产品或营收被验证</strong>；(4) 重资产 + 长周期 + 巨头/incumbents 夹击，是结构性的硬仗。早期度上，<strong>赛道 emerging、公司本身极早期</strong>——这意味着窗口还在、但「能不能挤进去并跑出来」此刻完全取决于它能否第一个把一条材料真量产卖钱，而这一点目前无人做到、它也未证明。</p>
+    <div class="callout warn">
+      <span class="label">使用提醒</span>
+      本页为对话式调研，信息主要来自公开来源（36氪/钛媒体/新浪/投中/腾讯报道、创始人播客发言、官宣稿）并按等级标注；<strong>开物纪极早期，存在大量「未披露」</strong>（估值、确切成立日、营收、量产实绩、《Nature》论文细节等均未独立核实）。融资数额、客户、能力声明等以官方一手为准，<strong>产品能力未必经独立验证</strong>，引用前请核对最新信息。技术路线「双引擎 / 弱先验规模化」属公司自述（🔴），尚无第三方验证。
+    </div>
+  </section>
+
+  <!-- 出处 -->
+  <section id="src">
+    <h2>出处</h2>
+    <ul style="font-size:13.5px">
+      <li><span class="src src-a">🟢</span> 创始人陆子恒公开发言 · 十字路口 Crossing 播客「你有一把能够挖出金子的铲子，肯定不会先给别人用｜对谈开物纪陆子恒：用AI发明新材料」：<a href="https://www.xiaoyuzhoufm.com/podcast/60502e253c92d4f62c2a9577" target="_blank" rel="noopener">小宇宙</a>（对标 Flagship/Moderna、双轨、不卖铲子）</li>
+      <li><span class="src src-b">🟡</span> 36氪：<a href="https://eu.36kr.com/zh/p/3736276672279040" target="_blank" rel="noopener">天使+轮数亿元 / 双引擎 / 目标材料 / 团队</a>；<a href="https://eu.36kr.com/en/p/3569268483578241" target="_blank" rel="noopener">亿元级天使轮 / 光源资本 FA</a></li>
+      <li><span class="src src-b">🟡</span> 腾讯新闻：<a href="https://news.qq.com/rain/a/20251126A05VO800" target="_blank" rel="noopener">成立不足3个月获近亿融资，百度投了（创始人/团队/投资方明细）</a></li>
+      <li><span class="src src-b">🟡</span> 新浪财经：<a href="https://finance.sina.com.cn/tech/roll/2026-03-24/doc-inhrzysz3522208.shtml" target="_blank" rel="noopener">天使+轮 / 杨孟洋 / 任瑜（BASF）</a>；<a href="https://finance.sina.com.cn/tech/roll/2025-11-26/doc-infystcn1274085.shtml" target="_blank" rel="noopener">天使轮 / 成立日期</a></li>
+      <li><span class="src src-b">🟡</span> DoNews：<a href="https://www.donews.com/news/detail/1/6480711.html" target="_blank" rel="noopener">Monolith 砺思领投天使+轮</a>；投中网：<a href="https://www.chinaventure.com.cn/news/113-20251126-389053.html" target="_blank" rel="noopener">天使轮</a></li>
+      <li><span class="src src-b">🟡</span> 创始人技术背景（MatterGen/MatterSim/DiG）· Microsoft Research：<a href="https://www.microsoft.com/en-us/research/people/zihenglu/" target="_blank" rel="noopener">Ziheng Lu</a>；<a href="https://www.microsoft.com/en-us/research/podcast/ideas-ai-for-materials-discovery-with-tian-xie-and-ziheng-lu/" target="_blank" rel="noopener">MSR Podcast: AI for materials discovery</a></li>
+      <li><span class="src src-b">🟡</span> 赛道 / 实验室到量产难点 / 开源压低预测价值 · MIT Tech Review：<a href="https://www.technologyreview.com/2025/12/15/1129210/ai-materials-science-discovery-startups-investment/" target="_blank" rel="noopener">AI materials discovery now needs to move into the real world</a></li>
+      <li><span class="src src-b">🟡</span> 竞品 · Periodic Labs：<a href="https://techcrunch.com/2025/09/30/former-openai-and-deepmind-researchers-raise-whopping-300m-seed-to-automate-science/" target="_blank" rel="noopener">TechCrunch $300M seed</a>；Orbital：<a href="https://fortune.com/2026/05/28/exclusive-orbital-industries-raises-50-million-series-b-funding-round-ai-to-discover-exotic-new-materials/" target="_blank" rel="noopener">Fortune $50M B 轮</a>；Citrine：<a href="https://www.businesswire.com/news/home/20230104005839/en/Citrine-Informatics-Raises-%2416M-in-Series-C-Financing" target="_blank" rel="noopener">Series C</a></li>
+      <li><span class="src src-b">🟡</span> 竞品 · 晶泰科技 XtalPi：<a href="https://www.xtalpi.com/about/" target="_blank" rel="noopener">官网/港股 18C</a>；深势科技 8 亿 C 轮：<a href="https://www.qbitai.com/2025/12/365728.html" target="_blank" rel="noopener">量子位</a></li>
+      <li><span class="src src-b">🟡</span> 模式对标 · Flagship Pioneering / Moderna：<a href="https://en.wikipedia.org/wiki/Flagship_Pioneering" target="_blank" rel="noopener">Wikipedia</a>；巨头开源 · MatterGen：<a href="https://www.microsoft.com/en-us/research/blog/mattergen-a-new-paradigm-of-materials-design-with-generative-ai/" target="_blank" rel="noopener">MSR Blog</a>；GNoME：<a href="https://deepmind.google/blog/millions-of-new-materials-discovered-with-deep-learning/" target="_blank" rel="noopener">DeepMind</a></li>
+    </ul>
+  </section>
+
+  <footer class="foot">
+    公司竞争格局 / 赛道早期度调研笔记，仅作梳理；信息按来源分级、产品能力未必经独立验证，以官方一手信息为准 · 整理日期 2026-06-30
+  </footer>
+
+</article>
+</body>
+</html>
