@@ -1,22 +1,38 @@
 [
   {
+<<<<<<< HEAD
     "slug": "2026-06-29-source-code-capital-investments",
     "title": "源码资本（Source Code Capital）2025–2026 投资盘点（公开披露部分）",
+=======
+    "slug": "2026-06-29-matrix-partners-china-investments",
+    "title": "经纬创投（Matrix Partners China）2025–2026 投资盘点（公开披露部分）",
+>>>>>>> 2d722ef (Add 投资研究: 经纬创投 2025-2026 投资盘点)
     "authors": "—",
     "team": "投资研究",
     "arxiv": "",
     "code": "",
     "date": "2026-06-30",
     "published": "投资研究 2026",
+<<<<<<< HEAD
     "tldr": "源码资本(曹毅,红杉中国出身)2025-2026公开披露投资盘点,按赛道整理(AI/大模型/agent/具身机器人/半导体硬科技/企业服务/消费)+赛道分布SVG+下注重心(AI与具身硬科技为重心);收录约11笔可核实公开交易及IPO退出(奕斯伟/卧安/壁仞),含2025-11新6亿美元成长基金,每笔标来源等级,数据为公开样本非完整;非投资建议",
+=======
+    "tldr": "经纬创投(张颖,与Matrix US已拆分/品牌独立为MPC)2025-2026公开披露投资盘点,按赛道整理(具身机器人/物理AI/半导体硬科技/医疗/企业服务/新消费等)+赛道分布SVG+下注重心(具身与医疗并列最重);沐曦IPO为最大退出;每笔标来源等级,公开样本非完整;非投资建议",
+>>>>>>> 2d722ef (Add 投资研究: 经纬创投 2025-2026 投资盘点)
     "tags": [
       "investment",
       "venture-capital",
       "china",
+<<<<<<< HEAD
       "source-code-capital",
       "portfolio"
     ],
     "path": "papers/2026-06-29-source-code-capital-investments/index.html"
+=======
+      "matrix-partners-china",
+      "portfolio"
+    ],
+    "path": "papers/2026-06-29-matrix-partners-china-investments/index.html"
+>>>>>>> 2d722ef (Add 投资研究: 经纬创投 2025-2026 投资盘点)
   },
   {
     "slug": "2026-06-29-engram",
@@ -2188,6 +2204,7 @@
       "mcp",
       "agent"
     ]
+<<<<<<< HEAD
   },
   {
     "slug": "2026-06-29-idg-capital-investments",
@@ -2207,5 +2224,7 @@
       "portfolio"
     ],
     "path": "papers/2026-06-29-idg-capital-investments/index.html"
+=======
+>>>>>>> 2d722ef (Add 投资研究: 经纬创投 2025-2026 投资盘点)
   }
 ]
