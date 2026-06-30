@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>高瓴（Hillhouse）2025–2026 投资盘点（公开披露部分）</title>
+<style>
+:root{
+  --bg:#0e1116; --card:#171b22; --card2:#1d222b; --text:#e6e9ef; --muted:#9aa4b2;
+  --line:#2a313c; --accent:#5aa0ff; --accent2:#7ee0c0; --warn:#ffcf6b; --bad:#ff8e8e;
+  --green:#54d98c; --yellow:#ffd166; --red:#ff7b7b;
+  --chip:#232a35; --shadow:rgba(0,0,0,.35);
+}
+@media (prefers-color-scheme: light){
+  :root{
+    --bg:#f6f7f9; --card:#ffffff; --card2:#f1f3f7; --text:#1a1f29; --muted:#5b6675;
+    --line:#e2e6ec; --accent:#2563eb; --accent2:#0d9488; --warn:#b45309; --bad:#b91c1c;
+    --green:#15803d; --yellow:#a16207; --red:#b91c1c;
+    --chip:#eef1f6; --shadow:rgba(0,0,0,.08);
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  line-height:1.7;font-size:16px}
+.wrap{max-width:980px;margin:0 auto;padding:32px 20px 80px}
+header.top{border-bottom:1px solid var(--line);padding-bottom:22px;margin-bottom:8px}
+h1{font-size:1.85rem;line-height:1.35;margin:0 0 10px}
+h2{font-size:1.35rem;margin:42px 0 14px;padding-top:8px;border-top:1px solid var(--line)}
+h2:first-of-type{border-top:none}
+h3{font-size:1.08rem;margin:24px 0 8px;color:var(--accent)}
+p{margin:10px 0}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+.sub{color:var(--muted);font-size:.95rem}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.chip{background:var(--chip);border:1px solid var(--line);border-radius:999px;
+  padding:3px 11px;font-size:.82rem;color:var(--muted)}
+.callout{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--warn);
+  border-radius:10px;padding:14px 16px;margin:18px 0;font-size:.95rem}
+.callout.danger{border-left-color:var(--bad)}
+.callout.info{border-left-color:var(--accent)}
+.callout b{color:var(--text)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;
+  padding:18px 20px;margin:16px 0;box-shadow:0 1px 3px var(--shadow)}
+.grades{display:flex;flex-wrap:wrap;gap:14px;font-size:.9rem;margin:8px 0 4px}
+.grade{display:inline-flex;align-items:center;gap:6px}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+.g-green{background:var(--green)} .g-yellow{background:var(--yellow)} .g-red{background:var(--red)}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;margin:16px 0}
+table{border-collapse:collapse;width:100%;min-width:760px;font-size:.9rem}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--card2);color:var(--muted);font-weight:600;position:sticky;top:0;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+td.co{font-weight:600;white-space:nowrap}
+.tag{display:inline-block;background:var(--chip);border:1px solid var(--line);
+  border-radius:6px;padding:1px 7px;font-size:.78rem;color:var(--muted);white-space:nowrap}
+.src{font-size:.8rem;white-space:nowrap}
+.na{color:var(--muted);font-style:italic}
+ul{margin:10px 0;padding-left:22px}
+li{margin:6px 0}
+.svgcard{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;margin:16px 0}
+.footnote{color:var(--muted);font-size:.85rem;margin-top:6px}
+.kpi{display:flex;flex-wrap:wrap;gap:12px;margin:14px 0}
+.kpi .box{flex:1 1 160px;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.kpi .num{font-size:1.5rem;font-weight:700;color:var(--accent2)}
+.kpi .lbl{font-size:.82rem;color:var(--muted)}
+hr{border:none;border-top:1px solid var(--line);margin:30px 0}
+footer{margin-top:50px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:.85rem}
+code{background:var(--chip);padding:1px 6px;border-radius:5px;font-size:.88em}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <h1>高瓴（Hillhouse）2025–2026 投资盘点<span class="sub">（公开披露部分）</span></h1>
+  <p class="sub">主体：高瓴 Hillhouse Capital / 高瓴投资 Hillhouse Investment（创始人张磊 Zhang Lei）；早期/创投部门 高瓴创投 GL Ventures。盘点范围：2025–2026 一级市场新投与重大资本事件（含部分 2024Q4 跨期交易，已注明）。</p>
+  <div class="meta">
+    <span class="chip">投资研究 · 2026</span>
+    <span class="chip">PE + 创投双轮</span>
+    <span class="chip">医药 · AI · 硬科技 · 具身 · 新能源</span>
+    <span class="chip">公开样本 · 非完整清单</span>
+  </div>
+</header>
+
+<div class="callout danger">
+  <b>醒目声明：</b>本文为<b>公开披露的部分样本，并非高瓴的完整投资清单</b>。高瓴大量交易未公开披露或仅披露被投方而未确认高瓴的领投/跟投角色与金额；本文每笔交易均按公开信源整理并标注来源等级，核不到的字段一律写「未披露」，<b>不编造公司名、金额、轮次或创始人</b>。本文为信息整理，<b>不构成任何投资建议</b>。
+</div>
+
+<div class="card">
+  <div class="grades">
+    <span class="grade"><span class="dot g-green"></span>🟢 一手 / 官方公告 / 当事机构发布</span>
+    <span class="grade"><span class="dot g-yellow"></span>🟡 二手 / 主流财经媒体报道</span>
+    <span class="grade"><span class="dot g-red"></span>🔴 传闻 / 单一来源未交叉验证</span>
+  </div>
+  <p class="footnote">来源等级标注的是「该笔交易及高瓴参与角色」的可信度，而非公司本身好坏。多数交易由被投方或主流财经媒体披露，列为 🟡；当事机构（高瓴创投/被投公司）直接发布的列为 🟢。</p>
+</div>
+
+<!-- ============ ① 背景速补 ============ -->
+<h2>① 背景速补：高瓴是谁</h2>
+
+<p><b>高瓴（Hillhouse）</b>由<b>张磊</b>于 2005 年创立，起步资金约 2000 万美元（来自耶鲁捐赠基金等）。如今总部职能分布于新加坡/香港/北京等地，是<b>亚洲规模最大的投资机构之一</b>，横跨二级市场对冲基金、私募股权（PE）、风险投资（VC）的全阶段全周期。</p>
+
+<div class="kpi">
+  <div class="box"><div class="num">2005</div><div class="lbl">创立年份（张磊）</div></div>
+  <div class="box"><div class="num">~$100B</div><div class="lbl">AUM 量级（2025 媒体口径 🟡，曾在 2023 回落至 ~$62B、2024 约 $73B）</div></div>
+  <div class="box"><div class="num">2020</div><div class="lbl">高瓴创投 GL Ventures 成立（早期专项）</div></div>
+</div>
+
+<h3>PE + 创投「双轮」如何区分</h3>
+<ul>
+  <li><b>高瓴 PE / 二级（HHLR 等平台）</b>：做大额成长期股权与上市公司持仓、港股 IPO 基石、跨境并购（buyout）。代表历史动作包括百丽国际私有化、格力电器混改入股等；2025 年频繁担任港股 IPO 基石投资人。</li>
+  <li><b>高瓴创投 / GL Ventures（Hillhouse Ventures）</b>：2020 年成立的早期/创投部门，主打「投早、投小、投硬核」，按合伙人李良口径在硬科技、具身智能等方向密集出手；本盘点中绝大多数一级市场早期交易由它完成。</li>
+</ul>
+
+<h3>风格画像（基于公开投资轨迹归纳）</h3>
+<p>高瓴长期重仓<b>医药生物</b>（创新药、CGT/细胞与基因治疗、放射性药物、医疗器械）、<b>消费</b>（茶饮/零售）、<b>科技/AI 与大模型</b>、<b>半导体/硬科技</b>、<b>具身智能/机器人</b>、<b>新能源/绿色材料</b>（氢能、储能、光伏）。其自我表述为「长期结构性价值投资」，强调赛道确定性需求与供应链关键节点。2025 年前后高瓴公开提到看好<b>半导体、前沿科技、新能源、智能硬件</b>四大科技细分赛道，并发起科技产业赛道专项基金。<span class="src">🟡</span></p>
+
+<div class="callout info">
+  <b>消歧提示：</b>媒体常混用「高瓴」「高瓴资本」「高瓴投资」「高瓴创投/GL Ventures」「HHLR」等名号。本文尽量区分：早期一级交易归于<b>高瓴创投/GL Ventures</b>，上市公司持仓与 IPO 基石归于<b>高瓴 PE/二级平台（HHLR 等）</b>。若来源仅写「高瓴」未细分，则照实标注。
+</div>
+
+<!-- ============ ② 投资清单 ============ -->
+<h2>② 2025–2026 投资清单（公开披露样本）</h2>
+<p class="sub">下表为可核实的公开披露交易样本。金额币种以来源原文为准（人民币元 / 美元混用，已逐行注明）；高瓴在多数早期项目中为<b>跟投/共投</b>而非领投，已逐行标注。缺失字段写「未披露」。</p>
+
+<div class="tablewrap">
+<table>
+<thead>
+<tr>
+  <th>被投公司</th><th>日期</th><th>轮次</th><th>金额</th><th>赛道</th><th>高瓴角色 / 共投方</th><th>来源</th>
+</tr>
+</thead>
+<tbody>
+
+<tr>
+  <td class="co">趋境科技<br><span class="sub">Approaching.AI</span></td>
+  <td>2025-02</td>
+  <td>天使轮</td>
+  <td>数千万元（人民币）</td>
+  <td><span class="tag">AI 基础设施</span><span class="tag">大模型推理</span></td>
+  <td><b>高瓴创投</b>与 Z 基金<b>领投</b>；水木校友种子基金、真知创投（老股东）跟投。<br><span class="sub">做大模型推理优化、软硬一体推理工作站，关联清华 KTransformers 开源项目。</span></td>
+  <td class="src">🟢 <a href="https://www.qbitai.com/2025/02/259227.html">量子位</a></td>
+</tr>
+
+<tr>
+  <td class="co">星海图<br><span class="sub">Galaxea AI</span></td>
+  <td>2024-11（Pre-A）<br>2025-02（A 轮）</td>
+  <td>Pre-A / A 轮</td>
+  <td>Pre-A 超 2 亿元；A 轮近 3 亿元（人民币）</td>
+  <td><span class="tag">具身智能</span><span class="tag">机器人</span></td>
+  <td>Pre-A 由<b>高瓴创投</b>与蚂蚁集团<b>领投</b>（米哈游等跟投）；A 轮蚂蚁集团领投、<b>高瓴创投持续加码</b>（IDG、百度风投、北京机器人产业基金等）。<br><span class="sub">「一脑多型」具身机器人，团队来自清华/伯克利/Waymo/Momenta。</span></td>
+  <td class="src">🟡 <a href="https://www.cls.cn/detail/1847400">财联社</a> · <a href="https://www.stcn.com/article/detail/1535489.html">证券时报</a></td>
+</tr>
+
+<tr>
+  <td class="co">它石智航<br><span class="sub">TARS</span></td>
+  <td>2025-03</td>
+  <td>天使轮</td>
+  <td>1.2 亿美元</td>
+  <td><span class="tag">具身智能</span></td>
+  <td>蓝驰创投、启明创投<b>领投</b>；<b>高瓴创投</b>与线性资本、恒旭、洪泰、联想创投、襄禾等<b>跟投</b>。<br><span class="sub">核心团队多出自华为/百度/大疆；被称中国具身智能天使轮最大单笔之一。</span></td>
+  <td class="src">🟡 <a href="https://finance.sina.com.cn/stock/relnews/us/2025-03-26/doc-ineqxyiv9141203.shtml">新浪财经</a> · <a href="https://www.chnfund.com/article/ARa02b65be-84b4-488b-1eea-3a18e4d5be1d">中国基金报</a></td>
+</tr>
+
+<tr>
+  <td class="co">章鱼动力<br><span class="sub">SynapX</span></td>
+  <td>2026-03</td>
+  <td>首轮（种子/天使）</td>
+  <td>近 5000 万美元</td>
+  <td><span class="tag">具身智能</span><span class="tag">物理 AGI</span></td>
+  <td>地平线、<b>高瓴创投</b>、小米战投、顺为资本、线性资本共同投资。<br><span class="sub">2026 年 1 月成立，创始人都大龙（地平线 6 号创始员工、原鉴智机器人创始人）。</span></td>
+  <td class="src">🟡 <a href="https://finance.sina.com.cn/tech/roll/2026-03-20/doc-inhrqyhx8167214.shtml">新浪科技</a></td>
+</tr>
+
+<tr>
+  <td class="co">地瓜机器人</td>
+  <td>2026-03</td>
+  <td>B1 轮</td>
+  <td>1.2 亿美元</td>
+  <td><span class="tag">机器人</span><span class="tag">智能计算</span></td>
+  <td><b>高瓴创投</b>等老股东超额跟投。<br><span class="sub">机器人智能计算/芯片方向，高瓴为老股东持续加注。</span></td>
+  <td class="src">🟡 <a href="https://zhuanlan.zhihu.com/p/2023093175435142213">具身融资汇总（2026-03）</a></td>
+</tr>
+
+<tr>
+  <td class="co">老鹰半导体<br><span class="sub">Eagle Semiconductor</span></td>
+  <td>2025</td>
+  <td>B 轮</td>
+  <td>超 3 亿元（人民币）</td>
+  <td><span class="tag">半导体材料</span><span class="tag">硬科技</span></td>
+  <td>投资方含上汽集团、诺瓦星云、<b>高瓴资本</b>、财通资本、唐兴资本等（领投方为他方）。<br><span class="sub">新型半导体材料设计、研发及封装加工。</span></td>
+  <td class="src">🟡 <a href="https://startup.aliyun.com/info/1092644.html">阿里云创业（投资速递）</a></td>
+</tr>
+
+<tr>
+  <td class="co">圳力能时代<br><span class="sub">Liotimes</span></td>
+  <td>2025</td>
+  <td>A 轮</td>
+  <td class="na">未披露</td>
+  <td><span class="tag">高端 X 射线影像</span><span class="tag">硬科技</span></td>
+  <td><b>高瓴创投独家投资</b>。<br><span class="sub">高端 X 射线影像系统核心部件。</span></td>
+  <td class="src">🟡 <a href="https://www.pedaily.cn/vc/2025/106421/">投资界（高瓴 2025 年汇总）</a></td>
+</tr>
+
+<tr>
+  <td class="co">星锐医药<br><span class="sub">Starna Therapeutics</span></td>
+  <td>2025-10</td>
+  <td>B 轮</td>
+  <td>逾 3 亿元（人民币）</td>
+  <td><span class="tag">生物医药</span><span class="tag">RNA 疗法</span></td>
+  <td>LYFE Capital、<b>高瓴创投</b>与礼来亚洲基金（LAV）<b>共同领投</b>；源码、夏尔巴、春华持续加码。<br><span class="sub">RNA 药物/肝外靶向递送、体内 CAR-T 管线。</span></td>
+  <td class="src">🟡 <a href="https://news.pedaily.cn/202510/556275.shtml">投资界</a> · <a href="https://finance.sina.com.cn/tech/roll/2025-10-24/doc-infuyrfi1341272.shtml">新浪财经</a></td>
+</tr>
+
+<tr>
+  <td class="co">通瑞生物<br><span class="sub">成都</span></td>
+  <td>2024-11<br><span class="sub">（跨期，列作参考）</span></td>
+  <td>A+ 轮</td>
+  <td>超 1 亿美元</td>
+  <td><span class="tag">生物医药</span><span class="tag">放射性药物</span></td>
+  <td>深创投新材料基金、泰珑投资<b>领投</b>；<b>高瓴创投</b>、三生制药、光华梧桐等跟投。<br><span class="sub">α 核素 RDC 创新药、放射性药物全链条服务。</span></td>
+  <td class="src">🟡 <a href="https://www.pharnexcloud.com/zixun/yytrz_29933">摩熵医药</a></td>
+</tr>
+
+<tr>
+  <td class="co">智谱<br><span class="sub">Z.ai / 智谱华章</span></td>
+  <td>2024–2025（多轮）</td>
+  <td>多轮（老股东）</td>
+  <td>半年内累计超 50 亿元（人民币，全轮非高瓴单方）</td>
+  <td><span class="tag">大模型</span><span class="tag">AGI</span></td>
+  <td><b>高瓴资本</b>为投资方之一（与启明、君联、美团、腾讯、小米等）。<br><span class="sub">最新估值约 400 亿元；2025-12 通过港交所聆讯，拟 2026 初上市。</span></td>
+  <td class="src">🟡 <a href="https://www.cls.cn/detail/2233971">财联社</a></td>
+</tr>
+
+<tr>
+  <td class="co">MiniMax<br><span class="sub">稀宇科技</span></td>
+  <td>2025-07（C 轮）<br>及更早多轮</td>
+  <td>C 轮（高瓴为老股东）</td>
+  <td>C 轮近 3 亿美元（全轮非高瓴单方）</td>
+  <td><span class="tag">大模型</span></td>
+  <td><b>高瓴创投</b>为投资方之一（与阿里、腾讯、云启、米哈游、IDG 等）。<br><span class="sub">估值约 40 亿美元；2025-12 通过港交所聆讯，拟 2026 初上市。</span></td>
+  <td class="src">🟡 <a href="https://www.cls.cn/detail/2233971">财联社</a></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+<p class="footnote">说明：智谱、MiniMax 为高瓴<b>既有持仓/老股东</b>，金额为该公司整轮规模而非高瓴单方出资，列入是为体现高瓴在大模型赛道的布局，<b>不代表 2025–2026 为新投</b>。通瑞生物为 2024Q4 交易、跨期列作参考。</p>
+
+<!-- ============ ③ 赛道分布 SVG ============ -->
+<h2>③ 赛道分布（已收录样本）</h2>
+<p class="sub">下图基于<b>本文已收录的 11 笔公开交易样本</b>统计，<b>非高瓴全量投资</b>，仅反映本盘点的样本结构，存在明显的「媒体可见性偏差」（具身/大模型类交易曝光度高、易被收录）。</p>
+
+<div class="svgcard">
+<svg viewBox="0 0 720 260" width="100%" role="img" aria-label="高瓴 2025-2026 已收录样本赛道分布柱状图">
+  <style>
+    .lbl{fill:var(--text);font-size:13px;font-family:inherit}
+    .val{fill:var(--muted);font-size:12px;font-family:inherit}
+    .axis{stroke:var(--line);stroke-width:1}
+  </style>
+  <!-- baseline -->
+  <line class="axis" x1="170" y1="20" x2="170" y2="230"/>
+  <!-- counts: 具身/机器人=4(星海图,它石,章鱼,地瓜); AI/大模型=3(趋境,智谱,MiniMax); 生物医药=2(星锐,通瑞); 半导体硬科技=2(老鹰,圳力能) ; scale max=4 -> 480px -->
+
+  <!-- row1 具身/机器人 4 -->
+  <text class="lbl" x="160" y="44" text-anchor="end">具身智能/机器人</text>
+  <rect x="170" y="32" width="480" height="20" fill="#5aa0ff" rx="4"/>
+  <text class="val" x="660" y="47" text-anchor="end">4 笔</text>
+
+  <!-- row2 AI/大模型 3 -->
+  <text class="lbl" x="160" y="84" text-anchor="end">AI / 大模型</text>
+  <rect x="170" y="72" width="360" height="20" fill="#7ee0c0" rx="4"/>
+  <text class="val" x="540" y="87" text-anchor="end">3 笔</text>
+
+  <!-- row3 生物医药 2 -->
+  <text class="lbl" x="160" y="124" text-anchor="end">生物医药</text>
+  <rect x="170" y="112" width="240" height="20" fill="#ffcf6b" rx="4"/>
+  <text class="val" x="420" y="127" text-anchor="end">2 笔</text>
+
+  <!-- row4 半导体/硬科技 2 -->
+  <text class="lbl" x="160" y="164" text-anchor="end">半导体 / 硬科技</text>
+  <rect x="170" y="152" width="240" height="20" fill="#c79bff" rx="4"/>
+  <text class="val" x="420" y="167" text-anchor="end">2 笔</text>
+
+  <!-- note row for not-in-sample tracks -->
+  <text class="lbl" x="160" y="204" text-anchor="end" fill="#9aa4b2">新能源/材料 · 消费</text>
+  <rect x="170" y="192" width="6" height="20" fill="#2a313c" rx="3"/>
+  <text class="val" x="186" y="207" text-anchor="start">本期样本未收录到具体新交易（见局限节）</text>
+</svg>
+<p class="footnote">N = 11 笔（含智谱/MiniMax 老股东持仓与通瑞生物 2024Q4 跨期交易）。柱长按「具身/机器人 4、AI/大模型 3、生物医药 2、半导体/硬科技 2」绘制。新能源/材料、消费、企业服务为高瓴历史重仓赛道，但<b>本期未核实到可写明的 2025–2026 具体新一级交易</b>，故未单列样本。</p>
+</div>
+
+<!-- ============ ④ 主题观察 ============ -->
+<h2>④ 主题观察（数据支持 vs 推测分清）</h2>
+
+<h3>有样本数据支持的观察</h3>
+<ul>
+  <li><b>具身智能/机器人是早期出手最密集的方向。</b>样本中星海图、它石智航、章鱼动力、地瓜机器人均为高瓴创投布局，且多为<b>跨轮持续加注</b>（星海图 Pre-A→A、地瓜老股东加注）。高瓴合伙人李良公开口径亦称在具身产业链已布局近 10 家。<span class="src">🟡</span></li>
+  <li><b>大模型走「老股东陪跑到 IPO」路径。</b>智谱、MiniMax 两家头部大模型均有高瓴在册，2025 年底双双通过港交所聆讯，体现「早期投入—二级退出」闭环倾向。<span class="src">🟡</span></li>
+  <li><b>生物医药仍是基本盘，且向前沿细分迁移。</b>样本集中在 RNA 疗法（星锐）、放射性药物（通瑞）等新一代模态，而非传统小分子，延续高瓴在创新药的长期布局。<span class="src">🟡</span></li>
+</ul>
+
+<h3>属于推测/需谨慎的判断</h3>
+<ul>
+  <li>「具身占比最高」很可能<b>部分源于媒体曝光偏差</b>——机器人融资在 2025–2026 是报道热点，更易进入公开样本；不能据此断言高瓴内部资金投向的真实权重。</li>
+  <li>本文未收录到的赛道（新能源/材料、消费、企业服务）<b>不等于高瓴没投</b>，仅代表本期未核实到可写明公司名/轮次的具体新交易。</li>
+  <li>高瓴在多数早期项目是<b>跟投而非领投</b>，单凭「高瓴参投」难以推断其判断权重或仓位大小。</li>
+</ul>
+
+<!-- ============ ⑤ 退出 / IPO ============ -->
+<h2>⑤ 退出 / IPO 与二级动作（2025）</h2>
+<p class="sub">高瓴 PE/二级平台在 2025 年的公开资本动作，体现「老仓减持 + 新港股 IPO 基石」的轮动。</p>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th>标的</th><th>动作</th><th>规模/口径</th><th>来源</th></tr></thead>
+<tbody>
+<tr>
+  <td class="co">百济神州<br><span class="sub">BeiGene</span></td>
+  <td>持续减持</td>
+  <td>2023-06 起 23 个月内持股由 ~11.02% 降至 4.89%，累计套现近 100 亿港元；2025-05 退出 5% 以上股东。</td>
+  <td class="src">🟡 <a href="https://www.chinaventure.com.cn/news/111-20250528-386484.html">投中网</a> · <a href="https://finance.sina.com.cn/tech/csj/2025-05-15/doc-inewqxsh0290739.shtml">新浪科技</a></td>
+</tr>
+<tr>
+  <td class="co">宁德时代<br><span class="sub">CATL 港股</span></td>
+  <td>IPO 基石认购</td>
+  <td>报道高瓴以约 2 亿美元认购；CATL 2025-05-20 以 263 港元发行价登陆港交所（今年港股大型 IPO 之一）。</td>
+  <td class="src">🟡 <a href="https://finance.sina.com.cn/roll/2025-06-08/doc-inezinsn7808323.shtml">新浪财经</a></td>
+</tr>
+<tr>
+  <td class="co">恒瑞医药<br><span class="sub">港股</span></td>
+  <td>IPO 基石认购</td>
+  <td>报道高瓴出资约 4000 万美元认购恒瑞医药港股 IPO。</td>
+  <td class="src">🟡 <a href="https://finance.sina.com.cn/stock/estate/integration/2025-05-15/doc-inewrkfy5156569.shtml">新浪财经</a></td>
+</tr>
+<tr>
+  <td class="co">蜜雪集团<br><span class="sub">蜜雪冰城 港股</span></td>
+  <td>IPO 基石认购</td>
+  <td>通过 HHLR 基金参与基石，认购总额报道超 2 亿（港元）。</td>
+  <td class="src">🟡 <a href="https://finance.sina.com.cn/roll/2025-06-08/doc-inezinsn7808323.shtml">新浪财经</a></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="footnote">退出/基石口径多来自媒体测算与公告交叉，金额可能含估算成分，列为 🟡。智谱、MiniMax 若 2026 初成功上市，将成为高瓴大模型布局的潜在退出通道（截至本文未完成 IPO，仅过聆讯）。</p>
+
+<!-- ============ ⑥ 局限 ============ -->
+<h2>⑥ 局限与存疑</h2>
+<ul>
+  <li><b>样本严重不全。</b>本文仅 11 笔一级交易 + 4 项二级动作，远不能代表高瓴（管理规模约 $100B 量级、被投组合数百家）的真实投资版图。高瓴官网与多数交易并不逐笔公开。</li>
+  <li><b>币种与口径混用。</b>表中金额人民币元 / 美元混用，且「整轮规模」≠「高瓴出资额」；本文未做币种统一换算，不可直接横向加总。</li>
+  <li><b>一级 vs 二级口径混淆风险。</b>「高瓴」可能指创投、PE 或二级平台（HHLR）。媒体常笼统称「高瓴」，本文已尽量区分但仍可能有归属误差。</li>
+  <li><b>领投/跟投角色与仓位无法确证。</b>多笔交易高瓴为跟投，公开信息不披露具体出资比例，无法据此判断其内部判断权重。</li>
+  <li><b>跨期与老股东问题。</b>通瑞生物属 2024Q4、智谱/MiniMax 属老股东多轮，严格说并非纯 2025–2026 新投，已逐条标注。</li>
+  <li><b>来源时效。</b>融资/上市进展随时间变化（如智谱、MiniMax 的 IPO 状态），请以最新公告为准。</li>
+</ul>
+
+<div class="callout danger">
+  <b>再次声明：</b>本文是<b>公开披露的部分样本，非完整投资清单</b>，仅供信息参考，<b>不构成任何投资建议</b>。涉及具体决策请以一手公告与专业尽调为准。
+</div>
+
+<footer>
+  <p>整理：投资研究 · 2026　|　方法：中英文公开信源交叉核实，每笔标注来源等级（🟢 一手 / 🟡 二手 / 🔴 传闻），核不到的字段写「未披露」，不编造数据。</p>
+  <p>主要信源：量子位、证券时报、财联社、投资界(PEdaily)、新浪财经/科技、中国基金报、投中网、摩熵医药、阿里云创业、维基百科等（正文内逐笔附链）。</p>
+</footer>
+
+</div>
+</body>
+</html>
