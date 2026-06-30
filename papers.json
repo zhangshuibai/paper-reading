@@ -1,5 +1,24 @@
 [
   {
+    "slug": "2026-06-29-idg-capital-investments",
+    "title": "IDG 资本（IDG Capital）2025–2026 投资盘点（公开披露部分）",
+    "authors": "—",
+    "team": "投资研究",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-30",
+    "published": "投资研究 2026",
+    "tldr": "IDG资本(中国最早美元VC之一,熊晓鸽1993入华)2025-2026公开披露投资盘点,按赛道整理(机器人/具身智能·AI大模型与应用·医疗大健康·半导体·新能源/钠电)+赛道分布SVG+下注重心(机器人+AI占样本一半);含退出/IPO(影石·小马·文远)与5亿美元接续基金;公开样本非完整、逐笔标来源等级;非投资建议",
+    "tags": [
+      "investment",
+      "venture-capital",
+      "china",
+      "idg-capital",
+      "portfolio"
+    ],
+    "path": "papers/2026-06-29-idg-capital-investments/index.html"
+  },
+  {
     "slug": "2026-06-29-engram",
     "title": "Engram：AI 持续记忆层赛道的竞争格局与早期度调研",
     "authors": "—",
@@ -37,6 +56,119 @@
       "map"
     ],
     "path": "papers/2026-06-17-overview-map/index.html"
+  },
+  {
+    "slug": "2026-06-28-quant-intro-for-ml",
+    "title": "量化投资(Quant)入门：用机器学习的语言重新理解它",
+    "authors": "—",
+    "team": "科普·入门",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-28",
+    "published": "财经投资",
+    "tldr": "写给有LLM/ML背景但量化零基础的人:用特征工程/训练测试集/过拟合/标签泄漏等你熟悉的概念一一对应量化里的因子/样本内外/曲线拟合/未来函数,讲透收益率/夏普/回撤/alpha-beta/因子/回测三大陷阱,含6个浏览器本地交互(价格模拟/夏普计算器/均线交叉回测/过拟合演示)和书课库数据社区资料大全+学习路线图",
+    "tags": [
+      "quant",
+      "量化投资",
+      "金融",
+      "factor-investing",
+      "backtest",
+      "入门科普",
+      "for-ML-people"
+    ],
+    "categories": [],
+    "path": "papers/2026-06-28-quant-intro-for-ml/index.html"
+  },
+  {
+    "slug": "2026-06-28-option-pricing-aapl-real",
+    "title": "真实案例:AAPL期权价格如何随时间和股价变化(交互)",
+    "authors": "—",
+    "team": "实战·进阶",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-28",
+    "published": "财经投资",
+    "tldr": "用Robinhood真实数据(AAPL 2026上半年日线+6/26真实期权链)拆解期权定价:真实期权链快照看delta逐级递减/theta每日损耗/买卖价差,Black-Scholes重建(经真实报价校验误差<2%)期权价格随股价和剩余天数的演变,含3个浏览器交互—真实股价图/BS价格曲线/时间机器(在真实AAPL走势上持有一张call看每日盈亏与时间价值融化),配大涨赢家与暴跌归零两个预设",
+    "tags": [
+      "options",
+      "期权",
+      "black-scholes",
+      "delta",
+      "theta",
+      "实战",
+      "真实数据",
+      "AAPL"
+    ],
+    "categories": [],
+    "path": "papers/2026-06-28-option-pricing-aapl-real/index.html"
+  },
+  {
+    "slug": "2026-06-28-black-scholes-explained",
+    "title": "从零讲透Black-Scholes:期权理论价是什么、有什么用",
+    "authors": "—",
+    "team": "零基础·科普",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-28",
+    "published": "财经投资",
+    "tldr": "面向金融零基础:用保险定价类比讲清Black-Scholes和期权理论价(公允价)是什么—理论价=内在价值+时间价值,波动越大时间越长越值钱(不确定性=价值),理论价vs市场价的差距就是IV的来源;含真实BS公式实时计算器(拖5个输入S/K/T/σ/r看理论价与内在外价值此消彼长)和单因子敏感度图,讲透5个输入怎么推动价格、理论价的5个用途与模型局限",
+    "tags": [
+      "black-scholes",
+      "期权",
+      "理论价",
+      "期权定价",
+      "零基础",
+      "科普",
+      "计算器"
+    ],
+    "categories": [],
+    "path": "papers/2026-06-28-black-scholes-explained/index.html"
+  },
+  {
+    "slug": "2026-06-28-retail-quant-strategies",
+    "title": "散户量化策略调研报告:$1万-$10万资金该做什么(含引用)",
+    "authors": "—",
+    "team": "调研·综述",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-28",
+    "published": "财经投资",
+    "tldr": "基于公开网络资料综合的散户量化调研:先校准现实(90%第一年跑不赢买入持有/80%回测过拟合失效/幸存者年化8-15%),再逐个拆解6类适合$1万-$10万的策略(资产类双动量/趋势跟踪管理期货/期权Wheel卖权收租/短期均值回归/因子ETF/加密),按资金量分层,讲2026 PDT$2.5万门槛取消等监管成本变化与QuantConnect/Alpaca/IBKR平台对比,给出推荐蓝图+现实收益复利计算器,20条来源引用",
+    "tags": [
+      "量化",
+      "散户",
+      "策略",
+      "动量",
+      "趋势跟踪",
+      "期权wheel",
+      "调研报告",
+      "2026"
+    ],
+    "categories": [],
+    "path": "papers/2026-06-28-retail-quant-strategies/index.html"
+  },
+  {
+    "slug": "2026-06-28-iron-condor",
+    "title": "详解Iron Condor铁鹰:beta=0的delta中性期权收租策略(交互)",
+    "authors": "—",
+    "team": "期权·进阶",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-28",
+    "published": "财经投资",
+    "tldr": "从卖宽跨式一步步搭出铁鹰:卖看涨价差+卖看跌价差4条腿,赌股价待在区间,delta≈0不赌方向(beta=0)风险有限,靠theta时间损耗+波动率溢价VRP赚钱;含真实AAPL期权参数计算的交互盈亏图(拖短腿距离/翼宽/剩余天数看桌面形盈亏与theta抬升曲线),讲透最大盈亏/盈亏平衡/净delta/4个希腊字母暴露/负偏风险与管理纪律(高流动性标的/30-45天/盈利50%了结/避财报/小仓位),含账户Level3多腿限制说明",
+    "tags": [
+      "iron-condor",
+      "铁鹰",
+      "期权",
+      "delta中性",
+      "market-neutral",
+      "theta",
+      "波动率溢价",
+      "交互"
+    ],
+    "categories": [],
+    "path": "papers/2026-06-28-iron-condor/index.html"
   },
   {
     "slug": "2026-06-17-hongshan-sequoia-china-investments",
@@ -2056,118 +2188,5 @@
       "mcp",
       "agent"
     ]
-  },
-  {
-    "slug": "2026-06-28-quant-intro-for-ml",
-    "title": "量化投资(Quant)入门：用机器学习的语言重新理解它",
-    "authors": "—",
-    "team": "科普·入门",
-    "arxiv": "",
-    "code": "",
-    "date": "2026-06-28",
-    "published": "财经投资",
-    "tldr": "写给有LLM/ML背景但量化零基础的人:用特征工程/训练测试集/过拟合/标签泄漏等你熟悉的概念一一对应量化里的因子/样本内外/曲线拟合/未来函数,讲透收益率/夏普/回撤/alpha-beta/因子/回测三大陷阱,含6个浏览器本地交互(价格模拟/夏普计算器/均线交叉回测/过拟合演示)和书课库数据社区资料大全+学习路线图",
-    "tags": [
-      "quant",
-      "量化投资",
-      "金融",
-      "factor-investing",
-      "backtest",
-      "入门科普",
-      "for-ML-people"
-    ],
-    "categories": [],
-    "path": "papers/2026-06-28-quant-intro-for-ml/index.html"
-  },
-  {
-    "slug": "2026-06-28-option-pricing-aapl-real",
-    "title": "真实案例:AAPL期权价格如何随时间和股价变化(交互)",
-    "authors": "—",
-    "team": "实战·进阶",
-    "arxiv": "",
-    "code": "",
-    "date": "2026-06-28",
-    "published": "财经投资",
-    "tldr": "用Robinhood真实数据(AAPL 2026上半年日线+6/26真实期权链)拆解期权定价:真实期权链快照看delta逐级递减/theta每日损耗/买卖价差,Black-Scholes重建(经真实报价校验误差<2%)期权价格随股价和剩余天数的演变,含3个浏览器交互—真实股价图/BS价格曲线/时间机器(在真实AAPL走势上持有一张call看每日盈亏与时间价值融化),配大涨赢家与暴跌归零两个预设",
-    "tags": [
-      "options",
-      "期权",
-      "black-scholes",
-      "delta",
-      "theta",
-      "实战",
-      "真实数据",
-      "AAPL"
-    ],
-    "categories": [],
-    "path": "papers/2026-06-28-option-pricing-aapl-real/index.html"
-  },
-  {
-    "slug": "2026-06-28-black-scholes-explained",
-    "title": "从零讲透Black-Scholes:期权理论价是什么、有什么用",
-    "authors": "—",
-    "team": "零基础·科普",
-    "arxiv": "",
-    "code": "",
-    "date": "2026-06-28",
-    "published": "财经投资",
-    "tldr": "面向金融零基础:用保险定价类比讲清Black-Scholes和期权理论价(公允价)是什么—理论价=内在价值+时间价值,波动越大时间越长越值钱(不确定性=价值),理论价vs市场价的差距就是IV的来源;含真实BS公式实时计算器(拖5个输入S/K/T/σ/r看理论价与内在外价值此消彼长)和单因子敏感度图,讲透5个输入怎么推动价格、理论价的5个用途与模型局限",
-    "tags": [
-      "black-scholes",
-      "期权",
-      "理论价",
-      "期权定价",
-      "零基础",
-      "科普",
-      "计算器"
-    ],
-    "categories": [],
-    "path": "papers/2026-06-28-black-scholes-explained/index.html"
-  },
-  {
-    "slug": "2026-06-28-retail-quant-strategies",
-    "title": "散户量化策略调研报告:$1万-$10万资金该做什么(含引用)",
-    "authors": "—",
-    "team": "调研·综述",
-    "arxiv": "",
-    "code": "",
-    "date": "2026-06-28",
-    "published": "财经投资",
-    "tldr": "基于公开网络资料综合的散户量化调研:先校准现实(90%第一年跑不赢买入持有/80%回测过拟合失效/幸存者年化8-15%),再逐个拆解6类适合$1万-$10万的策略(资产类双动量/趋势跟踪管理期货/期权Wheel卖权收租/短期均值回归/因子ETF/加密),按资金量分层,讲2026 PDT$2.5万门槛取消等监管成本变化与QuantConnect/Alpaca/IBKR平台对比,给出推荐蓝图+现实收益复利计算器,20条来源引用",
-    "tags": [
-      "量化",
-      "散户",
-      "策略",
-      "动量",
-      "趋势跟踪",
-      "期权wheel",
-      "调研报告",
-      "2026"
-    ],
-    "categories": [],
-    "path": "papers/2026-06-28-retail-quant-strategies/index.html"
-  },
-  {
-    "slug": "2026-06-28-iron-condor",
-    "title": "详解Iron Condor铁鹰:beta=0的delta中性期权收租策略(交互)",
-    "authors": "—",
-    "team": "期权·进阶",
-    "arxiv": "",
-    "code": "",
-    "date": "2026-06-28",
-    "published": "财经投资",
-    "tldr": "从卖宽跨式一步步搭出铁鹰:卖看涨价差+卖看跌价差4条腿,赌股价待在区间,delta≈0不赌方向(beta=0)风险有限,靠theta时间损耗+波动率溢价VRP赚钱;含真实AAPL期权参数计算的交互盈亏图(拖短腿距离/翼宽/剩余天数看桌面形盈亏与theta抬升曲线),讲透最大盈亏/盈亏平衡/净delta/4个希腊字母暴露/负偏风险与管理纪律(高流动性标的/30-45天/盈利50%了结/避财报/小仓位),含账户Level3多腿限制说明",
-    "tags": [
-      "iron-condor",
-      "铁鹰",
-      "期权",
-      "delta中性",
-      "market-neutral",
-      "theta",
-      "波动率溢价",
-      "交互"
-    ],
-    "categories": [],
-    "path": "papers/2026-06-28-iron-condor/index.html"
   }
 ]
