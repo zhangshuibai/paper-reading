@@ -1,5 +1,24 @@
 [
   {
+    "slug": "2026-06-29-idg-capital-investments",
+    "title": "IDG 资本（IDG Capital）2025–2026 投资盘点（公开披露部分）",
+    "authors": "—",
+    "team": "投资研究",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-30",
+    "published": "投资研究 2026",
+    "tldr": "IDG资本(中国最早美元VC之一,熊晓鸽1993入华)2025-2026公开披露投资盘点,按赛道整理(机器人/具身智能·AI大模型与应用·医疗大健康·半导体·新能源/钠电)+赛道分布SVG+下注重心(机器人+AI占样本一半);含退出/IPO(影石·小马·文远)与5亿美元接续基金;公开样本非完整、逐笔标来源等级;非投资建议",
+    "tags": [
+      "investment",
+      "venture-capital",
+      "china",
+      "idg-capital",
+      "portfolio"
+    ],
+    "path": "papers/2026-06-29-idg-capital-investments/index.html"
+  },
+  {
     "slug": "2026-06-29-source-code-capital-investments",
     "title": "源码资本（Source Code Capital）2025–2026 投资盘点（公开披露部分）",
     "authors": "—",
@@ -17,6 +36,26 @@
       "portfolio"
     ],
     "path": "papers/2026-06-29-source-code-capital-investments/index.html"
+  },
+  {
+    "slug": "2026-06-29-qiming-investments",
+    "title": "启明创投（Qiming Venture Partners）2025–2026 投资盘点（公开披露部分）",
+    "authors": "—",
+    "team": "投资研究",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-30",
+    "published": "投资研究 2026",
+    "tldr": "启明创投(邝子平,医疗+科技双引擎)2025-2026公开披露投资盘点,按赛道整理(生物医药/AI/半导体/具身机器人/新能源等)+赛道分布SVG+下注重心(生物医药为基本盘,具身智能与国产半导体为新重注);收录约17笔投资+7例港股IPO退出,每笔标来源等级,公开样本非完整;非投资建议",
+    "tags": [
+      "investment",
+      "venture-capital",
+      "china",
+      "qiming",
+      "healthcare",
+      "portfolio"
+    ],
+    "path": "papers/2026-06-29-qiming-investments/index.html"
   },
   {
     "slug": "2026-06-29-engram",
@@ -38,6 +77,44 @@
       "china"
     ],
     "path": "papers/2026-06-29-engram/index.html"
+  },
+  {
+    "slug": "2026-06-29-matrix-partners-china-investments",
+    "title": "经纬创投（Matrix Partners China）2025–2026 投资盘点（公开披露部分）",
+    "authors": "—",
+    "team": "投资研究",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-29",
+    "published": "投资研究 2026",
+    "tldr": "经纬创投(张颖,与Matrix US已拆分/品牌独立为MPC)2025-2026公开披露投资盘点,按赛道整理(具身机器人/物理AI/半导体硬科技/医疗/企业服务/新消费等)+赛道分布SVG+下注重心(具身与医疗并列最重);沐曦IPO为最大退出;每笔标来源等级,公开样本非完整;非投资建议",
+    "tags": [
+      "investment",
+      "venture-capital",
+      "china",
+      "matrix-partners-china",
+      "portfolio"
+    ],
+    "path": "papers/2026-06-29-matrix-partners-china-investments/index.html"
+  },
+  {
+    "slug": "2026-06-29-hillhouse-investments",
+    "title": "高瓴（Hillhouse）2025–2026 投资盘点（公开披露部分）",
+    "authors": "—",
+    "team": "投资研究",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-29",
+    "published": "投资研究 2026",
+    "tldr": "高瓴（张磊，PE+创投 GL Ventures）2025–2026 公开披露投资盘点：具身智能/机器人出手最密集、AI 大模型陪跑到港股 IPO、生物医药向 RNA/放射性药物等前沿模态迁移；公开样本非完整、每笔标来源等级；非投资建议。",
+    "tags": [
+      "investment",
+      "venture-capital",
+      "china",
+      "hillhouse",
+      "portfolio"
+    ],
+    "path": "papers/2026-06-29-hillhouse-investments/index.html"
   },
   {
     "slug": "2026-06-17-overview-map",
@@ -2188,63 +2265,5 @@
       "mcp",
       "agent"
     ]
-  },
-  {
-    "slug": "2026-06-29-idg-capital-investments",
-    "title": "IDG 资本（IDG Capital）2025–2026 投资盘点（公开披露部分）",
-    "authors": "—",
-    "team": "投资研究",
-    "arxiv": "",
-    "code": "",
-    "date": "2026-06-30",
-    "published": "投资研究 2026",
-    "tldr": "IDG资本(中国最早美元VC之一,熊晓鸽1993入华)2025-2026公开披露投资盘点,按赛道整理(机器人/具身智能·AI大模型与应用·医疗大健康·半导体·新能源/钠电)+赛道分布SVG+下注重心(机器人+AI占样本一半);含退出/IPO(影石·小马·文远)与5亿美元接续基金;公开样本非完整、逐笔标来源等级;非投资建议",
-    "tags": [
-      "investment",
-      "venture-capital",
-      "china",
-      "idg-capital",
-      "portfolio"
-    ],
-    "path": "papers/2026-06-29-idg-capital-investments/index.html"
-  },
-  {
-    "slug": "2026-06-29-qiming-investments",
-    "title": "启明创投（Qiming Venture Partners）2025–2026 投资盘点（公开披露部分）",
-    "authors": "—",
-    "team": "投资研究",
-    "arxiv": "",
-    "code": "",
-    "date": "2026-06-30",
-    "published": "投资研究 2026",
-    "tldr": "启明创投(邝子平,医疗+科技双引擎)2025-2026公开披露投资盘点,按赛道整理(生物医药/AI/半导体/具身机器人/新能源等)+赛道分布SVG+下注重心(生物医药为基本盘,具身智能与国产半导体为新重注);收录约17笔投资+7例港股IPO退出,每笔标来源等级,公开样本非完整;非投资建议",
-    "tags": [
-      "investment",
-      "venture-capital",
-      "china",
-      "qiming",
-      "healthcare",
-      "portfolio"
-    ],
-    "path": "papers/2026-06-29-qiming-investments/index.html"
-  },
-  {
-    "slug": "2026-06-29-matrix-partners-china-investments",
-    "title": "经纬创投（Matrix Partners China）2025–2026 投资盘点（公开披露部分）",
-    "authors": "—",
-    "team": "投资研究",
-    "arxiv": "",
-    "code": "",
-    "date": "2026-06-29",
-    "published": "投资研究 2026",
-    "tldr": "经纬创投(张颖,与Matrix US已拆分/品牌独立为MPC)2025-2026公开披露投资盘点,按赛道整理(具身机器人/物理AI/半导体硬科技/医疗/企业服务/新消费等)+赛道分布SVG+下注重心(具身与医疗并列最重);沐曦IPO为最大退出;每笔标来源等级,公开样本非完整;非投资建议",
-    "tags": [
-      "investment",
-      "venture-capital",
-      "china",
-      "matrix-partners-china",
-      "portfolio"
-    ],
-    "path": "papers/2026-06-29-matrix-partners-china-investments/index.html"
   }
 ]
