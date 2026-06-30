@@ -1,1 +1,2231 @@
-[]
+[
+  {
+    "slug": "2026-06-29-source-code-capital-investments",
+    "title": "源码资本（Source Code Capital）2025–2026 投资盘点（公开披露部分）",
+    "authors": "—",
+    "team": "投资研究",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-30",
+    "published": "投资研究 2026",
+    "tldr": "源码资本(曹毅,红杉中国出身)2025-2026公开披露投资盘点,按赛道整理(AI/大模型/agent/具身机器人/半导体硬科技/企业服务/消费)+赛道分布SVG+下注重心(AI与具身硬科技为重心);收录约11笔可核实公开交易及IPO退出(奕斯伟/卧安/壁仞),含2025-11新6亿美元成长基金,每笔标来源等级,数据为公开样本非完整;非投资建议",
+    "tags": [
+      "investment",
+      "venture-capital",
+      "china",
+      "source-code-capital",
+      "portfolio"
+    ],
+    "path": "papers/2026-06-29-source-code-capital-investments/index.html"
+  },
+  {
+    "slug": "2026-06-29-engram",
+    "title": "Engram：AI 持续记忆层赛道的竞争格局与早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://engram.com",
+    "code": "",
+    "date": "2026-06-29",
+    "published": "公司调研 2026",
+    "tldr": "Engram做AI持续记忆层(请求前预消化私有上下文/continual learning),融~$98M(估值~$600M,13人,Karpathy+Abbeel参投),首个产品是面向Agent的API;赛道emerging,最大威胁是大厂自带记忆+长上下文/RAG,whitespace在隐私/本地化垂直记忆",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "market-map",
+      "startup-idea",
+      "ai-memory",
+      "agent",
+      "china"
+    ],
+    "path": "papers/2026-06-29-engram/index.html"
+  },
+  {
+    "slug": "2026-06-17-overview-map",
+    "title": "🗺️ 总览导航：全部解读与调研按主题归类",
+    "authors": "—",
+    "team": "导航",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-28",
+    "published": "导航",
+    "tldr": "本repo所有解读/调研/科普的总览入口,按半导体硬件供应链/AI4S科学发现/AI数据RLHF评测/Agent与LLM论文工具/AI游戏/财经投资/公司调研等主题归类,一篇不漏可点击直达",
+    "tags": [
+      "overview",
+      "navigation",
+      "index",
+      "map"
+    ],
+    "path": "papers/2026-06-17-overview-map/index.html"
+  },
+  {
+    "slug": "2026-06-28-quant-intro-for-ml",
+    "title": "量化投资(Quant)入门：用机器学习的语言重新理解它",
+    "authors": "—",
+    "team": "科普·入门",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-28",
+    "published": "财经投资",
+    "tldr": "写给有LLM/ML背景但量化零基础的人:用特征工程/训练测试集/过拟合/标签泄漏等你熟悉的概念一一对应量化里的因子/样本内外/曲线拟合/未来函数,讲透收益率/夏普/回撤/alpha-beta/因子/回测三大陷阱,含6个浏览器本地交互(价格模拟/夏普计算器/均线交叉回测/过拟合演示)和书课库数据社区资料大全+学习路线图",
+    "tags": [
+      "quant",
+      "量化投资",
+      "金融",
+      "factor-investing",
+      "backtest",
+      "入门科普",
+      "for-ML-people"
+    ],
+    "categories": [],
+    "path": "papers/2026-06-28-quant-intro-for-ml/index.html"
+  },
+  {
+    "slug": "2026-06-28-option-pricing-aapl-real",
+    "title": "真实案例:AAPL期权价格如何随时间和股价变化(交互)",
+    "authors": "—",
+    "team": "实战·进阶",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-28",
+    "published": "财经投资",
+    "tldr": "用Robinhood真实数据(AAPL 2026上半年日线+6/26真实期权链)拆解期权定价:真实期权链快照看delta逐级递减/theta每日损耗/买卖价差,Black-Scholes重建(经真实报价校验误差<2%)期权价格随股价和剩余天数的演变,含3个浏览器交互—真实股价图/BS价格曲线/时间机器(在真实AAPL走势上持有一张call看每日盈亏与时间价值融化),配大涨赢家与暴跌归零两个预设",
+    "tags": [
+      "options",
+      "期权",
+      "black-scholes",
+      "delta",
+      "theta",
+      "实战",
+      "真实数据",
+      "AAPL"
+    ],
+    "categories": [],
+    "path": "papers/2026-06-28-option-pricing-aapl-real/index.html"
+  },
+  {
+    "slug": "2026-06-28-black-scholes-explained",
+    "title": "从零讲透Black-Scholes:期权理论价是什么、有什么用",
+    "authors": "—",
+    "team": "零基础·科普",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-28",
+    "published": "财经投资",
+    "tldr": "面向金融零基础:用保险定价类比讲清Black-Scholes和期权理论价(公允价)是什么—理论价=内在价值+时间价值,波动越大时间越长越值钱(不确定性=价值),理论价vs市场价的差距就是IV的来源;含真实BS公式实时计算器(拖5个输入S/K/T/σ/r看理论价与内在外价值此消彼长)和单因子敏感度图,讲透5个输入怎么推动价格、理论价的5个用途与模型局限",
+    "tags": [
+      "black-scholes",
+      "期权",
+      "理论价",
+      "期权定价",
+      "零基础",
+      "科普",
+      "计算器"
+    ],
+    "categories": [],
+    "path": "papers/2026-06-28-black-scholes-explained/index.html"
+  },
+  {
+    "slug": "2026-06-28-retail-quant-strategies",
+    "title": "散户量化策略调研报告:$1万-$10万资金该做什么(含引用)",
+    "authors": "—",
+    "team": "调研·综述",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-28",
+    "published": "财经投资",
+    "tldr": "基于公开网络资料综合的散户量化调研:先校准现实(90%第一年跑不赢买入持有/80%回测过拟合失效/幸存者年化8-15%),再逐个拆解6类适合$1万-$10万的策略(资产类双动量/趋势跟踪管理期货/期权Wheel卖权收租/短期均值回归/因子ETF/加密),按资金量分层,讲2026 PDT$2.5万门槛取消等监管成本变化与QuantConnect/Alpaca/IBKR平台对比,给出推荐蓝图+现实收益复利计算器,20条来源引用",
+    "tags": [
+      "量化",
+      "散户",
+      "策略",
+      "动量",
+      "趋势跟踪",
+      "期权wheel",
+      "调研报告",
+      "2026"
+    ],
+    "categories": [],
+    "path": "papers/2026-06-28-retail-quant-strategies/index.html"
+  },
+  {
+    "slug": "2026-06-28-iron-condor",
+    "title": "详解Iron Condor铁鹰:beta=0的delta中性期权收租策略(交互)",
+    "authors": "—",
+    "team": "期权·进阶",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-28",
+    "published": "财经投资",
+    "tldr": "从卖宽跨式一步步搭出铁鹰:卖看涨价差+卖看跌价差4条腿,赌股价待在区间,delta≈0不赌方向(beta=0)风险有限,靠theta时间损耗+波动率溢价VRP赚钱;含真实AAPL期权参数计算的交互盈亏图(拖短腿距离/翼宽/剩余天数看桌面形盈亏与theta抬升曲线),讲透最大盈亏/盈亏平衡/净delta/4个希腊字母暴露/负偏风险与管理纪律(高流动性标的/30-45天/盈利50%了结/避财报/小仓位),含账户Level3多腿限制说明",
+    "tags": [
+      "iron-condor",
+      "铁鹰",
+      "期权",
+      "delta中性",
+      "market-neutral",
+      "theta",
+      "波动率溢价",
+      "交互"
+    ],
+    "categories": [],
+    "path": "papers/2026-06-28-iron-condor/index.html"
+  },
+  {
+    "slug": "2026-06-17-hongshan-sequoia-china-investments",
+    "title": "红杉中国（HongShan）2025–2026 投资盘点（公开披露部分）",
+    "authors": "—",
+    "team": "投资研究",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-26",
+    "published": "投资研究 2026",
+    "tldr": "红杉中国(2023拆分独立为HongShan,沈南鹏)2025-2026公开披露投资盘点,按赛道与时间整理(AI/大模型/具身机器人/半导体/生物医疗/企业服务/消费出海)+赛道分布SVG+下注重心(AI与具身为重心);收录约16笔可核实公开交易及IPO退出,每笔标来源等级,数据为公开样本非完整;非投资建议",
+    "tags": [
+      "investment",
+      "venture-capital",
+      "china",
+      "hongshan",
+      "sequoia",
+      "portfolio"
+    ],
+    "path": "papers/2026-06-17-hongshan-sequoia-china-investments/index.html"
+  },
+  {
+    "slug": "2026-06-17-game-engines-mcp-ai-agents",
+    "title": "游戏引擎 × MCP/CLI × AI 做游戏 agent 调研（「游戏生成的 Cursor」）",
+    "authors": "—",
+    "team": "技术调研",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-26",
+    "published": "技术调研 2026",
+    "tldr": "盘点常用游戏/渲染引擎(UE5/Unity/Godot/Cocos/Three.js等)的CLI与MCP接口现状(多为社区项目如unity-mcp/unreal-mcp/blender-mcp),以及AI做游戏两条路线(引擎内Cursor式助手Ludus/Unity Muse + text-to-game Rosebud/Astrocade + 端到端generative game Genie/Oasis),给定位图与whitespace;非投资建议",
+    "tags": [
+      "game-engine",
+      "mcp",
+      "ai-agent",
+      "gamedev",
+      "explainer",
+      "generative-game"
+    ],
+    "path": "papers/2026-06-17-game-engines-mcp-ai-agents/index.html"
+  },
+  {
+    "slug": "2026-06-17-cpu-gpu-supply-chain-overlap",
+    "title": "CPU 与 GPU 供应链的重合关系：哪些共享 / 哪些专属 / 为什么互相挤产能（关系图）",
+    "authors": "—",
+    "team": "技术科普",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-24",
+    "published": "技术科普 2026",
+    "tldr": "CPU与GPU供应链大量重合(共享EDA/TSMC代工/ASML EUV设备/材料/CoWoS封装/OSAT封测),AI推动GPU需求暴涨正抢占共享的TSMC先进制程/CoWoS/HBM产能挤压CPU、抬升整链成本与交期;含交互重合关系图(三栏:CPU专属/共享/GPU专属)与产能争夺动画;非投资建议",
+    "tags": [
+      "explainer",
+      "interactive",
+      "diagram",
+      "semiconductors",
+      "supply-chain",
+      "cpu",
+      "gpu"
+    ],
+    "path": "papers/2026-06-17-cpu-gpu-supply-chain-overlap/index.html"
+  },
+  {
+    "slug": "2026-06-17-training-vs-inference-demand-shift",
+    "title": "训练 vs 推理：算力转向如何重排 AI 供应链需求（含 red-team 修订）",
+    "authors": "—",
+    "team": "技术科普",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-24",
+    "published": "技术科普 2026",
+    "tldr": "推理分prefill/decode/reasoning三态,算力转向把需求重心从compute/scale-out漂向memory/energy/scale-up,但关键修订是网络未必降权(分离式+scale-up加权)、受益集中在CoWoS/Broadcom/Marvell/TSMC而非广义第三方;含初版结论→red-team修订对照;非投资建议",
+    "tags": [
+      "explainer",
+      "interactive",
+      "diagram",
+      "semiconductors",
+      "ai-infra",
+      "inference"
+    ],
+    "path": "papers/2026-06-17-training-vs-inference-demand-shift/index.html"
+  },
+  {
+    "slug": "2026-06-17-stock-fundamentals-explainer",
+    "title": "股票的底层逻辑：为什么涨跌 / 为什么值钱 / 成长股 vs 周期股（小白向）",
+    "authors": "—",
+    "team": "财经科普",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-24",
+    "published": "财经科普 2026",
+    "tldr": "从最底层讲股票=公司未来利润索取权,价值=未来现金流折现,短期价格由预期/资金、长期向盈利收敛;股价≈EPS×PE,利率影响估值;讲透成长股vs周期股判断,以及周期股PE反直觉(顶部低PE陷阱、底部高PE/失效是机会);面向小白,非投资建议",
+    "tags": [
+      "explainer",
+      "finance",
+      "stocks",
+      "education",
+      "valuation"
+    ],
+    "path": "papers/2026-06-17-stock-fundamentals-explainer/index.html"
+  },
+  {
+    "slug": "2026-06-17-helium-supply-chain",
+    "title": "氦气（Helium）在供应链中的地位：技术 / 财经 / 未来 / 股票全解",
+    "authors": "—",
+    "team": "产业研究",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-24",
+    "published": "产业研究 2026",
+    "tldr": "氦是半导体/光纤/MRI不可替代的控温检漏低温刚需,不可再生且来源高度集中(美/卡塔尔/俄),资源+地缘型隐形卡点;价格周期性暴涨,联邦储备退役;纯氦大盘股几乎没有,稳的是工业气体巨头副业、纯押只能碰高风险勘探小盘;非投资建议",
+    "tags": [
+      "supply-chain",
+      "materials",
+      "helium",
+      "semiconductors",
+      "stocks",
+      "industry"
+    ],
+    "path": "papers/2026-06-17-helium-supply-chain/index.html"
+  },
+  {
+    "slug": "2026-06-17-ppio",
+    "title": "PPIO 派欧云：AI 推理算力云的竞争格局与早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://ppio.com",
+    "code": "",
+    "date": "2026-06-22",
+    "published": "公司调研 2026",
+    "tldr": "分布式边缘云转型的AI推理算力云(按token/卡时卖开源大模型推理+租GPU);赛道emerging→已crowded价格血战;最大威胁是大厂(火山/阿里/腾讯)自带推理碾毛利;whitespace在分布式聚合闲置算力压成本+信创私有化推理",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "market-map",
+      "startup-idea",
+      "ai-infra",
+      "gpu-cloud",
+      "china"
+    ],
+    "path": "papers/2026-06-17-ppio/index.html"
+  },
+  {
+    "slug": "2026-06-17-kobe",
+    "title": "Kobe（getkobe.ai）：AI 职业 agent 的竞争格局与早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://www.getkobe.ai",
+    "code": "",
+    "date": "2026-06-22",
+    "published": "公司调研 2026",
+    "tldr": "替个人读 Slack/Notion/Granola 工作流、量化技能并被动对接招聘的 AI career agent；赛道 emerging（切入点局部 nascent），与 Mercor/Micro1 的 B 端供给互补而非竞争；whitespace=读工作流的个人技能 agent + 隐私本地化；团队/融资未披露，产品实效未验证。",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "market-map",
+      "startup-idea",
+      "ai-agent",
+      "recruiting",
+      "china"
+    ],
+    "path": "papers/2026-06-17-kobe/index.html"
+  },
+  {
+    "slug": "2026-06-17-ai-native-ugc-game-platform",
+    "title": "AI Native UGC 游戏平台：赛道竞争格局与早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-22",
+    "published": "公司调研 2026",
+    "tldr": "AI让玩家零代码造游戏的UGC平台赛道:传统UGC平台(Roblox/蛋仔/Fortnite)已mature/crowded,但AI原生零代码这一新形态仍emerging→nascent;最大威胁是Roblox/蛋仔的网络效应+大厂(腾讯GiiNEX)资源;whitespace在'AI零代码×开放平台'象限尚无跑通赢家;引子公司上海哇奥醒梦科技为stealth查无公开信息",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "market-map",
+      "startup-idea",
+      "ai-games",
+      "ugc",
+      "china"
+    ],
+    "path": "papers/2026-06-17-ai-native-ugc-game-platform/index.html"
+  },
+  {
+    "slug": "2026-06-17-roblox",
+    "title": "Roblox：UGC 游戏平台的竞争格局与赛道调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://corp.roblox.com",
+    "code": "",
+    "date": "2026-06-22",
+    "published": "公司调研 2026",
+    "tldr": "UGC游戏平台定义者(玩家造experiences+Robux内购抽成+DevEx创作者经济);护城河=内容×玩家双边网络效应;赛道整体mature(但内部AI零代码创作emerging);中国对标网易蛋仔派对;whitespace=AI零代码×年轻成人受众绕开未成年人监管",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "market-map",
+      "startup-idea",
+      "ugc",
+      "ai-games",
+      "china"
+    ],
+    "path": "papers/2026-06-17-roblox/index.html"
+  },
+  {
+    "slug": "2026-06-17-ai-cluster-supply-chain-video",
+    "title": "AI 集群供应链科普（动画讲解版 + 配音脚本）",
+    "authors": "—",
+    "team": "硬件科普",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-22",
+    "published": "硬件科普 2026",
+    "tldr": "把AI集群供应链做成12幕自动播放动画讲解页(竖向9层SVG逐层点亮+大字旁白+ticker chips+可选zh-CN TTS朗读+播放/键盘控制),并附timed配音脚本script.md(含纯旁白全文+每幕英文视觉提示词)可喂AI视频工具生成MP4;面向硬件小白,术语讲人话;非投资建议。",
+    "tags": [
+      "ai-infra",
+      "semiconductors",
+      "supply-chain",
+      "hardware",
+      "explainer",
+      "video"
+    ],
+    "path": "papers/2026-06-17-ai-cluster-supply-chain-video/index.html"
+  },
+  {
+    "slug": "2026-06-17-ai-cluster-supply-chain",
+    "title": "AI 集群供应链全景：从一句 Prompt 到一座数据中心（含代表股票）",
+    "authors": "—",
+    "team": "硬件科普",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-22",
+    "published": "硬件科普 2026",
+    "tldr": "把AI集群从云/GPU/HBM/封装/设备/光互连/InP衬底/电力散热/原材料逐层拆开,每层讲人话+给代表股票ticker,讲清谁卡谁脖子(EUV=ASML独家/CoWoS=台积电/HBM三家/InP衬底三家);非投资建议",
+    "tags": [
+      "ai-infra",
+      "semiconductors",
+      "supply-chain",
+      "hardware",
+      "stocks",
+      "explainer"
+    ],
+    "path": "papers/2026-06-17-ai-cluster-supply-chain/index.html"
+  },
+  {
+    "slug": "2026-06-17-ai-cluster-architecture",
+    "title": "AI 集群技术架构关系图：各模块如何连接与协作（数据流动画）",
+    "authors": "—",
+    "team": "硬件科普",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-22",
+    "published": "硬件科普 2026",
+    "tldr": "从技术角度讲AI集群各模块如何连接与通信:按封装内(计算↔HBM/破内存墙)、节点内scale-up(NVLink把多卡黏成一块大GPU)、跨柜scale-out(NIC→光模块→交换机/IB或RoCE,spine-leaf,以GB200 NVL72举例)、存储与电力散热四个尺度组织,配一步训练的数据流动画(读batch→进HBM→前向→反向→域内NVLink聚合→跨柜光网络all-reduce→更新)讲清为什么互联带宽/延迟才是集群效率瓶颈(通信墙);面向硬件小白,内联SVG交互关系图+四尺度切换+自动浅深主题",
+    "tags": [
+      "ai-infra",
+      "hardware",
+      "architecture",
+      "interconnect",
+      "explainer"
+    ],
+    "path": "papers/2026-06-17-ai-cluster-architecture/index.html"
+  },
+  {
+    "slug": "2026-06-17-palantir",
+    "title": "Palantir：数据决策 / AIP 平台的竞争格局与赛道调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://www.palantir.com",
+    "code": "",
+    "date": "2026-06-22",
+    "published": "公司调研 2026",
+    "tldr": "政企大数据集成+ontology+AIP把LLM接进可执行决策、靠FDE重交付落地；底层数据平台已mature但「LLM/agent接ontology做可执行决策」仍emerging；最大威胁是Databricks/Snowflake+AWS/MS/Google超大厂自带AI、软肋是FDE重交付难规模化；一个whitespace=垂直行业轻量ontology+AIP并用AI agent替代部分FDE去够中腰部客户",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "market-map",
+      "startup-idea",
+      "data-platform",
+      "ai-ops",
+      "china"
+    ],
+    "path": "papers/2026-06-17-palantir/index.html"
+  },
+  {
+    "slug": "2026-06-17-cpu-supply-chain",
+    "title": "CPU 供应链：从 ISA 到成品芯片，谁供给谁（关系图 + 数据流）",
+    "authors": "—",
+    "team": "技术科普",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-22",
+    "published": "技术科普 2026",
+    "tldr": "把CPU供应链做成交互关系图(ISA/EDA/IP→设计→代工→设备→材料→封测→成品),含一颗CPU诞生的数据流动画,讲清谁供给谁与EUV/EDA/光刻胶等卡点;非投资建议",
+    "tags": [
+      "explainer",
+      "interactive",
+      "diagram",
+      "semiconductors",
+      "supply-chain",
+      "cpu"
+    ],
+    "path": "papers/2026-06-17-cpu-supply-chain/index.html"
+  },
+  {
+    "slug": "2026-06-17-asts",
+    "title": "AST SpaceMobile（ASTS）：基本面 / 估值 / 是否值得买入",
+    "authors": "—",
+    "team": "股票调研",
+    "arxiv": "https://investors.ast-science.com",
+    "code": "",
+    "date": "2026-06-21",
+    "published": "股票调研 2026",
+    "tldr": "卫星直连普通手机的 pre-revenue 叙事股：评级 持有/投机仓(仅小仓位)；最强多头=全球盲区 TAM 巨大+唯一上市纯标的+AT&T/Verizon/Google 绑定，最致命空头=持续巨额烧钱与无限摊薄+Starlink 碾压。",
+    "tags": [
+      "stock",
+      "equity-research",
+      "valuation",
+      "satellite",
+      "space",
+      "china"
+    ],
+    "path": "papers/2026-06-17-asts/index.html"
+  },
+  {
+    "slug": "2026-06-17-amd",
+    "title": "AMD（Advanced Micro Devices）：基本面 / 估值 / 是否值得买入",
+    "authors": "—",
+    "team": "股票调研",
+    "arxiv": "https://ir.amd.com",
+    "code": "",
+    "date": "2026-06-21",
+    "published": "股票调研 2026",
+    "tldr": "数据中心 GPU（EPYC+Instinct）成第二增长引擎、手握 OpenAI/Meta 各 6GW 协议与 MI450，评级 Hold（不追高）；最关键多空＝Meta/MI450 兑现 vs NVIDIA CUDA 生态与 71% 毛利率碾压。",
+    "tags": [
+      "stock",
+      "equity-research",
+      "valuation",
+      "semiconductors",
+      "ai-chips"
+    ],
+    "path": "papers/2026-06-17-amd/index.html"
+  },
+  {
+    "slug": "2026-06-17-intc",
+    "title": "Intel（INTC）：基本面 / 估值 / 是否值得买入",
+    "authors": "—",
+    "team": "股票调研",
+    "arxiv": "https://www.intc.com",
+    "code": "",
+    "date": "2026-06-21",
+    "published": "股票调研 2026",
+    "tldr": "x86 老霸主的困境反转：产品端被 AMD/ARM 蚕食、AI 几乎缺席输给 NVIDIA，却豪赌 Intel Foundry 反转抢 TSMC 生意、巨额 capex 烧钱致 FCF 连年为负；靠美国政府入股约10%+SoftBank输血续命、分红已砍；股价在政府背书+agentic CPU叙事下暴涨至≈34(市值≈72B)、已超分析师共识甚至Citi 30目标价——故事真但估值透支，评级减持/回避(Reduce→Avoid)。非投资建议。",
+    "tags": [
+      "stock",
+      "equity-research",
+      "valuation",
+      "semiconductors",
+      "foundry"
+    ],
+    "path": "papers/2026-06-17-intc/index.html"
+  },
+  {
+    "slug": "2026-06-17-e2b",
+    "title": "E2B：AI agent 代码沙箱赛道的竞争格局与早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://e2b.dev",
+    "code": "https://github.com/e2b-dev",
+    "date": "2026-06-21",
+    "published": "公司调研 2026",
+    "tldr": "E2B 是给 AI agent 跑代码的开源 secure sandbox（Firecracker microVM 秒级启动，SDK+托管云+self-host）；赛道 emerging→快速 crowded，最大威胁是大模型厂自带 code execution 与 Cloudflare/Vercel 顺手做，一个可借鉴 whitespace 是信创/私有化的 agent 沙箱。",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "market-map",
+      "startup-idea",
+      "agent-infra",
+      "sandbox",
+      "china"
+    ],
+    "path": "papers/2026-06-17-e2b/index.html"
+  },
+  {
+    "slug": "2605.17172-openjarvis-on-device-personal-ai",
+    "title": "OpenJarvis：把整套 Personal AI 搬上本地设备（LLM-guided spec search）",
+    "authors": "Jon Saad-Falcon, Avanika Narayan, Robby Manihani, et al.",
+    "team": "Stanford University; Lambda Labs",
+    "arxiv": "https://arxiv.org/abs/2605.17172",
+    "code": "https://github.com/openjarvis/openjarvis",
+    "date": "2026-06-17",
+    "published": "arXiv 2026",
+    "tldr": "把 personal AI 系统抽象成跨五个 primitive 的 typed spec，用 frontier 云模型在搜索期改写、本地推理期零云调用；本地 spec 平均仅差云 3.2 pp，但 API 成本降约 800×、延迟降 4×。",
+    "tags": [
+      "on-device LLM",
+      "personal AI",
+      "agent",
+      "local-cloud",
+      "spec search",
+      "distillation"
+    ],
+    "path": "papers/2605.17172-openjarvis-on-device-personal-ai/index.html"
+  },
+  {
+    "slug": "2512.24189-scp-science-context-protocol",
+    "title": "Science Context Protocol (SCP): Accelerating Discovery with a Global Web of Autonomous Scientific Agents",
+    "authors": "Yankai Jiang, Wenjie Lou, Lilong Wang, et al. (20 authors)",
+    "team": "Shanghai AI Lab (上海人工智能实验室 / InternScience)",
+    "arxiv": "https://arxiv.org/abs/2512.24189",
+    "code": "https://github.com/InternScience/scp",
+    "date": "2026-06-17",
+    "published": "arXiv 2025",
+    "tldr": "上海 AI Lab 面向科学 agent 的开放协议：在 MCP 之上加 experiment context、中心化 Hub 编排、多 agent 协调与湿实验室设备集成；开源 spec+参考实现+1600+工具平台，但仅有定性 case study、无量化 benchmark。",
+    "tags": [
+      "agent",
+      "mcp",
+      "lab-automation",
+      "autonomous-science",
+      "AI4S",
+      "protocol",
+      "multi-agent"
+    ],
+    "path": "papers/2512.24189-scp-science-context-protocol/index.html"
+  },
+  {
+    "slug": "2026-06-16-sakana-ai",
+    "title": "Sakana AI：竞争格局与赛道早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://sakana.ai",
+    "code": "",
+    "date": "2026-06-16",
+    "published": "公司调研 2026",
+    "tldr": "东京 frontier AI lab(David Ha+Llion Jones),小而精反 scaling 做 AI Scientist/进化式模型合并/Transformer²;早期度 emerging(招牌 AI-Scientist 滑向 crowded);Seed$30M→A~$200M→B$135M@$2.65B(In-Q-Tel,进军defense);中国whitespace=行业版AI Scientist+央国企渠道。注:AI CUDA Engineer「100×」被发现是reward hacking。",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "startup-idea",
+      "AI-lab",
+      "AI4S"
+    ],
+    "path": "papers/2026-06-16-sakana-ai/index.html"
+  },
+  {
+    "slug": "2026-06-16-fin-intercom",
+    "title": "Fin(Intercom)AI客服：竞争格局与赛道早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://fin.ai/",
+    "code": "",
+    "date": "2026-06-16",
+    "published": "公司调研 2026",
+    "tldr": "Fin=Intercom 的 AI 客服 agent(2026-05 母公司改名 Fin);按成功outcome收费$0.99/个;赛道 crowded→mature(Sierra$15.8B/Decagon$4.5B/Zendesk/Agentforce);中国 AI 客服已红海(智齿/网易七鱼/阿里小蜜/Coze),照搬没戏——可借鉴切口是出海英文/垂直私有化/按效果计费,出海最现实。",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "startup-idea",
+      "customer-service",
+      "SaaS"
+    ],
+    "path": "papers/2026-06-16-fin-intercom/index.html"
+  },
+  {
+    "slug": "2026-06-16-dp-technology",
+    "title": "深势科技 DP Technology：竞争格局与赛道早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://www.dp.tech",
+    "code": "",
+    "date": "2026-06-16",
+    "published": "公司调研 2026",
+    "tldr": "深势科技=中国最早体系化做AI for Science的平台型龙头(脱胎于鄂维南院士AISI,创始人孙伟杰/张林峰);开源DeePMD-kit势函数+DPA原子间势大模型+Uni-Mol,中层卖Bohrium玻尔科学计算云,上层做电池(Piloteye)/制药(Hermite)/材料;2025-12超8亿C轮、投后>60亿独角兽;赛道emerging→局部crowded(国内对标晶泰/百图,国际对标CuspAI/Periodic Labs/MS MatterGen);whitespace=站在深势开源+玻尔算力肩上做垂直行业×轻应用层闭环交付、按outcome收费。",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "startup-idea",
+      "AI4S",
+      "china"
+    ],
+    "path": "papers/2026-06-16-dp-technology/index.html"
+  },
+  {
+    "slug": "2026-06-16-xtalpi",
+    "title": "晶泰科技 XtalPi：竞争格局与赛道早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://www.xtalpi.com",
+    "code": "",
+    "date": "2026-06-16",
+    "published": "公司调研 2026",
+    "tldr": "量子物理+AI+机器人湿实验室做药物发现CRO，港股AI制药第一股、2025首次盈利(营收约8亿/净利约2.58亿)；赛道emerging→crowded，whitespace在垂直单病种/卖铲子/outcome-based细分CRO，但单客户(DoveTree)依赖是头号风险",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "startup-idea",
+      "drug-discovery",
+      "AI4S",
+      "china"
+    ],
+    "path": "papers/2026-06-16-xtalpi/index.html"
+  },
+  {
+    "slug": "2026-06-16-ai4s-picks-and-shovels",
+    "title": "AI4S「卖铲子」机会扫描：给中国创业者的细分赛道地图",
+    "authors": "—",
+    "team": "机会扫描",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-16",
+    "published": "机会扫描 2026",
+    "tldr": "为 AI4S 做卖铲子的 6 个细分赛道扫描（科学数据/专家RLHF、模拟数据飞轮、模型评测即服务、实验室中间件 lab OS、科研 agent 工具链/协议、CRO-like 按 outcome 收费），每格标早期度与拥挤度，给出最值得先挖的 whitespace。",
+    "tags": [
+      "AI4S",
+      "startup-idea",
+      "competitive-landscape",
+      "picks-and-shovels",
+      "china"
+    ],
+    "path": "papers/2026-06-16-ai4s-picks-and-shovels/index.html"
+  },
+  {
+    "slug": "2026-06-16-insilico-medicine",
+    "title": "英矽智能 Insilico Medicine：AI 制药的竞争格局与赛道早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://insilico.com",
+    "code": "",
+    "date": "2026-06-16",
+    "published": "公司调研 2026",
+    "tldr": "端到端 AI 制药（靶点/生成化学/临床预测三平台 + 自研管线 ISM001-055/Rentosertib 治 IPF），赛道 emerging→crowded、AI 获批药全球未验证；可借鉴 whitespace 是单病种/单模态的轻资产垂直工具层。",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "market-map",
+      "startup-idea",
+      "ai-drug-discovery",
+      "china"
+    ],
+    "path": "papers/2026-06-16-insilico-medicine/index.html"
+  },
+  {
+    "slug": "2026-06-16-wuxi-apptec",
+    "title": "药明康德 WuXi AppTec：CRDMO 巨头的竞争格局与赛道成熟度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://www.wuxiapptec.com",
+    "code": "",
+    "date": "2026-06-16",
+    "published": "公司调研 2026",
+    "tldr": "CRDMO 一体化药物研发+生产外包巨头（CRO+小分子/寡核苷酸/多肽 CDMO），赛道 mature 巨头主导；最大风险是美国 BIOSECURE Act；创业者最现实的 whitespace 是给 CRO/CDMO 卖铲子的实验室软件/数据层。",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "market-map",
+      "startup-idea",
+      "cro",
+      "cdmo",
+      "china"
+    ],
+    "path": "papers/2026-06-16-wuxi-apptec/index.html"
+  },
+  {
+    "slug": "2026-06-16-cro-industry-landscape",
+    "title": "CRO / CDMO 行业全景：赛道分段早期度与中国创业 whitespace",
+    "authors": "—",
+    "team": "机会扫描",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-16",
+    "published": "机会扫描 2026",
+    "tldr": "CRO/CDMO 是制药公司把研发+生产外包出去的卖铲子赛道;整体 mature(巨头主导、增速7-9%),但按分子×环节切开,TIDES(寡核苷酸+多肽)/ADC/CGT 新分子CDMO产能紧缺双位数增长、AI+CRO(发现端)emerging→crowded、实验室软件数据层(lab OS/LIMS/ELN)国内偏空白仍 emerging;叠加美国 BIOSECURE Act(2025-12 成法)制造友岸/国产替代窗口;给中国创业者最该切的一个=给CRO/CDMO卖铲子的研发数据/实验室软件层。数字口径乱,已多源并列标年份。",
+    "tags": [
+      "AI4S",
+      "startup-idea",
+      "competitive-landscape",
+      "cro",
+      "cdmo",
+      "china",
+      "industry-landscape"
+    ],
+    "path": "papers/2026-06-16-cro-industry-landscape/index.html"
+  },
+  {
+    "slug": "2026-06-16-ai-datacenter-cooling-materials",
+    "title": "AI 数据中心散热「材料」机会扫描：分层赛道早期度与中国创业 whitespace",
+    "authors": "—",
+    "team": "机会扫描",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-16",
+    "published": "机会扫描 2026",
+    "tldr": "AI 算力推高 GPU 机柜功率密度(GB200/GB300 ~120–140kW vs 风冷 ~15–30kW),液冷渗透拐点在 2024H2;散热从机房问题变材料问题——junction→TIM→冷板/均热板→冷却液 每层材料都是瓶颈。普通硅脂/铜冷板已 mature 红海;真正早的是两相介电工质(3M 退出 PFAS 留窗口)、沸腾强化涂层、高导热衬底(diamond/BN/graphene) nascent→emerging。给中国创业者最值得切的 whitespace=用 AI 找 PFAS-free 冷却液/TIM 配方 + 快速实测闭环,配套 immersion 兼容性测试数据库;PFAS 监管+3M 退出+AIDC capex 爆发=国产替代窗口。",
+    "tags": [
+      "AI4S",
+      "startup-idea",
+      "competitive-landscape",
+      "materials",
+      "thermal-management",
+      "datacenter-cooling",
+      "china"
+    ],
+    "path": "papers/2026-06-16-ai-datacenter-cooling-materials/index.html"
+  },
+  {
+    "slug": "2026-06-16-micro1",
+    "title": "Micro1：AI 招聘与专家数据的竞争格局与早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://micro1.ai",
+    "code": "",
+    "date": "2026-06-16",
+    "published": "公司调研 2026",
+    "tldr": "用 AI 面试官 Zara 筛专家、给前沿 AI labs 供 RLHF/专家数据的 AI 招聘起家公司；赛道 emerging→快速 crowding、巨头环伺，体量小护城河弱；可借鉴垂直专家数据闭环 whitespace。",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "market-map",
+      "startup-idea",
+      "ai-data",
+      "ai-recruiting",
+      "china"
+    ],
+    "path": "papers/2026-06-16-micro1/index.html"
+  },
+  {
+    "slug": "2026-06-16-snorkel-ai",
+    "title": "Snorkel AI：programmatic labeling 与 AI 评测的竞争格局与早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://snorkel.ai",
+    "code": "",
+    "date": "2026-06-16",
+    "published": "公司调研 2026",
+    "tldr": "Stanford 衍生、以 programmatic labeling/弱监督起家的 AI 数据公司，2025 转向专家数据+模型评测（Series D $100M@$1.3B）；赛道整体 crowded 但 programmatic+垂直 eval 切口仍 emerging，中国 whitespace 显著。",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "market-map",
+      "startup-idea",
+      "ai-data",
+      "data-labeling",
+      "china"
+    ],
+    "path": "papers/2026-06-16-snorkel-ai/index.html"
+  },
+  {
+    "slug": "2026-06-16-scientific-agent-infra",
+    "title": "科学 agent 基础设施深挖：仪器 MCP 协议层 × agent 评测即服务",
+    "authors": "—",
+    "team": "机会扫描",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-16",
+    "published": "机会扫描 2026",
+    "tldr": "深挖AI4S卖铲子两格:①科学仪器MCP/agent-to-instrument协议层(让agent真驱动移液机器人/HPLC/电镜)——判nascent,标准林立未统一(SiLA2/OPC-UA LADS/Allotrope),MCP真接仪器案例屈指可数(LBNL TEM Agent/InstrMCP),LAP(arXiv2606.03755)与上海AI Lab的SCP两个agent-to-instrument协议刚提出;②科学agent评测即服务——科研专用benchmark全是学术开源几乎无人商业化(judnascent),对比通用eval已crowded(Scale$29B/Mercor$10B/LMArena)。结论:A格更适合中国早期创业(付费方在中国+政策助力国产替代+商业模式可借鉴ECL/Ginkgo),B格付费方不明宜作A格嵌入能力。可借鉴:Emerald Cloud Lab/Ginkgo/Strateos/Opentrons/PyLabRobot。",
+    "tags": [
+      "AI4S",
+      "startup-idea",
+      "competitive-landscape",
+      "mcp",
+      "agent-eval",
+      "lab-automation",
+      "china"
+    ],
+    "path": "papers/2026-06-16-scientific-agent-infra/index.html"
+  },
+  {
+    "slug": "2026-06-16-turing",
+    "title": "Turing：从开发者人才平台到 AI 训练数据的竞争格局与早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://www.turing.com",
+    "code": "",
+    "date": "2026-06-16",
+    "published": "公司调研 2026",
+    "tldr": "起家远程开发者人才平台、2022 后转向给 frontier labs 供 coding/reasoning/RLHF 训练数据（2025 估值 $2.2B）；赛道判 crowded（专家 coding/agent 数据细分仍 emerging）；可借鉴 whitespace：把全球开发者供给池做成垂直 agent 轨迹数据护城河。",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "market-map",
+      "startup-idea",
+      "ai-data",
+      "coding-data",
+      "china"
+    ],
+    "path": "papers/2026-06-16-turing/index.html"
+  },
+  {
+    "slug": "2026-06-16-mercor",
+    "title": "Mercor：AI 专家数据市场的竞争格局与早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://mercor.com",
+    "code": "",
+    "date": "2026-06-16",
+    "published": "公司调研 2026",
+    "tldr": "AI驱动的专家数据市场:用20分钟AI面试筛医生/律师/PhD/工程师接入OpenAI/Anthropic等frontier labs做高端标注与eval;创始人Brendan Foody/Adarsh Hiremath/Surya Midha(22岁Thiel Fellow);Seed$3.6M→A~$32M→B$100M@$2B→C$350M@$10B(2025-10,Felicis领);ARR口径打架(传$450-500M@2025-09/$1.5B@2026-05,多为gross,take-rate30-40%);早期度emerging→crowded(Surge$25B/Scale$29B/Micro1/Handshake同质化升温);中国whitespace=出海接单+垂直医疗法律专家+AI面试工具层(大厂已自建晓天睿士/Xpert)。",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "market-map",
+      "startup-idea",
+      "ai-data",
+      "rlhf",
+      "china"
+    ],
+    "path": "papers/2026-06-16-mercor/index.html"
+  },
+  {
+    "slug": "2606.03755-lap-agent-to-instrument",
+    "title": "LAP: An Agent-to-Instrument Protocol for Autonomous Science",
+    "authors": "Linwu Zhu, Liqiang Gao, Yan Chen, Dan Zhu, Jian Huang",
+    "team": "Shiyanjia Lab",
+    "arxiv": "https://arxiv.org/abs/2606.03755",
+    "code": "",
+    "date": "2026-06-16",
+    "published": "arXiv 2026",
+    "tldr": "把 agentic 生态的第三条边 agent-to-instrument 标准化的协议设计：用 InstrumentCard、独占预约、绑定参数哈希的安全围栏 token、和强制带单位/标定/不确定度的 MeasurementResult 四原语，补上 MCP/A2A 没覆盖的「agent 驱动物理仪器」那条边；封装而非取代 SiLA 2/OPC-UA。仅 v0.1 设计规范，尚无开源实现。",
+    "tags": [
+      "agent",
+      "mcp",
+      "lab-automation",
+      "autonomous-science",
+      "AI4S",
+      "protocol",
+      "A2A"
+    ],
+    "path": "papers/2606.03755-lap-agent-to-instrument/index.html"
+  },
+  {
+    "slug": "2026-06-16-surge-ai",
+    "title": "Surge AI：RLHF 专家数据赛道的竞争格局与早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://www.surgehq.ai",
+    "code": "",
+    "date": "2026-06-16",
+    "published": "公司调研 2026",
+    "tldr": "纯 bootstrap、零 VC 做到 2024 传 ~$1.2B 营收反超 Scale 的 RLHF/专家数据公司；赛道判 crowded（高端仍有空），whitespace 在垂直专家 eval/RL 环境数据。",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "market-map",
+      "startup-idea",
+      "ai-data",
+      "rlhf",
+      "china"
+    ],
+    "path": "papers/2026-06-16-surge-ai/index.html"
+  },
+  {
+    "slug": "2026-06-15-agents-for-scientific-discovery",
+    "title": "Agent 在科学发现里的应用（文献综述）",
+    "authors": "—",
+    "team": "调研综述",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-15",
+    "published": "综述 2026",
+    "tldr": "Agent 把 AI 从 AI-for-Science 推向 Agentic Science：按科研闭环梳理端到端研究 agent(AI Scientist/Agent Lab)、假设生成(AI co-scientist)、化学材料自驱实验室(Coscientist/ChemCrow/A-Lab)、生物医药(BioDiscoveryAgent/Virtual Biotech)与评测(ScienceAgentBench 等),含现状与挑战。",
+    "tags": [
+      "AI-for-science",
+      "agentic-science",
+      "scientific-discovery",
+      "self-driving-lab",
+      "survey"
+    ],
+    "path": "papers/2026-06-15-agents-for-scientific-discovery/index.html"
+  },
+  {
+    "slug": "2023-11-29-a-lab-autonomous-materials",
+    "title": "An autonomous laboratory for the accelerated synthesis of novel materials (A-Lab)",
+    "authors": "Nathan J. Szymanski, et al. (G. Ceder group)",
+    "team": "UC Berkeley · Lawrence Berkeley National Laboratory",
+    "arxiv": "https://www.nature.com/articles/s41586-023-06734-w",
+    "code": "",
+    "date": "2026-06-15",
+    "published": "Nature 2023",
+    "tldr": "A-Lab 把计算预测→文献挖掘提配方→机器人合成→自动 XRD/Rietveld→ARROWS 主动学习串成无人闭环，17 天对 57 个目标成功合成 36 个(63%)；自驱实验室从有机液相走向固态无机粉末的代表作，含 post-publication 关于表征质量与 novelty 的争议与 Nature 更正。",
+    "tags": [
+      "self-driving-lab",
+      "materials-science",
+      "autonomous-synthesis",
+      "active-learning",
+      "scientific-discovery"
+    ],
+    "path": "papers/2023-11-29-a-lab-autonomous-materials/index.html"
+  },
+  {
+    "slug": "2410.05080-scienceagentbench",
+    "title": "ScienceAgentBench: Toward Rigorous Assessment of Language Agents for Data-Driven Scientific Discovery",
+    "authors": "Ziru Chen, Shijie Chen, ... Yu Su, Huan Sun, et al.",
+    "team": "The Ohio State University (OSU NLP)",
+    "arxiv": "https://arxiv.org/abs/2410.05080",
+    "code": "https://github.com/OSU-NLP-Group/ScienceAgentBench",
+    "date": "2026-06-15",
+    "published": "ICLR 2025",
+    "tldr": "从 44 篇同行评审论文抽取 102 个数据驱动科学发现任务（bioinformatics/计算化学/GIS/认知神经科学），统一成可执行验证的 Python program 生成问题，配 rubric 与防数据污染策略；评测 5 个 LLM × 3 个框架，最好的 agent（Claude-3.5-Sonnet+self-debug）三次尝试也只解 32.4%（带专家知识 34.3%），说明 language agent 离自动化科研还很远。",
+    "tags": [
+      "benchmark",
+      "scientific-discovery",
+      "language-agent",
+      "code-generation",
+      "evaluation"
+    ],
+    "path": "papers/2410.05080-scienceagentbench/index.html"
+  },
+  {
+    "slug": "2026-02-23-virtual-biotech",
+    "title": "The Virtual Biotech: A Multi-Agent AI Framework for Therapeutic Discovery and Development",
+    "authors": "Harrison G. Zhang, Peter Eckmann, Jiacheng Miao, Andrew B. Mahon, James Zou",
+    "team": "Stanford University (James Zou Lab)",
+    "arxiv": "https://www.biorxiv.org/content/10.64898/2026.02.23.707551v1",
+    "code": "",
+    "date": "2026-06-15",
+    "published": "bioRxiv 2026",
+    "tldr": "把一支药企早期研发团队抽象成 multi-agent 系统：CSO agent 编排跨学科科学家 agent（statistical genetics/functional genomics/cheminformatics/clinical 等），经 MCP 工具连接生物医学数据库做证据级分析；以三个真实案例（55,984 临床试验分析、B7-H3 肺癌靶点、OSMRβ 失败试验复盘）展示，全程 keep human in the loop。",
+    "tags": [
+      "multi-agent",
+      "drug-discovery",
+      "biomedicine",
+      "scientific-discovery",
+      "orchestration"
+    ],
+    "path": "papers/2026-02-23-virtual-biotech/index.html"
+  },
+  {
+    "slug": "2602.00169-agentic-materials-science",
+    "title": "Towards Agentic Intelligence for Materials Science",
+    "authors": "Huan Zhang, Yizhan Li, Wenhao Huang, ..., Heng Ji, Bang Liu",
+    "team": "Université de Montréal & Mila; UIUC; U. Waterloo; U. Tokyo IIS; CUHK-Shenzhen; Alibaba DAMO 等",
+    "arxiv": "https://arxiv.org/abs/2602.00169",
+    "code": "",
+    "date": "2026-06-15",
+    "published": "arXiv 2026",
+    "tldr": "以 pipeline-centric 端到端视角综述材料科学的 agentic intelligence：把语料/预训练/领域适配/微调/goal-conditioned agent 视为可联合优化系统，用真实发现奖励而非 proxy benchmark 驱动，梳理 reactive 能力维度与 agentic 系统、Scientist AI、自驱实验室及其挑战。",
+    "tags": [
+      "agentic-AI",
+      "materials-science",
+      "self-driving-lab",
+      "survey",
+      "scientific-discovery"
+    ],
+    "path": "papers/2602.00169-agentic-materials-science/index.html"
+  },
+  {
+    "slug": "2304.05376-chemcrow",
+    "title": "ChemCrow: Augmenting large-language models with chemistry tools",
+    "authors": "Andres M. Bran, Sam Cox, Oliver Schilter, Carlo Baldassari, Andrew D. White, Philippe Schwaller",
+    "team": "EPFL · University of Rochester · IBM Research",
+    "arxiv": "https://arxiv.org/abs/2304.05376",
+    "code": "https://github.com/ur-whitelab/chemcrow-public",
+    "date": "2026-06-15",
+    "published": "Nature Machine Intelligence 2024",
+    "tldr": "GPT-4 + 18 个专家化学工具，用 ReAct 式 Thought-Action-Observation 循环编排，自主规划并在 RoboRXN 上合成 DEET、三个 organocatalyst、发现新 chromophore；并揭示 GPT-4 当裁判会偏爱流畅但错误的答案。",
+    "tags": [
+      "LLM-agent",
+      "chemistry",
+      "tool-use",
+      "ReAct",
+      "scientific-discovery",
+      "retrosynthesis"
+    ],
+    "path": "papers/2304.05376-chemcrow/index.html"
+  },
+  {
+    "slug": "2026-06-15-unreasonable-labs",
+    "title": "Unreasonable Labs 公司调研（AI for 科学发现）",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://www.unreasonablelabs.ai/",
+    "code": "",
+    "date": "2026-06-15",
+    "published": "公司调研 2026",
+    "tldr": "Unreasonable Labs(2026-03 出 stealth, 3.5M, Playground 领投)做 AI 科学发现引擎 Unreasonable.DISCOVERY;创始人 Yuan Cao(Gemini)+Markus Buehler(MIT/SciAgents);技术血统=知识图谱+多agent图推理(SciAgents)+范畴论式生成+前沿LLM;早期、产品实效待验证。",
+    "tags": [
+      "AI-for-science",
+      "company",
+      "knowledge-graph",
+      "multi-agent",
+      "scientific-discovery",
+      "startup"
+    ],
+    "path": "papers/2026-06-15-unreasonable-labs/index.html"
+  },
+  {
+    "slug": "2026-06-15-cuspai",
+    "title": "CuspAI：竞争格局与赛道早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://www.cusp.ai/",
+    "code": "",
+    "date": "2026-06-15",
+    "published": "公司调研 2026",
+    "tldr": "材料搜索引擎/generative AI for materials(英国Cambridge,Welling);emerging→crowded,累计~$130M;idea=材料验证即服务+合成代工网络。",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "startup-idea",
+      "AI4S",
+      "materials"
+    ],
+    "path": "papers/2026-06-15-cuspai/index.html"
+  },
+  {
+    "slug": "2026-06-15-quantumbond-ai",
+    "title": "QuantumBond AI：竞争格局与赛道早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-15",
+    "published": "公司调研 2026",
+    "tldr": "声称做AI×电解质/催化剂界面模拟+IP授权,但公司本体网上无法确证(全标🔴);借此摸清电池界面AI4S赛道(emerging);idea=电化学界面轻资产配方IP工坊。",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "startup-idea",
+      "AI4S",
+      "batteries"
+    ],
+    "path": "papers/2026-06-15-quantumbond-ai/index.html"
+  },
+  {
+    "slug": "2026-06-15-periodic-labs",
+    "title": "Periodic Labs：竞争格局与赛道早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://periodic.com",
+    "code": "",
+    "date": "2026-06-15",
+    "published": "公司调研 2026",
+    "tldr": "AI scientist+自驱实验室(物理/材料,Fedus ex-OpenAI+Cubuk ex-DeepMind);a16z领投$300M种子;emerging;idea=自主实验室/数据 as-a-service。",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "startup-idea",
+      "AI4S",
+      "self-driving-lab"
+    ],
+    "path": "papers/2026-06-15-periodic-labs/index.html"
+  },
+  {
+    "slug": "2026-06-15-orbital-materials",
+    "title": "Orbital Industries(原 Orbital Materials)：竞争格局与赛道早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://www.orbitalindustries.com/",
+    "code": "",
+    "date": "2026-06-15",
+    "published": "公司调研 2026",
+    "tldr": "AI+自建制造做数据中心脱碳材料(液冷剂);2026改名Orbital Industries;累计~$70M;emerging;idea=抓监管逼出的刚需实物缺口(无PFAS冷却液)。",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "startup-idea",
+      "AI4S",
+      "materials"
+    ],
+    "path": "papers/2026-06-15-orbital-materials/index.html"
+  },
+  {
+    "slug": "2026-06-15-ares-materials",
+    "title": "Ares Materials：竞争格局与赛道早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://aresmaterials.com/",
+    "code": "",
+    "date": "2026-06-15",
+    "published": "公司调研 2026",
+    "tldr": "Texas柔性显示基板/光学薄膜(2014 UT Dallas spinout),AI仅内部加速器、非真AI4S平台;材料层crowded→mature;2025-10 Series B首笔$12M。",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "materials"
+    ],
+    "path": "papers/2026-06-15-ares-materials/index.html"
+  },
+  {
+    "slug": "2026-06-15-altrove",
+    "title": "Altrove：竞争格局与赛道早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://www.altrove.ai/",
+    "code": "",
+    "date": "2026-06-15",
+    "published": "公司调研 2026",
+    "tldr": "法国AI+自驱产线做无稀土磁体;外层材料发现crowded、内层垂直造磁体nascent;累计~$14M种子;idea=单一卡脖子材料品类自建小产线卖过认证实物+IP。",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "startup-idea",
+      "AI4S",
+      "materials"
+    ],
+    "path": "papers/2026-06-15-altrove/index.html"
+  },
+  {
+    "slug": "2026-06-15-lila-sciences",
+    "title": "Lila Sciences：竞争格局与赛道早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://www.lila.ai/",
+    "code": "",
+    "date": "2026-06-15",
+    "published": "公司调研 2026",
+    "tldr": "Flagship孵化的自驱跨域研发平台;种子$200M→A$350M累计$550M(~$1.3B,传洽$8.5B);emerging偏nascent;idea=自驱实验室 as-a-service(CRO 2.0)。",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "startup-idea",
+      "AI4S",
+      "self-driving-lab"
+    ],
+    "path": "papers/2026-06-15-lila-sciences/index.html"
+  },
+  {
+    "slug": "2026-06-15-radical-ai",
+    "title": "Radical AI：竞争格局与赛道早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://radical-ai.com",
+    "code": "",
+    "date": "2026-06-15",
+    "published": "公司调研 2026",
+    "tldr": "NYC自驱材料实验室,极端环境材料+政府/国防;$55M Seed+(RTX领投)+AFWERX合同;emerging;idea=极端环境材料×政府阶段交付窄缝。",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "startup-idea",
+      "AI4S",
+      "gov-contract"
+    ],
+    "path": "papers/2026-06-15-radical-ai/index.html"
+  },
+  {
+    "slug": "2026-06-15-exa-labs",
+    "title": "Exa Labs：竞争格局与赛道早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://exa.ai",
+    "code": "",
+    "date": "2026-06-15",
+    "published": "公司调研 2026",
+    "tldr": "AI搜索API(自建索引+自研embedding,前身Metaphor);通用搜索emerging→crowded;A→C $250M@$2.2B(a16z);idea=AI4S版的Exa(科研agent领域语义检索API)。",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "startup-idea",
+      "search",
+      "AI-infra"
+    ],
+    "path": "papers/2026-06-15-exa-labs/index.html"
+  },
+  {
+    "slug": "2026-06-15-isomorphic-labs",
+    "title": "Isomorphic Labs：竞争格局与赛道早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://www.isomorphiclabs.com",
+    "code": "",
+    "date": "2026-06-15",
+    "published": "公司调研 2026",
+    "tldr": "DeepMind分拆AI药物发现(Hassabis,AlphaFold);Lilly/Novartis合作+$600M+$2.1B B轮;crowded→maturing,临床尚未兑现;idea=做中立工具/数据/评测层卖铲子。",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "startup-idea",
+      "drug-discovery"
+    ],
+    "path": "papers/2026-06-15-isomorphic-labs/index.html"
+  },
+  {
+    "slug": "2026-06-15-ai4s-china-startup-map",
+    "title": "AI4S × 中国创业机会总览(国外 idea → 中国对标/拥挤度/切口)",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-15",
+    "published": "公司调研 2026",
+    "tldr": "把11家国外AI4S/AI公司的中国对标横向汇总:中国在模型层不落后甚至反超,机会在下游闭环/卖铲子/垂直卡脖子;最像whitespace的是AI冷却液与中文agent search API;避开AI药物与C端搜索红海。",
+    "tags": [
+      "AI4S",
+      "china",
+      "startup-idea",
+      "competitive-landscape",
+      "overview"
+    ],
+    "path": "papers/2026-06-15-ai4s-china-startup-map/index.html"
+  },
+  {
+    "slug": "2606.03854-cli-anything",
+    "title": "CLI-Anything: Towards Agent-Native Computer Use",
+    "authors": "Yuhao Yang, Tianyu Fan, Chao Huang",
+    "team": "HKUDS (The University of Hong Kong)",
+    "arxiv": "https://arxiv.org/abs/2606.03854",
+    "code": "https://github.com/HKUDS/CLI-Anything",
+    "date": "2026-06-12",
+    "published": "arXiv 2026",
+    "tldr": "把专业 GUI 软件 lift 成有状态的 command-line harness，用结构化命令/显式状态/确定反馈实现 agent-native computer use，并交付 CLI-Hub 平台生成与分发这些接口。",
+    "tags": [
+      "agent",
+      "computer-use",
+      "CLI",
+      "agent-native",
+      "tool-use",
+      "GUI"
+    ],
+    "path": "papers/2606.03854-cli-anything/index.html"
+  },
+  {
+    "slug": "2504.13065-echoworld",
+    "title": "EchoWorld: Learning Motion-Aware World Models for Echocardiography Probe Guidance",
+    "authors": "Yang Yue, Yulin Wang, Haojun Jiang, Pan Liu, Shiji Song, Gao Huang",
+    "team": "Tsinghua University (LeapLabTHU)",
+    "arxiv": "https://arxiv.org/abs/2504.13065",
+    "code": "https://github.com/LeapLabTHU/EchoWorld",
+    "date": "2026-06-11",
+    "published": "CVPR 2025",
+    "tldr": "用 world model 思路做心脏超声探头导航：JEPA 式 spatial(masked region) + motion(visual outcome) 双任务 pre-training，再用把 6-DoF 相对位姿嵌进 attention 的 motion-aware attention 融合历史，single-frame 与 sequential 协议下 guidance error 均最低。",
+    "tags": [
+      "world-model",
+      "medical-imaging",
+      "echocardiography",
+      "probe-guidance",
+      "representation-learning"
+    ],
+    "path": "papers/2504.13065-echoworld/index.html"
+  },
+  {
+    "slug": "2026-06-02-airllm-survey",
+    "title": "AirLLM 调研：小显存跑大模型 + 竞品对照",
+    "authors": "—",
+    "team": "工具调研",
+    "arxiv": "https://github.com/lyogavin/airllm",
+    "code": "https://github.com/lyogavin/airllm",
+    "date": "2026-06-05",
+    "published": "调研 2026",
+    "tldr": "AirLLM 用逐层 disk-offload 在 4GB 显卡跑 70B(不量化、保精度,但很慢);对照 Accelerate/ZeRO-Inference/FlexGen/llama.cpp/ktransformers/PowerInfer/Petals 等竞品与选型建议。",
+    "tags": [
+      "inference",
+      "offloading",
+      "local-LLM",
+      "quantization",
+      "hardware",
+      "工具调研"
+    ],
+    "path": "papers/2026-06-02-airllm-survey/index.html"
+  },
+  {
+    "slug": "2510.24645-funreason-mt",
+    "title": "FunReason-MT: Advanced Data Synthesis for Real-world Multi-Turn Tool-use",
+    "authors": "Zengzhuang Xu, Bingguang Hao, et al.",
+    "team": "AWorld Team, Inclusion AI (Ant Group); Zhejiang University; City University of Hong Kong",
+    "arxiv": "https://arxiv.org/abs/2510.24645",
+    "code": "https://github.com/inclusionAI/AWorld-RL",
+    "date": "2026-06-05",
+    "published": "arXiv 2025",
+    "tldr": "用 API graph 定向采样 + advanced-tool 反推 hard query + ground-truth 校验的迭代 CoT，合成高质量多轮 tool-use 数据；训出的 4B 模型在 BFCLv3 Multi-Turn 达 57.75，同尺寸 SOTA 并反超 Claude-Sonnet-4 等大模型。",
+    "tags": [
+      "tool-use",
+      "data-synthesis",
+      "multi-turn",
+      "function-calling",
+      "BFCL",
+      "agent"
+    ],
+    "path": "papers/2510.24645-funreason-mt/index.html"
+  },
+  {
+    "slug": "2026-06-02-mai-thinking-1",
+    "title": "MAI-Thinking-1: Building a Hill-Climbing Machine",
+    "authors": "The Microsoft AI (MAI) Team",
+    "team": "Microsoft AI",
+    "arxiv": "https://microsoft.ai/wp-content/uploads/2026/06/main_20260602_2.pdf",
+    "code": "",
+    "date": "2026-06-04",
+    "published": "Microsoft AI Tech Report 2026",
+    "tldr": "Microsoft AI 首个从零自研、不蒸馏第三方的 reasoning 模型（35B active / 1T total MoE）；把模型研发当成系统级优化的「爬山机」，靠 scaling 中心的 pre-training 与稳健 RL 配方实现数千步 log-linear 持续爬坡，AIME 2025 97.0%、SWE-Bench Pro 52.8%。纯技术报告，未开源。",
+    "tags": [
+      "MoE",
+      "reasoning",
+      "pretraining-scaling",
+      "RL",
+      "from-scratch",
+      "Microsoft"
+    ],
+    "path": "papers/2026-06-02-mai-thinking-1/index.html"
+  },
+  {
+    "slug": "2026-06-01-agentic-sft-algorithms-survey",
+    "title": "Agentic SFT 的算法研究现状（文献综述）",
+    "authors": "—",
+    "team": "调研综述",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-03",
+    "published": "综述 2026",
+    "tldr": "Agentic SFT 算法按 6 方向梳理：监督/掩码设计、多轮组样本与效率、轨迹数据合成、turn/step 级 credit、拒绝采样/自蒸馏、SFT 病理与 SFT↔RL 融合；含代表工作表与脉络判断。",
+    "tags": [
+      "agentic-sft",
+      "survey",
+      "tool-use",
+      "trajectory",
+      "credit-assignment",
+      "self-distillation"
+    ],
+    "path": "papers/2026-06-01-agentic-sft-algorithms-survey/index.html"
+  },
+  {
+    "slug": "2604.26904-clawgym-claw-agents",
+    "title": "ClawGym: A Scalable Framework for Building Effective Claw Agents",
+    "authors": "Fei Bai, Huatong Song, Shuang Sun, et al.",
+    "team": "RUC GSAI; IQuest Research; Beihang University",
+    "arxiv": "https://arxiv.org/abs/2604.26904",
+    "code": "https://github.com/ClawGym",
+    "date": "2026-06-03",
+    "published": "arXiv 2026",
+    "tldr": "为 Claw 式个人 agent 打造数据合成+训练+评测一体化框架：双路合成 13.5K 可验证任务，黑盒 rollout+SFT+轻量 RL 训出 ClawGym-Agents，并建 200 题 ClawGym-Bench；合成数据让 Qwen3-8B 在 PinchBench/ClawGym-Bench 相对提升 38.90%/43.46%。",
+    "tags": [
+      "agent",
+      "agentic-sft",
+      "data-synthesis",
+      "tool-use",
+      "benchmark",
+      "RL"
+    ],
+    "path": "papers/2604.26904-clawgym-claw-agents/index.html"
+  },
+  {
+    "slug": "2026-06-01-nvidia-rtx-spark",
+    "title": "NVIDIA RTX Spark 是什么（小白向调研）",
+    "authors": "—",
+    "team": "调研笔记",
+    "arxiv": "https://www.nvidia.com/en-us/products/rtx-spark/",
+    "code": "",
+    "date": "2026-06-02",
+    "published": "调研 2026",
+    "tldr": "RTX Spark 是 NVIDIA 的 CPU+GPU 融合芯片笔记本/小台式，最高 128GB 统一内存让本地能跑/微调大模型；区别于 DGX Spark(开发者版/Linux)。含与普通电脑对比、亮点、配套软件、选购建议。",
+    "tags": [
+      "hardware",
+      "NVIDIA",
+      "RTX-Spark",
+      "local-AI",
+      "unified-memory",
+      "科普"
+    ],
+    "path": "papers/2026-06-01-nvidia-rtx-spark/index.html"
+  },
+  {
+    "slug": "2605.27276-sia-self-improving-ai",
+    "title": "SIA: Self Improving AI with Harness & Weight Updates",
+    "authors": "Prannay Hebbar, Yogendra Manawat, Samuel Verboomen, Alesia Ivanova, Selvam Palanimalai, Kunal Bhatia, Vignesh Baskaran",
+    "team": "Hexo Labs · University of Oxford",
+    "arxiv": "https://arxiv.org/abs/2605.27276",
+    "code": "https://github.com/hexo-ai/sia",
+    "date": "2026-06-01",
+    "published": "arXiv 2026",
+    "tldr": "用一个 Feedback-Agent 在同一闭环里同时更新 agent 的 harness 与 LoRA 权重，在法律分类、GPU kernel、单细胞 RNA 去噪三任务上双杠杆均超只改 harness 与此前 SOTA。",
+    "tags": [
+      "self-improving-agents",
+      "test-time-training",
+      "RL",
+      "LoRA",
+      "harness"
+    ],
+    "path": "papers/2605.27276-sia-self-improving-ai/index.html"
+  },
+  {
+    "slug": "2504.16084-ttrl-test-time-reinforcement-learning",
+    "title": "TTRL: Test-Time Reinforcement Learning",
+    "authors": "Yuxin Zuo, Kaiyan Zhang, Li Sheng, Shang Qu, Ganqu Cui, et al.",
+    "team": "Tsinghua University · Shanghai AI Lab (PRIME-RL)",
+    "arxiv": "https://arxiv.org/abs/2504.16084",
+    "code": "https://github.com/PRIME-RL/TTRL",
+    "date": "2026-06-01",
+    "published": "NeurIPS 2025",
+    "tldr": "在无标签测试数据上用多数投票造伪标签与 reward 跑 RL，让 LLM 自我进化：Qwen2.5-Math-7B 在 AIME 2024 上 pass@1 +211%，且能超过自身 maj@n 并逼近偷看标签直训的上界。",
+    "tags": [
+      "test-time-training",
+      "RL",
+      "reasoning",
+      "majority-voting",
+      "unlabeled",
+      "GRPO"
+    ],
+    "path": "papers/2504.16084-ttrl-test-time-reinforcement-learning/index.html"
+  },
+  {
+    "slug": "2505.20633-test-time-learning-llm",
+    "title": "Test-Time Learning for Large Language Models",
+    "authors": "Jinwu Hu, Zitian Zhang, Guohao Chen, et al.",
+    "team": "South China University of Technology; Pazhou Laboratory",
+    "arxiv": "https://arxiv.org/abs/2505.20633",
+    "code": "https://github.com/Fhujinwu/TLM",
+    "date": "2026-06-01",
+    "published": "ICML 2025",
+    "tldr": "TLM：测试时只用无标注输入，通过最小化 input perplexity（+高perplexity样本选择+LoRA抗遗忘）让 LLM 在线适配目标域，domain 任务提升≥20%；含 AdaptEval benchmark。",
+    "tags": [
+      "test-time-learning",
+      "domain-adaptation",
+      "perplexity",
+      "LoRA",
+      "unsupervised"
+    ],
+    "path": "papers/2505.20633-test-time-learning-llm/index.html"
+  },
+  {
+    "slug": "2601.19897-self-distillation-continual-learning",
+    "title": "Self-Distillation Enables Continual Learning",
+    "authors": "Idan Shenfeld, Mehul Damani, Jonas Hübotter, Pulkit Agrawal",
+    "team": "MIT; Improbable AI Lab; ETH Zurich",
+    "arxiv": "https://arxiv.org/abs/2601.19897",
+    "code": "https://github.com/idanshen/Self-Distillation",
+    "date": "2026-06-01",
+    "published": "arXiv 2026",
+    "tldr": "SDFT 用 demonstration-conditioned 的自身作 teacher、在 on-policy 轨迹上做 reverse-KL 自蒸馏，无需显式 reward 即可从专家示范学习，大幅减少 catastrophic forgetting，实现从示范中持续学习。",
+    "tags": [
+      "continual-learning",
+      "catastrophic-forgetting",
+      "on-policy-distillation",
+      "self-distillation",
+      "in-context-learning",
+      "SFT"
+    ],
+    "path": "papers/2601.19897-self-distillation-continual-learning/index.html"
+  },
+  {
+    "slug": "2604.01193-self-distillation-code-generation",
+    "title": "Embarrassingly Simple Self-Distillation Improves Code Generation",
+    "authors": "Ruixiang Zhang, Richard He Bai, Huangjie Zheng, Navdeep Jaitly, Ronan Collobert, Yizhe Zhang",
+    "team": "Apple",
+    "arxiv": "https://arxiv.org/abs/2604.01193",
+    "code": "https://github.com/apple/ml-ssd",
+    "date": "2026-06-01",
+    "published": "arXiv 2026",
+    "tldr": "SSD 用某个 temperature/truncation 配置从 base model 采样代码、再对这些未验证样本做标准 SFT（无 verifier/teacher/RL），把 Qwen3-30B-Instruct 在 LiveCodeBench v6 上 pass@1 从 42.4% 提到 55.3%，增益集中在 hard 题，机制是缓解 decoding 的 precision-exploration conflict。",
+    "tags": [
+      "code-generation",
+      "self-distillation",
+      "LiveCodeBench",
+      "post-training",
+      "decoding-temperature",
+      "no-verifier"
+    ],
+    "path": "papers/2604.01193-self-distillation-code-generation/index.html"
+  },
+  {
+    "slug": "2605.21850-acc-agent-context-compilation",
+    "title": "ACC: Compiling Agent Trajectories for Long-Context Training",
+    "authors": "Qisheng Su, Zhen Fang, Shiting Huang, et al.",
+    "team": "USTC · Shanghai Innovation Institute · Shanghai AI Laboratory",
+    "arxiv": "https://arxiv.org/abs/2605.21850",
+    "code": "",
+    "date": "2026-06-01",
+    "published": "arXiv 2026",
+    "tldr": "把多轮 agent 轨迹编译成 long-context QA 对来做 SFT：拼接各 turn 的 tool response、不 mask、让模型直接在长上下文里推理作答，修复 agent SFT 的监督盲区。训练 Qwen3-30B-A3B 在 MRCR/GraphWalks 上逼近 Qwen3-235B-A22B。",
+    "tags": [
+      "long-context",
+      "agent",
+      "tool-use",
+      "training-data",
+      "distillation"
+    ],
+    "path": "papers/2605.21850-acc-agent-context-compilation/index.html"
+  },
+  {
+    "slug": "2026-06-01-rl-for-test-time-scaling",
+    "title": "RL for Test-Time Scaling（@sheriyuo 博客解读）",
+    "authors": "Xiuyu Li (@sheriyuo)",
+    "team": "个人博客 / X thread · 系列第三篇",
+    "arxiv": "https://x.com/sheriyuo/status/2061382777623519284",
+    "code": "",
+    "date": "2026-06-01",
+    "published": "Blog/X 2026",
+    "tldr": "把 TTS 写进训练目标的演进梳理：training-free 渐近次优(Ω√H)→MRT→e3→privileged on-policy exploration→InT→TTI，落到 OPD 与 Continual Learning。",
+    "tags": [
+      "test-time-scaling",
+      "RL",
+      "survey",
+      "blog",
+      "on-policy-distillation"
+    ],
+    "path": "papers/2026-06-01-rl-for-test-time-scaling/index.html"
+  },
+  {
+    "slug": "2026-06-01-agentic-sft-masking-multiturn",
+    "title": "Agentic SFT 笔记：tool response 该不该 mask + 多轮怎么组样本",
+    "authors": "对话调研整理",
+    "team": "—",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-01",
+    "published": "笔记 2026",
+    "tldr": "多轮工具调用 SFT 中 tool response 一律 mask；不带 thinking 整段一条、带 thinking 按轮拆 N 条(删历史思考)，One-Pass to Reason 给等价高效解。",
+    "tags": [
+      "agentic-sft",
+      "tool-use",
+      "MCP",
+      "loss-masking",
+      "multi-turn",
+      "reasoning"
+    ],
+    "path": "papers/2026-06-01-agentic-sft-masking-multiturn/index.html"
+  },
+  {
+    "slug": "2605.24517-echo-terminal-agents-world-models",
+    "title": "ECHO: Terminal Agents Learn World Models for Free",
+    "authors": "Vaishnavi Shrivastava, Piero Kauffmann, Ahmed Awadallah, Dimitris Papailiopoulos",
+    "team": "Microsoft Research",
+    "arxiv": "https://arxiv.org/abs/2605.24517",
+    "code": "https://github.com/microsoft/echo-rl",
+    "date": "2026-06-01",
+    "published": "arXiv 2026",
+    "tldr": "在 GRPO 的 action-token loss 之外加一项预测 terminal 输出 token 的 auxiliary cross-entropy，让 terminal agent 复用同一次 forward pass 顺带学到 world model；TerminalBench-2.0 pass@1 几乎翻倍，且能少用专家示范。",
+    "tags": [
+      "terminal-agent",
+      "world-model",
+      "RL",
+      "auxiliary-loss",
+      "GRPO",
+      "TerminalBench"
+    ],
+    "path": "papers/2605.24517-echo-terminal-agents-world-models/index.html"
+  },
+  {
+    "slug": "2605.17933-atlasva-visual-skill-memory",
+    "title": "AtlasVA: Self-Evolving Visual Skill Memory for Teacher-Free VLM Agents",
+    "authors": "Pan Wang, Yihao Hu, Xiujin Liu, Jingchu Yang, Hang Wang, Zhihao Wen",
+    "team": "Ant Group · USTC · Westlake · UMich · SYSU",
+    "arxiv": "https://arxiv.org/abs/2605.17933",
+    "code": "https://github.com/wangpan-ustc/AtlasVA",
+    "date": "2026-05-30",
+    "published": "arXiv 2026",
+    "tldr": "把 VLM 智能体的文本记忆升级为三层视觉技能记忆（热力图+视觉范例+符号文本），并用无教师的轨迹统计自进化出 danger/affinity 图谱、复用为稠密势函数奖励；3B 模型在 Sokoban/FrozenLake/3D 导航/机械臂上平均成功率 0.93，反超 GPT-5、o3 与 VAGEN。",
+    "tags": [
+      "VLM",
+      "Agent",
+      "Memory",
+      "Self-Evolving",
+      "Visual-Skill"
+    ],
+    "path": "papers/2605.17933-atlasva-visual-skill-memory/index.html",
+    "categories": [
+      "agent",
+      "self-evolving"
+    ]
+  },
+  {
+    "slug": "2605.27366-muse-autoskill",
+    "title": "MUSE-Autoskill: Self-Evolving Agents via Skill Creation, Memory, Management, and Evaluation",
+    "authors": "Huawei Lin, Peng Li, Jie Song, Fuxin Jiang, Tieying Zhang",
+    "team": "ByteDance (ByteBrain) · Rochester Institute of Technology",
+    "arxiv": "https://arxiv.org/abs/2605.27366",
+    "code": "",
+    "date": "2026-05-30",
+    "published": "arXiv 2026",
+    "tldr": "把 skill 重新定义为有完整 lifecycle（creation/memory/management/evaluation/refinement）的长期资产：ReAct 内 skill_create 现造、unit-test 门控进库、per-skill .memory.md、DAG 两级 context 压缩；SkillsBench 上 with-skills 68.40%（+15.21pp），自生成 skill 在覆盖到的 35 个任务达 87.94%，且能跨 agent 迁移。",
+    "tags": [
+      "LLM",
+      "Agent",
+      "Skill",
+      "Self-Evolving",
+      "Memory"
+    ],
+    "path": "papers/2605.27366-muse-autoskill/index.html",
+    "categories": [
+      "agent",
+      "self-evolving"
+    ]
+  },
+  {
+    "slug": "2605.24426-seal-coevolution-agents-environments",
+    "title": "SEAL: Synergistic Co-Evolution of Agents and Learning Environments",
+    "authors": "Yihao Hu, Zhihao Wen, Xiujin Liu, Pan Wang, Xin Zhang, Wei Wu",
+    "team": "Ant Group · Westlake University · University of Michigan–Ann Arbor · University of Science and Technology of China",
+    "arxiv": "https://arxiv.org/abs/2605.24426",
+    "code": "https://github.com/yihaohu0118/SEAL",
+    "date": "2026-05-30",
+    "published": "arXiv 2026",
+    "tldr": "提出 Agent-Environment Misalignment 问题，并用 verifier-grounded failure diagnosis 作为共享信号，闭环协同演化 training-time learning interface 与 policy（diagnosis-guided advantage reweighting）；仅 400 样本即在三个 backbone 上拿到 +8.25~+26.25 平均分提升并正向 OOD transfer。",
+    "tags": [
+      "LLM",
+      "Agent",
+      "Self-Evolving",
+      "Environment",
+      "Tool-Use",
+      "RL"
+    ],
+    "path": "papers/2605.24426-seal-coevolution-agents-environments/index.html",
+    "categories": [
+      "agent",
+      "self-evolving"
+    ]
+  },
+  {
+    "slug": "2026-05-30-kaonai-online-autoresearch",
+    "title": "Online Autoresearch: Running Autoresearch with Real Online Feedback",
+    "authors": "Alex Xi 等",
+    "team": "Kaon Labs (KaonAI)",
+    "arxiv": "https://research.kaonai.com/blog/online-autoresearch",
+    "code": "",
+    "date": "2026-05-30",
+    "published": "KaonAI Blog 2026",
+    "tldr": "把 autoresearch 的 agent loop 接到真实线上流量，用 online ELO win rate 作为唯一 reward，两天 7 个 SFT 实验把 win rate 从 56.0% 提到 60.1%；核心发现是更脏、更匹配 deployment distribution 的数据胜过干净的 expert 数据。",
+    "tags": [
+      "Blog",
+      "Agent",
+      "AutoResearch",
+      "RL",
+      "Online-Feedback"
+    ],
+    "path": "papers/2026-05-30-kaonai-online-autoresearch/index.html",
+    "categories": [
+      "agent",
+      "self-evolving"
+    ]
+  },
+  {
+    "slug": "2601.06487-arenarl",
+    "title": "ArenaRL: Scaling RL for Open-Ended Agents via Tournament-based Relative Ranking",
+    "authors": "Qiang Zhang, Boli Chen, Fanrui Zhang, Ruixue Ding, Shihang Wang, Qiuchen Wang, Yinfeng Huang, Haonan Zhang, Rongxiang Zhu, Pengyong Wang, Ailin Ren, Xin Li, Pengjun Xie, Jiawei Liu, Ning Guo, Jingren Zhou, Zheng-Jun Zha",
+    "team": "Tongyi Lab, Alibaba Group; Amap, Alibaba Group",
+    "arxiv": "https://arxiv.org/abs/2601.06487",
+    "code": "https://github.com/Alibaba-NLP/qqr",
+    "date": "2026-05-30",
+    "published": "arXiv 2026",
+    "tldr": "用锦标赛式组内相对排名替代会发生 discriminative collapse 的 pointwise scalar reward，并以 seeded single-elimination 把复杂度降到 O(N)，显著提升 open-ended agent 的 RL 效果。",
+    "tags": [
+      "LLM",
+      "Agent",
+      "RL",
+      "Ranking",
+      "Open-Ended"
+    ],
+    "path": "papers/2601.06487-arenarl/index.html",
+    "categories": [
+      "agent"
+    ]
+  },
+  {
+    "slug": "2605.26494-minimax-m2",
+    "title": "The MiniMax-M2 Series: Mini Activations Unleashing Max Real-World Intelligence",
+    "authors": "MiniMax",
+    "team": "MiniMax (MiniMaxAI)",
+    "arxiv": "https://arxiv.org/abs/2605.26494",
+    "code": "https://github.com/MiniMax-AI/MiniMax-M2",
+    "date": "2026-05-30",
+    "published": "arXiv 2026",
+    "tldr": "229.9B 总参 / 9.8B 激活的 MoE，用 agent 数据 pipeline + Forge RL 系统 + M2.7 self-evolution，把小激活推到逼近闭源前沿的 agentic coding/cowork/reasoning 水平。",
+    "tags": [
+      "LLM",
+      "MoE",
+      "Agent",
+      "RL",
+      "Self-Evolving"
+    ],
+    "path": "papers/2605.26494-minimax-m2/index.html",
+    "categories": [
+      "agent",
+      "self-evolving"
+    ]
+  },
+  {
+    "slug": "2605.23904-skillopt",
+    "title": "SkillOpt: Executive Strategy for Self-Evolving Agent Skills",
+    "authors": "Yifan Yang, Ziyang Gong, Weiquan Huang, Qihao Yang, Ziwei Zhou, Zisu Huang, Yan Li, Xuemei Gao, Qi Dai, Bei Liu, Kai Qiu, Yuqing Yang, Dongdong Chen, Xue Yang, Chong Luo",
+    "team": "Microsoft; SJTU; Tongji; Fudan",
+    "arxiv": "https://arxiv.org/abs/2605.23904",
+    "code": "https://github.com/microsoft/SkillOpt",
+    "date": "2026-05-30",
+    "published": "arXiv 2026",
+    "tldr": "把 agent 的 skill 文档当成 frozen 模型的可训练外部状态：独立 optimizer 提出有界 add/delete/replace 编辑，仅当 held-out validation 严格变好才接受；52 个 cell 全部 best-or-tied，部署零权重更新。",
+    "tags": [
+      "LLM",
+      "Agent",
+      "Skill",
+      "Self-Evolving",
+      "Optimization"
+    ],
+    "path": "papers/2605.23904-skillopt/index.html",
+    "categories": [
+      "agent",
+      "self-evolving"
+    ]
+  },
+  {
+    "slug": "2605.24539-demoevolve",
+    "title": "DemoEvolve: Overcoming Sparse Feedback in Agentic Harness Evolution with Demonstrations",
+    "authors": "Lirong Che, Yuzhe Yang, Peiwen Lin, Chuang Wang, Xueqian Wang, Jian Su",
+    "team": "AgiBot · Tsinghua University",
+    "arxiv": "https://arxiv.org/abs/2605.24539",
+    "code": "",
+    "date": "2026-05-30",
+    "published": "arXiv 2026",
+    "tldr": "用少量人类 demonstration 轨迹当 coding proposer 的诊断参照，破解 long-horizon、sparse-reward 下 self-rollout harness evolution 被噪声误导、改动不生效的问题，使 harness 编辑更有效、可定位、可审计。",
+    "tags": [
+      "LLM",
+      "Agent",
+      "Harness",
+      "Demonstrations",
+      "Self-Evolving"
+    ],
+    "path": "papers/2605.24539-demoevolve/index.html",
+    "categories": [
+      "agent",
+      "self-evolving"
+    ]
+  },
+  {
+    "slug": "2026-05-30-learning-beyond-gradients",
+    "title": "Learning Beyond Gradients",
+    "authors": "Jiayi Weng",
+    "team": "trinkle23897 (personal blog)",
+    "arxiv": "https://trinkle23897.github.io/learning-beyond-gradients",
+    "code": "https://github.com/Trinkle23897/learning-beyond-gradients",
+    "date": "2026-05-30",
+    "published": "Blog 2026",
+    "tldr": "提出 Heuristic Learning：不训练神经网络，而让 coding agent 读 reward/测试/日志/视频等多模态反馈直接改写手写代码策略，像软件系统一样持续生长；Atari/MuJoCo/VizDoom 上取得与 Deep RL 同量级结果。",
+    "tags": [
+      "Blog",
+      "Heuristic-Learning",
+      "Agent",
+      "RL",
+      "Continual-Learning"
+    ],
+    "path": "papers/2026-05-30-learning-beyond-gradients/index.html",
+    "categories": [
+      "agent",
+      "self-evolving"
+    ]
+  },
+  {
+    "slug": "2603.19312-leworldmodel",
+    "title": "LeWorldModel: Stable End-to-End Joint-Embedding Predictive Architecture from Pixels",
+    "authors": "Lucas Maes, Quentin Le Lidec, Damien Scieur, Yann LeCun, Randall Balestriero",
+    "team": "Mila & Université de Montréal · NYU · Samsung SAIL · Brown University",
+    "arxiv": "https://arxiv.org/abs/2603.19312",
+    "code": "https://github.com/lucas-maes/le-wm",
+    "date": "2026-05-30",
+    "published": "arXiv 2026",
+    "tldr": "首个从原始像素端到端稳定训练的 JEPA world model：只用 next-embedding prediction + 高斯正则 SIGReg 两项 loss，超参从 6 降到 1 且 anti-collapse 可证明；~15M 参数单卡可训，latent-space MPC 规划比 DINO-WM 快至多 48×。",
+    "tags": [
+      "World-Model",
+      "JEPA",
+      "Self-Supervised",
+      "Planning",
+      "Control"
+    ],
+    "path": "papers/2603.19312-leworldmodel/index.html",
+    "categories": [
+      "world-model"
+    ]
+  },
+  {
+    "slug": "2605.15155-sdar",
+    "title": "Self-Distilled Agentic Reinforcement Learning",
+    "authors": "Zhengxi Lu, Zhiyuan Yao, Zhuowen Han, Zi-Han Wang, Jinyang Wu, Qi Gu, Xunliang Cai, Weiming Lu, Jun Xiao, Yueting Zhuang, Yongliang Shen",
+    "team": "Zhejiang University (ZJU-REAL) · Meituan LongCat · Tsinghua University",
+    "arxiv": "https://arxiv.org/abs/2605.15155",
+    "code": "https://github.com/ZJU-REAL/SDAR",
+    "date": "2026-05-30",
+    "published": "arXiv 2026",
+    "tldr": "把 OPSD 当作 RL 之上的 gated 辅助 objective：用 detached sigmoid gate 对 teacher 背书的 positive-gap token 加强 distillation、对 negative rejection 柔性衰减，稳住多轮 agentic RL，全面超过 GRPO 与 hybrid baseline。",
+    "tags": [
+      "LLM",
+      "Agent",
+      "RL",
+      "Distillation",
+      "Self-Distillation"
+    ],
+    "path": "papers/2605.15155-sdar/index.html",
+    "categories": [
+      "agent",
+      "self-evolving"
+    ]
+  },
+  {
+    "slug": "2604.15840-coevolve-agent-data-mutual-evolution",
+    "title": "CoEvolve: Training LLM Agents via Agent-Data Mutual Evolution",
+    "authors": "Shidong Yang, Ziyu Ma, Tongwen Huang, Yiming Hu, Yong Wang, Xiangxiang Chu",
+    "team": "AMAP, Alibaba Group",
+    "arxiv": "https://arxiv.org/abs/2604.15840",
+    "code": "https://github.com/AMAP-ML/CoEvolve",
+    "date": "2026-05-30",
+    "published": "arXiv 2026",
+    "tldr": "在 GRPO 训练中从 rollout 抽取 forgetting/boundary/rare 三类弱点信号，引导 LLM 定向再探索并合成、验证新任务回训练集，让 agent 与训练数据相互进化；AppWorld/BFCL 上对 Qwen 系列取得 +15~19 分提升，仅约 10% 额外算力。",
+    "tags": [
+      "LLM-Agent",
+      "RL",
+      "GRPO",
+      "Synthetic-Data",
+      "Self-Evolving"
+    ],
+    "path": "papers/2604.15840-coevolve-agent-data-mutual-evolution/index.html",
+    "categories": [
+      "agent",
+      "self-evolving"
+    ]
+  },
+  {
+    "slug": "2604.20779-swe-chat-coding-agent-in-the-wild",
+    "title": "SWE-chat: Coding Agent Interactions From Real Users in the Wild",
+    "authors": "Joachim Baumann, Vishakh Padmakumar, Xiang Li, John Yang, Diyi Yang, Sanmi Koyejo",
+    "team": "Stanford University (SALT-NLP)",
+    "arxiv": "https://arxiv.org/abs/2604.20779",
+    "code": "https://github.com/SALT-NLP/SWE-chat",
+    "date": "2026-05-30",
+    "published": "arXiv 2026",
+    "tldr": "首个大规模真实'野外'coding agent 会话数据集（~6K 会话、63K+ prompt、355K+ tool call、逐行 human/agent 代码归属）：真实使用高度双峰、agent 自主性超过其寻求监督的能力、vibe coding 又贵又不安全。",
+    "tags": [
+      "Coding-Agent",
+      "Dataset",
+      "Human-AI-Interaction",
+      "Vibe-Coding",
+      "Code-Security"
+    ],
+    "path": "papers/2604.20779-swe-chat-coding-agent-in-the-wild/index.html",
+    "categories": [
+      "agent"
+    ]
+  },
+  {
+    "slug": "2604.08377-skillclaw-collective-skill-evolution",
+    "title": "SkillClaw: Let Skills Evolve Collectively with Agentic Evolver",
+    "authors": "Ziyu Ma, Shidong Yang, Yuxiang Ji, Xucong Wang, Yong Wang, Yiming Hu, Tongwen Huang, Xiangxiang Chu",
+    "team": "DreamX Team (AMAP, Alibaba)",
+    "arxiv": "https://arxiv.org/abs/2604.08377",
+    "code": "https://github.com/AMAP-ML/SkillClaw",
+    "date": "2026-05-30",
+    "published": "arXiv 2026",
+    "tldr": "把跨用户、跨时间的真实交互轨迹当作改进 agent skills 的第一信号：agentic evolver 对按 skill 分组的共享证据做 refine/create/skip，夜间真实环境验证后才合并同步，让 skills 在多用户生态中集体进化、单调不退化。",
+    "tags": [
+      "LLM-Agent",
+      "Agent-Skills",
+      "Skill-Evolution",
+      "Self-Improving",
+      "WildClawBench"
+    ],
+    "path": "papers/2604.08377-skillclaw-collective-skill-evolution/index.html",
+    "categories": [
+      "agent",
+      "self-evolving"
+    ]
+  },
+  {
+    "slug": "2605.07725-sod",
+    "title": "SOD: Step-wise On-policy Distillation for Small Language Model Agents",
+    "authors": "Qiyong Zhong, Mao Zheng, Mingyang Song, Xin Lin, Jie Sun, Houcheng Jiang, Xiang Wang, Junfeng Fang",
+    "team": "Zhejiang University; Tencent (LLM Dept); USTC; NUS",
+    "arxiv": "https://arxiv.org/abs/2605.07725",
+    "code": "https://github.com/YoungZ365/SOD",
+    "date": "2026-05-30",
+    "published": "arXiv 2026",
+    "tldr": "把 on-policy distillation 用于小模型 TIR 时，错误 tool call 会引发 error cascade 使 teacher 监督失准；SOD 用零开销的 step-level divergence 按步自适应缩放蒸馏强度，切断级联并允许先错后恢复，math/science/code 上相对次优 baseline 最高 +20.86%。",
+    "tags": [
+      "LLM",
+      "Agent",
+      "Distillation",
+      "On-Policy",
+      "Small-Models"
+    ],
+    "path": "papers/2605.07725-sod/index.html",
+    "categories": [
+      "agent"
+    ]
+  },
+  {
+    "slug": "2605.15040-orchard-agentic-modeling",
+    "title": "Orchard: An Open-Source Agentic Modeling Framework",
+    "authors": "Baolin Peng, Wenlin Yao, Qianhui Wu, Hao Cheng, Xiao Yu, Rui Yang, Tao Ge, Alessandro Sordoni, Xingdi Yuan, Yelong Shen, Pengcheng He, Tong Zhang, Zhou Yu, Jianfeng Gao",
+    "team": "Microsoft Research; Columbia University; UIUC",
+    "arxiv": "https://arxiv.org/abs/2605.15040",
+    "code": "https://github.com/microsoft/Orchard",
+    "date": "2026-05-30",
+    "published": "arXiv 2026",
+    "tldr": "把 agentic 训练的环境层抽象成薄、harness-agnostic 的 Kubernetes-native 服务 Orchard Env，并在其上搭 SWE/GUI/Claw 三个 SFT+RL recipe（SWE-bench Verified 67.5% 同尺寸开源 SOTA），论证环境层是 agentic 数据与 recipe 可复用的底座。",
+    "tags": [
+      "Agentic-Modeling",
+      "RL-Environment",
+      "SWE-Agent",
+      "GUI-Agent",
+      "SFT-RL"
+    ],
+    "path": "papers/2605.15040-orchard-agentic-modeling/index.html",
+    "categories": [
+      "agent"
+    ]
+  },
+  {
+    "slug": "2604.02268-skill-zero-skill-internalization",
+    "title": "SKILL0: In-Context Agentic Reinforcement Learning for Skill Internalization",
+    "authors": "Zhengxi Lu, Zhiyuan Yao, Jinyang Wu, Chengcheng Han, Qi Gu, Xunliang Cai, Weiming Lu, Jun Xiao, Yueting Zhuang, Yongliang Shen",
+    "team": "Zhejiang University (REAL Lab); Meituan; Tsinghua University",
+    "arxiv": "https://arxiv.org/abs/2604.02268",
+    "code": "https://github.com/ZJU-REAL/SkillZero",
+    "date": "2026-05-30",
+    "published": "arXiv 2026",
+    "tldr": "把 agent skill 从推理时的 prompt 注入「内化」进模型参数：In-Context RL 在训练 rollout 给 skill 指导、推理时完全移除，配 helpfulness 驱动的动态课程线性退火技能预算到 0；ALFWorld/Search-QA/WebShop +6.6~10.1% 且每步 context <0.5k token。",
+    "tags": [
+      "Agentic-RL",
+      "Skill-Internalization",
+      "In-Context-RL",
+      "Curriculum",
+      "Token-Efficiency"
+    ],
+    "path": "papers/2604.02268-skill-zero-skill-internalization/index.html",
+    "categories": [
+      "agent",
+      "self-evolving"
+    ]
+  },
+  {
+    "slug": "2605.10906-datamaster-data-centric-autonomous-ai",
+    "title": "DataMaster: Data-Centric Autonomous AI Research",
+    "authors": "Yaxin Du, Xiyuan Yang, Zhifan Zhou, Wanxu Liu, Zixing Lei, Zimeng Chen, Fenyi Liu, Haotian Wu, Yuzhu Cai, Zexi Liu, Xinyu Zhu, WenHao Wang, Linfeng Zhang, Chen Qian, Siheng Chen",
+    "team": "SJTU; CMU; Zhejiang University; BUAA",
+    "arxiv": "https://arxiv.org/abs/2605.10906",
+    "code": "https://github.com/sjtu-sai-agents/DataMaster",
+    "date": "2026-05-30",
+    "published": "arXiv 2026",
+    "tldr": "固定 learning algorithm、只在数据侧优化（外部数据发现/选择/清洗/转换）的自主 data-engineering 框架：DataTree 树搜索 + 共享 Data Pool + 累积 Global Memory；MLE-Bench Lite medal rate +32.27pt、PostTrainBench 平均 +22.70pt，GPQA 超人类专家 instruct。消融显示 Global Memory 是收益命门。",
+    "tags": [
+      "Data-Centric-AI",
+      "LLM-Agent",
+      "Tree-Search",
+      "AutoML",
+      "Post-Training"
+    ],
+    "path": "papers/2605.10906-datamaster-data-centric-autonomous-ai/index.html",
+    "categories": [
+      "agent"
+    ]
+  },
+  {
+    "slug": "2605.09998-continual-harness-self-improving-agents",
+    "title": "Continual Harness: Online Adaptation for Self-Improving Foundation Agents",
+    "authors": "Seth Karten, Joel Zhang, Tersoo Upaa Jr, Ruirong Feng, Wenzhe Li, Chengshuai Shi, Chi Jin, Kiran Vodrahalli",
+    "team": "Princeton University; ARISE Foundation; Google DeepMind",
+    "arxiv": "https://arxiv.org/abs/2605.09998",
+    "code": "https://github.com/sethkarten/continual-harness",
+    "date": "2026-05-30",
+    "published": "arXiv 2026",
+    "tldr": "reset-free 自改进框架：agent 一边玩一边由 Refiner 在同一局内对 prompt/sub-agents/skills/memory 做 CRUD 编辑，从极简接口追回到人工专家 harness 的大半差距；并用 process-reward + frontier teacher 重标注让开源模型在不重置环境下持续推进游戏里程碑（即 Gemini Plays Pokémon 的自动化版）。",
+    "tags": [
+      "Agentic-Harness",
+      "Self-Improving",
+      "Reset-Free",
+      "In-Context-Learning",
+      "LLM-Agent"
+    ],
+    "path": "papers/2605.09998-continual-harness-self-improving-agents/index.html",
+    "categories": [
+      "agent",
+      "self-evolving"
+    ]
+  },
+  {
+    "slug": "2605.12090-world-action-models-survey",
+    "title": "World Action Models: The Next Frontier in Embodied AI",
+    "authors": "Siyin Wang, Junhao Shi, Zhaoyang Fu, Xinzhe He, Feihong Liu, Chenchen Yang, Yikang Zhou, Zhaoye Fei, Jingjing Gong, Jinlan Fu, Mike Zheng Shou, Xuanjing Huang, Xipeng Qiu, Yu-Gang Jiang",
+    "team": "Fudan University (OpenMOSS); Shanghai Innovation Institute; NUS",
+    "arxiv": "https://arxiv.org/abs/2605.12090",
+    "code": "https://github.com/OpenMOSS/Awesome-WAM",
+    "date": "2026-05-30",
+    "published": "arXiv 2026",
+    "tldr": "首篇系统综述 World Action Models（WAMs）：把环境未来预测与动作生成统一进一个具身 foundation model、建模 p(o',a|o,l)；提出 Cascaded/Joint 分类法，梳理数据与评测协议，并指出'视觉逼真≠动作可行'的评测割裂缺陷。",
+    "tags": [
+      "Survey",
+      "World-Action-Model",
+      "Embodied-AI",
+      "VLA",
+      "World-Model"
+    ],
+    "path": "papers/2605.12090-world-action-models-survey/index.html",
+    "categories": [
+      "agent",
+      "world-model"
+    ]
+  },
+  {
+    "slug": "2508.14704-mcp-universe-benchmark",
+    "title": "MCP-Universe: Benchmarking Large Language Models with Real-World Model Context Protocol Servers",
+    "authors": "Ziyang Luo, Zhiqi Shen, Wenzhuo Yang, Zirui Zhao, Prathyusha Jwalapuram, Amrita Saha, Doyen Sahoo, Silvio Savarese, Caiming Xiong, Junnan Li",
+    "team": "Salesforce AI Research",
+    "arxiv": "https://arxiv.org/abs/2508.14704",
+    "code": "https://github.com/SalesforceAIResearch/MCP-Universe",
+    "date": "2026-05-30",
+    "published": "arXiv 2025",
+    "tldr": "第一个让 LLM 接入真实世界 MCP server 的综合 benchmark：6 领域 / 11 server（133 tools）/ 231 难任务 + execution-based 评测器（dynamic 评测自动抓实时 ground truth）；连 GPT-5 也只有 43.72% 成功率，Grok-4 33.33%、Claude-4-Sonnet 29.44%。框架 Apache-2.0 开源。",
+    "tags": [
+      "MCP",
+      "Benchmark",
+      "LLM-Agent",
+      "Tool-Use",
+      "Execution-Eval"
+    ],
+    "path": "papers/2508.14704-mcp-universe-benchmark/index.html",
+    "categories": [
+      "mcp",
+      "agent"
+    ]
+  },
+  {
+    "slug": "2506.14728-agentdistill-mcp-boxes",
+    "title": "AgentDistill: Training-Free Agent Distillation with Generalizable MCP Boxes",
+    "authors": "Jiahao Qiu, Xinzhe Juan, Yimin Wang, Ling Yang, Xuan Qi, Tongcheng Zhang, Jiacheng Guo, Yifu Lu, Zixin Yao, Hongru Wang, Shilong Liu, Xun Jiang, Liu Leqi, Mengdi Wang",
+    "team": "Princeton; UMich; Tsinghua (IIIS); SJTU; Columbia; CUHK; UT Austin",
+    "arxiv": "https://arxiv.org/abs/2506.14728",
+    "code": "",
+    "date": "2026-05-30",
+    "published": "arXiv 2025",
+    "tldr": "完全 training-free 的 agent 蒸馏：把蒸馏载体从 teacher 行为轨迹换成 teacher 自动生成的可参数化 MCP 工具，整理成可复用 MCP-Box 直接挂到小模型 student 的 tool 接口（零梯度更新）；PathVQA/SLAKE/Game-of-24 全面提升，student 追平 teacher。",
+    "tags": [
+      "MCP",
+      "Agent",
+      "Distillation",
+      "Training-Free",
+      "Tool-Use"
+    ],
+    "path": "papers/2506.14728-agentdistill-mcp-boxes/index.html",
+    "categories": [
+      "mcp",
+      "agent"
+    ]
+  },
+  {
+    "slug": "2510.24284-mcp-flow",
+    "title": "MCP-Flow: Facilitating LLM Agents to Master Real-World, Diverse and Scaling MCP Tools",
+    "authors": "Wenhao Wang, Peizhi Niu, Zhao Xu, Zhaoyu Chen, Jian Du, Yaxin Du, Xianghe Pang, Keduan Huang, Yanfeng Wang, Qiang Yan, Siheng Chen",
+    "team": "TikTok; Shanghai Jiao Tong University; Zhejiang University; UIUC",
+    "arxiv": "https://arxiv.org/abs/2510.24284",
+    "code": "https://github.com/wwh0411/MCP-Flow",
+    "date": "2026-05-30",
+    "published": "ACL 2026",
+    "tldr": "用 web agent 自动爬 6 大 MCP marketplace，造出覆盖 1166 server / 11536 tool 的 68733 条 function-call 数据 + 6439 条 trajectory；在其上 LoRA 微调的 0.6B–8B 小模型在真实 MCP 工具调用三指标上反超 GPT-4o / Claude-4-Sonnet，并泛化到 unseen tool/server。",
+    "tags": [
+      "MCP",
+      "LLM-Agent",
+      "Tool-Use",
+      "Function-Calling",
+      "Data-Synthesis"
+    ],
+    "path": "papers/2510.24284-mcp-flow/index.html",
+    "categories": [
+      "mcp",
+      "agent"
+    ]
+  },
+  {
+    "slug": "2510.01179-toucan-mcp-tool-agentic-data",
+    "title": "TOUCAN: Synthesizing 1.5M Tool-Agentic Data from Real-World MCP Environments",
+    "authors": "Zhangchen Xu, Adriana Meza Soria, Shawn Tan, Anurag Roy, Ashish Sunil Agrawal, Radha Poovendran, Rameswar Panda",
+    "team": "University of Washington; MIT-IBM Watson AI Lab",
+    "arxiv": "https://arxiv.org/abs/2510.01179",
+    "code": "https://github.com/TheAgentArk/Toucan",
+    "date": "2026-05-30",
+    "published": "arXiv 2025",
+    "tldr": "把近 500 个真实 MCP server 当可执行环境，合成 152.7 万条真实执行的 tool-agentic 轨迹（最大开源同类数据集）；仅用 11.9 万高质量子集 SFT，就让 Qwen2.5-7B/14B/32B 在 BFCL V3 上反超 GPT-4.5-Preview 并推进 MCP-Universe 的 Pareto frontier。",
+    "tags": [
+      "MCP",
+      "Tool-Agentic",
+      "Synthetic-Data",
+      "Function-Calling",
+      "SFT"
+    ],
+    "path": "papers/2510.01179-toucan-mcp-tool-agentic-data/index.html",
+    "categories": [
+      "mcp",
+      "agent"
+    ]
+  },
+  {
+    "slug": "2510.25726-toolathlon",
+    "title": "The Tool Decathlon: Benchmarking Language Agents for Diverse, Realistic, and Long-Horizon Task Execution",
+    "authors": "Junlong Li, Wenshuo Zhao, Jian Zhao, Weihao Zeng, Haoze Wu, et al. (21 authors)",
+    "team": "HKUST (hkust-nlp) · All Hands AI · CMU · Duke",
+    "arxiv": "https://arxiv.org/abs/2510.25726",
+    "code": "https://github.com/hkust-nlp/Toolathlon",
+    "date": "2026-05-30",
+    "published": "ICLR 2026",
+    "tldr": "面向 language agent 的真实/多样/长程工具使用 benchmark（又名 Toolathlon）：32 个真实软件、604 个工具（多为 MCP server）、108 个可确定性脚本验证的跨应用长程任务；最强 Claude-4.5-Sonnet 仅 38.6% Pass@1，最强开源 DeepSeek-V3.2-Exp 仅 20.1%。",
+    "tags": [
+      "Agent",
+      "Benchmark",
+      "MCP",
+      "Tool-Use",
+      "Long-Horizon"
+    ],
+    "path": "papers/2510.25726-toolathlon/index.html",
+    "categories": [
+      "agent",
+      "mcp"
+    ]
+  },
+  {
+    "slug": "2509.24002-mcpmark",
+    "title": "MCPMark: A Benchmark for Stress-Testing Realistic and Comprehensive MCP Use",
+    "authors": "Zijian Wu, Xiangyan Liu, Xinyuan Zhang, Lingjun Chen, Fanqing Meng, Lingxiao Du, Yiran Zhao, Fanshi Zhang, Yaoqi Ye, Jiawei Wang, Zirui Wang, Jinjie Ni, Yufan Yang, Arvin Xu, Michael Qizhe Shieh",
+    "team": "TRAIL @ NUS · EvalSys · LobeHub · SJTU · Fudan",
+    "arxiv": "https://arxiv.org/abs/2509.24002",
+    "code": "https://github.com/eval-sys/mcpmark",
+    "date": "2026-05-30",
+    "published": "arXiv 2025",
+    "tldr": "用 127 个专家+AI 协作构建、带程序化验证脚本的多步 CRUD 任务，跨 Notion/GitHub/Filesystem/PostgreSQL/Playwright 五个真实 MCP server 压测 MCP 使用能力；最强 gpt-5-medium 也仅 52.56% pass@1 / 33.86% pass^4，瓶颈在多轮 tool use 稳定性。",
+    "tags": [
+      "MCP",
+      "Benchmark",
+      "Tool-Use",
+      "LLM-Eval",
+      "CRUD"
+    ],
+    "path": "papers/2509.24002-mcpmark/index.html",
+    "categories": [
+      "mcp",
+      "agent"
+    ]
+  },
+  {
+    "slug": "2026-06-29-idg-capital-investments",
+    "title": "IDG 资本（IDG Capital）2025–2026 投资盘点（公开披露部分）",
+    "authors": "—",
+    "team": "投资研究",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-30",
+    "published": "投资研究 2026",
+    "tldr": "IDG资本(中国最早美元VC之一,熊晓鸽1993入华)2025-2026公开披露投资盘点,按赛道整理(机器人/具身智能·AI大模型与应用·医疗大健康·半导体·新能源/钠电)+赛道分布SVG+下注重心(机器人+AI占样本一半);含退出/IPO(影石·小马·文远)与5亿美元接续基金;公开样本非完整、逐笔标来源等级;非投资建议",
+    "tags": [
+      "investment",
+      "venture-capital",
+      "china",
+      "idg-capital",
+      "portfolio"
+    ],
+    "path": "papers/2026-06-29-idg-capital-investments/index.html"
+  },
+  {
+    "slug": "2026-06-29-qiming-investments",
+    "title": "启明创投（Qiming Venture Partners）2025–2026 投资盘点（公开披露部分）",
+    "authors": "—",
+    "team": "投资研究",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-30",
+    "published": "投资研究 2026",
+    "tldr": "启明创投(邝子平,医疗+科技双引擎)2025-2026公开披露投资盘点,按赛道整理(生物医药/AI/半导体/具身机器人/新能源等)+赛道分布SVG+下注重心(生物医药为基本盘,具身智能与国产半导体为新重注);收录约17笔投资+7例港股IPO退出,每笔标来源等级,公开样本非完整;非投资建议",
+    "tags": [
+      "investment",
+      "venture-capital",
+      "china",
+      "qiming",
+      "healthcare",
+      "portfolio"
+    ],
+    "path": "papers/2026-06-29-qiming-investments/index.html"
+  }
+]
