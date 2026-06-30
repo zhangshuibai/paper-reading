@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>源码资本（Source Code Capital）2025–2026 投资盘点（公开披露部分）</title>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1d2138; --text:#e8eaf2; --muted:#9aa3bd;
+    --line:#2a2f4a; --accent:#7aa2ff; --accent2:#9b8cff; --chip:#232842; --chipText:#c7cdec;
+    --ok:#43c59e; --warn:#ffb454; --bad:#ff6b81; --insight:#9b8cff; --shadow:0 8px 30px rgba(0,0,0,.35);
+    --ai:#7aa2ff; --robot:#9b8cff; --chip2:#43c59e; --bio:#ff6b81; --ent:#ffb454; --consume:#f0a6ca; --other:#6bb6ff;
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f7fb; --panel:#ffffff; --panel2:#f1f3fb; --text:#1a1f33; --muted:#5a627a;
+      --line:#e6e9f2; --accent:#3a66ff; --accent2:#6b4cff; --chip:#eef1fb; --chipText:#36406b;
+      --ok:#138a6e; --warn:#b3701a; --bad:#d23651; --insight:#6b4cff; --shadow:0 8px 24px rgba(20,30,80,.08);
+      --ai:#3a66ff; --robot:#6b4cff; --chip2:#138a6e; --bio:#d23651; --ent:#b3701a; --consume:#c44d86; --other:#2a7fd0;
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    line-height:1.7; font-size:16px;}
+  .back{display:inline-block; margin:22px 0 0 22px; color:var(--muted); text-decoration:none; font-size:14px}
+  .back:hover{color:var(--accent)}
+  article{max-width:1040px; margin:0 auto; padding:18px 22px 90px}
+  header.head{border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px}
+  h1{font-size:25px; line-height:1.35; margin:14px 0 6px}
+  .orig-title{color:var(--muted); font-size:15px; margin:0 0 16px}
+  .meta-grid{display:grid; grid-template-columns:max-content 1fr; gap:6px 16px; font-size:14px; margin:14px 0 0}
+  .meta-grid dt{color:var(--muted)} .meta-grid dd{margin:0}
+  .tldr{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent);
+        border-radius:12px; padding:14px 18px; margin:22px 0; box-shadow:var(--shadow)}
+  .tldr b{color:var(--accent)}
+  nav.toc{background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+          padding:12px 18px; margin:8px 0 30px; font-size:14px}
+  nav.toc b{display:block; margin-bottom:6px; color:var(--muted); font-weight:600; font-size:12.5px; letter-spacing:.4px}
+  nav.toc a{color:var(--text); text-decoration:none; margin-right:16px; white-space:nowrap; line-height:2}
+  nav.toc a:hover{color:var(--accent)}
+  section{margin:34px 0}
+  h2{font-size:20px; margin:0 0 14px; padding-top:8px; border-top:1px dashed var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:16px; margin:20px 0 6px}
+  p{margin:11px 0} ul,ol{padding-left:22px} li{margin:5px 0}
+  a{color:var(--accent)} strong{color:var(--text)}
+  code{background:var(--panel2); padding:1.5px 6px; border-radius:6px; font-size:.88em}
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:12.5px; overflow:hidden;
+        border:1px solid var(--line); border-radius:10px}
+  th,td{border-bottom:1px solid var(--line); padding:8px 9px; text-align:left; vertical-align:top}
+  th{background:var(--panel2); color:var(--muted); font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td a{word-break:break-word}
+  .callout{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin:20px 0; background:var(--panel)}
+  .callout .label{font-size:12px; letter-spacing:.5px; font-weight:700; text-transform:uppercase; display:block; margin-bottom:4px}
+  .callout.insight{border-left:4px solid var(--insight)} .callout.insight .label{color:var(--insight)}
+  .callout.note{border-left:4px solid var(--accent)} .callout.note .label{color:var(--accent)}
+  .callout.warn{border-left:4px solid var(--warn)} .callout.warn .label{color:var(--warn)}
+  .chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0}
+  .chip{background:var(--chip); color:var(--chipText); border:1px solid var(--line);
+        border-radius:999px; padding:3px 11px; font-size:12.5px}
+  .src{font-size:11.5px; white-space:nowrap}
+  .legend{display:flex; gap:16px; flex-wrap:wrap; font-size:13px; margin:10px 0 0; color:var(--muted)}
+  .tag{display:inline-block; padding:1px 7px; border-radius:6px; font-size:11px; font-weight:600; white-space:nowrap}
+  .t-ai{background:rgba(122,162,255,.16); color:var(--ai)}
+  .t-robot{background:rgba(155,140,255,.16); color:var(--robot)}
+  .t-chip{background:rgba(67,197,158,.16); color:var(--chip2)}
+  .t-ent{background:rgba(255,180,84,.16); color:var(--ent)}
+  .t-consume{background:rgba(240,166,202,.18); color:var(--consume)}
+  .t-other{background:rgba(107,182,255,.16); color:var(--other)}
+  .fig{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:18px; margin:18px 0; box-shadow:var(--shadow)}
+  .fig figcaption{color:var(--muted); font-size:13px; margin-top:10px; text-align:center}
+  .disc{background:var(--panel2); border:1px solid var(--line); border-left:4px solid var(--bad);
+        border-radius:12px; padding:13px 18px; margin:22px 0; font-size:13.5px; color:var(--muted)}
+  .disc b{color:var(--bad)}
+  .footnote{font-size:12.5px; color:var(--muted)}
+  hr{border:none; border-top:1px solid var(--line); margin:30px 0}
+  .grade-row{display:flex; gap:8px; flex-wrap:wrap; margin:6px 0 0; font-size:12.5px; color:var(--muted)}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← 返回目录</a>
+<article>
+<header class="head">
+  <div class="chips">
+    <span class="chip">投资研究</span>
+    <span class="chip">中国一级市场</span>
+    <span class="chip">VC / 成长期</span>
+    <span class="chip">公开披露样本</span>
+  </div>
+  <h1>源码资本（Source Code Capital）2025–2026 投资盘点（公开披露部分）</h1>
+  <p class="orig-title">Source Code Capital · 创始合伙人 曹毅（Cao Yi）· 北京 · 创立于 2014</p>
+  <dl class="meta-grid">
+    <dt>研究主体</dt><dd>源码资本（北京源码资本投资有限公司 / Source Code Capital）</dd>
+    <dt>时间窗口</dt><dd>2025 年 1 月 – 2026 年 6 月（以公开可核实信息为准）</dd>
+    <dt>整理团队</dt><dd>投资研究 · 2026</dd>
+    <dt>数据性质</dt><dd>公开披露样本，非完整投资组合清单</dd>
+  </dl>
+</header>
+
+<div class="tldr">
+  <b>TL;DR：</b>源码资本（创始合伙人曹毅，红杉中国出身，2014 年创立）是中国头部早期到成长期机构，经典案例字节跳动、美团、理想汽车、贝壳。2025–2026 年两件标志性事件：① <b>2025 年 11 月完成新一期双币成长基金募资，总规模约 6 亿美元</b>（比 2021 年的 10 亿美元 + 70 亿元人民币缩小），AUM 约 70 亿美元，主题锁定「AI+」与「Global+」；② 早期投资由黄云刚独立运营的「<b>源码律动</b>」承接，回归经典 VC 早期打法，与成长基金形成阶段分工。下注重心明显落在 <b>AI 大模型 / 具身机器人 / 半导体硬科技</b>：投资组合含宇树科技、银河通用、加速进化、月之暗面、LiblibAI、Sand.ai、奕斯伟材料、壁仞科技等；退出端 2025–2026 集中收获奕斯伟材料（科创板）、卧安机器人（港股）、壁仞科技（港股）等 IPO。本文为<b>公开披露样本、非完整清单</b>，每笔标来源等级；下方逐笔列出可核实交易，<b>非投资建议</b>。
+</div>
+
+<div class="disc">
+  <b>重要声明：</b>本文仅基于公开新闻、企业公告、上市文件等可检索资料整理，是<b>公开披露部分的样本，并非源码资本完整投资清单</b>。一级市场大量交易不披露金额/轮次/参投方，源码在很多明星项目里是「老股东持续加注」而非本轮领投，文中已尽量区分。所有数字以来源为准、可能存在口径差异或后续修订。<b>本文不构成任何投资建议，亦非对源码资本或任何被投公司的推荐。</b>
+</div>
+
+<nav class="toc">
+  <b>目录</b>
+  <a href="#bg">① 背景速补</a>
+  <a href="#list">② 2025–2026 投资清单</a>
+  <a href="#svg">③ 赛道分布</a>
+  <a href="#theme">④ 主题观察</a>
+  <a href="#exit">⑤ 退出 / IPO</a>
+  <a href="#limit">⑥ 局限与存疑</a>
+  <a href="#src">来源与分级</a>
+</nav>
+
+<section id="bg">
+  <h2><span class="n">①</span>背景速补：源码资本是谁</h2>
+
+  <h3>主体与创始人</h3>
+  <p><strong>源码资本（Source Code Capital）</strong>由<strong>曹毅（Cao Yi）</strong>于 2014 年春创立，总部北京。曹毅此前在<strong>红杉资本中国（今 HongShan / 红杉中国）</strong>任职，是红杉体系出身的投资人，独立创业后建立源码。机构定位横跨<strong>早期到成长期</strong>，主投科技驱动的商业变革，最为人熟知的早期战绩是<strong>字节跳动</strong>与<strong>美团</strong>——这两笔奠定了源码在中国 VC 圈的地位。<span class="src">🟢/🟡</span></p>
+
+  <h3>规模与版图</h3>
+  <ul>
+    <li><strong>AUM 约 70 亿美元</strong>（约合 500 亿元人民币，2025 年 11 月口径）。<span class="src">🟡</span></li>
+    <li>自 2014 年创立以来<strong>累计投资超 300 家</strong>创业公司。<span class="src">🟡</span></li>
+    <li>行业覆盖：产业数字化、人工智能、机器人、先进制造、绿色发展（新能源）、企业软件、生命科学、新消费与新品牌、出海（Global）。<span class="src">🟢/🟡</span></li>
+    <li>代表案例（历史 + 近期，机构官方/媒体口径）：字节跳动、美团、贝壳找房、理想汽车、悦刻（雾芯科技 / RLX）、布鲁可、塔斯汀、元保数科、OPay、Stori；以及 AI / 机器人新星宇树科技、银河通用、加速进化、月之暗面、LiblibAI、Sand.ai、奕斯伟材料、壁仞科技、云鲸智能、卧安机器人等。<span class="src">🟡</span></li>
+  </ul>
+
+  <div class="callout note">
+    <span class="label">领域背景速补（读者只需 LLM 基础）</span>
+    <ul style="margin:6px 0 0">
+      <li><strong>VC / 成长期投资</strong>：风险投资基金把出资人（LP）的钱投进未上市公司换股权，靠公司被并购或 IPO 退出赚钱。「早期」指天使/A 轮（公司很小、风险高、单笔金额小、占股多）；「成长期」指 B 轮之后（公司已验证、估值高、单笔金额大）。源码这次把成长期与早期拆成两条线运营。</li>
+      <li><strong>双币基金</strong>：同时募集人民币和美元两种货币的基金。美元基金能投/退海外与红筹结构，人民币基金对接 A 股科创板和国资 LP。中美环境收紧后，能两边都跑通是头部机构的护城河。</li>
+      <li><strong>领投 vs 跟投 / 老股东加注</strong>：「领投」是本轮定价、出资最多、谈条款的主导方；「跟投/参投」是搭车；「老股东持续加注（增持）」指此前已是股东、新一轮继续按比例或超额追加——这是源码在很多明星项目里的真实角色，<u>不等于本轮领投</u>，本文严格区分。</li>
+      <li><strong>具身智能 / 人形机器人</strong>：让 AI 不止「在屏幕里说话」，而是装进有身体的机器人去抓取、行走、干活；是 2024–2026 中国一级市场最热的赛道之一，源码重仓宇树、银河通用、加速进化等。</li>
+      <li><strong>科创板 / 港股 IPO</strong>：上交所科创板（STAR Market）面向硬科技、允许未盈利企业上市（「科创板八条」「新国九条」放宽了规则）；港股是中国科技公司另一上市地。两者都是 VC 的主要退出通道。</li>
+      <li><strong>AI2C / 2P</strong>：源码新基金的提法。2C = 面向消费者的 AI 应用；2P（to Prosumer / 专业个人）= 面向有付费能力的专业/创作者个体（如 AI 创作工具）。对应它对 LiblibAI、Sand.ai 这类「AI 应用 / 创作工具」的偏好。</li>
+    </ul>
+  </div>
+
+  <h3>2025–2026 的两件大事</h3>
+  <p><strong>(1) 新一期成长基金落地（2025 年 11 月）。</strong>源码完成新一期<strong>双币成长基金</strong>募资，<strong>总规模约 6 亿美元</strong>，投资期 5 年、退出期 20 年、整体存续周期约 25 年；资金「主要来自产业投资人和少数长期财务投资人」。规模相比 2021 年那一期（10 亿美元 + 70 亿元人民币）有所收缩，被解读为转向「少而精」——单项目下注更大、周期更长、加重投后。主题明确为<strong>「AI+」（AI2C/2P、算力产业链、卡脖子突破、AI 规模商业化）</strong>与<strong>「Global+」（智能硬件、软件应用出海）</strong>。<span class="src">🟢/🟡</span></p>
+  <p><strong>(2) 早期与成长期分工。</strong>由<strong>黄云刚</strong>独立运营的「<strong>源码律动</strong>」明确 all-in 早期、回归经典 VC 打法；新成长基金侧重成长期。换句话说，2025 年起源码把「找早期项目」与「成长期重仓」拆成两套班子。<span class="src">🟡</span></p>
+</section>
+
+<section id="list">
+  <h2><span class="n">②</span>2025–2026 投资 / 重大事件清单（公开样本）</h2>
+  <p>下表为本次能<strong>核实到的公开披露交易与重大事件样本</strong>，按赛道归类。注意：源码在多数明星项目中的角色是<strong>早期股东 + 老股东持续加注</strong>，本轮领投方常为他人；「源码角色」一列尽量标明。金额/轮次以来源为准，核不到的标「未披露」。<strong>这不是完整清单。</strong></p>
+
+  <div class="legend">
+    <span><span class="tag t-ai">AI/大模型</span></span>
+    <span><span class="tag t-robot">机器人/具身</span></span>
+    <span><span class="tag t-chip">半导体/硬科技</span></span>
+    <span><span class="tag t-ent">企业服务/出海</span></span>
+    <span><span class="tag t-consume">消费/新品牌</span></span>
+    <span><span class="tag t-other">其他/事件</span></span>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>公司 / 事件</th><th>赛道</th><th>日期</th><th>轮次</th><th>金额</th><th>源码角色 / 共投方</th><th>来源</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>LiblibAI（哩布哩布）</strong><br><span class="footnote">AI 图像创作社区/工具</span></td>
+        <td><span class="tag t-ai">AI/大模型</span></td>
+        <td>2025-10</td>
+        <td>B 轮</td>
+        <td>1.3 亿美元</td>
+        <td>本轮由<strong>红杉中国、CMC 资本及一战略方联合领投</strong>；<strong>源码为天使轮联合领投方、本轮老股东超额增持</strong>；顺为、明势同为增持老股东。早年天使轮约 350 万美元（金沙江、高榕、源码，估值约 1500 万美元）。</td>
+        <td class="src">🟡</td>
+      </tr>
+      <tr>
+        <td><strong>月之暗面（Moonshot AI / Kimi）</strong><br><span class="footnote">通用大模型，Kimi K2</span></td>
+        <td><span class="tag t-ai">AI/大模型</span></td>
+        <td>2025–2026（多轮）</td>
+        <td>C 轮及后续</td>
+        <td>2025 年底 C 轮约 5 亿美元（IDG 领投，阿里/腾讯等增持）；2026 上半年多轮推进、估值快速攀升</td>
+        <td><strong>源码为被投/老股东</strong>（机构口径将月之暗面列为代表项目）；近轮领投方为他人（如 IDG、美团龙珠等）。源码本轮份额未披露。</td>
+        <td class="src">🟡</td>
+      </tr>
+      <tr>
+        <td><strong>Sand.ai（曹越团队）</strong><br><span class="footnote">视频生成大模型，Magi-1 / VidMuse</span></td>
+        <td><span class="tag t-ai">AI/大模型</span></td>
+        <td>2025（约）</td>
+        <td>新一轮 / A 系列</td>
+        <td>新一轮约 5000 万美元（媒体另称三个月内累计超 1 亿美元）</td>
+        <td><strong>源码为参投/股东之一</strong>，与经纬、IDG、创新工场、今日资本、宿华、王慧文家办等同列；本轮领投方未明确归于源码。</td>
+        <td class="src">🟡</td>
+      </tr>
+      <tr>
+        <td><strong>宇树科技（Unitree）</strong><br><span class="footnote">四足/人形机器人</span></td>
+        <td><span class="tag t-robot">机器人/具身</span></td>
+        <td>—（早期投资）</td>
+        <td>早期股东</td>
+        <td>未披露</td>
+        <td><strong>源码为早期投资人</strong>，多次出现在投资人名单（机构代表项目）。2025–2026 具体新轮中源码份额未单独披露。</td>
+        <td class="src">🟡</td>
+      </tr>
+      <tr>
+        <td><strong>银河通用（Galbot）</strong><br><span class="footnote">具身智能 / 通用机器人</span></td>
+        <td><span class="tag t-robot">机器人/具身</span></td>
+        <td>2025-06 / 2025-12 / 2026-03</td>
+        <td>多轮</td>
+        <td>2025-06 约 11 亿元；2025-12 超 3 亿美元（估值约 30 亿美元）；2026-03 再融约 25 亿元</td>
+        <td><strong>源码为 A 轮前常驻/早期投资方之一</strong>。近期大额轮次领投方为中国移动链长基金、国家 AI 产业基金等国资/产业方，<u>非源码领投</u>。</td>
+        <td class="src">🟡</td>
+      </tr>
+      <tr>
+        <td><strong>加速进化（Booster Robotics）</strong><br><span class="footnote">人形机器人软硬件平台</span></td>
+        <td><span class="tag t-robot">机器人/具身</span></td>
+        <td>2025-06（A）/ 2025-07（A+）/ 2025-11（新一轮）</td>
+        <td>A → A+ → 新一轮</td>
+        <td>A 轮系列累计近 5 亿元；A+ 超亿元；2025-11 新一轮超亿元</td>
+        <td><strong>源码为老股东、多轮持续加注</strong>。A 轮深创投领投，A+ 北京机器人产业基金领投，2025-11 轮 IDG 资本投资、亦庄国投跟投；早年（2024-04）数千万元轮源码已是联合投资方。</td>
+        <td class="src">🟡</td>
+      </tr>
+      <tr>
+        <td><strong>云鲸智能（Narwal）</strong><br><span class="footnote">扫地/洗地机器人，出海</span></td>
+        <td><span class="tag t-robot">机器人/具身</span></td>
+        <td>约 2024 末–2025（披露于 2024-12）</td>
+        <td>新一轮（轮次未明示）</td>
+        <td>数亿元</td>
+        <td><strong>源码为 B 轮领投方、后续持续加码</strong>；机构称其为「持续陪伴者」。海外营收同比增长近 7 倍（截至当年 9 月底），覆盖 30+ 国家/地区。</td>
+        <td class="src">🟡</td>
+      </tr>
+      <tr>
+        <td><strong>奕斯伟材料（西安奕材，688783）</strong><br><span class="footnote">12 英寸大硅片</span></td>
+        <td><span class="tag t-chip">半导体/硬科技</span></td>
+        <td>2025-10（IPO）</td>
+        <td>科创板 IPO（退出事件）</td>
+        <td>募资约 46.36 亿元</td>
+        <td><strong>源码为上市前机构股东之一</strong>（机构股东近 60 家，累计融资超 100 亿元）。系「新国九条/科创板八条」后首家受理并上市的未盈利企业，首日大涨。</td>
+        <td class="src">🟢/🟡</td>
+      </tr>
+      <tr>
+        <td><strong>壁仞科技（Biren，06082.HK）</strong><br><span class="footnote">国产 GPGPU</span></td>
+        <td><span class="tag t-chip">半导体/硬科技</span></td>
+        <td>2025-12 递表 / 2026-01 上市</td>
+        <td>港股 IPO（退出事件）</td>
+        <td>募资约 6.23 亿美元（约 48 亿港元）</td>
+        <td><strong>源码为 2021-03 B+ 轮参投机构之一</strong>（17 家跟投方之一，与 IDG、海松、BAI 等同列）。系「港股 GPU 第一股」。</td>
+        <td class="src">🟡</td>
+      </tr>
+      <tr>
+        <td><strong>视涯科技</strong><br><span class="footnote">硅基 OLED 微显示</span></td>
+        <td><span class="tag t-chip">半导体/硬科技</span></td>
+        <td>2025</td>
+        <td>未披露</td>
+        <td>未披露</td>
+        <td><strong>源码 2025 年参投</strong>（角色/份额未披露）。</td>
+        <td class="src">🟡</td>
+      </tr>
+      <tr>
+        <td><strong>卧安机器人（06600.HK）</strong><br><span class="footnote">AI 具身家庭机器人系统</span></td>
+        <td><span class="tag t-robot">机器人/具身</span></td>
+        <td>2025-12-30（上市）</td>
+        <td>港股 IPO（退出事件）</td>
+        <td>发行价 73.8 港元，首发募资约 16.4 亿港元</td>
+        <td><strong>源码 2021 年 A+ 轮入股、后持续追投，上市前仍为最大机构股东之一</strong>。李泽湘体系孵化，高瓴等 7 名基石；号称「AI 具身家庭机器人第一股」。</td>
+        <td class="src">🟡</td>
+      </tr>
+      <tr>
+        <td><strong>新一期成长基金募资</strong><br><span class="footnote">机构自身事件</span></td>
+        <td><span class="tag t-other">其他/事件</span></td>
+        <td>2025-11</td>
+        <td>双币成长基金</td>
+        <td>总规模约 6 亿美元</td>
+        <td>主题「AI+」「Global+」；投资期 5 年/退出期 20 年；AUM 约 70 亿美元。</td>
+        <td class="src">🟢/🟡</td>
+      </tr>
+      <tr>
+        <td><strong>源码律动（黄云刚）</strong><br><span class="footnote">机构自身事件</span></td>
+        <td><span class="tag t-other">其他/事件</span></td>
+        <td>2024–2025</td>
+        <td>早期 VC 线</td>
+        <td>未披露</td>
+        <td>黄云刚独立运营、all-in 早期、回归经典 VC 打法，与成长基金阶段分工。</td>
+        <td class="src">🟡</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout warn">
+    <span class="label">如何读这张表</span>
+    本表混合了「新投/加注」与「IPO 退出」两类事件，便于一页看清 2025–2026 源码的活跃面。<strong>多数明星项目里源码是早期+老股东角色，本轮领投通常另有其人</strong>；只有云鲸（B 轮领投）、LiblibAI（天使轮联合领投）这类能明确看到源码主导的早期下注。机构自身的「6 亿美元募资」和「源码律动分线」反映其策略，而非对外投资。
+  </div>
+</section>
+
+<section id="svg">
+  <h2><span class="n">③</span>赛道分布（公开样本，N=11 笔交易/事件）</h2>
+  <p>下图按上表 <strong>11 个对外项目类条目</strong>（剔除「成长基金募资」「源码律动」两个纯机构事件）做粗略赛道计数。<strong>这是公开披露样本、非全量组合</strong>，仅反映「能被新闻核实到的 2025–2026 活跃面」，会系统性偏向有 IPO/大额融资曝光的项目，<u>不代表源码真实的资金权重</u>。</p>
+
+  <figure class="fig">
+    <svg viewBox="0 0 720 300" width="100%" role="img" aria-label="赛道分布条形图">
+      <line x1="180" y1="20" x2="180" y2="250" stroke="var(--line)" stroke-width="1"/>
+      <line x1="180" y1="250" x2="690" y2="250" stroke="var(--line)" stroke-width="1"/>
+
+      <g font-size="10" fill="var(--muted)" text-anchor="middle">
+        <line x1="180" y1="20" x2="180" y2="250" stroke="var(--line)"/>
+        <text x="180" y="266">0</text>
+        <line x1="282" y1="20" x2="282" y2="250" stroke="var(--line)" stroke-dasharray="2 4"/>
+        <text x="282" y="266">1</text>
+        <line x1="384" y1="20" x2="384" y2="250" stroke="var(--line)" stroke-dasharray="2 4"/>
+        <text x="384" y="266">2</text>
+        <line x1="486" y1="20" x2="486" y2="250" stroke="var(--line)" stroke-dasharray="2 4"/>
+        <text x="486" y="266">3</text>
+        <line x1="588" y1="20" x2="588" y2="250" stroke="var(--line)" stroke-dasharray="2 4"/>
+        <text x="588" y="266">4</text>
+        <line x1="690" y1="20" x2="690" y2="250" stroke="var(--line)" stroke-dasharray="2 4"/>
+        <text x="690" y="266">5</text>
+      </g>
+
+      <rect x="180" y="34" width="408" height="30" rx="5" fill="var(--robot)"/>
+      <text x="172" y="54" text-anchor="end" font-size="12" fill="var(--text)">机器人/具身</text>
+      <text x="596" y="54" font-size="12" fill="var(--text)">4</text>
+
+      <rect x="180" y="80" width="306" height="30" rx="5" fill="var(--ai)"/>
+      <text x="172" y="100" text-anchor="end" font-size="12" fill="var(--text)">AI/大模型</text>
+      <text x="494" y="100" font-size="12" fill="var(--text)">3</text>
+
+      <rect x="180" y="126" width="306" height="30" rx="5" fill="var(--chip2)"/>
+      <text x="172" y="146" text-anchor="end" font-size="12" fill="var(--text)">半导体/硬科技</text>
+      <text x="494" y="146" font-size="12" fill="var(--text)">3</text>
+
+      <rect x="180" y="172" width="2" height="30" rx="5" fill="var(--ent)"/>
+      <text x="172" y="192" text-anchor="end" font-size="12" fill="var(--text)">企业服务/出海*</text>
+      <text x="190" y="192" font-size="12" fill="var(--muted)">0</text>
+
+      <rect x="180" y="218" width="102" height="30" rx="5" fill="var(--consume)"/>
+      <text x="172" y="238" text-anchor="end" font-size="12" fill="var(--text)">消费/新品牌*</text>
+      <text x="290" y="238" font-size="12" fill="var(--text)">1</text>
+    </svg>
+    <figcaption>
+      赛道分布（公开样本，N=11，剔除 2 个纯机构事件）。<br>
+      *「企业服务/出海」本样本期内无可核实的独立新投（出海属性的云鲸已计入「机器人/具身」）；<br>
+      *「消费/新品牌」此处仅以历史代表项目作占位计 1，样本期内未核实到新投/重大事件。<br>
+      条形长度仅反映「被核实到的曝光数量」，<strong>不等于实际投资金额或资金权重</strong>。
+    </figcaption>
+  </figure>
+
+  <div class="callout insight">
+    <span class="label">一句话读图</span>
+    在<strong>能被核实的公开曝光层面</strong>，2025–2026 源码的活跃面高度集中在「<strong>具身机器人 + AI 大模型 + 半导体硬科技</strong>」三大硬科技板块，与新基金「AI+ / Global+」「算力产业链」「卡脖子」的官方定位一致；消费/企业服务在样本期内曝光明显减少。
+  </div>
+</section>
+
+<section id="theme">
+  <h2><span class="n">④</span>主题观察</h2>
+
+  <h3>1) 从「互联网+」彻底切到「AI + 硬科技」</h3>
+  <p>源码的历史标签是字节、美团、贝壳、理想这类「互联网/出行/消费平台」。2025–2026 公开曝光的重心已明显转向<strong>大模型、具身机器人、国产算力/半导体</strong>。新基金把主题直接写成「AI+」与「算力产业链/卡脖子」，与组合里的壁仞（GPU）、奕斯伟（大硅片）、银河通用/宇树/加速进化（机器人）形成呼应。<span class="src">🟡</span></p>
+
+  <h3>2) 「老股东持续加注」是源码近期最典型的动作</h3>
+  <p>在加速进化、云鲸、卧安、月之暗面、LiblibAI 等多个项目里，源码的角色都是<strong>早期进入 + 后续多轮加码</strong>，而非每轮领投。这与新基金「少而精、单项目下注更大、加重投后、长期陪伴」的自述一致——把弹药集中压在已验证的老组合上，而不是广撒网。<span class="src">🟡</span></p>
+
+  <h3>3) AI2C/2P：偏好「AI 应用 / 创作工具」而非只押底层模型</h3>
+  <p>LiblibAI（AI 图像创作社区）和 Sand.ai（视频生成 + VidMuse 产品）都属于「模型 + 产品双轮」的应用层，呼应新基金对 <strong>AI2C/2P</strong>（消费者 / 专业创作者）的明确点名。即便同时持有月之暗面这类底层模型，源码在应用层的下注同样显眼。<span class="src">🟡</span></p>
+
+  <h3>4) 募资收缩 + 早晚期分线，反映「降速提质」</h3>
+  <p>新一期成长基金 6 亿美元，低于 2021 年那期；同时把早期单拆给「源码律动」。组合拳的信号是：<strong>成长期更聚焦、单笔更重、周期更长</strong>，早期则回归经典 VC 小额多投的打法。这是行业整体募资降温背景下头部机构的常见调整。<span class="src">🟡</span></p>
+</section>
+
+<section id="exit">
+  <h2><span class="n">⑤</span>退出 / IPO（2025–2026 样本）</h2>
+  <p>2025–2026 是源码硬科技组合的集中收获期，三笔可核实的 IPO 退出窗口：</p>
+  <ul>
+    <li><strong>奕斯伟材料（西安奕材，688783）</strong>：2025-10 登陆<strong>上交所科创板</strong>，募资约 46.36 亿元，系「新国九条/科创板八条」后首家受理并上市的未盈利企业，首日大涨。源码为上市前机构股东之一。<span class="src">🟢/🟡</span></li>
+    <li><strong>卧安机器人（06600.HK）</strong>：2025-12-30 在<strong>港交所</strong>挂牌，发行价 73.8 港元、首发募资约 16.4 亿港元，号称「AI 具身家庭机器人第一股」。源码上市前为最大机构股东之一。<span class="src">🟡</span></li>
+    <li><strong>壁仞科技（Biren，06082.HK）</strong>：2025-12 递表、2026-01 上市，募资约 6.23 亿美元，系「港股 GPU 第一股」。源码为 2021 年 B+ 轮参投方之一。<span class="src">🟡</span></li>
+  </ul>
+  <div class="callout note">
+    <span class="label">提示</span>
+    上述为「公司 IPO 事件」，源码作为股东可借此实现部分退出，但<strong>源码具体持股比例、解禁安排与实际兑现收益均未公开披露</strong>，不应据此推断回报。
+  </div>
+</section>
+
+<section id="limit">
+  <h2><span class="n">⑥</span>局限与存疑</h2>
+  <ul>
+    <li><strong>样本性。</strong>本文是<strong>公开披露样本，非完整组合</strong>。源码累计投资超 300 家，本文仅覆盖能被新闻/公告核实的十余笔，存在严重的「曝光偏差」（有 IPO/大额融资的项目更易被收录）。</li>
+    <li><strong>角色易混淆。</strong>「源码为股东/老股东」≠「源码本轮领投」。很多明星项目近期大额轮由国资/产业方领投，源码只是早期股东或跟投；文中已尽量区分，但部分项目份额/轮次确实<strong>未披露</strong>。</li>
+    <li><strong>金额与口径。</strong>一级市场金额多为媒体口径，可能含估值传闻、未必经官方确认；人民币/美元换算、AUM「约 70 亿美元 / 约 500 亿元」等存在口径与时点差异。</li>
+    <li><strong>时间边界模糊。</strong>云鲸等项目的融资披露时点跨 2024 末–2025，月之暗面/银河通用为连续多轮，难以精确切到单一日期。</li>
+    <li><strong>未覆盖。</strong>企业服务/SaaS、新能源、生命科学、消费新品牌等赛道，源码历史上均有布局，但本样本期内未核实到可靠的「新投/重大事件」，故清单中较弱——<strong>这是核实缺口，不代表源码没在投</strong>。</li>
+    <li><strong>消歧。</strong>「源码资本」≠ 红杉中国（HongShan）≠ 顺为 ≠ 明势；曹毅虽红杉出身，但源码为独立机构。请勿与同期红杉中国盘点混淆。</li>
+  </ul>
+</section>
+
+<section id="src">
+  <h2><span class="n">＊</span>来源与分级</h2>
+  <div class="grade-row">
+    <span>🟢 一手/官方（机构公告、上市文件、官网）</span>
+    <span>🟡 二手（主流财经媒体、行研、数据库）</span>
+    <span>🔴 自述/未独立证实</span>
+  </div>
+  <p class="footnote" style="margin-top:12px">主要参考（节选）：</p>
+  <ul class="footnote">
+    <li>源码资本新一期 6 亿美元成长基金募资：投资界 pedaily、新浪财经（2025-11-13）。🟢/🟡</li>
+    <li>「AI+/Global+」主题、AUM 约 70 亿美元、累计 300+ 公司、代表项目名单：新浪财经、新浪科技（2025-11-13）。🟡</li>
+    <li>LiblibAI 1.3 亿美元 B 轮、源码天使轮联合领投+本轮增持：新浪科技/量子位/36氪（2025-10-23）。🟡</li>
+    <li>月之暗面多轮融资与估值：动点科技、新浪财经、36氪、东方财富（2025-12 至 2026-06）。🟡</li>
+    <li>Sand.ai 新一轮约 5000 万美元、参投机构名单：雪球（码刻）、36氪。🟡</li>
+    <li>银河通用 11 亿元/超 3 亿美元/25 亿元多轮：央广网、财新、东方财富、阿里云创新中心（2025-06 至 2026-03）。🟡</li>
+    <li>加速进化 A/A+/新一轮、源码老股东加注：新浪财经、证券时报、智东西、知乎行研（2025-06 至 2025-11）。🟡</li>
+    <li>云鲸智能数亿元新轮、源码 B 轮领投：阿里云创新中心「码刻」（披露于 2024-12）。🟡</li>
+    <li>奕斯伟材料科创板 IPO、募资 46.36 亿元：上交所/上市公告 PDF、每经、腾讯新闻（2025-10）。🟢/🟡</li>
+    <li>卧安机器人港股 IPO、发行价/募资/源码最大机构股东之一：新浪财经、财新、证券时报、36氪（2025-12）。🟡</li>
+    <li>壁仞科技港股 IPO、募资 6.23 亿美元、源码 B+ 轮参投：澎湃、INSIDE、美股之家、证券时报（2025-12 至 2026-01）。🟡</li>
+    <li>视涯科技参投、源码律动（黄云刚）早期分线：相关财经报道与机构口径。🟡</li>
+  </ul>
+  <div class="disc">
+    <b>再次声明：</b>本文为公开披露部分的<b>样本盘点、非完整清单</b>，所有交易以来源为准、可能有口径差异；<b>不构成投资建议</b>，亦非对源码资本或任何被投公司的推荐或背书。
+  </div>
+</section>
+
+</article>
+</body>
+</html>
