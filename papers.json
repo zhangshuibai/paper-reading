@@ -1,102 +1,23 @@
 [
   {
-    "slug": "2026-06-29-idg-capital-investments",
-    "title": "IDG 资本（IDG Capital）2025–2026 投资盘点（公开披露部分）",
-    "authors": "—",
-    "team": "投资研究",
-    "arxiv": "",
-    "code": "",
-    "date": "2026-06-30",
-    "published": "投资研究 2026",
-    "tldr": "IDG资本(中国最早美元VC之一,熊晓鸽1993入华)2025-2026公开披露投资盘点,按赛道整理(机器人/具身智能·AI大模型与应用·医疗大健康·半导体·新能源/钠电)+赛道分布SVG+下注重心(机器人+AI占样本一半);含退出/IPO(影石·小马·文远)与5亿美元接续基金;公开样本非完整、逐笔标来源等级;非投资建议",
-    "tags": [
-      "investment",
-      "venture-capital",
-      "china",
-      "idg-capital",
-      "portfolio"
-    ],
-    "path": "papers/2026-06-29-idg-capital-investments/index.html"
-  },
-  {
-    "slug": "2026-06-29-source-code-capital-investments",
-    "title": "源码资本（Source Code Capital）2025–2026 投资盘点（公开披露部分）",
-    "authors": "—",
-    "team": "投资研究",
-    "arxiv": "",
-    "code": "",
-    "date": "2026-06-30",
-    "published": "投资研究 2026",
-    "tldr": "源码资本(曹毅,红杉中国出身)2025-2026公开披露投资盘点,按赛道整理(AI/大模型/agent/具身机器人/半导体硬科技/企业服务/消费)+赛道分布SVG+下注重心(AI与具身硬科技为重心);收录约11笔可核实公开交易及IPO退出(奕斯伟/卧安/壁仞),含2025-11新6亿美元成长基金,每笔标来源等级,数据为公开样本非完整;非投资建议",
-    "tags": [
-      "investment",
-      "venture-capital",
-      "china",
-      "source-code-capital",
-      "portfolio"
-    ],
-    "path": "papers/2026-06-29-source-code-capital-investments/index.html"
-  },
-  {
-    "slug": "2026-06-29-qiming-investments",
-    "title": "启明创投（Qiming Venture Partners）2025–2026 投资盘点（公开披露部分）",
-    "authors": "—",
-    "team": "投资研究",
-    "arxiv": "",
-    "code": "",
-    "date": "2026-06-30",
-    "published": "投资研究 2026",
-    "tldr": "启明创投(邝子平,医疗+科技双引擎)2025-2026公开披露投资盘点,按赛道整理(生物医药/AI/半导体/具身机器人/新能源等)+赛道分布SVG+下注重心(生物医药为基本盘,具身智能与国产半导体为新重注);收录约17笔投资+7例港股IPO退出,每笔标来源等级,公开样本非完整;非投资建议",
-    "tags": [
-      "investment",
-      "venture-capital",
-      "china",
-      "qiming",
-      "healthcare",
-      "portfolio"
-    ],
-    "path": "papers/2026-06-29-qiming-investments/index.html"
-  },
-  {
-    "slug": "2026-06-29-kaiwu-intelligence",
-    "title": "开物纪（Kaiwu Intelligence）：AI 发明新材料的竞争格局与早期度调研",
-    "authors": "—",
-    "team": "公司调研",
-    "arxiv": "https://www.xiaoyuzhoufm.com/podcast/60502e253c92d4f62c2a9577",
-    "code": "",
-    "date": "2026-06-30",
-    "published": "公司调研 2026",
-    "tldr": "开物纪(陆子恒,前微软MatterGen/MatterSim负责人)用AI发明新材料,走'自己拥有材料IP'(对标Flagship Pioneering)而非卖铲子;赛道emerging+最大难点(实验室到量产/开源模型MatterGen/GNoME压低预测价值)+对标晶泰深势/MatterGen,产品实效未验证",
-    "tags": [
-      "company",
-      "competitive-landscape",
-      "market-map",
-      "startup-idea",
-      "ai4s",
-      "materials",
-      "china"
-    ],
-    "path": "papers/2026-06-29-kaiwu-intelligence/index.html"
-  },
-  {
-    "slug": "2026-06-29-bloomberggpt-fingpt-financial-llms",
-    "title": "BloombergGPT vs FinGPT：金融大模型的两条路线（综述）",
+    "slug": "2026-06-29-agents-in-chip-design",
+    "title": "AI Agent 如何参与芯片/半导体设计：流程 + 创业公司深挖（综述）",
     "authors": "—",
     "team": "调研综述",
-    "arxiv": "https://arxiv.org/abs/2303.17564",
-    "code": "https://github.com/AI4Finance-Foundation/FinGPT",
-    "date": "2026-06-30",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-07-01",
     "published": "综述 2026",
-    "tldr": "金融LLM两条路线——BloombergGPT(50B从头训/闭源/约300万美元)vs FinGPT(开源/LoRA微调+RAG/数据为中心/自述约300美元);并指出通用前沿模型已追平专用金融LLM、前沿转向RAG+金融agent;含5-8维对比表与两轴定位图",
+    "tldr": "<一句话:agent参与芯片设计分两类——RL优化(AlphaChip/DSO.ai/Cerebrus已量产)与LLM生成式(ChipNeMo写RTL/验证尚早期);验证是杀手级应用;深挖一批AI芯片设计/验证创业公司(ChipAgents/PrimisAI/Silogy/Astrus/Efabless等);护城河在专有数据,EDA三巨头内化AI压缩创业空间>",
     "tags": [
-      "finance",
-      "llm",
+      "agent",
+      "eda",
+      "chip-design",
+      "semiconductors",
       "survey",
-      "fingpt",
-      "bloomberggpt",
-      "fintech"
+      "startup"
     ],
-    "path": "papers/2026-06-29-bloomberggpt-fingpt-financial-llms/index.html"
+    "path": "papers/2026-06-29-agents-in-chip-design/index.html"
   },
   {
     "slug": "2026-06-29-engram",
@@ -118,44 +39,6 @@
       "china"
     ],
     "path": "papers/2026-06-29-engram/index.html"
-  },
-  {
-    "slug": "2026-06-29-matrix-partners-china-investments",
-    "title": "经纬创投（Matrix Partners China）2025–2026 投资盘点（公开披露部分）",
-    "authors": "—",
-    "team": "投资研究",
-    "arxiv": "",
-    "code": "",
-    "date": "2026-06-29",
-    "published": "投资研究 2026",
-    "tldr": "经纬创投(张颖,与Matrix US已拆分/品牌独立为MPC)2025-2026公开披露投资盘点,按赛道整理(具身机器人/物理AI/半导体硬科技/医疗/企业服务/新消费等)+赛道分布SVG+下注重心(具身与医疗并列最重);沐曦IPO为最大退出;每笔标来源等级,公开样本非完整;非投资建议",
-    "tags": [
-      "investment",
-      "venture-capital",
-      "china",
-      "matrix-partners-china",
-      "portfolio"
-    ],
-    "path": "papers/2026-06-29-matrix-partners-china-investments/index.html"
-  },
-  {
-    "slug": "2026-06-29-hillhouse-investments",
-    "title": "高瓴（Hillhouse）2025–2026 投资盘点（公开披露部分）",
-    "authors": "—",
-    "team": "投资研究",
-    "arxiv": "",
-    "code": "",
-    "date": "2026-06-29",
-    "published": "投资研究 2026",
-    "tldr": "高瓴（张磊，PE+创投 GL Ventures）2025–2026 公开披露投资盘点：具身智能/机器人出手最密集、AI 大模型陪跑到港股 IPO、生物医药向 RNA/放射性药物等前沿模态迁移；公开样本非完整、每笔标来源等级；非投资建议。",
-    "tags": [
-      "investment",
-      "venture-capital",
-      "china",
-      "hillhouse",
-      "portfolio"
-    ],
-    "path": "papers/2026-06-29-hillhouse-investments/index.html"
   },
   {
     "slug": "2026-06-17-overview-map",
@@ -2306,5 +2189,142 @@
       "mcp",
       "agent"
     ]
+  },
+  {
+    "slug": "2026-06-29-idg-capital-investments",
+    "title": "IDG 资本（IDG Capital）2025–2026 投资盘点（公开披露部分）",
+    "authors": "—",
+    "team": "投资研究",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-30",
+    "published": "投资研究 2026",
+    "tldr": "IDG资本(中国最早美元VC之一,熊晓鸽1993入华)2025-2026公开披露投资盘点,按赛道整理(机器人/具身智能·AI大模型与应用·医疗大健康·半导体·新能源/钠电)+赛道分布SVG+下注重心(机器人+AI占样本一半);含退出/IPO(影石·小马·文远)与5亿美元接续基金;公开样本非完整、逐笔标来源等级;非投资建议",
+    "tags": [
+      "investment",
+      "venture-capital",
+      "china",
+      "idg-capital",
+      "portfolio"
+    ],
+    "path": "papers/2026-06-29-idg-capital-investments/index.html"
+  },
+  {
+    "slug": "2026-06-29-source-code-capital-investments",
+    "title": "源码资本（Source Code Capital）2025–2026 投资盘点（公开披露部分）",
+    "authors": "—",
+    "team": "投资研究",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-30",
+    "published": "投资研究 2026",
+    "tldr": "源码资本(曹毅,红杉中国出身)2025-2026公开披露投资盘点,按赛道整理(AI/大模型/agent/具身机器人/半导体硬科技/企业服务/消费)+赛道分布SVG+下注重心(AI与具身硬科技为重心);收录约11笔可核实公开交易及IPO退出(奕斯伟/卧安/壁仞),含2025-11新6亿美元成长基金,每笔标来源等级,数据为公开样本非完整;非投资建议",
+    "tags": [
+      "investment",
+      "venture-capital",
+      "china",
+      "source-code-capital",
+      "portfolio"
+    ],
+    "path": "papers/2026-06-29-source-code-capital-investments/index.html"
+  },
+  {
+    "slug": "2026-06-29-qiming-investments",
+    "title": "启明创投（Qiming Venture Partners）2025–2026 投资盘点（公开披露部分）",
+    "authors": "—",
+    "team": "投资研究",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-30",
+    "published": "投资研究 2026",
+    "tldr": "启明创投(邝子平,医疗+科技双引擎)2025-2026公开披露投资盘点,按赛道整理(生物医药/AI/半导体/具身机器人/新能源等)+赛道分布SVG+下注重心(生物医药为基本盘,具身智能与国产半导体为新重注);收录约17笔投资+7例港股IPO退出,每笔标来源等级,公开样本非完整;非投资建议",
+    "tags": [
+      "investment",
+      "venture-capital",
+      "china",
+      "qiming",
+      "healthcare",
+      "portfolio"
+    ],
+    "path": "papers/2026-06-29-qiming-investments/index.html"
+  },
+  {
+    "slug": "2026-06-29-kaiwu-intelligence",
+    "title": "开物纪（Kaiwu Intelligence）：AI 发明新材料的竞争格局与早期度调研",
+    "authors": "—",
+    "team": "公司调研",
+    "arxiv": "https://www.xiaoyuzhoufm.com/podcast/60502e253c92d4f62c2a9577",
+    "code": "",
+    "date": "2026-06-30",
+    "published": "公司调研 2026",
+    "tldr": "开物纪(陆子恒,前微软MatterGen/MatterSim负责人)用AI发明新材料,走'自己拥有材料IP'(对标Flagship Pioneering)而非卖铲子;赛道emerging+最大难点(实验室到量产/开源模型MatterGen/GNoME压低预测价值)+对标晶泰深势/MatterGen,产品实效未验证",
+    "tags": [
+      "company",
+      "competitive-landscape",
+      "market-map",
+      "startup-idea",
+      "ai4s",
+      "materials",
+      "china"
+    ],
+    "path": "papers/2026-06-29-kaiwu-intelligence/index.html"
+  },
+  {
+    "slug": "2026-06-29-bloomberggpt-fingpt-financial-llms",
+    "title": "BloombergGPT vs FinGPT：金融大模型的两条路线（综述）",
+    "authors": "—",
+    "team": "调研综述",
+    "arxiv": "https://arxiv.org/abs/2303.17564",
+    "code": "https://github.com/AI4Finance-Foundation/FinGPT",
+    "date": "2026-06-30",
+    "published": "综述 2026",
+    "tldr": "金融LLM两条路线——BloombergGPT(50B从头训/闭源/约300万美元)vs FinGPT(开源/LoRA微调+RAG/数据为中心/自述约300美元);并指出通用前沿模型已追平专用金融LLM、前沿转向RAG+金融agent;含5-8维对比表与两轴定位图",
+    "tags": [
+      "finance",
+      "llm",
+      "survey",
+      "fingpt",
+      "bloomberggpt",
+      "fintech"
+    ],
+    "path": "papers/2026-06-29-bloomberggpt-fingpt-financial-llms/index.html"
+  },
+  {
+    "slug": "2026-06-29-matrix-partners-china-investments",
+    "title": "经纬创投（Matrix Partners China）2025–2026 投资盘点（公开披露部分）",
+    "authors": "—",
+    "team": "投资研究",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-29",
+    "published": "投资研究 2026",
+    "tldr": "经纬创投(张颖,与Matrix US已拆分/品牌独立为MPC)2025-2026公开披露投资盘点,按赛道整理(具身机器人/物理AI/半导体硬科技/医疗/企业服务/新消费等)+赛道分布SVG+下注重心(具身与医疗并列最重);沐曦IPO为最大退出;每笔标来源等级,公开样本非完整;非投资建议",
+    "tags": [
+      "investment",
+      "venture-capital",
+      "china",
+      "matrix-partners-china",
+      "portfolio"
+    ],
+    "path": "papers/2026-06-29-matrix-partners-china-investments/index.html"
+  },
+  {
+    "slug": "2026-06-29-hillhouse-investments",
+    "title": "高瓴（Hillhouse）2025–2026 投资盘点（公开披露部分）",
+    "authors": "—",
+    "team": "投资研究",
+    "arxiv": "",
+    "code": "",
+    "date": "2026-06-29",
+    "published": "投资研究 2026",
+    "tldr": "高瓴（张磊，PE+创投 GL Ventures）2025–2026 公开披露投资盘点：具身智能/机器人出手最密集、AI 大模型陪跑到港股 IPO、生物医药向 RNA/放射性药物等前沿模态迁移；公开样本非完整、每笔标来源等级；非投资建议。",
+    "tags": [
+      "investment",
+      "venture-capital",
+      "china",
+      "hillhouse",
+      "portfolio"
+    ],
+    "path": "papers/2026-06-29-hillhouse-investments/index.html"
   }
 ]
